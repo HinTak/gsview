@@ -7,7 +7,7 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 3.1 requires Ghostscript 4.03 - 6.99,
+ GSview 3.2 requires Ghostscript 4.03 - 6.99,
  preferably 6.0 or later.
 2Installation
 ?Installation
@@ -207,7 +207,7 @@ E
  user profile directory to the GSview directory, then edit it to
  remove all entries except for:
   [Options]
-  Version=3.1
+  Version=3.2
   GSversion=601
   Configured=1
   GhostscriptDLL=e:\Aladdin\gs6.01\bin\gsdll32.dll

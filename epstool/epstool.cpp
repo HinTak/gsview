@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "1.3  2000-06-27";
+char szVersion[] = "1.4  2000-06-30";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -358,16 +358,14 @@ char line[DSC_LINE_LENGTH+1];
 	fprintf(tempfile, " /EPSTOOL_countdictstack countdictstack def\r\n");
 
 	/* copy page to temporary file */
+	psfile_extract_header(tempfile);
 	if (dsc->page_count != 0) {
-	    psfile_extract_header(tempfile);
 	    psfile_extract_page(tempfile, page);
 	    if ((dsc->page_count > 1) || (dsc->page_pages > 1))
 		fprintf(stderr,"Can't handle multiple page PostScript files\n");
 	}
 	else {
-	    ps_copy(tempfile, psfile.file, dsc->begincomments, 
-		dsc->beginpreview); 
-	    ps_copy(tempfile, psfile.file, dsc->endpreview, dsc->endtrailer); 
+	    psfile_extract_page(tempfile, -1);
 	}
 	/* cope with EPS files with and without showpage */
 	fprintf(tempfile, "\n count EPSTOOL_count sub {pop} repeat\r\n");
@@ -832,21 +830,24 @@ psfile_extract_page(FILE *f, int page)
     ps_copy(f, psfile.file, dsc->beginprolog, dsc->endprolog);
     ps_copy(f, psfile.file, dsc->beginsetup, dsc->endsetup);
 
-    /* map page number to zero based index */
-    if (dsc->page_order == CDSC_DESCEND) 
-	i = dsc->page_count - page;
-    else
-	i = page - 1;
-    fseek(psfile.file, dsc->page[i].begin, SEEK_SET);
-    ps_copy_find(f, psfile.file, dsc->page[i].end, 
-	line, sizeof(line), "%%Page:");
-    fprintf(f, "%%%%Page: %s %d\r\n",
-	    dsc->page[i].label, page++);
-    position = ftell(psfile.file);
-    ps_copy(f, psfile.file, position, dsc->page[i].end);
+    if (dsc->page_count > 0) {
+	/* map page number to zero based index */
+	if (dsc->page_order == CDSC_DESCEND) 
+	    i = dsc->page_count - page;
+	else
+	    i = page - 1;
+	fseek(psfile.file, dsc->page[i].begin, SEEK_SET);
+	ps_copy_find(f, psfile.file, dsc->page[i].end, 
+	    line, sizeof(line), "%%Page:");
+	fprintf(f, "%%%%Page: %s %d\r\n",
+		dsc->page[i].label, page++);
+	position = ftell(psfile.file);
+	ps_copy(f, psfile.file, position, dsc->page[i].end);
+    }
 
     fseek(psfile.file, dsc->begintrailer, SEEK_SET);
     while (ps_copy_find(f, psfile.file, dsc->endtrailer, 
+	/* copy trailer, removing %%Pages: since it is now in comments */
 	line, sizeof(line), "%%Pages:")) {
     }
 }

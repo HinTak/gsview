@@ -51,6 +51,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef UNIX
+#define stricmp(s,t) strcasecmp(s,t)
+#endif
+
 
 #define ULONG unsigned long
 #define LONG long
@@ -382,7 +386,7 @@ CDSC::Reset(void)
     dsc_date = NULL;
 	
     cfile = NULL;
-    file_length = NULL;
+    file_length = 0;
 	
     // Clear private members
     string = string_head;

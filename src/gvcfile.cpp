@@ -24,7 +24,12 @@
 
 #include <stdio.h>
 #include <fcntl.h>
+#ifdef UNIX
+#include <unistd.h>
+#define O_BINARY (0)
+#else
 #include <io.h>
+#endif
 
 #include "gvcfile.h"
 

@@ -37,7 +37,7 @@ WORD get_word(unsigned char *buf);
 #define tiff_word(val, f) write_word(val, f)
 
 void write_dword(DWORD val, FILE *f);
-void wrte_word_as_dword(WORD val, FILE *f);
+void write_word_as_dword(WORD val, FILE *f);
 void write_word(WORD val, FILE *f);
 
 void copy_bbox_header(FILE *f);
@@ -289,7 +289,13 @@ CDSC *dsc = psfile.dsc;
 	    fprintf(f, "%%%%BoundingBox: %d %d %d %d\r\n",
 		bbox.llx, bbox.lly, bbox.urx, bbox.ury);
 	    here = ftell(psfile.file);
-	    ps_copy(f, psfile.file, here, dsc->endtrailer);
+	    ps_copy(f, psfile.file, here, dsc->endcomments);
+	    ps_copy(f, psfile.file, dsc->begindefaults, dsc->enddefaults);
+	    ps_copy(f, psfile.file, dsc->beginprolog, dsc->endprolog);
+	    ps_copy(f, psfile.file, dsc->beginsetup, dsc->endsetup);
+	    if (dsc->page_count > 0)
+		ps_copy(f, psfile.file, dsc->page[0].begin, dsc->page[0].end);
+	    ps_copy(f, psfile.file, dsc->begintrailer, dsc->endtrailer);
 	    fclose(f);
 	    info_wait(IDS_NOWAIT);
 	}
@@ -1550,6 +1556,7 @@ struct eps_header_s eps_header;
 FILE *tpsfile;
 char tpsname[MAXSTR];
 int code;
+CDSC *dsc = psfile.dsc;
 	
 	if ( (pbitmap = (unsigned char *)get_bitmap()) == (unsigned char *)NULL) {
 	    play_sound(SOUND_ERROR);
@@ -1578,8 +1585,12 @@ int code;
 		return 1;
 	    }
 	    copy_bbox_header(tpsfile); /* adjust %%BoundingBox: comment */
-	    ps_copy(tpsfile, psfile.file, psfile.dsc->endcomments, 
-		psfile.dsc->endtrailer);
+	    ps_copy(tpsfile, psfile.file, dsc->begindefaults, dsc->enddefaults);
+	    ps_copy(tpsfile, psfile.file, dsc->beginprolog, dsc->endprolog);
+	    ps_copy(tpsfile, psfile.file, dsc->beginsetup, dsc->endsetup);
+	    if (dsc->page_count > 0)
+		ps_copy(tpsfile, psfile.file, dsc->page[0].begin, dsc->page[0].end);
+	    ps_copy(tpsfile, psfile.file, dsc->begintrailer, dsc->endtrailer);
 	    fclose(tpsfile);
 	    if ( (tpsfile = fopen(tpsname, "rb")) == (FILE *)NULL) {
 		play_sound(SOUND_ERROR);
@@ -1655,8 +1666,14 @@ int code;
 		fwrite(buffer, 1, count, epsfile);
 	}
 	else {
-	    ps_copy(epsfile, psfile.file, psfile.dsc->begincomments,
-		psfile.dsc->endtrailer);
+	    ps_copy(epsfile, psfile.file, dsc->begincomments, dsc->endcomments);
+	    ps_copy(epsfile, psfile.file, dsc->begindefaults, dsc->enddefaults);
+	    ps_copy(epsfile, psfile.file, dsc->beginprolog, dsc->endprolog);
+	    ps_copy(epsfile, psfile.file, dsc->beginsetup, dsc->endsetup);
+	    if (dsc->page_count > 0)
+		ps_copy(epsfile, psfile.file, dsc->page[0].begin, 
+		    dsc->page[0].end);
+	    ps_copy(epsfile, psfile.file, dsc->begintrailer, dsc->endtrailer);
 	}
 	
 	/* copy tiff file */
@@ -1690,6 +1707,7 @@ write_interchange(FILE *f, unsigned char *pbitmap, BOOL calc_bbox)
 	PREBMAP prebmap;
 	PSBBOX devbbox;	/* in pixel units */
 	int code;
+	CDSC *dsc = psfile.dsc;
 	
 	if (*pbitmap == 'P')
 	    code = scan_pbmplus(&prebmap, pbitmap);
@@ -1741,8 +1759,7 @@ write_interchange(FILE *f, unsigned char *pbitmap, BOOL calc_bbox)
 #undef LIMIT
 	    }
 #endif
-	    ps_copy(f, psfile.file, psfile.dsc->begincomments, 
-		psfile.dsc->endcomments);
+	    ps_copy(f, psfile.file, dsc->begincomments, dsc->endcomments);
 	}
 
 	bwidth = (((devbbox.urx-devbbox.llx) + 7) & ~7) >> 3; /* byte width with 1 bit/pixel */
@@ -1798,9 +1815,12 @@ write_interchange(FILE *f, unsigned char *pbitmap, BOOL calc_bbox)
 	fputs("%%EndPreview",f);
 	fputs(EOLSTR, f);
 	free(preview);
-	ps_copy(f, psfile.file,
-	    psfile.dsc->endpreview ? psfile.dsc->endpreview : psfile.dsc->endcomments, 
-	    psfile.dsc->endtrailer);
+	ps_copy(f, psfile.file, dsc->begindefaults, dsc->enddefaults);
+	ps_copy(f, psfile.file, dsc->beginprolog, dsc->endprolog);
+	ps_copy(f, psfile.file, dsc->beginsetup, dsc->endsetup);
+	if (dsc->page_count > 0)
+	    ps_copy(f, psfile.file, dsc->page[0].begin, dsc->page[0].end);
+	ps_copy(f, psfile.file, dsc->begintrailer, dsc->endtrailer);
 	return 0;
 }
 
@@ -2040,6 +2060,7 @@ int type = 0;
 #define TIFF 1
 #define WMF 2
 char id[4];
+CDSC *dsc = psfile.dsc;
 
 	/* get user supplied preview */
 #ifdef EPSTOOL
@@ -2128,9 +2149,13 @@ char id[4];
 
 	write_doseps_header(&eps_header, epsfile);
 
-	rewind(psfile.file);
-	ps_copy(epsfile, psfile.file, psfile.dsc->begincomments, 
-	    psfile.dsc->endtrailer);
+	ps_copy(epsfile, psfile.file, dsc->begincomments, dsc->endcomments);
+	ps_copy(epsfile, psfile.file, dsc->begindefaults, dsc->enddefaults);
+	ps_copy(epsfile, psfile.file, dsc->beginprolog, dsc->endprolog);
+	ps_copy(epsfile, psfile.file, dsc->beginsetup, dsc->endsetup);
+	for (int j=0; j<(int)dsc->page_count; j++)
+	    ps_copy(epsfile, psfile.file, dsc->page[j].begin, dsc->page[j].end);
+	ps_copy(epsfile, psfile.file, dsc->begintrailer, dsc->endtrailer);
 	
 	/* copy preview file */
 	buffer = (char *)malloc(COPY_BUF_SIZE);
@@ -2516,6 +2541,7 @@ unsigned char *pbitmap;
 PSBBOX devbbox;
 MFH mf;
 int code;
+CDSC *dsc = psfile.dsc;
 
 	if ( (pbitmap = (unsigned char *)get_bitmap()) == (unsigned char *)NULL) {
 	    return 1;
@@ -2538,8 +2564,12 @@ int code;
 		return 1;
 	    }
 	    copy_bbox_header(tpsfile); /* adjust %%BoundingBox: comment */
-	    ps_copy(tpsfile, psfile.file, psfile.dsc->endcomments, 
-		psfile.dsc->endtrailer);
+	    ps_copy(tpsfile, psfile.file, dsc->begindefaults, dsc->enddefaults);
+	    ps_copy(tpsfile, psfile.file, dsc->beginprolog, dsc->endprolog);
+	    ps_copy(tpsfile, psfile.file, dsc->beginsetup, dsc->endsetup);
+	    if (dsc->page_count > 0)
+		ps_copy(tpsfile, psfile.file, dsc->page[0].begin, dsc->page[0].end);
+	    ps_copy(tpsfile, psfile.file, dsc->begintrailer, dsc->endtrailer);
 	    fclose(tpsfile);
 	    if ( (tpsfile = fopen(tpsname, "rb")) == (FILE *)NULL) {
 		release_bitmap();

@@ -267,8 +267,13 @@ gsview_extract()
 	}
 	if (dsc->page_count != 0)
 	    psfile_extract(f, 1);
-	else
-	    ps_copy(f, psfile.file, dsc->begincomments, dsc->endtrailer);
+	else {
+	    ps_copy(f, psfile.file, dsc->begincomments, dsc->endcomments);
+	    ps_copy(f, psfile.file, dsc->begindefaults, dsc->enddefaults);
+	    ps_copy(f, psfile.file, dsc->beginprolog, dsc->endprolog);
+	    ps_copy(f, psfile.file, dsc->beginsetup, dsc->endsetup);
+	    ps_copy(f, psfile.file, dsc->begintrailer, dsc->endtrailer);
+	}
 	dfclose();
     }
 
@@ -674,6 +679,7 @@ int original_llx, original_lly;
 float scale = 1.0;
 int rescale = FALSE;
 int width, height;
+CDSC *dsc = psfile.dsc;
 
     width = get_paper_width();
     height = get_paper_height();
@@ -731,7 +737,13 @@ int width, height;
 	    scale, scale, 
 	    -original_llx, -original_lly /* remove old offset */ );
     fprintf(f, "%%%%BeginDocument: %s\r\n", psfile.name);
-    ps_copy(f, psfile.file, psfile.dsc->begincomments, psfile.dsc->endtrailer);
+    ps_copy(f, psfile.file, dsc->begincomments, dsc->endcomments);
+    ps_copy(f, psfile.file, dsc->begindefaults, dsc->enddefaults);
+    ps_copy(f, psfile.file, dsc->beginprolog, dsc->endprolog);
+    ps_copy(f, psfile.file, dsc->beginsetup, dsc->endsetup);
+    for (int j=0; j<(int)dsc->page_count; j++)
+	ps_copy(f, psfile.file, dsc->page[j].begin, dsc->page[j].end);
+    ps_copy(f, psfile.file, dsc->begintrailer, dsc->endtrailer);
     fprintf(f, "\r\n%%%%EndDocument\r\n");
     fprintf(f, " count EPSTOOL_count sub {pop} repeat\r\n");
     fprintf(f, " countdictstack EPSTOOL_countdictstack sub {end} repeat\r\n");
@@ -792,11 +804,16 @@ copy_for_printer(FILE *pcfile, BOOL convert)
 		/* copy DSC file */
 		if ((psfile.dsc->page_count == 0) || 
 		    (!convert && psfile.print_ignoredsc)) {
-			ps_copy(pcfile, psfile.file, psfile.dsc->begincomments, 
-			    psfile.dsc->beginsetup);
+			CDSC *dsc = psfile.dsc;
+			ps_copy(pcfile, psfile.file, dsc->begincomments, 
+			    dsc->endcomments);
+			ps_copy(pcfile, psfile.file, dsc->begindefaults, 
+			    dsc->enddefaults);
+			ps_copy(pcfile, psfile.file, dsc->beginprolog, 
+			    dsc->endprolog);
 			copy_setup(pcfile, psfile.file, copies);
-			ps_copy(pcfile, psfile.file, psfile.dsc->endsetup, 
-			    psfile.dsc->endtrailer);
+			ps_copy(pcfile, psfile.file, dsc->begintrailer, 
+			    dsc->endtrailer);
 		    }
 		else
 		    psfile_extract(pcfile, copies);
@@ -1009,7 +1026,8 @@ int method = option.print_method;
 	    play_sound(SOUND_ERROR);
 	    return FALSE;
     }
-    fprintf(optfile, "-I\042%s\042\n", option.gsinclude);
+    if (option.gsinclude[0])
+	fprintf(optfile, "-I\042%s\042\n", option.gsinclude);
     fprintf(optfile, "-dNOPAUSE\n");
     if (option.safer)
 	fprintf(optfile, "-dSAFER\n");
@@ -1030,7 +1048,7 @@ int method = option.print_method;
 
     if (method == PRINT_GDI) {
 	fprintf(optfile, "-sOutputFile=\042%%handle%%%08lx\042\n",
-		print_gdi_write_handle);
+		(unsigned long)print_gdi_write_handle);
     }
     else {
 	fprintf(optfile, "-sOutputFile=\042");
