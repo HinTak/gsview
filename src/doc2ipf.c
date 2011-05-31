@@ -337,6 +337,11 @@ process_line(line, b)
                 j += strlen( "&colon." ) - 1 ;
                 break ;
 
+            case '\047':
+                strcpy( &line2[j], "&apos." ) ;
+                j += strlen( "&apos." ) - 1 ;
+                break ;
+
             case '&':
                 strcpy( &line2[j], "&amp." ) ;
                 j += strlen( "&amp." ) - 1 ;

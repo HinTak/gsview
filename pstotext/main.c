@@ -1,7 +1,7 @@
 /* Copyright (C) 1995, Digital Equipment Corporation.         */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Fri Oct 11 15:28:30 PDT 1996 by mcjones   */
+/* Last modified on Thu Aug 21 16:32:27 PDT 1997 by mcjones   */
 /*      modified on Thu Nov 16 13:33:13 PST 1995 by deutsch   */
 
 #include <sys/param.h>
@@ -40,8 +40,8 @@ static BOOLEAN bboxes = FALSE;
 static int explicitFiles = 0; /* count of explicit file arguments */
 
 usage() {
-  fprintf(stderr, "pstotext 1.5 of October 11, 1996\n");
-  fprintf(stderr, "Copyright (C) 1995-1996, Digital Equipment Corporation.\n");
+  fprintf(stderr, "pstotext 1.6 of 21 August 1997\n");
+  fprintf(stderr, "Copyright (C) 1995-1997, Digital Equipment Corporation.\n");
   fprintf(stderr, "Comments to {mcjones,birrell}@pa.dec.com.\n\n");
   fprintf(stderr, "Usage: %s [option|file]...\n", cmd);
   fprintf(stderr, "Options:\n");
@@ -122,8 +122,8 @@ static do_it(path) char *path; {
     "%s -r72 -dNODISPLAY -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE %s %s %s",
     gs_cmd,
     (debug ? "" : "-q"),
-    ocr_path,
     rotate_path,
+    ocr_path,
     input
     );
   if (debug) fprintf(stderr, "%s\n", gs_cmdline);

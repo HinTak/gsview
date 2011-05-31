@@ -39,6 +39,7 @@ BEGIN
 		MENUITEM SEPARATOR
 		MENUITEM "Meldungen anzeigen\tM", IDM_GSMESS
 		MENUITEM SEPARATOR
+		MENUITEM SEPARATOR
 		MENUITEM "E&nde", IDM_EXIT
 	END
 	POPUP "&Bearbeiten"
@@ -69,6 +70,7 @@ BEGIN
 	END
 	POPUP "O&ptionen"
 	BEGIN
+		MENUITEM "&Konfiguration...", IDM_CFG
 		MENUITEM "Konfiguriere &Ghostscript...", IDM_GSCOMMAND
 		MENUITEM "Klänge...", IDM_SOUNDS
 		POPUP "&Einheiten"
@@ -80,6 +82,7 @@ BEGIN
 		POPUP "&Sprache"
 		BEGIN
 			MENUITEM "&Englisch", IDM_LANGEN
+			MENUITEM "&Französisch", IDM_LANGFR
 			MENUITEM "&Deutsch", IDM_LANGDE
 		END
 		POPUP "PSzuText"
@@ -210,7 +213,11 @@ END
 STRINGTABLE
 BEGIN
 	/* filter strings */
+#ifdef __WIN32__
+	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|PS Dateien (*.ps)|*.ps;*.ps.gz|EPS Dateien (*.eps)|*.eps;*.eps.gz|EPI Dateien (*.epi)|*.epi;*.epi.gz|PDF Dateien (*.pdf)|*.pdf;*.pdf.gz|Alle Dateien (*.*)|*.*|"
+#else
 	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf|PS Dateien (*.ps)|*.ps|EPS Dateien (*.eps)|*.eps|EPI Dateien (*.epi)|*.epi|PDF Dateien (*.pdf)|*.pdf|Alle Dateien (*.*)|*.*|"
+#endif
 	IDS_FILTER_PS, "Default (*.ps)|*.ps|EPS Dateien (*.eps)|*.eps|EPI Dateien (*.epi)|*.epi|Alle Dateien (*.*)|*.*|"
 	IDS_FILTER_EPS, "EPS Dateien (*.eps)|*.eps|EPI Dateien (*.epi)|*.epi|PS Dateien (*.ps)|*.ps|Alle Dateien (*.*)|*.*|"
 	IDS_FILTER_EPI, "EPI Dateien (*.epi)|*.epi|EPS Dateien (*.eps)|*.eps|PS Dateien (*.ps)|*.ps|Alle Dateien (*.*)|*.*|"

@@ -39,6 +39,7 @@ BEGIN
 		MENUITEM SEPARATOR
 		MENUITEM "Meldungen anzeigen\tM", IDM_GSMESS
 		MENUITEM SEPARATOR
+		MENUITEM SEPARATOR
 		MENUITEM "E~nde", IDM_EXIT
 	END
 	SUBMENU "~Bearbeiten", IDM_EDITMENU
@@ -71,7 +72,7 @@ BEGIN
 	END
 	SUBMENU "O~ptionen", IDM_OPTIONMENU
 	BEGIN
-		MENUITEM "Konfiguriere...", IDM_CFG
+		MENUITEM "~Konfiguration...", IDM_CFG
 		MENUITEM "Konfiguriere ~Ghostscript...", IDM_GSCOMMAND
 		MENUITEM "Klänge...", IDM_SOUNDS
 		SUBMENU "~Einheiten", IDM_UNITMENU
@@ -83,6 +84,7 @@ BEGIN
 		SUBMENU "~Sprache", IDM_LANGMENU
 		BEGIN
 			MENUITEM "~Englisch", IDM_LANGEN
+			MENUITEM "~Französisch", IDM_LANGFR
 			MENUITEM "~Deutsch", IDM_LANGDE
 		END
 		SUBMENU "PSzuText", IDM_PSTOTEXTMENU
@@ -246,7 +248,7 @@ END
 
 STRINGTABLE
 BEGIN
-	IDS_FILTER_PSALL "*.ps;*.eps;*.epi;*.pdf|*.ps|*.eps|*.epi|*.pdf"
+	IDS_FILTER_PSALL "*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz"
 	IDS_FILTER_PS	"*.ps|*.ps;*.eps;*.epi;*.pdf|*.eps|*.epi|*.pdf"
 	IDS_FILTER_EPS	"*.eps|*.ps;*.eps;*.epi;*.pdf|*.ps|*.epi|*.pdf"
 	IDS_FILTER_EPI	"*.epi|*.ps;*.eps;*.epi;*.pdf|*.ps|*.eps|*.pdf"

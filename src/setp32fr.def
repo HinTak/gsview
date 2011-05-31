@@ -1,0 +1,5 @@
+LIBRARY		SETP32FR
+DESCRIPTION	'GSview Setup French Language Resources'
+DATA		MULTIPLE SHARED
+EXPORTS		DllEntryPoint
+

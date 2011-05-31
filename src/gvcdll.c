@@ -1,19 +1,19 @@
 /*  Copyright (C) 1996, Russell Lang.  All rights reserved.
 
- This file is part of GSview.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GSVIEW General Public License for more details.
-
- Everyone is granted permission to copy, modify and redistribute
- this program, but only under the conditions described in the GSVIEW
- General Public License.  A copy of this license is supposed to have been
- given to you along with this program so you can know your rights and
- responsibilities.  It should be in a file named COPYING.  Among other
- things, the copyright notice and this notice must be preserved on all
- copies. */
+  This file is part of GSview.
+  
+  This program is distributed with NO WARRANTY OF ANY KIND.  No author
+  or distributor accepts any responsibility for the consequences of using it,
+  or for whether it serves any particular purpose or works at all, unless he
+  or she says so in writing.  Refer to the GSview Free Public Licence 
+  (the "Licence") for full details.
+  
+  Every copy of GSview must include a copy of the Licence, normally in a 
+  plain ASCII text file named LICENCE.  The Licence grants you the right 
+  to copy, modify and redistribute GSview, but only under certain conditions 
+  described in the Licence.  Among other things, the Licence requires that 
+  the copyright notice and this notice be preserved on all copies.
+*/
 
 /* gvcdll.c */
 /* GS DLL associated routines */
@@ -270,7 +270,9 @@ int depth;
 	sprintf(buf,"Failed to open device or install ViewerPreProcess hook: returns %d\n", code);
 	gs_addmess(buf);
 	pending.unload = TRUE;
-	if (code == -13) {  /* limitcheck */
+	if ( (code == -13)	/* limitcheck */
+	     || (code = -8)	/* invalidexit */
+	   ) {
 	    gs_addmess("Page size may have been too large or resolution too high.\nResetting page size and resolution\n");
 	    if (option.xdpi > DEFAULT_RESOLUTION)
 		option.xdpi = option.ydpi = DEFAULT_RESOLUTION;
@@ -1303,6 +1305,7 @@ int angle = 0;
 int len;
 long lsize, ldone;
 int pcdone;
+int real_orientation;
     if (load_pstotext())
 	return 1;
   
@@ -1322,20 +1325,31 @@ int pcdone;
     percent_done = 0;
     post_img_message(WM_GSWAIT, IDS_WAITTEXT);
 
-    gs_printf("/setpagedevice { pop } def\n");
+    switch(d_orientation(psfile.pagenum)) {
+	default:
+	case 0:
+	    real_orientation = IDM_PORTRAIT;
+	    break;
+	case 1:
+	    real_orientation = IDM_SEASCAPE;
+	    break;
+	case 2:
+	    real_orientation = IDM_UPSIDEDOWN;
+	    break;
+	case 3:
+	    real_orientation = IDM_LANDSCAPE;
+	    break;
+    }
 
-    switch (option.orientation) {
+    if (psfile.ispdf)
+	real_orientation = pdf_orientation();
+
+    switch (real_orientation) {
 	case IDM_LANDSCAPE:
-	    if (option.swap_landscape)
-		angle = 90;
-	    else
-		angle = 270;
+	    angle = 270;
 	    break;
 	case IDM_SEASCAPE:
-	    if (option.swap_landscape)
-		angle = 270;
-	    else
-		angle = 90;
+	    angle = 90;
 	    break;
 	case IDM_PORTRAIT:
 	    angle = 0;
@@ -1364,6 +1378,10 @@ int pcdone;
 	unload_pstotext();
 	return code;
     }
+
+    /* Don't let anyone stuff around with the page size now */
+    gs_printf("/setpagedevice { pop } def\n");
+
 
     if (psfile.ispdf) {
 	int i;

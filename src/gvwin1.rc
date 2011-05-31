@@ -130,6 +130,10 @@ END
 IDR_VIEWER RCDATA
 BEGIN
 "/ViewerPreProcess { systemdict begin\015\012"
+#ifdef UNUSED
+"(entering ViewerPreProcess\n) print\015\012"
+"dup { exch ==only ( ) print == } forall flush\015\012"
+#endif
 /* %  copy dictionary so we can change the entries */
 "  dup length dict copy  \015\012"
 /* % remove entries that will upset viewer */
@@ -249,7 +253,13 @@ BEGIN
 "    >>\015\012"
 "  >> put\015\012"
 "  end % pop systemdict \015\012"
+#ifdef UNUSED
+"(exiting ViewerPreProcess\n) print\015\012"
+"dup { exch ==only ( ) print == } forall flush\015\012"
+"(done ViewerPreProcess\n) print\015\012"
+#endif
 "}\015\012"
+"\0"
 END
 
 gsview_bitmap BITMAP "binary/gvwmisc.bmp"

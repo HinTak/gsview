@@ -1,0 +1,222 @@
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+  
+  This file is part of GSview.
+  
+  This program is distributed with NO WARRANTY OF ANY KIND.  No author
+  or distributor accepts any responsibility for the consequences of using it,
+  or for whether it serves any particular purpose or works at all, unless he
+  or she says so in writing.  Refer to the GSview Free Public Licence 
+  (the "Licence") for full details.
+  
+  Every copy of GSview must include a copy of the Licence, normally in a 
+  plain ASCII text file named LICENCE.  The Licence grants you the right 
+  to copy, modify and redistribute GSview, but only under certain conditions 
+  described in the Licence.  Among other things, the Licence requires that 
+  the copyright notice and this notice be preserved on all copies.
+*/
+
+/* gvcfr.rc */
+/* Common French language resources */
+
+/* button help */
+STRINGTABLE
+BEGIN
+	IDM_OPEN, "Ouvrir..."
+	IDM_PRINT, "Imprimer..."
+	IDM_INFO, "Informations..."
+	IDM_HELPCONTENT, "Aide"
+	IDM_GOTO, "Atteindre la page..."
+	IDM_NEXT, "Page suivante"
+	IDM_PREV, "Page précédente"
+	IDM_NEXTSKIP, "Avancer de 5 pages"
+	IDM_PREVSKIP, "Reculer de 5 pages"
+	IDM_MAGPLUS, "Augmenter la résolution"
+	IDM_MAGMINUS, "Diminuer la résolution"
+	IDM_TEXTFIND, "Rechercher..."
+	IDM_TEXTFINDNEXT, "Rechercher suivant"
+END
+
+
+STRINGTABLE
+BEGIN
+	IDS_FILE, "Fichier : "
+	IDS_NOFILE, "Aucun fichier ouvert"
+	IDS_PAGE, "Page : "
+	IDS_NOPAGE, "Aucune numérotation des pages n'est disponible"
+	IDS_PAGESPECIAL, "La numérotation des pages est spéciale. Les pages ne peuvent pas être réordonnées de façon fiable. Consultez la rubrique d'aide 'Problèmes courants'. Continuer ?"
+	IDS_LANDSCAPE, "Paysage"
+	IDS_PORTRAIT, "Portrait"
+	IDS_ASCEND, "Ascendant"
+	IDS_DESCEND, "Descendant"
+	IDS_SPECIAL, "Spécial"
+	IDS_PAGEINFO, "Page : \042%s\042  %d sur %d"
+	IDS_LINKPAGE, "Lien avec la page %d"
+	IDS_DEFAULT, "Défaut"
+	IDS_NOTDEFTAG, "[Non définie]"
+	IDS_EPSF, "EPS"
+	IDS_EPSI, "EPS avec aperçu Interchange"
+	IDS_EPST, "EPS avec aperçu TIFF"
+	IDS_EPSW, "EPS avec aperçu Metafile"
+	IDS_DSC, "DSC"
+	IDS_NOTDSC, "Aucun commentaire DSC"
+	IDS_PDF, "Portable Document Format"
+	IDS_IGNOREDSC, "Commentaires DSC ignorés"
+	IDS_CTRLD, "Ctrl-D suivi de "
+	IDS_PJL, "PJL suivi de "
+	IDS_ZOOMED, " Agrandie"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_OUTPUTFILE, "Nom du fichier de sortie"
+	IDS_PRINTINGALL, "Aucun commentaire DSC\nImpression de toutes les pages"
+	IDS_PRINTFILE, "Impression du fichier"
+	IDS_SELECTPAGE, "Sélection de la page"
+	IDS_SELECTPAGES, "Sélection des pages"
+	IDS_NOTOPEN, "Aucun document ouvert"
+	IDS_CANNOTRUN, "Impossible d'exécuter "
+	IDS_TOOLONG, "Ligne de commande trop longue : "
+	IDS_NOMORE, "Plus aucune page"
+	IDS_GSCOMMAND, "Commande Ghostscript ?"
+	IDS_NOZOOM, "Affichage de la page nécessaire avant d'agrandir"
+	IDS_USERWIDTH, "Largeur en 1/72 de pouces ?"
+	IDS_USERHEIGHT, "Hauteur en 1/72 de pouces ?"
+	IDS_BADEPS, "Problème lors de la création du fichier EPS"
+	IDS_NOPREVIEW, "Ce n'est pas un fichier DOS EPS ou\naucun aperçu binaire"
+	IDS_NOTDFNAME, "Utilisation du même nom que le document ouvert impossible"
+	IDS_NOTEMP, "Ouverture du répertoire temporaire impossible.\nLe répertoire est peut-être en lecture seule.\nLa variable d'environnement TEMP n'est peut-être pas définie."
+	IDS_CANCELDONE, "%d%% terminé"
+	IDS_BADCLI, "Option de ligne de commande incorrecte : "
+	IDS_DUPOPT, "Spécification d'une option uniquement parmi /F /P /S. Erreur à : %s"
+	IDS_TEXTFIND, "Quel texte souhaitez-vous rechercher ?"
+	IDS_TEXTNOTFIND, "Texte non trouvé"
+	IDS_PRINTPDFPS "Impression d'un document PDF sur une imprimante PostScript impossible. Utilisez Fichier | Extraire..."
+	IDS_NOPDFQUICKTEXT "Extraction rapide de texte ou recherche dans un fichier PDF impossibles. Utilisez Options | PS vers texte"
+	IDS_BAD_DOSEPS_HEADER "Erreur dans l'en-tête DOS EPS. Commentaires DSC ignorés."
+END
+
+STRINGTABLE
+BEGIN
+	/* sound type types*/
+	IDS_SOUNDNAME, "Fichier son"
+	IDS_SNDPAGE, "Affichage d'une page"
+	IDS_SNDNOPAGE, "Page absente"
+	IDS_SNDNONUMBER, "Numérotation absente"
+	IDS_SNDNOTOPEN, "Aucun fichier ouvert"
+	IDS_SNDERROR, "Erreur"
+	IDS_SNDTIMEOUT,	"Dépassement du temps"
+	IDS_SNDSTART, "Ouverture de GSview"
+	IDS_SNDEXIT, "Fermeture de GSview"
+	IDS_SNDBUSY, "Occupé"
+	IDS_NONE, "<Aucun>"
+	IDS_SPKR, "<Bip>"
+END
+
+STRINGTABLE
+BEGIN
+	/* help topics - these need to match keywords in gvcXX.doc */
+	IDS_TOPICROOT,  "Index"
+	IDS_TOPICOPEN,  "Ouvrir"
+	IDS_TOPICPRINT, "Imprimer"
+	IDS_TOPICPROP, "Propriétés"
+	IDS_TOPICEDITPROP, "Modification des propriétés"
+	IDS_TOPICCLIP, "Presse-papiers"
+	IDS_TOPICPREVIEW, "Aperçu EPS"
+	IDS_TOPICGSCMD, "Configurer Ghostscript"
+	IDS_TOPICSOUND, "Sons"
+	IDS_TOPICDSET, "Paramètres de l'affichage"
+	IDS_TOPICMEDIA, "Format de la feuille"
+	IDS_TOPICPSTOEPS, "PS vers EPS"
+	IDS_TOPICGOTO, "Sélection d'une page"
+	IDS_TOPICINSTALL, "Installation"
+	IDS_TOPICTEXT, "Extraction de texte et recherche"
+	IDS_TOPICKEYS, "Raccourcis clavier"
+	IDS_TOPICMESS, "Afficher les messages"
+	IDS_TOPICSPOOL, "Gestionnaire d'impression"
+	IDS_TOPICZLIB, "zlib"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_BBPROMPT,  "Cliquez à gauche"
+	IDS_BBPROMPT1, "Cliquez en bas"
+	IDS_BBPROMPT2, "Cliquez à droite"
+	IDS_BBPROMPT3, "Cliquez en haut"
+	IDS_EPSONEPAGE, "Un fichier EPS ne doit contenir qu'une page.\nVoir la rubrique d'aide 'PS vers EPS'"
+	IDS_EPSQPAGES, "Ce document ne contient-il qu'une seule page ?"
+	IDS_EPSNOBBOX, "Obtention du cadre limite impossible"
+	IDS_EPSUSERINVALID, "Le fichier aperçu n'est ni au format TIFF ni au format Windows Metafile"
+	IDS_EPSUSERTITLE, "Ouverture du fichier aperçu"
+	IDS_EPS_OFF_PAGE, "Le cadre limite EPS est situé entièrement à l'extérieur de la page. Suggestion : utilisez 'Options | Ajuster l'affichage des fichiers EPS'"
+	IDS_MUSTUSEPORTRAIT, "Vous devez utiliser l'orientation Portrait."
+END
+
+STRINGTABLE
+BEGIN
+	/* wait messages */
+	IDS_WAIT, "Veuillez patienter"
+	IDS_WAITREAD,  "Lecture..."
+	IDS_WAITWRITE,  "Ecriture..."
+	IDS_WAITDRAW, "Affichage..."
+	IDS_WAITDRAW_PC, "Affichage %d%%"
+	IDS_WAITGSOPEN, "Ouverture de Ghostscript..."
+	IDS_WAITGSCLOSE,  "Fermeture de Ghostscript..."
+	IDS_WAITPRINT,  "Impression..."
+	IDS_WAITSEARCH,  "Recherche..."
+	IDS_WAITTEXT, "Extraction du texte %d%%"
+END
+
+STRINGTABLE
+BEGIN
+	/* debug messages */
+	IDS_DEBUG_DFISLOCKED, "dfreopen: file is locked"
+	IDS_DEBUG_DFISOPEN, "dfreopen: file is already open"
+	IDS_DEBUG_DFISMISSING, "dfreopen: file is missing"
+	IDS_DEBUG_DFCHANGED, "dfreopen: file has changed"
+	IDS_DEBUG_DFISCLOSED, "dfclose: file is already closed"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_PROCESS_GSLOAD_FAIL, "Chargement de la DLL de Ghostscript impossible"
+	IDS_PROCESS_INIT_FAIL, "gs_process : gsdll.init a échoué"
+	IDS_PROCESS_VIEWER_FAIL, "gs_process : '(viewer.ps) run' a échoué"
+	IDS_PROCESS_EXECUTE_FAIL, "gs_process : gsdll.execute_cont a échoué"
+END
+
+STRINGTABLE
+BEGIN
+	/* PDF messages */
+	IDS_PDFNOPAGE, "Nombre de pages inconnu dans le fichier PDF\nVous devez d'abord afficher le fichier" 
+	IDS_PDFEXTRACTALL, "Nombre de pages inconnu dans le fichier PDF\nExtraction ou impression de toutes les pages"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_LARGEMEDIA, "Attention : la taille de la page dépasse 2 mètres en largeur ou en hauteur. Veuillez vérifier 'Format | Taille personnalisée...'"
+	IDS_NOTIMPLEMENTED, "Non implémenté"
+	IDS_NOLINKTARGET, "Cible inconnue pour le lien"
+	IDS_PARSEERROR, "La ligne de commande contient une erreur de syntaxe"
+	IDS_ZLIB_FAIL, "Chargement de la DLL zlib impossible. Cliquez sur le bouton OK pour avoir de l'aide."
+END
+
+STRINGTABLE
+BEGIN
+	IDS_BETAEXPIRED, "Cette version BETA de GSview a expiré. Allez sur http://www.cs.wisc.edu/~ghost/ pour apprendre comment obtenir la version courante de GSview"
+	IDS_BETAWARN, AABETAWARN
+	IDS_NOPRINTERINI, "Ouverture du fichier printer.ini impossible"
+	IDS_NOINI, "Ouverture du fichier INI impossible"
+	IDS_NEEDTEMP, "Vous devez faire pointer la variable d'environnement TEMP vers un répertoire valide non protégé en écriture. Sans cela, GSview et Aladdin Ghostscript ne pourront pas imprimer"
+	IDS_VERSIONCHANGED, "La version de GSview installée a changé. Voulez-vous procéder à une nouvelle configuration de GSview ?"
+	IDS_GSNOTINSTALLED, "Vous n'avez pas installé Ghostscript. Veuillez lire le fichier README.TXT de GSview."
+	IDS_GSLIBNOTINSTALLED, "Vous n'avez pas installé les fichiers de la DLL de Ghostscript. Veuillez lire le fichier README.TXT de GSview."
+	IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED
+	IDS_NOPROGMAN, "Ouverture de la connexion DDE avec le Gestionnaire de programmes impossible"
+	IDS_WRONGEMX, "Vous avez emx %s.\rVous avez besoin d'emx %s ou ultérieur.\rPM GSview ne pourra pas fonctionner correctement."
+	IDS_GSVIEWVERSION, GSVIEW_VERSION
+	IDS_CFG73, AACFG73
+	IDS_CFG74, AACFG74
+	IDS_PROGMANGROUP4 AAPROGMANGROUP4
+END
+
+

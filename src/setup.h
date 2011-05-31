@@ -46,25 +46,11 @@
 #define IDD_MKDIR	330
 #define IDD_MKDIR_TEXT	331
 
-#define IDD_EAUTIL      355
-#define IDD_EAUTIL_TEXT 356
-
-#define IDD_UNZIP	340
-#define IDD_UNZIP_TEXT	341
+#define IDD_CONFIG	340
+#define IDD_CONFIG_TEXT	341
 
 #define IDD_FILE	350
 #define IDD_FILE_TEXT	351
-
-#define IDD_CONFIG	360
-#define IDD_CONFIG_TEXT	361
-
-#define IDD_ATM	370
-
-#define IDD_TEXTWIN	570
-#define TEXTWIN_MLE	571
-#define TEXTWIN_COPY	572
-
-#define IDS_INSTALLABORT 900
 
 #define IDD_GSVER	580
 #define IDD_GSVER_TEXT	581
@@ -82,4 +68,6 @@
 
 #define IDD_FAILED	595
 #define IDD_FAILED_REASON	596
-
+
+#define IDS_INSTALLABORT 900
+

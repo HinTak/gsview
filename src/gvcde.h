@@ -195,45 +195,67 @@
 #define AABITS "bits"
 
 /* Installation program */
-/* THIS SECTION IS OLD AND NEEDS UPDATING BEFORE A GERMAN */
-/* LANGUAGE INSTALL PROGRAM CAN BE COMPILED */
+/* ENGLISH */
 #define AAINSTALL1 "GSview Installation"
-#define AAINSTALLINTRO1 "GSview Installation - Einführung"
-#define AAINSTALLINTRO2 "Installationsprogramm für:"
-#define AAINSTALLINTRO3 "Bevor Sie fortfahren, prüfen Sie, ob die 3 Disketten (siehe README.TXT) vorliegen."
-#define AAINSTALLCOPYRIGHT1 "GSview Installation - Copyright"
+#define AAINSTALLINTRO1 "Dies Programm soll Ihnen bei der Installation helfen "
+#define AAINSTALLINTRO2 "Bevor Sie mit der Installation fortfahren, stellen Sie bitte sicher, daß sich die Dateien aus  README.TXT im aktuellen Verzeichnis oder auf drei Disketten befinden. "
+#define AAINSTALLINTRO3 "Die Installation beansprucht ca. 10 MB Platz auf der Festplatte."
+#define AAINSTALLCOPYRIGHT1 "Copyright Anmerkungen"
 #define AAINSTALLCOPYRIGHT2 "GSview und Aladdin Ghostscript sind separate Programme."
-#define AAINSTALLCOPYRIGHT3 "Sie gehören verschiedenen Eigentümern."
-#define AAINSTALLDIR1 "GSview Installation - Verzeichnis"
-#define AAINSTALLDIR2 "Das Basisverzeichnis für GSview und Ghostscript ist:"
-#define AAINSTALLDIR3 "innerhalb des Basisverzeichnis wird GSview in folgendes Unterverzeichnis installiert:"
-#define AAINSTALLDIR4 "Ghostscript wird in folgendem Unterverzeichnis installiert:"
-#define AAINSTALLDIR5 "Sie können das Basisverzeichnis ändern."
-#define AAINSTALLMKDIR1 "GSview Installation - Lege Verzeichnis an"
-#define AAINSTALLMKDIR2 "Das Verzeichnis"
-#define AAINSTALLMKDIR3 "existiert nicht.  Soll es angelegt werden?"
+#define AAINSTALLCOPYRIGHT3 "Sie gehören unterschiedlichen Personen."
+#define AAINSTALLGSVER1 "Welche Komponenten möchten Sie installieren?"
+#define AAINSTALLGSVER2 "Installiere GSview"
+#define AAINSTALLGSVER3 "Installiere Ghostscript"
+#define AAINSTALLGSVER4 "Welche Version von Ghostscript möchten Sie benutzen?"
+#define AAINSTALLDIR1 "Wählen Sie bitte ein Verzeichnis für Gsview und Ghostscript aus."
+#define AAINSTALLDIR2 "Innerhalb dieses Verzeichnisses wird sich Gsview in folgendem Unterverzeichnis befinden:"
+#define AAINSTALLDIR3 "Ghostscript wird in dem Unterverzeichnis installiert:"
+#define AAINSTALLMKDIR1 "Das angegebene Verzeichnis existiert nicht."
+#define AAINSTALLMKDIR2 "Ein neues Verzeichnis wird angelegt."
 #define AAINSTALLMISSING1 "GSview Installation - Fehlende ZIP Datei"
 #define AAINSTALLMISSING2 "Kann ZIP Datei nicht finden. Bitte die Diskette mit folgender Datei einlegen."
-#define AAINSTALLCONFIG1 "GSview Installation - Konfiguration"
-#define AAINSTALLCONFIG2 "Autoexec.bat nicht verändern"
-#define AAINSTALLCONFIG3 "Folgende Zeile wird an die autoexec.bat angefügt\r     SET TEMP=C:\\\rIhre alte autoexec.bat wird umbenannt in autoexec.gs"
-#define AAINSTALLUNZIP1 "GSview Installation - Entpacken"
-#define AAINSTALLEA1 "Aktualisiere erweiterte Attribute"
+#define AAINSTALLCONFIG1 "GSview und Ghostscript benutzen die Umgebungsvariable TEMP um ein Verzeichnis für temporäre Dateien zu bestimmen."
+#define AAINSTALLCONFIG2 "Bisher haben Sie kein TEMP definiert."
+#define AAINSTALLCONFIG3 "Folgende Zeile wird in Ihre autoexec.bat eingefügt \r     SET TEMP=C:\\"
+#define AAINSTALLCONFIG4 "Update autoexec.bat"
+#define AAINSTALLCONFIG5 "Backup der alten autoexec.bat behalten "
+#define AAINSTALLCONFIGPM1 "GSview und Ghostscript benutzen die Umgebungsvariable TEMP um ein Verzeichnis für temporäre Dateien zu bestimmen. "
+#define AAINSTALLCONFIGPM2 "Bisher haben Sie kein TEMP definiert, oder Sie benötigen EMX."
+#define AAINSTALLCONFIGPM3 "Folgende Zeile wird Ihrer config.sys zugefügt 'SET TEMP=C:\\'  und/oder Ihr PATH und LIBPATH wird um EMX erweitert. "
+#define AAINSTALLCONFIGPM4 "Aktualisieren config.sys"
+#define AAINSTALLCONFIGPM5 "Backup der alten config.sys behalten"
+#define AAINSTALLFINISH "GSview Setup ist jetzt fertig zum Start der Installation.  \r\rDrücken Sie Fertig um fortzufahren."
+#define AAINSTALLUNZIP1 "Entpacke Dateien..."
 #define AADIRNOTEXIST "Verzeichnis '%s' existiert nicht. Soll es angelegt werden?"
 #define AAMKDIRFAIL "Verzeichnis kann nicht angelegt werden"
 #define AABETAWARN "Dies ist eine BETA Test Version von GSview. Sie wird deaktiviert am %04d-%02d-%02d."
-#define AAINSTALLOKWIN "Installation erfolgreich.\015A Gruppe \042GS Tools\042 im Programm-Manager wurde angelegt."
-#define AAINSTALLOKPM "Installation erfolgreich.\012A GSview Programobjekt wurde auf dem Desktop angelegt"
-#define AAINSTALLABORT "Installation abgebrochen\012%s"
-#define AASKIPGSINSTALL "Ghostscript %s scheint schon installiert zu sein. Installation von Ghostscript überspringen?"
+#define AAINSTALLOK "Installation erfolgreich."
+#define AAINSTALLFAILED "Installation fehlgeschlagen"
 #define AAPROGMANGROUP1 "GSview kann eine Programm Manager Gruppe oder ein Start Menü anlegen."
 #define AAPROGMANGROUP2 "Lege Gruppe / Symbol an"
 #define AAPROGMANGROUP3 "Name"
 #define AAPROGMANGROUP4 "GS Tools"
 #define AAPROGMANGROUP5 "Eine Programm Manager Gruppe namens \042%s\042 wurde angelegt."
-#define AADONEBAK "Die altw autoexec.bat wurde umbenannt in %s"
+#define AAPROGMANGROUP6 "Ein Desktop Objekt namens \042GSview\042 wurde angelegt."
+#define AAPMOBJECT1 "GSview Setup kann ein Desktop Objekt für Gsview anlegen."
+#define AAPMOBJECT2 "Lege GSview Programm Object an."
+#define AADONEBAK "Die alte autoexec.bat wurde umbenannt in %s"
+#define AACANTLOAD "Nicht ladbar %s"
+#define AACANTCREATETEMPFILE "Kann temporäre Datei nicht anlegen "
+#define AACANTOPENREAD "Kann Datei %s nicht zum lesen öffnen "
+#define AACANTOPENWRITE "Kann Datei %s nicht zum schreiben öffnen "
+#define AAERRORRENAME "Fehler beim umbenennen von %s zu %s"
+#define AANODDEPROGMAN "Kann DDE Verbindung zum Programm Manager nicht öffnen.  Starten Sie bitte Windows erneut."
+#define AAINSERTDISK "Disk einlegen, die enthält %s"
+#define AAZIPNOTFOUND "Zip Datei nicht gefunden"
+#define AAUNZIPCANCELLED "Entpacken abgebrochen \n"
+#define AACANTALLOCBUF "Kann keinen Speicher für den Kopierpuffer bekommen "
+#define AAPROGRAMOBJECTFAILED  "Kann Desktop Objekt nicht anlegen"
 
 /* configure */
+#define AAGSVIEWC "GSview:"
+#define AAALADDINGSC "Aladdin Ghostscript:"
+#define AACFG1 "GSview Konfigurieren"  /* ENGLISH */
 #define AACFG10 "Dieser Wizard hilft Ihnen Gsview zu konfigurieren."
 #define AACFG11 "Wenn Sie einen Eintrag der folgenden Seiten nicht verstehen,\
  dann ändern Sie ihn nicht.  Die Defaults sollten sinnvoll sein."
@@ -243,32 +265,31 @@
 #define AACFG22 "In welchem Verzeichnis ist Ghostscript installiert?"
 #define AACFG23 "Zusätzliche Typ 1 Zeichensätze sind in"
 #define AACFG30 "GSview hält eine Liste von Ghostscript Druckern und\
- Auflösungen in seiner INI Datei vor. \
- Die Default Liste der Geräte und Auflösungen wurde der Standarddistribution \
- von Ghostscript 4.03 entnommen und könnte unvollständig sein."
-#define AACFG31 "Aktualisiere GSview Druckerliste, überschreibe vorhandene Einträge" 
-#define AACFG32 " Aktualisiere GSview Druckerliste " 
-#define AACFG33 " Aktualisierung der GSview Druckerliste überschreibt vorhandene Einträge"
+ Auflösungen in seiner INI Datei vor."
+#define AACFG31 "Die Default Liste der Geräte und Auflösungen wurde der Standarddistribution \
+ von Ghostscript 5.01 entnommen und könnte unvollständig sein."
+#define AACFG32 "Aktualisiere GSview Druckerliste"
+#define AACFG33 "Aktualisierung der GSview Druckerliste überschreibt vorhandene Einträge"
 #define AACFG40 "GSview kann Dateiverknüfungen für PostScript und\
  Portable Document Format (PDF) Dateien anlegen.\
  Durch diese Verknüpfungen führt ein Doppelklick auf jene Dateien \
  zum start von GSview.  Außerdem bewirken sie bei einigen WWW browsern,\
  daß GSview als ein Viewer für PostScript und PDF Dateien benutzt wird."
 #define AACFG41 "Verknüpfung von PostScript (.ps and .eps) Dateien mit GSview."
-#define AACFG42 " Verknüpfung von PDF (.pdf) Dateien mit GSview."
+#define AACFG42 "Verknüpfung von PDF (.pdf) Dateien mit GSview."
 #define AACFG50 "GSview kann eine Programm Manager Gruppe oder\
  Start Menü Einträge für GSview und Aladdin Ghostscript anlegen."
 #define AACFG51 "Lege Gruppe / Eintrag an"
 #define AACFG52 "Name"
-#define AACFG60 "GSview ist jetzt bereit die Konfiguration zu starten.\r\r \
- Drücken Sie Fertig um weiter zu machen."
+#define AACFG60 "GSview ist jetzt bereit die Konfiguration zu starten.\r\r\
+Drücken Sie Fertig um weiter zu machen."
 #define AACFG53 "GSview kann ein Desktop Programm Objekt für Gsview anlegen. \
  Dies verknüpft PostScript (.ps und .eps) und PDF (.pdf) Dateien mit GSview."
 #define AACFG54 "Lege Programm Objekt an"
 #define AACFG70 "Konfiguration erfolgreich."
 #define AACFG72 "Um die Konfiguration später zu verändern,\
- starten Sie GSview und wählen \042Optionen | Konfiguriere...\042 oderr\
- \042Optionen | Konfiguriere Ghostscript\042."
+ starten Sie GSview und wählen \042Optionen | Konfiguriere...\042 oder\
+ \042Optionen | Konfiguriere Ghostscript...\042."
 #define AACFG73 "Konfiguration fehlgeschlagen."
 #define AACFG74 "Konfiguration abgebrochen."
 
@@ -298,6 +319,6 @@
 #define AASELECTLANGUAGE "Select Language"   /* Don't translate this */
 #define AAENGLISH "English"
 #define AADEUTSCH "Deutsch"
+#define AAFRANCAIS "Français"
 
 
-

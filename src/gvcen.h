@@ -198,7 +198,7 @@
 /* Installation program */
 #define AAINSTALL1 "GSview Install"
 #define AAINSTALLINTRO1 "This wizard will help you install"
-#define AAINSTALLINTRO2 "Before continuing installation, make sure you have the 3 disks listed in README.TXT."
+#define AAINSTALLINTRO2 "Before continuing installation, make sure you have the files listed in README.TXT in the current directory or on 3 floppy disks."
 #define AAINSTALLINTRO3 "The installation will require 10 M bytes of hard disk space."
 #define AAINSTALLCOPYRIGHT1 "Copyright Notices"
 #define AAINSTALLCOPYRIGHT2 "GSview and Aladdin Ghostscript are separate programs."
@@ -230,19 +230,33 @@
 #define AADIRNOTEXIST "Directory '%s' does not exist.  Create it?"
 #define AAMKDIRFAIL "Couldn't make directory"
 #define AABETAWARN "This is a BETA test version of GSview.  It will disable on %04d-%02d-%02d."
-#define AAINSTALLOKWIN "Installation successful."
-#define AAINSTALLOKPM "Installation successful. \012A GSview program object has been created on the desktop." 
+#define AAINSTALLOK "Installation successful."
 #define AAINSTALLFAILED "Installation failed"
 #define AAPROGMANGROUP1 "GSview Setup can create a Program Manager Group or Start Menu Item."
 #define AAPROGMANGROUP2 "Create Group / Item"
 #define AAPROGMANGROUP3 "Name"
 #define AAPROGMANGROUP4 "GS Tools"
 #define AAPROGMANGROUP5 "A Program Manager group named \042%s\042 has been created."
+#define AAPROGMANGROUP6 "A desktop program object named \042GSview\042 has been created."
 #define AAPMOBJECT1 "GSview Setup can create a desktop object for GSview."
 #define AAPMOBJECT2 "Create GSview program object."
 #define AADONEBAK "The old autoexec.bat has been renamed to %s"
+#define AACANTLOAD "Can't load %s"
+#define AACANTCREATETEMPFILE "Can't create temporary filename"
+#define AACANTOPENREAD "Can't open %s for reading"
+#define AACANTOPENWRITE "Can't open %s for writing"
+#define AAERRORRENAME "Error renaming %s to %s"
+#define AANODDEPROGMAN "Couldn't open DDE connection to Program Manager.  Restart Windows."
+#define AAINSERTDISK "Insert disk containing %s"
+#define AAZIPNOTFOUND "Zip file not found"
+#define AAUNZIPCANCELLED "Unzip cancelled\n"
+#define AACANTALLOCBUF "Can't allocate memory for copy buffer"
+#define AAPROGRAMOBJECTFAILED "Couldn't create desktop program object"
 
 /* configure */
+#define AAGSVIEWC "GSview:"
+#define AAALADDINGSC "Aladdin Ghostscript:"
+#define AACFG1 "GSview Configure"
 #define AACFG10 "This wizard will help you configure GSview."
 #define AACFG11 "If you don't understand an item on the following pages,\
  don't change it.  The default are all sensible."
@@ -250,14 +264,13 @@
  and where it is located."
 #define AACFG21 "Which version of Ghostscript do you wish to use?"
 #define AACFG22 "In which directory is Ghostscript located?"
-#define AACFG23 "Look for additional Type 1 fonts in"
+#define AACFG23 "Search for additional Type 1 fonts in"
 #define AACFG30 "GSview keeps a list of Ghostscript printer devices and\
- resolutions in its initialization file. \
- The default list of devices and resolutions is taken from the standard\
- distribution version of Ghostscript 4.03 and may not be complete."
-#define AACFG31 "Update GSview printer list, overwriting any existing entries" 
+ resolutions in its initialization file."
+#define AACFG31 "The default list of devices and resolutions is taken from the standard\
+ distribution version of Ghostscript 5.01 and may not be complete."
 #define AACFG32 "Update GSview printer list" 
-#define AACFG33 "Updating the  GSview printer list will overwrite any existing entries." 
+#define AACFG33 "Updating the GSview printer list will overwrite any existing entries." 
 #define AACFG40 "GSview can create file associations for PostScript and\
  Portable Document Format (PDF) files.\
  With these associations, double clicking on a PostScript or PDF file will\
@@ -276,7 +289,7 @@
 #define AACFG70 "Configuration successful."
 #define AACFG72 "If you need to change the configuration later,\
  run GSview then select \042Options | Configure...\042 or\
- \042Options | Configure Ghostscript\042."
+ \042Options | Configure Ghostscript...\042."
 #define AACFG73 "Configuration failed."
 #define AACFG74 "Configuration cancelled."
 
@@ -306,4 +319,5 @@
 #define AASELECTLANGUAGE "Select Language"
 #define AAENGLISH "English"
 #define AADEUTSCH "Deutsch"
+#define AAFRANCAIS "Français"
 

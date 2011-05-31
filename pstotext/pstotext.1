@@ -56,9 +56,9 @@ input.)
 .PP
 The option \-cork is only relevant for PostScript files produced by
 dvips from TeX or LaTeX documents; it tells \fBpstotext\fR to use the
-Cork encoding rather than the old TeX text encoding. Unfortunately
-files produced by dvips don't distinguish which font encodings were
-used.
+Cork encoding (known as T1 in LaTeX) rather than the old TeX text
+encoding (known as OT1 in LaTeX). Unfortunately files produced by
+dvips don't distinguish which font encodings were used.
 .PP
 The options \-landscape and \-landscapeOther should be used for
 documents that must be rotated 90 degrees clockwise or
@@ -113,10 +113,10 @@ and Russell Lang (Windows and OS/2 adaptation).
 .SH "SEE ALSO"
 \fBpstotext\fR incorporates technology originally developed for the
 Virtual Paper project at SRC; see
-http://www.research.digital.com/SRC/virtualpaper/.
+http://www.research.digital.com/SRC/virtualpaper/.
 .PP
 As mentioned above, \fBpstotext\fR invokes Ghostscript.  See gs(1) or
-http://www.cs.wisc.edu/~ghost/.
+http://www.cs.wisc.edu/~ghost/.
 .SH "COPYRIGHT"
 .PP
 Copyright 1995 Digital Equipment Corporation.
@@ -128,7 +128,6 @@ See file pstotext.txt for details.
 .BR
 .PP
 .EX
-Last modified on Mon Oct 14 08:30:51 PDT 1996 by mcjones  
+Last modified on Tue Oct 29 09:55:14 PST 1996 by mcjones  
      modified on Wed Jun  7 17:47:56 PDT 1995 by birrell  
 .EE
-

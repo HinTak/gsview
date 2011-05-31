@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -44,6 +44,8 @@ BOOL win32s_printer_pending = FALSE;
 BMAP bitmap;		/* information about display bitmap */
 OPTIONS option;		/* GSview options (saved in INI file) */
 DISPLAY display;	/* Display parameters */
+char last_files[4][MAXSTR];	/* last 4 files used */
+int last_files_count;		/* number of files known */
 
 struct sound_s sound[NUMSOUND] = {
 	{"SoundOutputPage", IDS_SNDPAGE, ""},
@@ -296,6 +298,8 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
  	WinHelp(hwndimg,szHelpName,HELP_QUIT,(DWORD)NULL);
 	if (hlib_mmsystem != (HINSTANCE)NULL)
 	    FreeLibrary(hlib_mmsystem);
+	if ((hlanguage != (HINSTANCE)NULL) && (hlanguage != phInstance))
+	    FreeLibrary(hlanguage);
 	return 0;
 }
 
@@ -1040,6 +1044,32 @@ RECT rect;
 		enable_menu_item(IDM_ORIENTMENU, IDM_UPSIDEDOWN, !psfile.ispdf);
 		enable_menu_item(IDM_ORIENTMENU, IDM_SEASCAPE, !psfile.ispdf);
 		enable_menu_item(IDM_ORIENTMENU, IDM_SWAPLANDSCAPE, !psfile.ispdf);
+
+		/* Recent files */
+		{   char buf[MAXSTR];
+		    int i;
+		    HMENU hmenufile = GetSubMenu(hmenu,0);
+		    RemoveMenu(hmenufile, IDM_LASTFILE1, MF_BYCOMMAND);
+		    RemoveMenu(hmenufile, IDM_LASTFILE2, MF_BYCOMMAND);
+		    RemoveMenu(hmenufile, IDM_LASTFILE3, MF_BYCOMMAND);
+		    RemoveMenu(hmenufile, IDM_LASTFILE4, MF_BYCOMMAND);
+		    for (i=last_files_count; i>0; i--) {
+		        sprintf(buf, "&%d %s", i, last_files[i-1]);
+			if (strlen(buf)>36) {
+			    int j;
+			    for (j=strlen(buf); j>0; j--)
+				if ((buf[j] == '/') || (buf[j] == '\\'))
+				    break;
+			    if (strlen(buf) - j > 28)
+				memmove(buf+3, buf+strlen(buf)+1-30, 30);
+			    else {
+				buf[5] = buf[6] = buf[7] = '.';
+				memmove(buf+8, buf+j, strlen(buf)+1-j);
+			    }
+			}
+			InsertMenu(hmenufile, 13, MF_BYPOSITION | MF_STRING, IDM_LASTFILE1+i-1, buf);
+		    }
+		}
 		return 0;
 	    }
 	    break;
@@ -1549,6 +1579,10 @@ PSDOC *doc = psfile.doc;
     if (psfile.name[0] != '\0') {
 	i = load_string(IDS_FILE, buf, sizeof(buf));
 	GetFileTitle(psfile.name, buf+i, (WORD)(sizeof(buf)-i));
+	if (strlen(buf) > 24) {
+	    memmove(buf+3, buf+strlen(buf)+1-20, 20);
+	    buf[0] = buf[1] = buf[2] = '.';
+	}
 	TextOut(hdc, info_file.x, info_file.y, buf, strlen(buf));
 	if (szWait[0] != '\0') {
 	    sprintf(buf, szWait, percent_done);
@@ -1569,7 +1603,7 @@ PSDOC *doc = psfile.doc;
 		    sprintf(buf, fmt, " " ,psfile.pagenum,  doc->numpages);
 	    }
 	    if (zoom)
-		strcat(buf, "  Zoomed");
+		load_string(IDS_ZOOMED, buf+strlen(buf), sizeof(buf)-strlen(buf));
 	    TextOut(hdc, info_page.x, info_page.y, buf, strlen(buf));
 	  }
 	  else {

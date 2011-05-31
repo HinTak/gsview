@@ -310,6 +310,9 @@ typedef struct tagDISPLAY {
 	TID	tid;
 } DISPLAY;
 
+extern char last_files[4][MAXSTR];	/* last 4 files used */
+extern int last_files_count;		/* number of files known */
+
 typedef struct tagTEXTINDEX {
     int word;	/* offset to word */
     int line;	/* line number on page */
@@ -482,3 +485,4 @@ int gp_printfile(char *filename, char *port);
 extern char not_defined[];
 
 #endif
+

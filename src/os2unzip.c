@@ -30,6 +30,7 @@
 
 #include "unzip2.h"
 #include "setupc.h"
+#include "gvcrc.h"
 
 extern HAB hab;
 HINSTANCE unzip_hinstance;
@@ -106,8 +107,11 @@ APIRET rc;
 	unzip_hinstance = (HINSTANCE)NULL;
 
     if (unzip_hinstance == (HINSTANCE)NULL) {
-	sprintf(buf2, "Can't load unzip DLL '%s', error = %d\n", buf, (int)rc);
+	char mess[256];
+	load_string(IDS_CANTLOAD, mess, sizeof(mess));
+	sprintf(buf2, mess, buf);
 	gs_addmess(buf2);
+	sprintf(buf2, "rc = %d\n", (int)rc);
 	gs_addmess_update();
 	return 1;
     }

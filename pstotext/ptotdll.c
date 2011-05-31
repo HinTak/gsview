@@ -1,7 +1,7 @@
 /* Copyright (C) 1995-1996, Digital Equipment Corporation.    */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Fri Oct 11 16:42:13 PDT 1996 by mcjones   */
+/* Last modified on Mon Oct 28 12:12:42 PST 1996 by mcjones   */
 /*      modified on Sun Jul 28 00:00:00 UTC 1996 by rjl       */
 
 /* This module is based on OCR_PS.m3, a module of the Virtual Paper
@@ -250,11 +250,11 @@ static char *CorkSpecialGlyphs[] = {
     "E\236", /* Eogonek */
     "G\226", /* Gbreve */
     "L\264", /* Lacute */
-    "L\237", /* Lhackek */
+    "L\237", /* Lhacek */
     "L/",    /* Lslash/Lstroke */
     "N\264", /* Nacute */
-    "N\237", /* Nhachek */
-    "\\NG",   /* Eng */
+    "N\237", /* Nhacek */
+    "\\NG",  /* Eng */
     "O\235", /* Ohungarumlaut */
     "R\264", /* Racute */
     "R\237", /* Rhacek */
@@ -271,7 +271,7 @@ static char *CorkSpecialGlyphs[] = {
     "Z\227", /* Zdot */
     "IJ",    /* IJ */
     "I\227", /* Idot */
-    "\\dj",   /* dbar */
+    "\\dj",  /* dbar */
     "\247",  /* section */
     "a\226", /* abreve */
     "a\236", /* aogonek */
@@ -540,7 +540,7 @@ static int ParseEncodingMore(t, instr) T *t; char *instr; {
       tooSparse = (*enc)[i] == NonstandardGlyph;
     if (tooSparse)
       for (i = 0; i<256; i++)
-	if ((*enc)[i] == NonstandardGlyph) (*enc)[i] = i;
+        if ((*enc)[i] == NonstandardGlyph) (*enc)[i] = i;
   }
 
   return 0;
@@ -659,7 +659,7 @@ static int ParseMetricsMore(t, instr) T *t; char *instr; {
     /* If "FontBBox" was not specified, take a guess. */
     if (mt->blx == 0.0 && mt->bly == 0.0 && mt->toprx == 0.0 && mt->topry == 0.0) {
       for (i = 0; i<256; i++)
-	if (mt->chr[i].x > mt->toprx) mt->toprx = mt->chr[i].x;
+        if (mt->chr[i].x > mt->toprx) mt->toprx = mt->chr[i].x;
       mt->bly = GuessDescend * mt->toprx;
       mt->topry = GuessAscend * mt->toprx;
     }
@@ -704,10 +704,10 @@ static void Output(t, pre, word, llx, lly, urx, ury)
   if (t->nonEmptyPage) {
     mid = (topry+bly) / 2;
     if (t->blx<t->toprx && t->topry>=t->bly
-	|| blx<toprx && topry<bly
-	&& t->blx <= blx
-	&& t->topry <= mid
-	&& mid <= t->bly) *pre = " "; /* same line */
+        || blx<toprx && topry<bly
+        && t->blx <= blx
+        && t->topry <= mid
+        && mid <= t->bly) *pre = " "; /* same line */
     else *pre = "\n"; /* different line */
   }
   else *pre = "";
@@ -795,10 +795,10 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
     if (glyph == 0) {
 
       /* If any element of the current encoding is in the range used
-	 by Microsoft TrueType, assume this character is, too. */
+         by Microsoft TrueType, assume this character is, too. */
       int k; BOOLEAN tt = FALSE;
       for(k = 0; !tt && k < sizeof(*enc)/sizeof((*enc)[0]); k++) {
-	if (FirstTT1 <= (*enc)[k] && (*enc)[k] <= LastTT2) tt = TRUE;
+        if (FirstTT1 <= (*enc)[k] && (*enc)[k] <= LastTT2) tt = TRUE;
       }
       if (tt) glyph = FirstTT1 + (int)in;
       /* There are too many other exceptions to actually trap this:
@@ -837,7 +837,7 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
       }
       else if (glyph <= LASTDvipsGlyphs)
         /* Assume old text layout (OT1?). */
-	str = DvipsGlyphs[glyph-FIRSTDvipsGlyphs];
+        str = DvipsGlyphs[glyph-FIRSTDvipsGlyphs];
       else {
         tempstr[0] = UnknownChar; tempstr[1] = '\0';
         str = &tempstr[0];
@@ -849,17 +849,17 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
     else if (glyph <= LastTT2) {
       if (FirstTT2 <= glyph) glyph -= FirstTT2-FirstTT1;
       if (glyph < FirstTT1+32) {
-	buf[l] = UnknownChar; l++;
+        buf[l] = UnknownChar; l++;
       }
       else if (glyph < FIRSTTTSpecialGlyphs ||
-	    LASTTTSpecialGlyphs < glyph) {
-	buf[l] = (char)(glyph - FirstTT1); l++;
+            LASTTTSpecialGlyphs < glyph) {
+        buf[l] = (char)(glyph - FirstTT1); l++;
       }
       else {
-	char *str = TTSpecialGlyphs[glyph-FIRSTTTSpecialGlyphs];
-	int lstr = strlen(str);
-	strncpy(&buf[l], str, lstr);
-	l += lstr;
+        char *str = TTSpecialGlyphs[glyph-FIRSTTTSpecialGlyphs];
+        int lstr = strlen(str);
+        strncpy(&buf[l], str, lstr);
+        l += lstr;
       }
     }
     else if (glyph <= LastOldDvips) {
@@ -874,8 +874,8 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
     }
     else return PSTOTEXT_FILTER_BADGLYPHINDEX;
 
-    /* Substitute minus for hyphen. */
-    if (buf[l-1] == '\255') buf[l-1] = '-';
+    /* We no longer substitute minus for hyphen. */
+    /* if (buf[l-1] == '\255') buf[l-1] = '-'; */
   }
 
   ReadPair(&x1, &y1, &instr); /* final currentpoint */
@@ -883,20 +883,20 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
     if (t->lbuf == 0) {SetBuf();}
     else {
       /* If the distance between this string and the previous one is
-	 less than "spaceTol" times the minimum of the average
-	 character widths in the two strings, and the two strings
-	 are in the same direction, then append this string to the
-	 previous one.  Otherwise, output the previous string and
-	 then save the current one.
+         less than "spaceTol" times the minimum of the average
+         character widths in the two strings, and the two strings
+         are in the same direction, then append this string to the
+         previous one.  Otherwise, output the previous string and
+         then save the current one.
 
-	 Sometimes this string overlaps the previous string, e.g.,
-	 when TeX is overprinting an accent over another character.
-	 So we make a special case for this (but only handle the
-	 left-to-right orientation). */
+         Sometimes this string overlaps the previous string, e.g.,
+         when TeX is overprinting an accent over another character.
+         So we make a special case for this (but only handle the
+         left-to-right orientation). */
 
       /* Set "(xsp,ysp)" to the reporting space coordinates of the
-	 minimum of the average width of the characters in this
-	 string and the previous one. */
+         minimum of the average width of the characters in this
+         string and the previous one. */
 
       xsp = MIN((t->x1-t->x0) / t->lbuf, (x1-x0) / l);
       ysp = MIN((t->y1-t->y0) / t->lbuf, (y1-y0) / l);
@@ -906,24 +906,24 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
       maxx = spaceTol * xsp;
       maxy = spaceTol * ysp;
       if (dx*dx + dy*dy < maxx*maxx + maxy*maxy
-	  || t->y1 == y0 && t->x0 <= t->x1 && t->x0 <= x0 && x0 <= t->x1
-	 && SameDirection(t->x1-t->x0, t->y1-t->y0, x1-x0, y1-y0)) {
-	if (t->lbuf+l >= sizeof(t->buf)) {
-	  Output(t, pre, word, llx, lly, urx, ury);
+          || t->y1 == y0 && t->x0 <= t->x1 && t->x0 <= x0 && x0 <= t->x1
+         && SameDirection(t->x1-t->x0, t->y1-t->y0, x1-x0, y1-y0)) {
+        if (t->lbuf+l >= sizeof(t->buf)) {
+          Output(t, pre, word, llx, lly, urx, ury);
           *post = "";
-	  SetBuf();
-	}
-	else {
-	  strncpy(&t->buf[t->lbuf], buf, l);
-	  t->lbuf += l;
-	  t->x1 = x1; t->y1 = y1;
-	  /* *** Merge font bounding boxes? */
-	}
+          SetBuf();
+        }
+        else {
+          strncpy(&t->buf[t->lbuf], buf, l);
+          t->lbuf += l;
+          t->x1 = x1; t->y1 = y1;
+          /* *** Merge font bounding boxes? */
+        }
       }
       else {
-	Output(t, pre, word, llx, lly, urx, ury);
+        Output(t, pre, word, llx, lly, urx, ury);
         *post = "";
-	SetBuf();
+        SetBuf();
       }
     }
   }
@@ -957,13 +957,13 @@ int DLLEXPORT pstotextFilter(instance, instr, pre, word, post, llx, lly, urx, ur
                   if (t->lbuf > 0) {
                     Output(t, pre, word, llx, lly, urx, ury);
                     *post = "\n\f\n";
-		  }
+                  }
                   else {
                     *pre = "";
                     *word = "";
                     *llx = 0; *lly = 0; *urx = 0; *ury = 0;
                     *post = "\f\n";
-		  }
+                  }
                   t->nonEmptyPage = FALSE;
                   t->blx = t->bly = t->toprx = t->topry = 0;
                   break;
@@ -977,4 +977,4 @@ int DLLEXPORT pstotextFilter(instance, instr, pre, word, post, llx, lly, urx, ur
   }
   return 0;
 }
-
+

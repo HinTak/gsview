@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -73,6 +73,8 @@ BMAP bitmap;		/* Bitmap structure */
 OPTIONS option;		/* GSview options (saved in INI file) */
 DISPLAY display;	/* Display parameters */
 PRINTER printer;	/* Printer GS parameters */
+char last_files[4][MAXSTR];	/* last 4 files used */
+int last_files_count;		/* number of files known */
 
 int page_skip = 5;		/* number of pages to skip in IDM_NEXTSKIP or IDM_PREVSKIP */
 BOOL zoom = FALSE;		/* true if display zoomed */
@@ -251,7 +253,8 @@ main(int argc, char *argv[])
       }
   }
 
-  play_sound(SOUND_EXIT);
+  if (WinIsWindow(hab, hwnd_frame))	/* don't play sound if closed using system menu */
+      play_sound(SOUND_EXIT);
   if (multithread && display.tid) {
       int i = 100;	/* 10 seconds */
       pending.unload = TRUE;
@@ -796,6 +799,47 @@ BOOL addeps;
 	    enable_menu_item(IDM_FILEMENU, IDM_PRINTTOFILE, idle);
 	    enable_menu_item(IDM_FILEMENU, IDM_EXTRACT, idle);
 	    enable_menu_item(IDM_FILEMENU, IDM_PSTOEPS, idle);
+	    /* recent files */
+	    {	HWND hwndMenu;
+		MENUITEM mi;
+		MENUITEM mii;
+		char buf[MAXSTR];
+		int i;
+		hwndMenu = WinWindowFromID(hwnd_frame, FID_MENU);
+		WinSendMsg(hwndMenu, MM_QUERYITEM, 
+			MPFROM2SHORT(IDM_FILEMENU, TRUE), MPFROMP(&mi));
+		WinSendMsg(mi.hwndSubMenu, MM_DELETEITEM, 
+			MPFROM2SHORT(IDM_LASTFILE1, TRUE), (MPARAM)NULL);
+		WinSendMsg(mi.hwndSubMenu, MM_DELETEITEM, 
+			MPFROM2SHORT(IDM_LASTFILE2, TRUE), (MPARAM)NULL);
+		WinSendMsg(mi.hwndSubMenu, MM_DELETEITEM, 
+			MPFROM2SHORT(IDM_LASTFILE3, TRUE), (MPARAM)NULL);
+		WinSendMsg(mi.hwndSubMenu, MM_DELETEITEM, 
+			MPFROM2SHORT(IDM_LASTFILE4, TRUE), (MPARAM)NULL);
+		mii.iPosition = 13;
+		mii.afStyle = MIS_TEXT;
+		mii.afAttribute = 0;
+		mii.hwndSubMenu = (HWND)NULL;
+		mii.hItem = 0;
+		for (i=last_files_count; i>0; i--) {
+		    sprintf(buf, "~%d %s", i, last_files[i-1]);
+		    if (strlen(buf)>36) {
+			int j;
+			for (j=strlen(buf); j>0; j--)
+			    if ((buf[j] == '/') || (buf[j] == '\\'))
+				break;
+			if (strlen(buf) - j > 28)
+			    memmove(buf+3, buf+strlen(buf)+1-30, 30);
+			else {
+			    buf[5] = buf[6] = buf[7] = '.';
+			    memmove(buf+8, buf+j, strlen(buf)+1-j);
+			}
+		    }
+		    mii.id = IDM_LASTFILE1+i-1;
+		    WinSendMsg(mi.hwndSubMenu, MM_INSERTITEM, 
+			(MPARAM)&mii, (MPARAM)buf);
+		}
+	    }
 	    break;
 	case IDM_EDITMENU:
 	    request_mutex();
@@ -1718,7 +1762,7 @@ char fmt[MAXSTR];
 			sprintf(buf, fmt, " " ,psfile.pagenum,  psfile.doc->numpages);
 		}
 		if (zoom)
-		    strcat(buf, "  Zoomed");
+		    load_string(IDS_ZOOMED, buf+strlen(buf), sizeof(buf)-strlen(buf));
 	        GpiCharStringAt(ps, &info_page, strlen(buf), buf);
 	      }
 	      else {

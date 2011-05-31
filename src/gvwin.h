@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -29,6 +29,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <dir.h>
+#include <dirent.h>
 #include <io.h>
 #include <time.h>
 #include <process.h>
@@ -285,6 +286,9 @@ typedef struct tagDISPLAY {
 	HANDLE	event;
 	unsigned long tid;
 } DISPLAY;
+
+extern char last_files[4][MAXSTR];	/* last 4 files used */
+extern int last_files_count;		/* number of files known */
 
 struct prfentry {
 	char *name;

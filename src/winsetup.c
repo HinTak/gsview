@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.;
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.;
   
   This file is part of GSview.
   
@@ -17,8 +17,6 @@
 
 /* winsetup.c */
 /* MS-Windows installation program for GSview and Ghostscript */
-/* rjl 1996-01-02 */
-/* rjl 1996-06-21 */
 
 #define STRICT
 #include <windows.h>
@@ -51,6 +49,7 @@ char groupname[MAXSTR];
 char groupfile[MAXSTR];
 
 HINSTANCE phInstance;
+HINSTANCE hlanguage;
 #ifdef __WIN32__
 char szUnzipDll[]="wizunz32.dll";
 char szIniName[]="gsview32.ini";
@@ -69,10 +68,10 @@ int flag;
 DLGPROC lpProcDlg;
 #endif
 #ifdef __WIN32__
-    flag = DialogBoxParam( phInstance, MAKEINTRESOURCE(resource), hMain, dlgproc, (LPARAM)NULL);
+    flag = DialogBoxParam(hlanguage, MAKEINTRESOURCE(resource), hMain, dlgproc, (LPARAM)NULL);
 #else
     lpProcDlg = (DLGPROC)MakeProcInstance((FARPROC)dlgproc, phInstance);
-    flag = DialogBoxParam( phInstance, MAKEINTRESOURCE(resource), hMain, lpProcDlg, (LPARAM)NULL);
+    flag = DialogBoxParam(hlanguage, MAKEINTRESOURCE(resource), hMain, lpProcDlg, (LPARAM)NULL);
     FreeProcInstance((FARPROC)lpProcDlg);
 #endif
     return flag;
@@ -101,7 +100,7 @@ gs_chdir(char *dirname)
 int
 load_string(int id, char *str, int len)
 {
-	return LoadString(phInstance, id, str, len);
+	return LoadString(hlanguage, id, str, len);
 }
 
 void
@@ -190,6 +189,7 @@ update_config(void)
 {
 FILE *infile, *outfile;
 char inname[MAXSTR], outname[MAXSTR];
+char buf[MAXSTR];
 char line[1024];
 char tempname[MAXSTR];
 int i;
@@ -200,16 +200,18 @@ int i;
     strcpy(tempname, bootdrive);
     strcat(tempname, "\\GSXXXXXX");
     if (mktemp(tempname) == (char *)NULL) {
-	strcpy(error_message, "Can't create temporary filename");
-		return 1;
+	load_string(IDS_CANTCREATETEMPFILE, error_message, sizeof(error_message));
+	return 1;
     }
 
     if ( (infile = fopen(inname, "r")) == (FILE *)NULL) {
-	sprintf(error_message, "Can't open %s for reading", inname);
+	load_string(IDS_CANTOPENREAD, buf, sizeof(buf));
+	sprintf(error_message, buf, inname);
 	return 1;
     }
     if ( (outfile = fopen(tempname, "w")) == (FILE *)NULL)  {
-	sprintf(error_message, "Can't create %s for writing", tempname);
+	load_string(IDS_CANTOPENWRITE, buf, sizeof(buf));
+	sprintf(error_message, buf, tempname);
 	return 1;
     }
     while (fgets(line, sizeof(line), infile)) {
@@ -237,7 +239,8 @@ int i;
 		break;   /* found a suitable name */
 	}
         if (rename(inname, outname)) {
-	    sprintf(error_message, "Error renaming %s to %s", inname, outname);
+	    load_string(IDS_ERRORRENAME, buf, sizeof(buf));
+	    sprintf(error_message, buf, inname, outname);
 	    return 1;
 	}
 	strcpy(autoexec_bak, outname);
@@ -246,7 +249,8 @@ int i;
 	unlink(inname);
 
     if (rename(tempname, inname)) {
-	sprintf(error_message, "Error renaming %s to %s", tempname, inname);
+	load_string(IDS_ERRORRENAME, buf, sizeof(buf));
+	sprintf(error_message, buf, tempname, inname);
 	return 1;
     }
 
@@ -292,6 +296,7 @@ char setup[MAXSTR+MAXSTR];
 char buf[MAXSTR];
 DWORD dwResult;
 
+    fprintf(unziplogfile, "\n[ProgMan]\n");
     lpDdeProc = MakeProcInstance((FARPROC)DdeCallback, phInstance);
     if (DdeInitialize(&idInst, (PFNCALLBACK)lpDdeProc, CBF_FAIL_POKES, 0L)) {
 #ifndef __WIN32__
@@ -303,8 +308,7 @@ DWORD dwResult;
     hszSysTopic = DdeCreateStringHandle(idInst, "PROGMAN", CP_WINANSI);
     hConv = DdeConnect(idInst, hszServName, hszSysTopic, (PCONVCONTEXT)NULL);
     if (hConv == NULL) {
-	
-	sprintf(error_message, "Couldn't open DDE connection to Program Manager\n", 0);
+	load_string(IDS_NODDEPROGMAN, error_message, sizeof(error_message));
 	return 1;
     }
 
@@ -312,9 +316,11 @@ DWORD dwResult;
     DdeClientTransaction((LPBYTE)str, strlen(str)+1, hConv,\
 	NULL, CF_TEXT, XTYP_EXECUTE, 2000, &dwResult)
 
+    fprintf(unziplogfile, "ShowGroup=\042%s\042,1\n",groupname);
     sprintf(setup, "[CreateGroup(\042%s\042,%s.grp)][ShowGroup(\042%s\042,1)]",
 	groupname, groupfile, groupname);
     DDEEXECUTE(setup);
+    fprintf(unziplogfile, "DeleteItem=\042%s\042\n",GSVIEW_NAME);
     sprintf(setup, "[ReplaceItem(\042%s\042)]", GSVIEW_NAME);
     DDEEXECUTE(setup);
     if (!is_win4)
@@ -330,6 +336,7 @@ DWORD dwResult;
 /* In Win95, it appears you must put quotes around the EXE name */
 /* and options separately */
 
+    fprintf(unziplogfile, "DeleteItem=\042GSview README\042\n");
     sprintf(setup, "[ReplaceItem(\042GSview README\042)]");
     DDEEXECUTE(setup);
     if (!is_win4)
@@ -340,6 +347,7 @@ DWORD dwResult;
 	    destdir, gsviewbase);
     DDEEXECUTE(setup);
 
+    fprintf(unziplogfile, "DeleteItem=\042Ghostscript\042\n");
     sprintf(setup, "[ReplaceItem(\042Ghostscript\042)]");
     DDEEXECUTE(setup);
     if (!is_win4)
@@ -350,6 +358,7 @@ DWORD dwResult;
 	    destdir, gs_basedir, GS_EXENAME, destdir, gs_basedir, destdir, gs_basedir);
     DDEEXECUTE(setup);
 
+    fprintf(unziplogfile, "DeleteItem=\042Ghostscript README\042\n");
     sprintf(setup, "[ReplaceItem(\042Ghostscript README\042)]");
     DDEEXECUTE(setup);
     if (!is_win4)
@@ -361,6 +370,7 @@ DWORD dwResult;
     DDEEXECUTE(setup);
 #undef DDEXECUTE
 
+    fprintf(unziplogfile, "DeleteGroup=\042%s\042\n", groupname);
     DdeDisconnect(hConv);
     DdeUninitialize(idInst);
 
@@ -383,11 +393,11 @@ WIZPAGE *page;
 char buf[MAXSTR];
     /* main dialog box */
 #ifdef __WIN32__
-    hMain = CreateDialogParam(phInstance, MAKEINTRESOURCE(IDD_MAIN), (HWND)NULL, MainDlgProc, (LPARAM)NULL);
+    hMain = CreateDialogParam(hlanguage, MAKEINTRESOURCE(IDD_MAIN), (HWND)NULL, MainDlgProc, (LPARAM)NULL);
 #else
     lpMainDlgProc = (DLGPROC)MakeProcInstance((FARPROC)MainDlgProc, phInstance);
     lpChildDlgProc = (DLGPROC)MakeProcInstance((FARPROC)ModelessDlgProc, phInstance);
-    hMain = CreateDialogParam(phInstance, MAKEINTRESOURCE(IDD_MAIN), (HWND)NULL, lpMainDlgProc, (LPARAM)NULL);
+    hMain = CreateDialogParam(hlanguage, MAKEINTRESOURCE(IDD_MAIN), (HWND)NULL, lpMainDlgProc, (LPARAM)NULL);
 #endif
 
     sprintf(buf, "%d.%02d - %d.%02d", 
@@ -478,7 +488,6 @@ LPSTR d, s;
 	}
 	batch = TRUE;
     }
-    load_string(IDS_GSVIEWBASE, gsviewbase, sizeof(gsviewbase));
 
     /* find out if we are running under Win32s */
     /* Win32s */
@@ -501,9 +510,100 @@ LPSTR d, s;
     strcpy(bootdrive, "c:");
 
     gsver = GS_REVISION;
-    load_string(IDS_PROGMANGROUP4, groupname, sizeof(groupname));
 
     return 0;
+}
+
+/* returns TRUE if language change successful */
+BOOL
+load_language(int language)
+{   /* load language dependent resources */
+char langdll[MAXSTR];
+HINSTANCE hInstance;
+    /* load language dependent resources */
+    strcpy(langdll, sourcedir);
+#ifdef __WIN32__
+    strcat(langdll, "setp32");
+#else
+    strcat(langdll, "setp16");
+#endif
+    switch (language) {
+	case IDM_LANGDE:
+	    strcat(langdll, "de");
+	    break;
+	case IDM_LANGFR:
+	    strcat(langdll, "fr");
+	    break;
+	case IDM_LANGEN:
+	default:
+	    hlanguage = phInstance;
+	    return TRUE;
+    }
+    strcat(langdll, ".dll");
+    hInstance = LoadLibrary(langdll);
+    if (hInstance >= (HINSTANCE)HINSTANCE_ERROR) {
+	hlanguage = hInstance;
+	return TRUE;
+    }
+    
+    hlanguage = phInstance;
+    return FALSE;
+}
+
+#pragma argsused
+/* language dialog box */
+BOOL CALLBACK _export
+LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch(message) {
+        case WM_COMMAND:
+            switch(LOWORD(wParam)) {
+		case IDOK:
+                case IDCANCEL:
+                    EndDialog(hDlg, 0);
+                    return(TRUE);
+                case IDM_LANGEN:
+                case IDM_LANGDE:
+                case IDM_LANGFR:
+                    EndDialog(hDlg, LOWORD(wParam));
+                    return(TRUE);
+                default:
+                    return(FALSE);
+            }
+    }
+    return(FALSE);
+}
+
+/* prompt to change language if Windows language doesn't match */
+/* GSview language */
+void 
+check_language(void)
+{
+char winlang[MAXSTR];
+int language;
+    GetProfileString("Intl", "sLanguage", "ENG", winlang, sizeof(winlang));
+    /* if Window language isn't English */
+    if ( strnicmp(winlang, "EN", 2)
+#ifdef BETA
+      || TRUE
+#endif
+	)
+    {
+#ifdef __WIN32__
+	language = DialogBoxParam(hlanguage, MAKEINTRESOURCE(IDD_LANG), HWND_DESKTOP, LanguageDlgProc, (LPARAM)NULL);
+#else
+	DLGPROC lpProcLanguage;
+	lpProcLanguage = (DLGPROC)MakeProcInstance((FARPROC)LanguageDlgProc, phInstance);
+	language = DialogBoxParam(hlanguage, MAKEINTRESOURCE(IDD_LANG), HWND_DESKTOP, lpProcLanguage, (LPARAM)NULL);
+	FreeProcInstance((FARPROC)lpProcLanguage);
+#endif
+	switch (language) {
+	    case IDM_LANGEN:
+	    case IDM_LANGDE:
+	    case IDM_LANGFR:
+		load_language(language);
+	}
+    }
 }
 
 #pragma argsused	/* ignore warning for next function */
@@ -513,36 +613,43 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 int rc;
 MSG msg;
     /* copy the hInstance into a variable so it can be used */
-    phInstance = hInstance;
+    hlanguage = phInstance = hInstance;
+
     init_setup(lpszCmdLine);
 
-    if (beta_warn())
-	return 1;
-    
-    if (batch)
-	rc = do_install();
-    else
-        rc = create_dialog();
-    
-    if (!batch) {
-	while (GetMessage(&msg, (HWND)NULL, 0, 0)) {
-	    if (!IsDialogMessage(hwnd_current, &msg)
-		&& !IsDialogMessage(hMain, &msg) ) {
-		    TranslateMessage(&msg);
-		    DispatchMessage(&msg);
+    check_language();
+
+    load_string(IDS_GSVIEWBASE, gsviewbase, sizeof(gsviewbase));
+    load_string(IDS_PROGMANGROUP4, groupname, sizeof(groupname));
+
+    if (!beta_warn()) {
+	if (batch)
+	    rc = do_install();
+	else
+	    rc = create_dialog();
+	
+	if (!batch) {
+	    while (GetMessage(&msg, (HWND)NULL, 0, 0)) {
+		if (!IsDialogMessage(hwnd_current, &msg)
+		    && !IsDialogMessage(hMain, &msg) ) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	    }
+	    DestroyWindow(hMain);
 	}
-	DestroyWindow(hMain);
-    }
 
 #ifndef __WIN32__
-    if (!batch) {
-	if (lpMainDlgProc)
-	    FreeProcInstance((FARPROC)lpMainDlgProc);
-	if (lpChildDlgProc)
-	    FreeProcInstance((FARPROC)lpChildDlgProc);
-    }
+	if (!batch) {
+	    if (lpMainDlgProc)
+		FreeProcInstance((FARPROC)lpMainDlgProc);
+	    if (lpChildDlgProc)
+		FreeProcInstance((FARPROC)lpChildDlgProc);
+	}
 #endif
+    }
+    if (hlanguage != phInstance)
+	FreeLibrary(hlanguage);
 
     return rc;
 }
@@ -587,9 +694,9 @@ static BOOL initialised;
 		initialised=TRUE;
 		for (page=pages; page->id; page++) {
 #ifdef __WIN32__
-		    page->hwnd = CreateDialogParam(phInstance, MAKEINTRESOURCE(page->id), hDlg, ModelessDlgProc, (LPARAM)NULL);
+		    page->hwnd = CreateDialogParam(hlanguage, MAKEINTRESOURCE(page->id), hDlg, ModelessDlgProc, (LPARAM)NULL);
 #else
-		    page->hwnd = CreateDialogParam(phInstance, MAKEINTRESOURCE(page->id), hDlg, lpChildDlgProc, (LPARAM)NULL);
+		    page->hwnd = CreateDialogParam(hlanguage, MAKEINTRESOURCE(page->id), hDlg, lpChildDlgProc, (LPARAM)NULL);
 #endif
 		    ShowWindow(page->hwnd, SW_HIDE);
 		}

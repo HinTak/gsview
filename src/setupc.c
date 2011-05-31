@@ -42,7 +42,6 @@
 #include "gvcbeta.h"
 #include "gvcrc.h"
 #include "setup.h"
-#include "gvclang.h"
 #include "setupc.h"
 
 char szAppName[]="GSview Setup";
@@ -340,6 +339,7 @@ unzip_to_dir(char *filename, char *destination)
     FILE *f;
     int file_exists = 0;
     char cwd[256];
+    int len;
     int rc;
 
     /* prompt for disk to be installed */
@@ -350,12 +350,13 @@ unzip_to_dir(char *filename, char *destination)
 	gs_addmess(fullname);
 	gs_addmess("\n");
         if ( (f = fopen(fullname, "r")) == (FILE *)NULL ) {
-	    char buf[256];
+	    char buf[256], mess[256];
 	    gs_addmess_update();
-	    sprintf(buf, "Insert disk containing %s", fullname);
+	    load_string(IDS_INSERTDISK, mess, sizeof(mess));
+	    sprintf(buf, mess, fullname);
 	    strcpy(get_string_answer, fullname);
 	    if (dialog(IDD_FILE, InputDlgProc) != DID_OK) {
-		strcpy(error_message, "Zip file not found");
+		load_string(IDS_ZIPNOTFOUND, error_message, sizeof(error_message));
 		return 1;
 	    }
 	    strcpy(fullname, get_string_answer);
@@ -369,12 +370,15 @@ unzip_to_dir(char *filename, char *destination)
     getcwd(cwd, sizeof(cwd));
     gs_chdir(destination);
     strcpy(unzipprefix, destination);
+    len = strlen(unzipprefix);
+    if (len && (unzipprefix[len-1] == '\\'))
+	unzipprefix[len-1] = '\0';
     rc = unzip(fullname);
     gs_chdir(cwd);
 
     if (!rc) {
         if (cancelling) {
-	    strcpy(error_message, "Unzip cancelled\n");
+	    load_string(IDS_UNZIPCANCELLED, error_message, sizeof(error_message));
 	    return -1;
 	}
     }
@@ -387,14 +391,41 @@ do_install(void)
 {
 int rc=0;
 char buf[MAXSTR];
+char gsviewdir[MAXSTR];
+char gstoolsdir[MAXSTR];
     install_init();
+
+    if (!rc) {
+	char logname[MAXSTR];
+	char *p;
+
+	strcpy(gsviewdir, destdir);
+	if (strlen(gsviewdir) == 2)
+	    strcat(gsviewdir, "\\");	/* is root directory */
+	strcpy(gstoolsdir, gsviewdir);
+	if (strlen(gsviewdir) && (gsviewdir[strlen(gsviewdir)-1] != '\\'))
+	    strcat(gsviewdir, "\\");
+	strcat(gsviewdir, gsviewbase);
+	mkdirall(gsviewdir);
+
+	strcpy(logname, gsviewdir);
+	strcat(logname, "\\");
+	strcat(logname, GSVIEW_ZIP);
+	p = strrchr(logname, '.');
+	strcpy(p, ".log");
+	unziplogfile = fopen(logname, "w");	/* don't append */
+	if (unziplogfile == (FILE *)NULL) {
+	    load_string(IDS_CANTOPENWRITE, buf, sizeof(buf)); 
+	    sprintf(error_message, buf, logname);
+	    rc = 1;
+	}
+    }
+
     if (install_gs || install_gsview) {
+	fprintf(unziplogfile, "[Files]\n");
 	if (!rc) {
-	    /* copy unzip program for faster loading */
-	    strcpy(unzipname, destdir);
-	    strcat(unzipname, "\\");
-	    strcat(unzipname, gsviewbase);
-	    mkdirall(unzipname);
+	    /* copy unzip DLL so we don't demand load it from floppy */
+	    strcpy(unzipname, gsviewdir);
 	    strcat(unzipname, "\\");
 	    strcat(unzipname, szUnzipDll);
 	    strcpy(buf, sourcedir);
@@ -402,9 +433,6 @@ char buf[MAXSTR];
 	    rc = copyfile(unzipname, buf);
 	}
 
-	if (rc)
-	    return rc;
-        
 	if (cancelling)
 	    rc = 1;
 
@@ -413,29 +441,9 @@ char buf[MAXSTR];
 	    char zipname[MAXSTR];
 	    load_unzip(unzipname, phInstance, 
 		find_page_from_id(IDD_TEXTWIN)->hwnd, (HWND)NULL);
-	    strcpy(buf, destdir);
-	    if (strlen(buf) == 2)
-		strcat(buf, "\\");	/* is root directory */
+
 	    if (!rc && install_gsview) {
-		char buf2[MAXSTR];
-		strcpy(buf2, buf);
-		if (strlen(buf2) && (buf2[strlen(buf2)-1] != '\\'))
-		    strcat(buf2, "\\");
-		strcat(buf2, gsviewbase);
-		mkdirall(buf2);
-		if (!rc) { 
-		    char logname[MAXSTR];
-		    char *p;
-		    strcpy(logname, destdir);
-		    strcat(logname, "\\");
-		    strcat(logname, gsviewbase);
-		    strcat(logname, "\\");
-		    strcat(logname, GSVIEW_ZIP);
-		    p = strrchr(logname, '.');
-		    strcpy(p, ".log");
-		    unziplogfile = fopen(logname, "wa");
-		}
-		rc = unzip_to_dir(GSVIEW_ZIP, buf2);
+		rc = unzip_to_dir(GSVIEW_ZIP, gsviewdir);
 		if (cancelling)
 		    rc = 1;
 	    }
@@ -453,7 +461,7 @@ char buf[MAXSTR];
 	    if (!rc && install_gs) {
 		sprintf(zipname, "%sini.zip", gs_zipprefix);
 		if (!rc)
-		    rc = unzip_to_dir(zipname, buf);
+		    rc = unzip_to_dir(zipname, gstoolsdir);
 		if (cancelling)
 		    rc = 1;
 #ifdef OS2
@@ -466,11 +474,12 @@ char buf[MAXSTR];
 #endif
 #endif
 		if (!rc)
-		    rc = unzip_to_dir(zipname, buf);
+		    rc = unzip_to_dir(zipname, gstoolsdir);
 		if (cancelling)
 		    rc = 1;
 		sprintf(zipname, "%sfn1.zip", gs_zipprefix);
 		if (!rc) {
+		    strcpy(buf, gstoolsdir);
 		    if (strlen(buf) && (buf[strlen(buf)-1] != '\\'))
 			strcat(buf, "\\");
 		    strcat(buf, gs_basedir);
@@ -482,8 +491,6 @@ char buf[MAXSTR];
 
 	    gs_chdir(workdir);
 	    free_unzip();
-	    if (unziplogfile!=(FILE *)NULL)
-		fclose(unziplogfile);
 	}
 
 	/* remove unneeded unzip DLL */
@@ -506,10 +513,14 @@ char buf[MAXSTR];
 	strcpy(szIniName, bootdrive);
 	strcat(szIniName, "\\os2\\gvpm.ini");
 #endif
+	/* This doesn't work for Windows per user profiles */
 	rc = update_ini(szIniName);
     }
     if (cancelling)
 	rc = 1;
+
+    if (unziplogfile!=(FILE *)NULL)
+	fclose(unziplogfile);
 
     return rc;
 }
@@ -585,23 +596,26 @@ int copyfile(char *dname, char *sname)
 {
 FILE *dfile, *sfile;
 char *buffer;
+char mess[MAXSTR];
 int count;
 #define COPY_BUF_SIZE 16384
     sfile = fopen(sname, "rb");
     if (sfile == (FILE *)NULL) {
-	sprintf(error_message, "Can't open %s for reading", sname);
+	load_string(IDS_CANTOPENREAD, mess, sizeof(mess));
+	sprintf(error_message, mess, sname);
 	return 1;
     }
     dfile = fopen(dname, "wb");
     if (dfile == (FILE *)NULL) {
-	sprintf(error_message, "Can't open %s for writing", dname);
+	load_string(IDS_CANTOPENWRITE, mess, sizeof(mess));
+	sprintf(error_message, mess, dname);
 	fclose(sfile);
 	return 1;
     }
     if ( (buffer = malloc(COPY_BUF_SIZE)) == (char *)NULL ) {
 	fclose(sfile);
 	fclose(dfile);
-	sprintf(error_message, "Can't allocate memory for copy buffer");
+	load_string(IDS_CANTALLOCBUF, error_message, sizeof(error_message));
 	return 1;
     }
 

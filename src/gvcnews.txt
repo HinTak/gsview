@@ -1,4 +1,42 @@
 ----------------------
+Version 2.3 1997-09-16
+----------------------
+All:
+ File name filters now include .gz extension for PS/EPS/PDF files.
+ Fixed cursor coordinates for landscape and seascape (broken when
+ %%PageOrientation added).
+ Fixed pstotext text extraction when landscape or seascape.
+ Accept negative angles in PDF /Rotate.
+ Update to pstotext to handle landscape documents correctly.
+ Assume that an invalidexit when opening display device is really
+ a limitcheck from no memory, so reduce page size and resolution.
+PM:
+ Increase text limit for configure wizard edit fields.
+
+----------------------------
+Version 2.21 beta 1997-08-02
+----------------------------
+All:
+ Added French translation.
+ Added epswrite, pswrite, pxlmono and pxlcolor to the list of
+ devices known by GSview.
+ INI file in GSview directory will override user INI file
+ when upgrading or running first time.  This allows network
+ admin to avoid users seeing config wizard.
+ Config wizard changed to that "Look for additional Type 1 fonts"
+ is now "Search for ...". The directory specified is now used
+ as -sFONTPATH="..." rather than just appending it to the GS LIB path.
+ Config wizard now adds -dNOPLATFONTS.
+ Added recent 4 files to File menu.
+ Updated licence to Aladdin Free Public Licence version 6.
+Win:
+ Allow per user INI file for Windows.  Use registry entry for
+ Windows 4, or environment variable USERPROFILE if no registry entry.
+PM:
+ Fixed doc2ipf.c to allow apostrophes within topic names, as 
+ required by French.
+
+----------------------
 Version 2.2 1997-06-27
 ----------------------
 All:
@@ -754,4 +792,3 @@ Version 0.7 beta  1993-05-10
 
 First general release of Ghostview for Windows.
 
-

@@ -54,6 +54,10 @@ APIRET rc;
 	case IDM_LANGDE:
 	    strcat(langdll, "de");
 	    break;
+	case IDM_LANGFR:
+	    strcat(langdll, "fr");
+	    break;
+	case IDM_LANGEN:
 	default:
 	    strcat(langdll, "en");
     }
@@ -139,6 +143,7 @@ LanguageDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
                     break;
 		case IDM_LANGEN:
 		case IDM_LANGDE:
+		case IDM_LANGFR:
                     WinDismissDlg(hwnd, SHORT1FROMMP(mp1));
             }
             break;
@@ -166,12 +171,15 @@ ULONG pcbActual;
 	    (pci.country == 44) || (pci.country == 1)))
 	   ||
 	  ((option.language == IDM_LANGDE) && (pci.country != 49))
+	   ||
+	  ((option.language == IDM_LANGFR) && (pci.country != 33))
 	)
     {	/* GSview language doesn't match country code */
 	language = WinDlgBox(HWND_DESKTOP, hwnd_frame, LanguageDlgProc, hlanguage, IDD_LANG, NULL);
 	switch (language) {
 	    case IDM_LANGEN:
 	    case IDM_LANGDE:
+	    case IDM_LANGFR:
 		gsview_language(language);
 	}
     }
@@ -919,10 +927,12 @@ char *p;
     GetDlgItemText(page->hwnd, IDC_CFG22, buf, sizeof(buf));
     sprintf(option.gsdll, "%s\\%s", buf, GS_DLLNAME);
     sprintf(option.gsinclude, "%s;%s\\fonts", buf, buf);
+    strcpy(option.gsother, "-dNOPLATFONTS");
     GetDlgItemText(page->hwnd, IDC_CFG23, buf, sizeof(buf));
     if (strlen(buf)) {
-	strcat(option.gsinclude, ";");
-	strcat(option.gsinclude, buf);
+	strcat(option.gsother, " -sFONTPATH=\042");
+	strcat(option.gsother, buf);
+	strcat(option.gsother, "\042");
     }
 
     /* check if Ghostscript really has been installed */
@@ -968,7 +978,7 @@ char *p;
 	&& gsview_create_objects(buf))
 	return 1;
     
-    if ((BOOL)WinSendMsg( WinWindowFromID(find_page_from_id(IDD_CFG3)->hwnd, IDC_CFG31),
+    if ((BOOL)WinSendMsg( WinWindowFromID(find_page_from_id(IDD_CFG3)->hwnd, IDC_CFG32),
 	BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0)))
 	gsview_printer_profiles();
 
@@ -1029,6 +1039,10 @@ MRESULT EXPENTRY CfgMainDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		SetDlgItemText(page->hwnd, IDC_CFG20, buf);
 		SetDlgItemText(page->hwnd, IDC_CFG22, szExePath);
 		SetDlgItemText(page->hwnd, IDC_CFG23, "c:\\psfonts");
+		WinSendMsg( WinWindowFromID(page->hwnd, IDC_CFG22),
+		    EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
+		WinSendMsg( WinWindowFromID(page->hwnd, IDC_CFG23),
+		    EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
 	    }
 
 	    /* assume that GS is in the adjacent directory */
@@ -1050,7 +1064,7 @@ MRESULT EXPENTRY CfgMainDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    SetDlgItemText(page->hwnd, IDC_CFG22, gsdir);
 	    SetDlgItemText(page->hwnd, IDC_CFG23, "c:\\psfonts");
 
-	    WinSendMsg(WinWindowFromID(find_page_from_id(IDD_CFG3)->hwnd, IDC_CFG31), 
+	    WinSendMsg(WinWindowFromID(find_page_from_id(IDD_CFG3)->hwnd, IDC_CFG32), 
 		    BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
 	    WinSendMsg(WinWindowFromID(find_page_from_id(IDD_CFG4)->hwnd, IDC_CFG41), 
 		    BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
@@ -1061,6 +1075,8 @@ MRESULT EXPENTRY CfgMainDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    load_string(IDS_PROGMANGROUP4, buf, sizeof(buf));
 	    page = find_page_from_id(IDD_CFG5);
 	    if (page) {
+		WinSendMsg( WinWindowFromID(page->hwnd, IDC_CFG52),
+		    EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
 		WinSendMsg(WinWindowFromID(page->hwnd, IDC_CFG51), 
 		    BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
 		SetDlgItemText(page->hwnd, IDC_CFG52, buf);
@@ -1108,8 +1124,7 @@ MRESULT EXPENTRY CfgChildDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    prev_page(hwnd);
 	    return(MRESULT)TRUE;
 	case IDCANCEL:
-DosBeep(100,100);
-		{	char buf[MAXSTR];
+		{   char buf[MAXSTR];
 		    load_string(IDS_CFG74, buf, sizeof(buf));
 		    SetDlgItemText(find_page_from_id(IDD_CFG7)->hwnd, IDC_CFG70, buf);
 		    goto_page(hwnd, IDD_CFG7);

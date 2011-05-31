@@ -52,6 +52,7 @@ MRESULT EXPENTRY MainDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 
 HAB hab;
 HINSTANCE phInstance;	/* = hab */
+HMODULE hlanguage;
 HWND hwnd_dlg;
 char szUnzipDll[]="unzip2.dll";
 char szIniName[]="gvpm.ini";
@@ -65,10 +66,97 @@ int emx;
 int use_os2_fonts;
 int batch;
 
+/* returns TRUE if language change successful */
+BOOL
+load_language(int language)
+{   /* load language dependent resources */
+char langdll[MAXSTR];
+char buf[MAXSTR];
+HMODULE hmodule;
+APIRET rc;
+    /* load language dependent resources */
+    strcpy(langdll, sourcedir);
+    strcat(langdll, "setup2");
+    switch (language) {
+	case IDM_LANGDE:
+	    strcat(langdll, "de");
+	    break;
+	case IDM_LANGFR:
+	    strcat(langdll, "fr");
+	    break;
+	case IDM_LANGEN:
+	default:
+	    hlanguage = 0;
+	    return TRUE;
+    }
+    strcat(langdll, ".dll");
+    rc = DosLoadModule(buf, sizeof(buf), langdll, &hmodule);
+    if (!rc) {
+	hlanguage = hmodule;
+	return TRUE;
+    }
+
+    hlanguage = 0;
+    return FALSE;
+}
+
+MRESULT EXPENTRY 
+LanguageDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
+{
+    switch(mess) {
+        case WM_COMMAND:
+            switch(SHORT1FROMMP(mp1)) {
+		case DID_CANCEL:
+                case DID_OK:
+                    WinDismissDlg(hwnd, 0);
+                    break;
+		case IDM_LANGEN:
+		case IDM_LANGDE:
+		case IDM_LANGFR:
+                    WinDismissDlg(hwnd, SHORT1FROMMP(mp1));
+            }
+            break;
+    }
+    return WinDefDlgProc(hwnd, mess, mp1, mp2);
+}
+
+void 
+check_language(void)
+{
+int language;
+COUNTRYCODE pcc;
+COUNTRYINFO pci;
+ULONG pcbActual;
+    pcc.country = 0;	/* ask about default country */
+    pcc.codepage = 0;
+    if (DosQueryCtryInfo(sizeof(pci), &pcc, &pci, &pcbActual) != 0)
+	return;	/* give up */
+
+   if (pcbActual == 0)
+	return;
+
+    if (  
+	  !((pci.country == 99) || (pci.country == 61) ||
+	    (pci.country == 44) || (pci.country == 1))
+#ifdef BETA
+	|| 1
+#endif
+       )
+    {	/* language isn't English */
+	language = WinDlgBox(HWND_DESKTOP, HWND_DESKTOP, LanguageDlgProc, hlanguage, IDD_LANG, NULL);
+	switch (language) {
+	    case IDM_LANGEN:
+	    case IDM_LANGDE:
+	    case IDM_LANGFR:
+		load_language(language);
+	}
+    }
+}
+
 int
 dialog(int resource, PFNWP dlgproc)
 {
-    return WinDlgBox(HWND_DESKTOP, HWND_DESKTOP, dlgproc, 0, resource, 0);
+    return WinDlgBox(HWND_DESKTOP, HWND_DESKTOP, dlgproc, hlanguage, resource, 0);
 }
 
 int message_box(char *str, int icon)
@@ -106,7 +194,7 @@ gs_chdir(char *dirname)
 int
 load_string(int id, char *str, int len)
 {
-	return WinLoadString(hab, 0, id, len, str);
+	return WinLoadString(hab, hlanguage, id, len, str);
 }
 
 /* Update MLE to match twbuf */
@@ -216,6 +304,7 @@ FILE *infile, *outfile;
 char inname[MAXSTR], outname[MAXSTR];
 char line[1024];
 char tempname[MAXSTR];
+char buf[MAXSTR];
 BOOL got_temp = FALSE;
 BOOL changed = FALSE;
 int i;
@@ -226,16 +315,18 @@ int i;
     strcpy(tempname, bootdrive);
     strcat(tempname, "\\GSXXXXXX");
     if (mktemp(tempname) == (char *)NULL) {
-	strcpy(error_message, "Can't create temporary filename");
-		return 1;
+	load_string(IDS_CANTCREATETEMPFILE, error_message, sizeof(error_message));
+	return 1;
     }
 
     if ( (infile = fopen(inname, "r")) == (FILE *)NULL) {
-	sprintf(error_message, "Can't open %s for reading", inname);
+	load_string(IDS_CANTOPENREAD, buf, sizeof(buf));
+	sprintf(error_message, buf, inname);
 	return 1;
     }
     if ( (outfile = fopen(tempname, "w")) == (FILE *)NULL)  {
-	sprintf(error_message, "Can't create %s for writing", outname);
+	load_string(IDS_CANTOPENWRITE, buf, sizeof(buf));
+	sprintf(error_message, buf, outname);
 	return 1;
     }
     while (fgets(line, sizeof(line), infile)) {
@@ -281,7 +372,8 @@ int i;
 		break;   /* found a suitable name */
 	}
         if (rename(inname, outname)) {
-	    sprintf(error_message, "Error renaming %s to %s", inname, outname);
+	    load_string(IDS_ERRORRENAME, buf, sizeof(buf));
+	    sprintf(error_message, buf, inname, outname);
 	    return 1;
 	}
 	strcpy(autoexec_bak, outname);
@@ -290,7 +382,8 @@ int i;
 	unlink(inname);
 
     if (rename(tempname, inname)) {
-	sprintf(error_message, "Error renaming %s to %s", tempname, inname);
+	load_string(IDS_ERRORRENAME, buf, sizeof(buf));
+	sprintf(error_message, buf, tempname, inname);
 	return 1;
     }
 
@@ -304,7 +397,9 @@ PROFILE *prf;
 char buf[16];
     prf = profile_open(ininame);
     if (prf == (PROFILE *)NULL) {
-	sprintf(error_message, "Can't open %s", ininame);
+	char mess[MAXSTR];
+	load_string(IDS_CANTOPENREAD, mess, sizeof(mess));
+	sprintf(error_message, mess, ininame);
 	return 1;
     }
     profile_write_string(prf, "Options", "Configured", "0");
@@ -327,8 +422,12 @@ APIRET rc;
     sprintf(setup, "EXENAME=%s;ASSOCFILTER=*.ps,*.eps,*.pdf", buf);
     rc = !WinCreateObject("WPProgram", "GSview", setup, "<WP_DESKTOP>",
 	CO_REPLACEIFEXISTS);
-    if (rc) {
-	sprintf(error_message, "Couldn't create desktop program object");
+    if (rc)
+	load_string(IDS_PROGRAMOBJECTFAILED, error_message, sizeof(error_message));
+    else {
+	load_string(IDS_PROGMANGROUP6, setup, sizeof(setup));
+	sprintf(buf, setup, groupname);
+	SetDlgItemText(find_page_from_id(IDD_DONE)->hwnd, IDD_DONE_GROUP, buf);
     }
     return rc;
 }
@@ -339,7 +438,7 @@ create_dialog(void)
 WIZPAGE *page;
 char buf[MAXSTR];
     /* main dialog box */
-    hMain = WinLoadDlg(HWND_DESKTOP, HWND_DESKTOP, MainDlgProc, 0, IDD_MAIN, 0);
+    hMain = WinLoadDlg(HWND_DESKTOP, HWND_DESKTOP, MainDlgProc, hlanguage, IDD_MAIN, 0);
 
     sprintf(buf, "%d.%02d - %d.%02d", 
 	GS_REVISION_MIN / 100, GS_REVISION_MIN % 100,
@@ -450,7 +549,6 @@ HMODULE hmodule;
 	}
 	batch = TRUE;
     }
-    load_string(IDS_GSVIEWBASE, gsviewbase, sizeof(gsviewbase));
 
     /* get path to EXE */
     if ( (rc = DosGetInfoBlocks(&pptib, &pppib)) != 0 ) {
@@ -480,7 +578,6 @@ HMODULE hmodule;
     }
 
     gsver = GS_REVISION;
-    load_string(IDS_PROGMANGROUP4, groupname, sizeof(groupname));
 
     return 0;
 }
@@ -523,8 +620,18 @@ static BOOL initialised = FALSE;
 	    initialised=TRUE;
 	    for (page=pages; page->id; page++) {
 		page->hwnd = WinLoadDlg(hwnd, hwnd, ModelessDlgProc,
-		    0, page->id, 0);
+		    hlanguage, page->id, 0);
 		WinShowWindow(page->hwnd, FALSE);
+	    }
+	    page = find_page_from_id(IDD_DIR);
+	    if (page) {
+	        WinSendMsg( WinWindowFromID(page->hwnd, ID_ANSWER),
+		    EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
+	    }
+	    page = find_page_from_id(IDD_FINISH);
+	    if (page) {
+	        WinSendMsg( WinWindowFromID(page->hwnd, IDM_PROGMAN2),
+		    EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
 	    }
 	    WinShowWindow(pages[0].hwnd, TRUE);
 	    WinSetFocus(HWND_DESKTOP, WinWindowFromID(pages[0].hwnd, IDNEXT));
@@ -656,6 +763,7 @@ main(int argc, char *argv[])
 
     hab = WinInitialize(0);	/* Get the Anchor Block */
     phInstance = hab;
+    hlanguage = 0;
 
     hand_mq = WinCreateMsgQueue(hab, 0); /* start a queue */
 
@@ -664,22 +772,29 @@ main(int argc, char *argv[])
     else
         init_setup("");
 
-    if (beta_warn())
-	rc = 1;
+    check_language();
 
-    if (!rc) {
-	if (batch) {
-	    rc = do_install();
+    load_string(IDS_GSVIEWBASE, gsviewbase, sizeof(gsviewbase));
+    load_string(IDS_PROGMANGROUP4, groupname, sizeof(groupname));
+
+    if (!beta_warn()) {
+	if (!rc) {
+	    if (batch) {
+		rc = do_install();
+	    }
+	    else
+		rc = create_dialog();
 	}
-	else
-	    rc = create_dialog();
+
+	if (!batch) {
+	    while (!rc && WinGetMsg(hab, &q_mess, 0L, 0, 0))
+		WinDispatchMsg(hab, &q_mess);
+	    WinDestroyWindow(hMain);
+	}
     }
 
-    if (!batch) {
-	while (!rc && WinGetMsg(hab, &q_mess, 0L, 0, 0))
-	    WinDispatchMsg(hab, &q_mess);
-	WinDestroyWindow(hMain);
-    }
+    if (hlanguage)
+	DosFreeModule(hlanguage);
 
     WinDestroyMsgQueue(hand_mq);
     WinTerminate(hab);

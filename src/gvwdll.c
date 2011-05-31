@@ -1,19 +1,19 @@
 /* Copyright (C) 1996, 1997, Russell Lang.  All rights reserved.
 
- This file is part of GSview.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GSVIEW General Public License for more details.
-
- Everyone is granted permission to copy, modify and redistribute
- this program, but only under the conditions described in the GSVIEW
- General Public License.  A copy of this license is supposed to have been
- given to you along with this program so you can know your rights and
- responsibilities.  It should be in a file named COPYING.  Among other
- things, the copyright notice and this notice must be preserved on all
- copies. */
+  This file is part of GSview.
+  
+  This program is distributed with NO WARRANTY OF ANY KIND.  No author
+  or distributor accepts any responsibility for the consequences of using it,
+  or for whether it serves any particular purpose or works at all, unless he
+  or she says so in writing.  Refer to the GSview Free Public Licence 
+  (the "Licence") for full details.
+  
+  Every copy of GSview must include a copy of the Licence, normally in a 
+  plain ASCII text file named LICENCE.  The Licence grants you the right 
+  to copy, modify and redistribute GSview, but only under certain conditions 
+  described in the Licence.  Among other things, the Licence requires that 
+  the copyright notice and this notice be preserved on all copies.
+*/
 
 /* gvwdll.c */
 /* GS DLL associated routines for MS-Windows */

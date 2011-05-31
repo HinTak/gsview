@@ -1,7 +1,7 @@
 /* Copyright (C) 1996, Digital Equipment Corporation.         */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Fri Oct 11 16:57:17 PDT 1996 by mcjones   */
+/* Last modified on Sun Oct 13 08:46:00 PDT 1996 by mcjones   */
 /*      modified on Mon Jul 29 14:29:00 UTC 1996 by rjl       */
 
 /* Interface to ptotdll.c, which is based on OCR_PS.m3, a module of
@@ -72,4 +72,3 @@ int DLLEXPORT pstotextExit(void *instance);
 #define PSTOTEXT_FILTER_BADQS               204
 #define PSTOTEXT_FILTER_BADGLYPHINDEX       205
 
-

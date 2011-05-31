@@ -1,3 +1,6 @@
+Jobs to do and suggestions
+==========================
+
 WinNT: set page size from mswinpr2
 
 Print to printer device context using mswindll/os2dll device.
@@ -14,5 +17,30 @@ View bitmap files with viewjpg/viewbmp/viewpcx
 GSgrab needs a start_timer() added just before the main message loop.
 
 Check periodically if file is modified OR redisplay button.
+
+Start gvwgs minimised.  Place % complete in title.  Restore if error.
+
+Test setup from floppies with foreign language.
+
+Create DLLs without code or data, or change to only a small amount of code.
+
+Exit after successful /s print.
+Check /s"Printer name"
+Give useful error message if printer unknown.
+
+Fix /Orientation landscape/seascape values to be more consistent. 
+
+Document that -dFIXEDMEDIA in GS_OPTIONS will screw up GSview.
+
+OS/2 "Look for additional fonts" accepts too few characters.
+
+Why is redisplay of an existing modified file so slow?
+Suspect memory leak.
+
+Forward/backward button using history.
+
+Goto Page: Add edit field linked to listbox (or change to combobox)
+  to allow page number to be typed in.
+
 
 

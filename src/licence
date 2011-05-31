@@ -1,23 +1,34 @@
-                GSVIEW FREE PUBLIC LICENCE
-                (Version 3, 2nd August 1995)
+			ALADDIN FREE PUBLIC LICENCE
+			(Version 6, June 17, 1997)
 
-		Copyright (C) 1994, 1995 Aladdin Enterprises,
+		Copyright (C) 1994, 1995, 1997 Aladdin Enterprises,
 		Menlo Park, California, U.S.A.  All rights reserved.
 
-	NOTE: This licence is not the same as any of the GNU Licences
+	NOTE: This Licence is not the same as any of the GNU Licences
 	published by the Free Software Foundation.  Its terms are
 	substantially different from those of the GNU Licences.
 	If you are familiar with the GNU Licences, please read this
 	licence with extra care.
-	This licence is not identical to the ALADDIN GHOSTSCRIPT
-	FREE PUBLIC LICENSE.
+
+Aladdin Enterprises hereby grants to anyone the permission to apply this
+Licence to their own work, as long as the entire Licence (including the
+above notices and this paragraph) is copied with no changes, additions, or
+deletions except for changing the first paragraph of Section 0 to include a
+suitable description of the work to which the licence is being applied and
+of the person or entity that holds the copyright in the work, and, if the
+Licence is being applied to a work created in a country other than the
+United States, replacing the first paragraph of Section 6 with an
+appropriate reference to the laws of the appropriate country.
+
+0. Subject Matter
 
 This Licence applies to the computer program known as "GSview."  
-The "Program", below, refers to such program, and a "work
-based on the Program" means either the Program or any derivative work of
-the Program, such as a translation or a modification.  
-The Program is a copyrighted work whose copyright is held by Russell
-Lang (the "Licensor").
+The "Program", below, refers to such program.  The Program is a copyrighted
+work whose copyright is held by Russell Lang (the "Licensor").
+
+A "work based on the Program" means either the Program or any derivative
+work of the Program, as defined in the United States Copyright Act of 1976,
+such as a translation or a modification.
 
 BY MODIFYING OR DISTRIBUTING THE PROGRAM (OR ANY WORK BASED ON THE
 PROGRAM), YOU INDICATE YOUR ACCEPTANCE OF THIS LICENCE TO DO SO, AND ALL
@@ -46,25 +57,35 @@ distribute copies of such throughout the world, in any medium.
 This licence is subject to the following restrictions:
 
 (a) Distribution of the Program or any work based on the Program by a
-commercial organization to any third party is prohibited if any payment is
+commercial organisation to any third party is prohibited if any payment is
 made in connection with such distribution, whether directly (as in payment
 for a copy of the Program) or indirectly (as in payment for some service
-related to the Program, or payment for some product or service that
-includes a copy of the Program "without charge"; these are only examples,
-and not an exhaustive enumeration of prohibited activities).  However, the
-following methods of distribution involving payment shall not in and of
-themselves be a violation of this restriction:
+related to the Program, or payment for some product or service that includes
+a copy of the Program "without charge"; these are only examples, and not an
+exhaustive enumeration of prohibited activities).  The following methods of
+distribution involving payment shall not in and of themselves be a violation
+of this restriction:
 
 	(i) Posting the Program on a public access information storage and
 retrieval service for which a fee is received for retrieving information
-(such as an on-line service), provided that the fee is not
-content-dependent (i.e., the fee would be the same for retrieving the same
-volume of information consisting of random data).
+(such as an on-line service), provided that the fee is not content-dependent
+(i.e., the fee would be the same for retrieving the same volume of
+information consisting of random data) and that access to the service and to
+the Program is available independent of any other product or service.  An
+example of a service that does not fall under this section is an on-line
+service that is operated by a company and that is only available to
+customers of that company.  (This is not an exhaustive enumeration.)
 
-	(ii) Distributing the Program on a CD-ROM, provided that the files
-containing the Program are reproduced entirely and verbatim on such
-CD-ROM, and provided further that all information on such CD-ROM be
-redistributable for non-commercial purposes without charge.
+	(ii) Distributing the Program on removable computer-readable media,
+provided that the files containing the Program are reproduced entirely and
+verbatim on such media, that all information on such media be
+redistributable for non-commercial purposes without charge, and that such
+media are distributed by themselves (except for accompanying documentation)
+independent of any other product or service.  Examples of such media include
+CD-ROM, magnetic tape, and optical storage media.  (This is not intended to
+be an exhaustive list.)  An example of a distribution that does not fall
+under this section is a CD-ROM included in a book or magazine.  (This is not
+an exhaustive enumeration.)
 
 (b) Activities other than copying, distribution and modification of the
 Program are not subject to this Licence and they are outside its scope.
@@ -73,48 +94,48 @@ produced through the use of the Program is subject to this licence only if
 its contents constitute a work based on the Program (independent of having
 been made by running the Program).
 
-(c) You must meet all of the following conditions with respect to the
-distribution of any work based on the Program:
+(c) You must meet all of the following conditions with respect to any work
+that you distribute or publish that in whole or in part contains or is
+derived from the Program or any part thereof ("the Work"):
 
-	(i) If you have modified the Program, you must cause your work to
+	(i) If you have modified the Program, you must cause the Work to
 carry prominent notices stating that you have modified the Program's files
 and the date of any change;
 
-	(ii) You must cause any work that you distribute or publish, that
-in whole or in part contains or is derived from the Program or any part
-thereof, to be licensed as a whole and at no charge to all third parties
-under the terms of this Licence;
+	(ii) You must cause the Work to be licensed as a whole and at no
+charge to all third parties under the terms of this Licence;
 
-	(iii) If the modified program normally reads commands
-interactively when run, you must cause it, at each time the modified
-program commences operation, to print or display an announcement including
-an appropriate copyright notice and a notice that there is no warranty (or
-else, saying that you provide a warranty).  Such notice must also state
-that users may redistribute the Program only under the conditions of this
-Licence and tell the user how to view the copy of this Licence included
-with the Program.  (Exception: if the Program itself is interactive but
-does not normally print such an announcement, your work based on the
-Program is not required to print an announcement.);
+	(iii) If the Work normally reads commands interactively when run,
+you must cause it, at each time the Work commences operation, to print or
+display an announcement including an appropriate copyright notice and a
+notice that there is no warranty (or else, saying that you provide a
+warranty).  Such notice must also state that users may redistribute the Work
+only under the conditions of this Licence and tell the user how to view the
+copy of this Licence included with the Work.  (Exceptions: if the Program is
+interactive but normally prints or displays such an announcement only at the
+request of a user, such as in an "About box", the Work is required to print
+or display the notice only under the same circumstances; if the Program
+itself is interactive but does not normally print such an announcement, the
+Work is not required to print an announcement.);
 
-	(iv) You must accompany any such work based on the Program with
-the complete corresponding machine-readable source code, delivered on a
-medium customarily used for software interchange.  The source code for a
-work means the preferred form of the work for making modifications to it.
-For an executable work, complete source code means all the source code for
-all modules it contains, plus any associated interface definition files,
-plus the scripts used to control compilation and installation of the
-executable code.  However, the source code distributed need not include
-anything that is normally distributed (in either source or binary form)
-with the major components (compiler, kernel, and so on) of the operating
-system on which the executable runs, unless that component itself
-accompanies the executable code;
+	(iv) You must accompany the Work with the complete corresponding
+machine-readable source code, delivered on a medium customarily used for
+software interchange.  The source code for a work means the preferred form
+of the work for making modifications to it.  For an executable work,
+complete source code means all the source code for all modules it contains,
+plus any associated interface definition files, plus the scripts used to
+control compilation and installation of the executable code.  If you
+distribute with the Work any component that is normally distributed (in
+either source or binary form) with the major components (compiler, kernel,
+and so on) of the operating system on which the executable runs, you must
+also distribute the source code of that component if you have it and are
+allowed to do so;
 
 	(v) If you distribute any written or printed material at all with
-the Program or any work based on the Program, such material must include
-either a written copy of this Licence, or a prominent written indication
-that the Program or the work based on the Program is covered by this
-Licence and written instructions for printing and/or displaying the copy of
-the Licence on the distribution medium;
+the Work, such material must include either a written copy of this Licence,
+or a prominent written indication that the Work is covered by this Licence
+and written instructions for printing and/or displaying the copy of the
+Licence on the distribution medium;
 
 	(vi) You may not impose any further restrictions on the recipient's
 exercise of the rights granted herein.
@@ -167,6 +188,9 @@ SUCH DAMAGES.
 
 6.	General.  
 
-This Agreement is governed by the laws of the State of Victoria, 
+This Licence is governed by the laws of the State of Victoria, 
 Australia, excluding choice of law rules.
 
+If any part of this Licence is found to be in conflict with the law, that
+part shall be interpreted in its broadest meaning consistent with the law,
+and no other parts of the Licence shall be affected.

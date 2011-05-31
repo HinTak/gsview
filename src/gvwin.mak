@@ -25,11 +25,11 @@ COMPBASE = e:\bc45
 DEBUG=1
 # WIN32 is the default
 WIN32=1
-# Language is English (en) or Deutsch (de)
+# Language is English (en) or Deutsch (de) or French (fr)
 # This only applies to the utilties, not GSview itself.
 LANGUAGE=en
 # GSview version
-GSVIEW_VERSION=22
+GSVIEW_VERSION=23
 
 # Shouldn't need editing below here
 COMPDIR = $(COMPBASE)\bin
@@ -64,7 +64,9 @@ HDRS=gvwin.h ps.h gvcfn.h gvcver.h
 all: gsview$(WINEXT).exe\
   gsvw$(WINEXT)en.dll gsviewen.hlp\
   gsvw$(WINEXT)de.dll gsviewde.hlp\
-  gvwgs$(WINEXT).exe gsv16spl.exe winsetup.exe
+  gsvw$(WINEXT)fr.dll gsviewfr.hlp\
+  gvwgs$(WINEXT).exe gsv16spl.exe\
+  winsetup.exe setp$(WINEXT)fr.dll setp$(WINEXT)de.dll
 
 .c.obj:
 	$(COMPDIR)\$(CC) -c $(CFLAGS) {$< }
@@ -175,6 +177,45 @@ gsvw16de.def, +
 gsvw16de.res
 !
 
+gsvw32fr.res: gvwin2.rc gvcfr.h gvcfr.rc gvwfr.rc gvcver.h
+	copy gvcfr.h  gvclang.h
+	copy gvcfr.rc gvclang.rc
+	copy gvwfr.rc gvwlang.rc
+	$(COMPDIR)\brcc32 -i$(INCDIR) -r -fogsvw32fr gvwin2
+	-del gvclang.rc
+	-del gvwlang.rc
+
+gsvw32fr.dll: gvwlang.c gsvw32fr.res gsvw32fr.def
+	$(COMPDIR)\bcc32 -c -v -WD -w -I$(INCDIR) gvwlang.c
+	$(COMPDIR)\tlink32 -Tpd -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0d32 +
+gvwlang.obj +
+,gsvw32fr.dll,gsvw32fr, +
+$(LIBDIR)\import32 +
+$(LIBDIR)\cw32mt, +
+gsvw32fr.def, +
+gsvw32fr.res
+!
+
+gsvw16fr.res: gvwin2.rc gvcfr.h gvcfr.rc gvwfr.rc gvcver.h
+	copy gvcfr.h  gvclang.h
+	copy gvcfr.rc gvclang.rc
+	copy gvwfr.rc gvwlang.rc
+	$(COMPDIR)\brcc -i$(INCDIR) -r -fogsvw16fr gvwin2
+	-del gvclang.rc
+	-del gvwlang.rc
+
+gsvw16fr.dll: gvwlang.c gsvw16fr.res gsvw16fr.def
+	$(COMPDIR)\$(CC) -ml -c -v -WD -w -I$(INCDIR) gvwlang.c
+	$(COMPDIR)\tlink -Twd -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0dl +
+gvwlang.obj +
+,gsvw16fr.dll,gsvw16fr, +
+$(LIBDIR)\import +
+$(LIBDIR)\cwl, +
+gsvw16fr.def, +
+gsvw16fr.res
+!
 
 gvwin32.res: gvwin1.rc
 	$(COMPDIR)\brcc32 -i$(INCDIR) -r -fogvwin32 gvwin1
@@ -194,7 +235,7 @@ gvwdll.obj: gvwdll.c gvcrc.h gsdll.h $(HDRS)
 
 gvweps.obj: gvweps.c gvceps.h $(HDRS)
 
-gvwinit.obj: gvwinit.c $(HDRS)
+gvwinit.obj: gvwinit.c $(HDRS) gvcrc.h
 
 gvwmisc.obj: gvwmisc.c $(HDRS)
 
@@ -225,8 +266,8 @@ gvctext.obj: gvctext.c $(HDRS)
 winunzip.obj: winunzip.c wizdll.h
 	$(COMPDIR)\$(CC) -c $(CFLAGS) $*.c
 
-winsetup.res: winsetup.rc setup.h gvc$(LANGUAGE).h
-	copy gvc$(LANGUAGE).h  gvclang.h
+winsetup.res: winsetup.rc setup.h gvcen.h
+	copy gvcen.h  gvclang.h
 !if $(WIN32)
 	$(COMPDIR)\brcc32 -i$(INCDIR) -r $*.rc
 !else
@@ -236,8 +277,8 @@ winsetup.res: winsetup.rc setup.h gvc$(LANGUAGE).h
 setupc.obj: setupc.c setup.h setupc.h gvcrc.h gvcbeta.h
 	$(COMPDIR)\$(CC) -c $(CFLAGS) setupc.c
 
-winsetup.obj: winsetup.c setup.h setup.c gvcrc.h gvcbeta.h gvc$(LANGUAGE).h 
-	copy gvc$(LANGUAGE).h gvclang.h
+winsetup.obj: winsetup.c setup.h setup.c gvcrc.h gvcbeta.h gvcen.h gvcver.h
+	copy gvcen.h gvclang.h
 	$(COMPDIR)\$(CC) -c $(CFLAGS) winsetup.c
 
 winsetup.exe: winsetup.obj winsetup.res winsetup.def setupc.obj winunzip.obj gvcbeta.obj
@@ -267,6 +308,72 @@ winsetup.def, +
 winsetup.res
 !
 !endif
+
+setp32de.res: winsetup.rc gvcfr.h gvcver.h gvcrc.h setup.h
+	copy gvcde.h gvclang.h
+	$(COMPDIR)\brcc32 -i$(INCDIR) -r -fosetp32de winsetup
+	-del gvclang.h
+
+setp32de.dll: gvwlang.c setp32de.res setp32de.def
+	$(COMPDIR)\bcc32 -c -v -WD -w -I$(INCDIR) gvwlang.c
+	$(COMPDIR)\tlink32 -Tpd -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0d32 +
+gvwlang.obj +
+,setp32de.dll,setp32de, +
+$(LIBDIR)\import32 +
+$(LIBDIR)\cw32mt, +
+setp32de.def, +
+setp32de.res
+!
+
+setp32fr.res: winsetup.rc gvcfr.h gvcver.h gvcrc.h setup.h
+	copy gvcfr.h gvclang.h
+	$(COMPDIR)\brcc32 -i$(INCDIR) -r -fosetp32fr winsetup
+	-del gvclang.h
+
+setp32fr.dll: gvwlang.c setp32fr.res setp32fr.def
+	$(COMPDIR)\bcc32 -c -v -WD -w -I$(INCDIR) gvwlang.c
+	$(COMPDIR)\tlink32 -Tpd -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0d32 +
+gvwlang.obj +
+,setp32fr.dll,setp32fr, +
+$(LIBDIR)\import32 +
+$(LIBDIR)\cw32mt, +
+setp32fr.def, +
+setp32fr.res
+!
+
+setp16de.res: winsetup.rc gvcfr.h gvcver.h gvcrc.h setup.h
+	copy gvcde.h  gvclang.h
+	$(COMPDIR)\brcc -i$(INCDIR) -r -fosetp16de winsetup
+
+setp16de.dll: gvwlang.c setp16de.res setp16de.def
+	$(COMPDIR)\$(CC) -ml -c -v -WD -w -I$(INCDIR) gvwlang.c
+	$(COMPDIR)\tlink -Twd -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0dl +
+gvwlang.obj +
+,setp16de.dll,setp16de, +
+$(LIBDIR)\import +
+$(LIBDIR)\cwl, +
+setp16de.def, +
+setp16de.res
+!
+
+setp16fr.res: winsetup.rc gvcfr.h gvcver.h gvcrc.h setup.h
+	copy gvcfr.h  gvclang.h
+	$(COMPDIR)\brcc -i$(INCDIR) -r -fosetp16fr winsetup
+
+setp16fr.dll: gvwlang.c setp16fr.res setp16fr.def
+	$(COMPDIR)\$(CC) -ml -c -v -WD -w -I$(INCDIR) gvwlang.c
+	$(COMPDIR)\tlink -Twd -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0dl +
+gvwlang.obj +
+,setp16fr.dll,setp16fr, +
+$(LIBDIR)\import +
+$(LIBDIR)\cwl, +
+setp16fr.def, +
+setp16fr.res
+!
 
 gvdoc.exe: gvdoc.c
 	$(COMPDIR)\$(CCAUX) -w-pro -I$(INCDIR) -L$(LIBDIR) gvdoc.c
@@ -305,6 +412,14 @@ gsviewde.hlp: gvdoc.exe doc2rtf.exe gvcde.txt gsviewde.hpj
 	$(COMPDIR)\hc31 gsviewde.hpj
 	rename gsviewde.hlp gsviewde.hlp
 	-del gsviewde.rtf
+
+gsviewfr.hlp: gvdoc.exe doc2rtf.exe gvcfr.txt gsviewfr.hpj
+	gvdoc W gvcfr.txt gsviewfr.txt
+	doc2rtf gsviewfr.txt gsviewfr.rtf
+	-del gsviewfr.txt
+	$(COMPDIR)\hc31 gsviewfr.hpj
+	rename gsviewfr.hlp gsviewfr.hlp
+	-del gsviewfr.rtf
 
 gsview.htm: doc2html.exe gsview.txt
 	doc2html gsview.txt gsview.htm
@@ -390,22 +505,30 @@ gsv$(GSVIEW_VERSION)w32.zip:
 	$(COMPDIR)\tdstrp32 ..\gsview32.exe
 	copy gsviewen.hlp ..\gsviewen.hlp
 	copy gsviewde.hlp ..\gsviewde.hlp
+	copy gsviewfr.hlp ..\gsviewfr.hlp
 	copy gsvw32en.dll ..\gsvw32en.dll
 	copy gsvw32de.dll ..\gsvw32de.dll
+	copy gsvw32fr.dll ..\gsvw32fr.dll
 	$(COMPDIR)\tdstrp32 ..\gsvw32en.dll
 	$(COMPDIR)\tdstrp32 ..\gsvw32de.dll
+	$(COMPDIR)\tdstrp32 ..\gsvw32fr.dll
 	copy gsv16spl.exe ..\gsv16spl.exe
 	copy gvwgs32.exe ..\gvwgs32.exe
 	copy printer.ini ..\printer.ini
 	copy winsetup.exe ..\setup.exe
+	copy setp32de.dll ..\setp32de.dll
+	copy setp32fr.dll ..\setp32fr.dll
 	$(COMPDIR)\tdstrp32 ..\setup.exe
+	$(COMPDIR)\tdstrp32 ..\setp32de.dll
+	$(COMPDIR)\tdstrp32 ..\setp32fr.dll
 	cd ..
 	-del win32.zip
 	zip -9 -@ win32.zip < src\gvclist3.txt
 	echo Redistribution of this Win32 GSview MUST be accompanied by the> README32.TXT
 	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> README32.TXT
 	-del gsv$(GSVIEW_VERSION)w32.zip
-	zip -9 gsv$(GSVIEW_VERSION)w32.zip win32.zip setup.exe wizunz32.dll README32.TXT README.TXT FILE_ID.DIZ LICENCE
+	zip -9 gsv$(GSVIEW_VERSION)w32.zip win32.zip setup.exe wizunz32.dll setp32de.dll setp32fr.dll
+	zip -9 gsv$(GSVIEW_VERSION)w32.zip README32.TXT README.TXT FILE_ID.DIZ LICENCE
 	-del README32.TXT
 	-del README.TXT
 	-del LICENCE
@@ -414,12 +537,16 @@ gsv$(GSVIEW_VERSION)w32.zip:
 	-del gsview32.ico
 	-del gsviewen.hlp
 	-del gsviewde.hlp
+	-del gsviewfr.hlp
 	-del gsvw32en.dll
 	-del gsvw32de.dll
+	-del gsvw32fr.dll
 	-del gsv16spl.exe
 	-del gvwgs32.exe
 	-del printer.ini
 	-del setup.exe
+	-del setp32de.dll
+	-del setp32fr.dll
 	cd src
 	
 gsv$(GSVIEW_VERSION)w16.zip:
@@ -431,20 +558,27 @@ gsv$(GSVIEW_VERSION)w16.zip:
 	$(COMPDIR)\tdstrip ..\gsview16.exe
 	copy gsviewen.hlp ..\gsviewen.hlp
 	copy gsviewde.hlp ..\gsviewde.hlp
+	copy gsviewfr.hlp ..\gsviewfr.hlp
 	copy gsvw16en.dll ..\gsvw16en.dll
 	copy gsvw16de.dll ..\gsvw16de.dll
+	copy gsvw16fr.dll ..\gsvw16fr.dll
 	$(COMPDIR)\tdstrip ..\gsvw16en.dll
 	$(COMPDIR)\tdstrip ..\gsvw16de.dll
-	copy gsvw16de.dll ..\gsvw16de.dll
+	$(COMPDIR)\tdstrip ..\gsvw16fr.dll
 	copy gvwgs16.exe ..\gvwgs16.exe
 	copy printer.ini ..\printer.ini
 	copy winsetup.exe ..\setup16.exe
+	copy setp16de.dll ..\setp16de.dll
+	copy setp16fr.dll ..\setp16fr.dll
 	$(COMPDIR)\tdstrip ..\setup16.exe
+	$(COMPDIR)\tdstrip ..\setp16de.dll
+	$(COMPDIR)\tdstrip ..\setp16fr.dll
 	cd ..
 	# convert names to lower case
 	-rename gsview16.exe gsview16.exe
 	-rename gsvw16en.dll gsvw16en.dll
 	-rename gsvw16de.dll gsvw16de.dll
+	-rename gsvw16fr.dll gsvw16fr.dll
 	-rename gvwgs16.exe gvwgs16.exe
 	-rename setup16.exe setup16.exe
 	-del win16.zip
@@ -455,7 +589,8 @@ gsv$(GSVIEW_VERSION)w16.zip:
 	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> README16.TXT
 	echo Do not ask the author any questions about the 16-bit version. >> README16.TXT
 	-del gsv$(GSVIEW_VERSION)w16.zip
-	zip -9 gsv$(GSVIEW_VERSION)w16.zip win16.zip setup16.exe wizunz16.dll README16.TXT README.TXT FILE_ID.DIZ LICENCE
+	zip -9 gsv$(GSVIEW_VERSION)w16.zip win16.zip setup16.exe wizunz16.dll setp16de.dll setp16fr.dll
+	zip -9 gsv$(GSVIEW_VERSION)w16.zip README16.TXT README.TXT FILE_ID.DIZ LICENCE
 	-del README16.TXT
 	-del README.TXT
 	-del LICENCE
@@ -464,11 +599,15 @@ gsv$(GSVIEW_VERSION)w16.zip:
 	-del gsview32.ico
 	-del gsviewen.hlp
 	-del gsviewde.hlp
+	-del gsviewfr.hlp
 	-del gsvw16en.dll
 	-del gsvw16de.dll
+	-del gsvw16fr.dll
 	-del gvwgs16.exe
 	-del printer.ini
 	-del setup16.exe
+	-del setp16de.dll
+	-del setp16fr.dll
 	cd src
 	
 
@@ -523,15 +662,19 @@ clean: language
 	del gsview32.sym
 	del gsvw32de.map
 	del gsvw32en.map
+	del gsvw32fr.map
 	del gsvw16de.map
 	del gsvw16en.map
+	del gsvw16fr.map
 	del gvwlang.obj
 	del gvwin16.res
 	del gvwin32.res
 	del gsviewen.txt
 	del gsviewde.txt
+	del gsviewfr.txt
 	del gsviewen.rtf
 	del gsviewde.rtf
+	del gsviewfr.rtf
 	del doc2html.obj
 	del doc2html.exe
 	del doc2rtf.obj
@@ -552,6 +695,14 @@ clean: language
 	del winsetup.obj
 	del winsetup.res
 	del winsetup.map
+	del setp16fr.res
+	del setp16fr.map
+	del setp32fr.res
+	del setp32fr.map
+	del setp16de.res
+	del setp16de.map
+	del setp32de.res
+	del setp32de.map
 	del setupc.obj
 	del winunzip.obj
 	del gvwgs.obj
@@ -564,10 +715,14 @@ veryclean: clean
 	del gsview$(WINEXT).exe
 	del gsviewen.hlp
 	del gsviewde.hlp
+	del gsviewfr.hlp
 	del gsvw$(WINEXT)en.dll
 	del gsvw$(WINEXT)de.dll
+	del gsvw$(WINEXT)fr.dll
 	del gsview.htm
 	del gsv16spl.exe
-	del winsetup.exe
 	del gvwgs$(WINEXT).exe
+	del winsetup.exe
+	del setp$(WINEXT)de.dll
+	del setp$(WINEXT)fr.dll
 

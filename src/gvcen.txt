@@ -7,7 +7,7 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 2.2 requires Ghostscript 4.03 - 5.99.
+ GSview 2.3 requires Ghostscript 4.03 - 5.99.
  GSview was inspired by Tim Theisen's X11 Ghostview program.
 2Installation
 ?Installation
@@ -23,7 +23,8 @@
 3Uninstalling GSview and Ghostscript
 ?Uninstalling GSview and Ghostscript
  To uninstall GSview, remove the files in the `gsview ` directory.
- To uninstall Ghostscript, remove the files in the `gs5.01` directory.
+ To uninstall Ghostscript, remove the files in the `gsN.NN` directory
+ where N.NN is the version number of Ghostscript.
 
  Also remove
 P
@@ -33,6 +34,10 @@ W
 E
 
  from the appropriate system directory.
+W
+ For Windows you may also need to remove gsview32.ini
+ from user profile directories.
+E
 
 P
  Remove the `GSview ` object from the desktop.
@@ -68,11 +73,13 @@ E
  Next install
 P
  PM GSview by copying gvpm.exe, gvpgs.exe,
- gvpmen.dll, gvpmde.dll, gvpmen.hlp, gvpmde.hlp
+ gvpmen.dll, gvpmde.dll, gvpmfr.dll,
+ gvpmen.hlp, gvpmde.hlp, gvpmfr.hlp
  and printer.ini
 W
  GSview for Windows by copying gsview32.exe, gsv16spl.exe, gvwgs32.exe,
- gsvw32en.dll, gsvw32de.dll, gsviewen.hlp, gsviewde.hlp
+ gsvw32en.dll, gsvw32de.dll, gsvw32fr.dll,
+ gsviewen.hlp, gsviewde.hlp, gsviewfr.hlp,
  and printer.ini
 E
  to the `c:\gstools\gsview` directory.
@@ -104,7 +111,7 @@ E
  Enter the correct Ghostscript include path into the
  `Ghostscript Include Path` field.
  This include path must include the directories where the Ghostscript
- library files (gs_*.ps and Fontmap) and the Ghostscript fonts (*.gsf)
+ library files (gs_*.ps and Fontmap) and the Ghostscript fonts (*.pfb)
  are located. For example:
 P
    c:\gstools\gsN.NN;c:\gstools\gsN.NN\fonts;c:\psfonts
@@ -129,7 +136,8 @@ P
 W
  Create a Program Manager or Start Menu item for GSview.
 
- Add the .ps and .eps file types to the `Registry`.
+ Add the .ps and .eps (and optionally the .pdf) file types to 
+ the `Registry`.
 E
 
  If you have some Type 1 fonts on your system, it may be possible to
@@ -147,6 +155,48 @@ E
 
  Using a UNC path when installing GSview will not work
  from Windows 3.1, but does work from Windows 95.
+
+W
+ If user profiles are being used under Windows 95,
+ GSview will store the INI file in the user profile directory.
+ Otherwise, if the environment variable USERPROFILE is defined and is
+ a directory, GSview will store the INI file in this directory.
+ This will mean there is one configuration file for each user.
+
+E
+ If you wish to stop GSview from displaying the configuration
+ wizard when GSview is first run, or whenever GSview is upgraded,
+ place an INI file in the GSview directory.
+ `Remember to remove this file before upgrading GSview in the future.`
+ This should contain only those entries that you wish to overwrite
+ in the users configuration.
+ The suggested technique is to install GSview, then configure it.
+ Copy gsview32.ini or gvpm.ini from the system directory or your
+ user profile directory to the GSview directory, then edit it to
+ remove all entries except for:
+  [Options]
+  Version=2.3
+  GSversion=503
+  Configured=1
+  GhostscriptDLL=E:\GSTOOLS\gs5.03\gsdll32.dll
+  GhostscriptInclude=E:\GSTOOLS\gs5.03;E:\GSTOOLS\gs5.03\fonts
+  GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
+ When a user starts GSview, their INI file will normally be used.
+ The first time GSview is run, or when the GSview version doesn't
+ match the INI file, the following will occur:
+
+ 1. The INI file in the GSview directory will be read, overriding
+ the users INI file.
+
+ 2. The list of printers will be updated from printer.ini in
+ the GSview directory.
+
+ 3. File associations (.ps, .eps, .pdf) will NOT be made or changed.
+ If you wish to change these you must use `Options` | `Configure`.
+
+ 4. Program Manager groups / Start menu items / Program objects
+ will NOT be changed.
+ If you wish to change these you must use `Options` | `Configure`.
 3Ghostscript Installation
 ?Ghostscript Installation
  WARNING: SOME OF THE INFORMATION BELOW IS OLD.
@@ -159,7 +209,7 @@ E
   ftp://ftp.cs.wisc.edu/ghost/aladdin/gsNNN???.zip
  Where NNN is the version number.
 
- For Ghostscript N.NN, the files requires to run Ghostscript are:
+ For Ghostscript N.NN, the files required to run Ghostscript are:
 
  All PC platforms require the library (INI) files in
   gsNNNini.zip
@@ -178,7 +228,7 @@ E
  Unzip the INI zip file and the required DLL and EXE zip files.
  This should put the files into the directory d:\gstools\gsN.NN.
 
- If you also need the fonts, change to the d:\gstools\gsN.NN directory 
+ If you also need the fonts, change to the d:\gstools\gsN.NN directory
  and then unzip gsNNNfn1.zip.  This will put font files into .\fonts.
 
  To run Ghostscript without GSview, set the GS_LIB environment variable
@@ -242,7 +292,7 @@ E
 ?File searching
  (from Ghostscript use.txt)
 
- When looking for initialization files (gs_*.ps, pdf_*.ps), font files, the
+ When looking for initialisation files (gs_*.ps, pdf_*.ps), font files, the
  Fontmap file, and files named on the command line, Ghostscript first checks
  whether the file name specifies an explicit directory or drive (i.e.,
  doesn't begin with '/' on Unix systems; doesn't begin with a '/' or '\' or
@@ -419,7 +469,7 @@ E
  for some reason some versions of Ghostscript can't seem to find any of the
  Type1 fonts in /usr/openwin/lib/X11/fonts/Type1/outline.  It says: "15
  files, 15 scanned, 0 new fonts".  See Fontmap.Sol instead.
- 
+
  See also `Fontmap`.
 4Platform Fonts
 ?Platform Fonts
@@ -777,10 +827,10 @@ E
  `Orientation `is the default page orientation and is either
  `Portrait `or` Landscape`.
 
+ `Page Order` is either `Ascending`, `Descending` or `Special`.
+
  `Default Media` gives the media name followed by the width and
  height of that media in default user co-ordinates (1/72 inch).
-
- `Page Order` is either `Ascending`, `Descending` or `Special`.
 
  `Pages` is the total number of pages in the document.
 
@@ -844,12 +894,12 @@ E
  The list of available devices and resolutions is stored in the
  [Devices] section of
 W
- gsview32.ini
+ gsview32.ini.
 P
  gvpm.ini.
 E
  The default list of devices and resolutions is taken from the
- standard distribution version of Ghostscript 5.0 and may not
+ standard distribution version of Ghostscript 5.03 and may not
  be complete.
 
  To print a document without displaying it, open the document
@@ -1085,7 +1135,7 @@ E
 
  `Edit `| `Find Next` will continue the search.
 
- For most PostScript files you should used
+ For most PostScript files you should use
  `Options` | `PStoText` | `Normal`.
 
  `Options` | `PStoText` | `Dvips Cork Encoding`
@@ -1129,7 +1179,7 @@ E
  an index of the words in the document.  If any words are marked with
  the mouse, `Copy` will copy these words to the clipboard instead
  of copying a bitmap.  Text cannot be marked until either `Text Extract`
- or `Find` has been used with `Option` | `PStoText` enabled.
+ or `Find` has been used with `Options` | `PStoText` enabled.
 2EPS Preview
 ?EPS Preview
 ?Add EPS Preview
@@ -1144,7 +1194,7 @@ E
  1. Deselect `Options | Ignore DSC`
 
  2. Make sure the document has a correct bounding box.
- `Option` | `Show Bounding Box` is useful for checking the
+ `Options` | `Show Bounding Box` is useful for checking the
  bounding box.
  A bounding box can be added or changed using `File` | `PS to EPS`.
 
@@ -1197,7 +1247,7 @@ E
  It is not necessary to display the EPS file. `User Supplied Preview`
  can be used after an EPS file has been opened with `Select File`.
 
- You can add a preview that has no resemblance to the Postscript,
+ You can add a preview that has no resemblance to the PostScript,
  which is most undesirable.
 2Options
 ?Options
@@ -1273,8 +1323,8 @@ E
 3Language
 ?Language
 ?International
- GSview is available in English and German.  To change the language
- use `Options `| `Language`.
+ GSview is available in English, French and German.  To change the 
+ language use `Options` | `Language`.
 3PStoText
 ?PStoText
  GSview has two methods of extracting and searching text.
@@ -1305,7 +1355,9 @@ E
  all items on the `Options` menu and all items on the `Media` menu
  to the initialisation file
 W
- gsview32.ini in the Windows system directory.
+ gsview32.ini in the Windows system directory (or for Windows
+ 95 or NT 4 in the user profile directory if user profiles are
+ being used).
 P
  gvpm.ini in the OS/2 system directory.
 E
@@ -1670,7 +1722,7 @@ E
 
  `F1`  Help.  (`Help` | `Contents`)
 
- `Ctrl+C`, `Insert`  Copy displayed bitmap to clipboard.  (`Edit` | `Copy`)
+ `Ctrl+C`, `Ctrl+Insert`  Copy displayed bitmap to clipboard.  (`Edit` | `Copy`)
 
  `Ctrl+F`, Find Text. (`Edit` | `Find`)
 
@@ -1857,7 +1909,7 @@ W
 P
   GVPM.EXE - A Ghostscript graphical interface
 E
-  Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+  Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   Portions Copyright (C) 1994, Timothy O. Theisen.  All rights reserved.
 
  This file is part of GSview.
@@ -1887,7 +1939,6 @@ E
  See the licence in pstotext.txt or pstotext.zip for more details.
  If you do not agree to the pstotext licence, delete pstotext.zip,
  pstotxt2.dll and pstotxt3.dll.
-
 2Common Problems
 ?Common Problems
 ?Problems
@@ -1907,7 +1958,7 @@ W
 E
 
  This message also occurs if Ghostscript cannot find its
- initialization files (e.g. gs_init.ps).  Set the
+ initialisation files (e.g. gs_init.ps).  Set the
  `Ghostscript Include Path` correctly.
 
 W
@@ -2048,7 +2099,7 @@ E
  produced using the Adobe PostScript driver 4.10 for Windows 32-bit.
 
  Do not use Tagged binary communications protocol.
- Change this to "Printers | Postscript tab | Advanced... |
+ Change this to "Printers | PostScript tab | Advanced... |
  Data format group box | ASCII data"
 
 2Other Help Topics

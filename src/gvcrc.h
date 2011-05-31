@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -48,8 +48,12 @@
 #define IDM_PRINTTOFILE 111
 #define IDM_SPOOL	112
 #define IDM_GSMESS      113
-#define IDM_EXIT	114
-#define IDM_DROP	115
+#define IDM_LASTFILE1	114
+#define IDM_LASTFILE2	115
+#define IDM_LASTFILE3	116
+#define IDM_LASTFILE4	117
+#define IDM_EXIT	118
+#define IDM_DROP	119
 
 #define IDM_EDITMENU	150
 #define IDM_COPYCLIP	151
@@ -152,12 +156,13 @@
 #define IDM_LANGMENU	360
 #define IDM_LANGEN	361
 #define IDM_LANGDE	362
-#define IDD_LANG	363
+#define IDM_LANGFR	363
+#define IDD_LANG	365
 
-#define IDM_PSTOTEXTMENU	365
-#define IDM_PSTOTEXTDIS 	366
-#define IDM_PSTOTEXTNORM	367
-#define IDM_PSTOTEXTCORK	368
+#define IDM_PSTOTEXTMENU	370
+#define IDM_PSTOTEXTDIS 	371
+#define IDM_PSTOTEXTNORM	372
+#define IDM_PSTOTEXTCORK	373
 
 /* configuration dialog resource IDs */
 #define IDD_CFG0	380	/* parent */
@@ -173,7 +178,7 @@
 #define IDC_CFG21	391	/* gsver scroll bar */
 #define IDC_CFG22	392	/* GS dir edit field */
 #define IDC_CFG23	393	/* additional fonts edit field */
-#define IDC_CFG31	394	/* printer.ini checkbox */
+#define IDC_CFG32	394	/* printer.ini checkbox */
 #define IDC_CFG41	395	/* PS associate checkbox */
 #define IDC_CFG42	396	/* PDF associate checkbox */
 #define IDC_CFG51	397	/* create group checkbox */
@@ -326,6 +331,7 @@
 #define IDS_IGNOREDSC   632
 #define IDS_CTRLD	633
 #define IDS_PJL		634
+#define IDS_ZOOMED	635
 
 #define IDS_OUTPUTFILE	640
 #define IDS_PRINTINGALL	641
@@ -455,24 +461,16 @@
 
 #define IDS_BETAEXPIRED		850
 #define IDS_BETAWARN		851
-#define IDS_UPDATEPRINTER	852
-#define IDS_NOPRINTERINI	853
-#define IDS_NOINI		854
-#define IDS_NEEDTEMP		855
-#define IDS_VERSIONCHANGED	856
-#define IDS_CONFIGURECANCELLED	857
-#define IDS_GSNOTINSTALLED	858
-#define IDS_GSLIBNOTINSTALLED	859
-#define IDS_CONFIGURECOMPLETE	860
-#define IDS_PSTOTEXTFILEMISSING	861
-#define IDS_PROGRAMOBJECTFAILED	862
-#define IDS_ASSOCPS		863
-#define IDS_ASSOCPDF		864
-#define IDS_REGERROR		865
-#define IDS_NOPROGMAN		866
-#define IDS_CREATEGROUP		867
-#define IDS_SETUPOK		868
-#define IDS_SETUPABORT		869
+#define IDS_NOPRINTERINI	852
+#define IDS_NOINI		853
+#define IDS_NEEDTEMP		854
+#define IDS_VERSIONCHANGED	855
+#define IDS_CONFIGURECANCELLED	856
+#define IDS_GSNOTINSTALLED	857
+#define IDS_GSLIBNOTINSTALLED	858
+#define IDS_NOPROGMAN		859
+#define IDS_PROGRAMOBJECTFAILED 860
+
 #define IDS_MKDIRFAIL		870
 #define IDS_WRONGEMX		871
 #define IDS_DIRNOTEXIST		872
@@ -480,9 +478,20 @@
 #define IDS_GSVIEWVERSION	874
 #define IDS_PROGMANGROUP4	875
 #define IDS_PROGMANGROUP5	876
-#define IDS_DONEBAK		877
-#define IDS_CFG73		878
-#define IDS_CFG74		879
+#define IDS_PROGMANGROUP6	877
+#define IDS_DONEBAK		878
+#define IDS_CANTLOAD		879
+#define IDS_CANTCREATETEMPFILE	880
+#define IDS_CANTOPENREAD	881
+#define IDS_CANTOPENWRITE	882
+#define IDS_ERRORRENAME		883
+#define IDS_NODDEPROGMAN	884
+#define IDS_INSERTDISK		885
+#define IDS_ZIPNOTFOUND		886
+#define IDS_UNZIPCANCELLED	887
+#define IDS_CANTALLOCBUF	888
+#define IDS_CFG73		889
+#define IDS_CFG74		890
 
 
 /* RCDATA resources */

@@ -24,15 +24,17 @@
  *   FILE_ID.DIZ
  *   gvcnews.txt
  *   gvcXX.txt
- *   gvcXX.rc  (for Copyright dates)
+ *   gvcXX.h    (for Copyright dates)
+ *   gvpm.mak
+ *   gvwin.mak
  */
 
 
 /* GSview */
 
 #define GSVIEW_PRODUCT "GSview"
-#define GSVIEW_VERSION "2.2"
-#define GSVIEW_DATE    "1997-06-23"
+#define GSVIEW_VERSION "2.3"
+#define GSVIEW_DATE    "1997-09-16"
 #ifdef _Windows
 #ifdef __WIN32__
 #define GSVIEW_ZIP     "win32.zip"
@@ -47,7 +49,7 @@
 /* undefine BETA for a final release */
 /* #define BETA */
 #define BETA_YEAR    1997
-#define BETA_MONTH   07
+#define BETA_MONTH   10
 #define BETA_DAY     31
 
 
@@ -56,7 +58,7 @@
 #if defined(_Windows) && !defined(__WIN32__)
 #define GS_REVISION	  403		/* this is the last 16-bit version */
 #else
-#define GS_REVISION	  501
+#define GS_REVISION	  503
 #endif
 #define GS_REVISION_MIN   403
 #define GS_REVISION_MAX   599
@@ -76,7 +78,7 @@
 
 /* General */
 
-#define EMX_NEEDED "0.9b"
+#define EMX_NEEDED "0.9c"
 #define INSTALL_DIR "\\gstools"
 
 

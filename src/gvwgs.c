@@ -1,4 +1,4 @@
-/* Copyright (C) 1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1996-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -835,4 +835,3 @@ int code;
 */
 }
 
-

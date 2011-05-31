@@ -39,6 +39,7 @@ BEGIN
 		MENUITEM SEPARATOR
 		MENUITEM "Show Messages\tM", IDM_GSMESS 
 		MENUITEM SEPARATOR
+		MENUITEM SEPARATOR
 		MENUITEM "E&xit", IDM_EXIT
 	END
 	POPUP "&Edit"
@@ -81,6 +82,7 @@ BEGIN
 		POPUP "&Language"
 		BEGIN
 			MENUITEM "&English", IDM_LANGEN
+			MENUITEM "&French", IDM_LANGFR
 			MENUITEM "&German", IDM_LANGDE
 		END
 		POPUP "PStoText"
@@ -211,7 +213,11 @@ END
 STRINGTABLE
 BEGIN
 	/* filter strings */
+#ifdef __WIN32__
+	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|PS Files (*.ps)|*.ps;*.ps.gz|EPS Files (*.eps)|*.eps;*.eps.gz|EPI Files (*.epi)|*.epi;*.eps.gz|PDF Files (*.pdf)|*.pdf;*.pdf.gz|All Files (*.*)|*.*|"
+#else
 	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf|PS Files (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*|"
+#endif
 	IDS_FILTER_PS, "Default (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|"
 	IDS_FILTER_EPS, "EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|PS Files (*.ps)|*.ps|All Files (*.*)|*.*|"
 	IDS_FILTER_EPI, "EPI Files (*.epi)|*.epi|EPS Files (*.eps)|*.eps|PS Files (*.ps)|*.ps|All Files (*.*)|*.*|"

@@ -41,6 +41,7 @@ struct LIST *keylist = NULL;
 struct LIST *keyhead = NULL;
 
 int debug = FALSE;
+int nolinks = FALSE;
 
 void parse();
 void refs();
@@ -57,6 +58,11 @@ FILE * outfile;
 
     if (argv[argc-1][0]=='-' && argv[argc-1][1]=='d') {
         debug = TRUE;
+	argc--;
+    }
+
+    if (argv[argc-1][0]=='-' && argv[argc-1][1]=='n') {
+        nolinks = TRUE;
 	argc--;
     }
 
@@ -209,7 +215,10 @@ FILE *f;
         {
             c = list->string;
 	    while (isspace(*c)) c++;
-	    fprintf(f,"<A HREF=\042#%d\042>%s</A><BR>\n", list->line, c);
+	    if (nolinks)
+	        fprintf(f,"<B>%s</B><BR>\n", c);
+	    else
+	        fprintf(f,"<A HREF=\042#%d\042>%s</A><BR>\n", list->line, c);
             }
         list = list->next;
         }
@@ -307,7 +316,10 @@ process_line(line, b)
                     k = lookup(topic);
 		    if ((k > 0) && (k != last_line))
                     {
-                        sprintf( hyplink1, "<A HREF=\042#%d\042>", k ) ;
+			if (nolinks)
+                            sprintf( hyplink1, "<B>") ;
+			else
+                            sprintf( hyplink1, "<A HREF=\042#%d\042>", k ) ;
                         strcpy( line2+j, hyplink1 ) ;
                         j += strlen( hyplink1 )-1 ;
                         
@@ -340,7 +352,10 @@ process_line(line, b)
                         /* must be inref */
                         line2[j++] = '<';
                         line2[j++] = '/';
-                        line2[j++] = 'A';
+			if (nolinks)
+                            line2[j++] = 'B';
+			else
+                            line2[j++] = 'A';
                         line2[j] = '>';
                         inref = 0;
                         }
@@ -430,7 +445,10 @@ process_line(line, b)
 		fprintf( stderr, "%d: %s\n", line_count, &line2[1] ) ;
             k=lookup(&line2[1]) ;
 	    /* output unique ID and section title */
-            fprintf(b,"<HR>\n<H%c><A NAME=\042%d\042>", line[0]=='1'?line[0]:line[0]-1, line_count);
+	    if (nolinks)
+                fprintf(b,"<HR>\n<H%c>", line[0]=='1'?line[0]:line[0]-1);
+	    else
+                fprintf(b,"<HR>\n<H%c><A NAME=\042%d\042>", line[0]=='1'?line[0]:line[0]-1, line_count);
             fprintf(b,&(line2[1])); /* title */
             fprintf(b,"</A></H%c>\n<P>", line[0]=='1'?line[0]:line[0]-1) ;
           } else

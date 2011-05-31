@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -83,17 +83,22 @@ int width, height;
 	oldy = *y;
 	width  = (unsigned int)(display.width  * 72.0 / option.xdpi);
 	height = (unsigned int)(display.height * 72.0 / option.ydpi);
-#ifdef OLD
-	real_orientation = option.orientation;
-	if (option.swap_landscape) {
-	    if (option.orientation == IDM_LANDSCAPE)
+
+	switch(d_orientation(psfile.pagenum)) {
+	    default:
+	    case 0:
+		real_orientation = IDM_PORTRAIT;
+		break;
+	    case 1:
 		real_orientation = IDM_SEASCAPE;
-	    else if (option.orientation == IDM_SEASCAPE)
+		break;
+	    case 2:
+		real_orientation = IDM_UPSIDEDOWN;
+		break;
+	    case 3:
 		real_orientation = IDM_LANDSCAPE;
+		break;
 	}
-#else
-	real_orientation = IDM_PORTRAIT + d_orientation(psfile.pagenum);
-#endif
 
 	if (psfile.ispdf)
 	    real_orientation = pdf_orientation();
@@ -131,17 +136,22 @@ int width, height;
 	oldy = *y;
 	width  = (unsigned int)(display.width  * 72.0 / option.xdpi);
 	height = (unsigned int)(display.height * 72.0 / option.ydpi);
-#ifdef OLD
-	real_orientation = option.orientation;
-	if (option.swap_landscape) {
-	    if (option.orientation == IDM_LANDSCAPE)
+
+	switch(d_orientation(psfile.pagenum)) {
+	    default:
+	    case 0:
+		real_orientation = IDM_PORTRAIT;
+		break;
+	    case 1:
 		real_orientation = IDM_SEASCAPE;
-	    else if (option.orientation == IDM_SEASCAPE)
+		break;
+	    case 2:
+		real_orientation = IDM_UPSIDEDOWN;
+		break;
+	    case 3:
 		real_orientation = IDM_LANDSCAPE;
+		break;
 	}
-#else
-	real_orientation = IDM_PORTRAIT + d_orientation(psfile.pagenum);
-#endif
 
 	if (psfile.ispdf)
 	    real_orientation = pdf_orientation();
@@ -360,6 +370,36 @@ PSFILE *tpsfile;
 }
 
 
+void
+rotate_last_files(int count)
+{
+int i;
+char buf[MAXSTR];
+    strcpy(buf, last_files[count]);
+    for (i=count; i>0; i--)
+	strcpy(last_files[i], last_files[i-1]);
+    strcpy(last_files[0], buf);
+}
+
+void
+update_last_files(char *filename)
+{
+int i;
+    for (i=0; i<last_files_count; i++) {
+	if (strcmp(filename, last_files[i]) == 0)
+	    break;
+    }
+    if (i < last_files_count) {
+	/* already in list */
+	rotate_last_files(i);
+	return;
+    }
+    if (last_files_count < 4)
+        last_files_count++;
+    rotate_last_files(last_files_count-1);
+    strcpy(last_files[0], filename);
+}
+
 /* get filename then open new file for printing or extract */
 void 
 gsview_select()
@@ -376,6 +416,8 @@ gsview_selectfile(char *filename)
 {
 	while (*filename && *filename==' ')
 	     filename++;
+
+	update_last_files(filename);
 
 	if (gsdll.valid && (gsdll.state!=UNLOADED)) {
 	    /* remember name for later */
@@ -413,6 +455,9 @@ PSFILE *tpsfile;
 	tpsfile = gsview_openfile(filename);
 	if (!tpsfile)
 	    return;
+
+	update_last_files(filename);
+
 	if (pending.psfile) {
 	    message_box("pending.psfile is already set", 0);
 	    e_free_psfile(tpsfile);
@@ -556,13 +601,15 @@ int count;
 	return FALSE;
     }
 	
-    while ( (count = gzread(infile, buffer, COPY_BUF_SIZE)) != 0 ) {
+    while ( (count = gzread(infile, buffer, COPY_BUF_SIZE)) > 0 ) {
 	fwrite(buffer, 1, count, outfile);
     }
     free(buffer);
     gzclose(infile);
     fclose(outfile);
     /* unload_zlib(); */
+    if (count < 0)
+	return FALSE;
     return TRUE;
 }
 

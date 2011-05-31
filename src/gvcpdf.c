@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -65,6 +65,8 @@ Page /MediaBox pget\n\
 if\n\
 Page /Rotate pget not { 0 } if\n\
    (%s) print dup == flush\n\
+   dup 0 lt { 360 add } if\n\
+   dup 0 lt 1 index 270 gt or { pop 0 } if\n\
    90 idiv dup 3 eq\n\
     { pop 1 }\n\
     { dup 1 eq { pop 3 } if }\n\
@@ -304,6 +306,10 @@ char *line = str;
 	if (i==1) {
 	    if (debug)
 		gs_addmess("Found GSVIEW_PDF_ROTATE tag\n");
+	    while (rotate < 0)
+		rotate += 360;
+	    while (rotate >= 360)
+		rotate -= 360;
 	    switch (rotate) {
 		case 90:
 		    pdf_rotate = IDM_LANDSCAPE;
@@ -356,9 +362,18 @@ char *line = str;
 	    p = pdf_parse_mark(p, &key, &value);
 	    while (p) {
 		if (strcmp(key, "/Rect") == 0) {
+		    float fllx, flly, furx, fury;
 		    if (sscanf(value+1, "%d %d %d %d", 
 			&link.bbox.llx, &link.bbox.lly, &link.bbox.urx, &link.bbox.ury) == 4)
 			code = TRUE;
+		    else if (sscanf(value+1, "%f %f %f %f", 
+			&fllx, &flly, &furx, &fury) == 4) {
+			link.bbox.llx = (int)fllx;
+			link.bbox.lly = (int)flly;
+			link.bbox.urx = (int)(furx + 0.5);
+			link.bbox.ury = (int)(fury + 0.5);
+			code = TRUE;
+		    }
 		}
 		if (strcmp(key, "/Page") == 0) {
 		    if (strcmp(value, "/Next") == 0) {

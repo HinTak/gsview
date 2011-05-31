@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -31,6 +31,8 @@ struct buttonlist {
 };
 struct buttonlist *buttonhead, *buttontail;
 int real_button_width;
+
+FILE *logfile;
 
 BOOL parse_args(LPSTR str);
 
@@ -84,13 +86,17 @@ HINSTANCE hInstance;
 	case IDM_LANGDE:
 	    strcat(langdll, "de");
 	    break;
+	case IDM_LANGFR:
+	    strcat(langdll, "fr");
+	    break;
+	case IDM_LANGEN:
 	default:
 	    strcat(langdll, "en");
     }
     strcat(langdll, ".dll");
     hInstance = LoadLibrary(langdll);
     if (hInstance >= (HINSTANCE)HINSTANCE_ERROR) {
-	if (hlanguage)
+	if ((hlanguage != (HINSTANCE)NULL) && (hlanguage != phInstance))
 	    FreeLibrary(hlanguage);
 	hlanguage = hInstance;
 
@@ -137,6 +143,7 @@ LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                     return(TRUE);
                 case IDM_LANGEN:
                 case IDM_LANGDE:
+                case IDM_LANGFR:
                     EndDialog(hDlg, LOWORD(wParam));
                     return(TRUE);
                 default:
@@ -157,6 +164,7 @@ int language;
     /* if Window language doesn't match GSview language */
     if ( ((option.language == IDM_LANGEN) && strnicmp(winlang, "EN", 2))
       || ((option.language == IDM_LANGDE) && stricmp(winlang, "DEU"))
+      || ((option.language == IDM_LANGFR) && strnicmp(winlang, "FR", 2))
 	)
     {
 #ifdef __WIN32__
@@ -170,6 +178,7 @@ int language;
 	switch (language) {
 	    case IDM_LANGEN:
 	    case IDM_LANGDE:
+	    case IDM_LANGFR:
 		gsview_language(language);
 	}
     }
@@ -180,7 +189,9 @@ BOOL
 gsview_init1(LPSTR lpszCmdLine)
 {
 WNDCLASS wndclass;
+#ifdef __WIN32__
 DWORD version = GetVersion();
+#endif
 char *p;
 int length = 64;
 
@@ -252,6 +263,67 @@ int length = 64;
 	/* get path to INI file */
 	szIniFile[0] = '\0';
 	/* strcpy(szIniFile, szExePath); */
+#ifdef __WIN32__
+	/* allow for user profiles */
+	if (is_win4) {
+	    LONG rc;
+	    HKEY hkey;
+	    DWORD keytype;
+	    DWORD cbData;
+	    /* Find the user profile directory */
+	    rc = RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\ProfileReconciliation", 0, KEY_READ, &hkey);
+	    if (rc == ERROR_SUCCESS) {
+		cbData = sizeof(szIniFile)-sizeof(INIFILE);
+		keytype =  REG_SZ;
+		rc = RegQueryValueEx(hkey, "ProfileDirectory", 0, &keytype, (LPBYTE)szIniFile, &cbData);
+		RegCloseKey(hkey);
+	    }
+	    if (rc == ERROR_SUCCESS)
+		strcat(szIniFile, "\\");
+	    else {
+		    /* If we didn't succeed, use the Windows directory */
+		    szIniFile[0] = '\0';
+	    }
+	}
+	if (szIniFile[0] == '\0') {
+	    /* If we didn't succeed, try %USERPROFILE% */
+	    char *p = getenv("USERPROFILE");
+	    DWORD fa;
+	    if (p && *p) {
+		strcpy(szIniFile, p);
+		p = szIniFile + strlen(szIniFile) - 1;
+		if ((*p == '\\') || (*p == '/'))
+		    *p = '\0';
+		/* check if USERPROFILE contains a directory name */
+		fa = GetFileAttributes(szIniFile);
+		if (fa & FILE_ATTRIBUTE_DIRECTORY)
+		    strcat(szIniFile, "\\");
+		else
+		    szIniFile[0] = '\0';
+	    }
+	}
+#else
+	{
+	    char *p = getenv("USERPROFILE");
+	    DIR *d;
+	    if (p && *p) {
+		strcpy(szIniFile, p); 
+		p = szIniFile + strlen(szIniFile) - 1;
+		if ((*p == '\\') || (*p == '/'))
+		    *p = '\0';
+		/* check if USERPROFILE contains a directory name */
+		d = opendir(szIniFile);
+		if (d) {
+		    closedir(d);
+		    strcat(szIniFile, "\\");
+		}
+		else {
+		    /* If we didn't succeed, use the Windows directory */
+		    szIniFile[0] = '\0';
+		}
+	    }
+	}
+#endif
 	strcat(szIniFile, INIFILE);
 
 	getcwd(workdir, sizeof(workdir));
@@ -477,6 +549,12 @@ char filedir[MAXSTR];
 	GlobalUnlock(hglobal);
 	GlobalFree(hglobal);
     }
+
+    if (debug) {
+	gs_addmess("INI file is \042");
+	gs_addmess(szIniFile);
+	gs_addmess("\042\n");
+    }
     return !error;
 }
 
@@ -644,34 +722,115 @@ HKEY hsubkey;
 LONG rc;
 char buf[MAXSTR];
 
+LONG lrc;
+LONG lold;
+BOOL oldkey = FALSE;
+char oldvalue[MAXSTR];
+char oldopen[MAXSTR];
+char oldprint[MAXSTR];
+char oldicon[MAXSTR];
+
+const char opensubkey[] = "shell\\open";
+const char printsubkey[] = "shell\\print";
+const char commandsubkey[] = "command";
+
+    /* Save existing key for uninstall */
+    oldvalue[0] = oldopen[0] = oldprint[0] = oldicon[0] = '\0';
+    lrc = RegOpenKey(HKEY_CLASSES_ROOT, keyname, &hkey);
+/*
+    lrc = RegOpenKeyEx(HKEY_CLASSES_ROOT, keyname, 0, KEY_ALL_ACCESS, &hkey);
+*/
+    if (lrc == ERROR_SUCCESS) {
+	oldkey = TRUE;
+        lold = sizeof(oldvalue);
+	RegQueryValue(HKEY_CLASSES_ROOT, keyname, oldvalue, &lold);
+
+	lrc = RegOpenKey(hkey, opensubkey, &hsubkey);
+	if (lrc == ERROR_SUCCESS) {
+	    lold = sizeof(oldopen);
+	    RegQueryValue(hsubkey, commandsubkey, oldopen, &lold);
+	    RegCloseKey(hsubkey);
+	}
+
+	lrc = RegOpenKey(hkey, printsubkey, &hsubkey);
+	if (lrc == ERROR_SUCCESS) {
+	    lold = sizeof(oldprint);
+	    RegQueryValue(hsubkey, commandsubkey, oldprint, &lold);
+	    RegCloseKey(hsubkey);
+	}
+
+	if (is_win4) {
+	    lold = sizeof(oldicon);
+	    RegQueryValue(hkey, "DefaultIcon", oldicon, &lold);
+	}
+	RegCloseKey(hkey);
+    }
+
+    /* Write new information */
+    fprintf(logfile, "OpenKey=%s\n", keyname);
     rc = RegCreateKey(HKEY_CLASSES_ROOT, keyname, &hkey);
     if (rc != ERROR_SUCCESS)
 	return rc;
 
+    fprintf(logfile, "DeleteValue=\n");
     rc = RegSetValue(hkey, NULL, REG_SZ, description, strlen(description));
 
+    fprintf(logfile, "OpenSubKey=%s\n", opensubkey);
     if (rc == ERROR_SUCCESS)
-	rc = RegCreateKey(hkey, "shell\\open", &hsubkey);
+	rc = RegCreateKey(hkey, opensubkey, &hsubkey);
     sprintf(buf, "%s%s %%1", szExePath, GSVIEW_EXENAME);
     if (rc == ERROR_SUCCESS)
-	rc = RegSetValue(hsubkey, "command", REG_SZ, buf, strlen(buf));
+	rc = RegSetValue(hsubkey, commandsubkey, REG_SZ, buf, strlen(buf));
+    fprintf(logfile, "DeleteKey=%s\n", commandsubkey);
     RegCloseKey(hsubkey);
+    fprintf(logfile, "CloseSubKey=\n");
+    /* fprintf(logfile, "DeleteSubKey=%s\n", opensubkey); */
+    
 
+    fprintf(logfile, "OpenSubKey=%s\n", printsubkey);
     if (rc == ERROR_SUCCESS)
 	rc = RegCreateKey(hkey, "shell\\print", &hsubkey);
     sprintf(buf, "%s%s /p %%1", szExePath, GSVIEW_EXENAME);
     if (rc == ERROR_SUCCESS)
-	rc = RegSetValue(hsubkey, "command", REG_SZ, buf, strlen(buf));
+	rc = RegSetValue(hsubkey, commandsubkey, REG_SZ, buf, strlen(buf));
+    fprintf(logfile, "DeleteKey=%s\n", commandsubkey);
     RegCloseKey(hsubkey);
+    fprintf(logfile, "CloseSubKey=\n");
+    /* fprintf(logfile, "DeleteSubKey=%s\n", printsubkey); */
 
     if (is_win4) {
 	/* icon offset 3 is ID_GSVIEW_DOC */
 	sprintf(buf, "%s%s,3", szExePath, GSVIEW_EXENAME);
+	fprintf(logfile, "DeleteKey=%s\n", "DefaultIcon");
 	if (rc == ERROR_SUCCESS)
 	    rc = RegSetValue(hkey, "DefaultIcon", REG_SZ, buf, strlen(buf));
     }
 
     RegCloseKey(hkey);
+    fprintf(logfile, "CloseKey=\n");
+    if (!oldkey)
+        fprintf(logfile, "DeleteKey=%s\n", keyname);
+
+    /* Restore previous values */
+    if (oldkey) {
+	fprintf(logfile, "CreateKey=%s\n", keyname);
+	if (oldvalue[0])
+	    fprintf(logfile, "SetValue=,%s\n", oldvalue);
+	if (oldopen[0]) {
+	    fprintf(logfile, "CreateSubKey=%s\\%s\n", opensubkey, commandsubkey);
+	    fprintf(logfile, "SetValue=,%s\n", oldopen);
+	    fprintf(logfile, "CloseSubKey=\n");
+	}
+	if (oldprint[0]) {
+	    fprintf(logfile, "CreateSubKey=%s\\%s\n", printsubkey, commandsubkey);
+	    fprintf(logfile, "SetValue=,%s\n", oldprint);
+	    fprintf(logfile, "CloseSubKey=\n");
+	}
+	if (is_win4 && oldicon[0]) {
+	    fprintf(logfile, "SetValue=DefaultIcon,%s\n", oldicon);
+	}
+	fprintf(logfile, "CloseKey=\n");
+    }
 
     return rc;
 }
@@ -693,16 +852,38 @@ char *psext=".ps";
 char *epsext=".eps";
 char *pdfext=".pdf";
 LONG rc = ERROR_SUCCESS;
+char old[MAXSTR];
+LONG lold;
+LONG lrc = !ERROR_SUCCESS;
 
     if (!ps && !pdf)
 	return 0;
 
+    fprintf(logfile, "\n[Registry]\n");
     if (ps) {
+
+        if (rc == ERROR_SUCCESS) {
+	    lold = sizeof(old);
+	    lrc = RegQueryValue(HKEY_CLASSES_ROOT, psext, old, &lold);
+	}
         if (rc == ERROR_SUCCESS)
 	    rc = RegSetValue(HKEY_CLASSES_ROOT, psext, REG_SZ, pskey, strlen(pskey));
+	fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", psext);
+	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0'))
+	    fprintf(logfile, "SetValue=%s,%s\n", psext, old);
+
+        if (rc == ERROR_SUCCESS) {
+	    lold = sizeof(old);
+	    lrc = RegQueryValue(HKEY_CLASSES_ROOT, epsext, old, &lold);
+	}
 	if (rc == ERROR_SUCCESS)
 	    rc = RegSetValue(HKEY_CLASSES_ROOT, epsext, REG_SZ, pskey, strlen(pskey));
+	fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", epsext);
+	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0'))
+	    fprintf(logfile, "SetValue=%s,%s\n", epsext, old);
+
 #ifdef __WIN32__
+	/* Don't bother with undelete information for these */
 	if (!is_win32s) {
 	    sprintf(buf, "MIME\\Database\\%s\\%s", contentname, psmime);
 	    if (rc == ERROR_SUCCESS) {
@@ -734,9 +915,19 @@ LONG rc = ERROR_SUCCESS;
     }
 
     if (pdf) {
+
+        if (rc == ERROR_SUCCESS) {
+	    lold = sizeof(old);
+	    lrc = RegQueryValue(HKEY_CLASSES_ROOT, pdfext, old, &lold);
+	}
 	if (rc == ERROR_SUCCESS)
 	    rc = RegSetValue(HKEY_CLASSES_ROOT, pdfext, REG_SZ, pdfkey, strlen(pdfkey));
+	fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", pdfext);
+	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0'))
+	    fprintf(logfile, "SetValue=%s,%s\n", pdfext, old);
+
 #ifdef __WIN32__
+	/* Don't bother with undelete information for these */
 	if (!is_win32s) {
 	    sprintf(buf, "MIME\\Database\\%s\\%s", contentname, pdfmime);
 	    if (rc == ERROR_SUCCESS) {
@@ -1137,6 +1328,7 @@ char buf[MAXSTR];
 WIZPAGE *page;
 FILE *f;
 char *p;
+char logname[MAXSTR];
 
     /* get info from wizard */
     page = find_page_from_id(IDD_CFG2);
@@ -1144,10 +1336,12 @@ char *p;
     GetDlgItemText(page->hwnd, IDC_CFG22, buf, sizeof(buf));
     sprintf(option.gsdll, "%s\\%s", buf, GS_DLLNAME);
     sprintf(option.gsinclude, "%s;%s\\fonts", buf, buf);
+    strcpy(option.gsother, "-dNOPLATFONTS ");
     GetDlgItemText(page->hwnd, IDC_CFG23, buf, sizeof(buf));
     if (strlen(buf)) {
-	strcat(option.gsinclude, ";");
-	strcat(option.gsinclude, buf);
+	strcat(option.gsother, "-sFONTPATH=\042");
+	strcat(option.gsother, buf);
+	strcat(option.gsother, "\042");
     }
 
     /* check if Ghostscript really has been installed */
@@ -1175,29 +1369,50 @@ char *p;
     fclose(f);
     /* at this stage we don't look for fonts, but maybe we should */
     
+    strcpy(logname, szExePath);
+    strcat(logname, GSVIEW_ZIP);
+    p = strrchr(logname, '.');
+    strcpy(p, ".log");
+    logfile = fopen(logname, "a");	/* append */
+    if (logfile == (FILE *)NULL) {
+	logfile = fopen(logname, "w");	/* don't append */
+        if (logfile == (FILE *)NULL) {
+/*
+	    load_string(IDS_CANTOPENWRITE, buf, sizeof(buf)); 
+	    sprintf(error_message, buf, logname);
+*/
+	    return 1;
+	}
+    }
 
     assoc_ps = (BOOL)SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, 
 	    IDC_CFG41, BM_GETCHECK, (WPARAM)0, (LPARAM)0);
     assoc_pdf = (BOOL)SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, 
 	    IDC_CFG42, BM_GETCHECK, (WPARAM)0, (LPARAM)0);
-    if (update_registry(assoc_ps, assoc_pdf))
+    if (update_registry(assoc_ps, assoc_pdf)) {
+	fclose(logfile);
 	return 1;
+    }
 
     GetDlgItemText(find_page_from_id(IDD_CFG5)->hwnd, 
 	IDC_CFG52, buf, sizeof(buf));
     if (SendDlgItemMessage(find_page_from_id(IDD_CFG5)->hwnd, 
 	    IDC_CFG51, BM_GETCHECK, (WPARAM)0, (LPARAM)0)
-	&& gsview_create_objects(buf))
+	&& gsview_create_objects(buf)) {
+	fclose(logfile);
 	return 1;
+    }
     
     if (SendDlgItemMessage(find_page_from_id(IDD_CFG3)->hwnd, 
-	    IDC_CFG31, BM_GETCHECK, (WPARAM)0, (LPARAM)0))
+	    IDC_CFG32, BM_GETCHECK, (WPARAM)0, (LPARAM)0))
 	gsview_printer_profiles();
 
 
     option.configured = TRUE;
 
     write_profile();
+
+    fclose(logfile);
 
     return 0;
 }
@@ -1312,12 +1527,12 @@ CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		SetDlgItemText(page->hwnd, IDC_CFG22, gsdir);
 		SetDlgItemText(page->hwnd, IDC_CFG23, "c:\\psfonts");
 
-		SendDlgItemMessage(find_page_from_id(IDD_CFG3)->hwnd, IDC_CFG31, BM_SETCHECK, 
+		SendDlgItemMessage(find_page_from_id(IDD_CFG3)->hwnd, IDC_CFG32, BM_SETCHECK, 
 			    (WPARAM)1, (LPARAM)0);
 		SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, IDC_CFG41, BM_SETCHECK, 
 			    (WPARAM)1, (LPARAM)0);
 		SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, IDC_CFG42, BM_SETCHECK, 
-			    (WPARAM)1, (LPARAM)0);
+			    (WPARAM)0, (LPARAM)0);   /* PDF is NOT the default */
 
 		/* program group */
 		load_string(IDS_PROGMANGROUP4, buf, sizeof(buf));

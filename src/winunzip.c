@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "wizdll.h"
+#include "gvcrc.h"
+
 
 /* Porting definations between Win 3.1x and Win32 */
 #ifdef WIN32
@@ -18,6 +20,7 @@
 
 /* ************ EXTERNALS *********** */
 extern zip_message(char *str, int count);
+extern int load_string(int id, char *str, int len);
 
 #define WIZUNZIP_MAX_PATH       128   /* max total file or directory name path   */
 #define OPTIONS_BUFFER_LEN      256   /* buffer to hold .INI file options         */
@@ -196,7 +199,9 @@ DWORD dwVersion;  /* These variables are all used for version checking */
 	 }
 	 else {
 	char str[256];
-	wsprintf (str, "Cannot find %s", lpszDllName);
+	char mess[256];
+	load_string(IDS_CANTLOAD, mess, sizeof(mess));
+	wsprintf (str, mess, lpszDllName, (int)hWinDll);
 	MessageBox (lpDCL->hWndMain, str, szAppName, MB_ICONSTOP | MB_OK);
 	free_unzip();
 	return -1;
@@ -271,4 +276,3 @@ int i;
 	 return i;
 }
 #endif
-

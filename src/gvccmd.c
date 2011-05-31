@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -39,6 +39,16 @@ gsview_command(int command)
 		    return 0;
 		}
 		gsview_display();
+		return 0;
+	case IDM_LASTFILE1:
+	case IDM_LASTFILE2:
+	case IDM_LASTFILE3:
+	case IDM_LASTFILE4:
+		if (pending.psfile) {
+		    play_sound(SOUND_BUSY);
+		    return 0;
+		}
+		gsview_displayfile(last_files[command-IDM_LASTFILE1]);
 		return 0;
 	case IDM_CLOSE:
 		/* doesn't unload DLL */
@@ -185,6 +195,7 @@ gsview_command(int command)
 		gsview_select();
 		return 0;
 	case IDM_PRINT:
+	case IDM_PRINTTOFILE:
 		if (psfile.name[0] == '\0')
 		    gsview_select();
 		if (gsdll.state == BUSY) {
@@ -193,21 +204,12 @@ gsview_command(int command)
 		}
 		if (!dfreopen())
 		    return 0;
+		if (command == IDM_PRINTTOFILE)
+		    option.print_to_file = TRUE;
 		if (psfile.name[0] != '\0')
 		    gsview_print();
 		dfclose();
 		return 0;
-/*
-	case IDM_PRINTTOFILE:
-		if (psfile.name[0] == '\0')
-			gsview_select();
-		if (!dfreopen())
-		    return 0;
-		if (psfile.name[0] != '\0')
-		    gsview_print(TRUE);
-		dfclose();
-		return 0;
-*/
 	case IDM_SPOOL:
 		gsview_spool((char *)NULL, (char *)NULL);
 		return 0;
@@ -276,6 +278,7 @@ gsview_command(int command)
 		return 0;
 	case IDM_LANGEN:
 	case IDM_LANGDE:
+	case IDM_LANGFR:
 		gsview_language(command);
 		return 0;
 	case IDM_SAFER:

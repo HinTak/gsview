@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -219,4 +219,3 @@ BOOL is_link(float x, float y, PDFLINK *link);
 /* gvwprn.c or gvpprn.c */
 void gsview_print(void);
 void gsview_pdf2ps(char *output);
-

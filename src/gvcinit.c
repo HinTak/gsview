@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -255,6 +255,8 @@ char buf[MAXSTR];
 int
 gsview_changed(void)
 {
+char sysini[MAXSTR];
+
     if (!getenv("TEMP")) {
 	gserror(IDS_NEEDTEMP, NULL, 0, 0);
 	putenv("TEMP=c:\\");   /* just in case the user ignores us */
@@ -266,6 +268,17 @@ gsview_changed(void)
     if (beta_warn())
 	return 1;	/* don't run */
 
+    /* check if the system administrator has pre configured GSview */
+    strcpy(sysini, szExePath);
+    strcat(sysini, INIFILE);
+    read_profile(sysini);
+    if (option.configured) {
+	/* pre configured INI file was found */
+	gsview_printer_profiles();	/* trust sys admin to have it correct */
+	/* don't bother running the configure wizard */
+	return 0;
+    }
+
     check_language();	/* offer to change language if doesn't match WIN.INI */
 
     config_wizard();
@@ -273,4 +286,3 @@ gsview_changed(void)
     return 0;
 }
 
-

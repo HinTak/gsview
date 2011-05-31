@@ -9,7 +9,7 @@
 %   reconstruction of the document's words and an approximation of the words'
 %   bounding rectangles.
 
-% Last modified on Thu Oct 24 10:10:28 PDT 1996 by mcjones
+% Last modified on Thu Aug 21 16:41:40 PDT 1997 by mcjones
 %      modified on Thu Jan 25 15:24:37 PST 1996 by deutsch
 %      modified on Wed May  3 15:41:30 PDT 1995 by birrell
 
@@ -439,11 +439,23 @@ if
     } {
     //reportEncoding exec	% leaves e on stack
     dup 4 1 roll put		% define in /encodings
-    //encodingSpace 1 index
-    0 currentfont /Encoding get {
-      dup /space eq exch /G20 eq or { exit } if
-      1 add
-      } forall
+    % Find space character number for the encoding.
+    % Biased towards number 32, so avoid problems with weird encodings
+    //encodingSpace 1 index	% dict and key for putting the result
+    currentfont /Encoding get
+    dup length 32 le {
+      false
+      } {
+      dup 32 get dup /space eq exch /G20 eq or
+      } ifelse {
+      pop 32
+      } {
+      % It's not character number 32: search from 0
+      0 exch {
+        dup /space eq exch /G20 eq or { exit } if
+        1 add
+        } forall
+      } ifelse
     put				% put in /encodingSpace
     } ifelse			% stack: m e
   //encodingSpace 1 index get	% font's space character (256 if none)

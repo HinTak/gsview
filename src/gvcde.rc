@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
 
   This file is part of GSview.
 
@@ -63,6 +63,7 @@ BEGIN
 	IDS_IGNOREDSC, "Ignoriere DSC Anweisungen"
 	IDS_CTRLD, "Ctrl-D gefolgt von "
 	IDS_PJL, "PJL gefolgt von "
+	IDS_ZOOMED, " Vergrößert"  /* ENGLISH */
 END
 
 STRINGTABLE
@@ -204,24 +205,18 @@ STRINGTABLE
 BEGIN
 	IDS_BETAEXPIRED, "Diese BETA Test Kopie von GSview ist abgelaufen. Sehen Sie auf http://www.cs.wisc.edu/~ghost/ nach Details wie die aktuelle Version von GSview bezogen werden kann"
 	IDS_BETAWARN, AABETAWARN
-	IDS_UPDATEPRINTER, "Aktualisiere GSview Druckerliste, sollen existierende Einträge überschrieben werden?"
 	IDS_NOPRINTERINI, "Kann printer.ini nicht öffnen"
 	IDS_NOINI, "Kann INI Datei nicht öffnen"
 	IDS_NEEDTEMP, "Sie müssen die Umgebungsvariable TEMP auf ein gültiges Verzeichnis setzen. Wenn nicht, kann weder GSview noch Aladdin Ghostscript drucken"
 	IDS_VERSIONCHANGED, "Die installierte Version von GSview wurde verändert. Soll GSview neu konfiguriert werden?"
-	IDS_CONFIGURECANCELLED, "GSview wurde nicht korrekt konfiguriert. Bitte lesen Sie die Hilfe und setzen dann \042Optionen | Konfiguriere Ghostscript\042"
 	IDS_GSNOTINSTALLED, "Sie haben Ghostscript nicht installiert. Bitte lesen Sie die Datei README.TXT."
 	IDS_GSLIBNOTINSTALLED, "Sie haben die Ghostscript Bibliotheksdateien nicht installiert. Bitte lesen Sie die Datei README.TXT."
-	IDS_CONFIGURECOMPLETE, "Konfiguration vollständig"
-	IDS_PSTOTEXTFILEMISSING, "pstotext Textextraktionsdatei fehlt"
-	IDS_PROGRAMOBJECTFAILED, "Kann Desktop Objekt nicht anlegen"
-	IDS_ASSOCPS, "Dateiverknüpfung zwischen GSview und PostScript (.ps and .eps) anlegen?"
-	IDS_ASSOCPDF, "Dateiverknüpfung zwischen GSview und Portable Document Format (.pdf) anlegen?"
-	IDS_REGERROR, "Fehler bei der Aktualisierung der Registrierungsdatenbank"
+	IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED
 	IDS_NOPROGMAN, "Kann DDE Verbindung zum Program Manager nicht öffnen"
-	IDS_CREATEGROUP, "Anlegen einer Programm Manager Gruppe für GSview?"
-	IDS_SETUPOK, "Installation erfolgreich.\012A GSview Programobjekt wurde auf dem Desktop angelegt"
-	IDS_SETUPABORT, "Installation abgebrochen\012%s"
 	IDS_WRONGEMX, "Sie haben EMX %s.\rSie brauchen EMX %s oder höher.\rPM GSview wird nicht laufen."
 	IDS_GSVIEWVERSION, GSVIEW_VERSION
+	IDS_CFG73, AACFG73
+	IDS_CFG74, AACFG74
+	IDS_PROGMANGROUP4 AAPROGMANGROUP4
 END
+

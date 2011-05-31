@@ -11,7 +11,7 @@
  entwickelten PostScript Document Structuring Conventions
  (DSC-Konventionen) entsprechen, auf dem Bildschirm dargestellt und auf
  einen Drucker ausgegeben werden.
- Die Version GSview 2.2 erfordert Ghostscript in der Version 4.03 - 5.99.
+ Die Version GSview 2.3 erfordert Ghostscript in der Version 4.03 - 5.99.
  Grundlage für GSview ist das von Tim Theisen entwickelte Programm
  Ghostview für X11.
 2Installation
@@ -29,13 +29,17 @@
  Um das Programm GSview zu entfernen, löschen Sie die Dateien im
  Verzeichnis `gsview`.
  Um das Programm Ghostscript zu entfernen, löschen Sie die Dateien im
- Verzeichnis `gs5.01`.
+ Verzeichnis `gsN.NN`, wobei N.NN die Versionsnummer von Ghostscript ist.
 
  Löschen Sie anschließend folgende Datei aus dem Systemverzeichnis:
 P
   c:\os2\gvpm.ini
 W
   c:\windows\gsview32.ini
+E
+W
+ Für Windows muß gegebenenfalls noch die Datei gsview32.ini
+ aus dem Benutzerprofil-Verzeichnis gelöscht werden.
 E
 
 P
@@ -79,11 +83,13 @@ E
  Anschließend installieren Sie das Programm
 P
  PM GSview, indem Sie die Dateien gvpm.exe, gvpgs.exe,
- gvpmen.dll, gvpmde.dll, gvpmen.hlp, gvpmde.hlp
+ gvpmen.dll, gvpmde.dll, gvpmfr.dll,
+ gvpmen.hlp, gvpmde.hlp, gvpmfr.hlp,
  und printer.ini
 W
  GSview für Windows, indem Sie gsview32.exe, gsv16spl.exe, gvwgs32.exe,
- gsvw32en.dll, gsvw32de.dll, gsviewen.hlp, gsviewde.hlp
+ gsvw32en.dll, gsvw32de.dll, gsvw32fr.dll,
+ gsviewen.hlp, gsviewde.hlp, gsviewfr.hlp,
  und printer.ini
 E
  in das Verzeichnis `c:\gstools\gsview` kopieren.
@@ -160,6 +166,41 @@ E
 
  Unter Windows 3.x darf kein UNC-Pfad verwendet werden! Mit Windows 95
  sind keine Probleme bekannt.
+
+W
+ Wenn Benutzerprofile unter Windows 95 benutzt werden, dann speichert Gsview die INI Datei 
+ in dem Verzeichnis des entsprechenden Benutzerprofils. Ansonsten wird geprüft, ob die Umgebungsvariable  
+ USERPROFILE existiert und ob es sich um ein Verzeichnis handelt. In diesem Fall wird die INI Datei dort  
+ gespeichert und es kann dann keine Benutzerabhängige Konfiguration erstellt werden.
+
+E
+ Wenn Sie es verhindern wollen, daß das Installationsprogramm beim ersten Start von Gsview oder bei Updates
+ von Gsview, dann sollten Sie eine INI Datei in das Gsview Verzeichnis kopieren.
+ `Bei zukünftigen Updates kann es jedoch erforderlich sein, diese Datei wieder zu entfernen.`
+ Sie sollte nur jene Einträge enthalten, die in der Benutzerkonfiguration überschrieben werden sollen.
+ Die vorgeschlagene Methode ist zuerst Gsview zu installieren und dann zu konfigurieren.
+ Kopieren Sie gsview32.ini oder gvpm.ini aus dem Systemverzeichnis oder dem Benutzerprofil-Verzeichnis in  
+ das Gsview Verzeichnis und entfernen alle Einträge bis auf:
+[Options]
+  Version=2.3
+  GSversion=503
+  Configured=1
+  GhostscriptDLL=E:\GSTOOLS\gs5.03\gsdll32.dll
+  GhostscriptInclude=E:\GSTOOLS\gs5.03;E:\GSTOOLS\gs5.03\fonts
+  GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
+ Wenn ein Benutzer Gsview startet, dann wird normalerweise seine INI Datei benutzt.
+ Startet Gsview das erste Mal oder die Version von Gsview stimmt nicht mit der in der INI Datei überein, dann 
+ passiert folgendes:
+
+ 1. Die INI Datei in dem Gsview Verzeichnis wird gelesen und überschreibt die INI Datei des Benutzers.
+
+ 2. Die Druckerliste aus printer.ini im Gsview Verzeichnis wird aktualisiert.
+
+ 3. Dateiverknüfungen (.ps, .eps, .pdf) werden NICHT angelegt oder verändert.
+
+ 4. Programmanagergruppen / Startmenüeinträge / Programmobjekte werden NICHT verändert
+ Wenn Sie dieses Verhalten ändern möchten, so wählen Sie `Optionen` | `Konfigurieren`.
+
 3Ghostscript Installation
 ?Ghostscript Installation
  ACHTUNG: EINIGE DER HIER AUFGEFÜHRTEN INFORMATIONEN SIND VERALTET.
@@ -189,20 +230,20 @@ E
  Im folgenden wird davon ausgegangen, daß Ghostscript auf Laufwerk d:
  installiert werden soll.
  Dekomprimieren Sie die Datei INI zip und die DLL und EXE-Dateien aus dem
- Quellverzeichnis. Die Dateien werden damit in das Verzeichnis d:\gsN.NN
+ Quellverzeichnis. Die Dateien werden damit in das Verzeichnis d:\gstools\gsN.NN
  kopiert.
 
- Benötigen Sie auch die Fonts, wechseln Sie in das Verzeichnis d:\gsN.NN
+ Benötigen Sie auch die Fonts, wechseln Sie in das Verzeichnis d:\gstools\gsN.NN
  und dekomprimieren die Datei gsNNNfn1.zip. Die Dateien werden dann in das
  Unterverzeichnis .\fonts kopiert.
 
  Um Ghostscript ohne GSview zu betreiben, setzen Sie die GS_LIB
  Umgebungsvariable wie folgt:
-  SET GS_LIB=d:\gsN.NN;d:\gsN.NN\fonts
+  SET GS_LIB=d:\gstools\gsN.NN;d:\gstools\gsN.NN\fonts
  und starten anschließend die entsprechende EXE-Datei.
  Um Ghostscript ohne die Umgebungsvariable zu betreiben, verwenden Sie den
  folgenden Befehl:
-  d:\gsN.NN\gs -Id:\gsN.NN;d:\gsN.NN\fonts
+  d:\gstools\gsN.NN\gs -Id:\gstools\gsN.NN;d:\gstools\gsN.NN\fonts
  (Hier muß die Bezeichnung EXE durch die Bezeichnungen gs, gs386, gswin16,
  gswin32 oder gsos2 ersetzt werden).
 
@@ -266,9 +307,8 @@ E
  (aus Ghostscript use.txt)
 
  Während Ghostscript nach den Initialisierungsdateien (gs_*.ps), den
- Fontdateien (Fontmap, *.pfa, *.pfb, *.gsf) oder der Datei für den Operator
- 'run' sucht, wird zunächst geprüft, ob der Dateiname auf ein bestimmtes
- Verzeichnis oder Laufwerk verweist
+ Fontdateien (Fontmap, *.pfa, *.pfb, *.gsf) sucht, wird zunächst geprüft, 
+ ob der Dateiname auf ein bestimmtes Verzeichnis oder Laufwerk verweist
  (z.B. beginnt es bei Unix nicht mit '/'; enthält es unter MS-DOS
  kein ':' und beginnt nicht mit '/' oder '\'; enthält es bei
  VMS-Systemen kein ':' oder eckige Klammern)
@@ -276,20 +316,33 @@ E
  Andernfalls durchsucht Ghostscript folgende
  Verzeichnisse in der angegebenen Reihenfolge:
 
- 1. Das/die Verzeichnis(se), die durch die Aufrufoption -I in der
+ - Dem aktuellen Verzeichnis 
+
+ - Das/die Verzeichnis(se), die durch die Aufrufoption -I in der
  Kommandozeile gekennzeichnet ist/sind
 
- 2. Das/die Verzeichnis(se), die die Umgebungsvariable GS_LIB
+ - Das/die Verzeichnis(se), die die Umgebungsvariable GS_LIB
  enthält/enthalten
 
- 3.  Das/die Verzeichnis(se), die über das Makro GS_LIB_DEFAULT im
+ -  Das/die Verzeichnis(se), die über das Makro GS_LIB_DEFAULT im
  Makefile beschrieben wird/werden.
 
  GS_LIB_DEFAULT, GS_LIB und der -I-Parameter können mit einem oder mehreren
  Verzeichnissen belegt
  sein, wobei die Verzeichnisnamen je nach Betriebssystem durch das
  entsprechende Zeichen getrennt werden
- (':' bei Unix, ';' bei VMS-Systemen, ';' bei MS-DOS).
+ (':' bei Unix, ';' bei VMS-Systemen, ';' bei MS-DOS). Wir denken, daß es eine schlechte 
+ Idee ist, zuerst das aktuelle Verzeichnis zu durchsuchen -- es öffnet ernsthafte 
+ Sicherheitslücken und kann zu sehr verwirrenden Fehlern führen, wenn mehr als eine 
+ Version von Ghostscript in der Umgebung existiert -- aber als wir versuchten dies zu
+ ändern bestanden zahlreiche Benutzer darauf dieses Verhalten wieder einzuschalten.
+ Sie können das aktuelle Verzeichnis als ersten Suchpfad mit dem Schalter -P deaktivieren.
+
+ Bitte beachten Sie, daß Ghostscript diesen Suchalgorithmus nicht für den 'run' oder 'file' 
+ Operator verwendet. Für diese wird einfach der angegebene Dateiname verwendet, um 
+ auch dort den Suchalgrithmus zu benutzen muß 'runlibfile' anstelle von 'run' verwendet 
+ werden.
+
 3Fonts
 ?Fonts
  Der Zugriff auf die Fonts erfolgt bei Ghostscript auf zwei
@@ -297,7 +350,7 @@ E
 
  1. Fonts, die explizit in der Datei `Fontmap` aufgelistet sind.
 
- 2.  Die Fontdateien werden über die Umgebungsvariable `GS_FONTPATH`,
+ 2.  Die Fontdateien werden über -sFONTPATH= oder die Umgebungsvariable `GS_FONTPATH`,
  die die Verzeichnisse enthält, gesucht.
 
  Die in der Datei `Fontmap` aufgeführten Fonts können über den Ghostscript
@@ -380,6 +433,7 @@ E
   Fontmap.ATM    Windows mit den Standardfonts für Adobe Type Manager (13 Fonts)
   Fontmap.OS2    Type 1-Fonts unter OS/2 mit integriertem ATM (13 Fonts)
   Fontmap.OSF    DEC OSF/1 mit DPS
+  Fontmap.Sol    Für Solaris 2.3 und höher
   Fontmap.Ult    DEC Ultrix Systeme mit DPS
   Fontmap.VMS    VAX/VMS mit DECwindows/Motif und DPS
  Um eine dieser Font-Dateien verwenden zu können, gehen Sie
@@ -395,8 +449,15 @@ E
 ?GS_FONTPATH
  (aus Ghostscript use.txt)
 
- Wenn Ghostscript einen Font nicht finden kann, durchsucht es automatisch
- die Umgebungsvariable `GS_FONTPATH`, die mehrere Verzeichnisnamen enthält.
+ Ghostscript hat verschiedene Regeln um einen bestimmten Zeichensatz zu finden.
+ Es beginnt mit der Suche nach Fontmap Dateien in jedem Verzeichnis des Suchpfads:
+ diese Dateien enthalten Verknüpfungen zwischen Zeichensatznamen und Dateinamen. 
+ (Siehe Fontmap Datei in der Ghostscript Distribution für weitere Details.)
+
+ Wenn Ghostscript einen Font in keiner Fontmap Datei des Suchpfads finden kann, 
+ durchsucht es automatisch
+ die Umgebungsvariable `GS_FONTPATH`, die mehrere Verzeichnisnamen enthält
+ (oder die Liste, die evtl. durch den Schalter -sFONTMAP= angegeben wurde).
  Ghostscript geht in diese Verzeichnisse und durchsucht alle Verzeichnisse,
  die PostScript-Fonts enthalten könnten. Anschließend werden alle
  Fontdateien und die Fonts der internen Kopie der Fontmap hinzugefügt.
@@ -404,14 +465,32 @@ E
  `GS_FONTPATH` mit den hier aufgeführten Verzeichnissen.
  Ghostscript erhält dann automatisch alle installierten Type 1-Fonts:
 
-    Computer             GS_FONTPATH
-    -----------             -----------
-    AIX                     /usr/lpp/DPS/Fonts/outlines
-    NeXT                    /NextLibrary/Fonts/outline
-    OSF/1                   /usr/lib/X11/Fonts/Type1Adobe
-    Silicon Graphics        /usr/lib/DPS/outline/base
-    Sun (Solaris 2.3)       /usr/openwin/lib/X11/Fonts/Type1/outline
-    Ultrix                  /usr/lib/DPS/outline/decwin
+    Betriebssystem          GS_FONTPATH
+    --------------          -----------
+-----------       -----------
+  DEC OSF/1         /usr/lib/X11/fonts/Type1Adobe
+  DEC Ultrix        /usr/lib/DPS/outline/decwin
+  HP-UX 9           /usr/lib/X11/fonts/type1.st/typefaces
+  IBM AIX           /usr/lpp/DPS/fonts/outlines
+    "               /usr/lpp/X11/lib/X11/fonts/Type1
+    "               /usr/lpp/X11/lib/X11/fonts/Type1/DPS
+  NeXT              /NextLibrary/Fonts/outline
+  SGI IRIX          /usr/lib/DPS/outline/base
+    "               /usr/lib/X11/fonts/Type1
+  Sun SunOS 4.x     /usr/openwin/lib/X11/fonts/Type1/outline
+    " (NeWSprint only)
+   newsprint_2.5/SUNWsteNP/reloc/$BASEDIR/NeWSprint/small_openwin/lib/fonts
+  Sun Solaris 2    /usr/openwin/lib/X11/fonts/Type1/outline
+  VMS              SYS$COMMON:[SYSFONT.XDPS.OUTLINE]
+ Diese Pfade sind vielleicht nicht exakt so, wie auf Ihrem
+ System installiert. Fragen Sie ggfs. Ihren Systemadministrator
+ wo Zeichensätze wie Helvetica oder Courier zu finden sind.
+
+ ANMERKUNG: Auf Solaris System reicht das bloße setzen von GS_FONTPATH 
+ manchmal nicht aus. Einige Versionen von Ghostscript können anscheinend 
+ keine Type 1 Schriften in /usr/openwin/lib/X11/fonts/Type1/outline finden.
+ Es erscheint die Meldung: "15 files, 15 scanned, 0 new fonts".
+ In diesem Fall schauen Sie bitte in die Datei Fontmap.Sol.
 
  Siehe auch `Fontmap`.
 4Plattform-Fonts
@@ -897,7 +976,7 @@ P
 E
  gespeichert.
  Die Standard-Liste der Ausgabegeräte und Einstellungen stammt
- aus der Ghostscript Version 5.0, ist aber unter Umständen nicht
+ aus der Ghostscript Version 5.03, ist aber unter Umständen nicht
  vollständig.
 
  Wenn ein Dokument sofort gedruckt werden soll, vorher jedoch auf dem
@@ -1179,7 +1258,7 @@ E
  Das Bitmap wird dann im DIB/BMP-Format gespeichert.
 
  Eine weitere Möglichkeit, ein Bitmap zu erzeugen, besteht in der
- Verwendung eines BMP-Treibes. Siehe hierzu auch `Drucken`.
+ Verwendung eines BMP-Treibers. Siehe hierzu auch `Drucken`.
 
 W
  Mit dem Befehl `Einfügen` werden Device Independent Bitmaps aus der
@@ -1356,7 +1435,8 @@ E
 3Sprache
 ?Sprache
 ?International
- GSview ist sowohl in Englisch als auch in Deutsch verfügbar.
+ GSview ist sowohl in Englisch als auch auf Deutsch und Französisch
+ verfügbar.
  Über die Funktion `Optionen `| `Sprache`
  können Sie die Einstellung verändern.
 3PSzuText
@@ -1516,7 +1596,7 @@ E
  und dem Fensterrahmen wird dann hellgrau angezeigt.
  Deaktivieren Sie die Option, wenn z.B. die Fenstergröße nicht verkleinert
  werden soll, weil Seiten geringer Auflösung angezeigt werden sollen.
- In der Default-Einstellung ist diese Option deaktiviert.
+ In der Default-Einstellung ist diese Option aktiviert.
 3Schnelles Öffnen
 ?Schnelles Öffnen
  Ist die Option `Schnelles Öffnen` aktiviert, startet GSview Ghostscript
@@ -1586,7 +1666,7 @@ E
  den Adobe DSC-Konventionen entspricht.
  In diesem Fall können bei dem Versuch, das Dokument anzuzeigen,
  Probleme auftreten.
- Wenn Sie die Option `Ignoriere DSC`aktivieren, behandelt GSview das
+ Wenn Sie die Option `Ignoriere DSC` aktivieren, behandelt GSview das
  Dokument so, als ob es keine DSC-Kommentare enthält und zeigt die Seiten
  in der ursprünglichen Reihenfolge an.
 
@@ -1778,7 +1858,7 @@ E
 
  `F1`  Hilfe.  (`Hilfe` | `Inhalt`)
 
- `Ctrl+C`, `Einfg`  Angezeigte Bitmap in Zwischenablage kopieren.
+ `Ctrl+C`, `Ctrl+Einfg`  Angezeigte Bitmap in Zwischenablage kopieren.
  (`Bearbeiten` | `Kopieren`)
 
  `Ctrl+S`, Text suchen. (`Bearbeiten` | `Suche`)
@@ -1971,8 +2051,9 @@ W
 P
   GVPM.EXE - Bedienung von Ghostscript über graphische Oberfläche
 E
-  Copyright (C) 1993-1996, Russell Lang.  Alle Rechte vorbehalten.
-  Partielles Copyright (C) 1994, Timothy O. Theisen.  Alle Rechte vorbehalten.
+  Copyright (C) 1993-1997, Russell Lang.  Alle Rechte vorbehalten.
+  Partielles Copyright (C) 1994, Timothy O. Theisen.  Alle Rechte 
+  vorbehalten.
 
  Diese Datei ist Bestandteil des Programmes GSview.
 
@@ -2007,7 +2088,7 @@ E
 2Häufig auftretende Probleme
 ?Häufig auftretende Probleme
 ?Probleme
- `Problem:` Ghostscript DLL kann nicht geladen werden ...
+ `Problem:` Kann Ghostscript DLL nicht laden
 
  GSview benötigt Ghostscript DLL (gsdll2.dll für OS/2, gsdll32.dll für
  Win32). Diese Fehlermeldung tritt normalerweise auf, wenn Ghostscript
@@ -2217,7 +2298,7 @@ E
 
  zlib unterliegt dem Copyright 1995-1996 von Jean-loup Gailly und
  Mark Adler. Der Quelltext kann bezogen werden von
-  http://www.cdrom.com/pub/infozip/zlib/
+  http://quest.jpl.nasa.gov/zlib/
 2GSview intern
 ?GSview intern
  GSview verwendet Aladdin Ghostscript DLL zur Übertragung von

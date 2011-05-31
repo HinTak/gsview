@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -165,11 +165,6 @@ PROFILE *prf;
 	profile_read_string(prf, section, "Version", "", profile, sizeof(profile));
 	if (strcmp(profile, GSVIEW_VERSION)!=0)
 	    option.configured = FALSE;
-	profile_read_string(prf, section, "Language", "", profile, sizeof(profile));
-	if (strcmp(profile, "de") == 0)
-	    option.language = IDM_LANGDE;
-	else
-	    option.language = IDM_LANGEN;
 	profile_read_string(prf, section, "GhostscriptDLL", "", profile, sizeof(profile));
 	if (profile[0] != '\0')	/* don't copy a default - assume already set */
 		strcpy(option.gsdll, profile);
@@ -179,6 +174,13 @@ PROFILE *prf;
 	profile_read_string(prf, section, "GhostscriptOther", "", profile, sizeof(profile));
 	if (profile[0] != '\0')	/* don't copy a default - assume already set */
 		strcpy(option.gsother, profile);
+	profile_read_string(prf, section, "Language", "", profile, sizeof(profile));
+	if (strcmp(profile, "de") == 0)
+	    option.language = IDM_LANGDE;
+	else if (strcmp(profile, "fr") == 0)
+	    option.language = IDM_LANGFR;
+	else if (strcmp(profile, "en") == 0)
+	    option.language = IDM_LANGEN;
 	profile_read_string(prf, section, "Origin", "", profile, sizeof(profile));
 	option.img_origin.x = option.img_origin.y = CW_USEDEFAULT;
 	if (sscanf(profile,"%d %d", &i, &j) == 2) {
@@ -328,6 +330,13 @@ PROFILE *prf;
 		profile_read_string(prf, section, sound[i].entry, sound[i].file, profile, sizeof(profile));
 		strcpy(sound[i].file, profile);
 	}
+	profile_read_string(prf, section, "LastFile1", "", last_files[0], MAXSTR);
+	profile_read_string(prf, section, "LastFile2", "", last_files[1], MAXSTR);
+	profile_read_string(prf, section, "LastFile3", "", last_files[2], MAXSTR);
+	profile_read_string(prf, section, "LastFile4", "", last_files[3], MAXSTR);
+	for (last_files_count=0; last_files_count<4; last_files_count++)
+	    if (strlen(last_files[last_files_count])==0)
+		break;
 	profile_close(prf);
 }
 
@@ -347,6 +356,10 @@ PROFILE *prf;
 	    case IDM_LANGDE:
 		strcpy(profile, "de");
 		break;
+	    case IDM_LANGFR:
+		strcpy(profile, "fr");
+		break;
+	    case IDM_LANGEN:
 	    default:
 		strcpy(profile, "en");
 	}
@@ -433,6 +446,10 @@ PROFILE *prf;
 	profile_write_string(prf, section, "PostScriptPrinter", profile);
 	for (i=0; i<NUMSOUND; i++)
 	    profile_write_string(prf, section, sound[i].entry, sound[i].file);
+	profile_write_string(prf, section, "LastFile1", last_files[0]);
+	profile_write_string(prf, section, "LastFile2", last_files[1]);
+	profile_write_string(prf, section, "LastFile3", last_files[2]);
+	profile_write_string(prf, section, "LastFile4", last_files[3]);
 	profile_close(prf);
 }
 

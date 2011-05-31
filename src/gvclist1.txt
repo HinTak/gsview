@@ -4,12 +4,13 @@ gsview16.exe
 gsview32.ico
 gsviewde.hlp
 gsviewen.hlp
+gsviewfr.hlp
 gsvw16de.dll
 gsvw16en.dll
+gsvw16fr.dll
 gvwgs16.exe
 zlib16.dll
 printer.ini
 README.TXT
 LICENCE
 FILE_ID.DIZ
-

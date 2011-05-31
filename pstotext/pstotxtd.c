@@ -1,5 +1,5 @@
 /* pstotxtd.c */
-/* OS/2 and Windows Command line interface to pstotxt[123].dll */
+/* OS/2 and Win32 Command line interface to pstotxt[23].dll */
 /* 8086 MS-DOS command line EXE. */
 /* Russell Lang */
 
@@ -7,19 +7,13 @@
 /* Copyright (C) 1995, Digital Equipment Corporation.         */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Thu Aug  1 15:38:50 PDT 1996 by mcjones   */
+/* Last modified on Thu Aug 21 16:32:51 PDT 1997 by mcjones   */
 /*      modified on Thu Nov 16 13:33:13 PST 1995 by deutsch   */
 
 #ifndef MSDOS
 #ifdef _Windows
 #include <windows.h>
-#ifdef _MSC_VER
-/* You also need to add -D__WIN32__ and -D_Windows to the CL command line */
-#include <io.h>    /* MSVC++ 4.2 includes _mktemp here */
-#define mktemp _mktemp
-#else
 #include <dir.h>
-#endif
 #else
 #define INCL_DOS
 #include <os2.h>
@@ -83,7 +77,7 @@ static int bboxes = FALSE;
 static int explicitFiles = 0; /* count of explicit file arguments */
 
 void usage(void) {
-  fprintf(stderr, "pstotext 1.5 of October 11, 1996\n");
+  fprintf(stderr, "pstotext 1.6 of 21 August 1997\n");
   fprintf(stderr, "Copyright (C) 1995-1996, Digital Equipment Corporation.\n");
   fprintf(stderr, "Comments to {mcjones,birrell}@pa.dec.com.\n\n");
   fprintf(stderr, "Usage: %s [option|file]...\n", cmd);
@@ -392,7 +386,7 @@ char *gstemp = NULL;
 static void *instance; /* pstotext state */
 
 static int cleanup(void) {
-  int status = 0;
+  int gsstatus, status = 0;
   unload_pstotext();
   if (gs!=NULL) {
 #if defined(_Windows) || defined(MSDOS)
@@ -408,11 +402,7 @@ static int cleanup(void) {
   return status;
 }
 
-#ifdef _MSC_VER
-static void handler(int notused) {
-#else
 static void handler() {
-#endif
   int status = cleanup();
   if (status!=0)
     exit(status);
@@ -477,9 +467,9 @@ static void do_it(char *path) {
   }
   fprintf(gsargfile, "-r72 -dNODISPLAY -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE\n",
     (debug ? "" : "-q"));
-  fputs(ocr_path, gsargfile);
-  fputs("\n", gsargfile);
   fputs(rotate_path, gsargfile);
+  fputs("\n", gsargfile);
+  fputs(ocr_path, gsargfile);
   fputs("\n", gsargfile);
   fputs(input, gsargfile);
   fputs("\n", gsargfile);
@@ -494,7 +484,7 @@ static void do_it(char *path) {
     );
 
 #else   /* !MSDOS */
-  sprintf(gs_cmd, "%s -r72 -dNODISPLAY -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE %s %s %s %s %s",
+  sprintf(gs_cmd, "%s -r72 -dNODISPLAY -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE %s %s %s ",
     gscommand,
     (debug ? "" : "-q"),
     ocr_path,
@@ -586,4 +576,3 @@ main(argc, argv) int argc; char *argv[]; {
   if (explicitFiles==0) do_it(NULL);
   return 0;
 }
-

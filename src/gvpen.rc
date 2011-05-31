@@ -41,6 +41,7 @@ BEGIN
 		MENUITEM SEPARATOR
 		MENUITEM "Show Messages\tM", IDM_GSMESS 
 		MENUITEM SEPARATOR
+		MENUITEM SEPARATOR
 		MENUITEM "E~xit", IDM_EXIT
 	END
 
@@ -88,6 +89,7 @@ BEGIN
 		SUBMENU "~Language", IDM_LANGMENU
 		BEGIN
 			MENUITEM "~English", IDM_LANGEN
+			MENUITEM "~French", IDM_LANGFR
 			MENUITEM "~German", IDM_LANGDE
 		END
 		SUBMENU "PStoText", IDM_PSTOTEXTMENU
@@ -256,7 +258,7 @@ END
 STRINGTABLE
 BEGIN
 	/* default is first */
-	IDS_FILTER_PSALL "*.ps;*.eps;*.epi;*.pdf|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf"
+	IDS_FILTER_PSALL "*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz"
 	IDS_FILTER_PS	"*.ps|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf"
 	IDS_FILTER_EPS	"*.eps|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf"
 	IDS_FILTER_EPI	"*.epi|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf"
