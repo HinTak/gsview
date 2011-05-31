@@ -20,23 +20,30 @@
 CFLAGS=-D__WIN32__ -DEPSTOOL -I..\src -I.
 CC=cl
 
-OBJS=epstool.obj gvceps.obj ps.obj
+OBJS=epstool.obj gvceps.obj gvcdsc.obj gvcfile.obj gvwgsver.obj
 
 all: epstool.exe
 
-.c.obj:
-	$(CC) $(CFLAGS) -c $*.c
+.cpp.obj:
+	$(CC) $(CFLAGS) -c $*.cpp
 
-epstool.obj: epstool.c epstool.h ../src/ps.h ../src/gvceps.c
+epstool.obj: epstool.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h ../src/gvceps.cpp
+	$(CC) -c $(CFLAGS) epstool.cpp
 
-ps.obj: ../src/ps.c epstool.h ../src/ps.h ../src/gvceps.c
-	$(CC) -c $(CFLAGS) ../src/ps.c
+gvcdsc.obj: ../src/gvcdsc.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
+	$(CC) -c $(CFLAGS) ../src/gvcdsc.cpp
 
-gvceps.obj: ../src/gvceps.c epstool.h ../src/ps.h
-	$(CC) -c $(CFLAGS) ../src/gvceps.c
+gvcfile.obj: ../src/gvcfile.cpp ../src/gvcfile.h
+	$(CC) -c $(CFLAGS) ../src/gvcfile.cpp
+
+gvceps.obj: ../src/gvceps.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
+	$(CC) -c $(CFLAGS) ../src/gvceps.cpp
+
+gvwgsver.obj: ../src/gvwgsver.cpp
+	$(CC) -c $(CFLAGS) ../src/gvwgsver.cpp
 
 epstool.exe: $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) /Foepstool.exe $(OBJS)
+	link /SUBSYSTEM:console /OUT:epstool.exe $(OBJS) user32.lib advapi32.lib 
 
 veryclean: clean
 	-del epstool.exe
@@ -45,11 +52,37 @@ veryclean: clean
 clean:
 	-del epstool.map
 	-del epstool.obj
-	-del ps.obj
+	-del gvcdsc.obj
+	-del gvcfile.obj
 	-del gvceps.obj
+	-del gvwgsver.obj
+	-del epstool.ilk
+	-del epstool.pdb
+	-del files.txt
+
+files.txt: makefile.msc
+	echo epstool/epstool.cpp>files.txt
+	echo epstool/epstool.h>>files.txt
+	echo epstool/epstool.def>>files.txt
+	echo epstool/epstool.htm>>files.txt
+	echo epstool/makefile.msc>>files.txt
+	echo epstool/makefile.os2>>files.txt
+	echo epstool/makefile.tc>>files.txt
+	echo epstool/makefile.unx>>files.txt
+	echo src/LICENCE>>files.txt
+	echo src/gvceps.cpp>>files.txt
+	echo src/gvceps.h>>files.txt
+	echo src/gvcdsc.cpp>>files.txt
+	echo src/gvcdsc.h>>files.txt
+	echo src/gvcfile.cpp>>files.txt
+	echo src/gvcfile.h>>files.txt
+	echo src/gvwgsver.cpp>>files.txt
+	echo epstool.exe>>files.txt
+	echo epstool2.exe>>files.txt
+	echo epstool.htm>>files.txt
 
 
-zip: all
+zip: all files.txt
 	copy epstool.htm ..\epstool.htm
 	copy epstool.exe ..\epstool.exe
 	cd ..

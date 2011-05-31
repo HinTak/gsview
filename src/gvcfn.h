@@ -36,8 +36,11 @@ BOOL load_language(int language);
 void change_language(void);
 void check_language(void);
 void post_command_line(void);
+void system_colours(void);
 void unload_zlib(void);
 BOOL load_zlib(void);
+void unload_bzip2(void);
+BOOL load_bzip2(void);
 int config_wizard(void);
 void drop_filename(HWND hwnd, char *str);
 
@@ -64,6 +67,7 @@ void install_default(HWND hwnd);
 int gsview_changed(void);
 
 /* in gvcmisc.c */
+void make_cwd(const char *filename);
 void error_message(char *str);
 void info_init(HWND hwnd);
 void read_profile(char *str);
@@ -78,6 +82,7 @@ void delayed_message_box(int id, int icon);
 void check_menu_item(int menuid, int itemid, BOOL checked);
 int get_menu_string(int menuid, int itemid, char *str, int len);
 int load_string(int id, char *str, int len);
+int load_resource(int resource, char *str, int len);
 void play_system_sound(char *id);
 void play_sound(int i);
 void info_wait(int id);
@@ -145,6 +150,7 @@ void gsview_language(int new_language);
 void gsview_goto_page(int pagenum);
 
 /* in gvpdlg.c or gvwdlg.c */
+void centre_dialog(HWND hwnd);
 BOOL get_filename(char *filename, BOOL save, int filter, int title, int help);
 BOOL get_string(char *, char *);
 BOOL get_page(int *ppage, BOOL multiple, BOOL allpages);
@@ -160,6 +166,7 @@ void gs_showmess(void);
 HWND gs_showmess_modeless(void);
 void gs_addmess_count(char GVFAR *str, int count);
 void gs_addmess(char GVFAR *str);
+int get_dsc_response(char *message);
 
 /* in gvcprf.c or gvwprf.c */
 PROFILE * profile_open(char *filename);
@@ -180,18 +187,19 @@ void clip_convert(void);
 void paste_to_file(void);
 
 /* in gvcprn.c */
+void add_copies(FILE *f, int copies);
 struct prop_item_s * get_properties(char *device);
 void gsview_spool(char *, char *);
-void psfile_extract(FILE *f);
-char *get_devices(void);
+void psfile_extract(FILE *f, int copies);
+char *get_devices(BOOL convert);
 void print_cleanup(void);
 void gsview_saveas(void);
 void gsview_extract(void);
 int enum_upp_path(char *path, char *buffer, int len);
-char *uppname_to_model(char *buffer, char *name);
 char *uppmodel_to_name(char *buffer, char *model);
-BOOL copy_for_printer(FILE *pcfile);
+BOOL copy_for_printer(FILE *pcfile, BOOL convert);
 BOOL gsview_cprint(char *cfname, char *optfname);
+BOOL gsview_cprint(char *psname, char *optname, BOOL convert);
 
 /* in gvctext.c */
 void gsview_text_extract(void);
@@ -246,7 +254,7 @@ int pdf_trailer(void);
 int pdf_page_init(int pagenum);
 int pdf_page(void);
 int pdf_checktag(LPSTR str, int len);
-int pdf_extract(FILE *f);
+int pdf_extract(FILE *f, int copies);
 BOOL gsview_pdf2ps_common(char *psname, char *optname, char *output);
 int pdf_orientation(void);
 BOOL pdf_get_link(int index, PDFLINK *link);
@@ -255,8 +263,11 @@ BOOL is_link(float x, float y, PDFLINK *link);
 
 
 /* gvwprn.c or gvpprn.c */
-void gsview_print(void);
+void gsview_print(BOOL convert);
 void gsview_pdf2ps(char *output);
+BOOL get_page_range(HWND hwnd);
+void printer_cleanup(void);
+BOOL query_printer(void);
 
 /* gvwmeas.c or gvpmeas.c */
 void measure_show(void);
@@ -279,3 +290,20 @@ void measure_update_last(void);
 /* gvwgsver.c */
 BOOL get_gs_versions(int *pver);
 BOOL get_gs_string(int gs_revision, char *name, char *ptr, int len);
+BOOL find_gs(char *gspath, int len, int minver, BOOL bDLL);
+
+/* gvwreg.cpp or gvpreg.cpp */
+BOOL write_registration(unsigned int reg_receipt, unsigned int reg_number, 
+  char *reg_name);
+BOOL read_registration(unsigned int *preg_receipt, unsigned int *preg_number,
+  char *reg_name, int reg_len);
+BOOL registration_nag(void);
+
+/* gvcreg.cpp */
+
+BOOL registration_check(void);
+unsigned int make_reg(unsigned int receipt_number);
+
+/* gvwpgdi.cpp */
+BOOL start_gvwgs_with_pipe(HDC hdc);
+BOOL init_print_gdi(HDC hdc);

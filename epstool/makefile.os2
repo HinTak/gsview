@@ -1,4 +1,4 @@
-# Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+# Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -60,21 +60,25 @@ INCDIR=$(EMXPATH)/include
 LIBDIR=$(EMXPATH)/lib
 
 
-OBJS=epstool.$(OBJ) gvceps.$(OBJ) ps.$(OBJ)
+OBJS=epstool.$(OBJ) gvceps.$(OBJ) gvcdsc.$(OBJ) gvcfile.$(OBJ)
 
 all: epstool.exe
 
-.c.$(OBJ):
-	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c $*.c
+.cpp.$(OBJ):
+	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c $*.cpp
 
 
-epstool.$(OBJ): epstool.c epstool.h ../src/ps.h
+epstool.$(OBJ): epstool.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
+	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c $*.cpp
 
-ps.$(OBJ): ../src/ps.c epstool.h ../src/ps.h
-	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.c
+gvcdsc.$(OBJ): ../src/gvcdsc.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
+	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.cpp
 
-gvceps.$(OBJ): ../src/gvceps.c epstool.h ../src/ps.h
-	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.c
+gvcfile.$(OBJ): ../src/gvcfile.cpp
+	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.cpp
+
+gvceps.$(OBJ): ../src/gvceps.cpp epstool.h ../src/gvcdsc.h
+	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.cpp
 
 epstool.exe: $(OBJS) epstool.def
 !if $(USE_EMX)
@@ -92,25 +96,31 @@ epstool.exe: $(OBJS) epstool.def
 clean:
 	-del epstool.$(OBJ)
 	-del gvceps.$(OBJ)
-	-del ps.$(OBJ)
+	-del gvcdsc.$(OBJ)
+	-del gvcfile.$(OBJ)
 
 veryclean: clean
 	-del epstool.exe
 	-del epstool2.exe
 
 EPSFILES=\
- epstool/epstool.c\
+ epstool/epstool.cpp\
  epstool/epstool.h\
  epstool/epstool.def\
  epstool/epstool.htm\
  epstool/epstest.cmd\
+ epstool/makefile.msc\
  epstool/makefile.os2\
  epstool/makefile.tc\
  epstool/makefile.unx
 
 SRCFILES1=\
  src/LICENCE\
- src/gvceps.c\
+ src/gvcfile.cpp\
+ src/gvcfile.h\
+ src/gvcdsc.cpp\
+ src/gvcdsc.h\
+ src/gvceps.cpp\
  src/gvceps.h\
  src/PUBLIC\
  src/ps.c\

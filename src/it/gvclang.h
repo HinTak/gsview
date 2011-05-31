@@ -64,7 +64,6 @@
 #define AAABOUTGSVIEWPRINT "Informazioni su GSview Print"
 #define AACOPY1 "Versione:"
 #define AACOPY2 "Una interfaccia grafica a GhostScript"
-#define AACOPY3 "Portions Copyright (C) 1994, Timothy O. Theisen.  Tutti i diritti riservati."
 #define AACOPY4 "Questo programma è distribuito SENZA ALCUNA GARANZIA."
 #define AACOPY5 "L'Autore e il Distributore non si assumono alcuna responsabilità per le"
 #define AACOPY6 "conseguenze risultanti dal suo uso e non assicurano che che esso sia"
@@ -86,6 +85,10 @@
 #define AACOPY22 "GSview Win32s/Win16 spooler"
 
 #define AAINPUT "Input"
+
+/* DSC error dialog box */
+#define AADSC "Convenzioni sulla struttura del Documento (DSC)"
+#define AAIGNOREALLDSC "Ignora tutti i DSC"
 
 /* Info dialog box */
 #define AAINFO  "Informazioni"
@@ -113,7 +116,7 @@
 #define AASELECTPAGE "Seleziona pagina"
 #define AASELECTPAGES "Seleziona pagine"
 
-/* Printer Setup dialog box */
+/* Convert and Printer Setup dialog box */
 #define AAPRINTERSETUP "Imposta Stampante"
 #define AADEVICEC "Periferica:"
 #define AARESOLUTIONC "Risoluzione:"
@@ -122,6 +125,19 @@
 #define AAPSPRINTER "Stampante PostScript"
 #define AAOPTIONSC "Opzioni:"
 #define AAFIXEDMEDIA "Carta Fissa"
+#define AACONVERT "Converti"
+#define AAWINPRINTERSETTINGS "Impostazioni della Stampante di Windows"
+#define AACOLOURS "Colori"
+#define AABANDW "Bianco e Nero"
+#define AAGREY "Grigio"
+#define AAFULLCOLOUR "Gamma completa di colori"
+#define AASELECTGSDEVICE "Selecziona device di Ghostscript"
+
+#define AAODDEVEN "Dispari/Pari"
+#define AAIGNOREDSC "Ignora DSC"
+#define AAPAGES "Pagine"
+#define AAFROMC "Da:"
+#define AATOC "A:"
 
 #define AAADVANCED "Avanzate"
 #define AAADVANCEDPSOPT "Opzioni PostScript Avanzate"
@@ -198,8 +214,8 @@
 
 /* Download Ghostscript dialog box */
 #define AADOWNLOADGS "Download Ghostscript"
-#define AADOWNLOADNOW "Download Adesso"
-#define AAGSNOTFOUND "Ghostscript non può essere trovato sul tuo computer.  Avrai bisogno di fare il download e installare Aladdin Ghostscript da"
+#define AADOWNLOADNOW "Download"
+#define AAGSNOTFOUND "Ghostscript non può essere trovato sul computer.  E' necessario effettuare il download ed installare Aladdin Ghostscript da"
 
 #define AAGSMESSWIN "GSview per Windows - Messaggi di Ghostscript"
 #define AAGSMESSPM "PM GSview - Messaggi di Ghostscript"
@@ -237,13 +253,28 @@
 #define AAINVERTMATRIX "Inverti Matrix"
 
 /* PS to Edit dialog box */
-#define AAPSTOEDIT "PS to Edit"
+#define AAPSTOEDIT "Converti in formato vettoriale"
 #define AAFORMATC "Formato:"
 #define AADRAWTASP "Disegna testo come poligoni"
 #define AAMAPTOLATIN1 "Mappa in ISO-Latin1"
 #define AAFLATNESSC "Uniformità:"
 #define AADEFAULTFONTC "Carattere Predefinito:"
 #define AADRIVEROPTIONSC "Opzioni del Driver:"
+
+/* Registration */
+/* ENGLISH */
+#define AAREGTOC "Registrato come:"
+#define AANUMBERC "Numero:"
+#define AAGSVIEWREG "Registrazione di GSview"
+#define AAREGISTERNOW "Registra adesso"
+#define AAONLINEREG "Registrazione Online"
+#define AAREG1 "Inserire il nome e il numero di registrazione"
+#define AAREG2 ""
+#define AANAG1 "GSview è Copyright 2000 Ghostgum Software Pty Ltd."
+#define AANAG2 "Si prega di supportare lo sviluppo di GSview"
+#define AANAG3 "tramite la registrazione."
+#define AANAG4 "GSview può essere registrato online presso"
+#define AANAG5 "    http:/\057www.ghostgum.com.au/"
 
 
 /* Installation program */
@@ -390,5 +421,6 @@
 #define AADEUTSCH "Deutsch"
 #define AAFRANCAIS "Français"
 #define AAITALIANO "Italiano"
+#define AAESPANOL "Español"
 
 #define WINHELPFILE "gsviewit.hlp"

@@ -20,6 +20,7 @@
 
 #include <os2.h>
 #include "gvcrc.h"
+#define GSVIEW_RCDATA(x) RCDATA x
 #include "gvclang.h"
 
 #ifndef ES_ANY	/* emx08g doesn't define this */

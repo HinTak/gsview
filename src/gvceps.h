@@ -29,6 +29,12 @@
 #pragma pack(1)		/* align structures to byte boundaries */
 #endif
 
+// WARNING - these structures might not have byte packing.
+// When you read BMP files, do not use sizeof(structure).
+// Use RGB3_LENGTH instead of sizeof(RGB3)
+
+#ifndef BITMAP1AND2
+#define BITMAP1AND2
 typedef struct tagRGB3
 {
     BYTE    rgbtBlue;
@@ -36,6 +42,11 @@ typedef struct tagRGB3
     BYTE    rgbtRed;
 } RGB3;
 typedef RGB3 GVFAR* LPRGB3;
+
+#define RGB3_BLUE	0
+#define RGB3_GREEN	1
+#define RGB3_RED	2
+#define RGB3_LENGTH	3
 
 typedef struct tagRGB4
 {
@@ -46,6 +57,12 @@ typedef struct tagRGB4
 } RGB4;
 typedef RGB4 GVFAR* LPRGB4;
 
+#define RGB4_BLUE	0
+#define RGB4_GREEN	1
+#define RGB4_RED	2
+#define RGB4_EXTRA	3
+#define RGB4_LENGTH	4
+
 typedef struct tagBITMAP1
 {
     DWORD   bcSize;
@@ -55,6 +72,12 @@ typedef struct tagBITMAP1
     WORD    bcBitCount;
 } BITMAP1;
 typedef BITMAP1 GVFAR* LPBITMAP1;
+
+#define BITMAP1_WIDTH 4
+#define BITMAP1_HEIGHT 6
+#define BITMAP1_PLANES 8
+#define BITMAP1_BITCOUNT 10
+#define BITMAP1_LENGTH 12
 
 typedef struct tagBITMAP2
 {
@@ -72,6 +95,20 @@ typedef struct tagBITMAP2
 } BITMAP2;
 typedef BITMAP2 GVFAR* LPBITMAP2;
 
+#define BITMAP2_WIDTH 4
+#define BITMAP2_HEIGHT 8
+#define BITMAP2_PLANES 12
+#define BITMAP2_BITCOUNT 14
+#define BITMAP2_CLRUSED 32
+#define BITMAP2_LENGTH 40
+
+typedef struct tagBITMAP2INFO
+{
+	BITMAP2 bmp2;
+	RGB4 rgb4[256];
+} BITMAP2INFO;
+typedef BITMAP2INFO GVFAR LPBITMAP2INFO;
+
 typedef struct tagBITMAPFILE
 {
     WORD    bfType;
@@ -81,6 +118,8 @@ typedef struct tagBITMAPFILE
     DWORD   bfOffBits;
 } BITMAPFILE;
 typedef BITMAPFILE GVFAR* LPBITMAPFILE;
+#define BITMAPFILE_LENGTH 14
+#endif /*  BITMAP1AND2 */
 
 
 struct eps_header_s {
@@ -95,7 +134,7 @@ struct eps_header_s {
 };
 #define EPS_HEADER_SIZE 30
 
-#if defined(__EMX__) || defined(_MSC_VER)
+#ifdef __EMX__
 #pragma pack()
 #endif
 
@@ -107,6 +146,7 @@ typedef struct tagPREBMAP {
     int  depth;
     int  bytewidth;	/* length of each scan line in bytes */
     BYTE GVHUGE* bits;
+    BOOL os2;
     BOOL topleft;
 } PREBMAP;
 
@@ -125,15 +165,19 @@ LPBITMAP2 get_bitmap(void);
 void release_bitmap(void);
 
 /* in gvceps.c */
-unsigned long dib_bytewidth(LPBITMAP2 pbm);
-unsigned int dib_pal_colors(LPBITMAP2 pbm);
+unsigned long dib_bytewidth(unsigned char *pbitmap);
+unsigned int dib_pal_colors(unsigned char *pbitmap);
 int make_eps_tiff(int type, BOOL calc_bbox);
 int make_eps_interchange(BOOL calc_bbox);
 int make_eps_user(void);
 int make_eps_metafile(BOOL calc_bbox);
 void extract_doseps(int command);
 void copy_bbox_header(FILE *f);
-int scan_pbmplus(PREBMAP *ppbmap, LPBITMAP2 pbm);
-int scan_dib(PREBMAP *ppbmap, LPBITMAP2 pbm);
+int scan_pbmplus(PREBMAP *ppbmap, unsigned char *pbitmap);
+int scan_dib(PREBMAP *ppbmap, unsigned char *pbitmap);
 void scan_bbox(PREBMAP *pprebmap, PSBBOX *devbbox);
 
+void ps_copy(FILE *outfile, FILE *infile, long begin, long end);
+char * ps_fgets(char *s, int n, FILE *stream);
+BOOL ps_copy_find(FILE *outfile, FILE *infile, long end, 
+	char *s, int n, char *comment);

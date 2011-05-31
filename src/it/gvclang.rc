@@ -95,6 +95,8 @@ BEGIN
 	IDS_PRINTPDFPS "Non è possibile stampare file PDF in una stampante PostScript.  Usare File | Estrai"
 	IDS_NOPDFQUICKTEXT "Non è possibile estrarre o trovare velocemente del testo in un file PDF.  Usare Opzioni | PStoText"
 	IDS_BAD_DOSEPS_HEADER "La testata DOS EPS è errata.  Ignora commenti DSC."
+	IDS_PROBABLY_PCL "Questo somiglia di più al PCL, un linguaggio progettato per stampanti HP LaserJet o DeskJet.  Sei sicuro che si tratti di PostScript?"
+	IDS_BUSYPRINTING "GSview è occupato nella stampa.  Premere Cancella per attendere finchè GSview ha terminato."
 END
 
 STRINGTABLE
@@ -122,6 +124,7 @@ BEGIN
 	IDS_TOPICPRINT, "Stampa"
 	IDS_TOPICPROP, "Proprietà"
 	IDS_TOPICEDITPROP, "Modifica Proprietà"
+	IDS_TOPICCONVERT, "Converti"
 	IDS_TOPICCLIP, "Appunti"
 	IDS_TOPICPREVIEW, "Anteprima EPS"
 	IDS_TOPICSOUND, "Suoni"
@@ -131,16 +134,18 @@ BEGIN
 	IDS_TOPICGOTO, "Seleziona Pagina"
 	IDS_TOPICINSTALL, "Installazione"
 	IDS_TOPICTEXT, "Estrai e Cerca testo"
-	IDS_TOPICKEYS, "Chiavi"
+	IDS_TOPICKEYS, "Tasti"
 	IDS_TOPICMESS, "Mostra messaggi"
 	IDS_TOPICSPOOL, "Spooler"
 	IDS_TOPICZLIB, "zlib"
 	IDS_TOPICBZIP2, "bzip2"
-	IDS_TOPICPSTOEDIT, "PS to Edit"
+	IDS_TOPICPSTOEDIT, "Converti in formato vettoriale"
 	IDS_TOPICMEASURE, "Misure"
 	IDS_TOPICEASYCFG "Configurazione Facile"
 	IDS_TOPICADVANCEDCFG "Configurazione Avanzata"
 	IDS_TOPICDOWNLOAD "Download Ghostscript"
+	IDS_TOPICDSCWARN "Avvisi DSC"
+	IDS_TOPICREG "Registrazione"
 END
 
 STRINGTABLE
@@ -154,7 +159,7 @@ BEGIN
 	IDS_EPSNOBBOX, "Non posso ottenere i Limiti del Box"
 	IDS_EPSUSERINVALID, "Il file di anteprima non è un file TIFF o Windows Metafile"
 	IDS_EPSUSERTITLE, "Apri file di anteprima"
-	IDS_EPS_OFF_PAGE, "I limiti del box EPS sono completamente fuori dalla pagina.  Suggeriamo di usare 'Opzioni | Ritaglia EPSF'"
+	IDS_EPS_OFF_PAGE, "I limiti del box EPS sono completamente fuori dalla pagina.  Suggeriamo di usare 'Opzioni | Ritaglia EPS'"
 	IDS_MUSTUSEPORTRAIT, "Deve essere usato l'orientamento verticale."
 END
 
@@ -206,7 +211,7 @@ BEGIN
 	/* PDF messages */
 	IDS_PDFNOPAGE, "Numero di pagine sconosciuto nel file PDF\nDeve essere prima visualizzato il file" 
 	IDS_PDFEXTRACTALL, "Numero di pagine sconosciuto nel file PDF\nEstrae o stampa tutte le pagine"
-	IDS_USEPDFWRITE, "Per estrarre pagine da un file PFD, Stampa su File usando la periferica pdfwrite oppure pswrite." /* ENGLISH */
+	IDS_USEPDFWRITE, "Per estrarre pagine da un file PFD, Stampa su File usando la periferica pdfwrite oppure pswrite."
 END
 
 STRINGTABLE
@@ -235,5 +240,203 @@ BEGIN
 	IDS_CFG73, AACFG73
 	IDS_CFG74, AACFG74
 	IDS_PROGMANGROUP4 AAPROGMANGROUP4
+END
+
+STRINGTABLE
+BEGIN
+	IDS_DSC_INFO "Informazione DSC"
+	IDS_DSC_WARN "Avviso DSC"
+	IDS_DSC_ERROR "Errore DSC"
+        IDS_DSC_LINEFMT "%.40s alla linea %d:"
+	IDS_INVALIDREG "Nome o Numero di Registration non valido"
+	IDS_UNREGISTERED "Non registrato"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_PRN_PRINTMETHOD, "Metodo di Stampa"
+	IDS_PRN_WINDOWSGDI "Stampante GDI di Windows"
+	IDS_PRN_GSDEVICE "Device di Ghostscript"
+	IDS_PRN_PSPRINTER AAPSPRINTER		// "Stampante PostScript"
+	IDS_PRN_SETTINGS "Impostazioni"
+	IDS_PRN_HELP AAHELP			// "Help in linea"
+	IDS_PRN_SELECTPAGES "Seleziona Pagine"
+END
+
+/* These are in resources because STRINGTABLE entries are */
+/* limited to 256 bytes */
+
+GSVIEW_RCDATA(CDSC_RESOURCE_BBOX)
+BEGIN
+"Questa linea non è corretta.\012"
+"I limiti del box devono avere le ccordinate espresse in numeri interi,\012"
+"non decimali. Un limite del box espresso in numeri decimali dovrebbe\012"
+"essere specificando usando %%HiResBoundingBox:\012"
+"Un %%BoundingBox: dovrebbe essere impostato con un valore espresso in un numero intero.\012"
+"\012"
+"'OK' farà in modo che le coordinate siano convertite in numeri interi\012"
+"tramite un arrotondamento.\012"
+"'Cancella' farà in modo che questa linea sia ignorata.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_EARLY_TRAILER)
+BEGIN
+"Il 'trailer' è solitamente alla fine del documento,\012"
+"ma questa linea è stata trovata a più di 32k bytes dalla fine\012"
+"del file.  I 'Trailers' non hanno normalmente questa lunghezza.\012"
+"E' molto probabile che un altro file PostScript sia stato incluso\012"
+"senza essere stato racchiuso in %%BeginDocument / %%EndDocument.\012"
+"\012"
+"'OK' farà in modo che la riga sia ritenuta come parte di un file incluso.\012"
+"'Cancella' farà in modo che la riga sia ritenuta come il 'trailer'.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_EARLY_EOF)
+BEGIN
+"Questa linea si trova normalmente alla fine del documento,\012"
+"ma è stata trovata a più di 100 bytes dalla fine\012"
+"del file.\012"
+"E' molto probabile che un altro file PostScript sia stato incluso\012"
+"senza essere stato racchiuso in %%BeginDocument / %%EndDocument.\012"
+"\012"
+"'OK' farà in modo che la riga sia ritenuta come parte di un file incluso.\012"
+"'Cancella' farà in modo che la riga sia ritenuta come parte del 'trailer'.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_PAGE_IN_TRAILER)
+BEGIN
+"Questa linea %%Page: si trova nel 'trailer' e questo non è corretto.\012"
+"I file EPS dovrebbero essere incapsulati in %%BeginDocument / %%EndDocument.\012"
+"E' possibile che un file EPS sia stato incapsulato non correttamente,\012"
+"e quello sia stato confuso dal %%Trailer in un file EPS.\012"
+"\012"
+"'OK' per processare pagine ulteriori.\012"
+"'Cancella' per ignorare questo commento di pagina.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_PAGE_ORDINAL)
+BEGIN
+"Questa linea non è corretta.\012"
+"I due argomenti dovrebbero essere una etichetta ed un numero ordinale.\012"
+"Il numero ordinale dovrebbe essere 1 per la prima pagina e dovrebbe\012"
+"incrementare di 1 per ogni pagina seguente.\012"
+"Il numero ordinale di pagina è mancante oppure non in sequenza.\012"
+"\012"
+"E' probabile che questa linea sia parte di un file incluso che\012"
+"non è stato incapsulato in %%BeginDocument / %%EndDocument.\012"
+"\012"
+"'OK' farà in modo che questa pagina sia ignorata, ritenendola parte di un\012"
+"file EPS incapsulato scorrettamente.\012"
+"'Cancella' farà in modo che questa pagina sia considerata valida\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_PAGES_WRONG)
+BEGIN
+"%%Pages: non corrisponde al numero di %%Page:\012"
+"\012"
+"'OK' farà in modo che il conteggio delle pagine venga fatto corrispondere\012"
+"al numero dei commenti %%Page: trovati.\012"
+"'Cancella' farà in modo che il conteggio delle pagine sia impostato in base al %%Pages:\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_EPS_NO_BBOX)
+BEGIN
+"Questo file EPS manca del %%BoundingBox: richiesto.\012"
+"Vedere l'help di GSview per informazioni su come aggiungere/modificare i\012"
+"limiti del box.\012"
+"\012"
+"'OK' farà in modo che questo file sia ritenuto un EPS.\012"
+"'Cancella' farà in modo che questo file non sia considerato un EPS.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_EPS_PAGES)
+BEGIN
+"I files EPS devono avere 0 oppure 1 pagina.  Questo file 'EPS' ne ha\012"
+"di più e pertanto non è un file EPS.\012"
+"Non è possibile usare `Stampa Su` `Encapsulated PostScript File` per\012"
+"la stampa di file multipagina.  Il metodo corretto è di connettere\012"
+"la stampante a FILE: oppure selezionare 'Stampa su File'.\012"
+"\012"
+"'OK' farà in modo che questo file sia ritenuto un EPS.\012"
+"'Cancella' farà in modo che questo file non sia considerato un EPS.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_NO_MEDIA)
+BEGIN
+"La carta è stata impostata con %%DocumentMedia:, ma nessuna carta predefinita\012"
+"è stata impostata con %%PageMedia:.\012"
+"\012"
+"'OK' farà in modo che la carta predefinita sia impostata con la prima voce dell'elenco.\012"
+"'Cancella' non imposterà nessuna carta predefinita.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_ATEND)
+BEGIN
+"Questa linea non è corretta.\012"
+"Per rimandare un valore, deve essere usato '(atend)' e non 'atend'\012"
+"\012"
+"'OK' sarà ritenuto che si intendesse usare un (atend).\012"
+"'Cancella' ignorerà questa linea.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_DUP_COMMENT)
+BEGIN
+"Questo commento è duplicato in testata e pertanto è superfluo.\012"
+"La prima occorrenza trovata della linea di testata prende la precedenza.\012"
+"\012"
+"'OK' oppure 'Cancella' ignoreranno in ogni caso la linea duplicata.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_DUP_TRAILER)
+BEGIN
+"Questo commento è duplicato nel 'trailer' e pertanto è superfluo.\012"
+"L'ultima occorrenza trovata della linea del 'trailer' prende la precedenza.\012"
+"\012"
+"'OK' oppure 'Cancella' ignoreranno in ogni caso la linea duplicata.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_BEGIN_END)
+BEGIN
+"Il numero dei commenti Begin e End non corrisponde.\012"
+"\012"
+"'OK' oppure 'Cancella' ignoreranno in ogni caso questo accoppiamento inadeguato.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_BAD_SECTION)
+BEGIN
+"Questa linea è scorretta perchè non dovrebbe comparire all'interno\012"
+"di una pagina.  Questo indica probabilmente che un file EPS\012"
+"è stato incapsulato scorrettamente.  Questa linea sarà ignorata.\012"
+"\012"
+"'OK' oppure 'Cancella' ignoreranno in ogni caso questa linea.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_LONG_LINE)
+BEGIN
+"\012\012Le linee nei documenti DSC devono essere più corte di 255 caratteri.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_INCORRECT_USAGE)
+BEGIN
+"Questa linea di commento DSC non è corretta.\012"
+"Si prega di fare riferimento alle specifiche DSC.\012"
+"\012"
+"'OK' oppure 'Cancella' ignoreranno in ogni caso questo accoppiamento inadeguato.\012"
+"\0"
 END
 

@@ -39,7 +39,7 @@
 #include <io.h>
 #include <time.h>
 #include <process.h>
-#include "ver.h"
+#include "gsvver.h"
 #include "gvcrc.h"
 #ifdef _MSC_VER
 #define DLLEXPORT __declspec(dllimport)
@@ -48,19 +48,22 @@
 
 #ifndef RC_INVOKED
 
-#define NeedFunctionPrototypes 1
-#include "ps.h"
+#include "gvcfile.h"
+#include "gvcdsc.h"
 
-#ifdef DEBUG_MALLOC
-void FAR * debug_malloc(size_t size);
-void FAR * debug_calloc(size_t nitems, size_t size);
-void  FAR * debug_realloc(void FAR *block, size_t size);
-void debug_free(void FAR *block);
+#ifndef NODEBUG_MALLOC
+void * debug_malloc(size_t size);
+void  * debug_realloc(void *block, size_t size);
+void debug_free(void *block);
+void debug_memory_report(void);
 #define malloc(size) debug_malloc(size)
 #define calloc(nitems, size) debug_calloc(nitems, size)
 #define realloc(block, size) debug_realloc(block, size)
 #define free(block) debug_free(block)
 extern long allocated_memory;
+#endif
+
+#ifdef DEBUG_MALLOC
 extern FILE *malloc_file;
 #endif
 
@@ -76,6 +79,7 @@ extern HWND hwndspl;	/* window handle of gsv16spl.exe */
 #define DEFAULT_ZOOMRES 300.0
 #define INISECTION "Options"
 #define DEVSECTION "Devices"
+#define CONVERTSECTION "Convert"
 #define EOLSTR "\r\n"
 #define COPY_BUF_SIZE 4096
 /* don't have to worry about segments/selectors */
@@ -110,7 +114,9 @@ typedef struct tagBM {
     BOOL	changed;	/* if width or height changed by GS */
 } BMAP;
 
+/*
 typedef struct document PSDOC;
+*/
 
 typedef struct tagPDFLINK {
     PSBBOX bbox;
@@ -137,10 +143,18 @@ typedef struct tagPSFILE {
 	char 	name[MAXSTR];	/* name of selected document file */
 	char	tname[MAXSTR];	/* name of temporary file (gunzipped) */
 	FILE 	*file;		/* selected file */
-	PSDOC	*doc;		/* DSC structure.  NULL if not DSC */
+	CDSC	*dsc;		/* DSC structure.  NULL if not DSC */
 	PAGELIST page_list;	/* selected page list */
+	int	print_from;
+	int	print_to;
+#define ALL_PAGES 0
+#define ODD_PAGES 1
+#define EVEN_PAGES 2
+	int	print_oddeven;
+	BOOL	print_ignoredsc;
+	int	print_copies;
 	BOOL	locked;		/* To prevent two threads using the file */
-	BOOL	ignore_dsc;	/* true if DSC to be ignored */
+/*	BOOL	ignore_dsc;	/* true if DSC to be ignored */
 	BOOL	ignore_special;	/* true if %%PageOrder: Special to be ignored */
 	int 	pagenum;	/* current page number */
 	BOOL	ctrld;		/* TRUE if file starts with ^D */
@@ -148,7 +162,16 @@ typedef struct tagPSFILE {
 	BOOL	gzip;		/* TRUE if file compressed with gzip */
 	BOOL	bzip2;		/* TRUE if file compressed with bzip2 */
 	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
+#ifdef OLD
+	/* Can't use this because VC++ 5.0 and Windows 95 OSR1 & 2
+	 * give incorrect times for days when daylight savings
+	 * changes occur.  Main thread gives correct time, second
+	 * thread gives one hour earlier!
+	 */
 	time_t	datetime;	/* time/date of selected file */
+#else
+	FILETIME filetime;	/* time/date of selected file */
+#endif
 	long	length;		/* length of selected file */
 	BOOL	ispdf;		/* true if PDF document */
 	char 	text_name[MAXSTR];  /* name of file containing extracted text */
@@ -274,6 +297,7 @@ typedef struct tagOPTIONS {
 	BOOL	epsf_warn;
 	BOOL	redisplay;
 	BOOL    ignore_dsc;
+	int	dsc_warn;	/* level of DSC error warnings */
 	BOOL	show_bbox;
 	BOOL	auto_orientation;
 	int	orientation;
@@ -286,14 +310,27 @@ typedef struct tagOPTIONS {
 	int	alpha_text;
 	int	alpha_graphics;
 	BOOL	save_dir;
-	char	device_name[32];
-	char	device_resolution[32];
-	char	printer_port[32];
-	char	printer_queue[MAXSTR];
-	BOOL	print_to_file;
-	BOOL	psprinter;
-	BOOL	print_reverse;
+        /* for printing to GS device */
+	char	printer_device[64];	/* Ghostscript device for printing */
+	char	printer_resolution[64];
 	BOOL	print_fixed_media;
+	/* for converting with GS device */
+	char	convert_device[64];
+	char	convert_resolution[64];	/* Ghostscript device for converting */
+	BOOL	convert_fixed_media;
+	/* for printing to GDI device */
+	int	print_gdi_depth;	/* IDC_MONO, IDC_GREY, IDC_COLOUR */
+	BOOL	print_gdi_fixed_media;
+        /* general printing */
+#define PRINT_GDI 0
+#define PRINT_GS 1
+#define PRINT_PS 2
+#define PRINT_CONVERT 3
+	int	print_method;		/* GDI, GS, PS */
+	BOOL	print_reverse;		/* pages to be in reverse order */
+	BOOL	print_to_file;
+	char	printer_port[32];	/* for Win32s */
+	char	printer_queue[MAXSTR];	/* for Win32 */
 	int	pdf2ps;
 	BOOL	auto_bbox;
 	MATRIX	ctm;
@@ -366,8 +403,11 @@ typedef struct tagTEXTINDEX {
     PSBBOX bbox;
 } TEXTINDEX;
 extern TEXTINDEX *text_index;
-extern int text_index_count;	/* number of words in index */
+extern unsigned int text_index_count;	/* number of words in index */
 extern char *text_words;	/* storage for words */
+
+/* all the external DLL use "C", not C++ */
+extern "C" {
 
 /* for pstotext DLL */
 typedef int (GSDLLAPI *PFN_pstotextInit)(void **instance);
@@ -385,6 +425,7 @@ extern PFN_pstotextExit pstotextExit;
 extern PFN_pstotextSetCork pstotextSetCork;
 extern char pstotextLine[2048];
 extern int pstotextCount;
+
 
 /* for zlib gunzip decompression */
 extern HINSTANCE zlib_hinstance;
@@ -406,9 +447,16 @@ extern PFN_bzopen bzopen;
 extern PFN_bzread bzread;
 extern PFN_bzclose bzclose;
 
+}
 
-extern BOOL debug;			/* /D command line option used */
-extern FILE *debug_file;		/* for gs input logging */
+
+extern BOOL print_silent;	/* /P or /F command line option used */
+extern BOOL print_exit;		/* exit on completion of printing */
+extern int print_count;		/* number of current print jobs */
+				/* It is safe to exit GSview when this is 0 */
+
+extern int debug;		/* /D command line option used */
+extern FILE *debug_file;	/* for gs input logging */
 
 #define SOUND_PAGE 0
 #define SOUND_NOPAGE 1
@@ -435,7 +483,7 @@ extern const char szImgClassName[];
 extern const char szScratch[];  /* temporary filename prefix */
 extern char *szSpoolPrefix;	/* usually \\spool\ */
 extern char szAppName[MAXSTR];
-extern char szHelpTopic[MAXSTR];
+extern int nHelpTopic;
 extern char szWait[MAXSTR];
 extern char szExePath[MAXSTR];
 extern char szIniFile[MAXSTR];
@@ -467,6 +515,10 @@ extern HACCEL haccel;			/* menu accelerators */
 extern HCURSOR hcWait;
 extern HCURSOR hcCrossHair;
 extern HCURSOR hcHand;
+extern HPEN hpen_btnshadow;		/* button shadow */
+extern HPEN hpen_btnhighlight;		/* button highlight */
+extern HBRUSH hbrush_window;		/* Window background */
+extern HBRUSH hbrush_menu;		/* menu background */
 extern int bitmap_scrollx;	/* offset from bitmap to origin of child window */
 extern int bitmap_scrolly;
 extern HFONT info_font;
@@ -499,6 +551,16 @@ extern BOOL zoom;
 
 extern PSBBOX bbox;
 
+extern char registration_name[MAXSTR];
+extern unsigned int registration_receipt;
+
+/* PRINT_GDI */
+extern int print_gdi_width;
+extern int print_gdi_height;
+extern int print_gdi_xdpi;
+extern int print_gdi_ydpi;
+extern HANDLE print_gdi_read_handle;
+extern HANDLE print_gdi_write_handle;
 
 #ifdef __WIN32__
 #define _huge
@@ -519,6 +581,10 @@ extern PSBBOX bbox;
 #define GetNotification(wParam,lParam) (HIWORD(lParam))
 #define SendDlgNotification(hwnd, id, notice) \
     SendMessage((hwnd), WM_COMMAND, id, MAKELPARAM(GetDlgItem((hwnd),(id)),(notice)))
+#endif
+
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 #include "gvcfn.h"    /* common function prototypes */

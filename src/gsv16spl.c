@@ -1,4 +1,4 @@
-/* Copyright (C) 1995-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1995-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -41,7 +41,7 @@
  * gsv16spl is then called using SendMessage with the handle of
  * a global shareable memory block in lParam.
  * The first SendMessage should have the null terminated name of the 
- * printer port  in this memory block.
+ * printer port in this memory block.
  * Subsequent memory blocks contain data to be sent to that port.
  * The memory block contains a length count in the first WORD,
  * followed by the actual data.
@@ -71,6 +71,7 @@ int     WINAPI WriteDialog(HPJOB, LPSTR, int);
 int     WINAPI DeleteSpoolPage(HPJOB);
 
 HPJOB hJob;
+HDC hdc_printer;
 unsigned long bytes_written;
 char portname[64];
 POINT char_size;
@@ -117,7 +118,52 @@ draw_text(HWND hwnd, HDC hdc)
 int
 open_printer(LPSTR port)
 {
-    lstrcpy(portname, port);
+    char buf[256];
+    LPSTR device = "";
+    LPSTR driver = "";
+    
+#define XYZZY "xyzzy"
+    if ((port == NULL) || (lstrlen(port) == 0))
+	return FALSE;
+
+    hdc_printer = NULL;
+
+    /* if it is a port name, use it */
+    GetProfileString("Ports", port, XYZZY, device, sizeof(device));
+    if (lstrcmp(device, XYZZY) == 0) {
+	/* It wasn't a port.  Check if it is a queue name */
+	GetProfileString("Devices", port, "", buf, sizeof(buf));
+	if (lstrlen(buf)) {
+	    /* Found it, get driver and port name */
+	    char *p;
+	    device = port;
+	    driver = buf;
+	    while (*p && (*p != ','))
+		p++;
+	    if (*p == ',') {
+		*p = '\0';
+		port = p+1;
+	    }
+	    /* open device context, so OpenJob knows which printer 
+	     * queue to use */
+	    hdc_printer = CreateDC(driver, device, port, NULL);
+	}
+	else
+	    return FALSE;
+    }
+	    
+    /*
+     * Under Win32s with multiple printers connected to the same port,
+     * printing to a named printer always prints to the first listed
+     * printer.  If the first listed printer is a bi-directional printer
+     * but the desired printer is unidirectional, the wrong driver
+     * complains.  Somehow we need to tell OpenJob which printer
+     * owns the job.  Maybe this is done by passing an HDC for this
+     * printer as the 3rd argument of OpenJob, but the Device Driver
+     * Adaption Guide is no longer available, so we can't verify this.
+     * This problem isn't fixed.
+     */
+
     hJob = OpenJob(port, szAppName, (HDC)NULL);
     switch ((int)hJob) {
 	case SP_APPABORT:
@@ -127,11 +173,13 @@ open_printer(LPSTR port)
 	case SP_USERABORT:
 	    hJob = NULL;
 	    lstrcpy(debug_str, "OpenJob failed");
+	    DeleteDC(hdc_printer);
 	    return FALSE;
     }
     if (StartSpoolPage(hJob) < 0) {
 	lstrcpy(debug_str, "StartSpoolPage failed");
         DeleteJob(hJob, 0);
+	DeleteDC(hdc_printer);
         hJob = NULL;
 	return FALSE;
     }
@@ -143,6 +191,10 @@ close_printer(void)
 {	
     if (hJob == (HPJOB)NULL)
 	return FALSE;
+    if (hdc_printer != NULL) {
+	DeleteDC(hdc_printer);
+	hdc_printer = NULL;
+    }
     EndSpoolPage(hJob);
     CloseJob(hJob);
     hJob = NULL;

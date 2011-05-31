@@ -9,8 +9,7 @@
  Pour les documents respectant les conventions de structure du langage Adobe
  PostScript, GSview permet de visualiser ou d'imprimer des pages
  sélectionnées.
- GSview 2.9 nécessite Ghostscript version 4.03 - 6.99, de préférence 6.0.
- GSview s'est inspiré du programme Ghostview pour X11 de Tim Theisen.
+ GSview 3.0 nécessite Ghostscript version 4.03 - 6.99, de préférence 6.0.
 2Installation
 ?Installation
  Pour installer GSview il est recommandé d'utiliser le programme
@@ -207,11 +206,11 @@ E
  puis d'éditer ce fichier
  en supprimant toutes les entrées sauf :
   [Options]
-  Version=2.9
-  GSversion=600
+  Version=3.0
+  GSversion=601
   Configured=1
-  GhostscriptDLL=e:\Aladdin\gs6.0\bin\gsdll32.dll
-  GhostscriptInclude=e:\Aladdin\gs6.0\lib;e:\Aladdin\fonts
+  GhostscriptDLL=e:\Aladdin\gs6.01\bin\gsdll32.dll
+  GhostscriptInclude=e:\Aladdin\gs6.01\lib;e:\Aladdin\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Lorsqu'un utilisateur lance GSview, son fichier INI sera utilisé normalement.
  La première fois que GSview est exécuté ou
@@ -238,6 +237,23 @@ W
  Pour une plus grande sécurité, vous pouvez effacer le fichier `uninstal.txt` du
  répertoire de GSview.
 E
+2Registration
+?Registration
+ /* ENGLISH */
+ If you wish to support the development of GSview or wish
+ to disable the GSview nag screen, please consider registering
+ GSview.  There is no requirement for you to register GSview.
+ GSview is made available with the Aladdin Free Public Licence,
+ contained in the file `LICENCE`.
+ This allows free use, but restricts commercial distribution.
+
+ The registration fee is currently AUD$40.
+ GSview can be registered online at 
+  http://www.ghostgum.com.au/
+ or by faxing or mailing the
+ registration form which can be found in the file `regorder.txt` 
+ in the GSview directory.
+ Ghostgum Software prefers that you use the online registration.
 2Conventions de structure des documents
 ?Conventions de structure des documents
 ?Commentaires DSC
@@ -1542,6 +1558,27 @@ E
  dans l'ordre original.
 
  Par défaut, l'option `Ignorer les commentaires DSC` n'est `pas cochée`.
+3DSC Warnings
+?DSC Warnings
+ /* ENGLISH */
+ Some documents contain errors in the Document Structuring Conventions.
+ The level of warnings provided by GSview can be set using
+ `Options` | `DSC Warnings`.
+ If set to` Off`, GSview will assume that the DSC comments are correct.
+ `Errors` will notify you of errors in the DSC comments .
+ `Warnings` will notify you of warnings and errors in the DSC comments.
+ `All` will notify you of irregularities, warnings and errors in the
+ DSC comments.  The default is `Warnings`.
+
+ If you ask to be notified about errors and warnings, the DSC
+ warning dialog box allows you to make the following choices:
+ `OK` tells GSview to take a guess about what was probably meant
+ (rather than what the DSC comment actually said),
+ `Cancel` tells GSview to treat the DSC as being correct,
+ `Ignore DSC ` tells GSview to ignore all DSC comments.
+
+ If `DSC Warnings` is` Off`, GSview will assume `Cancel`.
+ Documents with incorrect DSC comments will be likely to cause problems.
 3Afficher le cadre limite
 ?Afficher le cadre limite
  Lorsque cette option est cochée, un rectangle pointillé indiquant la position
@@ -1653,20 +1690,16 @@ E
 ?Format inversé
  Le menu `Format `permet de sélectionner la taille de la page.
  Les tailles disponibles sont :
-  Letter          8.5 x 11   pouces
-  Tabloid        11   x 17   pouces
-  Ledger         17   x 11   pouces
-  Legal           8.5 x 14   pouces
-  Statement       5.5 x  8.5 pouces
-  Executive       7.5 x 10   pouces
+  11x17          11   x 17   pouces
   A3              297 x 420  mm
   A4              210 x 297  mm
   A5              148 x 210  mm
   B4              257 x 364  mm
   B5              182 x 257  mm
-  Folio           8.5 x 13   pouces
-  Quarto          8.5 x 10.8 pouces
-  10x14          10   x 14   pouces
+  Ledger         17   x 11   pouces
+  Letter          8.5 x 11   pouces
+  Legal           8.5 x 14   pouces
+  Note            8.5 x 11   pouces
 
  Une taille personnalisée peut être définie en points PostScript (1/72 de pouces)
  grâce à la commande `Taille personnalisée`. Une taille de 480x360 points à 96 dpi
@@ -1948,7 +1981,6 @@ P
   GVPM.EXE - Une interface graphique pour Ghostscript
 E
   Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  Tous droits réservés.
-  Portions Copyright (C) 1994, Timothy O. Theisen.  Tous droits réservés.
   Copyright (C) 1997-2000, Cyrille Chevallet, pour la traduction française.
 
  Ce fichier fait partie de GSview.

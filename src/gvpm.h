@@ -40,7 +40,7 @@
 #include <process.h>
 #endif
 #define NeedFunctionPrototypes 1
-#include "ver.h"
+#include "gsvver.h"
 #include "gvcrc.h"
 #include "gsdll.h"
 
@@ -49,7 +49,25 @@
 
 typedef unsigned short WORD;
 typedef unsigned long DWORD;
-#include "ps.h"
+
+#include "gvcfile.h"
+#include "gvcdsc.h"
+
+#ifndef NODEBUG_MALLOC
+void * debug_malloc(size_t size);
+void  * debug_realloc(void *block, size_t size);
+void debug_free(void *block);
+void debug_memory_report(void);
+#define malloc(size) debug_malloc(size)
+#define calloc(nitems, size) debug_calloc(nitems, size)
+#define realloc(block, size) debug_realloc(block, size)
+#define free(block) debug_free(block)
+extern long allocated_memory;
+#endif
+
+#ifdef DEBUG_MALLOC
+extern FILE *malloc_file;
+#endif
 
 #define MAXSTR 256	/* maximum file name length and general string length */
 #define PROFILE_SIZE 2048
@@ -59,6 +77,7 @@ typedef unsigned long DWORD;
 #define DEFAULT_ZOOMRES 300.0
 #define INISECTION "Options"
 #define DEVSECTION "Devices"
+#define CONVERTSECTION "Convert"
 #define EOLSTR "\r\n"
 #define CW_USEDEFAULT 32768
 #define COPY_BUF_SIZE 4096
@@ -141,10 +160,17 @@ typedef struct tagPSFILE {
 	char 	name[MAXSTR];	/* name of selected document file */
 	char	tname[MAXSTR];	/* name of temporary file (gunzipped) */
 	FILE 	*file;		/* selected file */
-	PSDOC	*doc;		/* DSC structure.  NULL if not DSC */
+	CDSC	*dsc;		/* DSC structure.  NULL if not DSC */
 	PAGELIST page_list;	/* selected page list */
+//	int	print_from;
+//	int	print_to;
+#define ALL_PAGES 0
+#define ODD_PAGES 1
+#define EVEN_PAGES 2
+//	int	print_oddeven;
+	BOOL	print_ignoredsc;
+	int	print_copies;
 	BOOL	locked;		/* To prevent two threads using the file */
-	BOOL	ignore_dsc;	/* true if DSC to be ignored */
 	BOOL	ignore_special;	/* true if %%PageOrder: Special to be ignored */
 	int 	pagenum;	/* current page number */
 	BOOL	ctrld;		/* TRUE if file starts with ^D */
@@ -277,6 +303,7 @@ typedef struct tagOPTIONS {
 	BOOL	epsf_warn;
 	BOOL	redisplay;
 	BOOL    ignore_dsc;
+	int	dsc_warn;	/* level of DSC error warnings */
 	BOOL	show_bbox;
 	BOOL	auto_orientation;
 	int	orientation;
@@ -289,14 +316,27 @@ typedef struct tagOPTIONS {
 	int	alpha_text;
 	int	alpha_graphics;
 	BOOL	save_dir;
-	char	device_name[32];
-	char	device_resolution[32];
-	char	printer_port[32];
-	char	printer_queue[MAXSTR];
-	BOOL	print_to_file;
-	BOOL	psprinter;
-	BOOL	print_reverse;
+        /* for printing to GS device */
+	char	printer_device[32];	/* Ghostscript device for printing */
+	char	printer_resolution[32];
 	BOOL	print_fixed_media;
+	/* for converting with GS device */
+	char	convert_device[32];
+	char	convert_resolution[32];	/* Ghostscript device for converting */
+	BOOL	convert_fixed_media;
+	/* for printing to GDI device */
+	int	print_gdi_depth;	/* IDC_MONO, IDC_GREY, IDC_COLOUR */
+	BOOL	print_gdi_fixed_media;
+        /* general printing */
+#define PRINT_GDI 0
+#define PRINT_GS 1
+#define PRINT_PS 2
+#define PRINT_CONVERT 3
+	int	print_method;		/* GDI, GS, PS */
+	BOOL	print_reverse;		/* pages to be in reverse order */
+	BOOL	print_to_file;
+	char	printer_port[32];	/* for Win32s */
+	char	printer_queue[MAXSTR];	/* for Win32 */
 	int	pdf2ps;
 	BOOL	auto_bbox;
 	MATRIX	ctm;
@@ -347,7 +387,7 @@ typedef struct tagTEXTINDEX {
     PSBBOX bbox;
 } TEXTINDEX;
 extern TEXTINDEX *text_index;
-extern int text_index_count;	/* number of words in index */
+extern unsigned int text_index_count;	/* number of words in index */
 extern char *text_words;	/* storage for words */
 
 typedef struct tagPRINTER {
@@ -372,21 +412,25 @@ extern POINTL button_shift;
 extern POINTL button_size;
 
 /* for pstotext DLL */
+extern HMODULE pstotextModule;
+extern FILE *pstotextOutfile;
+extern void *pstotextInstance;
+extern char pstotextLine[2048];
+extern int pstotextCount;
+
+extern "C" {
 typedef int (GSDLLAPI *PFN_pstotextInit)(void **instance);
 typedef int (GSDLLAPI *PFN_pstotextFilter)(void *instance, char *instr, 
     char **pre, char **word, char **post,
     int *llx, int *lly, int *urx, int *ury);
 typedef int (GSDLLAPI *PFN_pstotextExit)(void *instance);
 typedef int (GSDLLAPI *PFN_pstotextSetCork)(void *instance, int value);
-extern HMODULE pstotextModule;
-FILE *pstotextOutfile;
-void *pstotextInstance;
+
 extern PFN_pstotextInit pstotextInit;
 extern PFN_pstotextFilter pstotextFilter;
 extern PFN_pstotextExit pstotextExit;
 extern PFN_pstotextSetCork pstotextSetCork;
-char pstotextLine[2048];
-int pstotextCount;
+}
 
 /* for zlib gunzip decompression */
 extern HMODULE zlib_hmodule;
@@ -398,8 +442,12 @@ extern PFN_gzopen gzopen;
 extern PFN_gzread gzread;
 extern PFN_gzclose gzclose;
 
+extern BOOL print_silent;	/* /P or /F command line option used */
+extern BOOL print_exit;		/* exit on completion of printing */
+extern int print_count;		/* number of current print jobs */
+				/* It is safe to exit GSview when this is 0 */
 
-extern BOOL debug;			/* /D command line option used */
+extern int debug;			/* /D command line option used */
 extern FILE *debug_file;		/* for gs input logging */
 
 #define SOUND_PAGE 0
@@ -423,13 +471,13 @@ typedef ULONG (* PFN_MciPlayFile)(HWND hwndOwner, PSZ pszFile, ULONG ulFlags,
 extern PFN_MciPlayFile pfnMciPlayFile;
 
 extern char szAppName[MAXSTR];
-extern char szHelpTopic[MAXSTR];
+extern int nHelpTopic;
 extern char szExePath[MAXSTR];
 extern char szHelpName[MAXSTR];
 extern char szWait[MAXSTR];
 extern char szFindText[MAXSTR];
 extern char szIniFile[MAXSTR];
-extern char szMMini[MAXSTR];
+extern unsigned char szMMini[MAXSTR];
 extern char previous_filename[MAXSTR];	/* to remember name between file dlg boxes */
 extern char selectname[MAXSTR];		/* for IDM_SELECT */
 extern const char szScratch[];	/* temporary filename prefix */
@@ -484,6 +532,16 @@ extern BOOL zoom;
 
 extern PSBBOX bbox;
 
+extern char registration_name[MAXSTR];
+extern unsigned int registration_receipt;
+
+/* PRINT_GDI - NOT IMPLEMENTED FOR OS/2 */
+extern int print_gdi_width;
+extern int print_gdi_height;
+extern int print_gdi_xdpi;
+extern int print_gdi_ydpi;
+extern ULONG print_gdi_read_handle;
+extern ULONG print_gdi_write_handle;
 
 #include "gvcfn.h"	/* common function prototypes */
 #include "gvcbeta.h"    /* common function prototypes */

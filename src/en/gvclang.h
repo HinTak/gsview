@@ -64,7 +64,6 @@
 #define AAABOUTGSVIEWPRINT "About GSview Print"
 #define AACOPY1 "Version:"
 #define AACOPY2 "A Ghostscript graphical interface"
-#define AACOPY3 "Portions Copyright (C) 1994, Timothy O. Theisen.  All rights reserved."
 #define AACOPY4 "This program is distributed with NO WARRANTY OF ANY KIND."
 #define AACOPY5 "No author or distributor accepts any responsibility for the"
 #define AACOPY6 "consequences of using it, or for whether it serves any particular"
@@ -86,6 +85,10 @@
 #define AACOPY22 "GSview Win32s/Win16 spooler"
 
 #define AAINPUT "Input"
+
+/* DSC error dialog box */
+#define AADSC "Document Structuring Conventions"
+#define AAIGNOREALLDSC "Ignore all DSC"
 
 /* Info dialog box */
 #define AAINFO  "Info"
@@ -113,7 +116,7 @@
 #define AASELECTPAGE "Select Page"
 #define AASELECTPAGES "Select Pages"
 
-/* Printer Setup dialog box */
+/* Convert and Printer Setup dialog box */
 #define AAPRINTERSETUP "Printer Setup"
 #define AADEVICEC "Device:"
 #define AARESOLUTIONC "Resolution:"
@@ -122,6 +125,19 @@
 #define AAPSPRINTER "PostScript Printer"
 #define AAOPTIONSC "Options:"
 #define AAFIXEDMEDIA "Fixed media"
+#define AACONVERT "Convert"
+#define AAWINPRINTERSETTINGS "Windows Printer settings"
+#define AACOLOURS "Colours"
+#define AABANDW "Black and White"
+#define AAGREY "Grey"
+#define AAFULLCOLOUR "Full Colour"
+#define AASELECTGSDEVICE "Select Ghostscript device"
+
+#define AAODDEVEN "Odd/Even"
+#define AAIGNOREDSC "Ignore DSC"
+#define AAPAGES "Pages"
+#define AAFROMC "From:"
+#define AATOC "To:"
 
 #define AAADVANCED "Advanced"
 #define AAADVANCEDPSOPT "Advanced PostScript Options"
@@ -244,6 +260,21 @@
 #define AAFLATNESSC "Flatness:"
 #define AADEFAULTFONTC "Default font:"
 #define AADRIVEROPTIONSC "Driver options:"
+
+/* Registration */
+#define AAREGTOC "Registered to:"
+#define AANUMBERC "Number:"
+#define AAGSVIEWREG "GSview Registration"
+#define AAREGISTERNOW "Register Now"
+#define AAONLINEREG "Online Registration"
+#define AAREG1 "Please enter your name and registration number"
+#define AAREG2 ""
+#define AANAG1 "GSview is Copyright 2000 Ghostgum Software Pty Ltd."
+#define AANAG2 "Please support the development of GSview"
+#define AANAG3 "by registering it."
+#define AANAG4 "GSview can be registered online at"
+/* Borland Resource Compiler has a bug - it can handle "//" inside a string */
+#define AANAG5 "    http:/\057www.ghostgum.com.au/"
 
 
 /* Installation program */
@@ -390,5 +421,6 @@
 #define AADEUTSCH "Deutsch"
 #define AAFRANCAIS "Français"
 #define AAITALIANO "Italiano"
+#define AAESPANOL "Español"
 
 #define WINHELPFILE "gsviewen.hlp"

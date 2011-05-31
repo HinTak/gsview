@@ -82,7 +82,7 @@ BEGIN
 	IDS_USERWIDTH, "Breite in 1/72 Zoll Einheiten ?"
 	IDS_USERHEIGHT, "Höhe in 1/72 Zoll Einheiten ?"
 	IDS_BADEPS, "Problem beim Erstellen der EPS Datei"
-	IDS_NOPREVIEW, "Keine DOS EPS Dateie or\nKeine binäre Vorschau"
+	IDS_NOPREVIEW, "Keine DOS EPS Dateien oder\nKeine binäre Vorschau"
 	IDS_NOTDFNAME, "Kann nicht denselben Namen nehmen, wie geöffnetes Dokument"
 	IDS_NOTEMP, "Kann temporäre Datei nicht öffnen.\nVerzeichnis evtl. schreibgeschützt.\nTEMP Umgebungsvariable fehlt evt."
 	IDS_CANCELDONE, "%d%% fertig"
@@ -93,6 +93,8 @@ BEGIN
 	IDS_PRINTPDFPS "Kann eine PDF Datei nicht auf einem PostScript Drucker drucken. Benutzen Sie bitte Datei | Extrahiere"
 	IDS_NOPDFQUICKTEXT "Ausführen von schnellem Text Suchen/Ersetzen in PDF Datei nicht möglich. Bitte Optionen|PSzuText benutzen"
 	IDS_BAD_DOSEPS_HEADER "Falscher DOS EPS header.  DSC Anweisung wird ignoriert."
+	IDS_PROBABLY_PCL "Dies sieht aus wie PCL, bestimmt für HP LaserJet oder DeskJet Drucker.  Sind Sie sicher, dass es PostScript ist?"
+	IDS_BUSYPRINTING "GSview ist mit Drucken beschäftigt.  Drücken Sie Abbruch um auf die Beendigung von GSview zu warten."
 END
 
 STRINGTABLE
@@ -134,11 +136,13 @@ BEGIN
 	IDS_TOPICSPOOL, "Druck-Manager"
 	IDS_TOPICZLIB, "zlib"
 	IDS_TOPICBZIP2, "bzip2"
-	IDS_TOPICPSTOEDIT, "PStoEdit" /* ENGLISH */
-	IDS_TOPICMEASURE, "Measure" /* ENGLISH */
-	IDS_TOPICEASYCFG "Easy Configure" /* ENGLISH */
-	IDS_TOPICADVANCEDCFG "Advanced Configure" /* ENGLISH */
-	IDS_TOPICDOWNLOAD "Obtaining Ghostscript" /* ENGLISH */
+	IDS_TOPICPSTOEDIT, "PSzuEdit"
+	IDS_TOPICMEASURE, "Messen"
+	IDS_TOPICEASYCFG "Leichte Konfiguration"
+	IDS_TOPICADVANCEDCFG "Fortgeschrittene Konfiguration"
+	IDS_TOPICDOWNLOAD "Beschaffung von Ghostscript"
+	IDS_TOPICDSCWARN "DSC Warnungen"
+	IDS_TOPICREG "Registrierung"
 END
 
 STRINGTABLE
@@ -163,8 +167,8 @@ BEGIN
 	IDS_UNITMM, AAMM
 	IDS_UNITINCH, AAINCH
 	IDS_UNITCUSTOM, AACUSTOM
- 	IDS_INVALIDNUMBER, "Invalid number"	/* ENGLISH */
- 	IDS_CANTINVERT, "Cannot invert matrix"
+ 	IDS_INVALIDNUMBER, "Ungültige Nummer"
+ 	IDS_CANTINVERT, "Kann Matrix nicht invertieren"
 END
 
 STRINGTABLE
@@ -205,7 +209,7 @@ BEGIN
 	/* PDF messages */
 	IDS_PDFNOPAGE, "Unbekannte Seitenanzahl in PDF Datei\nSie müssen die Datei zuerst anzeigen lassen"
 	IDS_PDFEXTRACTALL, "Unbekannte Seitenanzahl in PDF Datei\nExtrahiere oder drucke alle Seiten"
-	IDS_USEPDFWRITE, "To extract pages from a PDF file, Print to File using the pdfwrite or pswrite device." /* ENGLISH */
+	IDS_USEPDFWRITE, "Um Seiten aus einer PDF Datei zu extrahieren, drucken Sie in eine Datei mittels pdfwrite oder pswrite."
 END
 
 STRINGTABLE
@@ -234,5 +238,204 @@ BEGIN
 	IDS_CFG73, AACFG73
 	IDS_CFG74, AACFG74
 	IDS_PROGMANGROUP4 AAPROGMANGROUP4
+END
+
+STRINGTABLE
+BEGIN
+	IDS_DSC_INFO "DSC Information"
+	IDS_DSC_WARN "DSC Warnung"
+	IDS_DSC_ERROR "DSC Fehler"
+        IDS_DSC_LINEFMT "%.40s in Zeile %d:"
+	IDS_INVALIDREG "Ungültige(r) Registrierungsname oder -Nummer"
+	IDS_UNREGISTERED "Unregistriert"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_PRN_PRINTMETHOD, "Druckmethode"
+	IDS_PRN_WINDOWSGDI "Windows GDI Drucker"
+	IDS_PRN_GSDEVICE "Ghostscript Treiber"
+	IDS_PRN_PSPRINTER AAPSPRINTER		// "PostScript Drucker"
+	IDS_PRN_SETTINGS "Settings"
+	IDS_PRN_HELP AAHELP			// "Hilfe"
+	IDS_PRN_SELECTPAGES "Seiten auswählen"
+END
+
+
+/* These are in resources because STRINGTABLE entries are */
+/* limited to 256 bytes */
+
+GSVIEW_RCDATA(CDSC_RESOURCE_BBOX)
+BEGIN
+"This line is incorrect.\012"
+"The bounding box must be in integer coordinates,\012"
+"not floating point. A floating point bounding box should\012"
+"be specified using %%HiResBoundingBox:\012"
+"A %%BoundingBox: should still be provided with integer values.\012"
+"\012"
+"'OK' will convert the coordinates to integers,\012"
+"rounding them outwards.\012"
+"'Cancel' will ignore this line.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_EARLY_TRAILER)
+BEGIN
+"The trailer is normally at the end of a document.\012"
+"This line was found more than 32k bytes from the end\012"
+"of the file.  Trailers are not usually this long.\012"
+"It is more likely that another PostScript file has been included,\012"
+"without enclosing it in %%BeginDocument / %%EndDocument.\012"
+"\012"
+"'OK' will assume this is part of an included file.\012"
+"'Cancel' will assume this is the trailer.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_EARLY_EOF)
+BEGIN
+"This line normally occurs at the end of a document.\012"
+"This line was found more than 100 bytes from the end\012"
+"of the file.\012"
+"It is more likely that another PostScript file has been included,\012"
+"without enclosing it in %%BeginDocument / %%EndDocument.\012"
+"\012"
+"'OK' will assume this is part of an included file.\012"
+"'Cancel' will assume this is part of the trailer.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_PAGE_IN_TRAILER)
+BEGIN
+"This %%Page: line occurred in the trailer, which is not legal.\012"
+"EPS files should be encapsulated in %%BeginDocument / %%EndDocument.\012"
+"If is possible that an EPS file was incorrectly encapsulated,\012"
+"and that we have been confused by the %%Trailer in an EPS file.\012"
+"\012"
+"'OK' will process more pages.\012"
+"'Cancel' will ignore this page comment.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_PAGE_ORDINAL)
+BEGIN
+"This line is incorrect.\012"
+"The two arguments should be a label and an ordinal.\012"
+"The ordinal should be 1 for the first page and should\012"
+"increase by 1 for each following page.\012"
+"The page ordinal is missing or is not in sequence.\012"
+"\012"
+"It is likely that this line is part of an included file that\012"
+"was not enclosed in %%BeginDocument / %%EndDocument.\012"
+"\012"
+"'OK' will ignore this page, assuming it is part of an\012"
+"incorrectly encapsulated EPS file.\012"
+"'Cancel' will treat this as a valid page\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_PAGES_WRONG)
+BEGIN
+"%%Pages: doesn't match number of %%Page:\012"
+"\012"
+"'OK' will adjust the page count to match the number of %%Page:\012"
+"comments found.\012"
+"'Cancel' will set the page count from %%Pages:\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_EPS_NO_BBOX)
+BEGIN
+"This EPS file is missing the required %%BoundingBox:\012"
+"See the GSview help for details of how to add/adjust the\012"
+"bounding box.\012"
+"\012"
+"'OK' will assume this as an EPS file.\012"
+"'Cancel' will assume this is NOT an EPS file.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_EPS_PAGES)
+BEGIN
+"EPS files may have 0 or 1 pages.  This 'EPS' file has\012"
+"more than this and so is not an EPS file.\012"
+"You cannot use `Print To` `Encapsulated PostScript File` for\012"
+"printing multipage files.  The correct method is to connect\012"
+"the printer to FILE: or to select 'Print to File'.\012"
+"\012"
+"'OK' will assume this as an EPS file.\012"
+"'Cancel' will assume this is NOT an EPS file.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_NO_MEDIA)
+BEGIN
+"Media was specified with %%DocumentMedia:, but no default.\012"
+"media was specified with %%PageMedia:.\012"
+"\012"
+"'OK' will set the default media to the first listed media.\012"
+"'Cancel' will not set a default media.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_ATEND)
+BEGIN
+"This line is incorrect.\012"
+"To defer a value, you must use '(atend)', not 'atend'\012"
+"\012"
+"'OK' will assume that (atend) was meant.\012"
+"'Cancel' will ignore this line.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_DUP_COMMENT)
+BEGIN
+"This comment is duplicated in the header, which is unnecessary.\012"
+"The first occurence of a header line takes precedence.\012"
+"\012"
+"'OK' or 'Cancel' will ignore the duplicate line.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_DUP_TRAILER)
+BEGIN
+"This comment is duplicated in the trailer, which is unnecessary.\012"
+"The last occurence of a trailer line takes precedence.\012"
+"\012"
+"'OK' or 'Cancel' will use the duplicate line.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_BEGIN_END)
+BEGIN
+"The number of Begin and End comments do not match.\012"
+"\012"
+"'OK' or 'Cancel' will ignore this mismatch.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_BAD_SECTION)
+BEGIN
+"This line is incorrect because it should not occur\012"
+"within a page.  This probably indicates that an EPS file\012"
+"was incorrectly encapsulated.  The line will be ignored.\012"
+"\012"
+"'OK' or 'Cancel' will ignore this line.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_LONG_LINE)
+BEGIN
+"\012\012Lines in DSC documents must be shorter than 255 characters.\012"
+"\0"
+END
+
+GSVIEW_RCDATA(CDSC_RESOURCE_INCORRECT_USAGE)
+BEGIN
+"This DSC comment line is incorrect.\012"
+"Please refer to the DSC specification.\012"
+"\012"
+"'OK' or 'Cancel' will ignore this mismatch.\012"
+"\0"
 END
 

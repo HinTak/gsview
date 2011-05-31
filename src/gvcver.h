@@ -36,13 +36,13 @@
 /*
 #define BETA
 #define BETA_YEAR    2000
-#define BETA_MONTH   3
-#define BETA_DAY     31
+#define BETA_MONTH   6
+#define BETA_DAY     30
 */
 
 
 /* GSview */
-#include "ver.h"
+#include "gsvver.h"
 
 #define GSVIEW_PRODUCT "GSview"
 
@@ -66,7 +66,7 @@
 #define GS_REVISION	  403		/* this is the last 16-bit version */
 #define GS_REVISION_MAX   403
 #else
-#define GS_REVISION	  601
+#define GS_REVISION	  600
 #define GS_REVISION_MAX   699
 #endif
 #ifdef _Windows

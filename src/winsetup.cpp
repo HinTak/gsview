@@ -22,6 +22,8 @@
 #ifndef __WIN32__
 #error Win16 is NOT supported.
 #endif
+// You also can't compile this with BC++ 4.5, because it
+// doesn't include the explorer shell interface
 
 #define STRICT
 #include <windows.h>
@@ -49,11 +51,11 @@
 #include "dwinst.h"
 
 #include "gvcver.h"
-extern "C" {
 #include "gvcbeta.h"
+/* extern "C" { */
     int message_box(char *str, int icon);
     int load_string(int id, char *str, int len);
-}
+/* } */
 #include "gvcrc.h"
 #include "setup.h"
 #include "gvclang.h"
@@ -469,7 +471,7 @@ int flag;
     return flag;
 }
 
-extern "C" int message_box(char *str, int icon)
+/* extern "C" */ int message_box(char *str, int icon)
 {
     return MessageBox(g_hMain, str, g_szAppName, icon);
 }
@@ -496,7 +498,7 @@ gs_chdir(char *dirname)
 #endif
 }
 
-extern "C" int
+/* extern "C" */ int
 load_string(int id, char *str, int len)
 {
 	return LoadString(g_hLanguage, id, str, len);
@@ -940,28 +942,51 @@ install_prog()
 	// write registry entries
 	gs_addmess("Updating Registry\n");
 	if (!cinst.RegistryBegin()) {
-		gs_addmess("Failed to begin registry update\n");
-		return FALSE;
+	    gs_addmess("Failed to begin registry update\n");
+	    return FALSE;
 	}
 
 	sprintf(buf, "SOFTWARE\\%s", regkey1);
 	if (!cinst.RegistryOpenKey(HKEY_LOCAL_MACHINE, buf)) {
-		gs_addmess("Failed to open/create registry application key\n");
-		return FALSE;
+	    gs_addmess("Failed to open/create registry application key\n");
+	    return FALSE;
 	}
 
 	sprintf(buf, "SOFTWARE\\%s\\%s", regkey1, regkey2);
 	if (!cinst.RegistryOpenKey(HKEY_LOCAL_MACHINE, buf)) {
-		gs_addmess("Failed to open/create registry application key\n");
-		return FALSE;
+	    gs_addmess("Failed to open/create registry application key\n");
+	    return FALSE;
 	}
 
 	if (!cinst.RegistrySetValue(GSVIEW_DOT_VERSION, g_szTargetDir)) {
-		gs_addmess("Failed to add registry value\n");
-		return FALSE;
+	    gs_addmess("Failed to add registry value\n");
+	    return FALSE;
 	}
 
 	cinst.RegistryCloseKey();
+
+	// Write App Paths to registry
+	sprintf(buf, 
+	    "Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\%s",
+	     "gsview32.exe");
+   
+	flag = cinst.RegistryOpenKey(HKEY_LOCAL_MACHINE, buf);
+	if (flag) {
+	    flag = cinst.RegistrySetValue(NULL, szProgram);
+	    if (flag) {
+		strcpy(buf, g_szTargetDir);
+		strcat(buf, "\\");
+		strcat(buf, cinst.GetMainDir());
+		flag = cinst.RegistrySetValue("Path", buf);
+	    }
+	    if (!flag)
+	        gs_addmess("Failed to open/create registry App Paths values\n");
+	    cinst.RegistryCloseKey();
+	}
+	else
+	    gs_addmess("Failed to open/create registry App Paths key\n");
+	if (!flag)
+	   return flag;
 
 
 	// now put in assocations
@@ -1301,10 +1326,14 @@ HINSTANCE hInstance;
 #ifdef DECALPHA
     strcat(langdll, "\\setpda");
 #else
+    strcat(langdll, "\\setp32");
 #endif
     switch (language) {
 	case IDM_LANGDE:
 	    strcat(langdll, "de");
+	    break;
+	case IDM_LANGES:
+	    strcat(langdll, "es");
 	    break;
 	case IDM_LANGFR:
 	    strcat(langdll, "fr");
@@ -1348,6 +1377,7 @@ LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                     return(TRUE);
                 case IDM_LANGEN:
                 case IDM_LANGDE:
+                case IDM_LANGES:
                 case IDM_LANGFR:
                 case IDM_LANGIT:
                     EndDialog(hDlg, LOWORD(wParam));
@@ -1378,6 +1408,7 @@ int language;
 	switch (language) {
 	    case IDM_LANGEN:
 	    case IDM_LANGDE:
+	    case IDM_LANGES:
 	    case IDM_LANGFR:
 	    case IDM_LANGIT:
 		load_language(language);

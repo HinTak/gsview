@@ -46,15 +46,16 @@
 #define IDM_INFO	108
 #define IDM_PRINT	110
 #define IDM_PRINTTOFILE 111
-#define IDM_SPOOL	112
-#define IDM_GSMESS      113
-#define IDM_LASTFILE1	114
-#define IDM_LASTFILE2	115
-#define IDM_LASTFILE3	116
-#define IDM_LASTFILE4	117
-#define IDM_EXIT	118
-#define IDM_DROP	119
-#define IDM_PSTOEDIT	120
+#define IDM_CONVERTFILE	112
+#define IDM_SPOOL	113
+#define IDM_GSMESS      114
+#define IDM_LASTFILE1	115
+#define IDM_LASTFILE2	116
+#define IDM_LASTFILE3	117
+#define IDM_LASTFILE4	118
+#define IDM_EXIT	119
+#define IDM_DROP	120
+#define IDM_PSTOEDIT	121
 
 #define IDM_EDITMENU	150
 #define IDM_COPYCLIP	151
@@ -133,24 +134,19 @@
 #define IDM_MAGMINUS	253
 
 #define IDM_MEDIAMENU	300
-#define IDM_LETTER	301
-#define IDM_LETTERSMALL	302
-#define IDM_TABLOID	303
-#define IDM_LEDGER	304
-#define IDM_LEGAL	305
-#define IDM_STATEMENT	306
-#define IDM_EXECUTIVE	307
-#define IDM_A3		308
-#define IDM_A4		309
-#define IDM_A4SMALL	310
-#define IDM_A5		311
-#define IDM_B4		312
-#define IDM_B5		313
-#define IDM_FOLIO	314
-#define IDM_QUARTO	315
-#define IDM_10X14	316
-#define IDM_USERSIZE	317
-#define IDM_MEDIALAST	318
+#define IDM_MEDIAFIRST	301
+#define IDM_11x17	301
+#define IDM_A3		302
+#define IDM_A4		303
+#define IDM_A5		304
+#define IDM_B4		305
+#define IDM_B5		306
+#define IDM_LEDGER	307
+#define IDM_LEGAL	308
+#define IDM_LETTER	309
+#define IDM_NOTE	310
+#define IDM_USERSIZE	311
+#define IDM_MEDIALAST	312
 #define MEDIA_USERDEFINED "User Defined"
 
 #define IDM_MEDIAROTATE	330
@@ -161,13 +157,15 @@
 #define IDM_HELPKEYS	353
 #define IDM_ABOUT	354
 #define IDM_MISC	355
+#define IDM_REGISTER	356
 
 #define IDM_LANGMENU	360
 #define IDM_LANGEN	361
 #define IDM_LANGDE	362
 #define IDM_LANGFR	363
 #define IDM_LANGIT	364
-#define IDD_LANG	365
+#define IDM_LANGES	365
+#define IDD_LANG	369
 
 #define IDM_PSTOTEXTMENU	370
 #define IDM_PSTOTEXTDIS 	371
@@ -268,6 +266,7 @@
 #define PAGE_EVEN	537
 #define PAGE_REVERSE	538
 
+#define IDD_CONVERT	539
 #define IDD_DEVICE	540
 #define DEVICE_NAME	541
 #define DEVICE_NAMETEXT	542
@@ -344,7 +343,6 @@
 #define IDS_HELPTITLE	604
 #define IDS_SIGSEGV	605
 #define IDS_FILENOTFOUND 606
-#define IDS_PRINTBUSY	607
 
 #define IDS_FILE	610
 #define IDS_NOFILE	611
@@ -399,6 +397,8 @@
 #define IDS_PRINTPDFPS	668
 #define IDS_NOPDFQUICKTEXT 669
 #define IDS_BAD_DOSEPS_HEADER 670
+#define IDS_PROBABLY_PCL 671
+#define IDS_BUSYPRINTING 672
 
 #define IDS_SOUNDNAME	680
 #define IDS_SNDPAGE	681
@@ -415,17 +415,17 @@
 #define IDS_SPKR	692
 
 /* help topics */
-#define IDS_TOPICROOT	701
-#define IDS_TOPICOPEN	702
-#define IDS_TOPICPRINT	703
-#define IDS_TOPICPROP   704
+#define IDS_TOPICROOT	 701
+#define IDS_TOPICOPEN	 702
+#define IDS_TOPICPRINT	 703
+#define IDS_TOPICPROP    704
 #define IDS_TOPICEDITPROP 705
-#define IDS_TOPICCLIP   706
-#define IDS_TOPICPREVIEW 707
-/* #define IDS_TOPICGSCMD	708 */
-#define IDS_TOPICSOUND	709
-#define IDS_TOPICDSET   710
-#define IDS_TOPICMEDIA  711
+#define IDS_TOPICCONVERT 706
+#define IDS_TOPICCLIP    707
+#define IDS_TOPICPREVIEW 708
+#define IDS_TOPICSOUND	 709
+#define IDS_TOPICDSET    710
+#define IDS_TOPICMEDIA   711
 #define IDS_TOPICPSTOEPS 712
 #define	IDS_TOPICGOTO    713
 #define IDS_TOPICINSTALL 714
@@ -440,6 +440,8 @@
 #define IDS_TOPICEASYCFG 723
 #define IDS_TOPICADVANCEDCFG 724
 #define IDS_TOPICDOWNLOAD 725
+#define IDS_TOPICDSCWARN 726
+#define IDS_TOPICREG     727
 
 /* ps_to_eps */
 #define IDS_BBPROMPT	750
@@ -521,6 +523,8 @@
 #define IDS_APPNAME		861
 #define IDS_TARGET_GROUP	862
 #define IDS_TARGET_DIR		863
+#define IDS_INVALIDREG		864
+#define IDS_UNREGISTERED	865
 
 #define IDS_MKDIRFAIL		870
 #define IDS_WRONGEMX		871
@@ -546,14 +550,21 @@
 #define IDS_UNINSTALLTITLE	891
 #define IDS_UNINSTALLITEM	892
 
+#define IDS_PRN_PRINTMETHOD	900
+#define IDS_PRN_WINDOWSGDI	901
+#define IDS_PRN_GSDEVICE	902
+#define IDS_PRN_PSPRINTER	903
+#define IDS_PRN_SETTINGS	904
+#define IDS_PRN_HELP		905
+#define IDS_PRN_SELECTPAGES	906
 
 /* RCDATA resources */
-#define IDR_VIEWER	902
-#define IDR_EPSFWARN	903
-#define IDR_DEVICES	904
-#define IDR_PORTS	905
-#define IDR_BUTTON	906
-#define IDR_HELP	907
+#define IDR_VIEWER	912
+#define IDR_EPSFWARN	913
+#define IDR_DEVICES	914
+#define IDR_PORTS	915
+#define IDR_BUTTON	916
+#define IDR_HELP	917
 
 /* cursors */
 #define IDP_CROSSHAIR  910
@@ -578,6 +589,16 @@
 
 /* non standard scroll bar code */
 #define SB_FIND WM_USER
+
+#define IDD_PRINTGDI		1538	/* must be this number */
+#define IDC_DEVICE_GROUP	1601	/* Group box */
+#define IDC_DEVICE_GDI		1602	/* GDI printing */
+#define IDC_DEVICE_GS		1603	/* GS printing */
+#define IDC_DEVICE_PS		1604	/* PS printing */
+#define IDC_GS_WINDOWS		1605	/* mono, grey, colour */
+#define IDC_GS_DEVNAME		1606	/* djet500, pdfwrite etc. */
+#define IDC_GS_ADVPS		1607	/* PS prolog, epilog */
+#define IDC_SELECT_PAGES	1608	/* show dialog for page selection */
 
 /*  Custom units dialog box  */
 #define IDD_CALC              2000
@@ -634,3 +655,93 @@
 #define IDC_MEASURE_ANGLE   2110
 #define IDC_MEASURE_SETPOINT   2111
 
+
+#ifndef CDSC_MESSAGE_DEFINED
+#define CDSC_MESSAGE_DEFINED
+#define CDSC_MESSAGE_BBOX 0
+#define CDSC_MESSAGE_EARLY_TRAILER 1
+#define CDSC_MESSAGE_EARLY_EOF 2
+#define CDSC_MESSAGE_PAGE_IN_TRAILER 3
+#define CDSC_MESSAGE_PAGE_ORDINAL 4
+#define CDSC_MESSAGE_PAGES_WRONG 5
+#define CDSC_MESSAGE_EPS_NO_BBOX 6
+#define CDSC_MESSAGE_EPS_PAGES 7
+#define CDSC_MESSAGE_NO_MEDIA 8
+#define CDSC_MESSAGE_ATEND 9
+#define CDSC_MESSAGE_DUP_COMMENT 10
+#define CDSC_MESSAGE_DUP_TRAILER 11
+#define CDSC_MESSAGE_BEGIN_END 12
+#define CDSC_MESSAGE_BAD_SECTION 13
+#define CDSC_MESSAGE_LONG_LINE 14
+#define CDSC_MESSAGE_INCORRECT_USAGE 15
+#endif
+
+/* We must define these directly, without using arithmetic */
+/* because OS/2 Resource Compiler won't accept arithmetic */
+#define CDSC_RESOURCE_BASE 		2200
+#define CDSC_RESOURCE_BBOX 		2200
+#define CDSC_RESOURCE_EARLY_TRAILER 	2201
+#define CDSC_RESOURCE_EARLY_EOF 	2202
+#define CDSC_RESOURCE_PAGE_IN_TRAILER 	2203
+#define CDSC_RESOURCE_PAGE_ORDINAL 	2204
+#define CDSC_RESOURCE_PAGES_WRONG 	2205
+#define CDSC_RESOURCE_EPS_NO_BBOX 	2206
+#define CDSC_RESOURCE_EPS_PAGES 	2207
+#define CDSC_RESOURCE_NO_MEDIA 		2208
+#define CDSC_RESOURCE_ATEND 		2209
+#define CDSC_RESOURCE_DUP_COMMENT 	2210
+#define CDSC_RESOURCE_DUP_TRAILER 	2211
+#define CDSC_RESOURCE_BEGIN_END 	2212
+#define CDSC_RESOURCE_BAD_SECTION 	2213
+#define CDSC_RESOURCE_LONG_LINE 	2214
+#define CDSC_RESOURCE_INCORRECT_USAGE 	2215
+
+#define IDD_DSCERROR 		2230
+#define DSC_IGNORE_ALL		2231
+#define DSC_STATIC_TEXT		2232
+#define DSC_STATIC_TEXT_LAST	2249
+
+#define IDS_DSC_INFO 		2250
+#define IDS_DSC_WARN		2251
+#define IDS_DSC_ERROR		2252
+#define IDS_DSC_LINEFMT		2253
+
+#define IDM_DSCMENU		2260
+#define IDM_DSC_OFF		2261
+#define IDM_DSC_ERROR		2262
+#define IDM_DSC_WARN		2263
+#define IDM_DSC_INFO		2264
+
+#define IDD_NAG			2270
+#define NAG_REGISTER		2271
+#define NAG_NAME		2272
+#define NAG_RECEIPT		2273
+#define NAG_ICON		2274
+
+#define IDD_REG			2280
+#define REGDLG_ONLINE		2281
+#define REGDLG_NAME		2282
+#define REGDLG_RECEIPT		2283
+#define REGDLG_NUMBER		2284
+#define REGDLG_ICON		2285
+
+#define IDC_ALL			2291
+#define IDC_ODD			2292
+#define IDC_EVEN		2293
+#define IDC_IGNOREDSC		2294
+#define IDC_FROM		2295
+#define IDC_TO			2296
+
+#define IDC_MONO		2297
+#define IDC_GREY		2298
+#define IDC_COLOUR		2299
+
+#define PRINT_GDI	0
+#define PRINT_GS	1
+#define PRINT_PS	2
+#define PRINT_CONVERT	3
+
+#define DEBUG_GENERAL	0x01
+#define DEBUG_GDI	0x02	/* GDI printing */
+#define DEBUG_MEM	0x04	/* memory allocation */
+#define DEBUG_LOG	0x08	/* write gs_addmess() to file c:\gsview.txt */

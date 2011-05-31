@@ -253,11 +253,36 @@ DWORD dwResult;
 	    gs_addmess("\n");
 	}
     }
+
+    // Find out if key has subkeys or values
+    TCHAR szClass[MAXSTR];
+    DWORD cchClass;
+    DWORD cSubKeys;
+    DWORD cchMaxSubKey;
+    DWORD cchMaxClass;
+    DWORD cValues;
+    DWORD cchMaxValueName;
+    DWORD cbMaxValueData;
+    DWORD cbSecurityDescriptor;
+    FILETIME ftLastWriteTime;
+    cchClass = sizeof(szClass) / sizeof(TCHAR);
+    cSubKeys = 0;
+    cValues = 0;
+    RegQueryInfoKey(hkey, szClass, &cchClass, NULL,
+    	&cSubKeys, &cchMaxSubKey, &cchMaxClass, 
+    	&cValues, &cchMaxValueName, &cbMaxValueData,
+    	&cbSecurityDescriptor, &ftLastWriteTime);
+
     // close key
     if (hkey != HKEY_CLASSES_ROOT)
 	RegCloseKey(hkey);
     // delete the key
-    if (strlen(keyname)) {
+    if ((cSubKeys != 0) || (cValues != 0)) {
+    	gs_addmess("Not deleting non empty registry key\n   ");
+	gs_addmess(keyname);
+	gs_addmess("\n");
+    }
+    else if (strlen(keyname)) {
 	gs_addmess("Deleting registry key\n   ");
 	gs_addmess(keyname);
 	gs_addmess("\n");

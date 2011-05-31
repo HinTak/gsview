@@ -15,9 +15,11 @@ gsview\gsview32.exe
 gsview\gsview32.ico
 gsview\gsviewde.hlp
 gsview\gsviewen.hlp
+gsview\gsviewes.hlp
 gsview\gsviewfr.hlp
 gsview\gsviewit.hlp
 gsview\gsvw32de.dll
+gsview\gsvw32es.dll
 gsview\gsvw32fr.dll
 gsview\gsvw32it.dll
 gsview\gsv16spl.exe
@@ -26,6 +28,11 @@ gsview\uninstgs.exe
 gsview\printer.ini
 gsview\zlib32.dll
 gsview\libbz2.dll
+gsview\gsprint.exe
+gsview\gsprint.htm
+gsview\epstool.exe
+gsview\epstool.htm
 gsview\Readme.htm
 gsview\cdorder.txt
+gsview\regorder.txt
 gsview\LICENCE

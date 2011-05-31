@@ -33,6 +33,7 @@
 #define DWORD unsigned int	/* 32 bits unsigned */
 #define UINT  unsigned int	/* native unsigned */
 #define LONG  int		/* 32 bits signed */
+#define ULONG  unsigned int	/* 32 bits signed */
 #define BOOL  int
 #define GVFAR 
 #define GVHUGE 
@@ -83,6 +84,7 @@
 #define DWORD unsigned long
 #define UINT  unsigned int
 #define LONG  long
+#define ULONG  unsigned int	/* 32 bits signed */
 #define BOOL  int
 #define READBIN  "rb"
 #define WRITEBIN "wb"
@@ -104,6 +106,7 @@
 #define DWORD unsigned int
 #define UINT  unsigned int
 #define LONG  int
+#define ULONG  unsigned int
 #define BOOL  int
 #define READBIN  "r"
 #define WRITEBIN "w"
@@ -125,7 +128,8 @@ extern char *getwd (char *pathname);
 #endif
 #endif
 
-#include "ps.h"
+#include "gvcfile.h"
+#include "gvcdsc.h"
 #include "gvceps.h"
 
 #define TRUE 1
@@ -147,8 +151,7 @@ extern char szAppName[];
 typedef struct document PSDOC;
 
 typedef struct tagPSFILE {
-	BOOL	ignore_dsc;	/* true if DSC to be ignored */
-	PSDOC	*doc;		/* DSC structure.  NULL if not DSC */
+	CDSC	*dsc;		/* DSC structure.  NULL if not DSC */
 	int 	pagenum;	/* current page number */
 	char 	name[MAXSTR];	/* name of selected document file */
 	FILE 	*file;		/* selected file */
@@ -166,6 +169,9 @@ void pserror(char *str);
 char * gs_getcwd(char *dirname, int size);
 void play_sound(int i);
 char * psfile_name(PSFILE *psf);
+BOOL ps_copy_find(FILE *outfile, FILE *infile, long end, 
+	char *s, int n, char *comment);
+BOOL find_gsexe(char *gsexe, int len);
 
 /* temporary kludges */
 extern PSDOC *doc;

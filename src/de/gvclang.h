@@ -64,7 +64,6 @@
 #define AAABOUTGSVIEWPRINT "Über  GSview Print"
 #define AACOPY1 "Version:"
 #define AACOPY2 "Grafische Bedienung von Ghostscript "
-#define AACOPY3 "Partielles Copyright (C) 1994, Timothy O. Theisen.  Alle Rechte vorbehalten."
 #define AACOPY4 "Dieses Programm wird ohne jede Gewährleistung vertrieben."
 #define AACOPY5 "Keiner der Autoren oder Distributoren ist verantwortlich"
 #define AACOPY6 "für die Folgen des Gebrauchs, weder für die Fehlerfreiheit einer"
@@ -86,6 +85,10 @@
 #define AACOPY22 "GSview Win32s/Win16 Druck-Manager"
 
 #define AAINPUT "Eingabe"
+
+/* DSC error dialog box */
+#define AADSC "Dokument Strukturierungs Konventionen" 
+#define AAIGNOREALLDSC "Alle DSC Kommentare ignorieren"
 
 /* Info dialog box */
 #define AAINFO  "Info"
@@ -121,15 +124,28 @@
 #define AAPRINTTOFILE "Druck in Datei"
 #define AAPSPRINTER "PostScript Drucker"
 #define AAOPTIONSC "Optionen:"
-#define AAFIXEDMEDIA "Fixed media" /* ENGLISH */
+#define AAFIXEDMEDIA "Fixed Medium"
+#define AACONVERT "Konvertierung"
+#define AAWINPRINTERSETTINGS "Windows Druckereinstellungen" 
+#define AACOLOURS "Farben"
+#define AABANDW "Schwarz Weiss"
+#define AAGREY "Grau"
+#define AAFULLCOLOUR "Echtfarben"
+#define AASELECTGSDEVICE "Select Ghostscript device" /* ENGLISH */
 
-#define AAADVANCED "Advanced"
-#define AAADVANCEDPSOPT "Advanced PostScript Options"
-#define AASENDCTRLDBEFORE "Send CTRL+D before job"
-#define AASENDCTRLDAFTER "Send CTRL+D after job"
-#define AAPROLOGFILE "Prolog File"
-#define AAEPILOGFILE "Epilog File"
-#define AABROWSE "Browse"
+#define AAODDEVEN "Ungerade/Gerade"
+#define AAIGNOREDSC "Ignoriere DSC"
+#define AAPAGES "Seiten"
+#define AAFROMC "Von:"
+#define AATOC "Bis:"
+
+#define AAADVANCED "Fortgeschritten"
+#define AAADVANCEDPSOPT "Fortgeschrittene PostScript Optionen"
+#define AASENDCTRLDBEFORE "Sende STRG+D vor jedem Auftrag"
+#define AASENDCTRLDAFTER "Sende STRG+D nach jedem Auftrag"
+#define AAPROLOGFILE "Prolog Datei"
+#define AAEPILOGFILE "Epilog Datei" 
+#define AABROWSE "Durchsuchen"
 
 /* PDF2PS dialog box */
 #define AAPDFTOPS	"PDF zu PostScript"
@@ -182,23 +198,23 @@
 #define AABOUNDINGBOX "BoundingBox"
 
 /* Advanced Configure dialog box */
-#define AACONFIGUREGS "Advanced Configure" /* ENGLISH */
+#define AACONFIGUREGS "Fortgeschrittene Konfigurierung"
 #define AAGHOSTSCRIPTDLLC "Ghostscript DLL:"
 #define AAGHOSTSCRIPTINCC "Ghostscript Suchpfad:"
 #define AAGHOSTSCRIPTOTHERC "Ghostscript Optionen:"
-#define AACOPYPRINTERDEF "Copy Printer Defaults" /* ENGLISH */
-#define AAASSOCIATEPS "Associate .ps files" /* ENGLISH */
-#define AAASSOCIATEPDF "Associate .pdf files" /* ENGLISH */
-#define AACREATESTARTMENU "Create Start Menu items" /* ENGLISH */
+#define AACOPYPRINTERDEF "Kopiere Drucker Defaults"
+#define AAASSOCIATEPS "Verknüpfe .ps Dateien"
+#define AAASSOCIATEPDF "Verknüpfe .pdf Dateien"
+#define AACREATESTARTMENU "Lege Start Menü Einträge an"
 
 /* Easy Configure dialog box */
-#define AAEASYCONFIGURE "Easy Configure" /* ENGLISH */
-#define AAWHICHGS "Which version of Ghostscript do you wish to use?" /* ENGLISH */
+#define AAEASYCONFIGURE "Einfache Konfigurierung"
+#define AAWHICHGS "Welche Version von Ghostscript wollen Sie einsetzen ?"
 
 /* Download Ghostscript dialog box */
-#define AADOWNLOADGS "Download Ghostscript" /* ENGLISH */
-#define AADOWNLOADNOW "Download Now" /* ENGLISH */
-#define AAGSNOTFOUND "Ghostscript can not be found on your computer.  You will need to download and install Aladdin Ghostscript from" /* ENGLISH */
+#define AADOWNLOADGS "Download Ghostscript"
+#define AADOWNLOADNOW "Download Jetzt"
+#define AAGSNOTFOUND "Ghostscript kann nicht auf Ihrem Computer gefunden werden.  Sie müssen einen Download starten und Aladdin Ghostscript installieren von"
 
 #define AAGSMESSWIN "GSview für Windows - Ghostscript Meldungen"
 #define AAGSMESSPM "PM GSview - Ghostscript Meldungen"
@@ -217,34 +233,46 @@
 #define AABITS "bits"
 
 /* Measure and custom units dialog box */
-/* ENGLISH */
 #define AAPT "pt"
 #define AAMM "mm"
-#define AAINCH "inch"
-#define AACUSTOM "Custom"
-#define AAMEASURE "Measure"
-#define AAUNITC	"Unit:"
+#define AAINCH "Zoll"
+#define AACUSTOM "Benutzerdefiniert"
+#define AAMEASURE "Messen"
+#define AAUNITC	"Einheit:"
 #define AASTARTC "Start:"
-#define AAFINISHC "Finish:"
+#define AAFINISHC "Ende:"
 #define AADELTAC "Delta:"
-#define AALENGTHC "Length:"
-#define AACHANGE "Change"
-#define AACALCXFORM "Calculate Transformation"
-#define AATRANSLATE "Translate"
-#define AAROTATE "Rotate"
-#define AASCALE "Scale"
+#define AALENGTHC "Länge:"
+#define AACHANGE "Änderung"
+#define AACALCXFORM "Berechne Transformation"
+#define AATRANSLATE "Translation"
+#define AAROTATE "Rotation"
+#define AASCALE "Skalierung"
 #define AAINITMATRIX "initmatrix"
 #define AAINVERTMATRIX "invertmatrix"
 
 /* PS to Edit dialog box */
-/* ENGLISH */
-#define AAPSTOEDIT "PS to Edit"
+#define AAPSTOEDIT "PS zu Edit"
 #define AAFORMATC "Format:"
-#define AADRAWTASP "Draw text as polygons"
-#define AAMAPTOLATIN1 "Map to ISO-Latin1"
-#define AAFLATNESSC "Flatness:"
-#define AADEFAULTFONTC "Default font:"
-#define AADRIVEROPTIONSC "Driver options:"
+#define AADRAWTASP "Zeichne Text als Polygone"
+#define AAMAPTOLATIN1 "Konvertiere zu ISO-Latin1"
+#define AAFLATNESSC "Flachheit:"
+#define AADEFAULTFONTC "Default Zeichensatz:"
+#define AADRIVEROPTIONSC "Treiber Optionen:"
+
+/* Registration */
+#define AAREGTOC "Registriert an:"
+#define AANUMBERC "Nummer:"
+#define AAGSVIEWREG "GSview Registrierung"
+#define AAREGISTERNOW "Registriere jetzt"
+#define AAONLINEREG "Online Registrierung"
+#define AAREG1 "Bitte geben Sie ihren Namen und ihre Registrierungsnummer ein"
+#define AAREG2 ""
+#define AANAG1 "GSview ist Copyright 2000 Ghostgum Software Pty Ltd."
+#define AANAG2 "Bitte unterstützen Sie die Entwicklung von GSview"
+#define AANAG3 "durch ihre Registrierung."
+#define AANAG4 "GSview kann online registriert werden bei"
+#define AANAG5 "    http:/\057www.ghostgum.com.au/"
 
 
 /* Installation program */
@@ -307,20 +335,19 @@
 #define AAUNINSTALLITEM "GSview und Aladdin Ghostscript löschen"
 
 /* setup program */
-/* ENGLISH */
-#define AAINSTALLSPACE "This installation will require 3 M bytes of hard disk space"
-#define AAGSVIEWREQUIRES "GSview also requires"
-#define AAVIEWREADMEDETAILS "View the Readme file for details of how to obtain Ghostscript."
-#define AACOPYRIGHTNOTICE "Copyright Notice"
-#define AASELECTGSVIEWDIR "Select a directory in which to install GSview"
-#define AABROWSEE "Browse..."
-#define AAGSVIEWADDSTARTMENU "GSview Setup will add items to the following Start Menu folder"
-#define AACREATEFOLDER "Create Folder"
-#define AAALLUSERS "All Users"
-#define AASELECTFOLDER "Select Folder"
-#define AAFOLDER "Folder"
-#define AADESTFOLDER "Destination Folder"
-#define AAVIEWREADME "View Readme"
+#define AAINSTALLSPACE "Diese Installation benötigt 3 M bytes Plattenplatz"
+#define AAGSVIEWREQUIRES "GSview benötigt ferner"
+#define AAVIEWREADMEDETAILS "Lesen Sie bitte das Readme wie Sie Ghostscript bekommen."
+#define AACOPYRIGHTNOTICE "Copyright Anmerkung"
+#define AASELECTGSVIEWDIR "Wählen Sie ein Verzeichnis aus, in das Sie GSview installieren wollen"
+#define AABROWSEE "Durchsuchen..."
+#define AAGSVIEWADDSTARTMENU "GSview Setup wird Einträge in den folgenden Start Menü Ordner machen"
+#define AACREATEFOLDER "Mappe anlegen"
+#define AAALLUSERS "Alle Benutzer"
+#define AASELECTFOLDER "Mappe auswählen"
+#define AAFOLDER "Mappe"
+#define AADESTFOLDER "Zielmappe"
+#define AAVIEWREADME "Lies Readme"
 
 /* configure */
 #define AAGSVIEWC "GSview:"
@@ -391,5 +418,6 @@ Drücken Sie Fertig um weiter zu machen."
 #define AADEUTSCH "Deutsch"
 #define AAFRANCAIS "Français"
 #define AAITALIANO "Italiano"
+#define AAESPANOL "Español"
 
 #define WINHELPFILE "gsviewde.hlp"

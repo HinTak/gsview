@@ -14,5 +14,6 @@ zlib16.dll
 printer.ini
 Readme.htm
 cdorder.txt
+regorder.txt
 LICENCE
 FILE_ID.DIZ

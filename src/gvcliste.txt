@@ -1,4 +1,4 @@
-epstool/epstool.c
+epstool/epstool.cpp
 epstool/epstool.def
 epstool/epstool.htm
 epstool/epstool.h

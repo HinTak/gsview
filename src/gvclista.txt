@@ -5,9 +5,11 @@ gsviewda.exe
 gsview32.ico
 gsviewde.hlp
 gsviewen.hlp
+gsviewes.hlp
 gsviewfr.hlp
 gsviewit.hlp
 gsvwdade.dll
+gsvwdaes.dll
 gsvwdafr.dll
 gsvwdait.dll
 gvwgsda.exe

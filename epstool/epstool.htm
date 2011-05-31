@@ -15,7 +15,7 @@ epstool
 <p>
 EPSTOOL - Create or extract preview bitmaps in EPS files.
 <br>
-Release date: 2000-02-15
+Release date: 2000-06-15
 </p>
 <h2>
 Table of contents
@@ -211,7 +211,9 @@ include path using the GS_LIB environment variable instead of using
 </p>
 
 <p>
-For Windows 95 or Windows NT, use gswin32c.exe.
+For Windows 95 or Windows NT, use gswin32c.exe.  If you installed
+Aladdin Ghostscript using the self installer, epstool should 
+automatically find the latest Ghostscript command line executable.
 For OS/2, use gsos2.exe.
 For MS-DOS, use gs386.exe.
 </p>
@@ -342,6 +344,32 @@ Other tools that can add previews to EPS files are
 <a name="Revision"></a>
 Revision History
 </h2>
+<h3>
+1.2 2000-06-15
+</h3>
+<p>
+  Release with GSview 3.0.
+</p>
+<h3>
+1.10 2000-04-01
+</h3>
+<p>
+  Fixes to DSC parser.
+</p>
+<h3>
+1.09 2000-03-11
+</h3>
+<p>
+  New DSC parser.
+<br>
+  Added #pragma pack(1) needed by MSVC++.
+<br>
+  Modified BMP reading so it works even if byte packing not used.
+<br>,
+  BMP reading might now work with big-endian architectures, so
+  might be able to use BMP devices on Unix (if compiled into Ghostscript).
+  (Untested).
+</p>
 <h3>
 1.08 2000-02-15
 </h3>

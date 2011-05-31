@@ -28,19 +28,21 @@ DEFINES=-DUNIX -DEPSTOOL -DHAVE_UNISTD_H
 OBJ=o
 CC=gcc
 
-OBJS=epstool.$(OBJ) gvceps.$(OBJ) ps.$(OBJ)
+OBJS=epstool.$(OBJ) gvceps.$(OBJ) gvcdsc.$(OBJ) gvcfile.$(OBJ)
 
 all: epstool
 
-.c.$(OBJ):
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $*.c
+.cpp.$(OBJ):
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $*.cpp
 
 
-epstool.$(OBJ): epstool.c epstool.h ps.h gvceps.h
+epstool.$(OBJ): epstool.cpp epstool.h gvcdsc.h gvceps.h gvcfile.h
 
-ps.$(OBJ): ps.c epstool.h ps.h gvceps.h
+gvcdsc.$(OBJ): gvcdsc.cpp epstool.h gvcdsc.h gvceps.h gvcfile.h
 
-gvceps.$(OBJ): gvceps.c epstool.h ps.h gvceps.h
+gvceps.$(OBJ): gvceps.cpp epstool.h gvcdsc.h gvceps.h gvcfile.h
+
+gvcfile.$(OBJ): gvcfile.cpp gvcfile.h
 
 epstool: $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) -o epstool $(OBJS) $(LIBS) 
@@ -48,7 +50,8 @@ epstool: $(OBJS)
 clean:
 	-$(RM) epstool.$(OBJ)
 	-$(RM) gvceps.$(OBJ)
-	-$(RM) ps.$(OBJ)
+	-$(RM) gvcdsc.$(OBJ)
+	-$(RM) gvcfile.$(OBJ)
 
 veryclean: clean
 	-$(RM) epstool

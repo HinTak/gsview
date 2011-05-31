@@ -1,5 +1,121 @@
 ----------------------
-Version 2.9 2000-03-20
+Version 3.0 2000-06-15
+----------------------
+All:
+  Updated Italian translation.
+
+  Updated Spanish translation.
+
+  German translation still needs updating for the Printing and
+  Conversion topics.
+
+  French translation still needs updating.
+
+---------------------------
+Version 2.94beta 2000-06-01
+---------------------------
+All:
+  Debug flag /d8 appends Ghostscript messages to the file
+  c:\gsview.txt.  Useful for post-mortem debugging.
+
+  If %%DocumentMedia describes only one media, and default %%PageMedia 
+  is missing, assume that media is the default.
+
+  Fixed GPF caused by GSview closing an already closed file when a
+  PostScript error occurred while extracting text.
+
+  Fixed GPF when DSC scanner found %%BeginData: 
+  without any parameters.  Generate warning message instead.
+
+  Updated Italian translation.
+
+  Updated German translation.  Still needs a bit more work on
+  the help file.
+
+  Added Spanish translation.
+
+Win32:
+  Fixed printing for Win32s.  Win32s comdlg32.dll did not contain
+  the print dialog template and we can't load the template from
+  the 16-bit commdlg.dll.  For Win32s, keep a local copy of the 
+  Windows 3.1 print dialog template (English only).
+
+  Added DDE commands [ShowWindow(nCmdShow)].  The integer value nCmdShow 
+  is the same as for the Windows API ShowWindow(hWnd, nCmdShow).
+  If SW_SHOW or SW_SHOWMAXIMISED or SW_SHOWNORMAL are used, 
+  GSview will be made the foreground window.
+  "gsview32 /E" now brings window to the front using [ShowWindow(1)].
+
+  gsview32 /S"printer name" now works.  GSview exits after file
+  has been spooled.
+
+  GSview now follows the system colours.  If the window background
+  colour is white, an alternative is chosen to allow the edge of 
+  a white page to be seen.
+
+  Updated libbz2.dll to bzip2 1.0.0.
+
+---------------------------
+Version 2.93beta 2000-04-18
+---------------------------
+All:
+  Any line that starts with %%Begin now terminates the comments
+  section.
+
+  "gsview32 /p filename" now prints without prompting, then exits.
+  This uses the printer and print method most recently used by GSview.
+  If print to file is used, you will still get the "Save as" dialog.
+  
+Win32:
+  When uninstalling, don't delete non empty registry keys
+  so the registration information is not deleted when someone
+  uninstalls GSview prior to installing a new version.
+
+  Use GetFileTime() to avoid VC++ 5.0 multithreaded bug in fstat()
+  which caused GSview to continually reopen files.
+
+  Fix word padding of Print common dialog template structure.
+  By chance it was correct for English, but wrong for German.
+
+  Setup program writes "App Paths" key and values so GSview
+  can be run from the start menu or the command line as 
+  "start gsview32".
+
+  When using "Windows GDI printer", an attempt to close GSview
+  before printing has finished results in a warning dialog.
+
+OS/2:
+  IDR_EPSFWARN was always being sent, because IDR_VIEWER didn't
+  have a terminating null.
+
+---------------------------
+Version 2.92beta 2000-04-01
+---------------------------
+All:
+  Fixed %%PaperSize: null pointer access.
+
+  Don't pause when showpage executed in trailer.
+
+  Ignore a few more common DSC comments that don't concern
+  GSview.
+
+Win32:
+  Fixed /t command line option.
+ 
+
+---------------------------
+Version 2.91beta 2000-03-12
+---------------------------
+Win32:
+  Don't start gvwgs32.exe with pipe method when converting.
+
+All:
+  Fixed memory leaks and allocation problems in new DSC code.
+  Memory allocation debugging using /d4.
+  Fixed displaying of PDF files.
+
+----------------------
+Version 2.9 2000-03-19
 ----------------------
 All:
   This is an out of sequence bug fix release to handle an 
@@ -17,8 +133,6 @@ All:
 Win32:
   When compiling gvceps.h with MSVC++, you must use #pragma pack(1).
   epstool would crash because this was not used.
-
-  Correctly handle GS 6.01 - 6.09 when accessing registry variables.
 
 ---------------------------
 Version 2.81beta 2000-03-17

@@ -301,5 +301,6 @@ IDM_TEXTFINDNEXT BITMAP "binary/gvwfindn.bmp"
 
 #include "gvwin2.rc"
 
+
 /* end of gvwin1.rc */
 

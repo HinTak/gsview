@@ -49,7 +49,7 @@ DEBUGLNK=/v
 !endif
 STRIP=tdstrip
 !endif
-OBJS=epstool.obj ps.obj gvceps.obj
+OBJS=epstool.obj gvceps.obj gvcdsc.obj gvcfile.obj gvwgsver.obj
 
 all: epstool.exe
 
@@ -71,13 +71,23 @@ $(LIBDIR)\c$(MODEL)
 !
 !endif
 
-epstool.obj: epstool.c epstool.h ../src/ps.h ../src/gvceps.c
+epstool.obj: epstool.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h ../src/gvceps.cpp
+	$(CC) -c $(CFLAGS) -oepstool.obj epstool.cpp
 
-ps.obj: ../src/ps.c epstool.h ../src/ps.h ../src/gvceps.c
-	$(COMPDIR)\$(CC) -c $(CFLAGS) ../src/ps.c
 
-gvceps.obj: ../src/gvceps.c epstool.h ../src/ps.h
-	$(COMPDIR)\$(CC) -c $(CFLAGS) ../src/gvceps.c
+gvcdsc.obj: ../src/gvcdsc.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
+	$(CC) -c $(CFLAGS) -ogvcdsc.obj ../src/gvcdsc.cpp
+
+gvcfile.obj: ../src/gvcfile.cpp ../src/gvcfile.h
+	$(CC) -c $(CFLAGS) -ogvcfile.obj ../src/gvcfile.cpp
+
+gvceps.obj: ../src/gvceps.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
+	$(CC) -c $(CFLAGS) -ogvceps.cpp ../src/gvceps.cpp
+
+gvwgsver.obj: ../src/gvwgsver.cpp
+	$(CC) -c $(CFLAGS) -ogvwgsver.cpp ../src/gvwgsver.cpp
+
+
 
 
 veryclean: clean

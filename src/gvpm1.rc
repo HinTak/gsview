@@ -20,6 +20,7 @@
 
 #include <os2.h>
 #include "gvcrc.h"
+#define GSVIEW_RCDATA(x) RCDATA x
 #include "gvclang.h"
 
 #define GVPM1
@@ -96,7 +97,7 @@ BEGIN
 	"  countdictstack eps_countdictstack\015\012"
 	"  ne {(Warning: EPS file altered dictionary stack count\\n) print flush} if\015\012"
 	"} def\015\012"
-	"\0"
+	"\0\0"
 END
 
 /* ViewerPreProcess hook */
@@ -224,6 +225,7 @@ BEGIN
 "  >> put\015\012"
 "  end % pop systemdict \015\012"
 "}\015\012"
+"\0\0"
 END
 
 
