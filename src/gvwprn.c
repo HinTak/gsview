@@ -345,7 +345,7 @@ PrintAbortProc(HDC hdcPrn, int code)
 /* port==NULL means prompt for port with dialog box */
 /* Win32s ignores the port parameter */
 int
-gp_printfile(char *filename, char *port)
+gp_printfile_win32s(char *filename, char *port)
 {
 HDC printer;
 PRINTDLG pd;
@@ -411,6 +411,100 @@ int error = TRUE;
 	fclose(f);
 	return !error;
 }
+
+/* Print File */
+int
+gp_printfile_win95(char *filename, char *pmport)
+{
+/* Get printer port from win.ini, then copy to \\.\port */
+#define PRINT_BUF_SIZE 1048
+char *buffer;
+char *portname;
+int i, port;
+FILE *f;
+WORD count;
+int error = FALSE;
+long lsize;
+long ldone;
+char pcdone[20];
+MSG msg;
+FILE *outfile;
+
+	/* get list of ports */
+	if ((buffer = malloc(PRINT_BUF_SIZE)) == (char *)NULL)
+	    return FALSE;
+
+	if ( (pmport == (char *)NULL) || (strlen(pmport)==0) || (strcmp(pmport, "PRN")==0) ) {
+	    GetProfileString("ports", NULL, "", buffer, PRINT_BUF_SIZE);
+	    /* select a port */
+	    port = DialogBoxParam(phInstance, "SpoolDlgBox", hwndtext, SpoolDlgProc, (LPARAM)buffer);
+	    if (!port) {
+	        free(buffer);
+	        return FALSE;
+	    }
+	    portname = buffer;
+	    for (i=1; i<port && strlen(portname)!=0; i++)
+	        portname += lstrlen(portname)+1;
+	}
+	else
+	    portname = (char *)pmport;	/* Print Manager port name already supplied */
+
+	if ((f = fopen(filename, "rb")) == (FILE *)NULL) {
+	    free(buffer);
+	    return FALSE;
+	}
+	fseek(f, 0L, SEEK_END);
+	lsize = ftell(f);
+	if (lsize <= 0)
+	    lsize = 1;
+	fseek(f, 0L, SEEK_SET);
+
+	
+	outfile = fopen(portname, "wb");
+	if (outfile == (FILE *)NULL) {
+		fclose(f);
+		free(buffer);
+		return FALSE;
+	}
+
+	hDlgModeless = CreateDialog(phInstance, "CancelDlgBox", hwndtext, CancelDlgProc);
+	ldone = 0;
+
+	while (!error && hDlgModeless 
+	  && (count = fread(buffer, 1, PRINT_BUF_SIZE, f)) != 0 ) {
+	    if (fwrite(buffer, 1, count, outfile) < count)
+		error = TRUE;
+	    ldone += count;
+	    sprintf(pcdone, "%d %%done", (int)(ldone * 100 / lsize));
+	    SetWindowText(GetDlgItem(hDlgModeless, CANCEL_PCDONE), pcdone);
+	    while (PeekMessage(&msg, hDlgModeless, 0, 0, PM_REMOVE)) {
+		if ((hDlgModeless == 0) || !IsDialogMessage(hDlgModeless, &msg)) {
+		    TranslateMessage(&msg);
+		    DispatchMessage(&msg);
+  		}
+  	    }
+  	}
+	free(buffer);
+	fclose(f);
+
+	if (!hDlgModeless)
+	    error=TRUE;
+	DestroyWindow(hDlgModeless);
+	hDlgModeless = 0;
+	fclose(outfile);
+	return !error;
+}
+
+/* Print File */
+int
+gp_printfile(char *filename, char *pmport)
+{
+	if (is_win95)  /* perhaps WinNT should also use this version */
+	    gp_printfile_win95(filename, pmport);
+	else
+	    gp_printfile_win32s(filename, pmport);
+}
+
 #else /* !__WIN32__ */
 /* Print File to port */
 /* port==NULL means prompt for port with dialog box */

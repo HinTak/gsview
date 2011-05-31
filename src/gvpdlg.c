@@ -106,14 +106,12 @@ int i;
 	    if (*p == '/')
 		*p = '\\';
 	}
-	if (filter) {
-	    i = strlen(FileDlg.szFullFile);
-	    if (i && FileDlg.szFullFile[i-1]!='\\') {
-		strcat(FileDlg.szFullFile, "\\");
-		i++;
-	    }
-	    load_string(IDS_FILTER_BASE+filter, FileDlg.szFullFile+i, sizeof(FileDlg.szFullFile)-i);
+	i = strlen(FileDlg.szFullFile);
+	if (i && FileDlg.szFullFile[i-1]!='\\') {
+	    strcat(FileDlg.szFullFile, "\\");
+	    i++;
 	}
+	load_string(IDS_FILTER_BASE+filter, FileDlg.szFullFile+i, sizeof(FileDlg.szFullFile)-i);
 	WinFileDlg(HWND_DESKTOP, hwnd_frame, &FileDlg);
 	if (FileDlg.lReturn == DID_OK) {
 	    f = (FILE *)NULL;

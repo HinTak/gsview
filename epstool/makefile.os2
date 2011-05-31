@@ -60,7 +60,7 @@ INCDIR=$(EMXPATH)/include
 LIBDIR=$(EMXPATH)/lib
 
 
-OBJS=epstool.$(OBJ) gvceps.$(OBJ) gvcdsc.$(OBJ)
+OBJS=epstool.$(OBJ) gvceps.$(OBJ) ps.$(OBJ)
 
 all: epstool.exe
 
@@ -68,12 +68,12 @@ all: epstool.exe
 	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c $*.c
 
 
-epstool.$(OBJ): epstool.c epstool.h ../src/gvcdsc.h
+epstool.$(OBJ): epstool.c epstool.h ../src/ps.h
 
-gvcdsc.$(OBJ): ../src/gvcdsc.c epstool.h ../src/gvcdsc.h
+ps.$(OBJ): ../src/ps.c epstool.h ../src/ps.h
 	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.c
 
-gvceps.$(OBJ): ../src/gvceps.c epstool.h ../src/gvcdsc.h
+gvceps.$(OBJ): ../src/gvceps.c epstool.h ../src/ps.h
 	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.c
 
 epstool.exe: $(OBJS) epstool.def
@@ -92,7 +92,7 @@ epstool.exe: $(OBJS) epstool.def
 clean:
 	-del epstool.$(OBJ)
 	-del gvceps.$(OBJ)
-	-del gvcdsc.$(OBJ)
+	-del ps.$(OBJ)
 
 veryclean: clean
 	-del epstool.exe

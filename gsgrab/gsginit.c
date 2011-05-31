@@ -117,6 +117,8 @@ char buf[64];
 /*
 	strcat(szCommand, "-c quit");
 */
+	if (strlen(szCommand) >= 127)
+	    MessageBox(hwndgrab, "Ghostscript command line is too long", szAppName, MB_OK);
 
 	GetPrivateProfileString(szOptionSection, "Version", "", buf, sizeof(buf), szIniName);
 	if (strcmp(buf, GSGRAB_VERSION)) {

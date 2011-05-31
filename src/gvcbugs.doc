@@ -1,5 +1,5 @@
 /* gvcbugs.doc */
-Known problems with GSview  1995-04-18
+Known problems with GSview  1995-05-23
 
 ALL
 ===
@@ -9,18 +9,40 @@ Ghostscript 3.12.  Works correctly with Ghostscript 2.6.1.
 This is a problem with Ghostscript 3.12, not GSview.
 Works correctly with Ghostscript 3.33
 
-Filenames with spaces probably won't work on the command line.
-
 
 MS-WINDOWS
 ==========
 
+
+MS-WINDOWS Win32s
+=================
+For a display size of 1024x768x64k, the image window will appear blank
+if it is taller than 576 pixels.  This is a bug in Windows/Win32s 1.2,
+and is not a bug in GSview or Ghostscript.
 
 MS-WINDOWS NT
 =============
 
 Occasionally gives "pipe handle is zero" errors.
 This will be fixed when I rewrite the GSview/Ghostscript interface.
+
+
+MS-WINDOWS 95
+=============
+
+If you grab the new resize square at the bottom right of the 
+window and you are using an unpatched version of Ghostscript 3.33,
+GSview will lock up.  The patched version of Ghostscript
+(gs333w32.exe dated after 23 May 1995) ignores the resize square.
+
+Orientation for Windows 95 produced postscript won't change.
+
+Ghostscript 3.33 under Windows 95 will not print to a printer port 
+except with the device mswinpr2.
+You may need to use the GSview "Print to File" and then "Print File".
+A patched version (gs333w32.exe dated after 23 May 1995) will print
+direct to print ports.
+
 
 OS/2
 ====

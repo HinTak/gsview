@@ -26,7 +26,10 @@ LPSTR old_lpstrFile;
 LPCSTR old_lpstrTitle;
 char szTitle[MAXSTR];
 BOOL flag;
-char temp[MAXSTR];
+LPCSTR old_lpstrFilter;
+char szFilter[256];		/* filter for OFN */
+int i;
+char cReplace;
 	if (help)
 	    LoadString(phInstance, help, szHelpTopic, sizeof(szHelpTopic));
 	old_lpstrTitle = ofn.lpstrTitle;
@@ -37,14 +40,26 @@ char temp[MAXSTR];
 	old_lpstrFile = ofn.lpstrFile;
 	if (filename != (LPSTR)NULL)
 		ofn.lpstrFile = filename;
-	ofn.nFilterIndex = filter;
+	/* Get filter types */
+	old_lpstrFilter = ofn.lpstrFilter;
+	ofn.nFilterIndex = 0;
+	if (LoadString(phInstance, IDS_FILTER_BASE+filter, szFilter, sizeof(szFilter)-1)) {
+	    cReplace = szFilter[strlen(szFilter)-1];
+	    for (i=0; szFilter[i] != '\0'; i++)
+	        if (szFilter[i] == cReplace)
+		    szFilter[i] = '\0';
+	    ofn.lpstrFilter = szFilter;
+	    ofn.nFilterIndex = 0;
+	}
+	/* call the common dialog box */
 	if (save)
 	    flag = GetSaveFileName(&ofn);
 	else
 	    flag = GetOpenFileName(&ofn);
 	ofn.lpstrTitle = old_lpstrTitle;
 	ofn.lpstrFile = old_lpstrFile;
-	ofn.nFilterIndex = FILTER_PS;
+	ofn.lpstrFilter = old_lpstrFilter;
+	ofn.nFilterIndex = 0;
 	if ( save && flag && 
 	        (psfile.name[0]!='\0') && (lstrcmp(filename, psfile.name) == 0) ) {
 	    gserror(IDS_NOTDFNAME, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
@@ -175,10 +190,19 @@ AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	    {DWORD dwUnit = GetDialogBaseUnits();
 	    RECT rect; POINT pt;
 	    pt.x = LOWORD(lParam); pt.y = HIWORD(lParam);
-	    rect.left   =   8 * LOWORD(dwUnit) / 4;
-	    rect.top    = 146 * HIWORD(dwUnit) / 8;
-	    rect.right  = 240 * LOWORD(dwUnit) / 4 + rect.left;
-	    rect.bottom =   8 * HIWORD(dwUnit) / 8 + rect.top;
+		/* this is for 8pt dialog fonts */
+		rect.left   =   8 * LOWORD(dwUnit) / 5;
+		rect.top    = 146 * HIWORD(dwUnit) / 10;
+		rect.right  = 240 * LOWORD(dwUnit) / 5 + rect.left;
+		rect.bottom =  10 * HIWORD(dwUnit) / 10 + rect.top;
+#ifdef NOTUSED
+		/* this is for 10pt dialog fonts */
+		rect.left   =   8 * LOWORD(dwUnit) / 4;
+		rect.top    = 146 * HIWORD(dwUnit) / 8;
+		rect.right  = 240 * LOWORD(dwUnit) / 4 + rect.left;
+		rect.bottom =   8 * HIWORD(dwUnit) / 8 + rect.top;
+#endif
+
 	    if (PtInRect(&rect,pt)) {
 		BITMAP bm;
 		HBITMAP hbitmap_old;

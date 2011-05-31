@@ -38,12 +38,15 @@ gsview_init0(LPSTR lpszCmdLine)
 {
 	HWND hwnd = FindWindow(szClassName, szAppName);
 	BringWindowToTop(hwnd);
+#if __BORLANDC__ == 0x452
+	/* avoid bug in BC++ 4.0 */
 #ifdef __WIN32__
 	/* skip over EXE name */
 	while ( *lpszCmdLine && (*lpszCmdLine!=' ')) 
 		lpszCmdLine++;
 	while ( *lpszCmdLine && (*lpszCmdLine==' ')) 
 		lpszCmdLine++;
+#endif
 #endif
 	if (lstrlen(lpszCmdLine) != 0) {
 	    /* open file specified on command line */
@@ -75,6 +78,7 @@ int length = 64;
 	if (length == 0)
 	    exit(0);	/* panic */
 	
+	/* figure out which version of Windows */
 	if ((LOBYTE(LOWORD(version))<<8) + HIBYTE(LOWORD(version)) >= 0x30a)
 	    is_win31 = TRUE;
 #ifdef __WIN32__
@@ -82,8 +86,9 @@ int length = 64;
 	if ((HIWORD(version) & 0x8000)==0)
 	    is_winnt = TRUE;
 	/* check if Windows 95 (Windows 4.0) */
-	if ((LOBYTE(LOWORD(version))<<8) + HIBYTE(LOWORD(version)) >= 0x400)
-	    is_winnt = TRUE;
+	if ((LOBYTE(LOWORD(version))<<8) + HIBYTE(LOWORD(version)) >= 0x400) {
+	    is_win95 = TRUE;
+	}
 #endif
 
 	/* get path to EXE */
@@ -190,12 +195,15 @@ int length = 64;
 	    }
 	}
 
+#if __BORLANDC__ == 0x452
+	/* avoid bug in BC++ 4.0 */
 #ifdef __WIN32__
 	/* skip over EXE name */
 	while ( *lpszCmdLine && (*lpszCmdLine!=' ')) 
 		lpszCmdLine++;
 	while ( *lpszCmdLine && (*lpszCmdLine==' ')) 
 		lpszCmdLine++;
+#endif
 #endif
 
 	if (lstrlen(lpszCmdLine) >= 2) {
@@ -211,6 +219,16 @@ int length = 64;
 	    /* open file specified on command line */
 	    HGLOBAL hglobal;
 	    LPSTR szFile;
+	    /* deal with filenames in quotes */
+	    /* quotes within filenames are not permitted */
+	    if (*lpszCmdLine == '\042') {
+		LPSTR p;
+		lpszCmdLine++;	/* skip over first quote */
+		p = lpszCmdLine;
+		while (*p && (*p != '\042'))
+		    p++;
+		*p = '\0';	/* remove end quote */
+	    }
 	    hglobal = GlobalAlloc(GHND | GMEM_SHARE, lstrlen(lpszCmdLine)+1);
 	    if (hglobal) {
 	        szFile = GlobalLock(hglobal);
@@ -265,6 +283,8 @@ WNDPROC	lpfnMenuButtonProc;
 POINT char_size;		/* size of default text characters */
 POINT button_size, button_shift;
 char thismedia[20];
+LOGFONT lf;
+HFONT old_hfont;
 
 	/* setup OPENFILENAME struct */
 	if (!LoadString(phInstance, IDS_FILTER, szOFilter, sizeof(szOFilter)-1))
@@ -291,10 +311,15 @@ char thismedia[20];
 
 	/* get default text size */
 	hdc = GetDC(hwndimg);
+	memset(&lf, 0, sizeof(LOGFONT));
+	lf.lfHeight = 8;  /* 8 pts */
+	strcpy(lf.lfFaceName, "Helv");
+	info_font = CreateFontIndirect(&lf);
+	old_hfont = SelectObject(hdc, info_font);
 	GetTextMetrics(hdc,(LPTEXTMETRIC)&tm);
 	display.planes = GetDeviceCaps(hdc, PLANES);
 	display.bitcount = GetDeviceCaps(hdc, BITSPIXEL);
-	
+	SelectObject(hdc, old_hfont);
 	ReleaseDC(hwndimg,hdc);
 	char_size.x = tm.tmAveCharWidth;
 	char_size.y = tm.tmHeight;
@@ -303,7 +328,7 @@ char thismedia[20];
 	info_rect.left = 0;
 	info_rect.right = info_rect.left + 64 * char_size.x;
 	info_rect.top = 0;
-	info_rect.bottom = char_size.y;
+	info_rect.bottom = char_size.y+4;
 	button_size.x = 24;
 	button_size.y = 24;
 	button_shift.x = 0;
@@ -318,13 +343,13 @@ char thismedia[20];
 	img_offset.x = button_rect.right + (option.button_show ? 1 : 0);
 	img_offset.y = info_rect.bottom + 1;
 	info_file.x = info_rect.left + 2;
-	info_file.y = 0;
+	info_file.y = 2;
 	info_coord.left = info_rect.left + 20 * char_size.x;
 	info_coord.right = info_rect.left + 34 * char_size.x;
-	info_coord.top = 0;
-	info_coord.bottom = char_size.y;
+	info_coord.top = 2;
+	info_coord.bottom = char_size.y+4;
 	info_page.x = info_rect.left + 36 * char_size.x + 2;
-	info_page.y = 0;
+	info_page.y = 2;
 
 	/* check menu items */
 	for (i=IDM_LETTER; i<IDM_USERSIZE; i++) {

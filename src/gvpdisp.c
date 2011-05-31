@@ -159,6 +159,96 @@ cleanup_pgm(PROG* prog)
 	prog->process_id = (PID)0;
 }
 
+BOOL
+pdf_convert(char *name, char *arg, PROG* prog)
+{
+	STARTDATA sdata;
+	APIRET rc;
+	char buf[256];
+	CHAR progname[256];
+	int pipe_handle[2];
+	PTIB pptib;
+	PPIB pppib;
+
+	REQUESTDATA Request;
+	ULONG DataLength;
+	PVOID DataAddress;
+	BYTE ElemPriority;
+	char term_queue_name[MAXSTR];
+	HQUEUE term_queue;	/* termination queue for child sessions */
+
+	if (DosGetInfoBlocks(&pptib, &pppib)) {
+		error_message("\nexec_pgm: Couldn't get environment\n");
+		return FALSE;
+	}
+
+	/* create termination queue so we can wait for conversion to finish */
+	sprintf(term_queue_name, "\\QUEUES\\PDF_%s", gsview.id);
+	if ( (rc = DosCreateQueue(&term_queue, QUE_FIFO, term_queue_name)) != 0 ) {
+		sprintf(buf,"Failed to create: \"%s\", rc = %d\n", term_queue_name, rc);
+		error_message(buf);
+		return FALSE;
+	}
+
+	/* Look for program in same directory as this EXE */
+	progname[0] = '\0';
+	if (!strchr(name, '\\'))
+	    strcpy(progname, szExePath);
+	strcat(progname, name);
+	
+	/* because new program is a different EXE type, 
+	 * we must use start session not DosExecPgm() */
+	sdata.Length = sizeof(sdata);
+	sdata.Related = SSF_RELATED_CHILD;	/* to be a child  */
+	sdata.FgBg = SSF_FGBG_BACK;		/* start in background */
+	sdata.TraceOpt = 0;
+	sdata.PgmTitle = name;
+	sdata.PgmName = progname;
+	sdata.PgmInputs = arg;
+	sdata.TermQ = term_queue_name;
+	sdata.Environment = pppib->pib_pchenv;	/* use Parent's environment */
+	sdata.InheritOpt = 0;
+	sdata.SessionType = SSF_TYPE_DEFAULT;		/* default is text */
+	sdata.IconFile = NULL;
+	sdata.PgmHandle = 0;
+	sdata.PgmControl = 0;
+	sdata.InitXPos = 0;
+	sdata.InitYPos = 0;
+	sdata.InitXSize = 0;
+	sdata.InitYSize = 0;
+	sdata.ObjectBuffer = NULL;
+	sdata.ObjectBuffLen = 0;
+
+/*
+sprintf(buf,"pdf_convert: %s %s\n",sdata.PgmName, sdata.PgmInputs);
+message_box(buf, 0);
+*/
+	rc = DosStartSession(&sdata, &prog->session_id, &prog->process_id);
+	if (rc == ERROR_FILE_NOT_FOUND) {
+	    /* didn't find it in same directory as this EXE so try PATH */
+	    sdata.PgmName = name;
+	    rc = DosStartSession(&sdata, &prog->session_id, &prog->process_id);
+	}
+	if (rc) {
+	    DosCloseQueue(term_queue);
+	    sprintf(buf,"\"%s %s\", rc = %d\n", sdata.PgmName, sdata.PgmInputs, rc);
+	    gserror(IDS_CANNOTRUN, buf, MB_ICONHAND, SOUND_ERROR);
+	    load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
+	    get_help();
+	    return FALSE;
+	}
+
+	/* wait for PDF converter to finish */
+	DosReadQueue(term_queue, &Request, &DataLength, &DataAddress, 
+			0, DCWW_WAIT, &ElemPriority, (HEV)NULL);
+	if (DataAddress != NULL)
+	    DosFreeMem(DataAddress);
+
+	DosCloseQueue(term_queue);
+
+	cleanup_pgm(prog);
+	return TRUE;
+}
 
 
 BOOL

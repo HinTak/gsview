@@ -133,6 +133,7 @@ _getcwd(char *dirname, int size)
 {
 #ifdef __WIN32__
 	GetCurrentDirectory(size, dirname);
+	return dirname;
 #else
 	return getcwd(dirname, size);
 #endif

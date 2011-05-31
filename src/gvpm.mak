@@ -193,13 +193,14 @@ doc2tex.exe: doc2tex.c
 !endif
 
 
-prezip: gvpm.exe gvpm.hlp gvpm.inf README.GV LICENCE
+prezip: gvpm.exe gvpm.hlp gvpm.inf README.GV FILE_ID.DIZ LICENCE
 	copy gvpm.exe ..
 	emxbind -s ../gvpm.exe
 	copy gvpm.hlp ..
 	copy gvpm.inf ..
-	copy README.GV ..
-	copy LICENCE ..
+	copy README.GV ..\README.GV
+	copy FILE_ID.DIZ ..\FILE_ID.DIZ
+	copy LICENCE ..\LICENCE
 	-del ..\gsview.zip
 
 zip: prezip

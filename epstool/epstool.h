@@ -81,7 +81,7 @@ char *getcwd(char *, int);
 #endif
 #endif
 
-#include "gvcdsc.h"
+#include "ps.h"
 #include "gvceps.h"
 
 #define TRUE 1
@@ -97,6 +97,16 @@ char *getcwd(char *, int);
 extern char oname[MAXSTR];
 extern char szScratch[];
 extern char szAppName[];
+
+typedef struct tagPSBBOX {
+	int	llx;
+	int	lly;
+	int	urx;
+	int	ury;
+	int	valid;
+} PSBBOX;
+
+typedef struct document PSDOC;
 
 typedef struct tagPSFILE {
 	BOOL	ignore_dsc;	/* true if DSC to be ignored */

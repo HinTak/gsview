@@ -41,9 +41,9 @@ extern BOOL is_pipe_done(void);	/* true if pipe has just been reset */
 /* In gsview 1.0, Ghostscript 2.6.1 and earlier, 
  * The global handle was passed in the LOWORD of lParam 
  * and the HIWORD contained the byte count.
- * This was changed in gsview 1.1, Ghostscript 3.0 so that
+ * This was changed in gsview 1.1, Ghostscript 3.0 so that a
  * 32 bit handle could be used for Win32  */
-/* In gsview 1.2, Windows NT uses a memory mapped file */
+/* In gsview 1.2, Windows NT or 95 uses a memory mapped file */
 
 char pipe_name[MAXSTR];		/* pipe filename */
 FILE *pipe_file;		/* pipe file */
@@ -73,7 +73,7 @@ pipeopen(void)
 	    pipe_name[0] = '\0';
 	}
 #ifdef __WIN32__
-	if (is_winnt) {
+	if (is_winnt || is_win95) {
 	    char buf[64];
 	    if (pipe_hmapfile != 0) {
 		if (pipe_mapptr != NULL)
@@ -132,7 +132,7 @@ LPBYTE lpb;
 	  else {
 #endif
 #ifdef __WIN32__
-	    if (is_winnt) {
+	    if (is_winnt || is_win95) {
 		/* send an EOF (zero length block) */
 		*((WORD *)pipe_mapptr) = 0;
 		PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, (LPARAM)hwndimg);
@@ -194,7 +194,7 @@ UINT count;
 	    return; 
 
 #ifdef __WIN32__
-	if (is_winnt) {
+	if (is_winnt || is_win95) {
 	    memcpy(pipe_mapptr+sizeof(WORD), pipebuf, count);
 	    *((WORD *)pipe_mapptr) = (WORD)count;
 	    PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, (LPARAM)hwndimg);

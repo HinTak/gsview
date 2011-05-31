@@ -22,6 +22,10 @@
 #include "gvcrc.h"
 #include "gvwin2.rc"	/* language independent resources */
 
+#ifndef DS_3DLOOK
+#define DS_3DLOOK 0x0004L	/* for Windows 95 look */
+#endif
+
 gsview_menu MENU
 BEGIN
 	POPUP "&File"
@@ -187,7 +191,7 @@ END
 STRINGTABLE
 BEGIN
 	/* general strings */
-	IDS_FILTER, "Default (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|Bitmap Files (*.bmp)|*.bmp|TIFF Files (*.tif)|*.tif|Metafiles (*.wmf)|*.wmf|Text (*.txt|*.txt|"
+	IDS_FILTER, "Default (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|Bitmap Files (*.bmp)|*.bmp|TIFF Files (*.tif)|*.tif|Windows Metafiles (*.wmf)|*.wmf|Text (*.txt|*.txt|"
 #ifdef __WIN32__
 	IDS_TITLE, "GSview for Windows 32"
 #else
@@ -215,6 +219,7 @@ BEGIN
 	IDS_EPSW, "EPS with Metafile Preview"
 	IDS_DSC, "DSC"
 	IDS_NOTDSC, "No DSC comments"
+	IDS_PDF, "Portable Document Format"
 	IDS_IGNOREDSC, "Ignoring DSC comments"
 	IDS_PAGEINFO, "Page: \"%s\"  %d of %d"
 END
@@ -309,9 +314,24 @@ BEGIN
 	IDS_WAITSEARCH,  "Searching..."
 END
 
+STRINGTABLE
+BEGIN
+	/* filter strings */
+	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi)|*.ps;*.eps;*.epi|PS Files (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|"
+	IDS_FILTER_PS, "Default (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|"
+	IDS_FILTER_EPS, "EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|PS Files (*.ps)|*.ps|All Files (*.*)|*.*|"
+	IDS_FILTER_EPI, "EPI Files (*.epi)|*.epi|EPS Files (*.eps)|*.eps|PS Files (*.ps)|*.ps|All Files (*.*)|*.*|"
+	IDS_FILTER_ALL, "All Files (*.*)|*.*|"
+	IDS_FILTER_BMP, "Bitmap Files (*.bmp)|*.bmp|All Files (*.*)|*.*|"
+	IDS_FILTER_TIFF, "TIFF Files (*.tif)|*.tif|All Files (*.*)|*.*|"
+	IDS_FILTER_WMF, "Windows Metafiles (*.wmf)|*.wmf|All Files (*.*)|*.*|"
+	IDS_FILTER_TXT, "Text Files (*.txt)|*.txt|All Files (*.*)|*.*|"
+END
+
 AboutDlgBox DIALOG 20, 32, 256, 164
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
 CAPTION "About GSview for Windows"
+Font 8, "Helv"
 BEGIN
 	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 218, 5, 32, 14
 #ifdef __WIN32__
@@ -340,8 +360,9 @@ BEGIN
 END
 
 InputDlgBox DIALOG 48, 32, 192, 56
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
 CAPTION "Input"
+Font 8, "Helv"
 BEGIN
 	LTEXT "", ID_PROMPT, 6, 6, 180, 10
 	CONTROL "", ID_ANSWER, "edit", ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD, 6, 18, 180, 12
@@ -351,8 +372,9 @@ BEGIN
 END
 
 InfoDlgBox DIALOG 20, 32, 175, 107
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
 CAPTION "Info"
+Font 8, "Helv"
 BEGIN
 	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 136, 89, 32, 14
 	RTEXT "File:", -1, 24, 8, 32, 8
@@ -381,8 +403,9 @@ BEGIN
 END
 
 SoundDlgBox DIALOG 16, 40, 204, 94
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
 CAPTION "Sounds"
+Font 8, "Helv"
 BEGIN
 	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 12, 32, 14
 	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 32, 32, 14
@@ -396,8 +419,9 @@ BEGIN
 END
 
 SpoolDlgBox DIALOG 32, 40, 110, 63
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
 CAPTION "Select Printer Port"
+Font 8, "Helv"
 BEGIN
 	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 72, 14, 32, 14
 	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 72, 36, 32, 14
@@ -405,7 +429,8 @@ BEGIN
 END
 
 CancelDlgBox DIALOG 32, 40, 120, 48
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | DS_3DLOOK
+Font 8, "Helv"
 BEGIN
 	CTEXT "Printing", -1, 8, 4, 104, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
 	CTEXT "", CANCEL_PCDONE, 8, 16, 104, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
@@ -413,7 +438,8 @@ BEGIN
 END
 
 PageDlgBox DIALOG 64, 32, 80, 142
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+Font 8, "Helv"
 BEGIN
 	CONTROL "", PAGE_LIST, "LISTBOX", LBS_NOTIFY | LBS_MULTIPLESEL | LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 8, 28, 128
 	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 8, 32, 14
@@ -424,8 +450,9 @@ BEGIN
 END
 
 DeviceDlgBox DIALOG 16, 40, 212, 94
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
 CAPTION "Select Device"
+Font 8, "Helv"
 BEGIN
 	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 12, 40, 14
 	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 32, 40, 14
@@ -438,8 +465,9 @@ BEGIN
 END
 
 PropDlgBox DIALOG 16, 40, 204, 94
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
 CAPTION "Edit Properties"
+Font 8, "Helv"
 BEGIN
 	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 12, 32, 14
 	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 32, 32, 14
@@ -451,8 +479,9 @@ BEGIN
 END
 
 BoundingBoxDlgBox DIALOG 12, 24, 120, 15
-STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_EX_TOPMOST
+STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_EX_TOPMOST | DS_3DLOOK
 CAPTION "BoundingBox"
+Font 8, "Helv"
 BEGIN
 	CTEXT "", BB_PROMPT, 4, 4, 112, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
 END

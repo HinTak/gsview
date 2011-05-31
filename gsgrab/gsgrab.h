@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -17,7 +17,7 @@
 
 /* gsgrab.h */
 
-#define GSGRAB_VERSION	"0.2alpha 1994-04-10"
+#define GSGRAB_VERSION	"0.3alpha 1995-04-26"
 
 #define GRABICON	100
 

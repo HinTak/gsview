@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -48,7 +48,7 @@ CAPTION "About GSgrab"
  RTEXT "Version:", -1, 86, 8, 32, 8
  LTEXT "", IDC_VERSION, 120, 8, 96, 8
  LTEXT "Grab PostScript from the file GSGRAB and", -1, 32, 16, 160, 8
- LTEXT "Copyright (C) 1994, Russell Lang.  All rights reserved.", -1, 7, 36, 240, 8
+ LTEXT "Copyright (C) 1994, 1995, Russell Lang.  All rights reserved.", -1, 7, 36, 240, 8
  LTEXT "This program is distributed with NO WARRANTY OF ANY KIND.  No author", -1, 7, 48, 240, 8
  LTEXT "or distributor accepts any responsibility for the consequences of using it,", -1, 7, 56, 240, 8
  LTEXT "or for whether it serves any particular purpose or works at all, unless he", -1, 7, 64, 240, 8

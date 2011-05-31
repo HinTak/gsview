@@ -1,7 +1,7 @@
 ===============================================================
-README.GV         1995-04-18
+README.GV         1995-05-23
 ===============================================================
-PM GSview and GSview for Windows. Needs Ghostscript 3.33.
+GSview 1.3 - PostScript previewer.  Needs Ghostscript 3.33.
 
 ========
 Overview
@@ -45,6 +45,10 @@ New features in version 1.2:
  - Works under Windows NT 3.5.
  - Draw bounding box over image (OS/2 only).
  - Works with GS 2.6.1 under MS-Windows, but not recommended.
+New features in version 1.3:
+ - Display PDF files (OS/2 only).
+ - Works under Windows 95 (see gvcbugs.doc)
+ - Smaller text in Windows Dialog boxes.
 
 PM GSview and GSview for Windows were written by 
 Russell Lang <rjl@aladdin.com>
@@ -83,8 +87,9 @@ GSview will probably run under Windows 3.0, but you need a special
 version of commdlg.dll, shell.dll and winhelp.exe.  This version has never 
 been tested with Windows 3.0.  If it works at all consider yourself lucky.
 
-gsview32.exe will work with Ghostscript under Windows 3.1/Win32s and
-Windows NT 3.5, but may have a few problems with the latter.
+gsview32.exe will work with Ghostscript under Windows 3.1/Win32s, 
+Windows NT 3.5 or Windows 95, but may have a few problems with the 
+latter two.
 
 See the on-line help for more details.
 The 'Common Problems' topic is worth reading if GSview won't work.
@@ -92,7 +97,6 @@ The 'Common Problems' topic is worth reading if GSview won't work.
 ====
 Bugs
 ====
-This is PM GSview and GSview for Windows 1.2.
 Send bug reports to Russell Lang <rjl@aladdin.com>.
 (This is an alias provided by Aladdin Enterprises.  Russell Lang is not 
 an employee or agent of Aladdin Enterprises).
@@ -111,7 +115,7 @@ Updates
 =======
 The latest version of PM GSview and GSview for Windows should 
 be available from
-  ftp://ftp.cs.wisc.edu/pub/ghost/rjl/gsview*.zip
+  ftp://ftp.cs.wisc.edu/ghost/rjl/gsview*.zip
 or by mail (see next section).
 
 A World Wide Web home page for Ghostscript, Ghostview and GSview is at

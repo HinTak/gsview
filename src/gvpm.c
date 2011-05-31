@@ -61,6 +61,7 @@ GVIEW gsview;		/* GSview structure */
 PSFILE psfile;		/* Postscript file structure */
 BMAP bitmap;		/* Bitmap structure */
 PROG gsprog;		/* Ghostscript program structure */
+PROG pdfconv;		/* Ghostscript running PDF converter */
 OPTIONS option;		/* GSview options (saved in INI file) */
 DISPLAY display;	/* Display parameters */
 PRINTER printer;	/* Printer GS parameters */
@@ -290,6 +291,8 @@ exit_func(void)
 	        unlink(printer.fname);
 	    printer.fname[0] = '\0';
 	}
+	if (psfile.ispdf && psfile.name[0] && psfile.pdftemp[0])
+	    unlink(psfile.pdftemp);  /* remove temporary DSC file */
 	if (option.settings)
 	    write_profile();
 	DosCloseQueue(gsview.term_queue);

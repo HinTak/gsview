@@ -43,7 +43,10 @@ info_init(HWND hwnd)
 	    if (psfile.ctrld)
 		load_string(IDS_NOTDSC, buf, sizeof(buf));
 	    else  {
-		if (doc->epsf) {
+		if (psfile.ispdf) {
+		    load_string(IDS_PDF, buf, sizeof(buf));
+		}
+		else if (doc->epsf) {
 		    switch (psfile.preview) {
 			case IDS_EPSI:
 			  load_string(IDS_EPSI, buf, sizeof(buf));

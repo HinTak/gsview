@@ -152,7 +152,8 @@ typedef struct tagPSFILE {
 	BOOL	previous_was_dsc;
 	long	previous_begintrailer;
 	long	previous_endtrailer;
-	
+	BOOL	ispdf;		/* true if PDF document */
+	char 	pdftemp[MAXSTR]; /* name of temporary DSC file */
 } PSFILE;
 
 /* options that are saved in INI file */
@@ -326,6 +327,7 @@ extern PFNWP OldFrameWndProc;
 
 
 extern PROG gsprog;
+extern PROG pdfconv;
 extern OPTIONS option;
 extern PSFILE psfile; 
 extern GVIEW gsview;
@@ -406,6 +408,7 @@ BOOL do_output(void);
 BOOL exec_pgm(char *name, char *arg, BOOL withpipe, PROG* prog);
 void stop_pgm(PROG* prog);
 void cleanup_pgm(PROG *prog);
+BOOL pdf_convert(char *name, char *arg, PROG* prog);
 BOOL gs_open(void);
 BOOL gs_close(void);
 void next_page(void);

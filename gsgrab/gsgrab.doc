@@ -103,7 +103,7 @@
 
   GSgrab.EXE - A Ghostscript printer interface
 
- Copyright (C) 1994, Russell Lang.  All rights reserved.
+ Copyright (C) 1994, 1995, Russell Lang.  All rights reserved.
   
  This program is distributed with NO WARRANTY OF ANY KIND.  No author
  or distributor accepts any responsibility for the consequences of using it,
@@ -136,3 +136,15 @@
  Printer port selection will confuse Ghostscript 2.6.1.
  Must use <Unknown>.
 
+ If the Ghostcript Command is too long, then Ghostscript will not be
+ started.  To shorten the command line, move Ghostscript to directory
+ with a shorter path, and/or put the -I option inside a file and
+ include that file on the Ghostscript command with the Ghostscript
+ @filename option that is described in the Ghostscript use.doc.
+ For example, the command line:
+  c:\winapps\ghostscr\gswin.exe -Ic:\winapps\ghostscr;c:\winapps\ghostscr\fonts;c:\psfonts
+ would be better if the file c:\winapps\gsgrab.opt contained
+  -Ic:\winapps\ghostscr;c:\winapps\ghostscr\fonts;c:\psfonts
+ and the Ghostscript command was
+  c:\winapps\ghostscr\gswin.exe @c:\winapps\gsgrab.opt
+ 

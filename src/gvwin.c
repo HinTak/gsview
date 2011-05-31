@@ -58,6 +58,7 @@ struct sound_s sound[NUMSOUND] = {
 /* initialised in init.c */
 BOOL is_win31 = FALSE;		/* To allow selective use of win 3.1 features */
 BOOL is_winnt = FALSE;		/* To allow selective use of Windows NT features */
+BOOL is_win95 = FALSE;		/* To allow selective use of Windows 95 features */
 char szHelpName[MAXSTR];	/* buffer for building help filename */
 char szHelpTopic[MAXSTR];	/* topic for OFN_SHOWHELP */
 UINT help_message;		/* message sent by OFN_SHOWHELP */
@@ -65,6 +66,7 @@ HMENU hmenu;			/* main menu */
 HACCEL haccel;			/* menu accelerators */
 HCURSOR hcWait;
 POINT img_offset;		/* offset to gswin child window */
+HFONT info_font;		/* font for info line */
 POINT info_file;		/* position of file information */
 POINT info_page;		/* position of page information */
 RECT  info_rect;		/* position and size of brief info area */
@@ -111,6 +113,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	if (hPrevInstance) {
 	    /* don't run more than one copy */
 	    /* because we can't run more than one Ghostscript */
+	    /* Win95 and WinNT always have hPrevInstance == 0 */
 	    gsview_init0(lpszCmdLine);
 	    return FALSE;
 	}
@@ -267,7 +270,11 @@ RECT rect;
 	    	    HGLOBAL hglobal;
 		    int i, cFiles, length;
 		    HDROP hdrop = (HDROP)wParam;
+#ifdef __WIN32__
+		    cFiles = DragQueryFile(hdrop, 0xffffffff, (LPSTR)NULL, 0);
+#else
 		    cFiles = DragQueryFile(hdrop, 0xffff, (LPSTR)NULL, 0);
+#endif
 		    for (i=0; i<cFiles; i++) {
 			length = DragQueryFile(hdrop, i, (LPSTR)NULL, 0);
 	    		hglobal = GlobalAlloc(GHND | GMEM_SHARE, length+1);
@@ -461,9 +468,13 @@ RECT rect;
 		if (hwndimgchild && IsWindow(hwndimgchild)) {
 		    if (in_child_client_area() || prev_in_child) {
 			/* update coordinate info */
-			HDC hdc;
-			hdc = GetDC(hwnd);
+			HFONT old_hfont;
+			HDC hdc = GetDC(hwnd);
+			if (info_font)
+			    old_hfont = SelectObject(hdc, info_font);
 			cursorpos_paint(hdc);
+			if (info_font)
+			    SelectObject(hdc, old_hfont);
 			ReleaseDC(hwnd, hdc);
 		    }
 		    prev_in_child = in_child_client_area();
@@ -750,7 +761,10 @@ RECT rect;
 int i;
 char buf[MAXSTR];
 char fmt[MAXSTR];
+HFONT old_hfont;
 	SetBkMode(hdc, TRANSPARENT);
+	if (info_font)
+	    old_hfont = SelectObject(hdc, info_font);
 	if (info_rect.bottom) {
 	    GetClientRect(hwnd, &rect);
 	    rect.top = 0;
@@ -760,6 +774,14 @@ char fmt[MAXSTR];
 	    SelectPen(hdc, GetStockObject(BLACK_PEN));
 	    MoveTo(hdc, rect.left, rect.bottom);
 	    LineTo(hdc, rect.right, rect.bottom);
+	    if (is_win95) {
+		SelectPen(hdc, GetStockObject(WHITE_PEN));
+		MoveTo(hdc, rect.left, rect.top+1);
+		LineTo(hdc, rect.right, rect.top+1);
+		SelectPen(hdc, GetStockObject(BLACK_PEN));
+		MoveTo(hdc, rect.left, rect.top);
+		LineTo(hdc, rect.right, rect.top);
+	    }
 	}
 	/* write file information */
 	if (psfile.name[0] != '\0') {
@@ -801,6 +823,8 @@ char fmt[MAXSTR];
 		TextOut(hdc, info_page.x, info_page.y, szWait, strlen(szWait));
 	    }
 	}
+	if (info_font)
+	    SelectObject(hdc, old_hfont);
 }
 
 
@@ -895,6 +919,8 @@ gsview_close()
 	if (option.settings)
 		write_profile();
 	SetCursor(GetClassCursor((HWND)NULL));
+	if (info_font)
+		DeleteObject(info_font);
 	return;
 }
 

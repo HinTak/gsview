@@ -15,7 +15,7 @@
 # the copyright notice and this notice be preserved on all copies.
 
 # Makefile for GSview for Windows - GSVIEW.EXE or GSVIEW32.EXE
-# using Borland C++ 3.1 or Borland C++ 4.0
+# using Borland C++ 3.1 or Borland C++ 4.5
 # 'make -fgvwin.mak'
 #
 
@@ -32,20 +32,20 @@ INCDIR = $(COMPBASE)\include
 LIBDIR = $(COMPBASE)\lib
 !if $(WIN32)
 WINEXT=32
-CC = bcc32
 CCAUX = bcc
 MODEL=32
 CFLAGS=-v -W -w -H=gsview32.sym -I$(INCDIR)
+CC = bcc32
 !if $(DEBUG)
 DEBUGLINK=-v
 !endif
 !else
 WINEXT=
-CC = bcc
 CCAUX = bcc
 MODEL=m
 CFLAGS=-v -m$(MODEL) -W -2 -h -w -H=gsview.sym -I$(INCDIR) $(OLD)
 DEBUGLINK=/v
+CC = bcc
 # uncomment following line if using GSview with gs 2.6.1
 OLD=-DGS261
 !endif
@@ -167,7 +167,8 @@ prezip:
 	$(COMPDIR)\tdstrip ..\gsview.exe
 !endif
 	copy gsview.hlp ..\gsview.hlp
-	copy README.gv ..\README.gv
+	copy README.GV ..\README.GV
+	copy FILE_ID.DIZ ..\FILE_ID.DIZ
 	copy LICENCE ..\LICENCE
 	-del ..\gsview.zip
 

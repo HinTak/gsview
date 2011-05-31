@@ -35,7 +35,6 @@
 #include "ps.h"
 #include "gvcrc.h"
 
-
 #ifndef RC_INVOKED
 
 /* messages used between gsview and gswin */
@@ -57,12 +56,13 @@
 #define PIPE_DATA	12
 
 
-#define MAXSTR 80	/* maximum file name length and general string length */
 #define PROFILE_SIZE 2048
 #ifdef WIN32
+#define MAXSTR 256	/* maximum file name length and general string length */
 #define DEFAULT_GSCOMMAND "gswin32.exe"
 #define INIFILE "gsview32.ini"
 #else
+#define MAXSTR 80	/* maximum file name length and general string length */
 #define DEFAULT_GSCOMMAND "gswin"
 #define INIFILE "gsview.ini"
 #endif
@@ -112,7 +112,8 @@ typedef struct tagPSFILE {
 	BOOL	previous_was_dsc;
 	long	previous_begintrailer;
 	long	previous_endtrailer;
-	
+	BOOL	ispdf;		/* true if PDF document */
+	char 	pdftemp[MAXSTR]; /* name of temporary DSC file */
 } PSFILE;
 
 /* options that are saved in INI file */
@@ -239,11 +240,13 @@ extern HWND hwndimgchild;		/* gswin image child window */
 extern HINSTANCE phInstance;		/* instance of gsview */
 extern BOOL is_win31;			/* To allow selective use of win 3.1 features */
 extern BOOL is_winnt;			/* To allow selective use of Windows NT features */
+extern BOOL is_win95;			/* To allow selective use of Windows 95 features */
 extern HMENU hmenu;			/* main menu */
 extern HACCEL haccel;			/* menu accelerators */
 extern HCURSOR hcWait;
 extern int bitmap_scrollx;	/* offset from bitmap to origin of child window */
 extern int bitmap_scrolly;
+extern HFONT info_font;
 extern POINT img_offset;		/* offset to gswin child window */
 extern POINT info_file;		/* position of file information */
 extern POINT info_page;		/* position of page information */

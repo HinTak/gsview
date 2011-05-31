@@ -23,7 +23,7 @@ COMP=gcc
 # Not sure what flag should be used
 FLAGS=
 
-OBJS=epstool.$(OBJ) gvceps.$(OBJ) gvcdsc.$(OBJ)
+OBJS=epstool.$(OBJ) gvceps.$(OBJ) ps.$(OBJ)
 
 all: epstool
 
@@ -31,11 +31,11 @@ all: epstool
 	$(COMP) $(FLAGS) -DUNIX -DEPSTOOL -c $*.c
 
 
-epstool.$(OBJ): epstool.c epstool.h gvcdsc.h
+epstool.$(OBJ): epstool.c epstool.h ps.h
 
-gvcdsc.$(OBJ): gvcdsc.c epstool.h gvcdsc.h
+ps.$(OBJ): ps.c epstool.h ps.h
 
-gvceps.$(OBJ): gvceps.c epstool.h gvcdsc.h
+gvceps.$(OBJ): gvceps.c epstool.h ps.h
 
 epstool: $(OBJS)
 	$(COMP) $(FLAGS) -o epstool $(OBJS)
@@ -43,7 +43,7 @@ epstool: $(OBJS)
 clean:
 	-del epstool.$(OBJ)
 	-del gvceps.$(OBJ)
-	-del gvcdsc.$(OBJ)
+	-del ps.$(OBJ)
 
 veryclean: clean
 	-del epstool

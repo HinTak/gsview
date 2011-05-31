@@ -37,7 +37,11 @@ do_message(void)
 BOOL
 gs_open(void)
 {
+#ifdef WIN32
 char command[256];
+#else
+char command[512];
+#endif
 	/* return if already open */
 	if ((gsprog.valid) && IsWindow(hwndimgchild))
 		return TRUE;
@@ -52,7 +56,8 @@ char command[256];
 		option.safer ? "-dSAFER" : "", 
 		option.xdpi, option.ydpi, 
                 display.width, display.height, (unsigned int)hwndimg);
-	if (strlen(command) > 126) {
+	if ( ((strlen(command) > 126) && !(is_winnt || is_win95))
+	  ||  (strlen(command) > 256) ) {
 		display.do_display = FALSE;
 		gserror(IDS_TOOLONG, command, MB_ICONSTOP, SOUND_ERROR);
 		return FALSE;
@@ -62,7 +67,9 @@ char command[256];
 	gsprog.hinst = (HINSTANCE)WinExec(command, SW_SHOWMINNOACTIVE);
 
 #ifdef __WIN32__
-	if (gsprog.hinst == NULL) {
+	if ( (is_win95 && ((int)gsprog.hinst < HINSTANCE_ERROR))
+	  || (is_winnt && ((int)gsprog.hinst < HINSTANCE_ERROR))
+          || (gsprog.hinst == NULL) ) {	/* Win32s WinExec returned buggy value */
 #else
 	if (gsprog.hinst < HINSTANCE_ERROR) {
 #endif

@@ -59,10 +59,10 @@ E
  error code.
 
 W
- Under Windows NT, the 32 bit version of GSview (gsview32.exe)
+ Under Windows 95 or NT, the 32 bit version of GSview (gsview32.exe)
  requires the 32 bit version of Ghostscript (gswin32.exe), and
  the 16 bit version of GSview (gsview.exe) requires the 16 bit
- version of Ghostscript (gswin.exe).  Under Windows NT you
+ version of Ghostscript (gswin.exe).  Under Windows 95 or NT you
  need a version of Ghostscript later than 3.12.
  Under Windows 3.1 with Win32s, the 16 and 32 bit versions can
  be intermixed.
@@ -75,7 +75,7 @@ E
 
  If you have some Type 1 fonts on your system, it may be possible to
  tell Ghostscript to use them.  See `Fontmap.os2` and `Fontmap.atm`
- supplied with Ghostscript for examples.
+ supplied with Ghostscript for examples.  See the `Fonts` topic.
 
  If you have problems, try reading the help topic `Common Problems`.
 
@@ -93,7 +93,7 @@ E
  the Ghostscript file use.doc.
 
  Aladdin Ghostscript for the PC is available on the Internet from
-  ftp://ftp.cs.wisc.edu/pub/ghost/aladdin/gsNNNxxx.zip
+  ftp://ftp.cs.wisc.edu/ghost/aladdin/gsNNNxxx.zip
  Where NNN is the version number.   
  For Ghostscript 3.33, the files requires to run Ghostscript are:
   gs333ini.zip
@@ -101,7 +101,7 @@ E
   gs333dos.zip   (MS-DOS 386 EXE)
   gs333os2.zip   (OS/2 2.0 or later EXE)
   gs333win.zip   (MS-Windows 3.1 16bit EXE)
-  gs333w32.zip   (MS-Windows 3.1/Win32s or MS-Windows NT EXE)
+  gs333w32.zip   (MS-Windows 3.1/Win32s or MS-Windows 95 or NT EXE)
  If you do not already have a set of Type 1 fonts, you will
  also need
   gs333fn1.zip
@@ -127,6 +127,32 @@ E
  use.doc and the sample Fontmap files for details.
 
  See the `Include Path` and `Fonts` topics for more details.
+P
+3Portable Document Format
+?Portable Document Format
+?PDF
+ GSview can display PDF files, although there are a number of problems
+ with the current method.  To enable display of PDF files, copy the
+ file pdf2dsc.ps from the GSview src directory to the Ghostscript
+ lib directory.  When you open a PDF file, GSview will start up
+ Ghostscript and using pdf2dsc.ps will create a temporary DSC file which 
+ will contain commands to display pages of the PDF file.  GSview will
+ then start Ghostscript a second time to actually display the PDF file.
+
+ Known problems with the current implemtentation are:
+
+ - For long PDF files, GSview will take a long time to scan the PDF file.
+ Be patient.
+
+ - Ghostscript is used twice to scan the PDF file,  which makes it take
+ even longer.  The GSview PDF code should eventually be rewritten to
+ avoid using the temporary DSC file so that only one pass is needed. 
+
+ - Zoom doesn't work for PDF files.  Attempting to use it will probably
+ cause GSview to crash with an out of memory error.
+
+ - Doesn't sense if PDF file has been changed during display.
+E
 3Include Path
 ?Include Path
  Ghostscript needs to read some initialisation files during startup,
@@ -1448,6 +1474,9 @@ W
  Make sure you don't already have Windows Ghostscript running.
  Only one copy of Windows Ghostscript can be running at a time.
  Only one copy of GSview can be running at a time.
+
+ If you can't get GSview to run Ghostscript correctly, make sure
+ you can run Ghostscript on its own.
 P
  `Problem:` Can't run gsos2...
 
@@ -1462,6 +1491,9 @@ P
 
  You must set the include path for Ghostscript using either the
  `-I` command or the `GS_LIB` environment variable.
+
+ If you can't get GSview to run Ghostscript correctly, make sure
+ you can run Ghostscript on its own.
 E
 
  `Problem:` Ghostscript starts and then immediately exits with error code 1.
@@ -1479,6 +1511,9 @@ E
  Alternatively, set the environment variable GS_LIB.
 
  Read the file use.doc that comes with Ghostscript.
+
+ If you can't get GSview to run Ghostscript correctly, make sure
+ you can run Ghostscript on its own.
 
 W
  Alternatively, you may be using an incompatible version of Ghostscript,
@@ -1517,7 +1552,7 @@ W
 
  `Problem:` Message Box says `Imitation pipe handle is zero`
 
- If you are running Windows NT, this is probably caused by a mismatch
+ If you are running Windows 95 or NT, this is probably caused by a mismatch
  between GSview and Ghostscript. Make sure you are running both GSview32 
  and gswin32.
 
@@ -1562,6 +1597,13 @@ E
  GSview will then ignore the DSC comments and allow you to view all
  pages, but only in the original order.  Complain to the author of the
  program that produced that PostScript file.
+
+ Some PostScript printer drivers include code that is specific to 
+ a particular printer.  The PostScript output from these drivers may
+ be unportable and may not display in GSview.  If you are having this
+ problem, try using a reasonably generic PostScript driver such as
+ `Apple LaserWriter II NT` for PostScript level 2 printers, or
+ `Apple LaserWriter Plus` for PostScript level 1 printers.
 
  `Problem:` PostScript files produced by MS-Windows start with a Control-D.
 
@@ -1635,7 +1677,7 @@ W
  the GSview and Ghostscript windows.
  GSview creates an imitation pipe to Ghostscript by writing
  into a shareable global memory block (or memory mapped file
- under Windows NT) and then passing the handle to Ghostscript.
+ under Windows 95 or NT) and then passing the handle to Ghostscript.
 
  GSview starts Ghostscript for displaying using
   gswin -dBitsPerPixel=x -dSAFER -rXDPIxYDPI -gWIDTHxHEIGHT -sGSVIEW=xxxx -

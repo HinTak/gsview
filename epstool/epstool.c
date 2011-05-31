@@ -24,7 +24,7 @@ char gsname[MAXSTR] = GSCOMMAND;
 char bmpname[MAXSTR];
 char szScratch[] = "ep";
 char szAppName[] = "epstool";
-char szVersion[] = "0.1 alpha 1994-05-24";
+char szVersion[] = "0.2 alpha 1995-04-26";
 int resolution = 72;
 int page = 1;	/* default is page 1 */
 BOOL calc_bbox = FALSE;
@@ -81,7 +81,7 @@ main(int argc, char *argv[])
 	   fprintf(stderr, "Can't open %s\n", psfile.name);
 	   return 1;
 	}
-	doc = dsc_scan_file(psfile.file);
+	doc = psscan(psfile.file);
 	if (doc == (PSDOC *)NULL) {
 	   fprintf(stderr, "File %s does not contain DSC comments\n", psfile.file);
 	   fclose(psfile.file);
@@ -93,7 +93,7 @@ main(int argc, char *argv[])
 	if (op==EXTRACTPS || op==EXTRACTPRE)
 	   return extract_section();
 
-	dsc_scan_clean(doc);
+	psfree(doc);
 	return 0;
 }
 
@@ -119,8 +119,8 @@ FILE *bmpfile;
 char gscommand[MAXSTR+MAXSTR];
 int width, height;
 	if ( !calc_bbox &&
-             ((doc->bbox.urx == doc->bbox.llx) ||
-	      (doc->bbox.ury == doc->bbox.lly)) ) {
+             ((doc->boundingbox[URX] == doc->boundingbox[LLX]) ||
+	      (doc->boundingbox[URY] == doc->boundingbox[LLY])) ) {
 	   fprintf(stderr, "Bounding Box is empty");
 	   return 1;
 	   /* if calc_bbox, this shouldn't be an error */
@@ -140,14 +140,14 @@ int width, height;
 	    psfile_extract_header(tempfile);
 	    psfile_extract_page(tempfile, page);
 	    fclose(tempfile);
-	    dsc_scan_clean(doc);	/* forget original file */
+	    psfree(doc);	/* forget original file */
 	    /* scan new file */
 	    strcpy(psfile.name, ename);
 	    if ((psfile.file = fopen(psfile.name, READBIN)) == (FILE *)NULL) {
 	       fprintf(stderr, "Can't open %s\n", psfile.file);
 	       return 1;
 	    }
-	    doc = dsc_scan_file(psfile.file);
+	    doc = psscan(psfile.file);
 	    if (doc == (PSDOC *)NULL) {
 	       fprintf(stderr, "File %s does not contain DSC comments\n", psfile.file);
 	       fclose(psfile.file);
@@ -170,7 +170,7 @@ int width, height;
 	   unlink(bmpname);
 	/* offset to bottom left corner of bounding box */
 	if (!calc_bbox)
-	   fprintf(tempfile, "%d %d translate\r\n", -doc->bbox.llx, -doc->bbox.lly);
+	   fprintf(tempfile, "%d %d translate\r\n", -doc->boundingbox[LLX], -doc->boundingbox[LLY]);
 	/* calculate page size */
 	if (calc_bbox) {
 	   if (doc->default_page_media) {
@@ -183,8 +183,8 @@ int width, height;
 	   }
 	}
 	else {
-	   width = (doc->bbox.urx - doc->bbox.llx)*resolution/72;
-	   height = (doc->bbox.ury - doc->bbox.lly)*resolution/72;
+	   width = (doc->boundingbox[URX] - doc->boundingbox[LLX])*resolution/72;
+	   height = (doc->boundingbox[URY] - doc->boundingbox[LLY])*resolution/72;
 	}
 	/* copy page to temporary file */
 	if (doc->numpages != 0) {
@@ -194,8 +194,8 @@ int width, height;
 		fprintf(stderr,"Can't handle multiple page PostScript files\n");
 	}
 	else {
-	    dsc_copy(psfile.file, tempfile, doc->begincomments, doc->beginpreview, NULL);
-	    dsc_copy(psfile.file, tempfile, doc->endpreview, doc->endtrailer, NULL);
+	    pscopyuntil(psfile.file, tempfile, doc->beginheader, doc->beginpreview, NULL);
+	    pscopyuntil(psfile.file, tempfile, doc->endpreview, doc->endtrailer, NULL);
 	}
 	fprintf(tempfile, "\nquit\n");
 	fclose(tempfile);
@@ -537,7 +537,7 @@ psfile_extract_header(FILE *f)
     BOOL pages_written = FALSE;
     long position;
 
-    fseek(psfile.file, doc->begincomments, SEEK_SET);
+    fseek(psfile.file, doc->beginheader, SEEK_SET);
     fgets(text, PSLINELENGTH, psfile.file);
     if (doc->epsf)
         fputs(text,f);
@@ -554,8 +554,8 @@ psfile_extract_header(FILE *f)
 	}
     }
     position = ftell(psfile.file);
-    while ( (comment = dsc_copy(psfile.file, f, position,
-			   doc->endcomments, "%%Pages:")) != (char *)NULL ) {
+    while ( (comment = pscopyuntil(psfile.file, f, position,
+			   doc->endheader, "%%Pages:")) != (char *)NULL ) {
 	position = ftell(psfile.file);
 	if (pages_written) {
 	    free(comment);
@@ -576,23 +576,23 @@ psfile_extract_page(FILE *f, int page)
     long position;
 
     /* don't copy preview because we might be adding our own */
-    dsc_copy(psfile.file, f, doc->begindefaults, doc->enddefaults, NULL);
-    dsc_copy(psfile.file, f, doc->beginprolog, doc->endprolog, NULL);
-    dsc_copy(psfile.file, f, doc->beginsetup, doc->endsetup, NULL);
+    pscopyuntil(psfile.file, f, doc->begindefaults, doc->enddefaults, NULL);
+    pscopyuntil(psfile.file, f, doc->beginprolog, doc->endprolog, NULL);
+    pscopyuntil(psfile.file, f, doc->beginsetup, doc->endsetup, NULL);
 
     if (doc->pageorder == DESCEND) 
 	i = (doc->numpages - 1) - page;
     else
 	i = page - 1;
-    comment = dsc_copy(psfile.file, f, doc->pages[i].begin,
+    comment = pscopyuntil(psfile.file, f, doc->pages[i].begin,
 			  doc->pages[i].end, "%%Page:");
     fprintf(f, "%%%%Page: %s %d\r\n",
 	    doc->pages[i].label, page++);
     free(comment);
-    dsc_copy(psfile.file, f, -1, doc->pages[i].end, NULL);
+    pscopyuntil(psfile.file, f, -1, doc->pages[i].end, NULL);
 
     position = doc->begintrailer;
-    while ( (comment = dsc_copy(psfile.file, f, position,
+    while ( (comment = pscopyuntil(psfile.file, f, position,
 			   doc->endtrailer, "%%Pages:")) != (char *)NULL ) {
 	position = ftell(psfile.file);
 	free(comment);

@@ -356,7 +356,7 @@ gsview_select()
 {
 char buf[MAXSTR];
 	strcpy(buf, previous_filename);
-	if (get_filename(buf, FALSE, FILTER_PS, 0, IDS_TOPICOPEN))
+	if (get_filename(buf, FALSE, FILTER_PSALL, 0, IDS_TOPICOPEN))
 		gsview_selectfile(buf);
 }
 
@@ -379,7 +379,7 @@ gsview_display()
 {
 char buf[MAXSTR];
 	strcpy(buf, previous_filename);
-	if (get_filename(buf, FALSE, FILTER_PS, 0, IDS_TOPICOPEN))
+	if (get_filename(buf, FALSE, FILTER_PSALL, 0, IDS_TOPICOPEN))
 		gsview_displayfile(buf);
 }
 
@@ -474,24 +474,33 @@ gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 BOOL
 dfreopen()
 {
+char *filename;
+	if (psfile.ispdf) 
+	    filename = psfile.pdftemp;
+	else
+	    filename = psfile.name;
 	if (doc == (PSDOC *)NULL)
 		return TRUE;
 	dfclose();
-	if (psfile.name[0] == '\0')
+	if (filename[0] == '\0')
 		return TRUE;
-	if ( (psfile.file = fopen(psfile.name, "rb")) == (FILE *)NULL ) {
+	if ( (psfile.file = fopen(filename, "rb")) == (FILE *)NULL ) {
 	    if (debug)
 		message_box("dfreopen: file missing",0);
-	    psfile.name[0] = '\0';
+	    filename[0] = '\0';
 	    return FALSE;
 	}
-	if (psfile_changed()) {
+	if (psfile_changed()) {  /* doesn't cope with pdf file changing */
 	    if (debug)
 		message_box("dfreopen: file changed",0);
 	    /* file may have changed beyond recognition so we must kill gs */
 	    gs_close();
 	    if (dsc_scan(psfile.name))
-	        if ( (psfile.file = fopen(psfile.name, "rb")) == (FILE *)NULL ) {
+		if (psfile.ispdf) 
+		    filename = psfile.pdftemp;
+		else
+		    filename = psfile.name;
+	        if ( (psfile.file = fopen(filename, "rb")) == (FILE *)NULL ) {
 		        psfile.name[0] = '\0';
 		        return FALSE;
 	        }
@@ -507,17 +516,103 @@ dfclose()
 	psfile.file = (FILE *)NULL;
 }
 
+/* take a PDF file, process it with gs to produce a DSC index file */
+/* then use the index file as a DSC document */
+BOOL
+dsc_pdf(void)
+{
+#ifdef OS2
+	int flag;
+	char command[MAXSTR+MAXSTR];
+	char progname[256];
+	char *args;
+	FILE *tempfile;
+	char temp[MAXSTR];
+	int i;
+	
+	/* change directory separators from \ to / */
+	strcpy(temp, psfile.name);
+	for (args=temp; *args; args++) {
+	    if (*args == '\\')
+		*args = '/';
+	}
+
+	args = strchr(option.gscommand, ' ');
+	if (args) {
+	    strncpy(progname, option.gscommand, (int)(args-option.gscommand));
+	    progname[(int)(args-option.gscommand)] = '\0';
+	    args++;
+	}
+	else {
+	    strncpy(progname, option.gscommand, MAXSTR);
+	    args = "";
+	}
+
+	/* get a temporary filename for pdf DSC index */
+	if ( (tempfile = gp_open_scratch_file(szScratch, psfile.pdftemp, "wb")) == (FILE *)NULL)
+	    return FALSE;
+	fclose(tempfile);
+	
+	sprintf(command,"%s -dNODISPLAY -sPDFname=%s -sDSCname=%s pdf2dsc.ps", args, temp, psfile.pdftemp);
+
+	if (strlen(command) > MAXSTR-1) {
+		/* command line too long */
+		gserror(IDS_TOOLONG, command, MB_ICONHAND, SOUND_ERROR);
+		if (!debug)
+		    unlink(psfile.pdftemp);
+		psfile.pdftemp[0] = '\0';
+		return FALSE;
+	}
+
+	load_string(IDS_WAIT, szWait, sizeof(szWait));
+	info_wait(TRUE);
+
+	flag = pdf_convert(progname, command, &pdfconv);
+	if (!flag) {
+		gserror(IDS_CANNOTRUN, command, MB_ICONHAND, SOUND_ERROR);
+		if (!debug)
+		    unlink(psfile.pdftemp);
+		psfile.pdftemp[0] = '\0';
+		info_wait(FALSE);
+		return FALSE;
+	}
+	/* open DSC index file */
+	if ( (psfile.file = fopen(psfile.pdftemp, "rb")) == (FILE *)NULL ) {
+		psfile.name[0] = '\0';
+		return FALSE;
+	}
+	psfile.ispdf = TRUE;
+	return TRUE;
+#else
+	message_box("Can't handle PDF files", 0);
+	return FALSE;
+#endif
+}
+
 /* scan file for PostScript Document Structuring Conventions */
 /* return TRUE if valid DSC comments found */
 BOOL
 dsc_scan(char *filename)
 {
-	strcpy(psfile.name, filename);
+char line[MAXSTR];
 	dfclose();
+	if (psfile.ispdf && psfile.name[0] && psfile.pdftemp[0])
+	    unlink(psfile.pdftemp);  /* remove temporary DSC file */
+	strcpy(psfile.name, filename);
 	if ( (psfile.file = fopen(psfile.name, "rb")) == (FILE *)NULL ) {
 		psfile.name[0] = '\0';
 		return FALSE;
 	}
+	/* check for PDF */
+	psfile.ispdf = FALSE;
+	fgets(line, sizeof(line)-1, psfile.file);
+        rewind(psfile.file);
+	if ( strncmp("%PDF-", line, 5) == 0 ) {
+	    dfclose();
+	    if (!dsc_pdf())
+		return FALSE;
+	}
+	/* save file */
 	psfile_savestat();
 	if (page_list.select)
 		free(page_list.select);
@@ -525,8 +620,8 @@ dsc_scan(char *filename)
 	if (doc)
 		psfree(doc);
 	psfile.preview = 0;
-	psfile.ctrld = (fgetc(psfile.file) == '\004');
-        rewind(psfile.file);
+	/* check for documents that start with Ctrl-D */
+	psfile.ctrld = (line[0] == '\004');
 	if (option.ignore_dsc)
 	    doc = (PSDOC *)NULL;
 	else 

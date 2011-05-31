@@ -40,7 +40,7 @@ CCAUX = bcc
 MODEL=l
 CFLAGS=-v -m$(MODEL) -h -w -DMSDOS -DEPSTOOL -I$(INCDIR)
 !endif
-OBJS=epstool.obj gvcdsc.obj gvceps.obj
+OBJS=epstool.obj ps.obj gvceps.obj
 
 all: epstool.exe
 
@@ -58,11 +58,11 @@ $(LIBDIR)\emu +
 $(LIBDIR)\c$(MODEL)
 !
 
-epstool.obj: epstool.c epstool.h ../src/gvcdsc.h ../src/gvceps.c
+epstool.obj: epstool.c epstool.h ../src/ps.h ../src/gvceps.c
 
-gvcdsc.obj: ../src/gvcdsc.c epstool.h ../src/gvcdsc.h ../src/gvceps.c
+ps.obj: ../src/ps.c epstool.h ../src/ps.h ../src/gvceps.c
 	$(COMPDIR)\$(CC) -c $(CFLAGS) {../src/$< }
 
-gvceps.obj: ../src/gvceps.c epstool.h ../src/gvcdsc.h ../src/gvceps.c
+gvceps.obj: ../src/gvceps.c epstool.h ../src/ps.h ../src/gvceps.c
 	$(COMPDIR)\$(CC) -c $(CFLAGS) {../src/$< }
 
