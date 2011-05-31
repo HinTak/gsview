@@ -62,6 +62,44 @@ BEGIN
 	"\0"
 END
 
+/* header to control page orientation */
+gsview_orientation RCDATA
+BEGIN
+	"/gsview_orientation {\r\n"
+	" gsview_offset\r\n"
+	" gsave clippath pathbbox grestore\r\n"
+	" 4 dict begin\r\n"
+	" /ury exch def /urx exch def /lly exch def /llx exch def\r\n"
+	" gsview_landscape\r\n"
+	" {-90 rotate\r\n llx ury add neg llx lly sub translate} if\r\n"
+	" gsview_upsidedown\r\n"
+	" {180 rotate\r\n llx urx add neg lly ury add neg translate} if\r\n"
+	" gsview_seascape\r\n"
+	" {90 rotate\r\n lly llx sub lly urx add neg translate} if\r\n"
+	" end\r\n} def\r\n"
+	"/showpage\r\n{1 true .outputpage\r\n"
+	" erasepage initgraphics\r\ngsview_orientation\r\n} bind def\r\n"
+	"gsview_orientation\r\n"
+	"/gsview_cleanup {clear cleardictstack} def\r\n"
+	"/gsview_setpagesize {\r\n"
+	" gsview_landscape gsview_seascape or {exch} if\r\n"
+	" //statusdict begin .setpagesize end gsview_orientation} def\r\n"
+	"/letter {612 792 gsview_setpagesize} def\r\n"
+	"/note {540 720 gsview_setpagesize} def\r\n"
+	"/legal {612 1008 gsview_setpagesize} def\r\n"
+	"/a3 {842 1190 gsview_setpagesize} def\r\n"
+	"/a4 {595 842 gsview_setpagesize} def\r\n"
+	"/a5 {421 595 gsview_setpagesize} def\r\n"
+	"/a6 {297 421 gsview_setpagesize} def\r\n"
+	"/b4 {709 1002 gsview_setpagesize} def\r\n"
+	"/flsa {612 936 gsview_setpagesize} def\r\n"
+	"/flse {612 936 gsview_setpagesize} def\r\n"
+	"/halfletter {396 612 gsview_setpagesize} def\r\n"
+	"/11x17 {792 1224 gsview_setpagesize} def\r\n"
+	"/ledger {1224 792 gsview_setpagesize} def\r\n"
+	"\0"
+END
+
 /* header to warn of operators incompatible with EPS */
 gsview_epswarn RCDATA
 BEGIN

@@ -1,0 +1,37 @@
+----------------------------
+Version 0.8 beta  1993-07-07
+----------------------------
+
+DSC file is now closed after each page is displayed.  
+The file is reopened just before the next page is displayed and 
+if the file length or date stamp have changed, gswin is killed 
+and the file rescanned.  Version 0.7 kept DSC files open which 
+caused problems if another program changed the file.
+
+Documented that gsview produces TIFF 5.0 Class B images.
+Added a menu option for creating a TIFF 4.0 preview for 
+Word Perfect 5.1 which requires a narrow minded interpretation
+of the TIFF 4.0 specification.
+
+Moved imitation pipe code to a separate module.
+Changed implementation of imitation pipe.  Instead of creating
+many temporary files, gsview now keeps a single read/write file open.
+When gsview writes to the imitation pipe the data is written to this file.  
+When the pipe is flushed gsview reads the file and passes it to gswin 
+in global memory blocks.  When gswin asks for data and there is no more 
+to give, gsview resets the file.
+
+If a file is specified on the gsview command line do not use the
+saved directory.  If a path to the file is given, use it as the 
+current directory, otherwise use the gsview working directory.
+
+To stop documents that change the paper size from interfering with
+gsview's orientation commands, gsview now adds paper size commands 
+(e.g. letter, a4) to the userdict to replace those in the systemdict.
+
+----------------------------
+Version 0.7 beta  1993-05-10
+----------------------------
+
+First general release of Ghostview for Windows.
+

@@ -2,8 +2,8 @@
 # using Borland C++ 3.1
 # 'make -fgsview.mak'
 #
-#COMPBASE = c:\borlandc
-COMPBASE = g:\utility\bc31
+COMPBASE = c:\borlandc
+#COMPBASE = g:\utility\bc31
 # Language is a two letter code for selecting alternate
 # .rc, .doc & .hpj files.
 # Only the default International English is available.
@@ -14,7 +14,7 @@ INCDIR = $(COMPBASE)\include
 LIBDIR = $(COMPBASE)\lib
 MODEL=m
 CFLAGS=-v -m$(MODEL) -W -2 -h -w -H=gsview.sym -I$(INCDIR)
-OBJS=gsview.obj dialog.obj display.obj print.obj clip.obj init.obj ps.obj
+OBJS=gsview.obj dialog.obj display.obj pipe.obj print.obj clip.obj init.obj ps.obj
 
 all: gsview$(LANG).exe gsview$(LANG).hlp
 
@@ -45,6 +45,8 @@ init.obj: init.c gsview.h ps.h
 dialog.obj: dialog.c gsview.h ps.h
 
 display.obj: display.c gsview.h ps.h
+
+pipe.obj: pipe.c gsview.h ps.h
 
 print.obj: print.c gsview.h ps.h
 
@@ -80,6 +82,7 @@ clean:
 	del dialog.obj
 	del display.obj
 	del init.obj
+	del pipe.obj
 	del print.obj
 	del ps.obj
 	del gsview.map

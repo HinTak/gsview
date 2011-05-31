@@ -71,6 +71,7 @@
 ?File
 ?Open
 ?Select File
+?Close
  The `Open` command on the `File` menu opens a file and displays
  the first page.
 
@@ -90,6 +91,12 @@
  The `Select File` command is similar to `Open` but it does not display
  the document.
  This command is useful for opening a document prior to printing it.
+
+ The `Close` command closes the currently open document.
+ This should be used before the current file is changed by another
+ program.
+ If you do not do this and Ghostview detects that the file length or date
+ have changed, it will close Ghostscript and rescan the document.
 
  See also `Print`.
 2Page Selection
@@ -135,9 +142,9 @@
  `Date` is the time the document was created.
 
  `BoundingBox` specifies a box that encloses all the marks painted
- on the page.  The four values are the coordinates of the lower left
- and upper right corners of the bounding box in default user
- coordinates (1/72 inch).
+ on the page.  The four integer values are the coordinates of the
+ lower left and upper right corners of the bounding box in default
+ user coordinates (1/72 inch).
 
  `Orientation `is either `Portrait `or` Landscape`.
 
@@ -245,7 +252,7 @@
  and then adding or fixing up the `%%BoundingBox` comment.
 
  To convert a PostScript file to `EPS`, the original file `must` be
- `single page` document.  If the document contains `DSC` comments
+ a `single page` document.  If the document contains `DSC` comments
  and is multi page, extract the desired page with `File` | `Extract`.
  If the document does not contain `DSC` comments, you will need to
  edit the file by hand to extract the desired page.
@@ -326,13 +333,42 @@
  `Add EPS Preview` can create a DOS EPS file with a Windows Metafile or
  TIFF preview, or an EPSI file with an Interchange preview.
  To use the `Add EPS Preview` command the following steps must be followed.
- Select `Orientation` | `Portrait`.  Select `Options` | `EPS Clip`.
- Select `Media` | `Resolution` and set a suitable resolution for the preview.
- `Open` an EPS file that does not contain a preview.  Select `Edit` | `Copy`.
- Select `Edit` | `Add EPS Preview`, then the preview format,
- then the new EPS filename.  
+
+ 1. Make sure the document has a correct bounding box.
+ A bounding box can be added or changed using `File` | `PS to EPS`.
+
+ 2. Select `Orientation` | `Portrait`.
+
+ 3. Select `Options` | `EPS Clip`.
+ This will cause Ghostscript to use a display window the size of the 
+ bounding box instead of the page size.
+
+ 4. Select `Media` | `Resolution` and set a suitable resolution
+ for the preview.  If the resolution is too high the bitmap may not
+ fit in the clipboard, or will make the EPS file excessively large.
+
+ 5. `Open` an EPS file that does not contain a preview.
+
+ 6. Select `Edit` | `Copy`.  This tells Ghostscript to copy the
+ display bitmap to the Clipboard.  This allows Ghostview to access
+ the bitmap in the next step.
+
+ 7. Select `Edit` | `Add EPS Preview`, then the preview format,
+ then the new EPS filename.  Ghostview will write a new file containing
+ the original PostScript EPS file and a preview created from the bitmap
+ in the clipboard.
+ The available preview formats are `Interchange`, `TIFF 4`, `TIFF 5`
+ and `Windows Metafile`.
  If adding an Interchange preview, the document must have an `%%EndComments`
  line, otherwise Ghostview may put the preview in the wrong place.
+ A TIFF 5 preview is a Class B image with no compression as described
+ in Appendix G of the TIFF 5.0 memorandum.  A TIFF 4 preview is almost
+ identical to the TIFF 5 preview, but avoids using tags which are not
+ described in the TIFF 4 specifiation.
+ WordPerfect 5.1 requires a TIFF 4 preview.
+
+ 8. Reset `Orientation` | `Portrait`, `Options` | `EPS Clip`
+ and `Media` | `Resolution` to their previous values.
 
  To extract the PostScript or Preview section from a DOS EPS
  file, use `File` | `Select File` followed by `Edit` | `Extract EPS`
@@ -399,10 +435,11 @@
 ?INI file
 ?Save Settings on Exit
  The `Save Settings` option saves the Ghostview window position,
- window size, last used printer, `User Defined`, `Ghostscript Command`,
- `Button Bar`, `Quick Open`, `Auto Redisplay`, `EPS Clip`, `EPS Warn`,
- `Sounds`, `Orientation`, `Media` and `Resolution` options to the file
- gsview.ini in the windows directory.
+ window size, last used printer, last directory, `Save Last Directory`,
+ `User Defined`, `Ghostscript Command`, `Button Bar`, `Quick Open`,
+ `Auto Redisplay`, `EPS Clip`, `EPS Warn`, `Sounds`, `Orientation`,
+ `Media` and `Resolution` options to the file gsview.ini in the
+ windows directory.
  Ghostview reads gsview.ini during startup.
 
  When the `Save Settings on Exit` option is checked, Ghostview will
@@ -578,6 +615,7 @@
   Associate With = PostScript (gsview)
  Then press `OK`.
 
+ Put gsview.exe and gsview.hlp in a directory on your PATH.
  That's it!  Now when you double click on a PostScript file,
  the `File Manager` will run Ghostview.  When you drop a PostScript
  file on the `Print Manager`, Ghostview will print the file.
@@ -611,6 +649,10 @@
 ?Problems
  `Problem:` Ghostview can't run gswin.
 
+ Ghostview requires Ghostscript for Windows (gswin.exe).
+ If you don't have Ghostscript for Windows, it is hardly suprising
+ that Ghostview can't run it.
+
  From the Ghostview menu select `Options` | `Ghostscript Command`
  and enter the correct executable path and include path for Ghostscript.
  For example:
@@ -636,7 +678,7 @@
 
  Read the file use.doc that comes with Ghostscript.
 
- `Problem:` Message Box says `Incompatible Ghostscript`
+ `Problem:` Message Box says `Incompatible Windows Ghostscript`
 
  You probably have an earlier version of Ghostscript.
  Make sure you have Ghostscript version 2.6 or later.
@@ -652,12 +694,47 @@
 
  If this is not the case then Ghostview probably got no response
  from Ghostscript.
- Open the Ghostscript text window and look at the error message.
+ Open the Ghostscript text window and look at any error messages.
  Close Ghostscript using the Ghostscript system menu.
  If Ghostview is still waiting, press the Ghostview Open button
  (even though the cursor is still an hourglass).
  Press the 'Yes' button on the 'gsview is busy' message box.
  Ghostview should then revert to the non-waiting mode.
+
+ `Problem:` Ghostview says that a multipage postscript file produced by
+ Word for Windows contains 0 pages and will only show the first page.
+
+ This is because the document does not have correct DSC comments.
+ From the Control Panel, select `Printers`, `Options...`, `Advanced` and
+ then check the `Conform to Adobe Document Structuring Convention`.
+
+ The DSC comment `%%Pages: 0` means that the document does not produce
+ any pages.  That is, the PostScript `showpage` operator is not used.
+ If you find a PostScript document that has multiple pages and contains
+ the `%%Pages: 0` comment, change the first line from `%!-PS-Adobe-` to `%!`.
+ Ghostview will then ignore the DSC comments and allow you to view all
+ pages, but only in the original order.  Complain to the author of the
+ program that produced that PostScript file.
+
+ `Problem:` PostScript files produced by Windows start with a Control-D.
+
+ Since this occurs even when the PostScript printer
+ `Conform to Document Structuring Convention`
+ checkbox is checked, this must be considered a
+ bug in the Windows PostScript printer driver.
+ The solution is documented in the Windows PRINTERS.WRI file.
+ Edit the win.ini file and search for the postscript printer section.
+ There may be more than one.  In each of these sections add
+ `CTRLD=0` as shown below.
+
+  [Apple LaserWriter II NT,FILE]
+  CTRLD=0
+
+ `Problem:` Ghostscript always outputs to a printer instead of the
+ Ghostview window.
+
+ You must not use the GS_DEVICE environment variable.
+
 2Internals
 ?Internals
  The preferred method for driving Ghostscript would be to start it
@@ -725,5 +802,5 @@
  The ability to select individual pages for an Adobe Document
  Structuring Conventions conforming document is due to the inclusion of
  the ps.c module from X11 Ghostview by Tim Theisen (ghostview@cs.wisc.edu).
- Don't sent mail to Tim about Ghostview for Windows, unless it is about a
+ Don't send mail to Tim about Ghostview for Windows, unless it is about a
  bug in the ps.c module.

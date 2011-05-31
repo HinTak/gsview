@@ -1,5 +1,7 @@
 readme
 copying
+history
+manifest
 gsview.exe
 gsview.hlp
 gsview.h
@@ -9,6 +11,7 @@ clip.c
 dialog.c
 display.c
 init.c
+pipe.c
 print.c
 ps.c
 gsview.def
@@ -21,4 +24,3 @@ gsview.mak
 gsview.rc
 gsview2.rc
 property.ini
-manifest

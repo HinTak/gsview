@@ -32,9 +32,13 @@
 #include <string.h>
 #include <ctype.h>
 #include <dir.h>
+#include <io.h>
 #define NeedFunctionPrototypes 1
 #include "ps.h"
 #include "gsview.h"
+
+struct ftime dftime;	/* time/date of selected file */
+long dflength;		/* length of selected file */
 
 /* get current media index to papersizes[], or -1 if no match */
 int
@@ -92,55 +96,85 @@ int i = get_papersizes_index();
 
 /* change the size of the gswin image if open */
 void
-gswin_resize(void)
+gswin_resize()
 {
-BOOL cfile_was_not_open = (cfile == (FILE *)NULL);
 BOOL display = FALSE;
+BOOL opened_dfile = FALSE;
 	gswin_size();
 	if (gswin_hinst == (HINSTANCE)NULL)
 	    return;
-	if (cfile_was_not_open && redisplay 
-	    && page_ready && (doc != (struct document *)NULL))
-	        display = TRUE;	/* redisplay page after resize */
+	if ( (dfile == (FILE *)NULL) && (doc != (struct document *)NULL) ) {
+	    dfreopen();
+	    opened_dfile = TRUE;
+	}
+	if (redisplay && page_ready && (doc != (struct document *)NULL))
+	    display = TRUE;	/* redisplay page after resize */
 	gsview_endfile();
-	if (cfile == (FILE *)NULL)
-	    if (!open_cfile())
-	        return;
 	if (gswin_hinst != (HINSTANCE)NULL) {
 	    fprintf(cfile,"mark /HWSize [%u %u]\r\n",bitmap_width,bitmap_height);
 	    fprintf(cfile,"/HWResolution [%g %g]\r\n",xdpi,ydpi);
 	    fprintf(cfile,"currentdevice putdeviceprops pop erasepage flushpage\r\n");
+	    pipeflush();
 	}
 	if (display) {
+	    if (gswin_hinst != (HINSTANCE)NULL)
+	        gswin_open();	/* we need it open to redisplay */
    	    fix_orientation(cfile);
    	    dsc_header(cfile);
 	    dsc_getpages(cfile,pagenum,pagenum);
+	    pipeflush();
 	}
-	if (cfile_was_not_open) {
-	    close_cfile();
-	    if (gswin_hinst != (HINSTANCE)NULL) {
-	        set_timer(timeout);
-	        pipe_file(cfname);
-	    }
-	}
-	else {
-	    if (cfile == (FILE *)NULL)
-	        open_cfile();
-	}
+
+	if (opened_dfile)
+	    dfclose();
 }
 
+void
+gsview_orientation(int new_orientation)
+{
+	if (new_orientation == orientation)
+		return;
+	if (new_orientation == IDM_SWAPLANDSCAPE) {
+	    swap_landscape = !swap_landscape;
+	    if (swap_landscape) 
+	        CheckMenuItem(hmenu, IDM_SWAPLANDSCAPE, MF_BYCOMMAND | MF_CHECKED);
+	    else
+	        CheckMenuItem(hmenu, IDM_SWAPLANDSCAPE, MF_BYCOMMAND | MF_UNCHECKED);
+	    if ((orientation != IDM_LANDSCAPE) && (orientation != IDM_SEASCAPE))
+	        return;
+	}
+	else {
+	    CheckMenuItem(hmenu, orientation, MF_BYCOMMAND | MF_UNCHECKED);
+	    orientation = new_orientation;
+	    CheckMenuItem(hmenu, orientation, MF_BYCOMMAND | MF_CHECKED);
+	}
+	gswin_resize();
+	return;
+}
+
+void
+gsview_media(int new_media)
+{
+	if ( (new_media == media) && (new_media != IDM_USERSIZE) )
+		return;
+	CheckMenuItem(hmenu, media, MF_BYCOMMAND | MF_UNCHECKED);
+	media = new_media;
+	CheckMenuItem(hmenu, media, MF_BYCOMMAND | MF_CHECKED);
+	gswin_resize();
+	return;
+}
 
 /* run Ghostscript for previewing document */
-/* return 0 if ok, 1 if error */
-int
+/* return TRUE if ok, FALSE if error */
+BOOL
 gswin_open()
 {
 char command[256];
 	/* return if already open */
 	if ((gswin_hinst != (HINSTANCE)NULL) && IsWindow(hwndimgchild))
-		return 0;
+		return TRUE;
 
-	bPipeDone = FALSE;	/* so we wait for first request */
+	pipeinit();		/* so we wait for first request */
 	gswin_size();
 	sprintf(command,"%s -r%gx%g -g%ux%u -sGSVIEW=%u -",
 		szGSwin, xdpi, ydpi, bitmap_width, bitmap_height,
@@ -149,7 +183,7 @@ char command[256];
 		info_wait(FALSE);
 		gserror(IDS_TOOLONG, command, MB_ICONSTOP, SOUND_ERROR);
 		gswin_hinst = (HINSTANCE)NULL;
-		return 1;
+		return FALSE;
 	}
 	gswin_hinst = (HINSTANCE)WinExec(command, SW_SHOWMINNOACTIVE);
 
@@ -157,7 +191,7 @@ char command[256];
 		info_wait(FALSE);
 		gserror(IDS_CANNOTRUN, command, MB_ICONSTOP, SOUND_ERROR);
 		gswin_hinst = (HINSTANCE)NULL;
-		return 1;
+		return FALSE;
 	}
 	if (hwndtext == (HWND)NULL) {
 		/* we are running an incompatible version of Ghostscript */
@@ -173,34 +207,37 @@ char command[256];
 		hwndimgchild = (HWND)NULL;
 		gswin_hinst = (HINSTANCE)NULL;
 		clear_timer();
-		pipe_clean();
 		info_wait(FALSE);
 		gserror(IDS_WRONGGS, NULL, MB_ICONSTOP, SOUND_ERROR);
-		return 1;
+		return FALSE;
 	}
 	saved = FALSE;
+
+	/* wait for gswin to initialise */
 	if (set_timer(CLOSE_TIMEOUT))
 	    EnableWindow(hwndimg, FALSE);
-	while (!bPipeDone &&  !bTimeout)
+	while (!is_pipe_done()&&  !bTimeout)
 		do_message();	/* wait for pipe data request from gswin */
 	clear_timer();
 	EnableWindow(hwndimg, TRUE);
+
+	cfile = pipeopen();	/* open pipe to gswin */
 	BringWindowToTop(hwndimg);
 	SetFocus(hwndimg);	/* kludge: without this desktop gets focus */
-	return 0;
+	return TRUE;
 }
 
 /* close Ghostscript */
-int
+BOOL
 gswin_close()
 {
 BOOL force = FALSE;
 	if (gswin_hinst == (HINSTANCE)NULL)
-	    return 0;
+	    return TRUE;
 
 	if (doc == (struct document*)NULL) {
 	    /* we don't know how many pages remain so we must force an exit */
-	    if (!bPipeDone)
+	    if (!is_pipe_done())
 		force = TRUE;
 	}
 	else {
@@ -210,7 +247,7 @@ BOOL force = FALSE;
 
 	if (!force) {
 	    /* try to close Ghostscript cleanly */
-	    pipe_close();
+	    pipeclose();
 	    if (set_timer(CLOSE_TIMEOUT))
 		EnableWindow(hwndimg, FALSE);
 	    while (GetModuleUsage(gswin_hinst) &&  !bTimeout)
@@ -241,8 +278,8 @@ BOOL force = FALSE;
 	bitmap_scrollx = bitmap_scrolly = 0;
 	page_ready = FALSE;
 	saved = FALSE;
-	pipe_clean();
-	return 0;
+	pipeclose();
+	return TRUE;
 }
 
 /* send a NEXT_PAGE message to Ghostscript */
@@ -258,7 +295,7 @@ int i;
 	for (i=0; i<32; i++) {
 	   /* Wait a bit for pipe contents after showpage to be read */
 	   do_message();
-	   if (bPipeDone)
+	   if (is_pipe_done())
 		break;
 	}
 }
@@ -278,7 +315,6 @@ do_message()
 
 
 /* end of file - get ready for new file */
-/* cfile is opened if needed, but not closed */
 void
 gsview_endfile()
 {
@@ -286,7 +322,7 @@ gsview_endfile()
 	if (gswin_hinst == (HINSTANCE)NULL)
 	    return;
 	if (!quick ||
-             ((doc == (struct document *)NULL) && !bPipeDone)) {
+             ((doc == (struct document *)NULL) && !is_pipe_done())) {
 		gswin_close();
 		return;
 	}
@@ -294,13 +330,9 @@ gsview_endfile()
 	if (page_ready)
 	    next_page();
 
-	if (cfile == (FILE *)NULL)
-	    if (!open_cfile())
-	        return;
-
 	if ((saved) && (doc != (struct document *)NULL) && (doc->pages)) {
 	    /* send trailer if needed */
-	        pscopy(dfile, cfile, doc->begintrailer, doc->endtrailer);
+	    pscopy(dfile, cfile, doc->begintrailer, doc->endtrailer);
 	}
 	if (saved) {
 	    /* restore interpreter state */
@@ -309,6 +341,7 @@ gsview_endfile()
 	}
 	else
 	    fputs("clear cleardictstack\r\n",cfile);
+	pipeflush();
 	saved = FALSE;
 }
 
@@ -339,10 +372,6 @@ int i;
 		    user_height = doc->default_page_media->height;
 		}
 	    }
-	    is_ctrld = FALSE;
-	    rewind(dfile);
-	    if (fgetc(dfile) == '\004')
-		is_ctrld = TRUE;
 	}
 }
 
@@ -360,14 +389,8 @@ gsview_select()
 void
 gsview_selectfile(char *filename)
 {
-	if (gswin_hinst != (HINSTANCE)NULL) {
+	if (gswin_hinst != (HINSTANCE)NULL)
 	    gsview_endfile();
-	    if (cfile != (FILE *)NULL) {
-	        close_cfile();
-	        set_timer(timeout);
-	        pipe_file(cfname);
-	    }
-	}
 	gsview_openfile(filename);
 	info_wait(FALSE);
 }
@@ -388,16 +411,16 @@ gsview_displayfile(char *filename)
 char *p;
 	gsview_endfile();
 
-	if (cfile == (FILE *)NULL)
-	    if (!open_cfile())
-	        return;
-
 	info_wait(TRUE);
 
 	gsview_openfile(filename);
 	if (epsf_clipped ||
 	     ((doc != (struct document *)NULL) && doc->epsf && epsf_clip))
 	    gswin_resize();
+
+	if (!gswin_open()) {
+	    MessageBox(hwndimg, "panic gsview_displayfile", szAppName, MB_OK);
+	}
 
 	fix_orientation(cfile);
 	if (doc != (struct document *)NULL) {
@@ -424,15 +447,23 @@ char *p;
 	    }
 	    fputs(") run flushpage\r\n",cfile);
 	}
-	close_cfile();
-
-	if (gswin_open())
-	    return;
-	set_timer(timeout);
-	saved = TRUE;	/* because gswin_open() killed it */
-	pipe_file(cfname);
+	
+	pipeflush();
 }
 
+
+void
+send_prolog(FILE *f, char *resource)
+{  
+HGLOBAL hglobal;
+LPSTR prolog;
+	hglobal = LoadResource(phInstance, FindResource(phInstance, resource, RT_RCDATA));
+	if ( (prolog = (LPSTR)LockResource(hglobal)) != (LPSTR)NULL) {
+	    while (*prolog)
+	        fputc(*prolog++, f);
+	    FreeResource(hglobal);
+	}
+}
 
 
 /* add Ghostscript code to change orientation */
@@ -443,16 +474,12 @@ int real_orientation;
 	/* save interpreter state */
 	fputs("clear cleardictstack save /gsview_save exch def\r\n",f);
 	saved = TRUE;
-	/* define this orientation */
-	fputs("/gsview_orientation {\r\n",f);
-	if (epsf_clipped) {
-	    /* provide epsf offset */
-	    fprintf(f," %d %d translate\r\n",
+	/* provide epsf offset */
+	if (epsf_clipped)
+	    fprintf(f,"/gsview_offset {%d %d translate} def\r\n",
 	        -doc->boundingbox[LLX], -doc->boundingbox[LLY]);
-	}
-	fputs(" gsave clippath pathbbox grestore\r\n",f);
-	fputs(" 4 dict begin\r\n",f);
-	fputs(" /ury exch def /urx exch def /lly exch def /llx exch def\r\n",f);
+	else
+	    fprintf(f,"/gsview_offset {} def\r\n");
 	real_orientation = orientation;
 	if (swap_landscape) {
 	    if (orientation == IDM_LANDSCAPE)
@@ -460,57 +487,15 @@ int real_orientation;
 	    else if (orientation == IDM_SEASCAPE)
 		real_orientation = IDM_LANDSCAPE;
 	}
-	switch(real_orientation) {
-	    case IDM_PORTRAIT:
-		break;
-	    case IDM_LANDSCAPE:
-		fputs(" -90 rotate\r\n llx ury add neg llx lly sub translate\r\n",f);
-		break;
-	    case IDM_UPSIDEDOWN:
-		fputs(" 180 rotate\r\n llx urx add neg lly ury add neg translate\r\n",f);
-		break;
-	    case IDM_SEASCAPE:
-		fputs("  90 rotate\r\n lly llx sub lly urx add neg translate\r\n",f);
-		break;
-	  }
-	fputs("  end\r\n} def\r\n",f);
-	/* redefine showpage */
-	fputs("/showpage\r\n{1 true .outputpage\r\n",f);
-	fputs("erasepage initgraphics\r\ngsview_orientation\r\n} bind def\r\n",f);
-	/* do the transformation now */
-	fputs("gsview_orientation\r\n",f);
-	fputs("/gsview_cleanup {clear cleardictstack} def\r\n",cfile);
+	fprintf(f,"/gsview_landscape  %s def\r\n",
+	    real_orientation == IDM_LANDSCAPE ? "true" : "false");
+	fprintf(f,"/gsview_upsidedown %s def\r\n",
+	    real_orientation ==  IDM_UPSIDEDOWN ? "true" : "false");
+	fprintf(f,"/gsview_seascape   %s def\r\n",
+	    real_orientation == IDM_SEASCAPE ? "true" : "false");
+	send_prolog(f, "gsview_orientation");
 	if (epsf_warn)
-	    epsf_warnprolog(f);
-}
-
-/* open temporary command file */
-BOOL
-open_cfile()
-{
-	if (cfile != (FILE *)NULL) {
-		close_cfile();
-		gserror(IDS_CFILEOPEN, NULL, NULL, SOUND_ERROR);
-	}
-	/* remove old file */
-	if ((cfname[0] != '\0') & !debug)
-		unlink(cfname);
-	cfname[0] = '\0';
-	/* get new scratch file */
-	if ( (cfile = gp_open_scratch_file(szScratch, cfname, "wb")) == (FILE *)NULL) {
-		info_wait(FALSE);
-		gserror(IDS_CFILEERR, NULL, MB_ICONSTOP, SOUND_ERROR);
-		return FALSE;
-	}
-	return TRUE;
-}
-
-void
-close_cfile()
-{
-	if (cfile)
-	    fclose(cfile);
-	cfile = (FILE *)NULL;
+	    send_prolog(f, "gsview_epswarn");
 }
 
 /* Create and open a scratch file with a given name prefix. */
@@ -534,6 +519,51 @@ gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 	return fopen(fname, mode);
 }
 
+/* reopen dfile */
+/* if dfile time/date or length has changed, kill gswin and rescan the file */
+BOOL
+dfreopen()
+{
+struct ftime thisftime;
+long thisflength;
+	if (doc == (struct document *)NULL)
+		return TRUE;
+	dfclose();
+	if (dfname[0] == '\0')
+		return TRUE;
+	if ( (dfile = fopen(efname[0] ? efname : dfname, "rb")) 
+	        == (FILE *)NULL ) {
+	    if (debug)
+	        MessageBox(hwndimg, "file missing", "dfreopen", MB_OK);
+	    dfname[0] = '\0';
+	    return FALSE;
+	}
+	getftime(fileno(dfile), &thisftime);
+	thisflength = filelength(fileno(dfile));
+	if ( (thisflength != dflength) ||
+		memcmp(&thisftime, &dftime, sizeof(thisftime)) ) {
+	    if (debug)
+	        MessageBox(hwndimg, "file changed", "dfreopen", MB_OK);
+	    /* file may have changed beyond recognition so we must kill gswin */
+	    gswin_close();
+	    if (dsc_scan(dfname))
+	        if ( (dfile = fopen(efname[0] ? efname : dfname, "rb")) 
+	            == (FILE *)NULL ) {
+		        dfname[0] = '\0';
+		        return FALSE;
+	        }
+	}
+	return TRUE;
+}
+
+void
+dfclose()
+{
+	if (dfile != (FILE *)NULL)
+		fclose(dfile);
+	dfile = (FILE *)NULL;
+}
+
 /* scan file for PostScript Document Structuring Conventions */
 /* return TRUE if valid DSC comments found */
 BOOL
@@ -541,17 +571,22 @@ dsc_scan(char *filename)
 {
 unsigned char eps[4];
 	strcpy(dfname, filename);
-	if (dfile != (FILE *)NULL)
-		fclose(dfile);
+	dfclose();
+	if ((efname[0] != '\0') && !debug)
+		unlink(efname);
+	efname[0] = '\0';
 	if ( (dfile = fopen(dfname, "rb")) == (FILE *)NULL ) {
 		dfname[0] = '\0';
 		return FALSE;
 	}
+	getftime(fileno(dfile), &dftime);
+	dflength = filelength(fileno(dfile));
 	if (page_list.select)
 		free(page_list.select);
 	page_list.select = NULL;
 	if (doc)
 		psfree(doc);
+	is_ctrld = FALSE;
 	fread(eps, 1, 4, dfile);
 	if ((eps[0]==0xc5) && (eps[1]==0xd0) && (eps[2]==0xd3) && (eps[3]==0xc6))
 	    extract_eps();
@@ -559,10 +594,11 @@ unsigned char eps[4];
 	    preview = 0;
 	doc = psscan(dfile);
 	if (doc == (struct document *)NULL) {
-		fclose(dfile);
-		dfile = (FILE *)NULL;
-		return FALSE;
+	    dfclose();
+	    return FALSE;
 	}
+	if (eps[0] == '\004')
+	    is_ctrld = TRUE;
 	if (!preview && doc->beginpreview)
 	    preview = IDS_EPSI;
 	page_list.select = (BOOL *)malloc( doc->numpages * sizeof(BOOL) );
@@ -615,16 +651,49 @@ void
 dsc_dopage(void)
 {
 	info_wait(TRUE);
-	if (!open_cfile())
-	    return;
 	if (!saved) {
    	    fix_orientation(cfile);
    	    dsc_header(cfile);
 	}
 	dsc_getpages(cfile,pagenum,pagenum);
-	close_cfile();
-	set_timer(timeout);
-	pipe_file(cfname);
+	pipeflush();
+}
+
+/* go forward skip pages */
+void
+dsc_next(int skip)
+{
+	if (pagenum == doc->numpages || doc->numpages == 0) {
+	    play_sound(SOUND_NOPAGE);
+	    info_wait(FALSE);
+	    return;
+	}
+	pagenum += skip;
+	if (pagenum > doc->numpages)
+	     pagenum = doc->numpages;
+	info_wait(TRUE);
+	if (page_ready)
+	    next_page();
+	if (gswin_open())
+	    dsc_dopage();
+}
+
+/* go back skip pages */
+void
+dsc_prev(int skip)
+{
+	if (pagenum == 1 || doc->numpages == 0) {
+		play_sound(SOUND_NOPAGE);
+		return;
+	}
+	pagenum -= skip;
+	if (pagenum < 1)
+	    pagenum = 1;
+	info_wait(TRUE);
+	if (page_ready)
+	    next_page();
+	if (gswin_open())
+	    dsc_dopage();
 }
 
 /* reverse zero based page number if needed */
@@ -634,92 +703,4 @@ map_page(int page)
     	if (doc->pageorder == DESCEND) 
 		return (doc->numpages - 1) - page;
 	return page;
-}
-
-/* imitation pipe */
-
-/* Data is passed in a global shareable memory block.
- * The global handle is passed in the LOWORD of lParam
- * and the HIWORD contains the byte count.
- * The maximum number of bytes passed is PIPE_DATASIZE.
- * EOF is signified by count = 0 (hglobal must still be valid)
- */
-
-/* pipe file to gswin */
-/* return TRUE if OK, FALSE if pipe overflow or file error */
-BOOL
-pipe_file(char *fname)
-{
-	if ((hfPipe!=(HFILE)NULL) || (!bPipeDone)) {
-		gserror(IDS_PIPEERR, NULL, NULL, SOUND_ERROR);
-		pipe_clean();
-		return FALSE;
-	}
-	hfPipe = _lopen(fname, READ);
-	if (hfPipe == HFILE_ERROR) {
-		gserror(IDS_PIPEERR, NULL, NULL, SOUND_ERROR);
-		return FALSE;
-	}
-	bPipeDone = FALSE;
-	info_wait(TRUE);
-	pipe_blk(hfPipe);
-	return TRUE;
-}
-
-/* copy up to PIPE_DATASIZE bytes from file to global block */
-/* send block to gswin */
-/* return number of bytes sent or -1 for error */
-int
-pipe_blk(HFILE hf)
-{
-HGLOBAL hglobal;
-LPBYTE lpb;
-UINT count;
-	hglobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, PIPE_DATASIZE);
-	if (hglobal == (HGLOBAL)NULL) {
-	    gserror(IDS_PIPEERR, NULL, NULL, SOUND_ERROR);
-	    return -1;
-	}
-	lpb = GlobalLock(hglobal);
-	count = _lread(hf, lpb, PIPE_DATASIZE);
-	GlobalUnlock(hglobal);
-	if ((HFILE)count == HFILE_ERROR) {
-	    GlobalFree(hglobal);
-	    gserror(IDS_PIPEERR, NULL, NULL, SOUND_ERROR);
-	    return -1;
-	}
-	/* we may be processing SendMessage so use PostMessage to avoid lockups */
-	if (count)
-	    PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, MAKELPARAM(hglobal,count));
-	else
-	    GlobalFree(hglobal);
-	return count;
-}
-
-/* send an EOF (zero length block) */
-void
-pipe_close()
-{
-HGLOBAL hglobal;
-	pipe_clean();
-	hglobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, 1);
-	if (hglobal == (HGLOBAL)NULL) {
-	    gserror(IDS_PIPEERR, NULL, NULL, SOUND_ERROR);
-	    return;
-	}
-	PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, MAKELPARAM(hglobal,0));
-	
-}
-
-/* clean up pipe overflow or close empty pipe input file */
-void
-pipe_clean()
-{
-	if (hfPipe) {
-		_lclose(hfPipe);
-		hfPipe = NULL;
-    	}
-	bPipeDone = TRUE;
-	clear_timer();
-	info_wait(FALSE);
 }

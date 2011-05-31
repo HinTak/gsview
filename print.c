@@ -32,9 +32,13 @@
 #include <string.h>
 #include <ctype.h>
 #include <dir.h>
+#include <io.h>
 #define NeedFunctionPrototypes 1
 #include "ps.h"
 #include "gsview.h"
+
+static char pcfname[MAXSTR];	/* name of temporary command file for printing */
+static char pfname[MAXSTR];	/* name of temporary file for printing options */
 
 /* documented in Device Driver Adaptation Guide */
 /* Prototypes taken from print.h */
@@ -462,7 +466,7 @@ MSG msg;
 }
 
 
-/* get a filename and spool it printing */
+/* get a filename and spool it for printing */
 void
 gsview_spool()
 {
@@ -508,6 +512,18 @@ char *p;
 	return p;
 }
 
+/* cleanup print temporary files */
+void
+print_cleanup(void)
+{
+	if ((pcfname[0] != '\0') && !debug)
+		unlink(pcfname);
+	pcfname[0] = '\0';
+	if ((pfname[0] != '\0') && !debug)
+		unlink(pfname);
+	pfname[0] = '\0';
+}
+
 /* print a range of pages using a Ghostscript device */
 void
 gsview_print(BOOL to_file)
@@ -523,6 +539,7 @@ gsview_print(BOOL to_file)
 	static char output[MAXSTR];	/* output filename for printing */
 	char *fname;			/* filename to print */
 	char command[256];
+	FILE *pcfile;
 	FILE *optfile;
 	int pages;
 	int thispage = pagenum;
@@ -563,11 +580,17 @@ gsview_print(BOOL to_file)
 	            if (page_list.select[i]) pages++;
 	        }
 	    }
-	    if (!open_cfile())
-	        return;
-	    pscopydoc(cfile);
-	    close_cfile();
-	    fname = cfname;
+
+	    if ((pcfname[0] != '\0') && !debug)
+		unlink(pcfname);
+	    pcfname[0] = '\0';
+	    if ( (pcfile = gp_open_scratch_file(szScratch, pcfname, "w")) == (FILE *)NULL) {
+		play_sound(SOUND_ERROR);
+		return;
+	    }
+	    pscopydoc(pcfile);
+	    fclose(pcfile);
+	    fname = pcfname;
 	}
 	
 	if (to_file) {

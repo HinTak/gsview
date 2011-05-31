@@ -32,6 +32,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <dir.h>
+#include <io.h>
 #define NeedFunctionPrototypes 1
 #include "ps.h"
 #include "gsview.h"
@@ -72,6 +73,8 @@ gsview_init1(LPSTR lpszCmdLine)
 WNDCLASS wndclass;
 WORD version = LOWORD(GetVersion());
 char *p;
+char workdir[MAXSTR];
+char filedir[MAXSTR];
 
 	if ((LOBYTE(version)<<8) + HIBYTE(version) >= 0x30a)
 	    is_win31 = TRUE;
@@ -117,6 +120,7 @@ char *p;
 	swap_landscape = FALSE;
 	hmenu = LoadMenu(phInstance, "gsview_menu");
 	haccel = LoadAccelerators(phInstance, "gsview_accel");
+	getcwd(workdir, sizeof(workdir));
 	/* read entries from gsview.ini */
 	read_profile();
 
@@ -156,8 +160,27 @@ char *p;
 		lstrcpy(szFile, lpszCmdLine);
 		PostMessage(hwndimg, WM_COMMAND, IDM_DROP, (LPARAM)szFile);
 	    }
+	    /* ignore last saved directory */
+	    /* use directory of file if given, or work directory */
+	    if ((lpszCmdLine[0] == '/') || (lpszCmdLine[0] == '-')) {
+		lpszCmdLine += 2;
+		while (*lpszCmdLine && (*lpszCmdLine == ' '))
+		    lpszCmdLine++;
+	    }
+	    lstrcpy(filedir, lpszCmdLine);
+	    if ( (p = strrchr(filedir, '\\')) == (char *)NULL ) {
+	        if ( (p = strrchr(filedir, ':')) == (char *)NULL )
+		    strcpy(filedir, workdir);  /* no path so use work directory */
+		else
+		    *(++p) = '\0';
+	    }
+	    else
+		*(++p) = '\0';
+	    if (!((strlen(filedir)==2) && isalpha(filedir[0]) && (filedir[1]==':')))
+	        chdir(filedir);
+	    if (isalpha(filedir[0]) && (filedir[1]==':'))
+		(void) setdisk(toupper(filedir[0])-'A');
 	}
-
 	play_sound(SOUND_START);
 }
 
@@ -456,6 +479,8 @@ int i;
 	WritePrivateProfileString(section, "AutoRedisplay", profile, file);
 	sprintf(profile, "%d", timeout);
 	WritePrivateProfileString(section, "Timeout", profile, file);
+	sprintf(profile, "%d", save_dir);
+	WritePrivateProfileString(section, "SaveLastDir", profile, file);
 	if (save_dir) {
 	    getcwd(profile, sizeof(profile));
 	    WritePrivateProfileString(section, "LastDir", profile, file);

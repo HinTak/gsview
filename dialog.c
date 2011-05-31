@@ -32,6 +32,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <dir.h>
+#include <io.h>
 #define NeedFunctionPrototypes 1
 #include "ps.h"
 #include "gsview.h"
@@ -62,6 +63,11 @@ BOOL flag;
 	ofn.lpstrTitle = old_lpstrTitle;
 	ofn.lpstrFile = old_lpstrFile;
 	ofn.nFilterIndex = FILTER_PS;
+	if ( save && flag && 
+	        (dfname[0]!='\0') && (lstrcmp(filename, dfname) == 0) ) {
+	    gserror(IDS_NOTDFNAME, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
+	    flag = FALSE;
+	}
 	return flag;
 }
 

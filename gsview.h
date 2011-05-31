@@ -20,37 +20,39 @@
  * Internet: rjl@monu1.cc.monash.edu.au
  */
 
-#define GSVIEW_VERSION "0.7 beta 1993-05-10"
+#define GSVIEW_VERSION "0.8 beta 1993-07-07"
 
 #define ID_ANSWER	51
 #define ID_PROMPT	52
 #define ID_HELP		53
 
 #define IDM_OPEN	101
-#define IDM_NEXT	102
-#define IDM_NEXTSKIP	103
-#define IDM_REDISPLAY   104
-#define IDM_PREV	105
-#define IDM_PREVSKIP	106
-#define IDM_GOTO	107
-#define IDM_INFO	108
-#define IDM_SELECT	109
-#define IDM_PRINT	110
-#define IDM_PRINTTOFILE 111
-#define IDM_SPOOL	112
-#define IDM_EXTRACT	113
-#define IDM_PSTOEPS	114
-#define IDM_EXIT	115
-#define IDM_DROP	116
+#define IDM_CLOSE	102
+#define IDM_NEXT	103
+#define IDM_NEXTSKIP	104
+#define IDM_REDISPLAY   105
+#define IDM_PREV	106
+#define IDM_PREVSKIP	107
+#define IDM_GOTO	108
+#define IDM_INFO	109
+#define IDM_SELECT	110
+#define IDM_PRINT	111
+#define IDM_PRINTTOFILE 112
+#define IDM_SPOOL	113
+#define IDM_EXTRACT	114
+#define IDM_PSTOEPS	115
+#define IDM_EXIT	116
+#define IDM_DROP	117
 
 #define IDM_COPYCLIP	151
 #define IDM_PASTETO	152
 #define IDM_CONVERT	153
 #define IDM_MAKEEPSI	154
-#define IDM_MAKEEPST	155
-#define IDM_MAKEEPSW	156
-#define IDM_EXTRACTPS	157
-#define IDM_EXTRACTPRE	158
+#define IDM_MAKEEPST4	155
+#define IDM_MAKEEPST	156
+#define IDM_MAKEEPSW	157
+#define IDM_EXTRACTPS	158
+#define IDM_EXTRACTPRE	159
 
 #define IDM_GSCOMMAND	  175
 #define IDM_SOUNDS	  176
@@ -188,10 +190,9 @@
 #define	IDS_USERHEIGHT	646
 #define IDS_BADEPS	647
 #define IDS_NOPREVIEW	648
-#define IDS_CFILEOPEN	649
-#define IDS_CFILEERR	650
-#define IDS_PIPEERR	651
-#define IDS_CANCELDONE	652
+#define IDS_NOTDFNAME   649
+#define IDS_PIPEERR	650
+#define IDS_CANCELDONE	651
 
 #define IDS_SOUNDNAME	670
 #define IDS_SNDPAGE	671
@@ -224,6 +225,7 @@
 #define IDS_EPSONEPAGE	754
 #define IDS_EPSQPAGES	755
 #define IDS_EPSNOBBOX	756
+#define IDS_EPSREAD     757
 
 /* now the stuff that the resource compiler shouldn't see */
 #ifndef RC_INVOKED
@@ -285,16 +287,15 @@ extern struct document *doc;		/* DSC structure.  NULL if not DSC */
 extern int pagenum;			/* current page number */
 extern char dfname[MAXSTR];		/* name of selected document file */
 extern FILE *dfile;			/* selected file */
-extern char cfname[MAXSTR];		/* temporary command filename */
 extern FILE *cfile;			/* command file */
 extern char efname[MAXSTR];		/* name of temp file extracted from DOS EPS file */
+extern char pcfname[MAXSTR];		/* name of temp command file for printing */
 extern char pfname[MAXSTR];		/* name of temp file for printing options */
 extern BOOL is_ctrld;			/* TRUE if DSC except for ctrl+D at start of file */
 extern int preview;			/* preview type IDS_EPSF, IDS_EPSI, etc. */
 extern BOOL page_ready;			/* true when gswin has sent an OUTPUT_PAGE and is waiting for NEXT_PAGE */
 extern BOOL at_prompt;			/* true if at prompt */
 extern BOOL saved;			/* true if interpreter state currently saved in /gssave */
-extern BOOL bPipeDone;			/* true if PIPE_REQUEST from gswin */
 extern int bitmap_scrollx;		/* offset from bitmap to origin of child window */
 extern int bitmap_scrolly;
 extern OPENFILENAME ofn;
@@ -309,10 +310,6 @@ extern FPSPS lpfnSndPlaySound;		/* pointer to sndPlaySound function if loaded */
 extern BOOL epsf_clipped;		/* clipping this page? */
 #define BEEP "beep"			/* profile entry for a speaker beep */
 extern BOOL debug;			/* /D command line option used */
-/* imitation pipe */
-#define PIPE_DATASIZE 16384U	/* maximum block size */
-extern BOOL bPipeDone;		/* has PIPE_REQUEST been received and not met? */
-extern HFILE hfPipe;		/* file handle for pipe */
 struct page_list_s {
 	int current;	/* index of current selection */
 	BOOL multiple;	/* true if multiple selection allowed */
@@ -361,8 +358,6 @@ void info_wait(BOOL);
 void play_sound(int);
 BOOL set_timer(UINT);
 void clear_timer(void);
-void gsview_orientation(int);
-void gsview_media(int);
 void gserror(UINT, char *, UINT, int);
 void pserror(char *);
 LRESULT CALLBACK _export MenuButtonProc(HWND, UINT, WPARAM, LPARAM);
@@ -380,6 +375,8 @@ void write_profile(void);
 int get_papersizes_index(void);
 void gswin_size(void);
 void gswin_resize(void);
+void gsview_orientation(int);
+void gsview_media(int);
 int gswin_open(void);
 int gswin_close(void);
 void next_page(void);
@@ -391,18 +388,16 @@ void gsview_selectfile(char *);
 void gsview_display(void);
 void gsview_displayfile(char *);
 void fix_orientation(FILE *f);
-BOOL open_cfile(void);
-void close_cfile(void);
 FILE * gp_open_scratch_file(const char *prefix, char *fname, const char *mode);
+BOOL dfreopen(void);
+void dfclose(void);
 BOOL dsc_scan(char *fname);
 void dsc_getpages(FILE *f, int first, int last);
 void dsc_header(FILE *f);
 void dsc_dopage(void);
+void dsc_next(int);
+void dsc_prev(int);
 int map_page(int page);
-BOOL pipe_file(char *fname);
-int pipe_blk(HFILE hf);
-void pipe_close(void);
-void pipe_clean(void);
 
 /* in dialog.c */
 #define OPEN FALSE
@@ -417,6 +412,15 @@ BOOL get_page(int *, BOOL);
 BOOL CALLBACK _export PageDlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL gsview_usersize(void);
 
+/* in pipe.c */
+void pipeinit(void);	/* prepare pipe for opening */
+FILE *pipeopen(void);	/* open pipe for first time */
+void pipeclose(void);	/* finished with pipe, close & delete temp files */
+void pipereset(void);	/* pipe is empty, do cleanup */
+void piperequest(void);	/* request from gswin for pipe data */
+void pipeflush(void);	/* start sending data through pipe */
+BOOL is_pipe_done(void);	/* true if pipe has just been reset */
+
 /* in print.c */
 BOOL CALLBACK _export DeviceDlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK _export CancelDlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -425,6 +429,7 @@ void gsview_spool(void);
 int gp_printfile(char *filename);
 void pscopydoc(FILE *fp);
 char *get_devices(void);
+void print_cleanup(void);
 void gsview_print(BOOL);
 void gsview_extract(void);
 
@@ -439,9 +444,8 @@ void clip_add_dib(void);
 void extract_eps(void);
 void extract_doseps(WORD);
 void make_eps_metafile(void);
-void make_eps_tiff(void);
+void make_eps_tiff(WORD);
 void make_eps_interchange(void);
-void epsf_warnprolog(FILE *f);
 void ps_to_eps(void);
 
 #ifdef WIN32

@@ -13,6 +13,7 @@ BEGIN
 	POPUP "&File"
 	BEGIN
 		MENUITEM "&Open...\tO", IDM_OPEN
+		MENUITEM "&Close\tC", IDM_CLOSE
 		MENUITEM "&Next Page\t+", IDM_NEXT
 		MENUITEM "Pre&vious Page\t-", IDM_PREV
 		MENUITEM "&Goto Page...\tG", IDM_GOTO
@@ -38,7 +39,8 @@ BEGIN
 		POPUP "&Add EPS Preview"
 		BEGIN
 		    MENUITEM "&Interchange", IDM_MAKEEPSI
-		    MENUITEM "&TIFF", IDM_MAKEEPST
+		    MENUITEM "TIFF 4", IDM_MAKEEPST4
+		    MENUITEM "&TIFF 5", IDM_MAKEEPST
 		    MENUITEM "&Windows Metafile", IDM_MAKEEPSW
 		END
 		POPUP "&Extract EPS"
@@ -103,6 +105,8 @@ gsview_accel ACCELERATORS
 BEGIN
 	"O", IDM_OPEN
 	"o", IDM_OPEN
+	"C", IDM_CLOSE
+	"c", IDM_CLOSE
 	"N", IDM_NEXT
 	"n", IDM_NEXT
 	"+", IDM_NEXT
@@ -135,7 +139,7 @@ BEGIN
 	IDS_FILTER, "Default (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|Bitmap Files (*.bmp)|*.bmp|TIFF Files (*.tif)|*.tif|Metafiles (*.wmf)|*.wmf|"
 	IDS_TITLE, "Ghostview for Windows"
 	IDS_HELPFILE, "gsview.hlp"
-	IDS_WRONGGS, "Incompatible Ghostscript"
+	IDS_WRONGGS, "Incompatible Windows Ghostscript Program"
 	IDS_BUSY, "Ghostview is busy.\nClear busy state?"
 END
 
@@ -180,8 +184,7 @@ BEGIN
 	IDS_USERHEIGHT, "Height in 1/72 inch units ?"
 	IDS_BADEPS, "Problem making EPS file"
 	IDS_NOPREVIEW, "Not a DOS EPS file or\nNo binary preview"
-	IDS_CFILEOPEN, "cfile is already open"
-	IDS_CFILEERR, "Can't open temporary cfile"
+	IDS_NOTDFNAME, "Can't use same name as open document"
 	IDS_PIPEERR, "Pipe error"
 	IDS_CANCELDONE, "%d%% done"
 END
@@ -225,6 +228,7 @@ BEGIN
 	IDS_EPSONEPAGE, "An EPS file must be a single page document.\nSee help on 'PS to EPS'"
 	IDS_EPSQPAGES, "Is this a single page document ?"
 	IDS_EPSNOBBOX, "Could not obtain Bounding Box"
+	IDS_EPSREAD, "Have you read help `PS to EPS` ?"
 END
 
 AboutDlgBox DIALOG 20, 32, 256, 156

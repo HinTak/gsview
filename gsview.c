@@ -32,6 +32,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <dir.h>
+#include <io.h>
 #define NeedFunctionPrototypes 1
 #include "ps.h"
 #include "gsview.h"
@@ -118,20 +119,13 @@ UINT timeout_count;
 struct document *doc;	/* DSC structure.  NULL if not DSC */
 int pagenum;		/* current page number */
 char dfname[MAXSTR];	/* name of selected document file */
+char efname[MAXSTR];	/* name of temporary file containing PS extracted 
+                           from DOS EPS file */
 FILE *dfile;		/* selected file */
-char cfname[MAXSTR];	/* temporary command filename */
-FILE *cfile;		/* command file */
-char efname[MAXSTR];	/* name of temporary file containing PS extracted from DOS EPS file */
-char pfname[MAXSTR];	/* name of temporary file for printing options */
+FILE *cfile;		/* command file (pipe) */
 BOOL is_ctrld;		/* TRUE if DSC except for ctrl+D at start of file */
 int preview;		/* preview type IDS_EPSF, IDS_EPSI, etc. */
 struct page_list_s page_list;	/*  page selection for print/extract */
-
-/* imitation pipes using SHAREABLE GLOBAL MEMORY */
-/* Write gswin commands to temporary file then call pipe_file(tempname) */
-/* gswin has finished with file when bPipeDone = TRUE */
-BOOL bPipeDone = FALSE;	/* has PIPE_REQUEST been received and not met? */
-HFILE hfPipe = NULL;	/* file handle for pipe */
 
 /* local functions */
 BOOL draw_button(DRAWITEMSTRUCT FAR *lpdis);
@@ -141,8 +135,6 @@ BOOL in_info_area(void);
 void info_paint(HWND);
 void gsview_close(void);
 int gsview_command(WORD);
-void dsc_next(int);
-void dsc_prev(int);
 BOOL not_open(void);
 BOOL not_dsc(void);
 
@@ -176,7 +168,6 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 
 	play_sound(SOUND_EXIT);
 	gsview_close();
-	gswin_close();
  	WinHelp(hwndimg,szHelpName,HELP_QUIT,(DWORD)NULL);
 	if (is_win31 && (hlib_mmsystem != (HINSTANCE)NULL))
 		FreeLibrary(hlib_mmsystem);
@@ -215,7 +206,7 @@ RECT rect;
 		bitmap_scrollx = bitmap_scrolly = 0;
 		page_ready = FALSE;
 		saved = FALSE;
-		pipe_clean();
+		pipeclose();
 		clear_timer();
 		info_wait(FALSE);
 		break;
@@ -255,12 +246,7 @@ RECT rect;
 		UpdateWindow(hwndimg);
 		break;
 	    case PIPE_REQUEST:
-		if (hfPipe) {
-		    if (pipe_blk(hfPipe) <= 0)
-			pipe_clean();
-    		}
-		else
-		    pipe_clean();
+		piperequest();
 		break;
 	    default:
 		gserror(0, "Unknown Message", MB_ICONEXCLAMATION, -1);
@@ -668,7 +654,7 @@ int x, y;
 		TextOut(hdc, info_page.x, info_page.y, buf, strlen(buf));
 	      }
 	      else {
-		if (bPipeDone)
+		if (is_pipe_done())
 		    i = LoadString(phInstance, IDS_NOMORE, buf, sizeof(buf));
 		else {
 		    i = LoadString(phInstance, IDS_PAGE, buf, sizeof(buf));
@@ -790,27 +776,25 @@ POINT pt;
 }
 
 
-/* remove temporary files */
+/* remove temporary files etc. */
 void
 gsview_close()
 {
-	if ((cfname[0] != '\0') && !debug)
-		unlink(cfname);
-	cfname[0] = '\0';
+	gswin_close();
+	pipeclose();
+	print_cleanup();
 	if ((efname[0] != '\0') && !debug)
 		unlink(efname);
 	efname[0] = '\0';
-	if ((pfname[0] != '\0') && !debug)
-		unlink(pfname);
-	pfname[0] = '\0';
 	if (page_list.select)
 		free(page_list.select);
 	page_list.select = NULL;
 	if (doc)
 		psfree(doc);
-	doc = 0;
+	doc = (struct document *)NULL;
 	if (settings)
 		write_profile();
+	SetCursor(GetClassCursor((HWND)NULL));
 	return;
 }
 
@@ -830,7 +814,6 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	LoadString(phInstance, IDS_BUSY, prompt, sizeof(prompt));
 	if (MessageBox(hwndimg, prompt, szAppName, MB_YESNO | MB_ICONQUESTION) == IDYES) {
 	    play_sound(SOUND_ERROR);
-	    pipe_clean();
 	    next_page();
 	    info_wait(FALSE);
 	}
@@ -838,16 +821,36 @@ char answer[MAXSTR];		/* input dialog box answer string */
     }
     switch (command) {
 	case IDM_OPEN:
+		dfreopen();
 		gsview_display();
+		dfclose();
+		return 0;
+	case IDM_CLOSE:
+		dfreopen();
+		gsview_endfile();
+		dfname[0] = '\0';
+		dfclose();
+		if (page_list.select)
+			free(page_list.select);
+		page_list.select = NULL;
+		if (doc)
+			psfree(doc);
+		doc = (struct document *)NULL;
+	    	if (gswin_hinst != (HINSTANCE)NULL) {
+	    	    fprintf(cfile,"erasepage flushpage\r\n");
+	            set_timer(timeout);
+	            pipeflush();
+	    	}
+		info_wait(FALSE);
 		return 0;
 	case IDM_NEXT:
 		if (not_open())
 		    return 0;
-		if (gswin_open())
-		    return 0;
 		info_wait(TRUE);
 		if (doc==(struct document *)NULL) {
-		    if (bPipeDone) {
+		    if (!gswin_open())
+		        return 0;
+		    if (is_pipe_done()) {
 			play_sound(SOUND_NOPAGE);
 			info_wait(FALSE);
 		    }
@@ -857,14 +860,16 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		    }
 		    return 0;
 		}
+		dfreopen();
 		dsc_next(1);
+		dfclose();
 		return 0;
 	case IDM_NEXTSKIP:
-		if (not_open())
-		    return 0;
 		if (not_dsc())
 		    return 0;
+		dfreopen();
 		dsc_next(page_skip);
+		dfclose();
 		return 0;
 	case IDM_REDISPLAY:
 		if (not_open())
@@ -872,64 +877,63 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		info_wait(TRUE);
 		if (doc==(struct document *)NULL) {
 		    /* don't know where we are so close and reopen */
-		    if (!bPipeDone)
+		    if (!is_pipe_done())
 			gswin_close();
 		}
-		if (gswin_open())
+		if (!gswin_open())
 		    return 0;
 		info_wait(TRUE);
 		if (page_ready)
 		    next_page(); 
+		dfreopen();
 		if ((doc==(struct document *)NULL) || (doc->pages==0)) {
 			gsview_displayfile(dfname);
+			dfclose();
 			return 0;
 		}
 		dsc_dopage();
+		dfclose();
 		return 0;
 	case IDM_PREV:
-		if (not_open())
-			return 0;
 		if (not_dsc())
 			return 0;
+		dfreopen();
 		dsc_prev(1);
+		dfclose();
 		return 0;
 	case IDM_PREVSKIP:
-		if (not_open())
-			return 0;
 		if (not_dsc())
 			return 0;
+		dfreopen();
 		dsc_prev(page_skip);
+		dfclose();
 		return 0;
 	case IDM_GOTO:
-		if (not_open())
-		    return 0;
-		if (doc!=(struct document *)NULL) {
-		    if (doc->numpages == 0) {
-			gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
+		if (not_dsc())
 			return 0;
+		dfreopen();
+		if (doc->numpages == 0) {
+		    gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
+		}
+		else if (get_page(&pagenum, FALSE)) {
+		    if (pagenum > doc->numpages) {
+			pagenum = doc->numpages;
+			play_sound(SOUND_NOPAGE);
 		    }
-		    if (get_page(&pagenum, FALSE)) {
-			if (pagenum > doc->numpages) {
-			    pagenum = doc->numpages;
-			    play_sound(SOUND_NOPAGE);
-			    return 0;
+		    else if (pagenum < 1) {
+			pagenum = 1;
+			play_sound(SOUND_NOPAGE);
+		    }
+		    else {
+			if (gswin_open()) {
+			    info_wait(TRUE);
+			    if (page_ready)
+			        next_page();
+			    dsc_dopage();
 			}
-			if (pagenum < 1) {
-			    pagenum = 1;
-			    play_sound(SOUND_NOPAGE);
-			    return 0;
-			}
-			if (gswin_open())
-			    return 0;
-			info_wait(TRUE);
-			if (page_ready)
-			    next_page();
-			dsc_dopage();
 		    }
 		}
-		else {
-			gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
-		}
+		dfclose();
 		return 0;
 	case IDM_INFO:
 		{
@@ -941,18 +945,23 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		return 0;
 	case IDM_SELECT:
 		gsview_select();
+		dfclose();
 		return 0;
 	case IDM_PRINT:
 		if (dfname[0] == '\0')
 		    gsview_select();
+		dfreopen();
 		if (dfname[0] != '\0')
 		    gsview_print(FALSE);
+		dfclose();
 		return 0;
 	case IDM_PRINTTOFILE:
 		if (dfname[0] == '\0')
 			gsview_select();
+		dfreopen();
 		if (dfname[0] != '\0')
 		    gsview_print(TRUE);
+		dfclose();
 		return 0;
 	case IDM_SPOOL:
 		gsview_spool();
@@ -960,8 +969,10 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	case IDM_EXTRACT:
 		if (dfname[0] == '\0')
 		    gsview_select();
+		dfreopen();
 		if (dfname[0] != '\0')
 		    gsview_extract();
+		dfclose();
 		return 0;
 	case IDM_EXIT:
 		PostQuitMessage(0);
@@ -1020,21 +1031,33 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	case IDM_PSTOEPS:
 		if (dfname[0] == '\0')
 		    gsview_display();
-		if (dfname[0] != '\0')
+		if (dfname[0] != '\0') {
+		    dfreopen();
 		    ps_to_eps();
+		    dfclose();
+		}
 		return 0;
 	case IDM_MAKEEPSI:
+		dfreopen();
 		make_eps_interchange();
+		dfclose();
 		return 0;
+	case IDM_MAKEEPST4:
 	case IDM_MAKEEPST:
-		make_eps_tiff();
+		dfreopen();
+		make_eps_tiff(command);
+		dfclose();
 		return 0;
 	case IDM_MAKEEPSW:
+		dfreopen();
 		make_eps_metafile();
+		dfclose();
 		return 0;
 	case IDM_EXTRACTPS:
 	case IDM_EXTRACTPRE:
+		dfreopen();
 		extract_doseps(command);
+		dfclose();
 		return 0;
 	case IDM_SETTINGS:
 		write_profile();
@@ -1062,7 +1085,9 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	case IDM_UPSIDEDOWN:
 	case IDM_SEASCAPE:
 	case IDM_SWAPLANDSCAPE:
+		dfreopen();
 		gsview_orientation(command);
+		dfclose();
 		return 0;
 	case IDM_RESOLUTION:
 		LoadString(phInstance, IDS_RES, prompt, sizeof(prompt));
@@ -1083,7 +1108,9 @@ char answer[MAXSTR];		/* input dialog box answer string */
 			    xdpi = DEFAULT_RESOLUTION;
 			if (ydpi==0.0)
 			    ydpi = DEFAULT_RESOLUTION;
+			dfreopen();
 			gswin_resize();
+			dfclose();
 		    }
 		}
 		return 0;
@@ -1107,7 +1134,9 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		if (command == IDM_USERSIZE)
 		    if (!gsview_usersize())
 			return 0;
+		dfreopen();
 		gsview_media(command);
+		dfclose();
 		return 0;
 	case IDM_HELPCONTENT:
 		WinHelp(hwndimg,szHelpName,HELP_CONTENTS,(DWORD)NULL);
@@ -1127,79 +1156,6 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	return 0;
 }
 
-void
-gsview_orientation(int new_orientation)
-{
-	if (new_orientation == orientation)
-		return;
-	if (new_orientation == IDM_SWAPLANDSCAPE) {
-	    swap_landscape = !swap_landscape;
-	    if (swap_landscape) 
-	        CheckMenuItem(hmenu, IDM_SWAPLANDSCAPE, MF_BYCOMMAND | MF_CHECKED);
-	    else
-	        CheckMenuItem(hmenu, IDM_SWAPLANDSCAPE, MF_BYCOMMAND | MF_UNCHECKED);
-	    if ((orientation != IDM_LANDSCAPE) && (orientation != IDM_SEASCAPE))
-	        return;
-	}
-	else {
-	    CheckMenuItem(hmenu, orientation, MF_BYCOMMAND | MF_UNCHECKED);
-	    orientation = new_orientation;
-	    CheckMenuItem(hmenu, orientation, MF_BYCOMMAND | MF_CHECKED);
-	}
-	gswin_resize();
-	return;
-}
-
-void
-gsview_media(int new_media)
-{
-	if ( (new_media == media) && (new_media != IDM_USERSIZE) )
-		return;
-	CheckMenuItem(hmenu, media, MF_BYCOMMAND | MF_UNCHECKED);
-	media = new_media;
-	CheckMenuItem(hmenu, media, MF_BYCOMMAND | MF_CHECKED);
-	gswin_resize();
-	return;
-}
-
-/* go forward skip pages */
-void
-dsc_next(int skip)
-{
-	if (pagenum == doc->numpages || doc->numpages == 0) {
-	    play_sound(SOUND_NOPAGE);
-	    info_wait(FALSE);
-	    return;
-	}
-	pagenum += skip;
-	if (pagenum > doc->numpages)
-	     pagenum = doc->numpages;
-	info_wait(TRUE);
-	if (page_ready)
-	    next_page();
-	if (gswin_open())
-	    return;
-	dsc_dopage();
-}
-
-/* go back skip pages */
-void
-dsc_prev(int skip)
-{
-	if (pagenum == 1 || doc->numpages == 0) {
-		play_sound(SOUND_NOPAGE);
-		return;
-	}
-	pagenum -= skip;
-	if (pagenum < 1)
-	    pagenum = 1;
-	info_wait(TRUE);
-	if (page_ready)
-	    next_page();
-	if (gswin_open())
-	    return;
-	dsc_dopage();
-}
 /* if no document open, display error message and return true */
 BOOL
 not_open()

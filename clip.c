@@ -32,6 +32,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <dir.h>
+#include <io.h>
 #define NeedFunctionPrototypes 1
 #include "ps.h"
 #include "gsview.h"
@@ -386,10 +387,6 @@ DWORD dtemp;
 	        preview = IDS_EPST;
 	}
 	fseek(dfile, pos, SEEK_SET);	/* seek to PS section */
-	/* remove old file */
-	if ((efname[0] != '\0') && !debug)
-		unlink(efname);
-	efname[0] = '\0';
 	/* get new scratch file */
 	if ( (f = gp_open_scratch_file(szScratch, efname, "wb")) == (FILE *)NULL) {
 		play_sound(SOUND_ERROR);
@@ -824,15 +821,15 @@ struct tiff_head_s {
 /* write tiff file from DIB bitmap */
 /* hglobal is handle to DIB in memory */
 void
-write_tiff(FILE *f, HGLOBAL hglobal)
+write_tiff(FILE *f, HGLOBAL hglobal, BOOL tiff4)
 {
 char *now;
 DWORD *strip;
-#define IFD_ENTRY_COUNT 12
+#define IFD_MAX_ENTRY 12
 struct tiff_head_s tiff_head;
 WORD ifd_length;
 DWORD ifd_next;
-struct ifd_entry_s ifd_entry[IFD_ENTRY_COUNT];
+struct ifd_entry_s ifd_entry[IFD_MAX_ENTRY];
 struct ifd_entry_s *pifd_entry;
 struct rational_s rational;
 DWORD tiff_end, end;
@@ -848,7 +845,7 @@ int bitcount;
 int bwidth;
 BOOL soft_extra = FALSE;
 BOOL date_extra = FALSE;
-	
+
 	pbmih = (LPBITMAPINFOHEADER)GlobalLock(hglobal);
 	lpDibBits = get_dib_bits(pbmih);
 
@@ -865,25 +862,41 @@ BOOL date_extra = FALSE;
 	tiff_head.ifd_offset = tiff_end;
 
 	tiff_end += sizeof(ifd_length);
-	ifd_length = IFD_ENTRY_COUNT;
 
-	tiff_end += sizeof(ifd_entry) + sizeof(ifd_next);
+	if (tiff4)
+	    ifd_length = 10;
+	else
+	    ifd_length = 12;
+
+	tiff_end += ifd_length * sizeof(struct ifd_entry_s) + sizeof(ifd_next);
 	ifd_next = 0;
 	pifd_entry = &ifd_entry[0];
-	pifd_entry->tag = 0xfe;		/* NewSubFileType */
-	pifd_entry->type = TIFF_LONG;
+	if (tiff4) {
+	    pifd_entry->tag = 0xff;	/* SubfileType */
+	    pifd_entry->type = TIFF_SHORT;
+	}
+	else {
+	    pifd_entry->tag = 0xfe;	/* NewSubfileType */
+	    pifd_entry->type = TIFF_LONG;
+	}
 	pifd_entry->length = 1;
 	pifd_entry->value = 0;
 
 	pifd_entry = &ifd_entry[1];
 	pifd_entry->tag = 0x100;	/* ImageWidth */
-	pifd_entry->type = TIFF_LONG;
+	if (tiff4)
+	    pifd_entry->type = TIFF_SHORT;
+	else
+	    pifd_entry->type = TIFF_LONG;
 	pifd_entry->length = 1;
 	pifd_entry->value = pbmih->biWidth;
 
 	pifd_entry = &ifd_entry[2];
 	pifd_entry->tag = 0x101;	/* ImageLength */
-	pifd_entry->type = TIFF_LONG;
+	if (tiff4)
+	    pifd_entry->type = TIFF_SHORT;
+	else
+	    pifd_entry->type = TIFF_LONG;
 	pifd_entry->length = 1;
 	pifd_entry->value = height;
 
@@ -933,34 +946,36 @@ BOOL date_extra = FALSE;
 	pifd_entry->value = tiff_end;
 	tiff_end += sizeof(struct rational_s);
 
-	pifd_entry = &ifd_entry[10];
-	pifd_entry->tag = 0x131;	/* Software */
-	pifd_entry->type = TIFF_ASCII;
-	pifd_entry->length = strlen(szAppName) + 1;
-	pifd_entry->value = tiff_end;
-	tiff_end += pifd_entry->length;
-	if (tiff_end & 1) { /* pad to word boundary */
-	    soft_extra = TRUE;
-	    tiff_end++;
-	}
+	if (!tiff4) {
+	    pifd_entry = &ifd_entry[10];
+	    pifd_entry->tag = 0x131;	/* Software */
+	    pifd_entry->type = TIFF_ASCII;
+	    pifd_entry->length = strlen(szAppName) + 1;
+	    pifd_entry->value = tiff_end;
+	    tiff_end += pifd_entry->length;
+	    if (tiff_end & 1) { /* pad to word boundary */
+	        soft_extra = TRUE;
+	        tiff_end++;
+	    }
 
-	pifd_entry = &ifd_entry[11];
-	pifd_entry->tag = 0x132;	/* DateTime */
-	pifd_entry->type = TIFF_ASCII;
-	t = time(NULL);
-	now = ctime(&t);
-	now[strlen(now)-1] = '\0';	/* remove trailing \n */
-	pifd_entry->length = strlen(now)+1;
-	pifd_entry->value = tiff_end;
-	tiff_end += pifd_entry->length;
-	if (tiff_end & 1) { /* pad to word boundary */
-	    date_extra = TRUE;
-	    tiff_end++;
+	    pifd_entry = &ifd_entry[11];
+	    pifd_entry->tag = 0x132;	/* DateTime */
+	    pifd_entry->type = TIFF_ASCII;
+	    t = time(NULL);
+	    now = ctime(&t);
+	    now[strlen(now)-1] = '\0';	/* remove trailing \n */
+	    pifd_entry->length = strlen(now)+1;
+	    pifd_entry->value = tiff_end;
+	    tiff_end += pifd_entry->length;
+	    if (tiff_end & 1) { /* pad to word boundary */
+	        date_extra = TRUE;
+	        tiff_end++;
+	    }
 	}
 
 	fwrite(&tiff_head, sizeof(tiff_head), 1, f);
 	fwrite(&ifd_length, sizeof(ifd_length), 1, f);
-	fwrite(&ifd_entry, sizeof(ifd_entry), 1, f);
+	fwrite(&ifd_entry, ifd_length * sizeof(struct ifd_entry_s), 1, f);
 	fwrite(&ifd_next, sizeof(ifd_next), 1, f);
 	strip = (DWORD *)malloc(height * sizeof(DWORD));
 	end = tiff_end;
@@ -979,12 +994,14 @@ BOOL date_extra = FALSE;
 	rational.numerator = (int)ydpi;
 	rational.denominator = 1;
 	fwrite(&rational, sizeof(rational), 1, f);
-	fwrite(szAppName, 1, strlen(szAppName)+1, f);
-	if (soft_extra)
-	    fputc('\0',f);
-	fwrite(now, 1, strlen(now)+1, f);
-	if (date_extra)
-	    fputc('\0',f);
+	if (!tiff4) {
+	    fwrite(szAppName, 1, strlen(szAppName)+1, f);
+	    if (soft_extra)
+	        fputc('\0',f);
+	    fwrite(now, 1, strlen(now)+1, f);
+	    if (date_extra)
+	        fputc('\0',f);
+	}
 
 	scan_colors(pbmih);
 
@@ -1005,7 +1022,7 @@ BOOL date_extra = FALSE;
 /* make a PC EPS file with a TIFF Preview */
 /* from a PS file and a clipboard bitmap */
 void
-make_eps_tiff(void)
+make_eps_tiff(WORD type)
 {
 char epsname[MAXSTR];
 HGLOBAL hglobal;
@@ -1046,7 +1063,7 @@ struct eps_header_s eps_header;
 	    CloseClipboard();
 	    return;
 	}
-	write_tiff(tiff_file, hglobal);
+	write_tiff(tiff_file, hglobal, (type == IDM_MAKEEPST4));
 	fclose(tiff_file);
 	CloseClipboard();
 	if (made_dib)
@@ -1190,7 +1207,7 @@ BOOL made_dib = FALSE;
 	    CloseClipboard();
 	    return;
 	}
-	
+
 	if ((epifile = fopen(epiname,"wb")) == (FILE *)NULL) {
 	    play_sound(SOUND_ERROR);
 	    if (made_dib)
@@ -1209,20 +1226,6 @@ BOOL made_dib = FALSE;
 	CloseClipboard();
 }
 
-/* write prolog which produces warnings when operators that should */
-/* not be included in EPS file are executed */
-void
-epsf_warnprolog(FILE *f)
-{
-HGLOBAL hglobal;
-LPSTR prolog;
-	hglobal = LoadResource(phInstance, FindResource(phInstance, "gsview_epswarn", RT_RCDATA));
-	if ( (prolog = (LPSTR)LockResource(hglobal)) != (LPSTR)NULL) {
-	    while (*prolog)
-	        fputc(*prolog++, f);
-	    FreeResource(hglobal);
-	}
-}
 
 int bbox[4];
 BOOL bbflag;
@@ -1309,8 +1312,8 @@ char text[PSLINELENGTH];
 char *comment;
 long here;
 
-/* should replace following Message Box with something more appropriate */
-	if (MessageBox(hwndimg, "Have you read help `PS to EPS` ?",szAppName, MB_YESNO | MB_ICONQUESTION)
+	LoadString(phInstance, IDS_EPSREAD, output, sizeof(output));
+	if (MessageBox(hwndimg, output, szAppName, MB_YESNO | MB_ICONQUESTION)
 	    != IDYES) {
 	    LoadString(phInstance, IDS_TOPICPSTOEPS, szHelpTopic, sizeof(szHelpTopic));
 	    SendMessage(hwndimg, help_message, 0, 0L);

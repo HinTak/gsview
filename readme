@@ -14,7 +14,7 @@ Features include:
  - view pages in arbitrary order (Next, Previous, Goto).
  - selectable display resolution.
  - page size is automatically selected from DSC comments.
- - page size can be select using the menu.
+ - page size can be selected using the menu.
  - orientation is automatically selected from DSC comments.
  - orientation can be selected using the menu (Portrait, Landscape).
  - print selected pages using Ghostscript.
@@ -54,11 +54,17 @@ See the on-line help for more details.
 ====
 Bugs
 ====
-This is Ghostview for Windows 0.7 BETA.
-There are likely to be bugs because very few people have used the program.
+This is Ghostview for Windows 0.8 BETA.
+There are likely to be bugs because some major changes have been made
+to file accessing since 0.7 BETA.
 Send bug reports to rjl@monu1.cc.monash.edu.au.
-Don't expect a fast response - I will only be reading mail every
-two weeks or so.
+When reporting bugs, please include the version number and date of 
+Ghostview for Windows (from the Help | About box), the version number
+of Ghostscript, and the exact wording of any error messages.
+If you get a GPF, please send the address of the GPF - I can use
+this to help locate the bug.
+Don't expect a fast response - the work I'm paid to do has a higher
+priority.
 
 ================
 Acknowledgements
