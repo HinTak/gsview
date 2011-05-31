@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -199,7 +199,7 @@ AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
         case WM_INITDIALOG:
-            SetDlgItemText(hDlg, ABOUT_VERSION, GSVIEW_VERSION);
+            SetDlgItemText(hDlg, ABOUT_VERSION, GSVIEW_DOT_VERSION);
             return( TRUE);
 	  case WM_LBUTTONDOWN:
 	    {
@@ -582,7 +582,7 @@ BOOL gap = FALSE;	/* TRUE is gap found after block */
 BOOL contiguous = TRUE;
 int block = 0;		/* number of pages set in a contiguous block */
 BOOL selected;
-    for (i=0; i<psfile.doc->numpages; i++) {
+    for (i=0; i<(int)(psfile.doc->numpages); i++) {
 	selected = (int)SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETSEL, i, 0L);
 	if (selected && contiguous) {
 	    if (gap)
@@ -620,7 +620,7 @@ PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	switch (wmsg) {
 	    case WM_INITDIALOG:
 		{char buf[MAXSTR];
-		for (i=0; i<psfile.doc->numpages; i++) {
+		for (i=0; i<(int)(psfile.doc->numpages); i++) {
 		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_ADDSTRING, 0, 
 			(LPARAM)((LPSTR)psfile.doc->pages[map_page(i)].label));
 		}
@@ -698,13 +698,13 @@ PageMultiDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	    case WM_INITDIALOG:
 		if (psfile.page_list.reverse)
 		    SendDlgItemMessage(hDlg, PAGE_REVERSE, BM_SETCHECK, 1, 0);
-		for (i=0; i<psfile.doc->numpages; i++) {
+		for (i=0; i<(int)(psfile.doc->numpages); i++) {
 		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_ADDSTRING, 0, 
 			(LPARAM)((LPSTR)psfile.doc->pages[map_page(i)].label));
 		}
 		if (psfile.page_list.multiple) {
 		    /* multiple selection list box */
-		    for (i=0; i<psfile.doc->numpages; i++)
+		    for (i=0; i<(int)(psfile.doc->numpages); i++)
 			if (psfile.page_list.select[i]) 
 			    SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETSEL, TRUE, MAKELPARAM(i,0));
 		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETSEL, TRUE, MAKELPARAM(psfile.page_list.current, 0));
@@ -761,7 +761,7 @@ PageMultiDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 				BM_GETCHECK, 0, 0);
 			i = (int)SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETCURSEL, 0, 0L);
 			psfile.page_list.current = (i == LB_ERR) ? -1 : i;
-			for (i=0; i<psfile.doc->numpages; i++) {
+			for (i=0; i<(int)(psfile.doc->numpages); i++) {
 			  psfile.page_list.select[i] =
 			    (int)SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETSEL, i, 0L);
 			}
@@ -804,7 +804,7 @@ int i;
 
 	memset(psfile.page_list.select, 0, psfile.doc->numpages * sizeof(BOOL) );
 	if (multiple) {
-	    for (i=0; i< psfile.doc->numpages; i++)
+	    for (i=0; i< (int)(psfile.doc->numpages); i++)
 		psfile.page_list.select[i] = allpages;
 	}
 	psfile.page_list.select[psfile.page_list.current] = TRUE;
@@ -967,7 +967,6 @@ DLGPROC lpProcPSTOEPS;
 }
 
 
-
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
@@ -994,6 +993,20 @@ InstallDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		    GetDlgItemText(hDlg, INSTALL_DLL, option.gsdll, MAXSTR);
 		    GetDlgItemText(hDlg, INSTALL_INCLUDE, option.gsinclude, MAXSTR);
 		    GetDlgItemText(hDlg, INSTALL_OTHER, option.gsother, MAXSTR);
+		    if (SendDlgItemMessage(hDlg, IDC_CONFIGADV_PRINTER, 
+			BM_GETCHECK, 0, 0))
+			gsview_printer_profiles();
+		    if (SendDlgItemMessage(hDlg, IDC_CONFIGADV_START, 
+			BM_GETCHECK, 0, 0))
+			gsview_create_objects("Ghostgum");
+		    {BOOL ps, pdf;
+			ps = SendDlgItemMessage(hDlg, IDC_CONFIGADV_PS, 
+			BM_GETCHECK, 0, 0);
+			pdf = SendDlgItemMessage(hDlg, IDC_CONFIGADV_PDF, 
+			BM_GETCHECK, 0, 0);
+			if (ps || pdf)
+			    update_registry(ps, pdf);
+		    }
                     EndDialog(hDlg, TRUE);
                     return(TRUE);
                 case IDCANCEL:
@@ -1014,7 +1027,10 @@ BOOL flag;
 #ifndef __WIN32__
 DLGPROC lpProcInstall;
 #endif
+/*
 	load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
+*/
+	load_string(IDS_TOPICADVANCEDCFG, szHelpTopic, sizeof(szHelpTopic));
 #ifdef __WIN32__
 	flag = DialogBoxParam(hlanguage, "InstallDlgBox", hwndimg, InstallDlgProc, (LPARAM)NULL);
 #else

@@ -122,7 +122,6 @@ BEGIN
 	IDS_TOPICEDITPROP, "Einstellung Bearbeiten"
 	IDS_TOPICCLIP, "Zwischenablage"
 	IDS_TOPICPREVIEW, "EPS Vorschau"
-	IDS_TOPICGSCMD, "Konfiguriere Ghostscript"
 	IDS_TOPICSOUND, "Klänge"
 	IDS_TOPICDSET, "Anzeige Einstellungen"
 	IDS_TOPICMEDIA, "Seitenformat"
@@ -134,6 +133,12 @@ BEGIN
 	IDS_TOPICMESS, "Zeige Meldungen"
 	IDS_TOPICSPOOL, "Druck-Manager"
 	IDS_TOPICZLIB, "zlib"
+	IDS_TOPICBZIP2, "bzip2"
+	IDS_TOPICPSTOEDIT, "PStoEdit" /* ENGLISH */
+	IDS_TOPICMEASURE, "Measure" /* ENGLISH */
+	IDS_TOPICEASYCFG "Easy Configure" /* ENGLISH */
+	IDS_TOPICADVANCEDCFG "Advanced Configure" /* ENGLISH */
+	IDS_TOPICDOWNLOAD "Obtaining Ghostscript" /* ENGLISH */
 END
 
 STRINGTABLE
@@ -220,12 +225,12 @@ BEGIN
 	IDS_NOINI, "Kann INI Datei nicht öffnen"
 	IDS_NEEDTEMP, "Sie müssen die Umgebungsvariable TEMP auf ein gültiges Verzeichnis setzen. Wenn nicht, kann weder GSview noch Aladdin Ghostscript drucken"
 	IDS_VERSIONCHANGED, "Die installierte Version von GSview wurde verändert. Soll GSview neu konfiguriert werden?"
-	IDS_GSNOTINSTALLED, "Sie haben Ghostscript nicht installiert. Bitte lesen Sie die Datei README.TXT."
-	IDS_GSLIBNOTINSTALLED, "Sie haben die Ghostscript Bibliotheksdateien nicht installiert. Bitte lesen Sie die Datei README.TXT."
+	IDS_GSNOTINSTALLED, "Sie haben Ghostscript nicht installiert. Bitte lesen Sie die Datei Readme.htm."
+	IDS_GSLIBNOTINSTALLED, "Sie haben die Ghostscript Bibliotheksdateien nicht installiert. Bitte lesen Sie die Datei Readme.htm."
 	IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED
 	IDS_NOPROGMAN, "Kann DDE Verbindung zum Program Manager nicht öffnen"
 	IDS_WRONGEMX, "Sie haben EMX %s.\rSie brauchen EMX %s oder höher.\rPM GSview wird nicht laufen."
-	IDS_GSVIEWVERSION, GSVIEW_VERSION
+	IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION
 	IDS_CFG73, AACFG73
 	IDS_CFG74, AACFG74
 	IDS_PROGMANGROUP4 AAPROGMANGROUP4

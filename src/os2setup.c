@@ -453,7 +453,7 @@ char buf[MAXSTR];
     /* initialize GS version */
     page = find_page_from_id(IDD_GSVER);
     if (page) {
-	sprintf(buf, "%d.%02d", GS_REVISION / 100, GS_REVISION % 100);
+	sprintf(buf, "%d.%02d", gsver / 100, gsver % 100);
         WinSetWindowText( WinWindowFromID(page->hwnd, IDD_GSVER_TEXT), buf);
 	WinSendMsg( WinWindowFromID(page->hwnd, PARTIAL_GSVIEW),
 	    BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
@@ -512,7 +512,7 @@ char *s, *d;
 
     /* derive group filename from group name */
     for (i=0, s=groupname, d=groupfile; i<8 && *s; s++) {
-	if (isalpha(*s) || isdigit(*s)) {
+	if (isalpha((int)(*s)) || isdigit((int)(*s))) {
 	    *d++ = *s;
 	    i++;
 	} 
@@ -520,6 +520,49 @@ char *s, *d;
     *d = '\0';
     if (strlen(groupfile)==0)
 	strcpy(groupfile, "gstools");
+}
+
+BOOL gszip_exists(int ver)
+{
+    FILE *f;
+    char name[256];
+    sprintf(name, "%sgs%03dos2.zip", sourcedir, ver);
+    if ( (f = fopen(name, "r")) != (FILE *)NULL ) {
+	fclose(f);
+	return TRUE;
+    }
+    return FALSE;
+}
+
+/* Try to find if we are being asked to install a different
+ * version of Ghostscript than GS_REVISION.
+ * Do this by trying to open gsNNNos2.zip for other version
+ * numbers.
+ */ 
+void
+find_gszip(void)
+{
+    int i;
+    gsver = GS_REVISION;
+
+    /* try to find a Ghostscript OS/2 zip file */
+    for (i=gsver; i <= GS_REVISION_MAX; i++) {
+	if (gszip_exists(i)) {
+	    gsver = i;
+	    return;	/* got one */
+	}
+    }
+
+    /* try a couple of earlier versions */
+    if (gszip_exists(550)) {
+	gsver = 550;
+	return;
+    }
+    if (gszip_exists(510)) {
+	gsver = 510;
+	return;
+    }
+
 }
 
 
@@ -582,7 +625,8 @@ HMODULE hmodule;
 	DosFreeModule(hmodule);
     }
 
-    gsver = GS_REVISION;
+    /* Set the initial Ghostscript revision (gsver) */
+    find_gszip();
 
     return 0;
 }

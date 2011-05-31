@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -103,12 +103,17 @@ BEGIN
 	"/setpageparams {/setpageparams eps_warn} def\015\012"
 	"/setshared {/setshared eps_warn} def\015\012"
 	"/startjob {/startjob eps_warn} def\015\012"
-	"/letter {/letter eps_warn} def\015\012"
-	"/note {/note eps_warn} def\015\012"
-	"/legal {/legal eps_warn} def\015\012"
-	"/a3 {/a3 eps_warn} def\015\012"
-	"/a4 {/a4 eps_warn} def\015\012"
-	"/a5 {/a5 eps_warn} def\015\012"
+	"/eps_pagesize_warn {(Warning: EPS file must not set page size: ) print dup == flush pop} def\015\012"
+	"/11x17 {/11x17 eps_pagesize_warn} def\015\012"
+	"/a3 {/a3 eps_pagesize_warn} def\015\012"
+	"/a4 {/a4 eps_pagesize_warn} def\015\012"
+	"/a4small {/a4small eps_pagesize_warn} def\015\012"
+	"/a5 {/a5 eps_pagesize_warn} def\015\012"
+	"/ledger {/ledger eps_pagesize_warn} def\015\012"
+	"/legal {/legal eps_pagesize_warn} def\015\012"
+	"/letter {/letter eps_pagesize_warn} def\015\012"
+	"/lettersmall {/lettersmall eps_pagesize_warn} def\015\012"
+	"/note {/note eps_pagesize_warn} def\015\012"
 	"/eps_warntwo {(Warning: EPS file should be careful using ) print dup == flush systemdict exch get exec} def\015\012"
 	"/nulldevice {/nulldevice eps_warntwo} def\015\012"
 	"/setgstate {/setgstate eps_warntwo} def\015\012"
@@ -232,8 +237,8 @@ BEGIN
 "    dup /ImagingBBox GSview /ImagingBBox get put\015\012"
 "  }\015\012"
 "  ifelse\015\012"
-/* % Insert Policy = use page size in InputAttributes */
-"  dup /Policy << /PageSize 5 >> put\015\012"
+/* % Insert Policies = use page size in InputAttributes */
+"  dup /Policies << /PageSize 5 >> put\015\012"
 /* % Insert InputAttributes */
 /* % Use this to specify media size */
 "  dup /InputAttributes <<\015\012"
@@ -297,3 +302,4 @@ IDM_TEXTFINDNEXT BITMAP "binary/gvwfindn.bmp"
 #include "gvwin2.rc"
 
 /* end of gvwin1.rc */
+

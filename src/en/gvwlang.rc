@@ -72,8 +72,8 @@ BEGIN
 	END
 	POPUP "O&ptions"
 	BEGIN
-		MENUITEM "Configure...", IDM_CFG
-		MENUITEM "Configure &Ghostscript...", IDM_GSCOMMAND
+		MENUITEM "Easy Configure...", IDM_CFG
+		MENUITEM "Advanced Configure...", IDM_GSCOMMAND
 		MENUITEM "Sounds...", IDM_SOUNDS
 		POPUP "&Units"
 		BEGIN
@@ -88,9 +88,7 @@ BEGIN
 			MENUITEM "&English", IDM_LANGEN
 			MENUITEM "&French", IDM_LANGFR
 			MENUITEM "&German", IDM_LANGDE
-/*
 			MENUITEM "&Italian", IDM_LANGIT
-*/
 		END
 		POPUP "PStoText"
 		BEGIN
@@ -125,6 +123,7 @@ BEGIN
 		MENUITEM "Previous Page and Home\tBkSp", IDM_PREVHOME
 		MENUITEM SEPARATOR
 		MENUITEM "Full &Screen\tF4", IDM_FULLSCREEN
+		MENUITEM "Fit &Window\tF6", IDM_FITWIN
 	END
 	POPUP "&Orientation"
 	BEGIN
@@ -140,6 +139,8 @@ BEGIN
 	POPUP "&Media"
 	BEGIN
 		MENUITEM "&Display Settings...", IDM_DISPLAYSETTINGS
+		MENUITEM SEPARATOR
+		MENUITEM "&Rotate Media", IDM_MEDIAROTATE
 		MENUITEM SEPARATOR
 		MENUITEM "Letter", IDM_LETTER
 		MENUITEM "Tabloid", IDM_TABLOID
@@ -218,6 +219,7 @@ BEGIN
 	VK_INSERT, IDM_COPYCLIP, VIRTKEY, CONTROL
 	VK_F4, IDM_FULLSCREEN, VIRTKEY
 	VK_F5, IDM_REDISPLAY, VIRTKEY
+	VK_F6, IDM_FITWIN, VIRTKEY
 END
 
 
@@ -225,7 +227,7 @@ END
 STRINGTABLE
 BEGIN
 	/* general strings */
-	IDS_HELPFILE, "gsviewen.hlp"
+	IDS_HELPFILE, WINHELPFILE
 	IDS_SOUNDNOMM, "Can't load WINMM.DLL\nSounds will be unavailable"
 END
 
@@ -233,7 +235,7 @@ STRINGTABLE
 BEGIN
 	/* filter strings */
 #ifdef __WIN32__
-	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|PS Files (*.ps)|*.ps;*.ps.gz|EPS Files (*.eps)|*.eps;*.eps.gz|EPI Files (*.epi)|*.epi;*.eps.gz|PDF Files (*.pdf)|*.pdf;*.pdf.gz|PRN Files (*.prn)|*.prn|All Files (*.*)|*.*|"
+	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz;*.ps.bz2;*.eps.bz2;*.pdf.bz2|PS Files (*.ps)|*.ps;*.ps.gz;*.ps.bz2|EPS Files (*.eps)|*.eps;*.eps.gz;*.eps.bz2|EPI Files (*.epi)|*.epi;*.epi.gz;*.epi.bz2|PDF Files (*.pdf)|*.pdf;*.pdf.gz;*.pdf.bz2|PRN Files (*.prn)|*.prn|All Files (*.*)|*.*|"
 #else
 	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn|PS Files (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|PDF Files (*.pdf)|*.pdf|PRN Files (*.prn)|*.prn|All Files (*.*)|*.*|"
 #endif

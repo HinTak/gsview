@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1996-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -106,8 +106,6 @@ WIZPAGE pages[]={
 };
 
 /* text window for unzipping */
-#define TWLENGTH 16384
-#define TWSCROLL 1024
 char twbuf[TWLENGTH];
 int twend;
 
@@ -479,12 +477,15 @@ char gstoolsdir[MAXSTR];
 		    rc = 1;
 	    }
 #endif
+
 	    if (!rc && install_gs) {
-		sprintf(zipname, "%sini.zip", gs_zipprefix);
-		if (!rc)
-		    rc = unzip_to_dir(zipname, gstoolsdir);
-		if (cancelling)
-		    rc = 1;
+		if (gsver < 600) {
+		    sprintf(zipname, "%sini.zip", gs_zipprefix);
+		    if (!rc)
+			rc = unzip_to_dir(zipname, gstoolsdir);
+		    if (cancelling)
+			rc = 1;
+		}
 #ifdef OS2
 		sprintf(zipname, "%sos2.zip", gs_zipprefix);
 #else
@@ -498,15 +499,17 @@ char gstoolsdir[MAXSTR];
 		    rc = unzip_to_dir(zipname, gstoolsdir);
 		if (cancelling)
 		    rc = 1;
-		sprintf(zipname, "%sfn1.zip", gs_zipprefix);
-		if (!rc) {
-		    strcpy(buf, gstoolsdir);
-		    if (strlen(buf) && (buf[strlen(buf)-1] != '\\'))
-			strcat(buf, "\\");
-		    strcat(buf, gs_basedir);
-		    rc = unzip_to_dir(zipname, buf);
-		    if (cancelling)
-			rc = 1;
+		if (gsver < 600) {
+		    sprintf(zipname, "%sfn1.zip", gs_zipprefix);
+		    if (!rc) {
+			strcpy(buf, gstoolsdir);
+			if (strlen(buf) && (buf[strlen(buf)-1] != '\\'))
+			    strcat(buf, "\\");
+			strcat(buf, gs_basedir);
+			rc = unzip_to_dir(zipname, buf);
+			if (cancelling)
+			    rc = 1;
+		    }
 		}
 	    }
 

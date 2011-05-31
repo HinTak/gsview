@@ -155,7 +155,7 @@ PSDOC *doc = psfile.doc;
 	    fputs("%%EndComments\r\n",f);
 
 	    fputs("%%Page: 1 1\r\n",f);
-	    fprintf(f,"%%BeginDocument: %s\r\n",psfile.name);
+	    fprintf(f,"%%%%BeginDocument: %s\r\n",psfile.name);
 
 	    /* create buffer for PS file copy */
 	    buffer = (char *)malloc(COPY_BUF_SIZE);
@@ -421,12 +421,12 @@ int i;
 	    p++;	/* skip comment line */
 	p++;
 	ppbmap->width = atoi(p);
-	while (isdigit(*p))
+	while (isdigit((int)(*p)))
 	    p++;
 	while (iswhitespace(*p))
 	    p++;
 	ppbmap->height = atoi(p);
-	while (isdigit(*p))
+	while (isdigit((int)(*p)))
 	    p++;
 	if (pbitmap[1] == '4') {	/* pbmraw */
 	    ppbmap->depth = 1;
@@ -438,7 +438,7 @@ int i;
 	    while (iswhitespace(*p))
 	        p++;
 	    /* ignore max value */
-	    while (isdigit(*p))
+	    while (isdigit((int)(*p)))
 	        p++;
 	    for (i=0; i < 256; i++)
 		isblack[i] = 1;
@@ -449,7 +449,7 @@ int i;
 	    while (iswhitespace(*p))
 	        p++;
 	    /* ignore max value */
-	    while (isdigit(*p))
+	    while (isdigit((int)(*p)))
 	        p++;
 	}
 	ppbmap->bits = ((BYTE GVHUGE *)p) +1;

@@ -109,7 +109,7 @@ play_sound(int num)
 	    DosBeep(200,200);
 	    return;
 	}
-	if (isdigit(*sound[num].file))
+	if (isdigit((int)(*sound[num].file)))
 	    play_system_sound(sound[num].file);
 	else {
 	    char buf[MAXSTR];
@@ -162,7 +162,7 @@ int rc = 0;
 	if (!rc && !((strlen(dirname)==2) && isalpha(dirname[0]) && (dirname[1]==':')))
 	    rc = _chdir(dirname);
 #else
-	if (isalpha(dirname[0]) && (dirname[1]==':'))
+	if (isalpha((int)(dirname[0])) && (dirname[1]==':'))
 	    if (_chdrive(dirname[0]))
 		rc = -1;
 	rc = _chdir2(dirname);

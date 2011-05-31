@@ -12,6 +12,7 @@ gvwgs16.exe
 ungsvw16.exe
 zlib16.dll
 printer.ini
-README.TXT
+Readme.htm
+cdorder.txt
 LICENCE
 FILE_ID.DIZ

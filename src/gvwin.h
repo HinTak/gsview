@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -39,12 +39,17 @@
 #include <io.h>
 #include <time.h>
 #include <process.h>
-#define NeedFunctionPrototypes 1
-#include "ps.h"
+#include "ver.h"
 #include "gvcrc.h"
+#ifdef _MSC_VER
+#define DLLEXPORT __declspec(dllimport)
+#endif
 #include "gsdll.h"
 
 #ifndef RC_INVOKED
+
+#define NeedFunctionPrototypes 1
+#include "ps.h"
 
 #ifdef DEBUG_MALLOC
 void FAR * debug_malloc(size_t size);
@@ -141,6 +146,7 @@ typedef struct tagPSFILE {
 	BOOL	ctrld;		/* TRUE if file starts with ^D */
 	BOOL	pjl;		/* TRUE if file starts with HP LaserJet PJL prologue */
 	BOOL	gzip;		/* TRUE if file compressed with gzip */
+	BOOL	bzip2;		/* TRUE if file compressed with bzip2 */
 	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
 	time_t	datetime;	/* time/date of selected file */
 	long	length;		/* length of selected file */
@@ -261,6 +267,7 @@ typedef struct tagOPTIONS {
 	BOOL	safer;
 	int	media;
 	char	medianame[32];
+	BOOL	media_rotate;
 	int	user_width;
 	int	user_height;
 	BOOL	epsf_clip;
@@ -286,6 +293,7 @@ typedef struct tagOPTIONS {
 	BOOL	print_to_file;
 	BOOL	psprinter;
 	BOOL	print_reverse;
+	BOOL	print_fixed_media;
 	int	pdf2ps;
 	BOOL	auto_bbox;
 	MATRIX	ctm;
@@ -387,6 +395,17 @@ typedef int (WINAPI *PFN_gzclose)(gzFile file);
 extern PFN_gzopen gzopen;
 extern PFN_gzread gzread;
 extern PFN_gzclose gzclose;
+
+/* for bzip2 decompression */
+extern HINSTANCE bzip2_hinstance;
+typedef void GVFAR *bzFile ;
+typedef bzFile (WINAPI *PFN_bzopen)(const char GVFAR *path, const char GVFAR *mode);
+typedef int (WINAPI *PFN_bzread)(bzFile file, void GVFAR *buf, unsigned len);
+typedef int (WINAPI *PFN_bzclose)(bzFile file);
+extern PFN_bzopen bzopen;
+extern PFN_bzread bzread;
+extern PFN_bzclose bzclose;
+
 
 extern BOOL debug;			/* /D command line option used */
 extern FILE *debug_file;		/* for gs input logging */

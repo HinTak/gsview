@@ -42,7 +42,7 @@ GSviewDdeCallback(UINT type, UINT fmt, HCONV hconv,
     HSZ hsz1, HSZ hsz2, HDDEDATA hData, DWORD dwData1, DWORD dwData2)
 {
 char szBuffer[32];
-  if (dde_enable_server) {
+  if (server_enabled) {
       switch (type) {
 	case XTYP_CONNECT:
 	    DdeQueryString(idInst, hsz2, (LPSTR)szBuffer, sizeof(szBuffer), 0);

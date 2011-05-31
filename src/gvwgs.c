@@ -19,6 +19,11 @@
 /* Ghostscript DLL interface for GSview */
 #include "gvwgs.h"
 
+#ifdef _MSC_VER
+#define _export
+#endif
+
+
 GSDLL gsdll;
 HINSTANCE phInstance;
 POINT char_size;
@@ -94,7 +99,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
     if (parse_args(argc, argv)) {
 #ifdef __WIN32__
 	if (multithread)
-	    gstid = _beginthread(gs_thread, 65536, NULL);
+	    gstid = _beginthread(gs_thread, 131072, NULL);
 	else 
 #endif
         {
@@ -496,7 +501,7 @@ AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
         case WM_INITDIALOG:
-            SetDlgItemText(hDlg, ABOUT_VERSION, GSVIEW_VERSION);
+            SetDlgItemText(hDlg, ABOUT_VERSION, GSVIEW_DOT_VERSION);
             return( TRUE);
         case WM_COMMAND:
             switch(LOWORD(wParam)) {

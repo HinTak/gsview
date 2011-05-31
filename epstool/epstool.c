@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "1.07  1998-12-23";
+char szVersion[] = "1.08  2000-02-15";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -34,6 +34,9 @@ BOOL calc_bbox = FALSE;
 BOOL got_op = FALSE;
 BOOL debug = FALSE;
 BOOL quiet = FALSE;
+BOOL ptsize = FALSE;
+int ptwidth = 612;	/* letter width */
+int ptheight = 842;	/* A4 height */
 int op = 0;
 #define EXTRACTPS	1
 #define EXTRACTPRE	2
@@ -93,7 +96,7 @@ main(int argc, char *argv[])
 #endif
 	if (scan_args(argc, argv))
 	   return 1;
-#if defined(__EMX__) || defined(MSDOS)
+#if defined(__EMX__) || defined(MSDOS) || defined(__WIN32__)
 	setmode(fileno(stdout), O_BINARY);
 #endif
 
@@ -220,13 +223,13 @@ int code = 0;
 	   fprintf(tempfile, "%d %d translate\r\n", -doc->boundingbox[LLX], -doc->boundingbox[LLY]);
 	/* calculate page size */
 	if (calc_bbox) {
-	   if (doc->default_page_media) {
+	   if (doc->default_page_media && !ptsize) {
 	       width = (int)(doc->default_page_media->width*(long)resolution/72L);
 	       height = (int)(doc->default_page_media->height*(long)resolution/72L);
 	   }
 	   else {
-	       width = (int)(612L*resolution/72L);	/* letter width */
-	       height = (int)(842L*resolution/72L);	/* A4 height */
+	       width = (int)(((long)ptwidth)*resolution/72L);
+	       height = (int)(((long)ptheight)*resolution/72L);
 	   }
 	}
 	else {
@@ -272,6 +275,7 @@ int code = 0;
 	if (!quiet)
 	    fprintf(stderr,"%s\n", gscommand);
 	system(gscommand);
+
 	if (!debug) {
 	    unlink(rspname);
 	    unlink(tempname);
@@ -361,6 +365,17 @@ int count;
 		      return 1;
 		  }
 		  break;
+		case 's':
+		   if (argp[2]) {
+		     if (sscanf(argp+2, "%dx%d", &ptwidth, &ptheight)
+			   == 2)
+			ptsize = TRUE;
+		     else {
+		        fprintf(stderr,"Incorrect size specified with -s\n");
+		        return 1;
+		     }
+		   }
+		   break;
 		case 'b':
 		  calc_bbox = !calc_bbox;
 		  break;
@@ -492,7 +507,7 @@ void
 do_help(void)
 {
    fprintf(stderr,"Usage:  epstool [option] operation filename\n");
-   fprintf(stderr,"  Copyright (C) 1995-1998, Ghostgum Software Pty Ltd.  All rights reserved.\n");
+   fprintf(stderr,"  Copyright (C) 1995-2000, Ghostgum Software Pty Ltd.  All rights reserved.\n");
    fprintf(stderr,"  Version: %s\n", szVersion);
    fprintf(stderr,"  Options:\n");
    fprintf(stderr,"     -b             Calculate BoundingBox from image\n");
@@ -501,6 +516,7 @@ do_help(void)
    fprintf(stderr,"     -ofilename     Output filename\n");
    fprintf(stderr,"     -q             Quiet (no messages)\n");
    fprintf(stderr,"     -rnumber       Preview resolution in dpi\n");
+   fprintf(stderr,"     -sWIDTHxHEIGHT Size of page used with -b\n");
    fprintf(stderr,"     -zdevice       Ghostscript device name\n");
    fprintf(stderr,"  Operations: (one only)\n");
    fprintf(stderr,"     -i             Add Interchange preview   (EPSI)\n");
@@ -665,10 +681,10 @@ psfile_extract_header(FILE *f)
         fputs(text,f);
     else {
 	switch(text[11]) {
-	    case 1:
+	    case '1':
                 fputs("%!PS-Adobe-1.0 EPSF-1.0\r\n",f);
 		break;
-	    case 2:
+	    case '2':
                 fputs("%!PS-Adobe-2.0 EPSF-2.0\r\n",f);
 		break;
 	    default:
@@ -722,6 +738,64 @@ psfile_extract_page(FILE *f, int page)
     }
 }
 
+/* Copy the header to file f */
+/* change bbox line if present, or add bbox line */
+void
+copy_eps_bbox_header(FILE *f)
+{
+    char text[PSLINELENGTH];
+    char *comment;
+    BOOL bbox_written = FALSE;
+    long position;
+    PSDOC *doc = psfile.doc;
+
+    fseek(psfile.file, doc->beginheader, SEEK_SET);
+    /* make sure first line is EPS */
+    fgets(text, PSLINELENGTH, psfile.file);
+    if (doc->epsf)
+        fputs(text,f);
+    else {
+	switch(text[11]) {
+	    case '1':
+                fputs("%!PS-Adobe-1.0 EPSF-1.0\r\n",f);
+		break;
+	    case '2':
+                fputs("%!PS-Adobe-2.0 EPSF-2.0\r\n",f);
+		break;
+	    default:
+                fputs("%!PS-Adobe-3.0 EPSF-3.0\r\n",f);
+	}
+    }
+    position = ftell(psfile.file);
+    if (!( (doc->boundingbox[LLX]==0) &&  (doc->boundingbox[LLY]==0) 
+          && (doc->boundingbox[URX]==0) &&  (doc->boundingbox[URY]==0) )) {
+      /* BoundingBox was in original file, replace it */
+      position = ftell(psfile.file);
+      while ( (comment = pscopyuntil(psfile.file, f, position,
+			   doc->endheader, "%%BoundingBox:")) != (char *)NULL )     {
+	position = ftell(psfile.file);
+	if (bbox_written) {
+	    free(comment);
+	    continue;
+	}
+	fprintf(f, "%%%%BoundingBox: %d %d %d %d\r\n",
+	    bbox.llx, bbox.lly, bbox.urx, bbox.ury);
+	bbox_written = TRUE;
+	free(comment);
+      }
+    }
+    else {
+      /* BoundingBox was not in original file, add it */
+      fgets(text, PSLINELENGTH, psfile.file);
+      fputs(text,f);
+      fprintf(f, "%%%%BoundingBox: %d %d %d %d\r\n",
+	    bbox.llx, bbox.lly, bbox.urx, bbox.ury);
+      position = ftell(psfile.file);
+      comment = pscopyuntil(psfile.file, f, position, doc->endheader, NULL);
+      free(comment);
+    }
+}
+
 /* copy psfile, updating %%BoundingBox */
 int
 make_eps_copy(void)
@@ -763,7 +837,11 @@ int code;
 	    bbox.ury = (int)(devbbox.ury * 72.0 / option.ydpi + 1.5);
 	    bbox.valid = TRUE;
 	}
-	copy_bbox_header(epsfile); /* adjust %%BoundingBox: comment */
+
+
+
+	copy_eps_bbox_header(epsfile); /* adjust %%BoundingBox: comment */
+
 	pscopyuntil(psfile.file, epsfile, psfile.doc->endheader, psfile.doc->endtrailer, NULL);
     }
     else {

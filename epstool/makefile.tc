@@ -94,7 +94,7 @@ EPSFILES1=\
  epstool/epstool.c\
  epstool/epstool.h\
  epstool/epstool.def\
- epstool/epstool.txt
+ epstool/epstool.htm
 
 EPSFILES2=\
 # epstool/epstest.cmd\
@@ -113,13 +113,13 @@ SRCFILES1=\
 ZIPFILES=\
  epstool.exe\
  epstool2.exe\
- epstool.txt\
+ epstool.htm\
  $(EPSFILES1)\
  $(EPSFILES2)\
  $(SRCFILES1)
 
 zip: all
-	copy epstool.txt ..\epstool.txt
+	copy epstool.htm ..\epstool.htm
 	copy epstool.exe ..\epstool.exe
 	$(STRIP) ..\epstool.exe
 	cd ..
@@ -127,7 +127,7 @@ zip: all
 	-del epstool.zip
 	echo epstool.exe > zipfiles.txt
 	echo epstool2.exe >> zipfiles.txt
-	echo epstool.txt >> zipfiles.txt
+	echo epstool.htm >> zipfiles.txt
 	echo $(EPSFILES1) >> zipfiles.txt
 	echo $(EPSFILES2) >> zipfiles.txt
 	echo $(SRCFILES1) >> zipfiles.txt

@@ -19,11 +19,10 @@
 /* Measure lengths on display */
 
 /* Bugs:
- - Measure dialog closes when you click in the image window area 
-   (should be fixed)
- - Doesn't set radio buttons when initialising Calc dialog box.
- - Crashes in measure_paint.
- Currently disabled in language/gvplang.rc
+ - Crashes in measure_transform_point() (in gvcmeas.c) when frame 
+   window resized.  All variables are correct, but a floating point
+   underflow error occurs for no apparent reason.
+ Currently disabled in language/gvplang.rc and gvpm.c
  */
 
 #include "gvpm.h"
@@ -187,17 +186,17 @@ MeasureDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 		    measure_update_last();
 		    return (MRESULT)FALSE;
 		case IDCANCEL:
-DosBeep(400,50);
 		    WinDestroyWindow(hwnd);
 		    hwnd_measure = 0;
 		    return (MRESULT)TRUE;
 	    }
 	    break;
 	case WM_CLOSE:
-DosBeep(400,50);
 	    WinDestroyWindow(hwnd);
-	    hwnd_measure = 0;
 	    return (MRESULT)TRUE;
+	case WM_DESTROY:
+	    hwnd_measure = 0;
+	    break;
     }
     return WinDefDlgProc(hwnd, mess, mp1, mp2);
 }
@@ -208,14 +207,14 @@ void
 measure_show(void)
 {
     if (hwnd_measure) {
-	WinSetWindowPos(hwnd_modeless, HWND_TOP, 0, 0, 0, 0, 
+	WinSetWindowPos(hwnd_measure, HWND_TOP, 0, 0, 0, 0, 
 	    SWP_ZORDER | SWP_ACTIVATE);
 	return;
     }
 
-    hwnd_modeless = WinLoadDlg(HWND_DESKTOP, hwnd_frame, MeasureDlgProc, 
+    hwnd_measure = WinLoadDlg(HWND_DESKTOP, hwnd_frame, MeasureDlgProc, 
 	hlanguage, IDD_MEASURE, NULL);
-    WinSetWindowPos(hwnd_modeless, HWND_TOP, 0, 0, 0, 0, 
+    WinSetWindowPos(hwnd_measure, HWND_TOP, 0, 0, 0, 0, 
 	SWP_ZORDER | SWP_ACTIVATE);
 
 }

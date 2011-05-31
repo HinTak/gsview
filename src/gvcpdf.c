@@ -133,15 +133,8 @@ char tname[MAXSTR];
 	psfile.page_list.select = (BOOL *)malloc( doc->numpages * sizeof(BOOL) );
     }
     /* put in some dummy values for the page size and bounding box */
-    i = get_paper_size_index();
-    if (i < 0) {
-	doc->default_page_boundingbox[URX] = option.user_width;
-	doc->default_page_boundingbox[URY] = option.user_height;
-    }
-    else {
-	doc->default_page_boundingbox[URX] = papersizes[i].width;
-	doc->default_page_boundingbox[URY] = papersizes[i].height;
-    }
+    doc->default_page_boundingbox[URX] = get_paper_width();
+    doc->default_page_boundingbox[URY] = get_paper_height();
     doc->default_page_boundingbox[LLX] = doc->default_page_boundingbox[LLX] = 0;
     doc->boundingbox[LLX] = doc->boundingbox[LLX] = 0;
     doc->boundingbox[URX] = doc->default_page_boundingbox[URX];
@@ -270,25 +263,24 @@ int level;
     return p;
 }
 
+#define MAX_TAG_LEN 4096
 
 /* Check stdout for tag giving page range, pdfmarks etc. */
 int
-pdf_process_tag(char *line, int len)
+pdf_process_tag(char *line)
 {
 int i, first, last;
-char buf[MAXSTR];
 float x0, x1, y0, y1;
 int rotate;
 int temp;
+int len = strlen(line);
 
     if ( (len < 1) || (*line != '%') )
 	return FALSE;
 
     if (psfile.ispdf && (len > sizeof(pdf_page_tag)) &&
 	(strncmp(line, pdf_page_tag, strlen(pdf_page_tag)) == 0) ) {
-	strncpy(buf, line, len);
-	buf[len] = '\0';
-	i = sscanf(buf+strlen(pdf_page_tag), "%d %d", &first, &last);
+	i = sscanf(line+strlen(pdf_page_tag), "%d %d", &first, &last);
 	if (i==2) {
 	    if (debug)
 		gs_addmess("Found GSVIEW_PDF_PAGE tag\n");
@@ -298,9 +290,7 @@ int temp;
     }
     if (psfile.ispdf && (len > sizeof(pdf_media_tag)) &&
 	(strncmp(line, pdf_media_tag, strlen(pdf_media_tag)) == 0) ) {
-	strncpy(buf, line, len);
-	buf[len] = '\0';
-	i = sscanf(buf+strlen(pdf_media_tag), "[%f %f %f %f]", &x0, &y0, &x1, &y1);
+	i = sscanf(line+strlen(pdf_media_tag), "[%f %f %f %f]", &x0, &y0, &x1, &y1);
 	if (i==4) {
 	    if (debug)
 		gs_addmess("Found GSVIEW_PDF_MEDIA tag\n");
@@ -324,9 +314,7 @@ int temp;
     }
     if (psfile.ispdf && (len > sizeof(pdf_crop_tag)) &&
 	(strncmp(line, pdf_crop_tag, strlen(pdf_crop_tag)) == 0) ) {
-	strncpy(buf, line, len);
-	buf[len] = '\0';
-	i = sscanf(buf+strlen(pdf_crop_tag), "[%f %f %f %f]", &x0, &y0, &x1, &y1);
+	i = sscanf(line+strlen(pdf_crop_tag), "[%f %f %f %f]", &x0, &y0, &x1, &y1);
 	if (i==4) {
 	    if (debug)
 		gs_addmess("Found GSVIEW_PDF_CROP tag\n");
@@ -351,9 +339,7 @@ int temp;
     }
     if (psfile.ispdf && (len > sizeof(pdf_rotate_tag)) &&
 	(strncmp(line, pdf_rotate_tag, strlen(pdf_rotate_tag)) == 0) ) {
-	strncpy(buf, line, len);
-	buf[len] = '\0';
-	i = sscanf(buf+strlen(pdf_rotate_tag), "%d", &rotate);
+	i = sscanf(line+strlen(pdf_rotate_tag), "%d", &rotate);
 	if (i==1) {
 	    if (debug)
 		gs_addmess("Found GSVIEW_PDF_ROTATE tag\n");
@@ -388,9 +374,7 @@ int temp;
 	int code = FALSE;
 	memset(&link, 0, sizeof(link));
 	link.border_width = 1;
-	strncpy(buf, line, len);
-	buf[len] = '\0';
-	p = buf+strlen(pdf_mark_tag);
+	p = line+strlen(pdf_mark_tag);
         if (strncmp(p, "/LNK ", 5) == 0) {
 	    p += 5;
 	    possibly_a_link = TRUE;
@@ -472,7 +456,7 @@ int temp;
     return FALSE;
 }
 
-char pdf_tag_line[1024];
+char pdf_tag_line[MAX_TAG_LEN];
 
 /* Check stdout for tag giving page range */
 int
@@ -527,7 +511,7 @@ int tag_len;
 	return FALSE; /* not yet complete */
 
     if ( (len >= 1) && (*pdf_tag_line == '%') )
-	code = pdf_process_tag(pdf_tag_line, strlen(pdf_tag_line));
+	code = pdf_process_tag(pdf_tag_line);
     pdf_tag_line[0] = '\0';
     return code;
 }
@@ -586,7 +570,11 @@ BOOL reverse = psfile.page_list.reverse;
 /Page# 0 def\r\n\
 /PDFSave null def\r\n\
 /DSCPageCount 0 def\r\n\
-/DoPDFPage {dup /Page# exch store pdfgetpage pdfshowpage} def\r\n\
+/DoPDFPage {\r\n\
+  (Page ) print dup == flush\r\n\
+  dup /Page# exch store\r\n\
+  pdfgetpage pdfshowpage\r\n\
+} def\r\n\
 GS_PDF_ProcSet begin\r\n\
 pdfdict begin\r\n\
 ", f);

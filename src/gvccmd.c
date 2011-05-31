@@ -44,6 +44,7 @@ gsview_command(int command)
 	case IDM_GOFWD:
 	case IDM_MAGPLUS:
 	case IDM_MAGMINUS:
+	case IDM_FITWIN:
 	case IDM_ZOOM:
 	case IDM_FULLSCREEN:
 	    /* These don't close the full screen window */
@@ -510,8 +511,19 @@ gsview_command(int command)
 	case IDM_MAGMINUS:
 		gs_magnify(0.8333);
 		return 0;
+	case IDM_FITWIN:
+		/* fit media to size of current window */
+		gsview_fitwin();
+		return 0;
 	case IDM_DISPLAYSETTINGS:
 		display_settings();
+		return 0;
+	case IDM_MEDIAROTATE:
+		option.media_rotate = !option.media_rotate;
+		check_menu_item(IDM_MEDIAMENU, IDM_MEDIAROTATE, 
+			option.media_rotate);
+		zoom = FALSE;
+		gs_resize();
 		return 0;
 	case IDM_LETTER:
 	case IDM_LETTERSMALL:

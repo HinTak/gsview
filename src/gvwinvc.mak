@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -21,32 +21,40 @@
 #
 # Path to Microsoft Visual C++ must NOT include spaces
 
-# Edit COMPBASE and WIN32 as required
+# Edit VCVER and DEVBASE as required
+VCVER=5
 DEVBASE = c:\devstudio
 # DEBUG=1 for Debugging options
 DEBUG=1
-# WIN32 is the default
+# WIN32 is the default - don't change this
 WIN32=1
+
 # ALPHA=1 for DEC Alpha
+!if "$(PROCESSOR_ARCHITECTURE)"=="ALPHA"
+ALPHA=1
+!else
 ALPHA=0
-# Language is English (en), Deutsch (de) or French (fr) or Italian (it)
-# This only applies to the utilties, not GSview itself.
-LANGUAGE=en
-# GSview version
-GSVIEW_VERSION=27
+!endif
 
 # Shouldn't need editing below here
+!if $(VCVER) <= 5
 COMPBASE = $(DEVBASE)\vc
+!else
+COMPBASE = $(DEVBASE)\vc98
+!endif
 COMPDIR = $(COMPBASE)\bin
 INCDIR = $(COMPBASE)\include
 LIBDIR = $(COMPBASE)\lib
 !if $(WIN32)
+CDEFS=-D_Windows -D__WIN32__ -I"$(INCDIR)"
 !if $(ALPHA)
 WINEXT=da
-CFLAGS=-D_Windows -D__WIN32__ -DDECALPHA -I$(INCDIR)
+CFLAGS= $(CDEFS) /nologo -DDECALPHA /QA21164
+LINKMACHINE=ALPHA
 !else
 WINEXT=32
-CFLAGS=-D_Windows -D__WIN32__ -I$(INCDIR)
+CFLAGS=$(CDEFS) /nologo
+LINKMACHINE=IX86
 !endif
 !if $(DEBUG)
 DEBUGLINK=/DEBUG
@@ -59,70 +67,75 @@ CC = cl $(CDEBUG)
     echo Win16 not supported with MSVC++
 !endif
 CLFLAG=
+!if $(VCVER) <= 5
 HC=$(COMPDIR)\hcw /C /E
-RCOMP=$(DEVBASE)\sharedide\bin\rc -D_MSC_VER $(CFLAGS)
+RCOMP=$(DEVBASE)\sharedide\bin\rc -D_MSC_VER $(CDEFS)
+!else
+HC=$(DEVBASE)\common\tools\hcw /C /E
+RCOMP=$(DEVBASE)\common\msdev98\bin\rc -D_MSC_VER $(CDEFS)
+!endif
 
 all: gsview$(WINEXT).exe\
   gsviewen.hlp\
-  gsvw$(WINEXT)de.dll gsviewde.hlp\
-  gsvw$(WINEXT)fr.dll gsviewfr.hlp\
-  gsvw$(WINEXT)it.dll gsviewit.hlp\
-  gvwgs$(WINEXT).exe\
-  winsetup.exe setp$(WINEXT)de.dll setp$(WINEXT)fr.dll setp$(WINEXT)fr.dll\
-  ungsview.exe
+  gsvw$(WINEXT)de.dll gsviewde.hlp setp$(WINEXT)de.dll\
+  gsvw$(WINEXT)fr.dll gsviewfr.hlp setp$(WINEXT)fr.dll\
+  gsvw$(WINEXT)it.dll gsviewit.hlp setp$(WINEXT)it.dll\
+  gvwgs$(WINEXT).exe gsv16spl.exe\
+  winsetup.exe uninstgs.exe
 
 .c.obj:
 	$(COMPDIR)\$(CC) -c $(CFLAGS) $< 
 
-lib.rsp: makefile
-        echo $(LIBDIR)\shell32.lib > lib.rsp
-        echo $(LIBDIR)\comdlg32.lib >> lib.rsp
-        echo $(LIBDIR)\gdi32.lib >> lib.rsp
-        echo $(LIBDIR)\user32.lib >> lib.rsp
-        echo $(LIBDIR)\winspool.lib >> lib.rsp
-        echo $(LIBDIR)\advapi32.lib >> lib.rsp
-	echo /NODEFAULTLIB:LIBC.lib >> lib.rsp
-        echo $(LIBDIR)\libcmt.lib >> lib.rsp
-
+!include "gvcver.mak"
 !include "gvwinc.mak"
+
+lib.rsp: makefile
+        echo "$(LIBDIR)\shell32.lib" > lib.rsp
+        echo "$(LIBDIR)\comdlg32.lib" >> lib.rsp
+        echo "$(LIBDIR)\gdi32.lib" >> lib.rsp
+        echo "$(LIBDIR)\user32.lib" >> lib.rsp
+        echo "$(LIBDIR)\winspool.lib" >> lib.rsp
+        echo "$(LIBDIR)\advapi32.lib" >> lib.rsp
+        echo "$(LIBDIR)\ole32.lib" >> lib.rsp
+        echo "$(LIBDIR)\uuid.lib" >> lib.rsp
+	echo /NODEFAULTLIB:LIBC.lib >> lib.rsp
+        echo "$(LIBDIR)\libcmt.lib" >> lib.rsp
+
 	
 # change cw32mt to cw32 for single thread
-gsview32.exe: $(OBJS) gvwin32.res gvwin32.def lib.rsp
+gsview$(WINEXT).exe: $(OBJS) gvwin$(WINEXT).res gvwin$(WINEXT).def lib.rsp
 	echo $(OBJ1) > link.rsp
 	echo $(OBJ2) >> link.rsp
 	echo $(OBJ3) >> link.rsp
 	echo $(OBJ4) >> link.rsp
 	echo $(OBJ5) >> link.rsp
-	$(COMPDIR)\link $(DEBUGLINK) /DEF:gvwin32.def /OUT:gsview32.exe @link.rsp @lib.rsp gvwin32.res
+	$(COMPDIR)\link $(DEBUGLINK) /DEF:gvwin$(WINEXT).def /OUT:gsview$(WINEXT).exe @link.rsp @lib.rsp gvwin$(WINEXT).res
 
 
-gsvw32de.dll: gvwlang.c gsvw32de.res de\gvwin32.def
-	$(COMPDIR)\$(CC) /c $(CFLAGS) /I$(INCDIR) gvwlang.c
-	$(COMPDIR)\link $(DEBUGLINK) /DLL /DEF:de\gvwin32.def /OUT:gsvw32de.dll gvwlang.obj gsvw32de.res
+gsvw$(WINEXT)de.dll: gsvw$(WINEXT)de.res de\gvwin32.def
+	$(COMPDIR)\link /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:de\gvwin32.def /OUT:gsvw$(WINEXT)de.dll gsvw$(WINEXT)de.res
 
 
-gsvw32fr.dll: gvwlang.c gsvw32fr.res fr\gvwin32.def
-	$(COMPDIR)\$(CC) /c $(CFLAGS) /I$(INCDIR) gvwlang.c
-	$(COMPDIR)\link $(DEBUGLINK) /DLL /DEF:fr\gvwin32.def /OUT:gsvw32fr.dll gvwlang.obj gsvw32fr.res
+gsvw$(WINEXT)fr.dll: gsvw$(WINEXT)fr.res fr\gvwin32.def
+	$(COMPDIR)\link /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:fr\gvwin32.def /OUT:gsvw$(WINEXT)fr.dll gsvw$(WINEXT)fr.res
 
-gsvw32it.dll: gvwlang.c gsvw32it.res it\gvwin32.def
-	$(COMPDIR)\$(CC) /c $(CFLAGS) /I$(INCDIR) gvwlang.c
-	$(COMPDIR)\link $(DEBUGLINK) /DLL /DEF:it\gvwin32.def /OUT:gsvw32it.dll gvwlang.obj gsvw32it.res
+gsvw$(WINEXT)it.dll: gsvw$(WINEXT)it.res it\gvwin32.def
+	$(COMPDIR)\link /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:it\gvwin32.def /OUT:gsvw$(WINEXT)it.dll gsvw$(WINEXT)it.res
 
-winsetup.exe: winsetup.obj winsetup.res winsetup.def setupc.obj winunzip.obj gvcbeta.obj gvwdde.obj lib.rsp
-	$(COMPDIR)\link $(DEBUGLINK) /DEF:winsetup.def /OUT:winsetup.exe winsetup.obj winunzip.obj setupc.obj gvcbeta.obj gvwdde.obj @lib.rsp winsetup.res
+uninstgs.exe: dwuninst.obj dwuninst.h dwuninst.res dwuninst.def
+	$(COMPDIR)\link $(DEBUGLINK) /DEF:dwuninst.def /OUT:uninstgs.exe dwuninst.obj @lib.rsp dwuninst.res
 
-setp32de.dll: gvwlang.c setp32de.res de\setup32.def
-	$(COMPDIR)\$(CC) /c $(CFLAGS) /I$(INCDIR) gvwlang.c
-	$(COMPDIR)\link $(DEBUGLINK) /DLL /DEF:de\setup32.def /OUT:setp32de.dll gvwlang.obj setp32de.res
+winsetup.exe: winsetup.obj winsetup.res winsetup.def dwinst.obj gvcbeta.obj lib.rsp
+	$(COMPDIR)\link $(DEBUGLINK) /DEF:winsetup.def /OUT:winsetup.exe winsetup.obj dwinst.obj gvcbeta.obj @lib.rsp winsetup.res
 
-setp32fr.dll: gvwlang.c setp32fr.res fr\setup32.def
-	$(COMPDIR)\$(CC) /c $(CFLAGS) /I$(INCDIR) gvwlang.c
-	$(COMPDIR)\link $(DEBUGLINK) /DLL /DEF:fr\setup32.def /OUT:setp32fr.dll gvwlang.obj setp32fr.res
+setp$(WINEXT)de.dll: setp$(WINEXT)de.res de\setup32.def
+	$(COMPDIR)\link /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:de\setup32.def /OUT:setp$(WINEXT)de.dll setp$(WINEXT)de.res
 
-setp32it.dll: gvwlang.c setp32it.res de\setup32.def
-	$(COMPDIR)\$(CC) /c $(CFLAGS) /I$(INCDIR) gvwlang.c
-	$(COMPDIR)\link $(DEBUGLINK) /DLL /DEF:it\setup32.def /OUT:setp32it.dll gvwlang.obj setp32it.res
+setp$(WINEXT)fr.dll: setp$(WINEXT)fr.res fr\setup32.def
+	$(COMPDIR)\link /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:fr\setup32.def /OUT:setp$(WINEXT)fr.dll setp$(WINEXT)fr.res
+
+setp$(WINEXT)it.dll: setp$(WINEXT)it.res de\setup32.def
+	$(COMPDIR)\link /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:it\setup32.def /OUT:setp$(WINEXT)it.dll setp$(WINEXT)it.res
 
 ungsview.exe: ungsview.obj ungsview.res ungsview.def
 	$(COMPDIR)\link $(DEBUGLINK) /DEF:ungsview.def /OUT:ungsview.exe ungsview.obj @lib.rsp ungsview.res
@@ -130,12 +143,12 @@ ungsview.exe: ungsview.obj ungsview.res ungsview.def
 
 # Intel
 gvwgs32.exe: gvwgs.c gvwgs.h gvwgs32.res lib.rsp
-	$(COMPDIR)\$(CC) -c $(CFLAGS) -I$(INCDIR) gvwgs.c
+	$(COMPDIR)\$(CC) -c $(CFLAGS) -I"$(INCDIR)" gvwgs.c
 	$(COMPDIR)\link $(DEBUGLINK) /DEF:gvwgs32.def /OUT:gvwgs32.exe gvwgs.obj @lib.rsp gvwgs32.res
 
 # DEC Alpha
-gvwgsda.exe: gvwgs.c gvwgs.h gvwgs32.res lib.rsp
-	$(COMPDIR)\$(CC) -c $(CFLAGS) -I$(INCDIR) gvwgs.c
+gvwgsda.exe: gvwgs.c gvwgs.h gvwgsda.res lib.rsp
+	$(COMPDIR)\$(CC) -c $(CFLAGS) -I"$(INCDIR)" gvwgs.c
 	$(COMPDIR)\link $(DEBUGLINK) /DEF:gvwgs32.def /OUT:gvwgsda.exe gvwgs.obj @lib.rsp gvwgs32.res
 
 gsv16spl.exe: gsv16spl.c gsv16spl.rc gsv16spl.def  $(LANGUAGE)\gvclang.h
@@ -146,7 +159,7 @@ strip: gsview$(WINEXT).exe
 #	$(COMPDIR)\tdstrp32 gsview32.exe
 
 gsv$(GSVIEW_VERSION)wda.zip:
-	copy README.TXT ..\README.TXT
+	copy Readme.htm ..\Readme.htm
 	copy LICENCE ..\LICENCE
 	copy FILE_ID.DIZ ..\FILE_ID.DIZ
 	copy gsviewda.exe ..\gsviewda.exe
@@ -170,9 +183,9 @@ gsv$(GSVIEW_VERSION)wda.zip:
 	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> README32.TXT
 	-del gsv$(GSVIEW_VERSION)wda.zip
 	zip -9 gsv$(GSVIEW_VERSION)wda.zip win32da.zip setupda.exe wizunzda.dll setpdade.dll setpdafr.dll setpdait.dll
-	zip -9 gsv$(GSVIEW_VERSION)wda.zip README32.TXT README.TXT FILE_ID.DIZ LICENCE
+	zip -9 gsv$(GSVIEW_VERSION)wda.zip README32.TXT Readme.htm FILE_ID.DIZ LICENCE
 	-del README32.TXT
-	-del README.TXT
+	-del Readme.htm
 	-del LICENCE
 	-del FILE_ID.DIZ
 	-del gsviewda.exe

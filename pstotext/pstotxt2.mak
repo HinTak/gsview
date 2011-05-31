@@ -5,7 +5,7 @@
 # Russell Lang, 1996-07-29
 # updated 1996-10-11
 
-DRIVE=c:
+DRIVE=
 COMP=gcc
 COMPBASE=$(DRIVE)\emx
 EMXPATH=$(DRIVE)/emx

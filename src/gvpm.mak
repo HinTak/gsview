@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -31,14 +31,9 @@ USE_OMF=1
 # DEBUG=1 for debugging
 DEBUG=0
 
-# Language is English (en) or Deutsch (de) or French (fr) or Italian (it)
-LANGUAGE=en
-# GSview version
-GSVIEW_VERSION=27
-
 !if $(USE_EMX)
 # EMX
-DRIVE=c:
+DRIVE=e:
 COMP=gcc
 COMPBASE=$(DRIVE)\emx
 EMXPATH=$(DRIVE)/emx
@@ -88,23 +83,25 @@ LIBDIR=$(EMXPATH)/lib
 
 
 OBJS=gvpm.$(OBJ) gvpdlg.$(OBJ) gvpdisp.$(OBJ) gvpedit.$(OBJ) gvpeps.$(OBJ)\
-   gvpinit.$(OBJ) gvpmeas.$(OBJ) gvpmisc.$(OBJ) gvpprn.$(OBJ)\
+   gvpgsver.$(OBJ) gvpinit.$(OBJ) gvpmeas.$(OBJ) gvpmisc.$(OBJ) gvpprn.$(OBJ)\
    gvccmd.$(OBJ) gvcdisp.$(OBJ) gvceps.$(OBJ) gvcinit.$(OBJ) gvcbeta.$(OBJ)\
    gvcmeas.$(OBJ) gvcmisc.$(OBJ) gvcprf.$(OBJ) gvcprn.$(OBJ) gvctext.$(OBJ)\
    gvpdll.$(OBJ) gvcdll.$(OBJ)  gvcpdf.$(OBJ) ps.$(OBJ) 
-HDRS=gvpm.h ps.h gvcfn.h gvcver.h
+HDRS=ver.h gvpm.h ps.h gvcfn.h gvcver.h
+
 
 all: gvpm.exe\
  gvpmen.hlp\
- gvpmde.hlp gvpmde.dll\
- gvpmfr.hlp gvpmfr.dll\
- gvpmit.hlp gvpmit.dll\
+ gvpmde.hlp gvpmde.dll setup2de.dll\
+ gvpmfr.hlp gvpmfr.dll setup2fr.dll\
+ gvpmit.hlp gvpmit.dll setup2it.dll\
  gvpgs.exe\
- os2setup.exe setup2de.dll setup2fr.dll setup2it.dll
+ os2setup.exe
 
 .c.$(OBJ):
 	$(COMP) $(FLAGS) -DOS2 -c $*.c
 
+!include "gvcver.mak"
 
 gvpm.$(OBJ): gvpm.c $(HDRS)
 
@@ -117,6 +114,8 @@ gvpdisp.$(OBJ): gvpdisp.c  $(HDRS)
 gvpedit.$(OBJ): gvpedit.c $(HDRS)
 
 gvpeps.$(OBJ): gvpeps.c gvceps.h $(HDRS)
+
+gvpgsver.$(OBJ): gvpgsver.c $(HDRS) gvcrc.h
 
 gvpinit.$(OBJ): gvpinit.c $(HDRS) gvcrc.h
 
@@ -394,13 +393,14 @@ gvpmen.inf: gvpmen.hlp
 
 html: gvpm.htm gsview.htm
 
-gvpm.htm: doc2html.exe gvpm.txt
+gvpm.htm: doc2html.exe en\gvclang.txt
+	gvdoc P en\gvclang.txt gvpm.txt
 	doc2html gvpm.txt GSview.htm
 	-del gvpm.htm
 	rename GSview.htm gvpm.htm
 
 gsview.txt: gvc.txt gvdoc.exe
-	gvdoc W gvc.txt gsview.txt
+	gvdoc W en\gvclang.txt gsview.txt
 
 gsview.htm: doc2html.exe gsview.txt
 	doc2html gsview.txt GSview.htm
@@ -449,7 +449,8 @@ gvpgs.exe: gvpgs.$(OBJ) gvpgs.res gvpgs.def
 
 
 gsv$(GSVIEW_VERSION)os2.zip:
-	copy README.TXT ..
+	copy Readme.htm ..
+	copy cdorder.txt ..
 	copy LICENCE ..
 	copy FILE_ID.DIZ ..
 	copy gvpm.exe ..
@@ -476,11 +477,11 @@ gsv$(GSVIEW_VERSION)os2.zip:
 	echo Redistribution of this OS/2 GSview MUST be accompanied by the> README2.TXT
 	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> README2.TXT
 	-del gsv$(GSVIEW_VERSION)os2.zip
-	zip -9 gsv$(GSVIEW_VERSION)os2.zip os2.zip os2setup.exe unzip2.dll setup2de.dll setup2fr.dll 
-#setup2it.dll 
-	zip -9 gsv$(GSVIEW_VERSION)os2.zip README2.TXT README.TXT FILE_ID.DIZ LICENCE
+	zip -9 gsv$(GSVIEW_VERSION)os2.zip os2.zip os2setup.exe unzip2.dll setup2de.dll setup2fr.dll setup2it.dll
+	zip -9 gsv$(GSVIEW_VERSION)os2.zip README2.TXT Readme.htm cdorder.txt FILE_ID.DIZ LICENCE
 	-del README2.TXT
-	-del README.TXT
+	-del Readme.htm
+	-del cdorder.txt
 	-del LICENCE
 	-del FILE_ID.DIZ
 	-del gvpm.exe
@@ -514,6 +515,7 @@ language:
 	-del *.res
 
 clean: language
+	-del ver.h
 	-del gvpm.res
 	-del gvpm.$(OBJ)
 	-del gvpdisp.$(OBJ)
@@ -521,6 +523,7 @@ clean: language
 	-del gvpdll.$(OBJ)
 	-del gvpedit.$(OBJ)
 	-del gvpeps.$(OBJ)
+	-del gvpgsver.$(OBJ)
 	-del gvpinit.$(OBJ)
 	-del gvpmeas.$(OBJ)
 	-del gvpmisc.$(OBJ)

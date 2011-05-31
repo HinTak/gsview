@@ -7,34 +7,54 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 2.7 requires Ghostscript 4.03 - 5.99.
+ GSview 2.76beta requires Ghostscript 4.03 - 6.99,
+ preferably 6.0 or later.
  GSview was inspired by Tim Theisen's X11 Ghostview program.
 2Installation
 ?Installation
  It is recommended that you use the installation program for
  installing GSview.
  This is called `setup.exe` for MS-Windows and `os2setup.exe` for OS/2.
- The installation program will install both GSview and Ghostscript.
+ GSview for MS-Windows is distributed in a self extracting archive -
+ running this will run the setup program.
+ You will need to install Ghostscript separately.
 
  If you wish to install GSview manually, see the `Manual Installation`
  topic.
 
- See also `Options` | `Language`.
-3Uninstalling GSview and Ghostscript
-?Uninstalling GSview and Ghostscript
-W
- To uninstall GSview and Ghostscript from Windows 95 or NT 4.0,
- use `Add/Remove Programs` from the Windows `Control Panel`.
+ Configuration will occur the first time GSview is run.
+ If you want to change the configuration later, use
+ `Options` | `Easy Configure` or
+ `Options` | `Advanced Configure`.
 
- For Windows NT 3.5 or Windows 3.1, use the
- "Uninstall GSview and Aladdin Ghostscript" program
- in the `GS Tools` group.
+ See also `Options` | `Language`.
+3Obtaining Ghostscript
+?Obtaining Ghostscript
+ GSview needs Aladdin Ghostscript.  GSview and Aladdin
+ Ghostscript are available separately from
+  http://www.cs.wisc.edu/~ghost/
+ To configure GSview, obtain and install both Aladdin Ghostscript
+ and GSview, then run GSview.
+3Ghostscript Installation
+?Ghostscript Installation
+W
+ Aladdin Ghostscript for Win32 is available as a self extracting
+ archive which installs itself.
+P
+ Aladdin Ghostscript for OS/2 is available as a zip file which
+ you must manually install.
+E
+ For details of how to manually install Ghostscript, please read
+ the Ghostscript documentation files Install.htm and Use.htm
+3Uninstalling GSview
+?Uninstalling GSview
+W
+ To uninstall GSview from Windows 95 or NT 4.0,
+ use `Add/Remove Programs` from the Windows `Control Panel`.
 4Manual uninstallation
 ?Manual uninstallation
 E
  To uninstall GSview, remove the files in the `gsview ` directory.
- To uninstall Ghostscript, remove the files in the `gsN.NN` directory
- where N.NN is the version number of Ghostscript.
 
  Also remove
 P
@@ -45,14 +65,14 @@ E
 
  from the appropriate system directory.
 W
- For Windows you may also need to remove gsview32.ini
+ For Windows NT you may also need to remove gsview32.ini
  from user profile directories.
 E
 
 P
  Remove the `GSview ` object from the desktop.
 W
- Remove the `GS Tools` group from the Program Manager or Start menu
+ Remove the `Ghostgum` group from the Program Manager or Start menu
 
  If you know how to edit the registry, remove the following keys:
   HKEY_CLASSES_ROOT\psfile
@@ -63,9 +83,14 @@ W
   HKEY_CLASSES_ROOT\pdffile
   HKEY_CLASSES_ROOT\.pdf
   HKEY_CLASSES_ROOT\MIME\Database\Content Type\application/pdf
- If you installed Ghostscript with GSview, remove the key
-  HKEY_LOCAL_MACHINE\Software\Aladdin Ghostscript\gsN.NN
 E
+
+W
+ The preferred method to uninstall Ghostscript is
+ using `Add/Remove Programs` from the Windows `Control Panel`.
+E
+ To manually uninstall Ghostscript, remove the files in the `gsN.NN`
+ directory where N.NN is the version number of Ghostscript.
 3Manual Installation
 ?Manual Installation
  It is recommended that you use the installation program for installing
@@ -80,79 +105,66 @@ E
  First you need to install Ghostscript, plus its library files and fonts.
  You need the Ghostscript version listed in `Overview`.
  This version of GSview will not work with other versions of Ghostscript.
- Install Ghostscript in a directory c:\gstools\gsN.NN
+ Install Ghostscript in a directory c:\Aladdin\gsN.NN
  (Replace N.NN by the Ghostscript version number.)
 
- Make a directory c:\gstools\gsview
+ Make a directory c:\ghostgum\gsview
 
  Next install
 P
  PM GSview by copying gvpm.exe, gvpgs.exe,
- gvpmde.dll, gvpmfr.dll,
- gvpmen.hlp, gvpmde.hlp, gvpmfr.hlp
+ gvpmde.dll, gvpmfr.dll, gvpmit.dll,
+ gvpmen.hlp, gvpmde.hlp, gvpmfr.hlp, gvpmit.hlp
  and printer.ini
 W
  GSview for Windows by copying gsview32.exe, gsv16spl.exe, gvwgs32.exe,
- gsvw32de.dll, gsvw32fr.dll,
- gsviewen.hlp, gsviewde.hlp, gsviewfr.hlp,
+ gsvw32de.dll, gsvw32fr.dll, gsvw32it.dll,
+ gsviewen.hlp, gsviewde.hlp, gsviewfr.hlp, gsviewit.hlp
  and printer.ini
 E
- to the `c:\gstools\gsview` directory.
+ to the `c:\ghostgum\gsview` directory.
 
+P
  Start GSview then follow the instructions given in the
  configuration wizard.  This will automatically configure
- `Options` | `Configure Ghostscript`, copy a list of known
+ `Options` | `Advanced Configure`, copy a list of known
  printers to the INI file,
-P
  and create a GSview program object on the desktop.
-W
- create file associations in the registry and create a program manager group.
-E
 
  If you want to run the configure wizard later, use
- `Options` | `Configure`.
+ `Options` | `Easy Configure`.
+W
+ Start GSview and select the appropriate version of Ghostscript
+ (usually the latest).  To change this later, use
+ `Options` | `Easy Configure`.
+E
+
+ For more control over configuration, see `Advanced Manual Installation`.
 3Advanced Manual Installation
 ?Advanced Manual Installation
- Instead of using the configure wizard `Options` | `Configure`, use
- `Options` | `Configure Ghostscript`.
+ Instead of using `Options` | `Easy Configure`, use
+ `Options` | `Advanced Configure`.
 
- In the `Ghostscript DLL` field enter the full path to the Ghostscript DLL.
+ First correctly set the three text fields (see `Advanced Configure`).
+
 P
-   c:\gstools\gsN.NN\gsdll2.dll
-W
-   c:\gstools\gsN.NN\gsdll32.dll
-E
-
- Enter the correct Ghostscript include path into the
- `Ghostscript Include Path` field.
- This include path must include the directories where the Ghostscript
- library files (gs_*.ps and Fontmap) and the Ghostscript fonts (*.pfb)
- are located. For example:
-P
-   c:\gstools\gsN.NN;c:\gstools\gsN.NN\fonts;c:\psfonts
-W
-   c:\gstools\gsN.NN;c:\gstools\gsN.NN\fonts
-E
- Do NOT put a `-I` before the include path.
-
- Leave the `Ghostscript Options` field empty.
-
- If you do not get the `Ghostscript DLL` field correct, GSview will
- not be able to load Ghostscript.
- If you do not get the `Ghostscript Include Path` correct, Ghostscript
- will not initialise and will then unload.
-
  Exit GSview, then append printer.ini to the GSview INI file
  (c:\windows\gsview32.ini or c:\os2\gvpm.ini)
 
-P
  Create a desktop program object for GSview, associating it
  with the file extensions .ps, .eps and .pdf.
 W
- Create a Program Manager or Start Menu item for GSview.
+ On the `Advanced Configure` dialog, either select the checkboxes
+ `Copy printer defaults`, `Associate .ps files with GSview` and
+ `Create Start Menu items`, or perform the following three steps.
 
- Add the .ps and .eps (and optionally the .pdf) file types to
+ 1. Exit GSview, then append printer.ini to the GSview INI file
+ (c:\windows\gsview32.ini or c:\os2\gvpm.ini)
+
+ 2. Add the .ps and .eps (and optionally the .pdf) file types to
  the `Registry`.
+
+ 3. Create a Program Manager or Start Menu item for GSview.
 E
 
  If you have some Type 1 fonts on your system, it may be possible to
@@ -185,8 +197,8 @@ W
  GSview will have trouble.
 
 E
- If you wish to stop GSview from displaying the configuration
- wizard when GSview is first run, or whenever GSview is upgraded,
+ If you wish to stop GSview from displaying the `Easy Configure`
+ when GSview is first run, or whenever GSview is upgraded,
  place an INI file in the GSview directory.
  `Remember to remove this file before upgrading GSview in the future.`
  This should contain only those entries that you wish to overwrite
@@ -196,11 +208,11 @@ E
  user profile directory to the GSview directory, then edit it to
  remove all entries except for:
   [Options]
-  Version=2.7
-  GSversion=550
+  Version=2.76beta
+  GSversion=600
   Configured=1
-  GhostscriptDLL=E:\GSTOOLS\gs5.50\gsdll32.dll
-  GhostscriptInclude=E:\GSTOOLS\gs5.50;E:\GSTOOLS\gs5.50\fonts
+  GhostscriptDLL=e:\Aladdin\gs6.0\bin\gsdll32.dll
+  GhostscriptInclude=e:\Aladdin\gs6.0\lib;e:\Aladdin\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  When a user starts GSview, their INI file will normally be used.
  The first time GSview is run, or when the GSview version doesn't
@@ -213,379 +225,20 @@ E
  the GSview directory.
 
  3. File associations (.ps, .eps, .pdf) will NOT be made or changed.
- If you wish to change these you must use `Options` | `Configure`.
+ If you wish to change these you must use `Options` | `Advanced Configure`.
 
  4. Program Manager groups / Start menu items / Program objects
  will NOT be changed.
- If you wish to change these you must use `Options` | `Configure`.
+ If you wish to change these you must use `Options` | `Advanced Configure`.
 W
 
  If a user tries to use the GSview uninstall program, it will
  try to delete the GSview and Ghostscript files on the network.
  Make sure the GSview and Ghostscript directories are not writeable
  by users.
- To be extra safe, you may wish to remove the file `win32.log` from
- the GSview directory.  This is the list of files that the
- uninstall program will remove.
-
- The uninstall program will also delete all registry keys in
- `win32new.reg` and then restore the registry keys in `win32old.reg`.
- These keys are those of the user who installed GSview
- on the network.  To disable this, delete these files.
-
- The file `win32dde.log` contains the Program Manager DDE commands
- that the uninstall program will use.
-
- If any or all of `win32.log`, `win32new.reg`, `win32old.reg`
- and `win32dde.log` are missing, the uninstall program will not
- complain.
+ To be extra safe, you may wish to remove the file `uninstal.txt` from
+ the GSview directory.
 E
-3Ghostscript Installation
-?Ghostscript Installation
- WARNING: SOME OF THE INFORMATION BELOW IS OLD.
-
- The following describes how to install Ghostscript, not GSview.
- The primary documentation on installing Ghostscript is found in
- the Ghostscript file Install.htm.
-
- Aladdin Ghostscript for the PC is available on the Internet from
-  ftp://ftp.cs.wisc.edu/ghost/aladdin/gsNNN???.zip
- Where NNN is the version number.
-
- For Ghostscript N.NN, the files required to run Ghostscript are:
-
- All PC platforms require the library (INI) files in
-  gsNNNini.zip
-
- If you do not already have a set of Type 1 fonts, you will need
-  gsNNNfn1.zip
-
- To run Ghostscript in conjunction with GSview you need
- one or more of the Ghostscript DLLs:
-  gsNNNos2.zip   (OS/2 2.0 or later DLL)
-  gsNNNw32.zip   (MS-Windows 3.1/Win32s, 95 or NT)
-
- The following assumes that Ghostscript is to be installed in the
- directory \gstools of drive d:.
- Make a directory d:\gstools then change to this directory.
- Unzip the INI zip file and the required DLL and EXE zip files.
- This should put the files into the directory d:\gstools\gsN.NN.
-
- If you also need the fonts, change to the d:\gstools\gsN.NN directory
- and then unzip gsNNNfn1.zip.  This will put font files into .\fonts.
-
- To run Ghostscript without GSview, set the GS_LIB environment variable
- as follows
-  SET GS_LIB=d:\gstools\gsN.NN;d:\gstools\gsN.NN\fonts
- then start the appropriate EXE.  To run Ghostscript without using
- the environment variable, use the following command
-  d:\gstools\gsN.NN\gs -Id:\gstools\gsN.NN;d:\gstools\gsN.NN\fonts
- where the EXE name needs to be replaced with the appropriate name
- (gs, gs386, gswin16, gswin32 or gsos2).
-
- If you already have some Type 1 fonts, there are two ways to tell
- Ghostscript about these fonts: editing/replacing the `Fontmap` file,
- or the `GS_FONTPATH` environment variable.  See the Ghostscript
- Use.htm and the sample Fontmap files for details.
-
- See the `Include Path` and `Fonts` topics for more details.
-3Include Path
-?Include Path
- Ghostscript needs to read some initialisation files during startup,
- and needs to read font files before drawing text.
- Ghostscript must be told where to find these files by using
- the Ghostscript `-I` command line switch or the `GS_LIB`
- environment variable can be used.
- See below for details for Unix or VMS.
-
- The `-I` switch or `GS_LIB` environment variable contains a list of
- directories to search for the required initialisation files.
- On a PC, it is normal to put the initialisation files in the
- same directory as the Ghostscript program.  If Ghostscript is in
- c:\gs, then `-Ic:\gs` would be used as a command line option to
- Ghostscript.
-
- Ghostscript also needs to find font files.  The list of fonts known to
- Ghostscript is contained in the `Fontmap` file.  The directories which
- contain these fonts should be added to the `-I` switch.
- If the Ghostscript *.pfb fonts are in c:\gs\fonts, and some other
- *.pfb fonts are in c:\psfonts, then `-Ic:\gs;c:\gs\fonts;c:\psfonts`
- would be used as a command line option to Ghostscript on a PC.
-
- Under Unix or VMS with Ghostview, the include path should have been
- configured when Ghostscript was compiled.
- If not, and Ghostview is being used, use the `GS_LIB` environment
- variable instead of `-I`.
- The Ghostscript include files are generally not put in the same
- directory as the executable under Unix.  Instead the executable
- might be in
-  /usr/local/bin
- while the include files are in
-  /usr/local/lib/ghostscript/gsN.NN
- and the fonts in
-  /usr/local/lib/ghostscript/fonts
- Consequently, the `GS_LIB` environment variable would need to
- be set to
-  /usr/local/lib/ghostscript/gsN.NN:/usr/local/lib/ghostscript/fonts
- It is to be hoped that these were set as the default when Ghostscript
- was compiled, and that it is unnecessary to use `GS_LIB`.
-
- For more information, see the following topic.
-4File searching
-?File searching
- (from Ghostscript Use.htm)
-
- When looking for initialisation files (gs_*.ps, pdf_*.ps), font files, the
- Fontmap file, and files named on the command line, Ghostscript first checks
- whether the file name specifies an explicit directory or drive (i.e.,
- doesn't begin with '/' on Unix systems; doesn't begin with a '/' or '\' or
- contain ':' as the second character on MS-DOS systems; doesn't contain a ':'
- or a square bracket on VMS systems).  If it does, Ghostscript simply tries
- to open the file using the given name.  Otherwise, Ghostscript will try
- directories in the following order:
-
- - The current directory (unless disabled by the -P- switch);
-
- - The directory/ies specified by the -I switch(es) in the command
- line (see below), if any;
-
- - The directory/ies specified by the GS_LIB environment variable,
- if any;
-
- - The directory/ies specified by the GS_LIB_DEFAULT macro in the
- Ghostscript makefile, if any.
-
- Each of these (GS_LIB_DEFAULT, GS_LIB, and -I parameter) may be either a
- single directory, or a list of directories separated by a character
- appropriate for the operating system (':' on Unix systems, ';' on VMS
- systems, ';' on MS-DOS systems).  We think that trying the current directory
- first is a very bad idea -- it opens serious security loopholes and can lead
- to very confusing errors if one has more than one version of Ghostscript in
- one's environment -- but when we attempted to change it, users insisted that
- we change it back.  You can disable looking in the current directory first
- using the -P- switch described below.
-
- Note that Ghostscript does not use this file searching algorithm for the
- 'run' or 'file' operators: for these operators, it simply opens the file
- with the given name.  To run a file using the searching algorithm, use
- 'runlibfile' instead of 'run'.
-3Fonts
-?Fonts
- Ghostscript locates fonts in two ways:
-
- 1. Those listed explicitly in `Fontmap`
-
- 2. Font files found in directories listed in the `GS_FONTPATH` environment
- variable or -sFONTPATH= switch.
-
- Those listed in the `Fontmap` file should be locatable on the Ghostscript
- include path, or should have fully qualified paths.  Note that
- you must use / or \\ and must not use \ within a directory name.
-
- Ghostscript now comes with a good quality set of free fonts.
- Most have a .pfb extension and can be used with Adobe Type Manager.
- The Ghostscript fonts can be broken into three main classes:
-
- 1. Type 1 outline fonts with hinting (*.pfb and most *.pfa).
- These produce good quality output.  The standard Fontmap file uses
- these in preference to the other font types.
- A full set of the common 35 PostScript fonts is available.
-
- 2. Type 1 outline fonts that have been created from bitmap fonts
- (*.gsf).  These produce poor quality output.
- These are ordinary Type 1 fonts (although they cannot be used with
- Adobe Type Manager).
- Avoid them if at all possible.
-
- 3. Type 1 stroked fonts created from the public domain Hershey fonts
- (h*.gsf, h*.pfa).  These produce moderate quality output, but do
- not correspond to standard PostScript fonts.
-
- If you have some other Type 1 outline fonts (*.pfa, *.pfb), it is
- possible to use these with Ghostscript.  Whether or not you are
- allowed to do this depends on the font licence.  If you do use
- these fonts with Ghostscript, it is `your` responsibility to make
- sure that the font licence permits this use.
- To use the other Type 1 fonts, you will need to replace or edit
- the `Fontmap` file, or use `GS_FONTPATH`.
-4Fontmap
-?Fontmap
- The `Fontmap` file tells Ghostscript what fonts are available
- and where to find them.
- Each line in `Fontmap` may be one of the following:
-
- 1. A comment.  These are lines that start with a %
-    % fontmap aka Fontmap - standard font catalog for Ghostscript.
-
- 2. A font name and file name.  For example
-    /Courier                (ncrr.pfa)      ;
-    /Courier-Italic         (ncrri.pfa)     ;
- The first of these lines says that the font name `Courier` is to
- be found in the file `ncrr.pfa`.
- The file `ncrr.pfa` must contain a font named Courier.
- If the name is not Courier then a font alias must be used.
- This is described later.
- Note that the file name is a PostScript string and so \ has a
- special meaning.
- If `ncrr.pfa` was in the c:\gs\fonts directory, you would need to
- have `c:\gs\fonts` as one of the directories listed in the include path,
- or you would need to use the file name (c:/gs/fonts/ncrr.pfa) or
- (c:\\gs\\fonts\\ncrr.pfa).  Using / is preferred to \\.
-
- 3. A font alias. For example
-    /Courier-Oblique                /Courier-Italic         ;
- This tells Ghostscript that if Courier-Oblique is requested,
- Courier-Italic is to be used instead.
- The standard Fontmap file uses aliases to replace the standard
- 35 fonts by a set of outline fonts with different names.
- The NimbusSansL-Regular font looks like Helvetica,
- so the default Fontmap file actually uses
-    /Helvetica                      /NimbusSansL-Regu    ;
-    /NimbusSansL-Regular            (n019003l.gsf)  ;
-
- A description of the required formatting for each line is near
- the top of each `Fontmap` file.
-
- Ghostscript comes with a number of alternate `Fontmap` files.
- These include
-  Fontmap        The standard fontmap file
-  Fontmap.ATB    For Adobe Type Basics (65 Type 1 fonts)
-  Fontmap.ATM    For Adobe Type Manager (13 fonts)
-  Fontmap.OS2    For Type 1 fonts shipped with OS/2 (13 fonts)
-  Fontmap.OSF    For DEC OSF/1 systems
-  Fontmap.Sol    For Solaris 2.3 and above
-  Fontmap.Ult    For DEC Ultrix systems
-  Fontmap.VMS    For VAX/VMS systems with DECwindows/Motif
-
- If you want to use one of the alternate Fontmap files, the procedure
- is as follows:
-
- 1. Copy Fontmap to Fontmap.old
-
- 2. Copy Fontmap.??? (your selected Fontmap file) to Fontmap
-
- 3. Add the directory that contains the Type 1 fonts to the
- include path (`-I` or `GS_LIB`)
-4GS_FONTPATH
-?GS_FONTPATH
- (From Ghostscript Use.htm)
-
- Ghostscript has slightly different rules for determining how to find the
- file containing a font with a given name.  It starts by looking for Fontmap
- files in every directory on the search path: these files provide mappings
- between font names and file names.  (See the Fontmap file in the Ghostscript
- distribution for details.)  If it can't find a font in any Fontmap file in
- the search path (or in the list provided with the -sFONTMAP= switch, if
- present), it looks at the GS_FONTPATH environment variable (or the value
- provided with the -sFONTPATH= switch, if present), which is also a list of
- directories.  It goes to those directories, one by one, and looks for all
- files that appear to contain PostScript fonts; it then effectively adds all
- those files and fonts to its internal copy of the Fontmap (the catalog of
- fonts and the files that contain them).  If you are using one of the
- following types of computer, you may wish to set GS_FONTPATH to the
- indicated value so that Ghostscript will automatically acquire all the
- installed Type 1 fonts:
-
-  System type       GS_FONTPATH
-  -----------       -----------
-  DEC OSF/1         /usr/lib/X11/fonts/Type1Adobe
-  DEC Ultrix        /usr/lib/DPS/outline/decwin
-  HP-UX 9           /usr/lib/X11/fonts/type1.st/typefaces
-  IBM AIX           /usr/lpp/DPS/fonts/outlines
-    "               /usr/lpp/X11/lib/X11/fonts/Type1
-    "               /usr/lpp/X11/lib/X11/fonts/Type1/DPS
-  NeXT              /NextLibrary/Fonts/outline
-  SGI IRIX          /usr/lib/DPS/outline/base
-    "               /usr/lib/X11/fonts/Type1
-  Sun SunOS 4.x     /usr/openwin/lib/X11/fonts/Type1/outline
-    " (NeWSprint only)
-     newsprint_2.5/SUNWsteNP/reloc/$BASEDIR/NeWSprint/small_openwin/lib/fonts
-  Sun Solaris 2    /usr/openwin/lib/X11/fonts/Type1/outline
-  VMS              SYS$COMMON:[SYSFONT.XDPS.OUTLINE]
-
- These paths may not be exactly right for your installation; if the
- indicated directory doesn't contain files whose names are familiar font
- names like Courier and Helvetica, you may wish to ask your system
- administrator where to find these fonts.
-
- NOTE: On Solaris systems simply setting GS_FONTPATH may not work, because
- for some reason some versions of Ghostscript can't seem to find any of the
- Type1 fonts in /usr/openwin/lib/X11/fonts/Type1/outline.  It says: "15
- files, 15 scanned, 0 new fonts".  See Fontmap.Sol instead.
-
- See also `Fontmap`.
-4Platform Fonts
-?Platform Fonts
- Platform fonts are described in Ghostscript Fonts.htm.
-
- WARNING: Text anti-aliasing will not work if platform fonts
- are used.  For this reason, GSview will automatically use
- -dNOPLATFONTS if text anti-aliasing is selected.
-
- The description below was written when Ghostscript came with
- bitmap derived fonts of poor quality.
- Ghostscript now comes with Type 1 fonts of good quality.
-
- The computer hosting Ghostscript may have the same fonts in better
- quality versions, either as scaleable fonts (e.g. Type 1 or TrueType)
- or as bitmaps.
- To improve the display of documents, Ghostscript can use these
- `platform fonts` instead of using the low quality fonts.
-
- This can be illustrated with an example.  The default /Helvetica-Bold
- font is phvb.gsf, an outline font derived from a bitmap.  When the
- /Helvetica-Bold font is requested, phvb.gsf is read.  When a character
- is to be rendered to the display, Ghostscript instead asks MS-Windows
- for the Helvetica-Bold font at the appropriate size.  MS-Windows then
- draws the requested character from the TrueType Arial Bold font, and
- Ghostscript puts it on the display.  The resulting output is of better
- quality than the /Helvetica-Bold bitmap derived font.
-
- In another example, the same request for /Helvetica-Bold under
- Unix/X11 might instead display characters using a prebuilt bitmap
- font if one is available in the requested size.
-
- There are some limitations to using `Platform fonts`.
-
- 1. Platform fonts are only used for upright (Portrait) characters.
- Rotated characters will be displayed using the original PostScript font.
-
- 2. A PostScript version of the required font must be available.
- This is needed to obtain character bounding box information,
- encoding vector for character sets, and drawing rotated characters.
-
- 3. Platform fonts may only used for a limited range of sizes.
- For example, MS-Windows only uses platform fonts for 6 to 36 point
- fonts.
-
- 4. MS-Windows lies about the available font sizes.  Ghostscript asks for
- a particular font size and MS-Windows returns a font that it claims
- is the same size.  However MS-Windows may instead return a font
- of a different size that it thinks will look better.  Often it
- looks worse because the intercharacter spacing is out of proportion
- to the character size.  If this happens, platform fonts can be
- disabled by adding -dNOPLATFONTS to the Ghostscript Command Line.
-
- 5. Platform fonts will only be used for the display.  Output to
- printer devices will continue to use the PostScript font.
-
- MS-Windows Ghostscript has a fixed alias table for fonts.
- In the table below, the name on the left is the name of the
- PostScript font, and the name on the right is the name that
- Ghostscript will try if MS-Windows doesn't know the PostScript
- name.
-  Courier         Courier New
-  Helvetica       Arial
-  Helvetica       Helv
-  Times           Times New Roman
-  Times           Tms Rmn
-
- Platform fonts are not supported under OS/2.
-
- Not yet written:
- Unix/X11 Ghostscript may have an ability to use Xresources to
- specify font aliases.  If this is the case, then the method should
- be described here.
 2Document Structuring Conventions
 ?Document Structuring Conventions
 ?DSC
@@ -650,9 +303,10 @@ E
  GSview can display and print PDF files, although there are a number
  of limitations with the current method.
 
- GSview ignores the page size on the Media menu, and instead uses
- the /MediaBox from the PDF file.  If `Options` | `EPS Clip` is
- enabled, GSview will use the /CropBox from the PDF file.
+ When displaying, GSview ignores the page size on the Media menu,
+ and instead uses the /MediaBox from the PDF file.
+ If `Options` | `EPS Clip` is enabled, GSview will use the /CropBox
+ from the PDF file.
 
  GSview needs to `Open` a PDF file to count the pages.  If you
  `Select` the file, GSview will not be able to `Text Extract`,
@@ -811,9 +465,8 @@ E
 ?Redisplay
 ?Goto Page
 ?View
-W
+?Fit Window
 ?Full Screen
-E
  `View` | `Next Page` or the `+` button moves to the next page of a
  document.
  This works even if the document does not contain `DSC` comments.
@@ -835,12 +488,15 @@ E
 
  The `Previous Page`, `Redisplay` and `Goto Page` commands work only if the
  document contains `DSC` comments.
-W
+
+ `View` | `Fit Window` or the `F6` key changes the display resolution
+ to fit the entire page within the current window.  Repeated use
+ causes either the width or height of the page to fit the current
+ window.
 
  `View` | `Full Screen` or the `F4` key displays the page full screen
  (without title bar, scroll bars etc.).
  To return to normal display, press the Escape key.
-E
 2Zoom
 ?Zoom
  To enlarge a displayed feature, position the cross-hair mouse pointer
@@ -1002,6 +658,14 @@ E
  This is useful for sending a document to a PostScript printer,
  or for sending an output file produced by Ghostscript to a printer.
 
+ If `Fixed media` is checked (the default), GSview will use the
+ page size on the Media menu and will ignore attempts by PostScript
+ or PDF documents to change the page size.
+ This is useful for PDF files that contain a mix of portrait and
+ landscape pages.
+ If `Fixed media` is unchecked, GSview will set the default page
+ size from the Media menu, but allow the page size to be changed.
+
  The `Options `field contains a Ghostscript command line option
  for the selected device.
 
@@ -1011,6 +675,9 @@ E
  name will be placed in the `Options `field of the Printer Setup.
  See the Ghostscript file `Devices.htm` for details of how to configure
  the uniprint device.
+
+ Some information of printer compatibility is available from
+  http://www.cs.wisc.edu/~ghost/printer.html
 3PostScript Printer
 ?PostScript Printer
 ?Advanced
@@ -1205,23 +872,23 @@ E
  Create a bitmap with smooth edges (anti-aliasing).
  1. Display with smooth edges and save the display bitmap.
  OR
- 2. Convert to ppmraw and set the properties
+ 2. Print to a bitmap device and set the following
+ in the properties.
     -dTextAlphaBits=4 -dGraphicsAlphaBits=4
 W
 2Convert to vector format
 ?Convert to vector format
 ?PStoEdit
- Contrary to what is written below, the pstoedit DLL is not
- included with GSview 2.7, because it was not publicly available
- when GSview 2.7 was released.  For information on the availabilty
- of the pstoedit DLL, see http://www.cs.wisc.edu/~ghost/gsview/
-
- You can convert a PostScript file to an editable vector format
- using `pstoedit` by Wolfgang Glunz.
- `pstoedit` is included with GSview for Win32.
- It is licensed with the GNU Public Licence.
+ You can convert a PostScript or PDF file to an editable vector
+ format using `pstoedit` by Wolfgang Glunz.
+ `pstoedit` is licensed with the GNU Public Licence.
+ Binaries are included in GSview with the permission of Wolfgang Glunz.
  A command line version `pstoedit.exe` and the manual `pstoedit.htm`
- are included in the gstools\pstoedit directory.
+ are included in the pstoedit directory.
+ The home page of pstoedit is
+  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/index.html
+ For updates to pstoedit, look at the pstoedit home page, or at
+  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.html
 
  To use `pstoedit` from within GSview, use
  `Edit | Convert to vector format`.
@@ -1511,7 +1178,7 @@ W
  upper part of the dialog.  You can enter a CTM directly
  if you like maths.
  It is easier to enter values in the Custom edit fields below this,
- but these have no effect until one of the transform buttons 
+ but these have no effect until one of the transform buttons
  (translate, rotate, scale) is selected.
 
  See also `Units`.
@@ -1519,30 +1186,78 @@ E
 2Options
 ?Options
  The `Options` menu has the following selections:
-3Configure Ghostscript
-?Configure Ghostscript
+3Easy Configure
+?Easy Configure
+W
+ Easy configure allows you to select a which version of
+ Ghostscript to use.  It is assumed that you have already installed
+ Aladdin Ghostscript 5.50 or later.
+ If you do not have Ghostscript installed, see the topic
+ `Obtaining Ghostscript`.
+ For more control over configuration of GSview, see
+ `Advanced Configure`.
+
+ Easy configure will set the correct paths for Ghostscript
+ and copy some printer defaults to the INI file.
+ It does not alter the registry or start menu.
+P
+ Easy configure starts a configuration wizard to select the
+ Ghostscript version and file associations.
+E
+3Advanced Configure
+?Advanced Configure
 ?Ghostscript DLL
 ?Ghostscript Include Path
 ?Ghostscript Options
  `Ghostscript DLL` tells GSview where to find Ghostscript.
- The default is `c:\gstools\gsN.NN\gsdll2.dll` for OS/2, and
- `c:\gstools\gsN.NN\gsdll32.dll` for Win32.
+W
+ The default for Win32 is
+  c:\Aladdin\gsN.NN\bin\gsdll32.dll
+P
+ The default for OS/2 is
+  c:\Aladdin\gsN.NN\bin\gsdll2.dll
+E
 
  Enter the correct Ghostscript include path into the
  `Ghostscript Include Path` field.
  This include path must include the directories where the Ghostscript
  library files (gs_*.ps and Fontmap) and the Ghostscript fonts (*.pfb)
- are located.
+ are located. For example:
 P
-   c:\gstools\gsN.NN;c:\gstools\gsN.NN\fonts;c:\psfonts
+   c:\Aladdin\gsN.NN\lib;c:\Aladdin\fonts;c:\psfonts
 W
-   c:\gstools\gsN.NN;c:\gstools\gsN.NN\fonts
+   c:\Aladdin\gsN.NN\lib;c:\Aladdin\fonts
 E
  Do NOT put a `-I` before the include path.
 
- It is usual to leave the `Ghostscript Options` field empty.
+ The `Ghostscript Options` field may be empty.
  If you wish to turn off the `Platform Fonts` feature under
  MS-Windows, put `-dNOPLATFONTS` in the `Ghostscript Options` field.
+ If you wish to search for fonts not listed in Fontmap,
+ add -sFONTPATH to this field.  For example
+   -dNOPLATFONTS -sFONTPATH="c:\psfonts"
+
+ If you do not get the `Ghostscript DLL` field correct, GSview will
+ not be able to load Ghostscript.
+ If you do not get the `Ghostscript Include Path` correct, Ghostscript
+ will not initialise and will then unload.
+W
+
+ Selecting `Copy printer defaults` will update gsview32.ini from the
+ file printer.ini.
+
+ Selecting `Associate .ps files with GSview` will update the registry
+ to associate PostScript files with GSview.
+
+ Selecting `Associate .pdf files with GSview` will update the registry
+ to associate Portable Document Format files with GSview.
+
+ Selecting `Create Start Menu items` will add GSview to the start menu.
+
+ There is no undo facility for the actions of these four checkboxes.
+ The Associate and Start Menu actions are normally performed
+ (with an undo facility) by the GSview setup program.
+E
 
  See the `Installation` topic.
 3Sounds
@@ -1751,6 +1466,8 @@ E
  window and areas outside the page will be drawn in light grey.
  This is useful if you do not wish the window to shrink when looking
  at pages at low resolution.  This is the default.
+
+ See also `View` | `Fit Window`.
 3Quick Open
 ?Quick Open
  When the `Quick Open` option is `checked`, GSview will not restart
@@ -1794,7 +1511,7 @@ E
 
  `EPS Clip` does not alter the original document, it only affects
  how much of the document is displayed by GSview.
-
+ It does not affect printing.
 
  See also `Edit `| `Add EPS Preview`
 3EPS Warn
@@ -1894,8 +1611,8 @@ E
  for the page bitmap but won't improve the display.
 
  The `Text Alpha` field sets anti-aliasing for fonts.  The default
- (no anti-aliasing) is 1 bit.  To enable anti-aliasing of fonts,
- use 2 bits or 4 bits.
+ (use anti-aliasing) is 4 bits.  To disable anti-aliasing of fonts,
+ use 1 bit.
 W
 
  `IMPORTANT`: If you use `Text Alpha`, GSview will disable
@@ -1930,6 +1647,7 @@ E
 ?Page Size
 ?Media
 ?User Defined
+?Rotate Media
  The `Media` menu also allows selection of page size.
  Available page sizes are:
   Letter          8.5 x 11   inch
@@ -1957,6 +1675,14 @@ E
  the page type will be selected automatically.
  If the media specification is not one of the above page types,
  the `User Defined` size will be set.
+
+ If `Rotate Media` is checked, the width and height of the page
+ are exchanged.  The image drawn on the page is not rotated.
+ This affects both display and printing.
+ Selecting `A4` and `Rotate Media` is equivalent to selecting
+ `User Defined` with a size of 842 x 595 pt.
+ It is more common to use the settings on the `Orientation` menu
+ than `Rotate Media`.
 2Keys
 ?Keys
  Following are the key assignments for GSview.
@@ -2004,10 +1730,10 @@ E
 
  `F3`, Find Next. (`Edit` | `Find Next`)
 
-W
  `F4`  Full Screen.  (`View` | `Full Screen`)
 
-E
+ `F6`  Fit Window.  (`View` | `Fit Window`)
+
  `Arrow Keys`  Scroll by 1/16 of a screen.
 
  `Ctrl + Arrow Keys`  Scroll by one screen.
@@ -2047,10 +1773,10 @@ W
   Identifier = psfile
   Filetype = PostScript
   Action = Open
-  Command = c:\gstools\gsview\gsview32 %1
+  Command = c:\ghostgum\gsview\gsview32 %1
   Uses DDE = unchecked
   Action = Print
-  Command = c:\gstools\gsview\gsview32 /p %1
+  Command = c:\ghostgum\gsview\gsview32 /p %1
   Uses DDE = unchecked
  Then press `OK`.
 
@@ -2077,12 +1803,12 @@ W
   Associated Extension = PS EPS
  Press the `New` button, then enter
   Action = open
-  Application used to perform action = c:\gstools\gsview\gsview32.exe
+  Application used to perform action = c:\ghostgum\gsview\gsview32.exe
  Press the `OK` button
 
  Press the `New` button, then enter
   Action = print
-  Application used to perform action = c:\gstools\gsview\gsview32.exe /p
+  Application used to perform action = c:\ghostgum\gsview\gsview32.exe /p
  Press the `OK` button
 
  Press the `Close `button.
@@ -2218,7 +1944,7 @@ W
 P
   GVPM.EXE - A Ghostscript graphical interface
 E
-  Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+  Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   Portions Copyright (C) 1994, Timothy O. Theisen.  All rights reserved.
 
  This file is part of GSview.
@@ -2237,7 +1963,7 @@ E
 
      Author: Russell Lang, Ghostgum Software Pty Ltd
    Internet: gsview@ghostgum.com.au
- Please read the `Common Problems` topic, the GSview README.TXT and browse
+ Please read the `Common Problems` topic, the GSview Readme.htm and browse
  the `WWW` page before sending mail to the author.
 
  GSview uses pstotext in an external DLL. pstotext was written by
@@ -2259,9 +1985,9 @@ E
  From the GSview menu select `Options` | `Configure Ghostscript`
  and enter the correct `Ghostscript DLL` path. For example
 P
-  c:\gstools\gsN.NN\gsdll2.dll
+  c:\Aladdin\gsN.NN\bin\gsdll2.dll
 W
-  c:\gstools\gsN.NN\gsdll32.dll
+  c:\Aladdin\gsN.NN\bin\gsdll32.dll
 E
 
  This message also occurs if Ghostscript cannot find its
@@ -2448,7 +2174,6 @@ E
 ?Other Help Topics
  These topics are usually accessed by pressing the `Help` button
  on a dialog box.
-
 3Show Messages
 ?Show Messages
  GSview uses Ghostscript to display or print PostScript files.
@@ -2463,6 +2188,25 @@ E
 
  Explanations of some of the error message that may appear in the
  `Show Messages` are given in the `Common Problems` topic.
+W
+3bzip2
+?bzip2
+ If you attempt to load a file that has been compressed by bzip2,
+ GSview will attempt to load the bzip2 DLL, then uncompress it
+ to a temporary file.
+
+ If you get an error message `Failed to load bzip2 DLL...` then
+ you probably don't have the bzip2 DLL available.
+ Obtain it from the same place you obtained GSview or from
+  ftp://ftp.cs.wisc.edu/ghost/ghostgum/
+ Place the bzip2 DLL in the same directory as the GSview EXE.
+ libbz2.dll is for Win32.  At this stage there is no bzip2 DLL
+ for Win16 or OS/2.
+
+ bzip2 is Copyright 1996-1999 by Julian Seward
+ The source code can be obtained from
+  http://www.muraroa.demon.co.uk/
+E
 3zlib
 ?zlib
 ?gzip

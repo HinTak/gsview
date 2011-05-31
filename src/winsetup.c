@@ -290,9 +290,16 @@ create_object(void)
 int rc;
 char gspath[MAXSTR], gsargs[MAXSTR];
 char gsviewpath[MAXSTR];
-    sprintf(gspath, "%s\\%s\\", destdir, gs_basedir);
-    sprintf(gsargs, "%s\\%s;%s\\%s\\fonts", destdir, gs_basedir, 
-	destdir, gs_basedir);
+    if (gsver >= 593) {
+	sprintf(gspath, "%s\\%s\\bin\\", destdir, gs_basedir);
+	sprintf(gsargs, "%s\\%s\\lib;%s\\fonts", destdir, gs_basedir, 
+	    destdir);
+    }
+    else {
+	sprintf(gspath, "%s\\%s\\", destdir, gs_basedir);
+	sprintf(gsargs, "%s\\%s;%s\\%s\\fonts", destdir, gs_basedir, 
+	    destdir, gs_basedir);
+    }
     sprintf(gsviewpath, "%s\\%s\\", destdir, gsviewbase);
     rc = gsview_progman(groupname, gsviewpath, gsver, gspath, gsargs);
 
@@ -403,7 +410,7 @@ char *s, *d;
 
     /* derive group filename from group name */
     for (i=0, s=groupname, d=groupfile; i<8 && *s; s++) {
-	if (isalpha(*s) || isdigit(*s)) {
+	if (isalpha((int)(*s)) || isdigit((int)(*s))) {
 	    *d++ = *s;
 	    i++;
 	} 

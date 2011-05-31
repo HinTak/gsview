@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,7 +20,8 @@
 
 /* Version number changes must be made to
  *   gvcver.h
- *   README.TXT
+ *   gvcver.mak
+ *   Readme.htm
  *   FILE_ID.DIZ
  *   gvcnews.txt
  *   language/gvclang.txt
@@ -34,30 +35,24 @@
 /* undefine BETA for a final release */
 /*
 #define BETA
-#define BETA_YEAR    1998
-#define BETA_MONTH   12
+#define BETA_YEAR    2000
+#define BETA_MONTH   3
 #define BETA_DAY     31
 */
 
 
 /* GSview */
+#include "ver.h"
 
 #define GSVIEW_PRODUCT "GSview"
-#define GSVIEW_VERSION "2.7"
-#define GSVIEW_DATE    "1998-12-23"
+
 #ifdef _Windows
-#ifdef __WIN32__
 #ifdef DECALPHA
-#define GSVIEW_ZIP     "win32da.zip"
 #define GSVIEW_BASEDIR "gsviewda"
 #else
-#define GSVIEW_ZIP     "win32.zip"
 #define GSVIEW_BASEDIR "gsview"
 #endif
-#else
-#define GSVIEW_ZIP     "win16.zip"
-#define GSVIEW_BASEDIR "gsview16"
-#endif
+#define GSVIEW_ZIP     "win32.zip"
 #else
 #define GSVIEW_ZIP     "os2.zip"
 #define GSVIEW_BASEDIR "gsview"
@@ -71,21 +66,18 @@
 #define GS_REVISION	  403		/* this is the last 16-bit version */
 #define GS_REVISION_MAX   403
 #else
-#define GS_REVISION	  550
-#define GS_REVISION_MAX   599
+#define GS_REVISION	  600
+#define GS_REVISION_MAX   699
 #endif
 #ifdef _Windows
-#ifdef __WIN32__
+#ifdef DECALPHA
+#define GSVIEW_EXENAME "gsviewda.exe"
+#else
 #define GSVIEW_EXENAME "gsview32.exe"
+#endif
 #define GS_EXENAME  "gswin32.exe"
 #define GS_DLLNAME  "gsdll32.dll"
 #define INIFILE "gsview32.ini"
-#else
-#define GSVIEW_EXENAME "gsview16.exe"
-#define GS_EXENAME  "gswin16.exe"
-#define GS_DLLNAME  "gsdll16.dll"
-#define INIFILE "gsview16.ini"
-#endif
 #else
 #define GS_DLLNAME  "gsdll2.dll"
 #define INIFILE "gvpm.ini"
@@ -93,6 +85,6 @@
 
 /* General */
 
-#define EMX_NEEDED "0.9c"
+#define EMX_NEEDED "0.9d"
 #define INSTALL_DIR "\\gstools"
 

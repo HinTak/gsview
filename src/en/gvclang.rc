@@ -124,7 +124,6 @@ BEGIN
 	IDS_TOPICEDITPROP, "Edit Properties"
 	IDS_TOPICCLIP, "Clipboard"
 	IDS_TOPICPREVIEW, "EPS Preview"
-	IDS_TOPICGSCMD, "Configure Ghostscript"
 	IDS_TOPICSOUND, "Sounds"
 	IDS_TOPICDSET, "Display Settings"
 	IDS_TOPICMEDIA, "Media"
@@ -136,8 +135,12 @@ BEGIN
 	IDS_TOPICMESS, "Show Messages"
 	IDS_TOPICSPOOL, "Spooler"
 	IDS_TOPICZLIB, "zlib"
+	IDS_TOPICBZIP2, "bzip2"
 	IDS_TOPICPSTOEDIT, "PStoEdit"
 	IDS_TOPICMEASURE, "Measure"
+	IDS_TOPICEASYCFG "Easy Configure"
+	IDS_TOPICADVANCEDCFG "Advanced Configure"
+	IDS_TOPICDOWNLOAD "Obtaining Ghostscript"
 END
 
 STRINGTABLE
@@ -213,6 +216,7 @@ BEGIN
 	IDS_NOLINKTARGET, "Unknown target for link"
 	IDS_PARSEERROR, "Error parsing command line"
 	IDS_ZLIB_FAIL, "Failed to load zlib DLL.  Press OK button for help."
+	IDS_BZIP2_FAIL, "Failed to load bzip2 DLL.  Press OK button for help."
 END
 
 STRINGTABLE
@@ -222,12 +226,12 @@ BEGIN
 	IDS_NOPRINTERINI, "Can't open printer.ini"
 	IDS_NOINI, "Can't open INI file"
 	IDS_NEEDTEMP, "You must set the environment variable TEMP to a valid writeable directory.  Without this, GSview and Aladdin Ghostscript will not be able to print"
-	IDS_GSNOTINSTALLED, "You have not installed Ghostscript.  Please read the GSview README.TXT file."
-	IDS_GSLIBNOTINSTALLED, "You have not installed the Ghostscript library files.  Please read the GSview README.TXT file."
+	IDS_GSNOTINSTALLED, "You have not installed Ghostscript.  Please read the GSview Readme.htm file."
+	IDS_GSLIBNOTINSTALLED, "You have not installed the Ghostscript library files.  Please read the GSview Readme.htm file."
 	IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED
 	IDS_NOPROGMAN, AANODDEPROGMAN
 	IDS_WRONGEMX, "You have emx %s.\rYou need emx %s or later.\rPM GSview will not run correctly."
-	IDS_GSVIEWVERSION, GSVIEW_VERSION
+	IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION
 	IDS_CFG73, AACFG73
 	IDS_CFG74, AACFG74
 	IDS_PROGMANGROUP4 AAPROGMANGROUP4

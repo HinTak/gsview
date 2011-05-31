@@ -563,8 +563,16 @@ int
 load_pstotext(void)
 {
 char dllname[MAXSTR];
+char *p;
     /* load pstotext DLL */
     strcpy(dllname, szExePath);
+    p = strrchr(dllname, '\\');	/* remove trailing backslash */
+    if (p)
+	*p = '\0';
+    p = strrchr(dllname, '\\');	/* remove trailing gsview */
+    if (p)
+	*(++p) = '\0';
+    strcat(dllname, "pstotext\\");
 #ifdef __WIN32__
     strcat(dllname, "pstotxt3.dll");
 #else

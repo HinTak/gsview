@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -18,11 +18,11 @@
 /* de\gvclang.h */
 /* Common German language defines */
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1998 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2000 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Alle Rechte vorbehalten."
 #define GSVIEW_COPYRIGHT3 "Siehe Datei LICENCE für mehr Details."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-1998 Aladdin Enterprises,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2000 Aladdin Enterprises,"
 #define GS_COPYRIGHT2 "Menlo Park, California, U.S.A.  Alle Rechte vorbehalten."
 #define GS_COPYRIGHT3 "Siehe Datei PUBLIC für mehr Details."
 
@@ -121,6 +121,7 @@
 #define AAPRINTTOFILE "Druck in Datei"
 #define AAPSPRINTER "PostScript Drucker"
 #define AAOPTIONSC "Optionen:"
+#define AAFIXEDMEDIA "Fixed media" /* ENGLISH */
 
 #define AAADVANCED "Advanced"
 #define AAADVANCEDPSOPT "Advanced PostScript Options"
@@ -180,11 +181,24 @@
 
 #define AABOUNDINGBOX "BoundingBox"
 
-/* Configure Ghostscript dialog box */
-#define AACONFIGUREGS "Konfiguriere Ghostscript"
+/* Advanced Configure dialog box */
+#define AACONFIGUREGS "Advanced Configure" /* ENGLISH */
 #define AAGHOSTSCRIPTDLLC "Ghostscript DLL:"
 #define AAGHOSTSCRIPTINCC "Ghostscript Suchpfad:"
 #define AAGHOSTSCRIPTOTHERC "Ghostscript Optionen:"
+#define AACOPYPRINTERDEF "Copy Printer Defaults" /* ENGLISH */
+#define AAASSOCIATEPS "Associate .ps files" /* ENGLISH */
+#define AAASSOCIATEPDF "Associate .pdf files" /* ENGLISH */
+#define AACREATESTARTMENU "Create Start Menu items" /* ENGLISH */
+
+/* Easy Configure dialog box */
+#define AAEASYCONFIGURE "Easy Configure" /* ENGLISH */
+#define AAWHICHGS "Which version of Ghostscript do you wish to use?" /* ENGLISH */
+
+/* Download Ghostscript dialog box */
+#define AADOWNLOADGS "Download Ghostscript" /* ENGLISH */
+#define AADOWNLOADNOW "Download Now" /* ENGLISH */
+#define AAGSNOTFOUND "Ghostscript can not be found on your computer.  You will need to download and install Aladdin Ghostscript from" /* ENGLISH */
 
 #define AAGSMESSWIN "GSview für Windows - Ghostscript Meldungen"
 #define AAGSMESSPM "PM GSview - Ghostscript Meldungen"
@@ -222,11 +236,21 @@
 #define AAINITMATRIX "initmatrix"
 #define AAINVERTMATRIX "invertmatrix"
 
+/* PS to Edit dialog box */
+/* ENGLISH */
+#define AAPSTOEDIT "PS to Edit"
+#define AAFORMATC "Format:"
+#define AADRAWTASP "Draw text as polygons"
+#define AAMAPTOLATIN1 "Map to ISO-Latin1"
+#define AAFLATNESSC "Flatness:"
+#define AADEFAULTFONTC "Default font:"
+#define AADRIVEROPTIONSC "Driver options:"
+
 
 /* Installation program */
 #define AAINSTALL1 "GSview Installation"
 #define AAINSTALLINTRO1 "Dies Programm soll Ihnen bei der Installation helfen "
-#define AAINSTALLINTRO2 "Bevor Sie mit der Installation fortfahren, stellen Sie bitte sicher, daß sich die Dateien aus  README.TXT im aktuellen Verzeichnis oder auf drei Disketten befinden. "
+#define AAINSTALLINTRO2 "Bevor Sie mit der Installation fortfahren, stellen Sie bitte sicher, daß sich die Dateien aus Readme.htm im aktuellen Verzeichnis."
 #define AAINSTALLINTRO3 "Die Installation beansprucht ca. 10 MB Platz auf der Festplatte."
 #define AAINSTALLCOPYRIGHT1 "Copyright Anmerkungen"
 #define AAINSTALLCOPYRIGHT2 "GSview und Aladdin Ghostscript sind separate Programme."
@@ -281,6 +305,22 @@
 #define AAPROGRAMOBJECTFAILED  "Kann Desktop Objekt nicht anlegen"
 #define AAUNINSTALLTITLE "GSview und Aladdin Ghostscript "
 #define AAUNINSTALLITEM "GSview und Aladdin Ghostscript löschen"
+
+/* setup program */
+/* ENGLISH */
+#define AAINSTALLSPACE "This installation will require 3 M bytes of hard disk space"
+#define AAGSVIEWREQUIRES "GSview also requires"
+#define AAVIEWREADMEDETAILS "View the Readme file for details of how to obtain Ghostscript."
+#define AACOPYRIGHTNOTICE "Copyright Notice"
+#define AASELECTGSVIEWDIR "Select a directory in which to install GSview"
+#define AABROWSEE "Browse..."
+#define AAGSVIEWADDSTARTMENU "GSview Setup will add items to the following Start Menu folder"
+#define AACREATEFOLDER "Create Folder"
+#define AAALLUSERS "All Users"
+#define AASELECTFOLDER "Select Folder"
+#define AAFOLDER "Folder"
+#define AADESTFOLDER "Destination Folder"
+#define AAVIEWREADME "View Readme"
 
 /* configure */
 #define AAGSVIEWC "GSview:"
@@ -352,4 +392,4 @@ Drücken Sie Fertig um weiter zu machen."
 #define AAFRANCAIS "Français"
 #define AAITALIANO "Italiano"
 
-
+#define WINHELPFILE "gsviewde.hlp"

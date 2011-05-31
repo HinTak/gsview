@@ -123,7 +123,6 @@ int orientation;
 int
 d_resize(void)
 {
-int i = get_paper_size_index();
 int code = 0;
 PSDOC *doc;
 float	width;		  /* page width in 1/72" */
@@ -169,18 +168,10 @@ int	yoffset;	  /* page origin offset in 1/72" */
     }
     else {
 	/* !zooming && !display.epsf_clipped && !ispdf */
-	if (i < 0) {
-	    width = option.user_width;
-	    height = option.user_height;
-	    xoffset = 0;
-	    yoffset = 0;
-	}
-	else {
-	    width = papersizes[i].width;
-	    height = papersizes[i].height;
-	    xoffset = 0;
-	    yoffset = 0;
-	}
+	xoffset = 0;
+	yoffset = 0;
+	width = get_paper_width();
+	height = get_paper_height();
     }
 
     display.orientation = d_orientation(psfile.pagenum);

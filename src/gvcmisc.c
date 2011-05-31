@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -46,6 +46,10 @@ info_init(HWND hwnd)
 	    *p = '\0';
 	    if (psfile.gzip) {
 		strcpy(p, "gzip ");
+	        p += strlen(p);
+	    }
+	    if (psfile.bzip2) {
+		strcpy(p, "bzip2 ");
 	        p += strlen(p);
 	    }
 	    if (psfile.ctrld)
@@ -163,7 +167,7 @@ PROFILE *prf;
 	     (option.gsversion > GS_REVISION_MAX) )
 	    option.gsversion = GS_REVISION;
 	profile_read_string(prf, section, "Version", "", profile, sizeof(profile));
-	if (strcmp(profile, GSVIEW_VERSION)!=0)
+	if (strcmp(profile, GSVIEW_DOT_VERSION)!=0)
 	    option.configured = FALSE;
 	profile_read_string(prf, section, "GhostscriptDLL", "", profile, sizeof(profile));
 	if (profile[0] != '\0')	/* don't copy a default - assume already set */
@@ -234,6 +238,9 @@ PROFILE *prf;
 	profile_read_string(prf, section, "Media", "", profile, sizeof(profile));
 	if (strlen(profile)!=0)
 	    strncpy(option.medianame, profile, sizeof(option.medianame));
+	profile_read_string(prf, section, "MediaRotate", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+		option.media_rotate = i;
 	profile_read_string(prf, section, "UserSize", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d %d", &option.user_width, &option.user_height) != 2) {
 		/* this gives 640x480 pixels at 96dpi */
@@ -336,6 +343,9 @@ PROFILE *prf;
 	profile_read_string(prf, section, "PrintReverse", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
 		option.print_reverse = i;
+	profile_read_string(prf, section, "PrintFixedMedia", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+		option.print_fixed_media = i;
 	for (i=0; i<NUMSOUND; i++) {
 		profile_read_string(prf, section, sound[i].entry, sound[i].file, profile, sizeof(profile));
 		strcpy(sound[i].file, profile);
@@ -355,14 +365,14 @@ PROFILE *prf;
 
 /* write settings to INI file */
 void
-write_profile()
+write_profile(void)
 {
 char profile[MAXSTR];
 char *section = INISECTION;
 int i;
 PROFILE *prf;
 	prf = profile_open(szIniFile);
-	profile_write_string(prf, section, "Version", GSVIEW_VERSION);
+	profile_write_string(prf, section, "Version", GSVIEW_DOT_VERSION);
 	sprintf(profile, "%d", (int)option.gsversion);
 	profile_write_string(prf, section, "GSversion", profile);
 	switch (option.language) {
@@ -412,6 +422,8 @@ PROFILE *prf;
 	else
 	    strcpy(profile, option.medianame);
 	profile_write_string(prf, section, "Media", profile);
+	sprintf(profile, "%d", (int)option.media_rotate);
+	profile_write_string(prf, section, "MediaRotate", profile);
 	sprintf(profile, "%u %u", option.user_width, option.user_height);
 	profile_write_string(prf, section, "UserSize", profile);
 	sprintf(profile, "%d", (int)option.epsf_clip);
@@ -464,6 +476,8 @@ PROFILE *prf;
 	profile_write_string(prf, section, "PostScriptPrinter", profile);
 	sprintf(profile, "%d", (int)option.print_reverse);
 	profile_write_string(prf, section, "PrintReverse", profile);
+	sprintf(profile, "%d", (int)option.print_fixed_media);
+	profile_write_string(prf, section, "PrintFixedMedia", profile);
 	for (i=0; i<NUMSOUND; i++)
 	    profile_write_string(prf, section, sound[i].entry, sound[i].file);
 	profile_write_string(prf, section, "LastFile1", last_files[0]);
@@ -473,6 +487,19 @@ PROFILE *prf;
 
 	write_measure_profile(prf);
 
+	profile_close(prf);
+}
+
+void
+write_profile_last_files(void)
+{
+char *section = INISECTION;
+PROFILE *prf;
+	prf = profile_open(szIniFile);
+	profile_write_string(prf, section, "LastFile1", last_files[0]);
+	profile_write_string(prf, section, "LastFile2", last_files[1]);
+	profile_write_string(prf, section, "LastFile3", last_files[2]);
+	profile_write_string(prf, section, "LastFile4", last_files[3]);
 	profile_close(prf);
 }
 

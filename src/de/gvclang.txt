@@ -1,6 +1,8 @@
  GSview Hilfe
 1Inhaltsübersicht
 ?Inhaltsübersicht
+ /* ENGLISH */ This documentation needs updating. 
+
  Das Programm `GSview` stellt eine grafische Schnittstelle für Ghostscript
  unter MS-Windows oder OS/2 dar.
 
@@ -11,7 +13,7 @@
  entwickelten PostScript Document Structuring Conventions
  (DSC-Konventionen) entsprechen, auf dem Bildschirm dargestellt und auf
  einen Drucker ausgegeben werden.
- Die Version GSview 2.7 erfordert Ghostscript in der Version 4.03 - 5.99.
+ Die Version GSview 2.7 erfordert Ghostscript in der Version 4.03 - 6.99.
  Grundlage für GSview ist das von Tim Theisen entwickelte Programm
  Ghostview für X11.
 2Installation
@@ -194,10 +196,10 @@ E
  das Gsview Verzeichnis und entfernen alle Einträge bis auf:
   [Options]
   Version=2.7
-  GSversion=550
+  GSversion=600
   Configured=1
-  GhostscriptDLL=E:\GSTOOLS\gs5.50\gsdll32.dll
-  GhostscriptInclude=E:\GSTOOLS\gs5.50;E:\GSTOOLS\gs5.50\fonts
+  GhostscriptDLL=E:\GSTOOLS\gs6.0\gsdll32.dll
+  GhostscriptInclude=E:\GSTOOLS\gs6.0;E:\GSTOOLS\gs6.0\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Wenn ein Benutzer Gsview startet, dann wird normalerweise seine INI Datei benutzt.
  Startet Gsview das erste Mal oder die Version von Gsview stimmt nicht mit der in der INI Datei überein, dann
@@ -1194,6 +1196,118 @@ E
   -dBitsPerPixel=24 -dDepletion=1 -dShingling=2 -dBlackCorrect=4
  Handelt es sich um einen `[Undefiniert]`-Wert, wird die Einstellung nicht
  an Ghostscript weitergeleitet.
+2File conversions and tricks
+?File Conversions
+?Tricks
+ Some common file conversions that can be performed
+ using GSview and Ghostscript are:
+
+ Convert PostScript to PDF.
+ File | `Print`, select pdfwrite, 300dpi, Print to File.
+ With Ghostscript 5.50, fonts with non-standard encodings
+ will be included as bitmaps.  If you choose 72dpi, fonts
+ will look rough.
+
+ Convert PDF to PostScript.
+ File | `Print`, select pswrite, 300dpi, Print to File.
+
+ Convert Level 2 PostScript to Level 1 PostScript.
+ File | `Print`, select psmono, 300dpi, Print to File.
+ Instead of 300dpi, you should use the resolution of your
+ printer.
+
+ Convert to a bitmap.
+ File | `Print`, select bmp16m, 72dpi, Print to File.
+
+ Convert to an editable vector format (pstoedit).
+ Edit | `Convert to vector format` OR convert to PDF
+ using the method above.
+
+ Extract text (pstotext).
+ Edit | `Text Extract`
+
+ Add a preview to an EPS file.
+ Edit | `Add EPS Preview`.   See `Add EPS Preview` for
+ more details.
+
+ Remove preview from an EPS file.
+ Edit | `Extract EPS` | PostScript
+
+ Display with smooth edges.
+ Media | `Display Settings`.  Set `Text Alpha` and
+ `Graphics Alpha` to 4.  You need a display with
+ at least 8 bits per pixel.
+
+ Save the displayed bitmap.
+ Edit | `Copy` to copy to the clipboard.
+ To save to a BMP file, use Edit | `Copy` then `Paste To`...
+
+ Create a bitmap with smooth edges (anti-aliasing).
+ 1. Display with smooth edges and save the display bitmap.
+ OR
+ 2. Convert to ppmraw and set the properties
+    -dTextAlphaBits=4 -dGraphicsAlphaBits=4
+W
+2Convert to vector format
+?Convert to vector format
+?PStoEdit
+ You can convert a PostScript or PDF file to an editable vector
+ format using `pstoedit` by Wolfgang Glunz.
+ `pstoedit` is licensed with the GNU Public Licence.
+ Binaries are included in GSview with the permission of Wolfgang Glunz.
+ A command line version `pstoedit.exe` and the manual `pstoedit.htm`
+ are included in the pstoedit directory.
+ The home page of pstoedit is
+  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/index.html
+ For updates to pstoedit, look at the pstoedit home page, or at
+  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.html
+
+ To use `pstoedit` from within GSview, use
+ `Edit | Convert to vector format`.
+ Three dialog boxes will be shown.
+
+ The first dialog is for pstoedit settings.
+
+ Select an output `Format`.
+
+ `Draw text as polygons` should be selected if the PostScript file
+ contains text and the output format does not support this, e.g. gnuplot.
+ This might produce a large output file.
+
+ When `Map to ISO-Latin1` is selected, pstoedit maps all character codes
+ to the ones defined by the ISO-Latin1 encoding, which is used by
+ HTML and MS-Windows.  This is the default.
+ If you uncheck this item, the encoding from the input PostScript
+ is passed unchanged to the output.
+
+ If the output format does not support curves in the way PostScript
+ does, all curves are approximated by lines. The `Flatness` option
+ is used to control this approximation. This parameter is directly
+ converted to a PostScript setflat command. Small values produce
+ a more accurate approximation, but more line segments.
+
+ Sometimes fonts embedded in a PostScript program do not have a
+ fontname. For example, this happens in PostScript files generated
+ by dvips. In such a case pstoedit uses a replacement font.
+ The default for this is Courier.  Another font can be specified
+ using the `Default Font` option.
+ Some alternative font names are Courier, Helvetica and Times-Roman.
+
+ Some of the output formats support extra options.  See the pstoedit
+ manual for more details.  For example, the java output format
+ uses `Driver Options` to specify the name of the java class.
+
+ The second dialog (omitted if no page numbering is available)
+ specifies the page to be converted, or if supported by the output
+ format, a range of pages to be converted.
+
+ The third dialog specifies the output file name.
+
+ Not all `pstoedit` formats support bitmap graphics.
+ If you need bitmap output, see `File conversions and tricks`.
+
+ For more details please read the pstoedit manual.
+E
 2Text extrahieren und Suche
 ?Text extrahieren und Suche
 ?Text
@@ -1423,6 +1537,44 @@ E
 
  Sie können auch eine Preview einfügen, die keine Ähnlichkeit mit
  PostScript hat. Dies ist allerdings nicht wünschenswert.
+W
+2Measure
+?Measure
+?Calculate Transformed Units
+ Lengths can be measured using the cursor location displayed on
+ the status bar, or with the `Edit |` `Measure` dialog box.
+
+ This dialog box shows the start location, finish location,
+ difference between these locations and the length and angle
+ between these locations.
+ The start location is set when you click the left mouse button.
+ The default start location is the lower left corner of the page.
+ The units can be pt, mm, inch, or custom.
+
+ Custom units allows you to display coordinates as they appear
+ in a PostScript file.
+ Custom units are usually specified by starting with an identity
+ matrix and then performing a series of transformations.
+ If a PostScript file invokes landscape orientation using
+  90 rotate
+  0 -595 translate
+ then to display the user coordinates you would enter
+ the following in the Calculate Transformation dialog:
+  Custom
+  initmatrix
+  90 rotate
+  0 -595 translate
+  invertmatrix
+  Ok
+ The Current Transformation Matrix (CTM) is shown in
+ upper part of the dialog.  You can enter a CTM directly
+ if you like maths.
+ It is easier to enter values in the Custom edit fields below this,
+ but these have no effect until one of the transform buttons
+ (translate, rotate, scale) is selected.
+
+ See also `Units`.
+E
 2Optionen
 ?Optionen
  Das Menü `Optionen` enthält die folgenden Befehle:
@@ -2119,7 +2271,7 @@ W
 P
   GVPM.EXE - Bedienung von Ghostscript über graphische Oberfläche
 E
-  Copyright (C) 1993-1997, Ghostgum Software Pty Ltd.  Alle Rechte vorbehalten.
+  Copyright (C) 1993-1999, Ghostgum Software Pty Ltd.  Alle Rechte vorbehalten.
   Partielles Copyright (C) 1994, Timothy O. Theisen.  Alle Rechte
   vorbehalten.
 
@@ -2141,7 +2293,7 @@ E
       Autor: Russell Lang, Ghostgum Software Pty Ltd
    Internet: gsview@ghostgum.com.au
  Lesen Sie zunächst das Thema `Häufig auftretende Probleme`,
- die GSview-Datei README.TXT und die entsprechende `WWW`-Seite,
+ die GSview-Datei Readme.htm und die entsprechende `WWW`-Seite,
  bevor Sie sich per E-Mail an den Autor wenden.
 
  Das Programm pstotext (geschrieben von Andrew Birrell und Paul McJones)
@@ -2402,6 +2554,25 @@ E
  zlib unterliegt dem Copyright 1995-1996 von Jean-loup Gailly und
  Mark Adler. Der Quelltext kann bezogen werden von
   http://quest.jpl.nasa.gov/zlib/
+W
+3bzip2
+?bzip2
+ If you attempt to load a file that has been compressed by bzip2,
+ GSview will attempt to load the bzip2 DLL, then uncompress it
+ to a temporary file.
+
+ If you get an error message `Failed to load bzip2 DLL...` then
+ you probably don't have the bzip2 DLL available.
+ Obtain it from the same place you obtained GSview or from
+  ftp://ftp.cs.wisc.edu/ghost/ghostgum/
+ Place the bzip2 DLL in the same directory as the GSview EXE.
+ libbz2.dll is for Win32.  At this stage there is no bzip2 DLL
+ for Win16 or OS/2.
+
+ bzip2 is Copyright 1996-1999 by Julian Seward
+ The source code can be obtained from
+  http://www.muraroa.demon.co.uk/
+E
 2GSview intern
 ?GSview intern
  GSview verwendet Aladdin Ghostscript DLL zur Übertragung von

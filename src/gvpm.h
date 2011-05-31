@@ -40,6 +40,7 @@
 #include <process.h>
 #endif
 #define NeedFunctionPrototypes 1
+#include "ver.h"
 #include "gvcrc.h"
 #include "gsdll.h"
 
@@ -149,6 +150,7 @@ typedef struct tagPSFILE {
 	BOOL	ctrld;		/* TRUE if file starts with ^D */
 	BOOL	pjl;		/* TRUE if file starts with HP LaserJet PJL prologue */
 	BOOL	gzip;		/* TRUE if file compressed with gzip */
+	BOOL	bzip2;		/* TRUE if file compressed with bzip2 */
 	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
 #ifdef _Windows
 	struct	ftime datetime;	/* time/date of selected file */
@@ -268,6 +270,7 @@ typedef struct tagOPTIONS {
 	BOOL	safer;
 	int	media;
 	char	medianame[32];
+	BOOL	media_rotate;
 	int	user_width;
 	int	user_height;
 	BOOL	epsf_clip;
@@ -293,6 +296,7 @@ typedef struct tagOPTIONS {
 	BOOL	print_to_file;
 	BOOL	psprinter;
 	BOOL	print_reverse;
+	BOOL	print_fixed_media;
 	int	pdf2ps;
 	BOOL	auto_bbox;
 	MATRIX	ctm;
@@ -436,6 +440,8 @@ extern HMTX hmutex_ps;
 extern HAB hab;
 extern HWND hwnd_frame;
 extern HWND hwnd_bmp;
+extern HWND hwnd_image;
+extern HWND hwnd_fullscreen;
 #define hwndimg hwnd_bmp		/* to look like Windows */
 extern HWND hwnd_status;
 extern HWND hwnd_button;

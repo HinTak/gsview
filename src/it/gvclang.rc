@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -21,136 +21,141 @@
 /* button help */
 STRINGTABLE
 BEGIN
-	IDM_OPEN, "Open..."
-	IDM_PRINT, "Print..."
-	IDM_INFO, "Info..."
-	IDM_HELPCONTENT, "Help"
-	IDM_GOTO, "Goto Page..."
-	IDM_NEXT, "Next Page"
-	IDM_PREV, "Previous Page"
-	IDM_NEXTSKIP, "Skip forwards 5 pages"
-	IDM_PREVSKIP, "Skip backwards 5 pages"
-	IDM_MAGPLUS, "Increase Resolution"
-	IDM_MAGMINUS, "Decrease Resolution"
-	IDM_TEXTFIND, "Find..."
-	IDM_TEXTFINDNEXT, "Find Next"
+	IDM_OPEN, "Apri..."
+	IDM_PRINT, "Stampa..."
+	IDM_INFO, "Informazioni..."
+	IDM_HELPCONTENT, "Guida di GSview"
+	IDM_GOTO, "Vai a Pagina..."
+	IDM_NEXT, "Pagina Successiva"
+	IDM_PREV, "Pagina Precedente"
+	IDM_NEXTSKIP, "Salta avanti di 5 pagine"
+	IDM_PREVSKIP, "Salta indietro di 5 pagine"
+	IDM_MAGPLUS, "Aumenta Risoluzione"
+	IDM_MAGMINUS, "Diminuisci Risoluzione"
+	IDM_TEXTFIND, "Cerca..."
+	IDM_TEXTFINDNEXT, "Cerca Successivo"
 END
 
 
 STRINGTABLE
 BEGIN
 	IDS_FILE, "File: "
-	IDS_NOFILE, "No File"
-	IDS_PAGE, "Page: "
-	IDS_NOPAGE, "No page numbering available"
-	IDS_PAGESPECIAL, "Page ordering is Special.  Pages can not be reliably reordered.  See help 'Common Problems'.  Continue?"
-	IDS_LANDSCAPE, "Landscape"
-	IDS_PORTRAIT, "Portrait"
-	IDS_ASCEND, "Ascending"
-	IDS_DESCEND, "Descending"
-	IDS_SPECIAL, "Special"
-	IDS_PAGEINFO, "Page: \042%s\042  %d of %d"
-	IDS_LINKPAGE, "Link to page %d"
-	IDS_DEFAULT, "Default"
-	IDS_NOTDEFTAG, "[Not defined]"
+	IDS_NOFILE, "Nessun File"
+	IDS_PAGE, "Pagina: "
+	IDS_NOPAGE, "Nessuna numerazione di pagina disponibile"
+	IDS_PAGESPECIAL, "L'ordinamento di pagina è Speciale. Le pagine non possono essere riordinate in modo preciso.  Vedere nella Guida l'argomento 'Problemi comuni'.  Continuare?"
+	IDS_LANDSCAPE, "Orizzontale"
+	IDS_PORTRAIT, "Verticale"
+	IDS_ASCEND, "Ascendente"
+	IDS_DESCEND, "Discendente"
+	IDS_SPECIAL, "Speciale"
+	IDS_PAGEINFO, "Pagina: \042%s\042  %d di %d"
+	IDS_LINKPAGE, "Collegamento alla pagina %d"
+	IDS_DEFAULT, "Predefinito"
+	IDS_NOTDEFTAG, "[Non definito]"
 	IDS_EPSF, "EPS"
-	IDS_EPSI, "EPS with Interchange Preview"
-	IDS_EPST, "EPS with TIFF Preview"
-	IDS_EPSW, "EPS with Metafile Preview"
+	IDS_EPSI, "EPS con Anteprima Interchange"
+	IDS_EPST, "EPS con Anteprima TIFF"
+	IDS_EPSW, "EPS con Anteprima Metafile"
 	IDS_DSC, "DSC"
-	IDS_NOTDSC, "No DSC comments"
+	IDS_NOTDSC, "Nessun commento DSC"
 	IDS_PDF, "Portable Document Format"
-	IDS_IGNOREDSC, "Ignoring DSC comments"
-	IDS_CTRLD, "Ctrl-D followed by "
-	IDS_PJL, "PJL followed by "
-	IDS_ZOOMED, " Zoomed"
+	IDS_IGNOREDSC, "Ignora commenti DSC"
+	IDS_CTRLD, "Ctrl-D seguito da "
+	IDS_PJL, "PJL seguito da "
+	IDS_ZOOMED, " Zoomato"
 END
 
 STRINGTABLE
 BEGIN
-	IDS_OUTPUTFILE, "Output Filename"
-	IDS_PRINTINGALL, "No DSC comments\nPrinting all pages"
-	IDS_PRINTFILE, "Print File"
-	IDS_SELECTPAGE, "Select Page"
-	IDS_SELECTPAGES, "Select Pages"
-	IDS_NOTOPEN, "No document open"
-	IDS_CANNOTRUN, "Can't run "
-	IDS_TOOLONG, "Command line too long: "
-	IDS_NOMORE, "No more pages"
+	IDS_OUTPUTFILE, "Nome del file di Output"
+	IDS_PRINTINGALL, "Nessun commento DSC\nStampa tutte le pagine"
+	IDS_PRINTFILE, "Stampa su File"
+	IDS_SELECTPAGE, "Seleziona Pagina"
+	IDS_SELECTPAGES, "Seleziona Pagine"
+	IDS_NOTOPEN, "Nessun documento aperto"
+	IDS_CANNOTRUN, "Non posso eseguire "
+	IDS_TOOLONG, "Linea di comando troppo lunga: "
+	IDS_NOMORE, "Non ci sono più pagine"
 /* OLD
-	IDS_GSCOMMAND, "Ghostscript command ?"
+	IDS_GSCOMMAND, "Comando Ghostscript ?"
 */
-	IDS_NOZOOM, "Must display page before zooming"
-	IDS_USERWIDTH, "Width in 1/72 inch units ?"
-	IDS_USERHEIGHT, "Height in 1/72 inch units ?"
-	IDS_BADEPS, "Problem making EPS file"
-	IDS_NOPREVIEW, "Not a DOS EPS file or\nNo binary preview"
-	IDS_NOTDFNAME, "Can't use same name as open document"
-	IDS_NOTEMP, "Couldn't open temporary file.\nDirectory may be Read Only.\nTEMP environment variable may not set."
-	IDS_CANCELDONE, "%d%% done"
-	IDS_BADCLI, "Bad command line option: "
-	IDS_DUPOPT, "Can only specify one of /F /P /S options.  Error at: %s"
-	IDS_TEXTFIND, "Find text ?"
-	IDS_TEXTNOTFIND, "Text not found"
-	IDS_PRINTPDFPS "Can't print PDF to a PostScript printer.  Use File | Extract"
-	IDS_NOPDFQUICKTEXT "Can't do quick text extract or find on PDF file.  Use Options | PStoText"
-	IDS_BAD_DOSEPS_HEADER "DOS EPS header is bad.  Ignoring DSC comments."
+	IDS_NOZOOM, "E' necessario visualizzare la pagina prima effettuare lo zoom"
+	IDS_USERWIDTH, "Impostare le Unità di misura della larghezza a 1/72 di pollice ?"
+	IDS_USERHEIGHT, "Impostare le Unità di misura dell'altezza a 1/72 di pollice ?"
+	IDS_BADEPS, "Problema nella creazione del file EPS"
+	IDS_NOPREVIEW, "Nessun DOS EPS file oppure\nNessuna anteprima binaria"
+	IDS_NOTDFNAME, "Non è possibile usare il nome di un documento aperto"
+	IDS_NOTEMP, "Non è possibile aprire files temporanei.\nLa cartella potrebbe essere di sola lettura.\nLa variabile di ambiente TEMP potrebbe non essere impostata."
+	IDS_CANCELDONE, "%d%% fatto"
+	IDS_BADCLI, "Errata opzione della linea di comando: "
+	IDS_DUPOPT, "E' possibile specificare solo una delle opzioni /F /P /S .  Errore in: %s"
+	IDS_TEXTFIND, "Trova testo ?"
+	IDS_TEXTNOTFIND, "Testo non trovato"
+	IDS_PRINTPDFPS "Non è possibile stampare file PDF in una stampante PostScript.  Usare File | Estrai"
+	IDS_NOPDFQUICKTEXT "Non è possibile estrarre o trovare velocemente del testo in un file PDF.  Usare Opzioni | PStoText"
+	IDS_BAD_DOSEPS_HEADER "La testata DOS EPS è errata.  Ignora commenti DSC."
 END
 
 STRINGTABLE
 BEGIN
 	/* sound type types*/
-	IDS_SOUNDNAME, "Sound File"
-	IDS_SNDPAGE, "Output Page"
-	IDS_SNDNOPAGE, "No Page"
-	IDS_SNDNONUMBER, "No Numbering"
-	IDS_SNDNOTOPEN, "Not Open"
-	IDS_SNDERROR, "Error"
-	IDS_SNDTIMEOUT,	"Timeout"
-	IDS_SNDSTART, "Start"
-	IDS_SNDEXIT, "Exit"
-	IDS_SNDBUSY, "Busy"
-	IDS_NONE, "<None>"
-	IDS_SPKR, "<Speaker Beep>"
+	IDS_SOUNDNAME, "File di suono"
+	IDS_SNDPAGE, "Pagina di Output"
+	IDS_SNDNOPAGE, "Nessuna Pagina"
+	IDS_SNDNONUMBER, "Nessuna Numerazione"
+	IDS_SNDNOTOPEN, "Non Aperto"
+	IDS_SNDERROR, "Errore"
+	IDS_SNDTIMEOUT,	"Intervallo"
+	IDS_SNDSTART, "Inizia"
+	IDS_SNDEXIT, "Esci"
+	IDS_SNDBUSY, "Occupato"
+	IDS_NONE, "<Nessuno>"
+	IDS_SPKR, "<Beep Altoparlante>"
 END
 
 STRINGTABLE
 BEGIN
 	/* help topics - these need to match keywords in XX\gvclang.txt */
-	IDS_TOPICROOT,  "Overview"
-	IDS_TOPICOPEN,  "Open"
-	IDS_TOPICPRINT, "Print"
-	IDS_TOPICPROP, "Properties"
-	IDS_TOPICEDITPROP, "Edit Properties"
-	IDS_TOPICCLIP, "Clipboard"
-	IDS_TOPICPREVIEW, "EPS Preview"
-	IDS_TOPICGSCMD, "Configure Ghostscript"
-	IDS_TOPICSOUND, "Sounds"
-	IDS_TOPICDSET, "Display Settings"
-	IDS_TOPICMEDIA, "Media"
-	IDS_TOPICPSTOEPS, "PS to EPS"
-	IDS_TOPICGOTO, "Page Selection"
-	IDS_TOPICINSTALL, "Installation"
-	IDS_TOPICTEXT, "Text Extract and Find"
-	IDS_TOPICKEYS, "Keys"
-	IDS_TOPICMESS, "Show Messages"
+	IDS_TOPICROOT,  "Veduta generale"
+	IDS_TOPICOPEN,  "Apri"
+	IDS_TOPICPRINT, "Stampa"
+	IDS_TOPICPROP, "Proprietà"
+	IDS_TOPICEDITPROP, "Modifica Proprietà"
+	IDS_TOPICCLIP, "Appunti"
+	IDS_TOPICPREVIEW, "Anteprima EPS"
+	IDS_TOPICSOUND, "Suoni"
+	IDS_TOPICDSET, "Impostazioni di visualizzazione"
+	IDS_TOPICMEDIA, "Carta"
+	IDS_TOPICPSTOEPS, "Converti PS in EPS"
+	IDS_TOPICGOTO, "Seleziona Pagina"
+	IDS_TOPICINSTALL, "Installazione"
+	IDS_TOPICTEXT, "Estrai e Cerca testo"
+	IDS_TOPICKEYS, "Chiavi"
+	IDS_TOPICMESS, "Mostra messaggi"
 	IDS_TOPICSPOOL, "Spooler"
 	IDS_TOPICZLIB, "zlib"
+	IDS_TOPICBZIP2, "bzip2"
+	IDS_TOPICPSTOEDIT, "PS to Edit"
+	IDS_TOPICMEASURE, "Misure"
+	IDS_TOPICEASYCFG "Configurazione Facile"
+	IDS_TOPICADVANCEDCFG "Configurazione Avanzata"
+	IDS_TOPICDOWNLOAD "Download Ghostscript"
 END
 
 STRINGTABLE
 BEGIN
-	IDS_BBPROMPT,  "Click at left"
-	IDS_BBPROMPT1, "Click at bottom"
-	IDS_BBPROMPT2, "Click at right"
-	IDS_BBPROMPT3, "Click at top"
-	IDS_EPSONEPAGE, "An EPS file must be a single page document. \nSee help on 'PS to EPS'"
-	IDS_EPSQPAGES, "Is this a single page document ?"
-	IDS_EPSNOBBOX, "Could not obtain Bounding Box"
-	IDS_EPSUSERINVALID, "Preview file is not TIFF or Windows Metafile"
-	IDS_EPSUSERTITLE, "Open Preview File"
-	IDS_EPS_OFF_PAGE, "EPS Bounding Box is entirely off the page.  Suggest you use 'Options | EPSF Clip'"
-	IDS_MUSTUSEPORTRAIT, "You must use Portrait orientation."
+	IDS_BBPROMPT,  "Cliccare a sinistra"
+	IDS_BBPROMPT1, "Cliccare sotto"
+	IDS_BBPROMPT2, "Cliccare a destra"
+	IDS_BBPROMPT3, "Cliccare sopra"
+	IDS_EPSONEPAGE, "Un file EPS deve essere un documento formato da una singola pagina. \nVedere nella Guida l'argomento 'Converti PS in EPS'"
+	IDS_EPSQPAGES, "E' un documento di una singola pagina ?"
+	IDS_EPSNOBBOX, "Non posso ottenere i Limiti del Box"
+	IDS_EPSUSERINVALID, "Il file di anteprima non è un file TIFF o Windows Metafile"
+	IDS_EPSUSERTITLE, "Apri file di anteprima"
+	IDS_EPS_OFF_PAGE, "I limiti del box EPS sono completamente fuori dalla pagina.  Suggeriamo di usare 'Opzioni | Ritaglia EPSF'"
+	IDS_MUSTUSEPORTRAIT, "Deve essere usato l'orientamento verticale."
 END
 
 STRINGTABLE
@@ -159,74 +164,74 @@ BEGIN
 	IDS_UNITMM, AAMM
 	IDS_UNITINCH, AAINCH
 	IDS_UNITCUSTOM, AACUSTOM
- 	IDS_INVALIDNUMBER, "Invalid number" /* ENGLISH */
- 	IDS_CANTINVERT, "Cannot invert matrix"
+ 	IDS_INVALIDNUMBER, "Numero non valido"
+ 	IDS_CANTINVERT, "Non posso invertire la matrice"
 END
-
 
 STRINGTABLE
 BEGIN
 	/* wait messages */
-	IDS_WAIT, "Wait"
-	IDS_WAITREAD,  "Reading..."
-	IDS_WAITWRITE,  "Writing..."
-	IDS_WAITDRAW, "Drawing..."
-	IDS_WAITDRAW_PC, "Drawing %d%%"
-	IDS_WAITGSOPEN, "Opening Ghostscript..."
-	IDS_WAITGSCLOSE,  "Closing Ghostscript..."
-	IDS_WAITPRINT,  "Printing..."
-	IDS_WAITSEARCH,  "Searching..."
-	IDS_WAITTEXT, "Extracting Text %d%%"
+	IDS_WAIT, "Attendi"
+	IDS_WAITREAD,  "Lettura in corso..."
+	IDS_WAITWRITE,  "Scrittura in corso..."
+	IDS_WAITDRAW, "Disegno in corso..."
+	IDS_WAITDRAW_PC, "Disegno %d%% in corso"
+	IDS_WAITGSOPEN, "Apertura Ghostscript in corso..."
+	IDS_WAITGSCLOSE,  "Chiusura Ghostscript in corso..."
+	IDS_WAITPRINT,  "Stampa in corso..."
+	IDS_WAITSEARCH,  "Ricerca in corso..."
+	IDS_WAITTEXT, "Estrazione testo %d%%"
 END
 
 STRINGTABLE
 BEGIN
 	/* debug messages */
-	IDS_DEBUG_DFISLOCKED, "dfreopen: file is locked"
-	IDS_DEBUG_DFISOPEN, "dfreopen: file is already open"
-	IDS_DEBUG_DFISMISSING, "dfreopen: file is missing"
-	IDS_DEBUG_DFCHANGED, "dfreopen: file has changed"
-	IDS_DEBUG_DFISCLOSED, "dfclose: file is already closed"
+	IDS_DEBUG_DFISLOCKED, "dfreopen: il file è bloccato"
+	IDS_DEBUG_DFISOPEN, "dfreopen: il file è già aperto"
+	IDS_DEBUG_DFISMISSING, "dfreopen: il file è mancante"
+	IDS_DEBUG_DFCHANGED, "dfreopen: il file è cambiato"
+	IDS_DEBUG_DFISCLOSED, "dfclose: il file è già chiuso"
 END
 
 STRINGTABLE
 BEGIN
-	IDS_PROCESS_GSLOAD_FAIL, "Can't load Ghostscript DLL"
-	IDS_PROCESS_INIT_FAIL, "gs_process: gsdll.init failed"
-	IDS_PROCESS_VIEWER_FAIL, "gs_process: '(viewer.ps) run' failed"
-	IDS_PROCESS_EXECUTE_FAIL, "gs_process: gsdll.execute_cont failed"
+	IDS_PROCESS_GSLOAD_FAIL, "Non posso caricare la DLL di Ghostscript"
+	IDS_PROCESS_INIT_FAIL, "gs_process: gsdll.init fallito"
+	IDS_PROCESS_VIEWER_FAIL, "gs_process: '(viewer.ps) run' fallito"
+	IDS_PROCESS_EXECUTE_FAIL, "gs_process: gsdll.execute_cont fallito"
 END
 
 STRINGTABLE
 BEGIN
 	/* PDF messages */
-	IDS_PDFNOPAGE, "Unknown number of pages in PDF file\nYou must display the file first" 
-	IDS_PDFEXTRACTALL, "Unknown number of pages in PDF file\nExtracting or printing all pages"
-	IDS_USEPDFWRITE, "To extract pages from a PDF file, Print to File using the pdfwrite or pswrite device." /* ENGLISH */
+	IDS_PDFNOPAGE, "Numero di pagine sconosciuto nel file PDF\nDeve essere prima visualizzato il file" 
+	IDS_PDFEXTRACTALL, "Numero di pagine sconosciuto nel file PDF\nEstrae o stampa tutte le pagine"
+	IDS_USEPDFWRITE, "Per estrarre pagine da un file PFD, Stampa su File usando la periferica pdfwrite oppure pswrite." /* ENGLISH */
 END
 
 STRINGTABLE
 BEGIN
-	IDS_LARGEMEDIA, "Warning: media size is wider than 2 metres or higher than 2 metres.  Please check 'Media | User Defined'"
-	IDS_NOTIMPLEMENTED, "Not implemented"
-	IDS_NOLINKTARGET, "Unknown target for link"
-	IDS_PARSEERROR, "Error parsing command line"
-	IDS_ZLIB_FAIL, "Failed to load zlib DLL.  Press OK button for help."
+IDS_LARGEMEDIA, "Attenzione: la dimensione della carta è più ampia di 2 metri o più alta di 2 metri.  Per favore cerca 'Carta | Impostazioni dell'utente'"
+	IDS_NOTIMPLEMENTED, "Non implementato"
+	IDS_NOLINKTARGET, "Oggetto sconosciuto per il collegamento"
+	IDS_PARSEERROR, "Errore nell'analisi della linea di comando"
+	IDS_ZLIB_FAIL, "Errore nel caricamento della DLL zlib.  Premi il pulsante OK per avere un aiuto dalla Guida."
+	IDS_BZIP2_FAIL, "Errore nel caricamento della DLL bzip2.  Premi il pulsante OK per avere un aiuto dalla Guida."
 END
 
 STRINGTABLE
 BEGIN
-	IDS_BETAEXPIRED, "This BETA test copy of GSview has expired.  See http://www.cs.wisc.edu/~ghost/ for details about how to obtain the current version of GSview"
+	IDS_BETAEXPIRED, "Questa copia di test BETA di GSview è scaduta.  Vedi http://www.cs.wisc.edu/~ghost/ per dettagli su come ottenere la versione corrente di GSview"
 	IDS_BETAWARN, AABETAWARN
-	IDS_NOPRINTERINI, "Can't open printer.ini"
-	IDS_NOINI, "Can't open INI file"
-	IDS_NEEDTEMP, "You must set the environment variable TEMP to a valid writeable directory.  Without this, GSview and Aladdin Ghostscript will not be able to print"
-	IDS_GSNOTINSTALLED, "You have not installed Ghostscript.  Please read the GSview README.TXT file."
-	IDS_GSLIBNOTINSTALLED, "You have not installed the Ghostscript library files.  Please read the GSview README.TXT file."
+	IDS_NOPRINTERINI, "Non posso aprire printer.ini"
+	IDS_NOINI, "Non posso aprire il file INI"
+	IDS_NEEDTEMP, "Deve essere impostata la variabile di ambiente TEMP in una cartella con permesso di scrittura.  Senza questo, GSview e Aladdin Ghostscript non sono abilitati alla stampa"
+	IDS_GSNOTINSTALLED, "Non è stato installato Ghostscript.  Per favore leggere il file GSview Readme.htm."
+	IDS_GSLIBNOTINSTALLED, "Non sono stati installati i files di libreria di Ghostscript.  Per favore leggere il file GSview Readme.htm."
 	IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED
 	IDS_NOPROGMAN, AANODDEPROGMAN
-	IDS_WRONGEMX, "You have emx %s.\rYou need emx %s or later.\rPM GSview will not run correctly."
-	IDS_GSVIEWVERSION, GSVIEW_VERSION
+	IDS_WRONGEMX, "E' presente emx %s.\rE' necessario emx %s o successivo.\rPM GSview non viene eseguito correttamente."
+	IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION
 	IDS_CFG73, AACFG73
 	IDS_CFG74, AACFG74
 	IDS_PROGMANGROUP4 AAPROGMANGROUP4

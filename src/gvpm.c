@@ -42,8 +42,10 @@ HMTX hmutex_ps;
 HAB hab;		/* Anchor Block */
 ULONG os_version;
 BOOL multithread;
-HWND hwnd_frame;
-HWND hwnd_bmp;
+HWND hwnd_frame;	/* main window */
+HWND hwnd_bmp;		/* client area of main window */
+HWND hwnd_image;	/* full screen popup or child window */
+HWND hwnd_fullscreen;	/* full screen popup */
 HWND hwnd_status;
 HWND hwnd_button;
 HWND hwnd_help;
@@ -77,6 +79,7 @@ PRINTER printer;	/* Printer GS parameters */
 char last_files[4][MAXSTR];	/* last 4 files used */
 int last_files_count;		/* number of files known */
 HISTORY history;		/* history of pages displayed */
+BOOL fullscreen = FALSE;
 
 int page_skip = 5;		/* number of pages to skip in IDM_NEXTSKIP or IDM_PREVSKIP */
 BOOL zoom = FALSE;		/* true if display zoomed */
@@ -125,8 +128,8 @@ update_scroll_bars(void)
 {
     /* Cause update of scroll bars etc. */
     SWP swp;
-    WinQueryWindowPos(hwnd_bmp, &swp);
-    WinSendMsg(hwnd_bmp, WM_SIZE, MPFROM2SHORT(swp.cx, swp.cy), MPFROM2SHORT(swp.cx, swp.cy));
+    WinQueryWindowPos(hwnd_image, &swp);
+    WinSendMsg(hwnd_image, WM_SIZE, MPFROM2SHORT(swp.cx, swp.cy), MPFROM2SHORT(swp.cx, swp.cy));
 }
 
 
@@ -152,6 +155,8 @@ exit_func(void)
     psfile_free(&psfile);
     if (option.settings)
 	write_profile();
+    else
+	write_profile_last_files();	/* always save MRU files */
     unload_zlib();
 }
 
@@ -232,7 +237,7 @@ main(int argc, char *argv[])
 
   if (multithread) {
       /* start thread for displaying */
-      display.tid = _beginthread(gs_thread, NULL, 65536, NULL);
+      display.tid = _beginthread(gs_thread, NULL, 131072, NULL);
   }
 
   play_sound(SOUND_START);
@@ -593,6 +598,7 @@ paint_bitmap(HPS ps, PRECTL prect, int scrollx, int scrolly)
     int wx, wy;
     HRGN hrgn, hrgnold;
     HPOINTER hptr;
+    LONG background_colour = SYSCLR_DIALOGBACKGROUND;
     if (WinIsRectEmpty(hab, prect))
 	return 0;
 
@@ -663,34 +669,39 @@ paint_bitmap(HPS ps, PRECTL prect, int scrollx, int scrolly)
 	GpiDrawBits(ps, bitmap.bits, bitmap.pbmi, 4, apts, 
 		(bitmap.depth != 1) ? ROP_SRCCOPY : ROP_NOTSRCCOPY, 0);
     }
+
+
+    if (fullscreen)
+	background_colour = CLR_WHITE;
+
     /* Fill areas around page */
     if (prect->yBottom < display.offset.y) {	/* bottom centre */
 	rect.yBottom = prect->yBottom;
 	rect.yTop = display.offset.y;
 	rect.xLeft = apts[0].x;
 	rect.xRight = rect.xLeft + wx;
-	WinFillRect(ps, &rect, SYSCLR_DIALOGBACKGROUND);
+	WinFillRect(ps, &rect, background_colour);
     }
     if (prect->yTop > bitmap.height + display.offset.y) { /* top centre */
 	rect.yBottom = bitmap.height + display.offset.y;
 	rect.yTop = prect->yTop;
 	rect.xLeft = apts[0].x;
 	rect.xRight = rect.xLeft + wx;
-	WinFillRect(ps, &rect, SYSCLR_DIALOGBACKGROUND);
+	WinFillRect(ps, &rect, background_colour);
     }
     if (prect->xLeft < display.offset.x) { /* left */
 	rect.yBottom = prect->yBottom;
 	rect.yTop = prect->yTop;
 	rect.xLeft = prect->xLeft;
 	rect.xRight = display.offset.x;
-	WinFillRect(ps, &rect, SYSCLR_DIALOGBACKGROUND);
+	WinFillRect(ps, &rect, background_colour);
     }
     if (prect->xRight > bitmap.width + display.offset.x) { /* right */
 	rect.yBottom = prect->yBottom;
 	rect.yTop = prect->yTop;
 	rect.xLeft = bitmap.width + display.offset.x;
 	rect.xRight = prect->xRight;
-	WinFillRect(ps, &rect, SYSCLR_DIALOGBACKGROUND);
+	WinFillRect(ps, &rect, background_colour);
     }
 
     /* clip other drawing commands to update rectangle */
@@ -895,19 +906,21 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	    }
 	    return (MRESULT)TRUE;
 	case WM_GSSYNC:
-	    if (!WinInvalidateRect(hwnd_bmp, (PRECTL)NULL, TRUE))
-		    error_message("error invalidating rect");
-	    if (!WinUpdateWindow(hwnd_bmp))
-		    error_message("error updating window");
+	    if (!fullscreen) {
+		if (!WinInvalidateRect(hwnd_image, (PRECTL)NULL, TRUE))
+			error_message("error invalidating rect");
+		if (!WinUpdateWindow(hwnd_image))
+			error_message("error updating window");
+	    }
 	    return 0;
 	case WM_GSPAGE:
 	    ignore_sync = FALSE;
 	    play_sound(SOUND_PAGE);
 	    if (display.show_find)
 		scroll_to_find();
-	    if (!WinInvalidateRect(hwnd_bmp, (PRECTL)NULL, TRUE))
+	    if (!WinInvalidateRect(hwnd_image, (PRECTL)NULL, TRUE))
 		    error_message("error invalidating rect");
-	    if (!WinUpdateWindow(hwnd_bmp))
+	    if (!WinUpdateWindow(hwnd_image))
 		    error_message("error updating window");
 	    return 0;
 	case WM_GSDEVICE:
@@ -918,6 +931,8 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		bitmap.valid = TRUE;
 	    }
 	    else {
+		if (fullscreen)
+		    gsview_fullscreen_end();
 		bitmap.valid = FALSE;
 		update_scroll_bars();
 	    }
@@ -1108,7 +1123,8 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	        paint_bitmap(hps, &rect, nHscrollPos, nVscrollMax - nVscrollPos);
 	    WinEndPaint(hwnd);
 	    release_mutex();
-
+	    if (hwnd == hwnd_fullscreen)
+		WinSetPointer(HWND_DESKTOP, 0);
 	    if (gsdll.lock_device && gsdll.device)
 	        (*gsdll.lock_device)(gsdll.device, 0);
 	    return 0;
@@ -1142,7 +1158,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		    cyAdjust = bitmap.height - cyClient;
 		}
 		else {
-		    if (fit_page_enabled) {
+		    if (!fullscreen && fit_page_enabled) {
 			/* We just got a GSDLL_SIZE and option.fitpage was TRUE */
 			/* enlarge window to smaller of bitmap height */
 			/* and height if client extended to bottom of screen */
@@ -1165,15 +1181,22 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		if (!gsdll.device || !bitmap.valid)
 			cyClient = cyAdjust = nVscrollMax = nVscrollPos = 0;
 
-		hwndScroll = WinWindowFromID(WinQueryWindow(hwnd, QW_PARENT), FID_VERTSCROLL);
-		WinSendMsg(hwndScroll, SBM_SETSCROLLBAR, MPFROMLONG(nVscrollPos), 
-			MPFROM2SHORT(0, nVscrollMax));
-		if (gsdll.device && bitmap.valid)
-		    WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, MPFROM2SHORT(cyClient, bitmap.height),
-			MPFROMLONG(0));
-		else
-		    WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, MPFROM2SHORT(1, 1),
-			MPFROMLONG(0));
+		if (fullscreen) {
+		    /* we don't have scroll bars */
+		}
+		else {
+		    hwndScroll = WinWindowFromID(
+			WinQueryWindow(hwnd, QW_PARENT), FID_VERTSCROLL);
+		    WinSendMsg(hwndScroll, SBM_SETSCROLLBAR, 
+			MPFROMLONG(nVscrollPos), MPFROM2SHORT(0, nVscrollMax));
+		    if (gsdll.device && bitmap.valid)
+			WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, 
+			    MPFROM2SHORT(cyClient, bitmap.height),
+			    MPFROMLONG(0));
+		    else
+			WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, 
+				MPFROM2SHORT(1, 1), MPFROMLONG(0));
+		}
 
 #ifdef OLD
 		cxAdjust = min(bitmap.width,  cxClient) - cxClient;
@@ -1209,17 +1232,24 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		if (!gsdll.device || !bitmap.valid)
 			cxClient = cxAdjust = nHscrollMax = nHscrollPos = 0;
 
-		hwndScroll = WinWindowFromID(WinQueryWindow(hwnd, QW_PARENT), FID_HORZSCROLL);
-		WinSendMsg(hwndScroll, SBM_SETSCROLLBAR, MPFROMLONG(nHscrollPos), 
-			MPFROM2SHORT(0, nHscrollMax));
-		if (gsdll.device && bitmap.valid)
-		    WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, MPFROM2SHORT(cxClient, bitmap.width),
-			MPFROMLONG(0));
-		else
-		    WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, MPFROM2SHORT(1, 1),
-			MPFROMLONG(0));
+		if (fullscreen) {
+		    /* we don't have scroll bars */
+		}
+		else {
+		    hwndScroll = WinWindowFromID(
+			WinQueryWindow(hwnd, QW_PARENT), FID_HORZSCROLL);
+		    WinSendMsg(hwndScroll, SBM_SETSCROLLBAR, 
+			MPFROMLONG(nHscrollPos), MPFROM2SHORT(0, nHscrollMax));
+		    if (gsdll.device && bitmap.valid)
+			WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, 
+			    MPFROM2SHORT(cxClient, bitmap.width), 
+			    MPFROMLONG(0));
+		    else
+			WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, 
+			    MPFROM2SHORT(1, 1), MPFROMLONG(0));
+		}
 
-		if ( option.fit_page && gsdll.device &&
+		if (!fullscreen && option.fit_page && gsdll.device &&
 			(cxAdjust!=0 || cyAdjust!=0) ) {
 		        SWP swp;
 			/* don't interrogate the window location immediately since */
@@ -1234,7 +1264,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		}
 		display.offset.x = -cxAdjust/2;
 		display.offset.y = -cyAdjust/2;
-	    	if (hwnd_frame) {
+	    	if (!fullscreen && hwnd_frame) {
 		    SWP swp;
 		    WinQueryWindowPos(WinQueryWindow(hwnd, QW_PARENT), &swp);
 		    if (!(swp.fl & SWP_MINIMIZE)) {
@@ -1411,53 +1441,77 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	    }
 	    break;
 	case WM_CHAR:	/* process keystrokes here */
-	    /* Process only key presses, not key releases */
-	    if (SHORT1FROMMP(mp1) & KC_KEYUP)
-	        break;
-	    if (SHORT1FROMMP(mp1) & KC_VIRTUALKEY) {
+	    if (!(SHORT1FROMMP(mp1) & KC_KEYUP) && 
+		(SHORT1FROMMP(mp1) & KC_VIRTUALKEY)) {
+	        /* Process virtual keys only on presses, not key releases */
 		USHORT vkey = SHORT2FROMMP(mp2);
+		/* Note that the cursor keys these scroll hwnd_image, not hwnd.
+		 * This is needed for fullscreen because the key presses
+		 * are sent to the frame child window, not the fullscreen
+		 * window which has the focus!
+		 */ 
 		switch(vkey) {
+		    case VK_ESC:
+			if (fullscreen)
+			    gsview_fullscreen_end();
+			break;
 		    case VK_HOME:
-		    	WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_TOP));
+	    		if (SHORT1FROMMP(mp1) & KC_CTRL)
+			    WinSendMsg(hwnd_image, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_TOP));
+			else
+			    WinSendMsg(hwnd_image, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_TOP));
 		    	break;
 		    case VK_END:
-		    	WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_BOTTOM));
+	    		if (SHORT1FROMMP(mp1) & KC_CTRL)
+			    WinSendMsg(hwnd_image, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_BOTTOM));
+			else
+			    WinSendMsg(hwnd_image, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_BOTTOM));
 		    	break;
 		    case VK_UP:
-		    	WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_LINEUP));
+	    		if (SHORT1FROMMP(mp1) & KC_CTRL)
+		    	    WinSendMsg(hwnd_image, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGEUP));
+			else
+			    WinSendMsg(hwnd_image, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_LINEUP));
 		    	break;
 		    case VK_DOWN:
-		    	WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_LINEDOWN));
+	    		if (SHORT1FROMMP(mp1) & KC_CTRL)
+		    	    WinSendMsg(hwnd_image, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGEDOWN));
+			else
+			    WinSendMsg(hwnd_image, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_LINEDOWN));
 		    	break;
 		    case VK_PAGEUP:
 	    		if (SHORT1FROMMP(mp1) & KC_CTRL)
-		    	    WinSendMsg(hwnd, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGELEFT));
+		    	    WinSendMsg(hwnd_image, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGELEFT));
 		 	else
-		    	    WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGEUP));
+		    	    WinSendMsg(hwnd_image, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGEUP));
 		    	break;
 		    case VK_PAGEDOWN:
 	    		if (SHORT1FROMMP(mp1) & KC_CTRL)
-		    	    WinSendMsg(hwnd, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGERIGHT));
+		    	    WinSendMsg(hwnd_image, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGERIGHT));
 		 	else
-		    	    WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGEDOWN));
+		    	    WinSendMsg(hwnd_image, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGEDOWN));
 		    	break;
 		    case VK_LEFT:
 	    		if (SHORT1FROMMP(mp1) & KC_CTRL)
-		    	    WinSendMsg(hwnd, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGELEFT));
+		    	    WinSendMsg(hwnd_image, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGELEFT));
 		  	else
-		    	    WinSendMsg(hwnd, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_LINELEFT));
+		    	    WinSendMsg(hwnd_image, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_LINELEFT));
 		    	break;
 		    case VK_RIGHT:
 	    		if (SHORT1FROMMP(mp1) & KC_CTRL)
-		    	    WinSendMsg(hwnd, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGERIGHT));
+		    	    WinSendMsg(hwnd_image, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGERIGHT));
 		    	else
-		    	    WinSendMsg(hwnd, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_LINERIGHT));
+		    	    WinSendMsg(hwnd_image, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_LINERIGHT));
 		    	break;
 		}
 	    }
 	    break;
 	case WM_BUTTON1DOWN:
-		if (hwnd_modeless) 
+		if (fullscreen && (hwnd == hwnd_fullscreen)) {
+		    WinPostMsg(hwnd_image, WM_COMMAND, MPFROMSHORT(IDM_NEXT), 
+			MPFROMLONG(0));
+		}
+		else if (hwnd_modeless) 
 		    WinPostMsg(hwnd_modeless, WM_COMMAND, MPFROMSHORT(BB_CLICK), MPFROMLONG(0));
 		else {
 		    int iword ;
@@ -1490,6 +1544,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 			else {
 			    gsview_unzoom();
 			    pending.pagenum = link.page;
+			    history_add(pending.pagenum);
 			    pending.now = TRUE;
 			}
 		    }
@@ -1499,7 +1554,12 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		}
 		break;
 	case WM_BUTTON2DOWN:
-		{ float x, y;
+		if (fullscreen && (hwnd == hwnd_fullscreen)) {
+		    WinPostMsg(hwnd_image, WM_COMMAND, MPFROMSHORT(IDM_PREV), 
+			MPFROMLONG(0));
+		}
+		else { 
+		    float x, y;
 		    if (hwnd_modeless) {
 			play_sound(SOUND_BUSY);
 			break;
@@ -1590,7 +1650,14 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		    }
 		}
 		/* update cursor */
-	        if (szWait[0] != '\0')
+		if (fullscreen && (hwnd == hwnd_fullscreen)) {
+		   if (szWait[0] != '\0')
+    		        WinSetPointer(HWND_DESKTOP, 0);
+		   else
+    		        WinSetPointer(HWND_DESKTOP, 
+			  WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
+		}
+		else if (szWait[0] != '\0')
     		    WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_WAIT, FALSE));
 		else {
 		    float x, y;
@@ -1615,6 +1682,17 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		}
 		break;
 	    case WM_DESTROY:
+		hwnd_image = hwnd_bmp;
+		fullscreen = FALSE;
+		if ((hwnd == hwnd_fullscreen) && gsdll.device) {
+		    WinShowWindow(hwnd_frame, TRUE);
+		    update_scroll_bars();
+		    WinInvalidateRect(hwnd_image, NULL, FALSE);
+		    WinUpdateWindow(hwnd_image);
+		    if (debug)
+			gs_addmess("Full Screen finished\r\n");
+		}
+		hwnd_fullscreen = (HWND)NULL;
 		break;
 	    case DM_DRAGOVER:
 		return DragOver((PDRAGINFO)mp1);
@@ -1666,8 +1744,8 @@ POINTL pt;
 	    return FALSE;
 	if (!WinQueryPointerPos(HWND_DESKTOP, &pt))
 	    return FALSE;
-	WinMapWindowPoints(HWND_DESKTOP, hwnd_bmp, &pt, 1);
-	WinQueryWindowRect(hwnd_bmp, &rect);
+	WinMapWindowPoints(HWND_DESKTOP, hwnd_image, &pt, 1);
+	WinQueryWindowRect(hwnd_image, &rect);
 	if (!WinPtInRect(hab, &rect, &pt))
 	    return FALSE;
 	*x = scroll_pos.x+pt.x-display.offset.x;
@@ -2202,7 +2280,7 @@ scroll_to_find(void)
     float x, y;
 
     request_mutex();
-    WinEnableWindowUpdate(hwnd_bmp, FALSE);
+    WinEnableWindowUpdate(hwnd_image, FALSE);
     /* first translate found box to window coordinates */
     x = psfile.text_bbox.llx;
     y = psfile.text_bbox.lly;
@@ -2215,15 +2293,15 @@ scroll_to_find(void)
     rect.xRight  = (int)x;
     rect.yTop    = (int)y;
 
-    WinQueryWindowRect(hwnd_bmp, &rect_client);
+    WinQueryWindowRect(hwnd_image, &rect_client);
 
     /* scroll to bring the bottom left to the centre of the window */
     if ((rect.xLeft < rect_client.xLeft) || (rect.xRight > rect_client.xRight))
-	WinPostMsg(hwnd_bmp, WM_HSCROLL, 0, MPFROM2SHORT(((rect_client.xRight-rect_client.xLeft)/2) - rect.xLeft, SB_FIND));
+	WinPostMsg(hwnd_image, WM_HSCROLL, 0, MPFROM2SHORT(((rect_client.xRight-rect_client.xLeft)/2) - rect.xLeft, SB_FIND));
 
     if ((rect.yTop > rect_client.yTop) || (rect.yBottom < rect_client.yBottom))
-	WinPostMsg(hwnd_bmp, WM_VSCROLL, 0, MPFROM2SHORT(((rect_client.yTop-rect_client.yBottom)/2) - ((rect.yBottom+rect.yTop)/2) , SB_FIND));
-    WinEnableWindowUpdate(hwnd_bmp, TRUE);
+	WinPostMsg(hwnd_image, WM_VSCROLL, 0, MPFROM2SHORT(((rect_client.yTop-rect_client.yBottom)/2) - ((rect.yBottom+rect.yTop)/2) , SB_FIND));
+    WinEnableWindowUpdate(hwnd_image, TRUE);
     release_mutex();
 }
 
@@ -2400,9 +2478,150 @@ PDFLINK link;
 void
 gsview_fullscreen_end(void)
 {
+    if (fullscreen) {
+	gs_addmess("Full Screen ending\r\n");
+	WinDestroyWindow(hwnd_fullscreen);
+    }
 }
 
 void
 gsview_fullscreen(void)
 {
+    unsigned char class[] = "gvBmpFullscreenClass";  /* class name */
+    RECTL rect;
+    static BOOL class_registered;
+
+    if (!gsdll.device)
+	return;
+
+    if (fullscreen && (hwnd_fullscreen != (HWND)NULL))
+	return;
+
+    if (!class_registered) {
+	if (!WinRegisterClass(	/* register this window class */
+	    hab,			/* anchor block */
+	    (PSZ)class,		/* class name */
+	    (PFNWP) ClientWndProc,	/* window function */
+	    CS_SIZEREDRAW |		/* window style */
+	    CS_MOVENOTIFY,		
+	    0))			/* no storage */
+	    return;
+	class_registered = TRUE;
+    }
+
+    WinQueryWindowRect(HWND_DESKTOP, &rect);
+    fullscreen = TRUE;
+    hwnd_fullscreen = WinCreateWindow(
+    	HWND_DESKTOP,	/* parent */
+    	class,
+    	"GSview fullscreen client",
+	0,		/* not visible */
+	rect.xLeft, rect.yBottom, rect.xRight, rect.yTop,
+	HWND_DESKTOP,	/* owner */
+	HWND_TOP,	/* insert behind */
+	0,		/* ID */
+	NULL,		/* control data */
+	NULL);		/* presentation parameters */
+
+    if (hwnd_fullscreen) {
+	hwnd_image = hwnd_fullscreen;
+	update_scroll_bars();
+	WinShowWindow(hwnd_fullscreen, TRUE);
+	gs_addmess("Full Screen started\r\n");
+    }
+    else {
+	gs_addmess("Full Screen failed\r\n");
+	fullscreen = FALSE;
+    }
+}
+
+/* Set the current resolution to fill the window.
+ * If neither width nor height match, fit whole page
+ * into window.  If either width or height match
+ * the window size, fit the height or width respectively.
+ */
+void 
+gsview_fitwin(void) 
+{
+RECTL rect;
+int width, height;
+float dpi, xdpi, ydpi;
+	if (psfile.ispdf) {
+	    if (option.epsf_clip) {
+		width = psfile.doc->boundingbox[URX] 
+			- psfile.doc->boundingbox[LLX];
+		height = psfile.doc->boundingbox[URY] 
+			- psfile.doc->boundingbox[LLY];
+	    }
+	    else {
+		width = psfile.doc->default_page_boundingbox[URX] 
+			- psfile.doc->default_page_boundingbox[LLX];
+		height = psfile.doc->default_page_boundingbox[URY] 
+			- psfile.doc->default_page_boundingbox[LLY];
+	    }
+	}
+	else {
+	    width = get_paper_width();
+	    height = get_paper_height();
+	}
+
+	if (display.orientation & 1) {
+	    /* page is rotated 90 degrees */
+	    int temp = width;
+	    width = height;
+	    height = temp;
+	}
+	
+	/* get client window size */
+	WinQueryWindowRect(hwnd_image, &rect);
+
+	xdpi = (rect.xRight - rect.xLeft) * 72.0 / width;
+	ydpi = (rect.yTop - rect.yBottom) * 72.0 / height;
+
+	/* don't need to worry about scroll bars - these are always
+	 * present in a normal window but outside the client area,
+ 	 * and in fullscreen mode (if ever implemented) are not present
+	 */
+
+	if (display.orientation & 1) {
+	    /* page is rotated 90 degrees */
+	    float ftemp;
+	    ftemp = xdpi;
+	    xdpi = ydpi;
+	    ydpi = ftemp;
+	}
+
+	if ( ((xdpi + 0.5) > option.xdpi) && (xdpi - 0.5) < option.xdpi) {
+	    /* Width matches. Set size based on height. */
+	    dpi = ydpi;
+	}
+	else if ( ((ydpi + 0.5) > option.ydpi) && (ydpi - 0.5) < option.ydpi) {
+	    /* Height matches. Set size based on width. */
+	    dpi = xdpi;
+	}
+	else  {
+	    /* Neither width nor height match.  Fit the whole page. */
+	    if (xdpi > ydpi)
+		    dpi = ydpi;
+	    else
+		    dpi = xdpi;
+	}
+#ifdef DEBUG
+	{
+	char buf[MAXSTR];
+	sprintf(buf, "\nrect=%d %d %d %d\n", 
+	rect.left, rect.top, rect.right, rect.bottom);
+	gs_addmess(buf);
+	sprintf(buf, "size=%d %d\n", width, height);
+	gs_addmess(buf);
+	sprintf(buf, "old dpi=%f %f\n", option.xdpi, option.ydpi);
+	gs_addmess(buf);
+	sprintf(buf, "dpi=%f %f\n", xdpi, ydpi);
+	gs_addmess(buf);
+	sprintf(buf, "final dpi=%f\n", dpi);
+	gs_addmess(buf);
+	}
+#endif
+	option.xdpi = option.ydpi = dpi;
+	gs_resize();
 }

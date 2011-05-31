@@ -268,7 +268,7 @@ MRESULT EXPENTRY AboutDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_INITDLG:
 /*
 	WinSetWindowText( WinWindowFromID(hwnd, ABOUT_VERSION),
-	    	GSVIEW_VERSION );
+	    	GSVIEW_DOT_VERSION );
 */
 	break;
     case WM_BUTTON1DBLCLK:
@@ -945,7 +945,7 @@ MRESULT EXPENTRY SoundDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			    DosBeep(200,200);
 			    return FALSE;
 			}
-			if (isdigit(*dsound[ievent].file))
+			if (isdigit((int)(*dsound[ievent].file)))
 			    play_system_sound(dsound[ievent].file);
 			else {
 			    buf[0] = '\042';
@@ -1143,7 +1143,7 @@ InstallDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 BOOL
 install_gsdll(void)
 {
-	load_string(IDS_TOPICGSCMD, szHelpTopic, sizeof(szHelpTopic));
+	load_string(IDS_TOPICADVANCEDCFG, szHelpTopic, sizeof(szHelpTopic));
 	if (WinDlgBox(HWND_DESKTOP, hwnd_frame, InstallDlgProc, hlanguage, IDD_INSTALL, NULL)
 	   == DID_OK) {
 		option.configured = TRUE;

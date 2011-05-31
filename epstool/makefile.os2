@@ -28,7 +28,7 @@ USE_OMF=0
 
 !if $(USE_EMX)
 # EMX
-DRIVE=c:
+DRIVE=
 COMP=gcc
 COMPBASE=$(DRIVE)\emx
 EMXPATH=$(DRIVE)/emx
@@ -102,7 +102,7 @@ EPSFILES=\
  epstool/epstool.c\
  epstool/epstool.h\
  epstool/epstool.def\
- epstool/epstool.txt\
+ epstool/epstool.htm\
  epstool/epstest.cmd\
  epstool/makefile.os2\
  epstool/makefile.tc\
@@ -118,7 +118,7 @@ SRCFILES1=\
 
 ZIPFILES=\
  epstool.exe\
- epstool.txt\
+ epstool.htm\
  $(EPSFILES)\
  $(SRCFILES1)
 
@@ -129,7 +129,7 @@ prezip:
 	cd epstool
 
 zip: all
-	copy epstool.txt ..
+	copy epstool.htm ..
 	copy epstool.exe ..
 	emxbind -s ../epstool.exe
 	cd ..

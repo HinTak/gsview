@@ -439,6 +439,7 @@ char *p;
 		dfclose();
 		request_mutex();
 		pending.pagenum = i+1;
+		history_add(pending.pagenum);
 		pending.now = TRUE;
 		release_mutex();
 		return;
@@ -753,6 +754,7 @@ char find_text[MAXSTR];
 		request_mutex();
 		psfile.text_bbox.valid = TRUE;
 		pending.pagenum = psfile.text_page+1;
+		history_add(pending.pagenum);
 		pending.now = TRUE;
 		release_mutex();
 		/* scroll_to_find occurs after page is displayed */

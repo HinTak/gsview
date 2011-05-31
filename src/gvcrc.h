@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -116,6 +116,8 @@
 #define IDM_GOFWD	209
 #define IDM_REDISPLAY   210
 #define IDM_SKIP	211
+#define IDM_FULLSCREEN  212
+#define IDM_FITWIN	213
 
 #define IDM_ORIENTMENU	220
 #define IDM_PORTRAIT	221
@@ -150,6 +152,8 @@
 #define IDM_USERSIZE	317
 #define IDM_MEDIALAST	318
 #define MEDIA_USERDEFINED "User Defined"
+
+#define IDM_MEDIAROTATE	330
 
 #define IDM_HELPMENU	350
 #define IDM_HELPCONTENT 351
@@ -191,6 +195,8 @@
 #define IDC_CFG52	398	/* group name */
 #define IDC_CFG70	399	/* result */
 #define IDC_CFG71	400	/* failed reason */
+
+#define IDC_GSVER	401
 
 /* info dialog box */
 #define IDD_INFO	410
@@ -273,6 +279,7 @@
 #define DEVICE_OPTIONSTEXT  548
 #define DEVICE_UNIPRINT  549
 #define DEVICE_ADVPS   480
+#define DEVICE_FIXEDMEDIA  529
 
 #define IDD_UNIPRINT	550
 #define UPP_LIST	551
@@ -306,6 +313,10 @@
 #define INSTALL_DLL	581
 #define INSTALL_INCLUDE	582
 #define INSTALL_OTHER	583
+#define IDC_CONFIGADV_PRINTER	584
+#define IDC_CONFIGADV_PS 	585
+#define IDC_CONFIGADV_PDF	586
+#define IDC_CONFIGADV_START	587
 
 #define IDD_DSET	590
 #define DSET_RES	591
@@ -411,7 +422,7 @@
 #define IDS_TOPICEDITPROP 705
 #define IDS_TOPICCLIP   706
 #define IDS_TOPICPREVIEW 707
-#define IDS_TOPICGSCMD	708
+/* #define IDS_TOPICGSCMD	708 */
 #define IDS_TOPICSOUND	709
 #define IDS_TOPICDSET   710
 #define IDS_TOPICMEDIA  711
@@ -423,8 +434,12 @@
 #define IDS_TOPICMESS    717
 #define IDS_TOPICSPOOL   718
 #define IDS_TOPICZLIB	 719
-#define IDS_TOPICPSTOEDIT 720
-#define IDS_TOPICMEASURE 721
+#define IDS_TOPICBZIP2	 720
+#define IDS_TOPICPSTOEDIT 721
+#define IDS_TOPICMEASURE 722
+#define IDS_TOPICEASYCFG 723
+#define IDS_TOPICADVANCEDCFG 724
+#define IDS_TOPICDOWNLOAD 725
 
 /* ps_to_eps */
 #define IDS_BBPROMPT	750
@@ -490,6 +505,7 @@
 #define IDS_NOLINKTARGET	842
 #define IDS_PARSEERROR		844
 #define IDS_ZLIB_FAIL		845
+#define IDS_BZIP2_FAIL		846
 
 #define IDS_BETAEXPIRED		850
 #define IDS_BETAWARN		851
@@ -502,6 +518,9 @@
 #define IDS_GSLIBNOTINSTALLED	858
 #define IDS_NOPROGMAN		859
 #define IDS_PROGRAMOBJECTFAILED 860
+#define IDS_APPNAME		861
+#define IDS_TARGET_GROUP	862
+#define IDS_TARGET_DIR		863
 
 #define IDS_MKDIRFAIL		870
 #define IDS_WRONGEMX		871
@@ -615,4 +634,3 @@
 #define IDC_MEASURE_ANGLE   2110
 #define IDC_MEASURE_SETPOINT   2111
 
-#define IDM_FULLSCREEN 2200

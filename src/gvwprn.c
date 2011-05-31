@@ -664,6 +664,8 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			EnableWindow(GetDlgItem(hDlg, SPOOL_PORTTEXT), FALSE);
 		    }
 		}
+	        SendDlgItemMessage(hDlg, DEVICE_FIXEDMEDIA, BM_SETCHECK, 
+		    option.print_fixed_media, 0);
 		return TRUE;
 	    case WM_COMMAND:
 		notify_message = GetNotification(wParam,lParam);
@@ -863,9 +865,16 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			return FALSE;
 		    case IDOK:
 			/* save device name and resolution */
-		        GetDlgItemText(hDlg, DEVICE_NAME, option.device_name, sizeof(option.device_name));
-		        GetDlgItemText(hDlg, DEVICE_RES, option.device_resolution, sizeof(option.device_resolution));
-		 	option.psprinter = (int)SendDlgItemMessage(hDlg, DEVICE_PSPRINT, BM_GETCHECK, 0, 0);
+		        GetDlgItemText(hDlg, DEVICE_NAME, 
+				option.device_name, 
+				sizeof(option.device_name));
+		        GetDlgItemText(hDlg, DEVICE_RES, 
+				option.device_resolution, 
+				sizeof(option.device_resolution));
+		 	option.psprinter = (int)SendDlgItemMessage(hDlg, 
+				DEVICE_PSPRINT, BM_GETCHECK, 0, 0);
+		 	option.print_fixed_media = (int)SendDlgItemMessage(
+				hDlg, DEVICE_FIXEDMEDIA, BM_GETCHECK, 0, 0);
 			/* get Print to File status */
 		 	option.print_to_file = (int)SendDlgItemMessage(hDlg, 
 			    SPOOL_TOFILE, BM_GETCHECK, 0, 0);

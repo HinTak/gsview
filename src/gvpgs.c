@@ -107,7 +107,7 @@ QMSG qmsg;
     if (!init_window(hab)) {
 
 	if (parse_arg(argc, argv)) {
-	    gstid = _beginthread(gs_thread, NULL, 65536, NULL);
+	    gstid = _beginthread(gs_thread, NULL, 131072, NULL);
 	}
 
 	text_update();
@@ -637,7 +637,7 @@ MRESULT EXPENTRY AboutDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
   switch(msg) {
     case WM_INITDLG:
 	WinSetWindowText( WinWindowFromID(hwnd, ABOUT_VERSION),
-	    	GSVIEW_VERSION );
+	    	GSVIEW_DOT_VERSION );
 	break;
     case WM_COMMAND:
       switch(SHORT1FROMMP(mp1)) {

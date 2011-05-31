@@ -167,8 +167,23 @@ char *s, *d;
 FILE *ddefile;
 char gspathbuf[MAXSTR];
 char gsviewpathbuf[MAXSTR];
+char gsdocbuf[MAXSTR];
 
     strncpy(gspathbuf, gspath, sizeof(gspathbuf));
+    strncpy(gsdocbuf, gsargs, sizeof(gsdocbuf));
+    d = strchr(gsdocbuf, ';');
+    if (d)
+       *d = '\0';
+    if (gsver >= 593) {
+	d = strrchr(gsdocbuf, '\\');
+	if (d) {
+	    d++;
+	    strcpy(d, "doc\\");
+	}
+    }
+    else {
+	strcat(gsdocbuf, "\\");
+    }
     strncpy(gsviewpathbuf, gsviewpath, sizeof(gsviewpathbuf));
 #ifdef __WIN32__
     if (!is_win32s) {
@@ -201,7 +216,7 @@ char gsviewpathbuf[MAXSTR];
 
     /* derive group filename from group name */
     for (i=0, s=groupname, d=groupfile; i<8 && *s; s++) {
-	if (isalpha(*s) || isdigit(*s)) {
+	if (isalpha((int)(*s)) || isdigit((int)(*s))) {
 	    *d++ = *s;
 	    i++;
 	} 
@@ -262,11 +277,15 @@ char gsviewpathbuf[MAXSTR];
 
     sprintf(setup, "[ReplaceItem(\042GSview README\042)]");
     DDEEXECUTE(setup);
+#ifdef NOTUSED_IN_GSVIEW28
     if (!is_win4)
 	sprintf(setup, "[AddItem(\042notepad.exe %sREADME.TXT\042,\042GSview README\042)]", 
 	    gsviewpathbuf);
     else
 	sprintf(setup, "[AddItem(\042notepad.exe\042 \042%sREADME.TXT\042,\042GSview README\042,\042notepad.exe\042,1)]", 
+	    gsviewpathbuf);
+#endif
+    sprintf(setup, "[AddItem(\042%sReadme.htm\042,\042GSview README\042)]", 
 	    gsviewpathbuf);
     DDEEXECUTE(setup);
     if (ddefile)
@@ -287,20 +306,17 @@ char gsviewpathbuf[MAXSTR];
     sprintf(setup, "[ReplaceItem(\042Ghostscript README\042)]");
     DDEEXECUTE(setup);
     if (gsver >= 540) {
-	if (!is_win4)
-	    sprintf(setup, "[AddItem(\042%sReadme.htm\042,\042Ghostscript README\042)]", 
-		 gspathbuf);
-	else
-	    sprintf(setup, "[AddItem(\042%sReadme.htm\042,\042Ghostscript README\042)]", 
-		 gspathbuf);
+	    sprintf(setup, 
+		"[AddItem(\042%sReadme.htm\042,\042Ghostscript README\042)]", 
+		 gsdocbuf);
     }
     else {
 	if (!is_win4)
 	    sprintf(setup, "[AddItem(\042notepad.exe %sREADME.\042,\042Ghostscript README\042)]", 
-		 gspathbuf);
+		 gsdocbuf);
 	else
 	    sprintf(setup, "[AddItem(\042notepad.exe\042 \042%sREADME.\042,\042Ghostscript README\042, \042notepad.exe\042,1)]", 
-		 gspathbuf);
+		 gsdocbuf);
     }
     DDEEXECUTE(setup);
     if (ddefile)

@@ -603,7 +603,7 @@ char buf[MAXSTR];
     else if (strcmp(buf, "fr") == 0)
 	language = ID_FRENCH;
 
-    GetPrivateProfileString("Options", "Version", GSVIEW_VERSION, 
+    GetPrivateProfileString("Options", "Version", GSVIEW_DOT_VERSION, 
 	gsview_version, sizeof(gsview_version), szIniFile);
     gs_version = GetPrivateProfileInt("Options", "GSversion", GS_REVISION, 
 	szIniFile);

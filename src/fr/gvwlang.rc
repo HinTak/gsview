@@ -46,7 +46,7 @@ BEGIN
 	BEGIN
 		MENUITEM "&Copier\tCtrl+C", IDM_COPYCLIP
 		MENUITEM SEPARATOR
-		MENUITEM "C&oller...", IDM_PASTETO
+		MENUITEM "C&oller vers...", IDM_PASTETO
 		MENUITEM "Convertir &Bitmap", IDM_CONVERT
 		MENUITEM SEPARATOR
 		POPUP "&Ajouter un aperçu EPS"
@@ -64,16 +64,16 @@ BEGIN
 		    MENUITEM "la partie &aperçu", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
-		MENUITEM "Measure", IDM_MEASURE /* ENGLISH */
-		MENUITEM "Convert to vector format...", IDM_PSTOEDIT /* ENGLISH */
+		MENUITEM "Mesure", IDM_MEASURE
+		MENUITEM "Conversion vers un format vectoriel...", IDM_PSTOEDIT
 		MENUITEM "Extraire le &texte...", IDM_TEXTEXTRACT
 		MENUITEM "&Rechercher...\tCtrl+R", IDM_TEXTFIND
 		MENUITEM "Rechercher &suivant\tF3", IDM_TEXTFINDNEXT
 	END
 	POPUP "&Options"
 	BEGIN
-		MENUITEM "&Configurer...", IDM_CFG
-		MENUITEM "Configurer &Ghostscript...", IDM_GSCOMMAND
+		MENUITEM "Configuration standard...", IDM_CFG
+		MENUITEM "Configuration avancée...", IDM_GSCOMMAND
 		MENUITEM "&Sons...", IDM_SOUNDS
 		POPUP "&Unités"
 		BEGIN
@@ -81,16 +81,14 @@ BEGIN
 			MENUITEM "&mm", IDM_UNITMM
 			MENUITEM "p&ouce", IDM_UNITINCH
 			MENUITEM SEPARATOR
-			MENUITEM "&Fine Resolution", IDM_UNITFINE
+			MENUITEM "&Résolution fine", IDM_UNITFINE
 		END
 		POPUP "&Langue"
 		BEGIN
 			MENUITEM "&Anglais", IDM_LANGEN
 			MENUITEM "&Français", IDM_LANGFR
 			MENUITEM "Alleman&d", IDM_LANGDE
-/*
 			MENUITEM "&Italien", IDM_LANGIT
-*/
 		END
 		POPUP "PS vers &texte"
 		BEGIN
@@ -117,12 +115,15 @@ BEGIN
 		MENUITEM "Page &suivante\t+", IDM_NEXT
 		MENUITEM "Page &précédente\t-", IDM_PREV
 		MENUITEM "&Atteindre la page...\tA", IDM_GOTO
-		MENUITEM "Go &Back\tB", IDM_GOBACK
-		MENUITEM "Go &Forward", IDM_GOFWD
+		MENUITEM "Re&tour\tB", IDM_GOBACK
+		MENUITEM "A&vance", IDM_GOFWD
 		MENUITEM "&Réafficher\tR", IDM_REDISPLAY
 		MENUITEM SEPARATOR
 		MENUITEM "Haut de la page suivante\tEspace", IDM_NEXTHOME
 		MENUITEM "Haut de la page précédente\tRetour", IDM_PREVHOME
+		MENUITEM SEPARATOR
+		MENUITEM "P&lein écran\tF4", IDM_FULLSCREEN
+		MENUITEM "S'adapter à la fenêtre\tF6", IDM_FITWIN
 	END
 	POPUP "Orientatio&n"
 	BEGIN
@@ -138,6 +139,8 @@ BEGIN
 	POPUP "Forma&t"
 	BEGIN
 		MENUITEM "Paramètres de l'&affichage...", IDM_DISPLAYSETTINGS
+		MENUITEM SEPARATOR
+		MENUITEM "Format &inversé", IDM_MEDIAROTATE
 		MENUITEM SEPARATOR
 		MENUITEM "Letter", IDM_LETTER
 		MENUITEM "Tabloid", IDM_TABLOID
@@ -183,8 +186,8 @@ BEGIN
 	VK_BACK, IDM_PREVHOME, VIRTKEY, SHIFT
 	"A", IDM_GOTO
 	"a", IDM_GOTO
-	"B", IDM_GOBACK
-	"b", IDM_GOBACK
+	"T", IDM_GOBACK
+	"t", IDM_GOBACK
 	"I", IDM_INFO
 	"i", IDM_INFO
 	"R", IDM_REDISPLAY
@@ -214,6 +217,9 @@ BEGIN
 	VK_F1, IDM_HELPCONTENT, VIRTKEY
 	"^C", IDM_COPYCLIP
 	VK_INSERT, IDM_COPYCLIP, VIRTKEY, CONTROL
+	VK_F4, IDM_FULLSCREEN, VIRTKEY
+	VK_F5, IDM_REDISPLAY, VIRTKEY
+	VK_F6, IDM_FITWIN, VIRTKEY
 END
 
 
@@ -221,7 +227,7 @@ END
 STRINGTABLE
 BEGIN
 	/* general strings */
-	IDS_HELPFILE, "gsviewfr.hlp"
+	IDS_HELPFILE, WINHELPFILE
 	IDS_SOUNDNOMM, "Chargement de WINMM.DLL impossible\nSons non disponibles"
 END
 
@@ -229,7 +235,7 @@ STRINGTABLE
 BEGIN
 	/* filter strings */
 #ifdef __WIN32__
-	IDS_FILTER_PSALL, "Défaut (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|Fichiers PS (*.ps)|*.ps;*.ps.gz|Fichiers EPS (*.eps)|*.eps;*.eps.gz|Fichiers EPI (*.epi)|*.epi;*.eps.gz|Fichiers PDF (*.pdf)|*.pdf;*.pdf.gz|Fichiers PRN (*.prn)|*.prn|Tous (*.*)|*.*|"
+	IDS_FILTER_PSALL, "Défaut (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz;*.ps.bz2;*.eps.bz2;*.pdf.bz2|Fichiers PS (*.ps)|*.ps;*.ps.gz;*.ps.bz2|Fichiers EPS (*.eps)|*.eps;*.eps.gz;*.eps.bz2|Fichiers EPI (*.epi)|*.epi;*.eps.gz;*.epi.bz2|Fichiers PDF (*.pdf)|*.pdf;*.pdf.gz;*.pdf.bz2|Fichiers PRN (*.prn)|*.prn|Tous (*.*)|*.*|"
 #else
 	IDS_FILTER_PSALL, "Défaut (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn|Fichiers PS (*.ps)|*.ps|Fichiers EPS (*.eps)|*.eps|Fichiers EPI (*.epi)|*.epi|Fichiers PDF (*.pdf)|*.pdf|Fichiers PRN (*.prn)|*.prn|Tous (*.*)|*.*|"
 #endif

@@ -1044,6 +1044,8 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		WinEnableWindow(WinWindowFromID(hwnd, SPOOL_TOFILE), FALSE);
 		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_OPTIONSTEXT), FALSE);
 		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_OPTIONS), FALSE);
+		WinSendMsg( WinWindowFromID(hwnd, SPOOL_PORT),
+		    LM_SELECTITEM, MPFROMLONG(device_queue_index), MPFROMLONG(TRUE) );
 	    }
 	    else {
 		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_ADVPS), FALSE);
@@ -1060,6 +1062,8 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			LM_SELECTITEM, MPFROMLONG(device_queue_index), MPFROMLONG(TRUE) );
 		}
 	    }
+	    WinSendMsg( WinWindowFromID(hwnd, DEVICE_FIXEDMEDIA), BM_SETCHECK, 
+		MPFROMLONG(option.print_fixed_media ? 1 : 0), MPFROMLONG(0));
 	    break;
     	case WM_CONTROL:
 	    if (mp1 == MPFROM2SHORT(DEVICE_NAME, CBN_LBSELECT)) {
@@ -1190,6 +1194,10 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    	        BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
 		    /* get Print to File state */
 	            option.print_to_file = (int)WinSendMsg( WinWindowFromID(hwnd, SPOOL_TOFILE),
+	    	        BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+		    /* Fixed Media */
+	            option.print_fixed_media = (int)WinSendMsg( 
+			WinWindowFromID(hwnd, DEVICE_FIXEDMEDIA),
 	    	        BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
 		    if (!option.print_to_file) {
 			/* save queue name */

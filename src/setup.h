@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -52,6 +52,8 @@
 #define IDD_FILE	350
 #define IDD_FILE_TEXT	351
 
+#define IDD_ASSOC	400
+
 #define IDD_GSVER	580
 #define IDD_GSVER_TEXT	581
 #define IDD_GSVER_SCROLL 582
@@ -71,3 +73,16 @@
 
 #define IDS_INSTALLABORT 900
 
+
+#define IDD_DIRDLG      	1005
+#define IDC_FILES       	1006
+#define IDC_FOLDER      	1007
+#define IDC_TARGET      	1008
+
+#define IDC_BROWSE_DIR  	1009
+#define IDC_BROWSE_GROUP	1010
+#define IDC_ALLUSERS    	1011
+#define IDC_CREATEFOLDER	1012
+
+#define IDC_VIEWREADME		1013
+#define IDC_VIEWHELP		1014

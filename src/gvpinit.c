@@ -77,7 +77,7 @@ APIRET rc;
 	hlanguage = hmodule;
 
 	load_string(IDS_GSVIEWVERSION, langdll, sizeof(langdll));
-	if (strcmp(GSVIEW_VERSION, langdll) != 0)
+	if (strcmp(GSVIEW_DOT_VERSION, langdll) != 0)
 	    message_box("Language resources version doesn't match GSview EXE", 0);
 
 	return TRUE;
@@ -271,6 +271,7 @@ gsview_init(int argc, char *argv[])
   	0,			/* resource module */
   	ID_GSVIEW,		/* resource identifier */
   	&hwnd_bmp);		/* pointer to client */
+    hwnd_image = hwnd_bmp;
 
     change_language();
 
@@ -449,7 +450,7 @@ gsview_init(int argc, char *argv[])
 	    strncpy(cmd, workdir, 2);	/* copy current drive */
 	    strcpy(cmd+2, filedir);	/* append path */
 	}
-	else if (cmd[0] && isalpha(cmd[0]) && cmd[1]==':') {
+	else if (cmd[0] && isalpha((int)(cmd[0])) && cmd[1]==':') {
 	    /* drive code specified */
 	    if ( (strlen(cmd) >= 3) && (cmd[2]=='\\') ) {
 		/* fully specified path and drive */
@@ -919,13 +920,14 @@ char *p;
     if (strlen(buf) < 6)
 	return;
     p = buf + strlen(buf) - 4;
-    if (isdigit(p[0]) && (p[1]=='.') && isdigit(p[2]) && isdigit(p[3])) {
+    if (isdigit((int)(p[0])) && (p[1]=='.') && 
+	isdigit((int)(p[2])) && isdigit((int)(p[3]))) {
 	strcpy(p, verstr);
         SetDlgItemText(hwnd, IDC_CFG22, buf);
     }
     else {
 	p = buf + strlen(buf) - 3;
-	if (isdigit(p[0]) && (p[1]=='.') && isdigit(p[2])) {
+	if (isdigit((int)(p[0])) && (p[1]=='.') && isdigit((int)(p[2]))) {
 	    strcpy(p, verstr);
 	    SetDlgItemText(hwnd, IDC_CFG22, buf);
 	}
@@ -944,8 +946,11 @@ char *p;
     page = find_page_from_id(IDD_CFG2);
     option.gsversion = add_gsver(page->hwnd, 0);
     GetDlgItemText(page->hwnd, IDC_CFG22, buf, sizeof(buf));
-    sprintf(option.gsdll, "%s\\%s", buf, GS_DLLNAME);
-    sprintf(option.gsinclude, "%s;%s\\fonts", buf, buf);
+    if (option.gsversion >= 593)
+        sprintf(option.gsdll, "%s\\bin\\%s", buf, GS_DLLNAME);
+    else
+        sprintf(option.gsdll, "%s\\%s", buf, GS_DLLNAME);
+    default_gsinclude_from_path(option.gsinclude, buf);
     strcpy(option.gsother, "-dNOPLATFONTS");
     GetDlgItemText(page->hwnd, IDC_CFG23, buf, sizeof(buf));
     if (strlen(buf)) {
@@ -965,11 +970,12 @@ char *p;
     fclose(f);
 
     /* next look for gs_init.ps */
-    strcpy(buf, option.gsdll);
-    p = strrchr(buf, '\\');	/* remove trailing DLLNAME */
+    strcpy(buf, option.gsinclude);
+    p = strchr(buf, ';');	/* remove trailing paths */
     if (p)
-	*(++p) = '\0';
-    strcat(buf, "gs_init.ps");
+	*p = '\0';
+    strcat(buf, "\\gs_init.ps");
+    strcpy(buf, option.gsdll);
     if ( (f = fopen(buf, "rb")) == (FILE *)NULL ) {
 	load_string(IDS_GSLIBNOTINSTALLED, buf, sizeof(buf));
 	SetDlgItemText(find_page_from_id(IDD_CFG7)->hwnd, IDC_CFG71,

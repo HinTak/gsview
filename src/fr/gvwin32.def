@@ -1,5 +1,2 @@
 LIBRARY		GSVW32FR
 DESCRIPTION	'GSview French Language Resources'
-DATA		MULTIPLE SHARED
-EXPORTS		DllEntryPoint
-

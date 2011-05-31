@@ -78,6 +78,11 @@ const char *dllname;
 	rc = DosLoadModule(buf, sizeof(buf), dllname, &gsdll.hmodule);
 	if (rc) {
 	    /* failed */
+	    /* try once more - which bug are we dodging? */
+	    rc = DosLoadModule(buf, sizeof(buf), dllname, &gsdll.hmodule);
+	}
+	if (rc) {
+	    /* failed */
 	    /* try again, with path of EXE */
 	    if ((shortname = strrchr((char *)option.gsdll, '\\')) == (const char *)NULL)
 		shortname = option.gsdll;

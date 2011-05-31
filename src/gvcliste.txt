@@ -1,7 +1,8 @@
 epstool/epstool.c
 epstool/epstool.def
-epstool/epstool.txt
+epstool/epstool.htm
 epstool/epstool.h
 epstool/makefile.os2
+epstool/makefile.msc
 epstool/makefile.tc
 epstool/makefile.unx

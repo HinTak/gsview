@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -105,6 +105,7 @@ init_options(void)
     option.safer = TRUE;
     option.media = IDM_A4;
     strcpy(option.medianame, "A4");
+    option.media_rotate = FALSE;
     option.user_width = 610;
     option.user_height = 792;
     option.epsf_clip = FALSE;
@@ -128,6 +129,7 @@ init_options(void)
     option.print_to_file = FALSE;
     option.psprinter = FALSE;
     option.print_reverse = FALSE;
+    option.print_fixed_media = TRUE;
     option.pdf2ps = 0;
     option.auto_bbox = TRUE;
     option.configured = FALSE;
@@ -182,6 +184,7 @@ init_check_menu(void)
         check_menu_item(IDM_ORIENTMENU, option.orientation, TRUE);
     check_menu_item(IDM_ORIENTMENU, IDM_SWAPLANDSCAPE, option.swap_landscape);
     check_menu_item(IDM_MEDIAMENU, option.media, TRUE);
+    check_menu_item(IDM_MEDIAMENU, IDM_MEDIAROTATE, option.media_rotate);
     check_menu_item(IDM_OPTIONMENU, IDM_QUICK_OPEN, option.quick_open);
     check_menu_item(IDM_OPTIONMENU, IDM_SAVESETTINGS, option.settings);
     check_menu_item(IDM_OPTIONMENU, IDM_BUTTONSHOW, option.button_show);
@@ -218,8 +221,10 @@ char *p;
 void
 default_gsdll(char *buf)
 {
+    if (get_gs_string(option.gsversion, "GS_DLL", buf, MAXSTR))
+	return;
     default_gsdir(buf);
-    strcat(buf, "\\");
+    strcat(buf, "\\bin\\");
     strcat(buf, GS_DLLNAME);
 }
 
@@ -227,20 +232,38 @@ void
 default_gsinclude(char *buf)
 {
 char destdir[MAXSTR];
+    if (get_gs_string(option.gsversion, "GS_LIB", buf, MAXSTR))
+	return;
     default_gsdir(destdir);
+    default_gsinclude_from_path(buf, destdir);
+}
 
-    strcpy(buf, destdir);
-
+/* return GS fontpath in buf, based on Ghostscript path in gspath */
+/* Handles different paths pre/post GS 5.93 */
+void
+default_gsinclude_from_path(char *buf, char *gspath)
+{
+char temp[MAXSTR];
+    strcpy(buf, gspath);
+    if (option.gsversion >= 593)
+        strcat(buf, "\\lib");
     strcat(buf, ";");
-    strcat(buf, destdir);
+
+    strcat(buf, gspath);
+    if (option.gsversion >= 593) {
+	char *p;
+	p = strrchr(buf, '\\');	/* remove trailing \\gsN.NN */
+	if (p)
+	    *p = '\0';
+    }
     strcat(buf, "\\fonts");
 
-    gs_getcwd(destdir, sizeof(destdir)-1);
+    gs_getcwd(temp, sizeof(temp)-1);
     if (!gs_chdir("c:\\psfonts")) {
 	strcat(buf, ";");
 	strcat(buf, "c:\\psfonts");
     }
-    gs_chdir(destdir);
+    gs_chdir(temp);
 }
 
 void
@@ -254,7 +277,7 @@ char buf[MAXSTR];
     default_gsinclude(buf);
     SetDlgItemText(hwnd, INSTALL_INCLUDE, buf);
 
-    buf[0]='\0';
+    strcpy(buf, "-dNOPLATFONTS -sFONTPATH=\042c:\\psfonts\042");
     SetDlgItemText(hwnd, INSTALL_OTHER, buf);
 }
 

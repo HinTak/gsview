@@ -42,6 +42,8 @@
  * rjl 1998-07-02
  *   Modified %MSEPS Premable kludge to only work when not inside
  *   %%Begin/%%EndDocument or similar.
+ * rjl 2000-01-19
+ *   gettext and other place now recognise \r as EOL.
  */
 
 #include <stdio.h>
@@ -354,7 +356,8 @@ psscan(file)
 	if (line[0] != '%' ||
 	    iscomment(line+1, "%EndComments") ||
 	    line[1] == ' ' || line[1] == '\t' || line[1] == '\n' ||
-	    !isprint(line[1])) {
+	    line[1] == '\r' || /* rjl */
+	    !isprint((int)(line[1]))) {
 	    break;
 	} else if (line[1] != '%') {
 	    /* Do nothing */
@@ -985,7 +988,9 @@ continuepage:
 			    &(doc->pages[doc->numpages].boundingbox[LLY]),
 			    &(doc->pages[doc->numpages].boundingbox[URX]),
 			    &(doc->pages[doc->numpages].boundingbox[URY])) == 4)
+		    {
 			if (page_bb_set == NONE) page_bb_set = 1;
+		    }
 		    else {
 			float fllx, flly, furx, fury;
 			if (sscanf(line+length("%%PageBoundingBox:"),
@@ -1282,7 +1287,8 @@ gettext(line, next_char)
 	if (*line == ')')	/* rjl 1996-08-05 */
 	    line++;		/* rjl 1996-08-05 */
     } else {
-	while (*line && !(*line == ' ' || *line == '\t' || *line == '\n'))
+	while (*line && !(*line == ' ' || *line == '\t' || *line == '\n'
+		|| *line == '\r')) /* rjl: \r is EOL */
 	    *cp++ = *line++;
     }
     *cp = '\0';
@@ -1336,12 +1342,13 @@ readline(line, size, fp, enddoseps, position, line_len, line_count, imported)
     *line_count += 1;
     if (cp == NULL) line[0] = '\0';
     *line_len = strlen(line);
-#if defined(__TURBOC__) || defined(OS2)
+#if defined(__TURBOC__) || defined(OS2) || defined(_MSC_VER)
     /* remove MS-DOS carriage-return */
     if ((i = *line_len) >= 2) {
 	if ((line[i-2] == '\r') && (line[i-1] == '\n')) {
 	    line[i-2] = '\n';
 	    line[i-1] = '\0';
+            *line_len = strlen(line);
 	}
     }
 #endif
@@ -1425,7 +1432,8 @@ readline(line, size, fp, enddoseps, position, line_len, line_count, imported)
 		  do { /* rjl: handle antisocial PostScript with excessively long lines */
 		    cp = fgets(line, size, fp);
 		    *line_len += cp ? strlen(line) : 0;
-		  } while ( (strlen(line) == size-1) && (line[size-2] != '\n') );
+		  } while ( (strlen(line) == size-1) && 
+			!( (line[size-2] == '\n') || (line[size-2] == '\r') ));
 		}
 	    } else {
 		while (num > BUFSIZ) {
@@ -1502,7 +1510,9 @@ pscopy(from, to, begin, end)
 		      do { /* rjl: handle antisocial PostScript with excessively long lines */
 			fgets(line, sizeof line, from);
 			fputs(line, to);
-		      } while ( (strlen(line) == sizeof(line)-1) && (line[sizeof(line)-2] != '\n') );
+		      } while ( (strlen(line) == sizeof(line)-1) && 
+			  !( (line[sizeof(line)-2] == '\n') ||
+		   	     (line[sizeof(line)-2] == '\r') ) );
 		    }
 		} else {
 		    while (num > BUFSIZ) {
@@ -1585,7 +1595,9 @@ pscopyuntil(from, to, begin, end, comment)
 		      do { /* rjl: handle antisocial PostScript with excessively long lines */
 			fgets(line, sizeof line, from);
 			fputs(line, to);
-		      } while ( (strlen(line) == sizeof(line)-1) && (line[sizeof(line)-2] != '\n') );
+		      } while ( (strlen(line) == sizeof(line)-1) && 
+			  !( (line[sizeof(line)-2] == '\n') ||
+		   	     (line[sizeof(line)-2] == '\r') ) );
 		    }
 		} else {
 		    while (num > BUFSIZ) {
@@ -1623,7 +1635,7 @@ blank(line)
     char *cp = line;
 
     while (*cp == ' ' || *cp == '\t') cp++;
-    return *cp == '\n' || (*cp == '%' && (line[0] != '%' || line[1] != '%'));
+    return *cp == '\n' || *cp == '\r' || (*cp == '%' && (line[0] != '%' || line[1] != '%'));
 }
 
 /* rjl: routines to handle reading DOS EPS files */

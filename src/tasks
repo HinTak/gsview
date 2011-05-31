@@ -16,22 +16,11 @@ View bitmap files with viewjpg/viewbmp/viewpcx
 GSgrab needs a start_timer() added just before the main message loop.
 (Don't bother - RedMon is better).
 
-Write GS_LIB and GS_DLL registry names on configure if needed.
-Currently they are only written when winsetup is run.
-Implement for OS/2 also.
-
-Test setup from floppies with foreign language.
-
-Create DLLs without code or data, or change to only a small amount of code.
-
 Fix /Orientation landscape/seascape values to be more consistent. 
 
 Why is redisplay of an existing modified file so slow?
 
 Remember extracted text between uses.
-
-Check if user profiles work under NT 4.0.  If so, update
-the help file.
 
 Write to network printing without connection.
 
@@ -42,60 +31,29 @@ but the desired printer is unidirectional, the wrong driver
 complains.  (Mike Uren, 6 April 1998).
 (Too hard - gsv16spl only gets the printer port, not the printer name).
 
-Printing of Portrait PDF files with Rotate 90 is
-now broken.  They print on landscape paper.
-In the previous version of Ghostscript, they were not
-rotated and so printed correctly.  This was due to some
-code which detected displays and rotated only for displays.
-This is a Ghostscript bug.
-
-Add "Fit Page to Window" which causes the resolution to be changed.
-
-User profile directory might be read only.
-
-Test pstoedit.
-
 Copy to clipboard from 16-bit GSview dies in GSDLL16.DLL under NT.
 
-Done:
-=====
-You can use spaces in the Ghostscript path, but I can't figure out
-how to create a Win95 shortcut to "-Ic:\gs tools" using Progman DDE.
+Provide some means for clearing all pages in OS/2 multiple 
+selection list box.
 
-Check periodically if file is modified OR redisplay button.
+OS/2 beeps madly when opening second gzipped file.
 
-Compile pstotxt3.dll with MSVC++ 5.0.  Currently it compiles,
-but crashes caller.
+Change message "File '' does not exist" to something more meaningful,
+and don't display it on shutdown.
 
-Forward/backward button using history.
+Adobe PS 5.0.1 driver for NT 4.0 produces incorrect DSC comments 
+(BeginResource without EndResource). This is fixed in Adobe PS 5.1
 
-Print EPS by adding showpage wrapper.
-Resize if needed.
+Some PDF 1.3 files give incorrect links.  Check GS 5.91.
+  http://www.pragma-ade.nl/itdemos/internal/gw/gw-s.pdf
 
-pstotext 1.7 is returning wrong coordinates with GS 5.50.
-Add -dFIXEDMEDIA.
 
-Update documentation about PDF.
-
-pdf2ps now uses pswrite.  Old method has been removed
-so File | Extract doesn't work.
-Change GSview to use pdfwrite or pswrite.
-
-(Option to specify decimal places for cursor position.)
-Added "Fine resolution".
-
-Add more space in status line for filename and page number.
-
-Option to append ^D for PostScript printers.
-
-Command line option to open in existing GSview, instead of starting 
-a new version.
-
-Measure distances by dragging.
-
-Display full screen (no menu, buttons, sliders etc).
-This requires creating a new client window WS_POPUP.
-
-Put wrapper around EPS files in epstool to cope with 
-extra dictionaries on the stack.
+Add "Fit Window" to German.
+gvclang.txt:
+ Add help key and text to "View".
+ "Fit Window to Page" should have See also "View | Fit Window".
+ Add F6 to keys help.
+gvwlang.rc:
+ Add accelerator F6
+ Add menu item "Fit Window"
 

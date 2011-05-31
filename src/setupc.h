@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1996-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -17,7 +17,12 @@
 
 /* setupc.h */
 
+#ifdef MAX_PATH
+#define MAXSTR MAX_PATH
+#else
 #define MAXSTR 256
+#endif
+
 
 #ifdef _MSC_VER
 #define _export

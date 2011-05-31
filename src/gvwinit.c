@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -36,6 +36,29 @@ BOOL exit_existing = FALSE;	/* /X command line option */
 BOOL dde_exit = FALSE;		/* exit after sending DDE command */
 
 BOOL parse_args(LPSTR str);
+
+/* convert gs version integer to string */
+/* buf must be 6 chars or longer */
+void gsver_string(int ver, char *buf)
+{
+    /* make sure length including null never exceeds 6 */
+    if (ver >= 9999)
+	strcpy(buf, "0.0");
+    sprintf(buf, "%d.%02d", ver / 100, ver % 100);
+}
+
+/* convert gs version string to integer */
+int gsver_int(char *buf)
+{
+    int ver;
+    if (strlen(buf) == 4)
+	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10 + (buf[3]-'0');
+    else if (strlen(buf) == 3)
+	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10;
+    else
+	ver = GS_REVISION;
+    return ver;
+}
 
 void
 drop_filename(HWND hwnd, char *str)
@@ -123,7 +146,7 @@ HINSTANCE hInstance;
 	hlanguage = hInstance;
 
 	load_string(IDS_GSVIEWVERSION, langdll, sizeof(langdll));
-	if (strcmp(GSVIEW_VERSION, langdll) != 0)
+	if (strcmp(GSVIEW_DOT_VERSION, langdll) != 0)
 	    message_box("Language resources version doesn't match GSview EXE", 0);
 
 	return TRUE;
@@ -1193,6 +1216,8 @@ int rc;
     return rc;
 }
 
+/***************************/
+
 HINSTANCE zlib_hinstance;
 PFN_gzopen gzopen;
 PFN_gzread gzread;
@@ -1230,10 +1255,16 @@ char buf[MAXSTR];
     /* first look in GSview directory */
     strcpy(buf, szExePath);
     strcat(buf, zlibname);
+    gs_addmess("Attempting to load ");
+    gs_addmess(buf);
+    gs_addmess("\n");
     zlib_hinstance = LoadLibrary(buf);
     if (zlib_hinstance < (HINSTANCE)HINSTANCE_ERROR) {
 	/* if that fails, use the system search path */
 	strcpy(buf, zlibname);
+	gs_addmess("Attempting to load ");
+	gs_addmess(buf);
+	gs_addmess("\n");
 	zlib_hinstance = LoadLibrary(buf);
     }
     if (zlib_hinstance >= (HINSTANCE)HINSTANCE_ERROR) {
@@ -1268,6 +1299,187 @@ char buf[MAXSTR];
     
     return TRUE;
 }
+
+/***************************/
+
+#ifdef __WIN32__
+HINSTANCE bzip2_hinstance;
+PFN_bzopen bzopen;
+PFN_bzread bzread;
+PFN_bzclose bzclose;
+
+void
+unload_bzip2(void)
+{
+    if (zlib_hinstance == (HINSTANCE)NULL)
+	return;
+    FreeLibrary(bzip2_hinstance);
+    bzip2_hinstance = NULL;
+    bzopen = NULL;
+    bzread = NULL;
+    bzclose = NULL;
+}
+
+/* load bzip2 DLL for gunzip */
+BOOL
+load_bzip2(void)
+{   
+char buf[MAXSTR];
+    char bzip2name[] = "libbz2.dll";
+    if (bzip2_hinstance != (HINSTANCE)NULL)
+	return TRUE;	/* already loaded */
+
+    /* first look in GSview directory */
+    strcpy(buf, szExePath);
+    strcat(buf, bzip2name);
+    gs_addmess("Attempting to load ");
+    gs_addmess(buf);
+    gs_addmess("\n");
+    bzip2_hinstance = LoadLibrary(buf);
+    if (bzip2_hinstance < (HINSTANCE)HINSTANCE_ERROR) {
+	/* if that fails, use the system search path */
+	strcpy(buf, bzip2name);
+	bzip2_hinstance = LoadLibrary(buf);
+	gs_addmess("Attempting to load ");
+	gs_addmess(buf);
+	gs_addmess("\n");
+    }
+    if (bzip2_hinstance >= (HINSTANCE)HINSTANCE_ERROR) {
+        bzopen = (PFN_bzopen) GetProcAddress(bzip2_hinstance, "bzopen");
+	if (bzopen == NULL) {
+	    unload_bzip2();
+	}
+	else {
+	    bzread = (PFN_bzread) GetProcAddress(bzip2_hinstance, "bzread");
+	    if (bzread == NULL) {
+		unload_bzip2();
+	    }
+	    else {
+		bzclose = (PFN_bzclose) GetProcAddress(bzip2_hinstance, "bzclose");
+		if (bzclose == NULL) {
+		    unload_bzip2();
+		}
+	    }
+	}
+    }
+    else
+	bzip2_hinstance = NULL;
+
+    if (bzip2_hinstance == NULL) {
+	load_string(IDS_BZIP2_FAIL, buf, sizeof(buf));
+	if (message_box(buf, MB_OKCANCEL) == IDOK) {
+	    load_string(IDS_TOPICBZIP2, szHelpTopic, sizeof(szHelpTopic));
+	    get_help();
+	}
+	return FALSE;
+    }
+    
+    return TRUE;
+}
+
+#endif
+
+/****************************************************/
+/* Easy Configure */
+
+#ifdef __BORLANDC__
+#pragma argsused
+#endif
+/* easy configure dialog box */
+BOOL CALLBACK _export
+EasyConfigureDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    WORD notify_message;
+    switch(message) {
+	case WM_INITDIALOG:
+	    {
+		int *gsver = (int *)lParam;
+		int i;
+		char buf[16];
+	        for (i=1; i<=gsver[0]; i++) {
+		    gsver_string(gsver[i], buf);
+		    /* put string in list box */
+		    SendDlgItemMessage(hDlg, IDC_GSVER, LB_ADDSTRING, 
+			0, (LPARAM)((LPSTR)buf));
+		}
+		SendDlgItemMessage(hDlg, IDC_GSVER, LB_SETCURSEL, 
+		    gsver[0]-1, 0L);
+	    }
+	    return TRUE;
+        case WM_COMMAND:
+	    notify_message = GetNotification(wParam,lParam);
+            switch(LOWORD(wParam)) {
+		case IDOK:
+		    {
+		    char buf[16];
+		    int i = (int)SendDlgItemMessage(hDlg, IDC_GSVER, 
+			LB_GETCURSEL, 0, 0L);
+		    SendDlgItemMessage(hDlg, IDC_GSVER, LB_GETTEXT, 
+			i, (LPARAM)(LPSTR)buf);
+                    EndDialog(hDlg, gsver_int(buf));
+		    }
+                    return(TRUE);
+                case IDCANCEL:
+                    EndDialog(hDlg, 0);
+                    return(TRUE);
+		case ID_HELP:
+		    get_help();
+		    return(FALSE);
+		case IDC_GSVER:
+		    if (notify_message == LBN_DBLCLK)
+			PostMessage(hDlg, WM_COMMAND, IDOK, 0);
+		    return(FALSE);
+                default:
+                    return(FALSE);
+            }
+    }
+    return(FALSE);
+}
+
+int
+config_easy(void)
+{
+#ifndef __WIN32__
+#error Win16 is no longer supported
+#endif
+	int result;
+	int *gsver;
+	int gs_count = 0;
+	get_gs_versions(&gs_count);
+	if (gs_count == 0)
+	   return 1;
+	gsver = (int *)malloc(sizeof(int) * (gs_count + 1));
+	if (gsver == (int *)NULL)
+	    return 1;
+	gsver[0] = gs_count+1;
+	load_string(IDS_TOPICEASYCFG, szHelpTopic, sizeof(szHelpTopic));
+	if (get_gs_versions(gsver)) {
+	    result = DialogBoxParam(hlanguage, "EasyConfigureDlgBox", hwndimg, 
+		EasyConfigureDlgProc, (LPARAM)gsver);
+	}
+	free(gsver);
+
+	if (result == 0)
+	    return 1;	/* don't configure */
+
+	option.gsversion= result;
+	get_gs_string(option.gsversion, "GS_DLL", option.gsdll, 
+	    sizeof(option.gsdll));
+	get_gs_string(option.gsversion, "GS_LIB", option.gsinclude, 
+	    sizeof(option.gsinclude));
+	strcpy(option.gsother, "-dNOPLATFONTS -sFONTPATH=\042c:\\psfonts\042");
+
+	/* copy printer.ini */
+	gsview_printer_profiles();
+
+	option.configured = TRUE;
+
+	write_profile();
+
+	return 0; /* success */
+}
+
+
 
 /***************************/
 /* configure dialog wizard */
@@ -1430,13 +1642,14 @@ char *p;
     if (strlen(buf) < 6)
 	return;
     p = buf + strlen(buf) - 4;
-    if (isdigit(p[0]) && (p[1]=='.') && isdigit(p[2]) && isdigit(p[3])) {
+    if (isdigit((int)(p[0])) && (p[1]=='.') && 
+	isdigit((int)(p[2])) && isdigit((int)(p[3]))) {
 	strcpy(p, verstr);
         SetDlgItemText(hwnd, IDC_CFG22, buf);
     }
     else {
 	p = buf + strlen(buf) - 3;
-	if (isdigit(p[0]) && (p[1]=='.') && isdigit(p[2])) {
+	if (isdigit((int)(p[0])) && (p[1]=='.') && isdigit((int)(p[2]))) {
 	    strcpy(p, verstr);
 	    SetDlgItemText(hwnd, IDC_CFG22, buf);
 	}
@@ -1457,8 +1670,13 @@ char *p;
     page = find_page_from_id(IDD_CFG2);
     option.gsversion = add_gsver(page->hwnd, 0);
     GetDlgItemText(page->hwnd, IDC_CFG22, buf, sizeof(buf));
-    sprintf(option.gsdll, "%s\\%s", buf, GS_DLLNAME);
-    sprintf(option.gsinclude, "%s;%s\\fonts", buf, buf);
+    if (option.gsversion >= 593) {
+        sprintf(option.gsdll, "%s\\bin\\%s", buf, GS_DLLNAME);
+    }
+    else {
+        sprintf(option.gsdll, "%s\\%s", buf, GS_DLLNAME);
+    }
+    default_gsinclude_from_path(option.gsinclude, buf);
     strcpy(option.gsother, "-dNOPLATFONTS ");
     GetDlgItemText(page->hwnd, IDC_CFG23, buf, sizeof(buf));
     if (strlen(buf)) {
@@ -1478,11 +1696,11 @@ char *p;
     fclose(f);
 
     /* next look for gs_init.ps */
-    strcpy(buf, option.gsdll);
-    p = strrchr(buf, '\\');	/* remove trailing DLLNAME */
+    strcpy(buf, option.gsinclude);
+    p = strchr(buf, ';');	/* remove trailing paths */
     if (p)
-	*(++p) = '\0';
-    strcat(buf, "gs_init.ps");
+	*p = '\0';
+    strcat(buf, "\\gs_init.ps");
     if ( (f = fopen(buf, "rb")) == (FILE *)NULL ) {
 	load_string(IDS_GSLIBNOTINSTALLED, buf, sizeof(buf));
 	SetDlgItemText(find_page_from_id(IDD_CFG7)->hwnd, IDC_CFG71,
@@ -1512,7 +1730,6 @@ char *p;
 	    IDC_CFG32, BM_GETCHECK, (WPARAM)0, (LPARAM)0))
 	gsview_printer_profiles();
 
-
     option.configured = TRUE;
 
     write_profile();
@@ -1541,35 +1758,117 @@ DLGPROC lpProcCfgMain;
 DLGPROC lpProcCfgChild;
 #endif
 
+#ifdef __BORLANDC__
+#pragma argsused
+#endif
+/* Download GS dialog box */
+BOOL CALLBACK _export
+DownloadGSDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch(message) {
+        case WM_COMMAND:
+            switch(LOWORD(wParam)) {
+		case IDOK:
+                    EndDialog(hDlg, TRUE);
+                    return(TRUE);
+                case IDCANCEL:
+                    EndDialog(hDlg, FALSE);
+                    return(TRUE);
+		case ID_HELP:
+		    get_help();
+		    return(FALSE);
+                default:
+                    return(FALSE);
+            }
+    }
+    return(FALSE);
+}
+
+
 int
 config_wizard(void)
 {
-    /* main dialog box */
-    EnableWindow(hwndimg, FALSE);
-    /* we must use modeless dialog box to get the correct dialog control */
-    /* handling in the child windows */
-#ifdef __WIN32__
-    hWiz = CreateDialogParam(hlanguage, MAKEINTRESOURCE(IDD_CFG0), hwndimg, CfgMainDlgProc, (LPARAM)NULL);
-#else
-    if (!lpProcCfgMain)
-        lpProcCfgMain = (DLGPROC)MakeProcInstance((FARPROC)CfgMainDlgProc, phInstance);
-    if (!lpProcCfgChild)
-        lpProcCfgChild = (DLGPROC)MakeProcInstance((FARPROC)CfgChildDlgProc, phInstance);
-    hWiz = CreateDialogParam(hlanguage, MAKEINTRESOURCE(IDD_CFG0), hwndimg, lpProcCfgMain, (LPARAM)NULL);
-    
-/* We can't free these thunks until the dialog box has returned */
-/* This happens elsewhere which makes it hard to delete them */
-/* For the present, leave them lying around because we won't be */
-/* using the config wizard often */
-/* 
-    FreeProcInstance((FARPROC)lpProcCfgMain);
-    lpProcCfgMain = (DLGPROC)NULL;
-    FreeProcInstance((FARPROC)lpProcCfgChild);
-    lpProcCfgChild = (DLGPROC)NULL;
-*/
-#endif
+    /* We don't use a configure wizard anymore - this is done in
+     * the setup program.
+     * Instead we have several options:
+     * 1. GS is installed on hard disk - offer the easy configure
+     *    which relys on the setup program having written entries
+     *    to the registry.
+     * 2. If GS not installed, or 1. fails, look for 
+     *      ..\gsN.NN\bin\gsdll32.dll 
+     *    If this exists, configure silently since we are either
+     *    running from CD-ROM or network drive.
+     * 3. Tell user to download GS
+     */   
+    int gscount;
+    char basedir[MAXSTR];
+    char gsdir[MAXSTR];
+    char gsdll[MAXSTR];
+    int gsver;
+    char *p;
+    FILE *f;
 
-    return 0; /* success */
+    /* 1. If GS installed, easy configure */
+    gscount = 0;
+    get_gs_versions(&gscount);
+    if (gscount > 0) {
+	if (config_easy() == 0)
+	    return 0;	/* success */
+    }
+
+    /* 2. GS not installed.  Look for GS in adajacent directory */
+    strcpy(basedir, szExePath);
+    p = strrchr(basedir, '\\');	/* remove trailing backslash */
+    if (p)
+	*p = '\0';
+    p = strrchr(basedir, '\\');	/* remove trailing gsview */
+    if (p)
+	*(++p) = '\0';
+    strcpy(gsdir, basedir);
+
+    p = gsdir + strlen(gsdir);
+
+
+    gs_addmess("Ghostscript registry entries not present.\n");
+
+    gsver = GS_REVISION;
+    while (gsver <= GS_REVISION_MAX) {
+	if (gsver % 100 == 0)
+	    sprintf(p, "gs%d.%d", gsver / 100, gsver % 100);
+	else
+	    sprintf(p, "gs%d.%02d", gsver / 100, gsver % 100);
+
+	strcpy(gsdll, gsdir);
+	strcat(gsdll, "\\bin\\gsdll32.dll");
+
+	if ( (f = fopen(gsdll, "rb")) != (FILE *)NULL ) {
+	    /* GS DLL exists. Configure GSview */
+	    fclose(f);
+	    gs_addmess("Found ");
+	    gs_addmess(gsdll);
+	    gs_addmess("\n");
+	    option.gsversion = gsver;
+	    strcpy(option.gsdll, gsdll);
+	    sprintf(option.gsinclude, "%s\\lib;%sfonts", gsdir, basedir);
+	    strcpy(option.gsother, "-dNOPLATFONTS -sFONTPATH=\042c:\\psfonts\042");
+	    gsview_printer_profiles();
+	    option.configured = TRUE;
+	    write_profile();
+	    return 0;	/* success */
+	}
+	gsver++;
+    }
+
+    
+    load_string(IDS_TOPICDOWNLOAD, szHelpTopic, sizeof(szHelpTopic));
+    if (DialogBoxParam(hlanguage, "DownloadGSDlgBox", hwndimg, 
+		DownloadGSDlgProc, (LPARAM)0)) {
+	/* download now */
+	ShellExecute(hwndimg, NULL, "http://www.cs.wisc.edu/~ghost/index.html",
+	    NULL, NULL, SW_SHOWNORMAL);
+    }
+    
+    return 1;	/* failed */
 }
 
 

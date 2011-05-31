@@ -6,11 +6,13 @@ gsview32.ico
 gsviewde.hlp
 gsviewen.hlp
 gsviewfr.hlp
+gsviewit.hlp
 gsvwdade.dll
 gsvwdafr.dll
+gsvwdait.dll
 gvwgsda.exe
 zlibda.dll
 printer.ini
-README.TXT
+Readme.htm
 LICENCE
 FILE_ID.DIZ

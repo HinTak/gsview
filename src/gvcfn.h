@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -25,11 +25,13 @@ BOOL get_cursorpos(float *x, float *y);
 void scroll_to_find(void);
 void gsview_fullscreen_end(void);
 void gsview_fullscreen(void);
+void gsview_fitwin(void);
 
 /* in gvpinit.c  or gvwinit.c */
 void show_buttons(void);
 void delete_buttons(void);
 int gsview_create_objects(char *name);
+int update_registry(BOOL ps, BOOL pdf);
 BOOL load_language(int language);
 void change_language(void);
 void check_language(void);
@@ -57,6 +59,7 @@ void gsview_initc(LPSTR cmdline);
 void init_check_menu(void);
 void default_gsdll(char *buf);
 void default_gsinclude(char *buf);
+void default_gsinclude_from_path(char *buf, char *gspath);
 void install_default(HWND hwnd);
 int gsview_changed(void);
 
@@ -65,6 +68,7 @@ void error_message(char *str);
 void info_init(HWND hwnd);
 void read_profile(char *str);
 void write_profile(void);
+void write_profile_last_files(void);
 
 /* in gvwmisc or gvpmisc.c */
 void post_img_message(int message, int param);
@@ -88,6 +92,8 @@ void transform_point(float *x, float *y);
 void itransform_point(float *x, float *y);
 int real_depth(int depth);
 int get_paper_size_index(void);
+int get_paper_width();
+int get_paper_height();
 void gs_size(PENDING *pend);
 void gs_resize(void);
 void gs_magnify(float scale);
@@ -268,3 +274,8 @@ BOOL dialog_get_ctm(HWND hwnd, MATRIX *ctm, BOOL error);
 BOOL calc_command(HWND hwnd, int message, MATRIX *ctm, int *unit);
 void measure_dialog_unit(void);
 void measure_update_last(void);
+
+
+/* gvwgsver.c */
+BOOL get_gs_versions(int *pver);
+BOOL get_gs_string(int gs_revision, char *name, char *ptr, int len);

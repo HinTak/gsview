@@ -124,7 +124,6 @@ BEGIN
 	IDS_TOPICEDITPROP, "Modification des propriétés"
 	IDS_TOPICCLIP, "Presse-papiers"
 	IDS_TOPICPREVIEW, "Aperçu EPS"
-	IDS_TOPICGSCMD, "Configurer Ghostscript"
 	IDS_TOPICSOUND, "Sons"
 	IDS_TOPICDSET, "Paramètres de l'affichage"
 	IDS_TOPICMEDIA, "Format de la feuille"
@@ -133,9 +132,15 @@ BEGIN
 	IDS_TOPICINSTALL, "Installation"
 	IDS_TOPICTEXT, "Extraction de texte et recherche"
 	IDS_TOPICKEYS, "Raccourcis clavier"
-	IDS_TOPICMESS, "Affichier les messages"
+	IDS_TOPICMESS, "Afficher les messages"
 	IDS_TOPICSPOOL, "Gestionnaire d'impression"
 	IDS_TOPICZLIB, "zlib"
+	IDS_TOPICBZIP2, "bzip2"
+	IDS_TOPICPSTOEDIT, "PS vers Edit"
+	IDS_TOPICMEASURE, "Mesure"
+	IDS_TOPICEASYCFG "Configuration standard"
+	IDS_TOPICADVANCEDCFG "Configuration avancée"
+	IDS_TOPICDOWNLOAD "Obtenir Ghostscript"
 END
 
 STRINGTABLE
@@ -159,8 +164,8 @@ BEGIN
 	IDS_UNITMM, AAMM
 	IDS_UNITINCH, AAINCH
 	IDS_UNITCUSTOM, AACUSTOM
- 	IDS_INVALIDNUMBER, "Invalid number" /* ENGLISH */
- 	IDS_CANTINVERT, "Cannot invert matrix"
+ 	IDS_INVALIDNUMBER, "Nombre non valide"
+ 	IDS_CANTINVERT, "Impossible d'inverser la matrice"
 END
 
 STRINGTABLE
@@ -201,7 +206,7 @@ BEGIN
 	/* PDF messages */
 	IDS_PDFNOPAGE, "Nombre de pages inconnu dans le fichier PDF\nVous devez d'abord afficher le fichier" 
 	IDS_PDFEXTRACTALL, "Nombre de pages inconnu dans le fichier PDF\nExtraction ou impression de toutes les pages"
-	IDS_USEPDFWRITE, "To extract pages from a PDF file, Print to File using the pdfwrite or pswrite device." /* ENGLISH */
+	IDS_USEPDFWRITE, "Pour extraire des pages d'un fichier PDF à partir d'un fichier PDF, Imprimer vers un fichier en utilisant pdfwrite ou pswrite."
 END
 
 STRINGTABLE
@@ -210,7 +215,8 @@ BEGIN
 	IDS_NOTIMPLEMENTED, "Non implémenté"
 	IDS_NOLINKTARGET, "Cible inconnue pour le lien"
 	IDS_PARSEERROR, "La ligne de commande contient une erreur de syntaxe"
-	IDS_ZLIB_FAIL, "Chargement de la DLL zlib impossible. Cliquez sur le bouton OK pour avoir de l'aide."
+	IDS_ZLIB_FAIL, "Chargement de la DLL zlib impossible.  Cliquez sur le bouton OK pour avoir de l'aide."
+ 	IDS_BZIP2_FAIL, "Chargement de la DLL bzip2 impossible.  Cliquez sur le bouton OK pour avoir de l'aide."
 END
 
 STRINGTABLE
@@ -220,12 +226,12 @@ BEGIN
 	IDS_NOPRINTERINI, "Ouverture du fichier printer.ini impossible"
 	IDS_NOINI, "Ouverture du fichier INI impossible"
 	IDS_NEEDTEMP, "Vous devez faire pointer la variable d'environnement TEMP vers un répertoire valide non protégé en écriture. Sans cela, GSview et Aladdin Ghostscript ne pourront pas imprimer"
-	IDS_GSNOTINSTALLED, "Vous n'avez pas installé Ghostscript. Veuillez lire le fichier README.TXT de GSview."
-	IDS_GSLIBNOTINSTALLED, "Vous n'avez pas installé les fichiers de la DLL de Ghostscript. Veuillez lire le fichier README.TXT de GSview."
+	IDS_GSNOTINSTALLED, "Vous n'avez pas installé Ghostscript. Veuillez lire le fichier Readme.htm de GSview."
+	IDS_GSLIBNOTINSTALLED, "Vous n'avez pas installé les fichiers de la DLL de Ghostscript. Veuillez lire le fichier Readme.htm de GSview."
 	IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED
 	IDS_NOPROGMAN, AANODDEPROGMAN
 	IDS_WRONGEMX, "Vous avez emx %s.\rVous avez besoin d'emx %s ou ultérieur.\rPM GSview ne pourra pas fonctionner correctement."
-	IDS_GSVIEWVERSION, GSVIEW_VERSION
+	IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION
 	IDS_CFG73, AACFG73
 	IDS_CFG74, AACFG74
 	IDS_PROGMANGROUP4 AAPROGMANGROUP4

@@ -7,30 +7,44 @@
 # makefile created by
 # Russell Lang, 1998-10-09
 
+
+# Edit VCVER and DEVBASE as required
+VCVER=5
+DEVBASE = c:\devstudio
+
+# Debugging
+DEBUG=1
+
+!if $(DEBUG)
+DEBUGLINK=/DEBUG
+CDEBUG=/Zi
+!endif
+
+
 # For Intel x386 use pstotxt3
 DEST=pstotxt3
-# For debugging use
-#CFLAGS=/D__WIN32__ /Zi
 CFLAGS=/D__WIN32__
 
 # For Alpha, uncomment the following two lines
 #DEST=pstotxta
 #CFLAGS=/D__WIN32__ /DDECALPHA
 
-# For debugging, use link /DEBUG 
-#DEBUGLINK=/DEBUG
-DEBUGLINK=
 
-DEVBASE = e:\devstudio
-
-COMPBASE = e:\devstudio\vc
+!if $(VCVER) <= 5
+COMPBASE = $(DEVBASE)\vc
+!else
+COMPBASE = $(DEVBASE)\vc98
+!endif
 COMPDIR = $(COMPBASE)\bin
 INCDIR = $(COMPBASE)\include
 LIBDIR = $(COMPBASE)\lib
-RCOMP32=$(DEVBASE)\sharedide\bin\rc -D_MSC_VER
-RCOMP=$(RCOMP32)
+!if $(VCVER) <= 5
+RCOMP=$(DEVBASE)\sharedide\bin\rc -D_MSC_VER $(CFLAGS)
+!else
+RCOMP=$(DEVBASE)\common\msdev98\bin\rc -D_MSC_VER $(CFLAGS)
+!endif
 
-CC=$(COMPDIR)\cl -DNEED_PROTO $(CFLAGS) /I$(INCDIR)
+CC=$(COMPDIR)\cl -DNEED_PROTO $(CFLAGS) $(CDEBUG) /I$(INCDIR)
 CCAUX=$(CC)
 
 all:	$(DEST).dll $(DEST).exe
@@ -57,7 +71,7 @@ $(DEST).rc:  ocr.h rot270.h rot90.h
 	copy ocr.h+rot270.h+rot90.h $(DEST).rc
 
 $(DEST).res: pstotxt3.rc
-	$(RCOMP32) -i$(INCDIR) -r $(DEST).rc
+	$(RCOMP) -i$(INCDIR) -r $(DEST).rc
 
 $(DEST).dll: $(DEST).obj $(DEST).res
 	$(COMPDIR)\link $(DEBUGLINK) /DLL /DEF:pstotxt3.def /OUT:$(DEST).dll $(DEST).obj $(DEST).res

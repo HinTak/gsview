@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -64,8 +64,12 @@
 #define MAXSTR 256
 #define DIRSEP '\\'
 #define EOLSTR "\r\n"
+#ifdef _MSC_VER
+#include <direct.h>
+#else
 #include <alloc.h>
 #include <dir.h>
+#endif
 #include <io.h>
 #include <fcntl.h>
 #endif

@@ -80,8 +80,9 @@ static int bboxes = FALSE;
 static int explicitFiles = 0; /* count of explicit file arguments */
 
 void usage(void) {
-  fprintf(stderr, "pstotext 1.8 of 16 October 1998\n");
+  fprintf(stderr, "pstotext 1.8g of 25 January 2000\n");
   fprintf(stderr, "Copyright (C) 1995-1998, Digital Equipment Corporation.\n");
+  fprintf(stderr, "Modified by Ghostgum Software Pty Ltd for Ghostscript 6.0.\n");
   fprintf(stderr, "Comments to {mcjones,birrell}@pa.dec.com.\n\n");
   fprintf(stderr, "Usage: %s [option|file]...\n", cmd);
   fprintf(stderr, "Options:\n");
@@ -402,10 +403,12 @@ static int cleanup(void) {
     pclose(gs);
 #endif
   }
-  if (gstemp != NULL)
+  if (gstemp!=NULL && !debug)
     unlink(gstemp);
-  if (rotate_path!=NULL && strcmp(rotate_path, "")!=0) unlink(rotate_path);
-  if (ocr_path!=NULL) unlink(ocr_path);
+  if (rotate_path!=NULL && strcmp(rotate_path, "")!=0 && !debug) 
+    unlink(rotate_path);
+  if (ocr_path!=NULL && !debug) 
+     unlink(ocr_path);
   return status;
 }
 
@@ -512,7 +515,7 @@ static void do_it(char *path) {
 
 #if defined(_Windows) || defined(MSDOS)
   if (system(gs_cmd)) {
-    fprintf(stderr,"Can't run (errno=%d): %s\n", errno, gs_cmd);
+    fprintf(stderr,"\nCan't run (errno=%d):\n   %s\n", errno, gs_cmd);
     cleanup();
     exit(1);
   }
@@ -523,7 +526,8 @@ static void do_it(char *path) {
 #endif
 
 #ifdef MSDOS
-  unlink(gsargtemp);
+  if (!debug)
+     unlink(gsargtemp);
   free(gsargtemp);
 #endif
 

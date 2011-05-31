@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -15,77 +15,73 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* it\gvplang.rc */
+/* it\gvwlang.rc */
 
 /* Windows Italian language resources */
 
-/* Translations below courtesy of DEC's babelfish.
- * They are probably wildly wrong!
- */
-
 gsview_menu MENU
 BEGIN
-	POPUP "&Archivio"
+	POPUP "&File"
 	BEGIN
-		MENUITEM "Apert&o...\tO", IDM_OPEN
-		MENUITEM "&Selezionare Archivio...\tS", IDM_SELECT
-		MENUITEM "Risparmi &As...\tA", IDM_SAVEAS
-		MENUITEM "&Estratto...\tE", IDM_EXTRACT
-		MENUITEM "PS a EPS", IDM_PSTOEPS
-		MENUITEM "&Fine\tC", IDM_CLOSE
-		MENUITEM "&Info...\tI", IDM_INFO
+		MENUITEM "&Apri...\tA", IDM_OPEN
+		MENUITEM "Sele&ziona File...\tZ", IDM_SELECT
+		MENUITEM "Salva con &Nome...\tN", IDM_SAVEAS
+		MENUITEM "Es&trai...\tT", IDM_EXTRACT
+		MENUITEM "Converti PS in EPS", IDM_PSTOEPS
+		MENUITEM "&Chiudi\tC", IDM_CLOSE
+		MENUITEM "&Informazioni...\tI", IDM_INFO
 		MENUITEM SEPARATOR
 		MENUITEM "Stam&pa...\tP", IDM_PRINT
 /*
-		MENUITEM "Print To &File...\tF", IDM_PRINTTOFILE
+		MENUITEM "Stampa su &File...\tF", IDM_PRINTTOFILE
 */
-		MENUITEM "Stampa Archivio...", IDM_SPOOL
+		MENUITEM "Stampa File...", IDM_SPOOL
 		MENUITEM SEPARATOR
-		MENUITEM "Mostrare i messaggi\tM", IDM_GSMESS 
+		MENUITEM "&Mostra Messaggi\tM", IDM_GSMESS 
 		MENUITEM SEPARATOR
 		MENUITEM SEPARATOR
-		MENUITEM "&Uscita", IDM_EXIT
+		MENUITEM "&Esci", IDM_EXIT
 	END
-	POPUP "Modificar&e"
+	POPUP "&Modifica"
 	BEGIN
-		MENUITEM "&Copy\tCtrl+C", IDM_COPYCLIP
+		MENUITEM "&Copia\tCtrl+C", IDM_COPYCLIP
 		MENUITEM SEPARATOR
-		MENUITEM "&Paste To...", IDM_PASTETO
-		MENUITEM "Convert &Bitmap", IDM_CONVERT
+		MENUITEM "&Incolla su...", IDM_PASTETO
+		MENUITEM "Converti &Bitmap", IDM_CONVERT
 		MENUITEM SEPARATOR
-		POPUP "&Add EPS Preview"
+		POPUP "&Aggiungi Anteprima EPS"
 		BEGIN
 		    MENUITEM "&Interchange", IDM_MAKEEPSI
 		    MENUITEM "TIFF 4", IDM_MAKEEPST4
-		    MENUITEM "&TIFF 6 uncompressed", IDM_MAKEEPST6U
+		    MENUITEM "&TIFF 6 non compresso", IDM_MAKEEPST6U
 		    MENUITEM "TIFF 6 &packbits", IDM_MAKEEPST6P
 		    MENUITEM "&Windows Metafile", IDM_MAKEEPSW
-		    MENUITEM "&User Supplied Preview", IDM_MAKEEPSU
+		    MENUITEM "Anteprima fornita dall'&Utente", IDM_MAKEEPSU
 		END
-		POPUP "&Extract EPS"
+		POPUP "&Estrai EPS"
 		BEGIN
 		    MENUITEM "&PostScript", IDM_EXTRACTPS
-		    MENUITEM "Pre&view", IDM_EXTRACTPRE
+		    MENUITEM "&Anteprima", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
-		MENUITEM "Measure", IDM_MEASURE
-		MENUITEM "Convert to vector format...", IDM_PSTOEDIT
-		MENUITEM "&Text Extract...", IDM_TEXTEXTRACT
-		MENUITEM "&Find...\tCtrl+F", IDM_TEXTFIND
-		MENUITEM "Find &Next\tF3", IDM_TEXTFINDNEXT
+		MENUITEM "Misure", IDM_MEASURE
+		MENUITEM "Converti in formato vettoriale...", IDM_PSTOEDIT
+		MENUITEM "Es&trai testo...\tT", IDM_TEXTEXTRACT
+		MENUITEM "C&erca...\tE", IDM_TEXTFIND
+		MENUITEM "Cerca &Successivo\tF3", IDM_TEXTFINDNEXT
 	END
-	POPUP "O&pzioni"
+	POPUP "&Opzioni"
 	BEGIN
-		MENUITEM "Configure...", IDM_CFG
-		MENUITEM "Configure &Ghostscript...", IDM_GSCOMMAND
-		MENUITEM "Sounds...", IDM_SOUNDS
-		POPUP "&Units"
+		MENUITEM "Configurazione Facile...", IDM_CFG
+		MENUITEM "Configurazione Avanzata...", IDM_GSCOMMAND
+		MENUITEM "Suoni...", IDM_SOUNDS
+		POPUP "&Unità di misura"
 		BEGIN
 			MENUITEM "&pt", IDM_UNITPT
 			MENUITEM "&mm", IDM_UNITMM
-			MENUITEM "&inch", IDM_UNITINCH
+			MENUITEM "poll&ici", IDM_UNITINCH
 			MENUITEM SEPARATOR
-			MENUITEM "&Fine Resolution", IDM_UNITFINE
+			MENUITEM "Risoluzione &Fine", IDM_UNITFINE
 		END
 		POPUP "&Lingua"
 		BEGIN
@@ -94,50 +90,57 @@ BEGIN
 			MENUITEM "Te&desco", IDM_LANGDE
 			MENUITEM "&Italiano", IDM_LANGIT
 		END
-		POPUP "PStoText"
+		POPUP "&PStoText"
 		BEGIN
-			MENUITEM "Disabled", IDM_PSTOTEXTDIS
-			MENUITEM "Normal", IDM_PSTOTEXTNORM
-			MENUITEM "Dvips Cork Encoding", IDM_PSTOTEXTCORK
+			MENUITEM "Disabilitato", IDM_PSTOTEXTDIS
+			MENUITEM "Normale", IDM_PSTOTEXTNORM
+			MENUITEM "Codifica Dvips Cork", IDM_PSTOTEXTCORK
 		END
-		MENUITEM "Save Settings &Now", IDM_SETTINGS
+		MENUITEM "Salva Impostazioni Adess&o", IDM_SETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "&Save Settings on Exit", IDM_SAVESETTINGS
-		MENUITEM "Sa&fer", IDM_SAFER
-		MENUITEM "Save Last &Directory", IDM_SAVEDIR
-		MENUITEM "&Button Bar", IDM_BUTTONSHOW
-		MENUITEM "&Fit Window to Page", IDM_FITPAGE
-		MENUITEM "&Quick Open", IDM_QUICK_OPEN
-		MENUITEM "Auto &Redisplay", IDM_AUTOREDISPLAY
-		MENUITEM "EPS &Clip", IDM_EPSFCLIP
-		MENUITEM "EPS &Warn", IDM_EPSFWARN
-		MENUITEM "&Ignore DSC", IDM_IGNOREDSC
-		MENUITEM "Show Bounding Bo&x", IDM_SHOWBBOX
+		MENUITEM "&Salva Impostazioni all'uscita", IDM_SAVESETTINGS
+		MENUITEM "Si&curezza", IDM_SAFER
+		MENUITEM "Salva Ultima &Cartella", IDM_SAVEDIR
+		MENUITEM "&Barra Pulsanti", IDM_BUTTONSHOW
+		MENUITEM "&Adatta la Finestra alla Pagina", IDM_FITPAGE
+		MENUITEM "Apertura &Veloce", IDM_QUICK_OPEN
+		MENUITEM "&Rivisualizza Automaticamente", IDM_AUTOREDISPLAY
+		MENUITEM "Rita&glia EPS", IDM_EPSFCLIP
+		MENUITEM "&Avvisi EPS", IDM_EPSFWARN
+		MENUITEM "&Ignora DSC", IDM_IGNOREDSC
+		MENUITEM "Mostra Limiti del Bo&x", IDM_SHOWBBOX
 	END
-	POPUP "&Vista"
+	POPUP "&Visualizza"
 	BEGIN
-		MENUITEM "&Next Page\t+", IDM_NEXT
-		MENUITEM "Pre&vious Page\t-", IDM_PREV
-		MENUITEM "&Goto Page...\tG", IDM_GOTO
-		MENUITEM "&Redisplay\tR", IDM_REDISPLAY
+		MENUITEM "Pagina &Successiva\t+", IDM_NEXT
+		MENUITEM "Pagina &Precedente\t-", IDM_PREV
+		MENUITEM "&Vai a Pagina...\tV", IDM_GOTO
+		MENUITEM "Vai In&dietro\tD", IDM_GOBACK
+		MENUITEM "Vai A&vanti\tS", IDM_GOFWD
+		MENUITEM "&Rivisualizza\tR", IDM_REDISPLAY
 		MENUITEM SEPARATOR
-		MENUITEM "Next Page and Home\tSpace", IDM_NEXTHOME
-		MENUITEM "Previous Page and Home\tBkSp", IDM_PREVHOME
+		MENUITEM "Pagina successiva in alto\tSpace", IDM_NEXTHOME
+		MENUITEM "Pagina precedente in alto\tBkSp", IDM_PREVHOME
+		MENUITEM SEPARATOR
+		MENUITEM "A tutto &Schermo\tF4", IDM_FULLSCREEN
+		MENUITEM "Adatta &Finestra\tF6", IDM_FITWIN
 	END
-	POPUP "&Orientamento"
+POPUP "&Orientamento"
 	BEGIN
-		MENUITEM "&Auto", IDM_AUTOORIENT
+		MENUITEM "&Automatico", IDM_AUTOORIENT
 		MENUITEM SEPARATOR
-		MENUITEM "&Portrait", IDM_PORTRAIT
-		MENUITEM "&Landscape", IDM_LANDSCAPE
-		MENUITEM "&Upside-down", IDM_UPSIDEDOWN
-		MENUITEM "&Seascape", IDM_SEASCAPE
+		MENUITEM "&Verticale", IDM_PORTRAIT
+		MENUITEM "&Orizzontale", IDM_LANDSCAPE
+		MENUITEM "V&erticale capovolto", IDM_UPSIDEDOWN
+		MENUITEM "O&rizzontale capovolto", IDM_SEASCAPE
 		MENUITEM SEPARATOR
-		MENUITEM "S&wap Landscape", IDM_SWAPLANDSCAPE
+		MENUITEM "&Inverti Orizzontale", IDM_SWAPLANDSCAPE
 	END
-	POPUP "&Mezzi"
+	POPUP "&Carta"
 	BEGIN
-		MENUITEM "&Display Settings...", IDM_DISPLAYSETTINGS
+		MENUITEM "&Impostazioni visualizzazione...", IDM_DISPLAYSETTINGS
+		MENUITEM SEPARATOR
+		MENUITEM "&Gira Carta", IDM_MEDIAROTATE
 		MENUITEM SEPARATOR
 		MENUITEM "Letter", IDM_LETTER
 		MENUITEM "Tabloid", IDM_TABLOID
@@ -153,56 +156,53 @@ BEGIN
 		MENUITEM "Folio", IDM_FOLIO
 		MENUITEM "Quarto", IDM_QUARTO
 		MENUITEM "10x14", IDM_10X14
-		MENUITEM "User Defined...", IDM_USERSIZE
+		MENUITEM "Definite dall'utente...", IDM_USERSIZE
 	END
-	POPUP "&Aiuto"
+	POPUP "&?"
 	BEGIN
-		MENUITEM "&Contents", IDM_HELPCONTENT
-		MENUITEM "&Search for Help on...", IDM_HELPSEARCH
-		MENUITEM "&Keys Help", IDM_HELPKEYS
+		MENUITEM "&Sommario", IDM_HELPCONTENT
+		MENUITEM "&Indice...", IDM_HELPSEARCH
+		MENUITEM "&Elenco delle Chiavi", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-		MENUITEM "&About...", IDM_ABOUT
+		MENUITEM "&Informazioni su GSView...", IDM_ABOUT
 	END
 END
 
 gsview_accel ACCELERATORS
 BEGIN
-	"O", IDM_OPEN
-	"o", IDM_OPEN
+	"A", IDM_OPEN
+	"a", IDM_OPEN
 	"C", IDM_CLOSE
 	"c", IDM_CLOSE
-	"N", IDM_NEXT
-	"n", IDM_NEXT
+	"S", IDM_NEXT
+	"s", IDM_NEXT
 	"+", IDM_NEXT
 	" ", IDM_NEXTHOME
 	VK_SPACE, IDM_NEXTHOME, VIRTKEY
-	"V", IDM_PREV
-	"v", IDM_PREV
 	"-", IDM_PREV
 	VK_BACK, IDM_PREVHOME, VIRTKEY
 	VK_BACK, IDM_PREVHOME, VIRTKEY, SHIFT
-	"G", IDM_GOTO
-	"g", IDM_GOTO
+	"V", IDM_GOTO
+	"v", IDM_GOTO
+	"D", IDM_GOBACK
+	"d", IDM_GOBACK
 	"I", IDM_INFO
 	"i", IDM_INFO
 	"R", IDM_REDISPLAY
 	"r", IDM_REDISPLAY
-	"S", IDM_SELECT
-	"s", IDM_SELECT
-	"A", IDM_SAVEAS
-	"a", IDM_SAVEAS
+	"Z", IDM_SELECT
+	"z", IDM_SELECT
+	"N", IDM_SAVEAS
+	"n", IDM_SAVEAS
 	"P", IDM_PRINT
 	"p", IDM_PRINT
 	"F", IDM_PRINTTOFILE
 	"f", IDM_PRINTTOFILE
-#ifdef OLD
-	VK_F, IDM_TEXTFIND, VIRTKEY, CONTROL
-#else
-	"^F", IDM_TEXTFIND
-#endif
+	"E", IDM_TEXTFIND
+	"e", IDM_TEXTFIND
 	VK_F3, IDM_TEXTFINDNEXT, VIRTKEY
-	"E", IDM_EXTRACT
-	"e", IDM_EXTRACT
+	"T", IDM_EXTRACT
+	"t", IDM_EXTRACT
 	"M", IDM_GSMESS
 	"m", IDM_GSMESS
 	"<", IDM_MAGMINUS
@@ -212,6 +212,9 @@ BEGIN
 	VK_F1, IDM_HELPCONTENT, VIRTKEY
 	"^C", IDM_COPYCLIP
 	VK_INSERT, IDM_COPYCLIP, VIRTKEY, CONTROL
+	VK_F4, IDM_FULLSCREEN, VIRTKEY
+	VK_F5, IDM_REDISPLAY, VIRTKEY
+	VK_F6, IDM_FITWIN, VIRTKEY
 END
 
 
@@ -219,17 +222,17 @@ END
 STRINGTABLE
 BEGIN
 	/* general strings */
-	IDS_HELPFILE, "gsviewen.hlp"
-	IDS_SOUNDNOMM, "Can't load WINMM.DLL\nSounds will be unavailable"
+	IDS_HELPFILE, WINHELPFILE
+	IDS_SOUNDNOMM, "Non è possibile caricare WINMM.DLL\nI suoni non saranno disponibili"
 END
 
 STRINGTABLE
 BEGIN
 	/* filter strings */
 #ifdef __WIN32__
-	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|PS Files (*.ps)|*.ps;*.ps.gz|EPS Files (*.eps)|*.eps;*.eps.gz|EPI Files (*.epi)|*.epi;*.eps.gz|PDF Files (*.pdf)|*.pdf;*.pdf.gz|All Files (*.*)|*.*|"
+	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz;*.ps.bz2;*.eps.bz2;*.pdf.bz2|PS Files (*.ps)|*.ps;*.ps.gz;*.ps.bz2|EPS Files (*.eps)|*.eps;*.eps.gz;*.eps.bz2|EPI Files (*.epi)|*.epi;*.epi.gz;*.epi.bz2|PDF Files (*.pdf)|*.pdf;*.pdf.gz;*.pdf.bz2|PRN Files (*.prn)|*.prn|All Files (*.*)|*.*|"
 #else
-	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf|PS Files (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*|"
+	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn|PS Files (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|PDF Files (*.pdf)|*.pdf|PRN Files (*.prn)|*.prn|All Files (*.*)|*.*|"
 #endif
 	IDS_FILTER_PS, "Default (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|"
 	IDS_FILTER_EPS, "EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|PS Files (*.ps)|*.ps|All Files (*.*)|*.*|"

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -196,6 +196,44 @@ int i;
 		return i;
 	}
 	return -1;
+}
+
+int get_paper_width()
+{
+    int width;
+    int i = get_paper_size_index();
+    if (i < 0) {
+	if (option.media_rotate)
+	    width = option.user_height;
+	else
+	    width = option.user_width;
+    }
+    else {
+	if (option.media_rotate)
+	    width = papersizes[i].height;
+	else
+	    width = papersizes[i].width;
+    }
+    return width;
+}
+
+int get_paper_height()
+{
+    int height;
+    int i = get_paper_size_index();
+    if (i < 0) {
+	if (option.media_rotate)
+	    height = option.user_width;
+	else
+	    height = option.user_height;
+    }
+    else {
+	if (option.media_rotate)
+	    height = papersizes[i].width;
+	else
+	    height = papersizes[i].height;
+    }
+    return height;
 }
 
 
@@ -639,6 +677,12 @@ int count;
 	free(buffer);
 	return FALSE;
     }
+
+    gs_addmess("Uncompressing ");
+    gs_addmess(psf->name);
+    gs_addmess(" to ");
+    gs_addmess(psf->tname);
+    gs_addmess("\n");
 	
     while ( (count = gzread(infile, buffer, COPY_BUF_SIZE)) > 0 ) {
 	fwrite(buffer, 1, count, outfile);
@@ -650,6 +694,174 @@ int count;
     if (count < 0)
 	return FALSE;
     return TRUE;
+}
+
+#ifdef __WIN32__
+/* Uncompress bzip2 to temporary file */
+BOOL
+dsc_bunzip2(PSFILE *psf)
+{
+FILE *outfile;
+bzFile *infile;
+char *buffer;
+int count;
+    
+    if (!load_bzip2())
+	return FALSE;
+
+    /* create buffer for file copy */
+    buffer = malloc(COPY_BUF_SIZE);
+    if (buffer == (char *)NULL) {
+	play_sound(SOUND_ERROR);
+	unload_bzip2();
+	return FALSE;
+    }
+
+    if ((infile = bzopen(psf->name, "rb")) == (bzFile)NULL) {
+	play_sound(SOUND_ERROR);
+	unload_bzip2();
+	free(buffer);
+	return FALSE;
+    }
+
+    if ( (outfile = gp_open_scratch_file(szScratch, psf->tname, "wb")) == (FILE *)NULL) {
+	gserror(IDS_NOTEMP, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
+	bzclose(infile);
+	unload_bzip2();
+	free(buffer);
+	return FALSE;
+    }
+    gs_addmess("Uncompressing ");
+    gs_addmess(psf->name);
+    gs_addmess(" to ");
+    gs_addmess(psf->tname);
+    gs_addmess("\n");
+	
+    while ( (count = bzread(infile, buffer, COPY_BUF_SIZE)) > 0 ) {
+	fwrite(buffer, 1, count, outfile);
+    }
+    free(buffer);
+    bzclose(infile);
+    fclose(outfile);
+    /* unload_bzip2(); */
+    if (count < 0)
+	return FALSE;
+    return TRUE;
+}
+#endif
+
+/* Debug for DSC comments */
+void
+dsc_dump(PSFILE *psf)
+{
+char buf[MAXSTR];
+struct documentmedia *media;
+int i;
+PSDOC *doc = psf->doc;
+    sprintf(buf, "DSC dump for %s\n", psf->name);
+    gs_addmess(buf);
+    sprintf(buf, "espf=%d\n", doc->epsf);
+    gs_addmess(buf);
+    if (doc->title) {
+       gs_addmess("title=\042");
+       gs_addmess(doc->title);
+       gs_addmess("\042\n");
+    }
+    else {
+       gs_addmess("No title\n");
+    }
+    if (doc->date) {
+       gs_addmess("date=\042");
+       gs_addmess(doc->date);
+       gs_addmess("\042\n");
+    }
+    else {
+       gs_addmess("No date\n");
+    }
+    sprintf(buf, "pageorder=%d\n", doc->pageorder);
+    gs_addmess(buf);
+    sprintf(buf, "header=%ld %ld  %d\n", doc->beginheader, 
+	doc->endheader, doc->lenheader);
+    gs_addmess(buf);
+    sprintf(buf, "preview=%ld %ld  %d\n", doc->beginpreview, 
+	doc->endpreview, doc->lenpreview);
+    gs_addmess(buf);
+    sprintf(buf, "defaults=%ld %ld  %d\n", doc->begindefaults, 
+	doc->enddefaults, doc->lendefaults);
+    gs_addmess(buf);
+    sprintf(buf, "prolog=%ld %ld  %d\n", doc->beginprolog, 
+	doc->endprolog, doc->lenprolog);
+    gs_addmess(buf);
+    sprintf(buf, "setup=%ld %ld  %d\n", doc->beginsetup, 
+	doc->endsetup, doc->lensetup);
+    gs_addmess(buf);
+    sprintf(buf, "trailer=%ld %ld  %d\n", doc->begintrailer, 
+	doc->endtrailer, doc->lentrailer);
+    gs_addmess(buf);
+    sprintf(buf, "boundingbox=%d %d %d %d\n",
+	doc->boundingbox[LLX], doc->boundingbox[LLY],
+	doc->boundingbox[URX], doc->boundingbox[URY]);
+    gs_addmess(buf);
+    sprintf(buf, "default_page_boundingbox=%d %d %d %d\n",
+	doc->default_page_boundingbox[LLX], doc->default_page_boundingbox[LLY],
+	doc->default_page_boundingbox[URX], doc->default_page_boundingbox[URY]);
+    gs_addmess(buf);
+    sprintf(buf, "orientation=%d\n", doc->orientation);
+    gs_addmess(buf);
+    sprintf(buf, "nummedia=%d\n", doc->nummedia);
+    gs_addmess(buf);
+    for (i=0; i<doc->nummedia; i++) {
+        media = &doc->media[i];
+	sprintf(buf, " media[%d]=%s %d %d\n", i, media->name,
+	    media->width, media->height);
+	gs_addmess(buf);
+    }
+    media = doc->default_page_media;
+    if (media) {
+	sprintf(buf, "default_page_media[%d]=%s %d %d\n", i, media->name,
+	    media->width, media->height);
+	gs_addmess(buf);
+    }
+    else
+	gs_addmess("No default_page_media\n");
+
+    if (doc->doseps) {
+	DOSEPS de=*doc->doseps;
+	sprintf(buf, "doseps=ps %ld %ld mf %ld %ld tiff %ld %ld checksum %d\n",
+	    de.ps_begin, de.ps_length, de.mf_begin, de.mf_length,
+	    de.tiff_begin, de.tiff_length, de.checksum);
+	gs_addmess(buf);
+    }
+    else
+	gs_addmess("No doseps\n");
+
+    sprintf(buf, "numpages=%d\n", doc->numpages);
+    gs_addmess(buf);
+    for (i=0; i<doc->numpages; i++) {
+	struct page *p = &doc->pages[i];
+	sprintf(buf, "page %d (%s)\n", i+1, p->label);
+	gs_addmess(buf);
+	sprintf(buf, "  boundingbox=%d %d %d %d\n",
+	    p->boundingbox[LLX], p->boundingbox[LLY],
+	    p->boundingbox[URX], p->boundingbox[URY]);
+	gs_addmess(buf);
+	media = p->media;
+	if (media) {
+	    sprintf(buf, "  media[%d]=%s %d %d\n", i, media->name,
+		media->width, media->height);
+	    gs_addmess(buf);
+	}
+	else
+	    gs_addmess("  No media\n");
+	sprintf(buf, "  offsets=%ld %ld  %d\n", p->begin,
+	    p->end, p->len);
+	gs_addmess(buf);
+	sprintf(buf, "  orientation=%d\n", p->orientation);
+	gs_addmess(buf);
+    }
+
+    sprintf(buf, "End of DSC dump\n");
+    gs_addmess(buf);
 }
 
 /* scan file for PostScript Document Structuring Conventions */
@@ -696,6 +908,7 @@ long file_length;
 
 	/* check for gzip */
 	psf->gzip = FALSE;
+	psf->bzip2 = FALSE;
 	if ( (line[0]=='\037') && (line[1]=='\213') ) { /* 1F 8B */
 	    psf->gzip = TRUE;
 	    fclose(psf->file);
@@ -717,6 +930,33 @@ long file_length;
 	    }
 	    fgets(line, sizeof(line)-1, psf->file);
             rewind(psf->file);
+	}
+	if ( (line[0]=='B') && (line[1]=='Z') && (line[2]=='h')) { /* "BZh */
+#ifdef __WIN32__
+	    psf->bzip2 = TRUE;
+	    fclose(psf->file);
+	    psf->file = NULL;
+	    if (!dsc_bunzip2(psf)) {
+/* ENGLISH */
+		message_box("Failed to uncompress bzip2 file", 0);
+		psf->name[0] = '\0';
+		psf->locked = FALSE;
+		return FALSE;
+	    }
+	    if ( (psf->file = fopen(psfile_name(psf), "rb")) == (FILE *)NULL ) {
+		char buf[MAXSTR+MAXSTR];
+		sprintf(buf, "File '%s' does not exist", psfile_name(psf));
+		message_box(buf, 0);
+		psf->name[0] = '\0';
+		psf->locked = FALSE;
+		return FALSE;
+	    }
+	    fgets(line, sizeof(line)-1, psf->file);
+            rewind(psf->file);
+#else
+	    message_box("This is a bzip2 file.  Please uncompress it first.", 0);
+	    return FALSE;
+#endif
 	}
 
 	/* save file date and length */
@@ -805,16 +1045,9 @@ long file_length;
 	}
 	if (doc->epsf) {
 	    /* warn if bounding box off the page */
-	    int i = get_paper_size_index();
 	    int width, height;
-	    if (i < 0) {
-	        width = option.user_width;
-	        height = option.user_height;
-	    }
-	    else {
-	        width = papersizes[i].width;
-	        height = papersizes[i].height;
-	    }
+	    width = get_paper_width();
+	    height = get_paper_height();
 	    if ( !option.epsf_clip &&
 	        ((doc->boundingbox[LLX] > width) || 
 		 (doc->boundingbox[LLY] > height) ||
@@ -834,6 +1067,10 @@ long file_length;
 	        message_box(buf, 0);
 	    }
 	}
+
+	if (debug)
+	    dsc_dump(psf);
+
 	return TRUE;
 }
 
@@ -886,13 +1123,14 @@ char *
 psfile_name(PSFILE *psf)
 {
     /* if original file was gzipped, give name of gunzipped file */
-    if ((psf->tname[0]!='\0') && (psf->gzip))
+    if ((psf->tname[0]!='\0') && ((psf->gzip) || psf->bzip2))
 	return psf->tname;
     /* otherwise return original file name */
     return psf->name;
 }
 
-#ifdef UNUSED
+/* #define DEBUG_HISTORY */
+#ifdef DEBUG_HISTORY
 void history_debug(void)
 {
 char buf[256];
@@ -909,6 +1147,9 @@ int i;
     }
     gs_addmess("\n");
 }
+#define HISTORY_DEBUG history_debug()
+#else
+#define HISTORY_DEBUG
 #endif
 
 void
@@ -938,6 +1179,7 @@ history_add(int pagenum)
     history.index++;
     if (history.index > history.count)
 	history.count = history.index;
+    HISTORY_DEBUG;
 }
 
 
@@ -945,6 +1187,7 @@ void
 history_reset(void)
 {
     history.index = history.count = 0;
+    HISTORY_DEBUG;
 }
 
 void
@@ -964,6 +1207,7 @@ history_back(void)
     gsview_unzoom();
     pending.now = TRUE;
     release_mutex();
+    HISTORY_DEBUG;
 }
 
 void
@@ -985,4 +1229,5 @@ history_forward(void)
     release_mutex();
 
     history.index++;
+    HISTORY_DEBUG;
 }

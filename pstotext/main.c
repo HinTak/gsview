@@ -54,8 +54,9 @@ static BOOLEAN bboxes = FALSE;
 static int explicitFiles = 0; /* count of explicit file arguments */
 
 usage() {
-  fprintf(stderr, "pstotext 1.8 of 16 October 1998\n");
+  fprintf(stderr, "pstotext 1.8g of 25 January 2000\n");
   fprintf(stderr, "Copyright (C) 1995-1998, Digital Equipment Corporation.\n");
+  fprintf(stderr, "Modified by Ghostgum Software Pty Ltd for Ghostscript 6.0.\n");
   fprintf(stderr, "Comments to {mcjones,birrell}@pa.dec.com\n\n");
 #ifdef VMS
   fprintf(stderr, "VMS Comments to goathunter@madgoat.com\n\n");

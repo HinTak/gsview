@@ -457,6 +457,7 @@ int closedir (DIR *dir)
     if ((dir->hff) && (dir->hff != INVALID_HANDLE_VALUE))
 	FindClose(dir->hff);
     free(dir);
+    return 0;
 }
 
 struct dirent *readdir(DIR *dir)
@@ -630,17 +631,10 @@ psfile_epsf_print(FILE *f)
 int llx, lly, urx, ury;
 float scale = 1.0;
 int rescale = FALSE;
-int i = get_paper_size_index();
 int width, height;
 
-    if (i < 0) {
-	width = option.user_width;
-	height = option.user_height;
-    }
-    else {
-	width = papersizes[i].width;
-	height = papersizes[i].height;
-    }
+    width = get_paper_width();
+    height = get_paper_height();
 
     llx = psfile.doc->boundingbox[LLX];
     lly = psfile.doc->boundingbox[LLY];
@@ -789,7 +783,7 @@ char psepilog[MAXSTR];
     }
 
     if (option.psprinter) {
-	/* for PostScript printers, provide options for sending
+	/* For PostScript printers, provide options for sending
          * Ctrl+D before and after job, and sending a prolog
 	 * and epilog file.
 	 * These are set using the Advanced button on the Printer
@@ -879,15 +873,8 @@ char psepilog[MAXSTR];
 	case 1:
 	    print_ydpi = print_xdpi;
     }
-    i = get_paper_size_index();
-    if (i < 0) {
-	widthpt = option.user_width;
-	heightpt = option.user_height;
-    }
-    else {
-	widthpt = papersizes[i].width;
-	heightpt = papersizes[i].height;
-    }
+    widthpt = get_paper_width();
+    heightpt = get_paper_height();
     width  = (unsigned int)(widthpt  / 72.0 * print_xdpi + 0.5);
     height = (unsigned int)(heightpt / 72.0 * print_ydpi + 0.5);
 
@@ -963,6 +950,17 @@ char psepilog[MAXSTR];
     p = option.gsother;
     while ((p = gs_argnext(p, buf)) != NULL)
         fprintf(optfile, "%s\n", buf);
+
+    if (option.print_fixed_media)
+	/* Force page size to remain unchanged and let the
+	 * GS page matching code rotate the pages as needed.
+	 * Must do this after the device is opened.
+	 */
+    	fprintf(optfile, "-c << /Policies << /PageSize 5 >> \
+/PageSize [%d %d] \
+/InputAttributes << 0 << /PageSize [%d %d] >> >> >> setpagedevice \
+-f",
+	widthpt, heightpt, widthpt, heightpt);
 
     fclose(optfile);
     return TRUE;

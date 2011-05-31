@@ -5,13 +5,16 @@ pstotxt2.exe
 gvpm.exe
 gvpmde.dll
 gvpmfr.dll
+gvpmit.dll
 gvpmen.hlp
 gvpmde.hlp
 gvpmfr.hlp
+gvpmit.hlp
 gvpm.ico
 gvpgs.exe
 zlib2.dll
 printer.ini
-README.TXT
+Readme.htm
+cdorder.txt
 LICENCE
 FILE_ID.DIZ

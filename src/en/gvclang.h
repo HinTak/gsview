@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,11 +18,11 @@
 /* en\gvclang.h */
 /* Common English language defines */
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1998 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2000 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "All rights reserved."
 #define GSVIEW_COPYRIGHT3 "See the file LICENCE for more details."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-1998 Aladdin Enterprises,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2000 Aladdin Enterprises,"
 #define GS_COPYRIGHT2 "Menlo Park, California, U.S.A.  All rights reserved."
 #define GS_COPYRIGHT3 "See the file PUBLIC for more details."
 
@@ -121,6 +121,7 @@
 #define AAPRINTTOFILE "Print to File"
 #define AAPSPRINTER "PostScript Printer"
 #define AAOPTIONSC "Options:"
+#define AAFIXEDMEDIA "Fixed media"
 
 #define AAADVANCED "Advanced"
 #define AAADVANCEDPSOPT "Advanced PostScript Options"
@@ -181,11 +182,24 @@
 
 #define AABOUNDINGBOX "BoundingBox"
 
-/* Configure Ghostscript dialog box */
-#define AACONFIGUREGS "Configure Ghostscript"
+/* Advanced Configure dialog box */
+#define AACONFIGUREGS "Advanced Configure"
 #define AAGHOSTSCRIPTDLLC "Ghostscript DLL:"
 #define AAGHOSTSCRIPTINCC "Ghostscript Include Path:"
 #define AAGHOSTSCRIPTOTHERC "Ghostscript Options:"
+#define AACOPYPRINTERDEF "Copy Printer Defaults"
+#define AAASSOCIATEPS "Associate .ps files with GSview"
+#define AAASSOCIATEPDF "Associate .pdf files with GSview"
+#define AACREATESTARTMENU "Create Start Menu items"
+
+/* Easy Configure dialog box */
+#define AAEASYCONFIGURE "Easy Configure"
+#define AAWHICHGS "Which version of Ghostscript do you wish to use?"
+
+/* Download Ghostscript dialog box */
+#define AADOWNLOADGS "Download Ghostscript"
+#define AADOWNLOADNOW "Download Now"
+#define AAGSNOTFOUND "Ghostscript can not be found on your computer.  You will need to download and install Aladdin Ghostscript from"
 
 #define AAGSMESSWIN "GSview for Windows - Ghostscript Messages"
 #define AAGSMESSPM "PM GSview - Ghostscript Messages"
@@ -222,10 +236,20 @@
 #define AAINITMATRIX "initmatrix"
 #define AAINVERTMATRIX "invertmatrix"
 
+/* PS to Edit dialog box */
+#define AAPSTOEDIT "PS to Edit"
+#define AAFORMATC "Format:"
+#define AADRAWTASP "Draw text as polygons"
+#define AAMAPTOLATIN1 "Map to ISO-Latin1"
+#define AAFLATNESSC "Flatness:"
+#define AADEFAULTFONTC "Default font:"
+#define AADRIVEROPTIONSC "Driver options:"
+
+
 /* Installation program */
 #define AAINSTALL1 "GSview Install"
 #define AAINSTALLINTRO1 "This wizard will help you install"
-#define AAINSTALLINTRO2 "If you are not using the self extracting EXE install, make sure you have the files listed in README.TXT in the current directory or on 3 floppy disks."
+#define AAINSTALLINTRO2 "If you are not using the self extracting EXE install, make sure you have the files listed in Readme.htm in the current directory."
 #define AAINSTALLINTRO3 "The installation will require 10 M bytes of hard disk space."
 #define AAINSTALLCOPYRIGHT1 "Copyright Notices"
 #define AAINSTALLCOPYRIGHT2 "GSview and Aladdin Ghostscript are separate programs."
@@ -282,6 +306,21 @@
 #define AAUNINSTALLTITLE "GSview and Aladdin Ghostscript"
 #define AAUNINSTALLITEM "Uninstall GSview and Aladdin Ghostscript"
 
+/* setup program */
+#define AAINSTALLSPACE "This installation will require 3 M bytes of hard disk space"
+#define AAGSVIEWREQUIRES "GSview also requires"
+#define AAVIEWREADMEDETAILS "View the Readme file for details of how to obtain Ghostscript."
+#define AACOPYRIGHTNOTICE "Copyright Notice"
+#define AASELECTGSVIEWDIR "Select a directory in which to install GSview"
+#define AABROWSEE "Browse..."
+#define AAGSVIEWADDSTARTMENU "GSview Setup will add items to the following Start Menu folder"
+#define AACREATEFOLDER "Create Folder"
+#define AAALLUSERS "All Users"
+#define AASELECTFOLDER "Select Folder"
+#define AAFOLDER "Folder"
+#define AADESTFOLDER "Destination Folder"
+#define AAVIEWREADME "View Readme"
+
 /* configure */
 #define AAGSVIEWC "GSview:"
 #define AAALADDINGSC "Aladdin Ghostscript:"
@@ -297,7 +336,7 @@
 #define AACFG30 "GSview keeps a list of Ghostscript printer devices and\
  resolutions in its initialisation file."
 #define AACFG31 "The default list of devices and resolutions is taken from the standard\
- distribution version of Ghostscript 5.01 and may not be complete."
+ distribution version of Ghostscript 5.50 and may not be complete."
 #define AACFG32 "Update GSview printer list" 
 #define AACFG33 "Updating the GSview printer list will overwrite any existing entries." 
 #define AACFG40 "GSview can create file associations for PostScript and\
@@ -318,8 +357,8 @@
 #define AACFG60 "GSview is now ready to start configuration. \r\rPress Finish to continue."
 #define AACFG70 "Configuration successful."
 #define AACFG72 "If you need to change the configuration later,\
- run GSview then select \042Options | Configure...\042 or\
- \042Options | Configure Ghostscript...\042."
+ run GSview then select \042Options | Easy Configure...\042 or\
+ \042Options | Advanced Configure...\042."
 #define AACFG73 "Configuration failed."
 #define AACFG74 "Configuration cancelled."
 
@@ -346,9 +385,10 @@
 #endif
 
 /* Language changing */
-#define AASELECTLANGUAGE "Select Language"
+#define AASELECTLANGUAGE "Select Language"   /* Don't translate this */
 #define AAENGLISH "English"
 #define AADEUTSCH "Deutsch"
 #define AAFRANCAIS "Français"
 #define AAITALIANO "Italiano"
 
+#define WINHELPFILE "gsviewen.hlp"
