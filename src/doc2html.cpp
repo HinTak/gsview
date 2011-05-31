@@ -12,6 +12,8 @@
  *   Convert {bml* file.bmp} to <IMG SRC="file.gif">
  * Modified by Russell Lang 1997-12-18
  *   Convert non-ascii characters to &#nnn;
+ * Modified by Russell Lang 2000-06-16
+ *   Change A HREF and NAME fields to use the topic title, not line number.
  *
  * usage:  doc2html gnuplot.doc gnuplot.htm
  *
@@ -49,6 +51,7 @@ int nolinks = FALSE;
 
 void parse(FILE *a);
 int lookup(char *s);
+char *title_from_index(int id);
 void refs(int l, FILE *f);
 void convert(FILE *a,FILE *b);
 void process_line(char *line, FILE *b);
@@ -195,6 +198,20 @@ lookup(char *s)
 	return(-1);
 }
 
+char *title_from_index(int id)
+{
+struct LIST *l = NULL;
+    if (id < 0)
+	return "";
+    l = head;
+    while (l != NULL) {
+	if (id == l->line)
+	    return l->string;
+        l = l->next;
+    }
+    return NULL;
+}
+
 
 /* search through the list to find any references */
 void
@@ -217,26 +234,34 @@ refs(int l, FILE *f)
 	fprintf(f,"<P>\n");
 	}
 
-    while (list != NULL)
-    {
+    while (list != NULL) {
         /* we are onto the next topic so stop */
         if (list->level == curlevel)
             break;
         /* these are the next topics down the list */
-        if (list->level == curlevel+1)
-        {
+        if (list->level == curlevel+1) {
             c = list->string;
 	    while (isspace(*c)) c++;
 	    if (nolinks)
 	        fprintf(f,"<B>%s</B><BR>\n", c);
-	    else
-	        fprintf(f,"<A HREF=\042#%d\042>%s</A><BR>\n", list->line, c);
-            }
+	    else {
+		char *p = c;
+	        fprintf(f,"<A HREF=\042#");
+		while (*p) {
+		    if (*p == ' ')
+			fputc('_', f);
+		    else 
+			fputc(*p, f);
+		    p++;
+		}
+	        fprintf(f,"\042>%s</A><BR>\n", c);
+	    }
+	}
         list = list->next;
-        }
-	if (inlist)
-	    fprintf(f,"<P>\n");
     }
+    if (inlist)
+	fprintf(f,"<P>\n");
+}
 
 void
 convert(FILE *a,FILE *b)
@@ -327,8 +352,22 @@ process_line(char *line, FILE *b)
                     {
 			if (nolinks)
                             sprintf( hyplink1, "<B>") ;
-			else
-                            sprintf( hyplink1, "<A HREF=\042#%d\042>", k ) ;
+			else {
+			    char *p = title_from_index(k);
+			    char *t;
+                            sprintf( hyplink1, "<A HREF=\042#");
+			    t = hyplink1 + strlen(hyplink1);
+			
+			    while (p && *p) {
+				if (*p == ' ')
+				    *t++ = '_';
+				else 
+				    *t++ = *p;
+				p++;
+			    }
+			    *t = '\0';
+			    strcat(hyplink1, "\042>") ;
+			}
                         strcpy( line2+j, hyplink1 ) ;
                         j += strlen( hyplink1 )-1 ;
                         
@@ -481,8 +520,19 @@ process_line(char *line, FILE *b)
 	    /* output unique ID and section title */
 	    if (nolinks)
                 fprintf(b,"<HR>\n<H%c>", line[0]=='1'?line[0]:line[0]-1);
-	    else
-                fprintf(b,"<HR>\n<H%c><A NAME=\042%d\042>", line[0]=='1'?line[0]:line[0]-1, line_count);
+	    else {
+		char *p = &(line2[1]);
+                fprintf(b,"<HR>\n<H%c><A NAME=\042", 
+			line[0]=='1'?line[0]:line[0]-1);
+		while (*p) {
+		    if (*p == ' ')
+			fputc('_', b);
+		    else 
+			fputc(*p, b);
+		    p++;
+		}
+                fprintf(b,"\042>");
+	    }
             fprintf(b,&(line2[1])); /* title */
             fprintf(b,"</A></H%c>\n", line[0]=='1'?line[0]:line[0]-1) ;
           } else

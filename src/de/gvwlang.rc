@@ -125,8 +125,8 @@ BEGIN
 		MENUITEM "&Nächste Seite\t+", IDM_NEXT
 		MENUITEM "&Vorherige Seite\t-", IDM_PREV
 		MENUITEM "&Gehe zu Seite...\tG", IDM_GOTO
-		MENUITEM "Go &Back\tB", IDM_GOBACK
-		MENUITEM "Go &Forward", IDM_GOFWD
+		MENUITEM "Go &Back\tB", IDM_GOBACK	 /* ENGLISH */
+		MENUITEM "Go &Forward", IDM_GOFWD	/* ENGLISH */
 		MENUITEM "&Wiederaufbau\tW", IDM_REDISPLAY
 		MENUITEM SEPARATOR
 		MENUITEM "Nächste Seite oben\tLeer", IDM_NEXTHOME
@@ -242,7 +242,7 @@ STRINGTABLE
 BEGIN
 	/* filter strings */
 #ifdef __WIN32__
-	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|PS Dateien (*.ps)|*.ps;*.ps.gz|EPS Dateien (*.eps)|*.eps;*.eps.gz|EPI Dateien (*.epi)|*.epi;*.epi.gz|PDF Dateien (*.pdf)|*.pdf;*.pdf.gz|PRN Dateien (*.prn)|*.prn|Alle Dateien (*.*)|*.*|"
+	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.psz;*.eps.gz;*.epi.gz;*.pdf.gz|PS Dateien (*.ps)|*.ps;*.ps.gz|EPS Dateien (*.eps)|*.eps;*.eps.gz|EPI Dateien (*.epi)|*.epi;*.epi.gz|PDF Dateien (*.pdf)|*.pdf;*.pdf.gz|PRN Dateien (*.prn)|*.prn|Alle Dateien (*.*)|*.*|"
 #else
 	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn|PS Dateien (*.ps)|*.ps|EPS Dateien (*.eps)|*.eps|EPI Dateien (*.epi)|*.epi|PDF Dateien (*.pdf)|*.pdf|PRN Dateien (*.prn)|*.prn|Alle Dateien (*.*)|*.*|"
 #endif

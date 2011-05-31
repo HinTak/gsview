@@ -242,7 +242,7 @@ STRINGTABLE
 BEGIN
 	/* filter strings */
 #ifdef __WIN32__
-	IDS_FILTER_PSALL, "Défaut (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz;*.ps.bz2;*.eps.bz2;*.pdf.bz2|Fichiers PS (*.ps)|*.ps;*.ps.gz;*.ps.bz2|Fichiers EPS (*.eps)|*.eps;*.eps.gz;*.eps.bz2|Fichiers EPI (*.epi)|*.epi;*.eps.gz;*.epi.bz2|Fichiers PDF (*.pdf)|*.pdf;*.pdf.gz;*.pdf.bz2|Fichiers PRN (*.prn)|*.prn|Tous (*.*)|*.*|"
+	IDS_FILTER_PSALL, "Défaut (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.psz;*.eps.gz;*.epi.gz;*.pdf.gz;*.ps.bz2;*.eps.bz2;*.pdf.bz2|Fichiers PS (*.ps)|*.ps;*.ps.gz;*.ps.bz2|Fichiers EPS (*.eps)|*.eps;*.eps.gz;*.eps.bz2|Fichiers EPI (*.epi)|*.epi;*.eps.gz;*.epi.bz2|Fichiers PDF (*.pdf)|*.pdf;*.pdf.gz;*.pdf.bz2|Fichiers PRN (*.prn)|*.prn|Tous (*.*)|*.*|"
 #else
 	IDS_FILTER_PSALL, "Défaut (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn|Fichiers PS (*.ps)|*.ps|Fichiers EPS (*.eps)|*.eps|Fichiers EPI (*.epi)|*.epi|Fichiers PDF (*.pdf)|*.pdf|Fichiers PRN (*.prn)|*.prn|Tous (*.*)|*.*|"
 #endif

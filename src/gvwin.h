@@ -48,8 +48,8 @@
 
 #ifndef RC_INVOKED
 
+#include "dscparse.h"
 #include "gvcfile.h"
-#include "gvcdsc.h"
 
 #ifndef NODEBUG_MALLOC
 void * debug_malloc(size_t size);
@@ -82,16 +82,10 @@ extern HWND hwndspl;	/* window handle of gsv16spl.exe */
 #define CONVERTSECTION "Convert"
 #define EOLSTR "\r\n"
 #define COPY_BUF_SIZE 4096
-/* don't have to worry about segments/selectors */
-#ifdef __WIN32__
-#define GVFAR
-#define GVHUGE
-#else
-#define GVFAR FAR
-#define GVHUGE _huge
-#endif
+#define PATHSEP "\\"
 
 #include "gvceps.h"
+#include "gvcprf.h"
 
 /* program details */
 typedef struct tagPROG {
@@ -313,14 +307,14 @@ typedef struct tagOPTIONS {
         /* for printing to GS device */
 	char	printer_device[64];	/* Ghostscript device for printing */
 	char	printer_resolution[64];
-	BOOL	print_fixed_media;
+	int	print_fixed_media;
 	/* for converting with GS device */
 	char	convert_device[64];
 	char	convert_resolution[64];	/* Ghostscript device for converting */
-	BOOL	convert_fixed_media;
+	int	convert_fixed_media;
 	/* for printing to GDI device */
 	int	print_gdi_depth;	/* IDC_MONO, IDC_GREY, IDC_COLOUR */
-	BOOL	print_gdi_fixed_media;
+	int	print_gdi_fixed_media;
         /* general printing */
 #define PRINT_GDI 0
 #define PRINT_GS 1
@@ -329,7 +323,7 @@ typedef struct tagOPTIONS {
 	int	print_method;		/* GDI, GS, PS */
 	BOOL	print_reverse;		/* pages to be in reverse order */
 	BOOL	print_to_file;
-	char	printer_port[32];	/* for Win32s */
+	char	printer_port[MAXSTR];	/* for Win32s */
 	char	printer_queue[MAXSTR];	/* for Win32 */
 	int	pdf2ps;
 	BOOL	auto_bbox;
@@ -373,30 +367,6 @@ typedef struct tagHISTORY {
 extern HISTORY history;		/* history of pages displayed */
 
 
-struct prfentry {
-	char *name;
-	char *value;
-	struct prfentry *next;
-};
-
-struct prfsection {
-	char *name;
-	struct prfentry *entry;
-	struct prfsection *next;
-};
-
-struct prop_item_s {
-	char	name[MAXSTR];
-	char	value[MAXSTR];
-};
-
-typedef struct tagPROFILE {
-	char *name;
-	FILE *file;
-	BOOL changed;
-	struct prfsection *section;
-} PROFILE;
-
 typedef struct tagTEXTINDEX {
     int word;	/* offset to word */
     int line;	/* line number on page */
@@ -429,9 +399,9 @@ extern int pstotextCount;
 
 /* for zlib gunzip decompression */
 extern HINSTANCE zlib_hinstance;
-typedef void GVFAR *gzFile ;
-typedef gzFile (WINAPI *PFN_gzopen)(const char GVFAR *path, const char GVFAR *mode);
-typedef int (WINAPI *PFN_gzread)(gzFile file, void GVFAR *buf, unsigned len);
+typedef void *gzFile ;
+typedef gzFile (WINAPI *PFN_gzopen)(const char *path, const char *mode);
+typedef int (WINAPI *PFN_gzread)(gzFile file, void *buf, unsigned len);
 typedef int (WINAPI *PFN_gzclose)(gzFile file);
 extern PFN_gzopen gzopen;
 extern PFN_gzread gzread;
@@ -439,9 +409,9 @@ extern PFN_gzclose gzclose;
 
 /* for bzip2 decompression */
 extern HINSTANCE bzip2_hinstance;
-typedef void GVFAR *bzFile ;
-typedef bzFile (WINAPI *PFN_bzopen)(const char GVFAR *path, const char GVFAR *mode);
-typedef int (WINAPI *PFN_bzread)(bzFile file, void GVFAR *buf, unsigned len);
+typedef void *bzFile ;
+typedef bzFile (WINAPI *PFN_bzopen)(const char *path, const char *mode);
+typedef int (WINAPI *PFN_bzread)(bzFile file, void *buf, unsigned len);
 typedef int (WINAPI *PFN_bzclose)(bzFile file);
 extern PFN_bzopen bzopen;
 extern PFN_bzread bzread;
@@ -507,9 +477,7 @@ extern BOOL is_win98;			/* To allow selective use of Windows 98 features */
 extern BOOL is_win32s;			/* To allow selective use of Win32s misfeatures */
 extern BOOL is_win4;			/* To allow selective use of Windows 4.0 features */
 extern BOOL multithread;		/* TRUE if running multithreaded */
-#ifdef __WIN32__
 extern CRITICAL_SECTION crit_sec;	/* for thread synchronization */
-#endif
 extern HANDLE hmutex_ps;		/* for protecting psfile and pending */
 extern HMENU hmenu;			/* main menu */
 extern HACCEL haccel;			/* menu accelerators */
@@ -531,6 +499,8 @@ extern RECT  info_coord;		/* position and size of coordinate information */
 extern RECT  button_rect;		/* position and size of button area */
 extern int on_link;			/* TRUE if we were or are over link */
 extern int on_link_page;		/* page number of link target */
+extern long gsbytes_size;		/* number of bytes for this page */
+extern long gsbytes_done;		/* number of byte written */
 extern OPENFILENAME ofn;
 extern WNDPROC lpfnButtonWndProc;
 extern int percent_done;		/* percentage of document processed */
@@ -563,8 +533,6 @@ extern int print_gdi_ydpi;
 extern HANDLE print_gdi_read_handle;
 extern HANDLE print_gdi_write_handle;
 
-#ifdef __WIN32__
-#define _huge
 #define MoveTo(hdc,x,y) MoveToEx((hdc),(x),(y),(LPPOINT)NULL)
 #define SetWindowOrg(hdc, x, y) SetWindowOrgEx(hdc, x, y, (LPPOINT)NULL)
 #define	SetWindowExt(hdc, x, y) SetWindowExtEx(hdc, x, y, (LPSIZE)NULL)
@@ -576,13 +544,7 @@ extern HANDLE print_gdi_write_handle;
 /* early versions of Win32s don't support lstrcpyn */
 #undef lstrcpyn
 #define lstrcpyn(d,s,n) strncpy(d,s,n)
-#else
-#define SetClassCursor(hwnd, hcursor) SetClassWord(hwnd, GCW_HCURSOR, (WORD)(hcursor))
-#define GetClassCursor(hwnd) ((HCURSOR)GetClassWord(hwnd, GCW_HCURSOR))
-#define GetNotification(wParam,lParam) (HIWORD(lParam))
-#define SendDlgNotification(hwnd, id, notice) \
-    SendMessage((hwnd), WM_COMMAND, id, MAKELPARAM(GetDlgItem((hwnd),(id)),(notice)))
-#endif
+
 
 #ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))

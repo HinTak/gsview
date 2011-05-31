@@ -80,19 +80,17 @@ char cReplace;
 	    gserror(IDS_NOTDFNAME, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    flag = FALSE;
 	}
-#if defined(__WIN32__)
 	/* GetOpenFileName() should change current directory */
 	/* Deal with broken Win32 that doesn't do this */
 	if (flag)
 	    make_cwd(filename);
-#endif
 	return flag;
 }
 
 /* Input Dialog Box structures */
-LPSTR input_prop = "input_prop";
+LPCSTR input_prop = "input_prop";
 struct input_param {
-	LPSTR prompt;
+	LPCSTR prompt;
 	LPSTR answer;
 };
 
@@ -157,22 +155,13 @@ InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 BOOL
-get_string(char *prompt, char *answer)
+query_string(const char *prompt, char *answer)
 {
 struct input_param param;
 BOOL flag;
-#ifndef __WIN32__
-DLGPROC lpProcInput;
-#endif
 	param.answer = answer;
 	param.prompt = prompt;
-#ifdef __WIN32__
 	flag = DialogBoxParam(hlanguage, "InputDlgBox", hwndimg, InputDlgProc, (LPARAM)&param);
-#else
-	lpProcInput = (DLGPROC)MakeProcInstance((FARPROC)InputDlgProc, phInstance);
-	flag = DialogBoxParam(hlanguage, "InputDlgBox", hwndimg, lpProcInput, (LPARAM)&param);
-	FreeProcInstance((FARPROC)lpProcInput);
-#endif
 	return flag;
 }
 
@@ -283,14 +272,7 @@ AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 void
 show_about()
 {
-#ifdef __WIN32__
 	DialogBoxParam(hlanguage, "AboutDlgBox", hwndimg, AboutDlgProc, (LPARAM)NULL);
-#else
-	DLGPROC lpProcAbout;
-	lpProcAbout = (DLGPROC)MakeProcInstance((FARPROC)AboutDlgProc, phInstance);
-	DialogBoxParam(hlanguage, "AboutDlgBox", hwndimg, lpProcAbout, (LPARAM)NULL);
-	FreeProcInstance((FARPROC)lpProcAbout);
-#endif
 }
 
 #ifdef __BORLANDC__
@@ -324,14 +306,7 @@ InfoDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 void
 show_info()
 {
-#ifdef __WIN32__
 	DialogBoxParam(hlanguage, "InfoDlgBox", hwndimg, InfoDlgProc, (LPARAM)NULL);
-#else
-	DLGPROC lpProcInfo;
-	lpProcInfo = (DLGPROC)MakeProcInstance((FARPROC)InfoDlgProc, phInstance);
-	DialogBoxParam(hlanguage, "InfoDlgBox", hwndimg, lpProcInfo, (LPARAM)NULL);
-	FreeProcInstance((FARPROC)lpProcInfo);
-#endif
 }
 
 
@@ -430,16 +405,8 @@ free_sounds(void)
 void
 change_sounds(void)
 {
-#ifdef __WIN32__
 	nHelpTopic = IDS_TOPICSOUND;
 	DialogBoxParam(hlanguage, "SoundDlgBox", hwndimg, SoundDlgProc, (LPARAM)NULL);
-#else
-	DLGPROC lpProcSound;
-	nHelpTopic = IDS_TOPICSOUND;
-	lpProcSound = (DLGPROC)MakeProcInstance((FARPROC)SoundDlgProc, phInstance);
-	DialogBoxParam(hlanguage, "SoundDlgBox", hwndimg, lpProcSound, (LPARAM)NULL);
-	FreeProcInstance((FARPROC)lpProcSound);
-#endif
 }
 
 #ifdef __BORLANDC__
@@ -677,6 +644,14 @@ PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			    EndDialog(hDlg, FALSE);
 			else {
 			    psfile.page_list.current = i;
+			    /* if available, also save in selection array */
+			    if (psfile.page_list.select) {
+			      for (i=0; i<(int)(psfile.dsc->page_count); i++) {
+				  psfile.page_list.select[i] = FALSE;
+			      }
+			      psfile.page_list.select[psfile.page_list.current]
+				 = TRUE;
+			    }
 			    EndDialog(hDlg, TRUE);
 			}
 			return TRUE;
@@ -786,9 +761,6 @@ PageMultiDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 BOOL
 get_page(int *ppage, BOOL multiple, BOOL allpages)
 {
-#ifndef __WIN32__
-DLGPROC lpProcPage;
-#endif
 DLGPROC lpProc;
 BOOL flag;
 LPSTR dlgname;
@@ -821,13 +793,7 @@ int i;
 	    dlgname = "PageDlgBox";
 	    lpProc = (DLGPROC)PageDlgProc;
 	}
-#ifdef __WIN32__
 	flag = DialogBoxParam(hlanguage, dlgname, hwndimg, lpProc, (LPARAM)NULL);
-#else
-	lpProcPage = (DLGPROC)MakeProcInstance((FARPROC)lpProc, phInstance);
-	flag = DialogBoxParam(hlanguage, dlgname, hwndimg, lpProcPage, (LPARAM)NULL);
-	FreeProcInstance((FARPROC)lpProcPage);
-#endif
 	if (flag && (psfile.page_list.current >= 0))
 		*ppage = psfile.page_list.current + 1;
 	return flag;
@@ -893,27 +859,16 @@ char buf[MAXSTR];
 BOOL
 get_bbox(void)
 {
-#ifndef __WIN32__
-DLGPROC lpfnBoundingBoxProc;
-#endif
 	bbox.valid = FALSE;
 	bbox.llx = bbox.lly = bbox.urx = bbox.ury = 0;
 	if ((gsdll.state != PAGE) && (gsdll.state != IDLE)) {
 	    gserror(IDS_EPSNOBBOX, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    return FALSE;
 	}
-#ifdef __WIN32__
 	hDlgModeless = CreateDialogParam(hlanguage, "BoundingBoxDlgBox", hwndimg, BoundingBoxDlgProc, (LPARAM)NULL);
-#else
-	lpfnBoundingBoxProc = (DLGPROC)MakeProcInstance((FARPROC)BoundingBoxDlgProc, phInstance);
-	hDlgModeless = CreateDialogParam(hlanguage, "BoundingBoxDlgBox", hwndimg, lpfnBoundingBoxProc, (LPARAM)NULL);
-#endif
 	while (hDlgModeless) {
 	    do_message();	/* wait for bounding box to be obtained */
 	}
-#ifndef __WIN32__
-	FreeProcInstance((FARPROC)lpfnBoundingBoxProc);
-#endif
 	return bbox.valid;
 }
 
@@ -956,17 +911,8 @@ BOOL
 pstoeps_warn(void)
 {
 int flag;
-#ifndef __WIN32__
-DLGPROC lpProcPSTOEPS;
-#endif
     nHelpTopic = IDS_TOPICPSTOEPS;
-#ifdef __WIN32__
     flag = DialogBoxParam(hlanguage, "PSTOEPSDlgBox", hwndimg, PSTOEPSDlgProc, (LPARAM)NULL);
-#else
-    lpProcPSTOEPS = (DLGPROC)MakeProcInstance((FARPROC)PSTOEPSDlgProc, phInstance);
-    flag = DialogBoxParam(hlanguage, "PSTOEPSDlgBox", hwndimg, lpProcPSTOEPS, (LPARAM)NULL);
-    FreeProcInstance((FARPROC)lpProcPSTOEPS);
-#endif
     return (flag == IDYES);
 }
 
@@ -1028,20 +974,11 @@ BOOL
 install_gsdll(void)
 {
 BOOL flag;
-#ifndef __WIN32__
-DLGPROC lpProcInstall;
-#endif
 /*
 	nHelpTopic = IDS_TOPICINSTALL;
 */
 	nHelpTopic = IDS_TOPICADVANCEDCFG;
-#ifdef __WIN32__
 	flag = DialogBoxParam(hlanguage, "InstallDlgBox", hwndimg, InstallDlgProc, (LPARAM)NULL);
-#else
-	lpProcInstall = (DLGPROC)MakeProcInstance((FARPROC)InstallDlgProc, phInstance);
-	flag = DialogBoxParam(hlanguage, "InstallDlgBox", hwndimg, lpProcInstall, (LPARAM)NULL);
-	FreeProcInstance((FARPROC)lpProcInstall);
-#endif
 	if (flag)
 	    option.configured = TRUE;
 	return flag;
@@ -1236,14 +1173,7 @@ DisplaySettingsDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 void
 display_settings()
 {
-#ifdef __WIN32__
 	DialogBoxParam(hlanguage, "DisplaySettingsDlgBox", hwndimg, DisplaySettingsDlgProc, (LPARAM)NULL);
-#else
-	DLGPROC lpProcDisplaySettings;
-	lpProcDisplaySettings = (DLGPROC)MakeProcInstance((FARPROC)DisplaySettingsDlgProc, phInstance);
-	DialogBoxParam(hlanguage, "DisplaySettingsDlgBox", hwndimg, lpProcDisplaySettings, (LPARAM)NULL);
-	FreeProcInstance((FARPROC)lpProcDisplaySettings);
-#endif
 }
 
 /* dialog box for selecting PDF2PS options */
@@ -1293,17 +1223,8 @@ BOOL
 get_pdf2ps_options(void)
 {
 int flag;
-#ifndef __WIN32__
-DLGPROC lpProcPDF2PS;
-#endif
     nHelpTopic = IDS_TOPICOPEN;
-#ifdef __WIN32__
     flag = DialogBoxParam(hlanguage, "PDF2PSDlgBox", hwndimg, PDF2PSDlgProc, (LPARAM)NULL);
-#else
-    lpProcPDF2PS = (DLGPROC)MakeProcInstance((FARPROC)PDF2PSDlgProc, phInstance);
-    flag = DialogBoxParam(hlanguage, "PDF2PSDlgBox", hwndimg, lpProcPDF2PS, (LPARAM)NULL);
-    FreeProcInstance((FARPROC)lpProcPDF2PS);
-#endif
     return flag;
 }
 
@@ -1334,14 +1255,9 @@ TextDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
             SetDlgItemText(hDlg, TEXTWIN_MLE, twbuf);
 	    {
 	    DWORD linecount;
-#ifdef __WIN32__
 	    /* EM_SETSEL, followed by EM_SCROLLCARET doesn't work */
 	    linecount = SendDlgItemMessage(hDlg, TEXTWIN_MLE, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
 	    SendDlgItemMessage(hDlg, TEXTWIN_MLE, EM_LINESCROLL, (WPARAM)0, (LPARAM)linecount-18);
-#else
-	    linecount = SendDlgItemMessage(hDlg, TEXTWIN_MLE, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
-	    SendDlgItemMessage(hDlg, TEXTWIN_MLE, EM_LINESCROLL, (WPARAM)0, MAKELPARAM(linecount-18, 0));
-#endif
 	    }
             return(TRUE);
         case WM_COMMAND:
@@ -1377,11 +1293,7 @@ TextDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			MessageBeep(-1);
 			return(FALSE);
 		    }
-#ifdef __WIN32__
 		    strncpy(p, twbuf+start, end-start);
-#else
-		    lstrcpyn(p, twbuf+start, end-start);
-#endif
 		    GlobalUnlock(hglobal);
 		    OpenClipboard(hwndimg);
 		    EmptyClipboard();
@@ -1400,24 +1312,17 @@ TextDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 void 
 gs_showmess(void)
 {
-#ifdef __WIN32__
     nHelpTopic = IDS_TOPICMESS;
     DialogBoxParam(hlanguage, "TextDlgBox", hwndimg, TextDlgProc, (LPARAM)NULL);
-#else
-    DLGPROC lpProcText;
-    nHelpTopic = IDS_TOPICMESS;
-    lpProcText = (DLGPROC)MakeProcInstance((FARPROC)TextDlgProc, phInstance);
-    DialogBoxParam(hlanguage, "TextDlgBox", hwndimg, lpProcText, (LPARAM)NULL);
-    FreeProcInstance((FARPROC)lpProcText);
-#endif
 }
 
 
 /* Add string for Ghostscript message window */
 void
-gs_addmess_count(char GVFAR *str, int count)
+gs_addmess_count(const char *str, int count)
 {
-LPSTR p;
+char *p;
+const char *s;
 int i, lfcount;
     /* if debugging, write to a log file */
     if (debug & DEBUG_LOG) {
@@ -1430,11 +1335,11 @@ int i, lfcount;
 
     /* we need to add \r after each \n, so count the \n's */
     lfcount = 0;
-    p = str;
+    s = str;
     for (i=0; i<count; i++) {
-	if (*p == '\n')
+	if (*s == '\n')
 	    lfcount++;
-	p++;
+	s++;
     }
     if (count + lfcount >= TWSCROLL)
 	return;		/* too large */
@@ -1460,7 +1365,7 @@ int i, lfcount;
 }
 
 void
-gs_addmess(char GVFAR *str)
+gs_addmess(const char *str)
 {
     gs_addmess_count(str, lstrlen(str));
 }
@@ -1480,13 +1385,13 @@ DSCErrorDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
 		case IDOK:
-                    EndDialog(hDlg, CDSC_OK);
+                    EndDialog(hDlg, CDSC_RESPONSE_OK);
                     return(TRUE);
                 case IDCANCEL:
-                    EndDialog(hDlg, CDSC_CANCEL);
+                    EndDialog(hDlg, CDSC_RESPONSE_CANCEL);
                     return(TRUE);
                 case DSC_IGNORE_ALL:
-                    EndDialog(hDlg, CDSC_IGNORE_ALL);
+                    EndDialog(hDlg, CDSC_RESPONSE_IGNORE_ALL);
                     return(TRUE);
 		case ID_HELP:
 		    get_help();

@@ -811,7 +811,7 @@ init(void)
 	}
 	if (strlen(szLogFile) == 0) {
 		MessageBox(HWND_DESKTOP, "Usage: uninstgs logfile.txt", 
-			"Aladdin Ghostscript Uninstall", MB_OK);
+			"GSview Uninstall", MB_OK);
 		return FALSE;
 	}
 	

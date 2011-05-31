@@ -21,11 +21,7 @@
 #ifdef EPSTOOL
 #include "epstool.h"
 #else	/* GSview */
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
+#include "gvc.h"
 #endif
 
 PSBBOX bbox;
@@ -44,7 +40,7 @@ void copy_bbox_header(FILE *f);
 int scan_dib(PREBMAP *ppbmap, unsigned char *pbitmap);
 void shift_preview(unsigned char *preview, int bwidth, int offset);
 void scan_bbox(PREBMAP *pprebmap, PSBBOX *psbbox);
-void get_dib_line(BYTE GVHUGE *line, unsigned char *preview, int width, int bitcount);
+void get_dib_line(BYTE *line, unsigned char *preview, int width, int bitcount);
 
 
 void 
@@ -121,7 +117,7 @@ char * ps_fgets(char *s, int n, FILE *stream)
 /* Assume that end does not occur in the middle of a line */
 /* return TRUE if comment found, FALSE if not found */
 BOOL ps_copy_find(FILE *outfile, FILE *infile, long end, 
-	char *s, int n, char *comment)
+	char *s, int n, const char *comment)
 {
     while ((ftell(infile) < end) && ps_fgets(s, n-1, infile)) {
 	s[n-1] = '\0';
@@ -179,11 +175,16 @@ CDSC *dsc = psfile.dsc;
 		gserror(IDS_MUSTUSEPORTRAIT, 0, MB_ICONEXCLAMATION, 0); 
 		return;
 	    }
+#ifndef UNIX
 	    if (gsdll.lock_device && gsdll.device)
 		gsdll.lock_device(gsdll.device, 1);
-	    if ( (pbitmap = (unsigned char *)get_bitmap()) == (unsigned char *)NULL) {
+#endif
+	    if ( (pbitmap = (unsigned char *)get_bitmap()) 
+		== (unsigned char *)NULL) {
+#ifndef UNIX
 		if (gsdll.lock_device && gsdll.device)
 		    gsdll.lock_device(gsdll.device, 0);
+#endif
 		play_sound(SOUND_ERROR);
 		return;
 	    }
@@ -197,13 +198,28 @@ CDSC *dsc = psfile.dsc;
 	    bbox.valid = FALSE;
 	    scan_bbox(&prebmap, &devbbox);
 	    release_bitmap();
+#ifndef UNIX
 	    if (gsdll.lock_device && gsdll.device)
 		gsdll.lock_device(gsdll.device, 0);
+#endif
 	    if (devbbox.valid) {
 		bbox.llx = (int)(devbbox.llx / option.xdpi * 72 - 0.5);
 		bbox.lly = (int)(devbbox.lly / option.ydpi * 72 - 0.5);
 		bbox.urx = (int)(devbbox.urx / option.xdpi * 72 + 1.5);
 		bbox.ury = (int)(devbbox.ury / option.ydpi * 72 + 1.5);
+		if (display.epsf_clipped) {
+		    /* correct for clipped page */
+		    int xoffset = 0;
+		    int yoffset = 0;
+		    if (dsc->bbox != (CDSCBBOX *)NULL) {
+			xoffset = dsc->bbox->llx;
+			yoffset = dsc->bbox->lly;
+		    }
+		    bbox.llx += xoffset;
+		    bbox.lly += yoffset;
+		    bbox.urx += xoffset;
+		    bbox.ury += yoffset;
+		}
 		bbox.valid = TRUE;
 	    }
 	    if (!bbox.valid) {
@@ -293,8 +309,8 @@ CDSC *dsc = psfile.dsc;
 	    ps_copy(f, psfile.file, dsc->begindefaults, dsc->enddefaults);
 	    ps_copy(f, psfile.file, dsc->beginprolog, dsc->endprolog);
 	    ps_copy(f, psfile.file, dsc->beginsetup, dsc->endsetup);
-	    if (dsc->page_count > 0)
-		ps_copy(f, psfile.file, dsc->page[0].begin, dsc->page[0].end);
+	    if (dsc->page_count)
+	        ps_copy(f, psfile.file, dsc->page[0].begin, dsc->page[0].end);
 	    ps_copy(f, psfile.file, dsc->begintrailer, dsc->endtrailer);
 	    fclose(f);
 	    info_wait(IDS_NOWAIT);
@@ -555,7 +571,7 @@ int i;
 	    while (isdigit((int)(*p)))
 	        p++;
 	}
-	ppbmap->bits = ((BYTE GVHUGE *)p) +1;
+	ppbmap->bits = ((BYTE *)p) +1;
         ppbmap->bytewidth = (( ppbmap->width * ppbmap->depth + 7) & ~7) >> 3;
 	ppbmap->topleft = TRUE;
     }
@@ -576,7 +592,7 @@ scan_dib(PREBMAP *ppbmap, unsigned char *pbitmap)
 	ppbmap->width = (short)get_word(pbitmap+BITMAP1_WIDTH);
 	ppbmap->height = (short)get_dword(pbitmap+BITMAP1_HEIGHT);
 	ppbmap->depth = get_word(pbitmap+BITMAP1_BITCOUNT);
-	ppbmap->bits =  (((BYTE GVHUGE *)pbitmap) + size)
+	ppbmap->bits =  (((BYTE *)pbitmap) + size)
 			+ dib_pal_colors(pbitmap) * RGB3_LENGTH; 
 	ppbmap->os2 = TRUE;
     }
@@ -584,7 +600,7 @@ scan_dib(PREBMAP *ppbmap, unsigned char *pbitmap)
 	ppbmap->width = (LONG)get_dword(pbitmap+BITMAP2_WIDTH);
 	ppbmap->height = (LONG)get_dword(pbitmap+BITMAP2_HEIGHT);
 	ppbmap->depth = get_word(pbitmap+BITMAP2_BITCOUNT);
-	ppbmap->bits =  (((BYTE GVHUGE *)pbitmap) + size)
+	ppbmap->bits =  (((BYTE *)pbitmap) + size)
 			+ dib_pal_colors(pbitmap) * RGB4_LENGTH; 
 	ppbmap->os2 = FALSE;
     }
@@ -669,12 +685,12 @@ scan_colors(PREBMAP *ppbmap, unsigned char *pbitmap)
 }
 
 /* return pointer to bitmap bits */
-BYTE GVHUGE *
+BYTE *
 get_dib_bits(unsigned char *pbitmap)
 {
-BYTE GVHUGE *lpDibBits;
+BYTE *lpDibBits;
 	unsigned int size = get_dword(pbitmap);
-	lpDibBits = (((BYTE GVHUGE *)pbitmap) + size);
+	lpDibBits = (((BYTE *)pbitmap) + size);
 	if (size == BITMAP1_LENGTH)
 	    lpDibBits += dib_pal_colors(pbitmap) * RGB3_LENGTH; 
 	else
@@ -686,7 +702,7 @@ BYTE GVHUGE *lpDibBits;
 /* also works for PBM (pnmraw) bitmap */
 /* preview has 0=black, 1=white */
 void
-get_dib_line(BYTE GVHUGE *line, unsigned char *preview, int width, int bitcount)
+get_dib_line(BYTE *line, unsigned char *preview, int width, int bitcount)
 {
 int bwidth = ((width + 7) & ~7) >> 3; /* byte width with 1 bit/pixel */
 unsigned char omask;
@@ -762,7 +778,7 @@ int i;
 	    newpbm->biClrUsed = 0;
 	    newpbm->biClrImportant = 0;
 	    /* write palette */
-	    prgb = ((BYTE GVFAR *)newpbm) + sizeof(BITMAP2);
+	    prgb = ((BYTE *)newpbm) + sizeof(BITMAP2);
 	    switch (ppbmap->depth) {
 		case 24:
 		    break;	/* no palette */
@@ -1039,7 +1055,7 @@ DWORD ifd_next;
 DWORD tiff_end, end;
 int i;
 unsigned char *preview;
-BYTE GVHUGE *line;
+BYTE *line;
 int source_bwidth, bwidth;
 BOOL soft_extra = FALSE;
 PREBMAP prebmap;
@@ -1162,9 +1178,9 @@ int lastrow;
 	    }
 	    if (prebmap.bits) {
 		if (prebmap.topleft)
-		    line = (BYTE GVHUGE *)prebmap.bits + ((long)prebmap.bytewidth * (prebmap.height - devbbox.ury));
+		    line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (prebmap.height - devbbox.ury));
 		else
-		    line = (BYTE GVHUGE *)prebmap.bits + ((long)prebmap.bytewidth * (devbbox.ury-1));
+		    line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (devbbox.ury-1));
 	    }
 	    else {
 #if defined(_Windows) && !defined(EPSTOOL)
@@ -1182,7 +1198,7 @@ int lastrow;
 		for (i = 0; i< lastrow; i++) {
 #if defined(_Windows) && !defined(EPSTOOL)
 		    if (prebmap.bits == NULL)
-			gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE GVFAR *)line, devbbox.ury-1-(i+is));
+			gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, devbbox.ury-1-(i+is));
 #endif
 		    if (tiff4 || prebmap.depth==1)
 			get_dib_line(line, preview, prebmap.width, prebmap.depth);
@@ -1481,9 +1497,9 @@ int lastrow;
 
 	if (prebmap.bits) {
 	    if (prebmap.topleft)
-		line = (BYTE GVHUGE *)prebmap.bits + ((long)prebmap.bytewidth * (prebmap.height - devbbox.ury));
+		line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (prebmap.height - devbbox.ury));
 	    else
-		line = (BYTE GVHUGE *)prebmap.bits + ((long)prebmap.bytewidth * (devbbox.ury-1));
+		line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (devbbox.ury-1));
 	}
 	else {
 #if defined(_Windows) && !defined(EPSTOOL)
@@ -1501,7 +1517,7 @@ int lastrow;
 	    for (i = 0; i < lastrow; i++) {
 #if defined(_Windows) && !defined(EPSTOOL)
 		if (prebmap.bits == NULL)
-		    gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE GVFAR *)line, devbbox.ury-1-(i+is));
+		    gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, devbbox.ury-1-(i+is));
 #endif
 		if (tiff4 || prebmap.depth==1)
 		    get_dib_line(line, preview, prebmap.width, prebmap.depth);
@@ -1556,7 +1572,6 @@ struct eps_header_s eps_header;
 FILE *tpsfile;
 char tpsname[MAXSTR];
 int code;
-CDSC *dsc = psfile.dsc;
 	
 	if ( (pbitmap = (unsigned char *)get_bitmap()) == (unsigned char *)NULL) {
 	    play_sound(SOUND_ERROR);
@@ -1578,6 +1593,7 @@ CDSC *dsc = psfile.dsc;
 	}
 
 	if (calc_bbox) {
+	    CDSC *dsc = psfile.dsc;
 	    /* we need to copy the psfile to a temporary file */
 	    /* because we will be changing the %%BoundingBox line */
 	    if ( (tpsfile = gp_open_scratch_file(szScratch, tpsname, "wb")) == (FILE *)NULL) {
@@ -1588,8 +1604,8 @@ CDSC *dsc = psfile.dsc;
 	    ps_copy(tpsfile, psfile.file, dsc->begindefaults, dsc->enddefaults);
 	    ps_copy(tpsfile, psfile.file, dsc->beginprolog, dsc->endprolog);
 	    ps_copy(tpsfile, psfile.file, dsc->beginsetup, dsc->endsetup);
-	    if (dsc->page_count > 0)
-		ps_copy(tpsfile, psfile.file, dsc->page[0].begin, dsc->page[0].end);
+	    if (dsc->page_count)
+	        ps_copy(tpsfile, psfile.file, dsc->page[0].begin, dsc->page[0].end);
 	    ps_copy(tpsfile, psfile.file, dsc->begintrailer, dsc->endtrailer);
 	    fclose(tpsfile);
 	    if ( (tpsfile = fopen(tpsname, "rb")) == (FILE *)NULL) {
@@ -1666,13 +1682,13 @@ CDSC *dsc = psfile.dsc;
 		fwrite(buffer, 1, count, epsfile);
 	}
 	else {
+	    CDSC *dsc = psfile.dsc;
 	    ps_copy(epsfile, psfile.file, dsc->begincomments, dsc->endcomments);
 	    ps_copy(epsfile, psfile.file, dsc->begindefaults, dsc->enddefaults);
 	    ps_copy(epsfile, psfile.file, dsc->beginprolog, dsc->endprolog);
 	    ps_copy(epsfile, psfile.file, dsc->beginsetup, dsc->endsetup);
-	    if (dsc->page_count > 0)
-		ps_copy(epsfile, psfile.file, dsc->page[0].begin, 
-		    dsc->page[0].end);
+	    if (dsc->page_count)
+	        ps_copy(epsfile, psfile.file, dsc->page[0].begin, dsc->page[0].end);
 	    ps_copy(epsfile, psfile.file, dsc->begintrailer, dsc->endtrailer);
 	}
 	
@@ -1701,7 +1717,7 @@ write_interchange(FILE *f, unsigned char *pbitmap, BOOL calc_bbox)
 {
 	int i, j;
 	unsigned char *preview;
-	BYTE GVHUGE *line;
+	BYTE *line;
 	int preview_width, bwidth;
 	int lines_per_scan;
 	PREBMAP prebmap;
@@ -1774,9 +1790,9 @@ write_interchange(FILE *f, unsigned char *pbitmap, BOOL calc_bbox)
 
 	if (prebmap.bits) {
 	    if (prebmap.topleft)
-		line = (BYTE GVHUGE *)prebmap.bits + ((long)prebmap.bytewidth * (prebmap.height - devbbox.ury));
+		line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (prebmap.height - devbbox.ury));
 	    else
-		line = (BYTE GVHUGE *)prebmap.bits + ((long)prebmap.bytewidth * (devbbox.ury-1));
+		line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (devbbox.ury-1));
 	}
 	else {
 #if defined(_Windows) && !defined(EPSTOOL)
@@ -1789,7 +1805,7 @@ write_interchange(FILE *f, unsigned char *pbitmap, BOOL calc_bbox)
 	for (i = 0; i < (devbbox.ury-devbbox.lly); i++) {
 #if defined(_Windows) && !defined(EPSTOOL)
 	    if (prebmap.bits == NULL)
-	        gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE GVFAR *)line, devbbox.ury-1-i);
+	        gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, devbbox.ury-1-i);
 #endif
 	    get_dib_line(line, preview, prebmap.width, prebmap.depth);
 	    if (devbbox.llx)
@@ -1818,7 +1834,7 @@ write_interchange(FILE *f, unsigned char *pbitmap, BOOL calc_bbox)
 	ps_copy(f, psfile.file, dsc->begindefaults, dsc->enddefaults);
 	ps_copy(f, psfile.file, dsc->beginprolog, dsc->endprolog);
 	ps_copy(f, psfile.file, dsc->beginsetup, dsc->endsetup);
-	if (dsc->page_count > 0)
+	if (dsc->page_count)
 	    ps_copy(f, psfile.file, dsc->page[0].begin, dsc->page[0].end);
 	ps_copy(f, psfile.file, dsc->begintrailer, dsc->endtrailer);
 	return 0;
@@ -1878,12 +1894,12 @@ void
 scan_bbox(PREBMAP *pprebmap, PSBBOX *devbbox)
 {
 	unsigned char *preview;
-	BYTE GVHUGE *line;
+	BYTE *line;
 	int bwidth = ((pprebmap->width + 7) & ~7) >> 3; /* byte width with 1 bit/pixel */
 	int i, j, k, l;
 	int x;
 	BYTE ch;
-	BYTE GVFAR *chline;
+	BYTE *chline;
 	unsigned char omask;
 
 	devbbox->llx = pprebmap->width;
@@ -1896,9 +1912,9 @@ scan_bbox(PREBMAP *pprebmap, PSBBOX *devbbox)
 
 	if (pprebmap->bits) {
 	    if (pprebmap->topleft)
-		line = (BYTE GVHUGE *)pprebmap->bits + ((long)pprebmap->bytewidth * (pprebmap->height-1));
+		line = (BYTE *)pprebmap->bits + ((long)pprebmap->bytewidth * (pprebmap->height-1));
 	    else
-		line = (BYTE GVHUGE *)pprebmap->bits;
+		line = (BYTE *)pprebmap->bits;
 	}
 	else {
 #if defined(_Windows) && !defined(EPSTOOL)
@@ -1917,7 +1933,7 @@ scan_bbox(PREBMAP *pprebmap, PSBBOX *devbbox)
 	    /* get 1bit/pixel line, 0=black, 1=white */
 #if defined(_Windows) && !defined(EPSTOOL)
 	    if (pprebmap->bits == NULL)
-	        gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE GVFAR *)line, i);
+	        gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, i);
 #endif
 	    get_dib_line(line, preview, pprebmap->width, pprebmap->depth);
 	    chline = preview;
@@ -2319,7 +2335,7 @@ unsigned char *prgb;
     write_dword(pbmi->biClrUsed, f);
     write_dword(pbmi->biClrImportant, f);
 
-    prgb = ((BYTE GVFAR *)pbmi) + pbmi->biSize;
+    prgb = ((BYTE *)pbmi) + pbmi->biSize;
     for (i=0; i<palcount; i++) {
 	fputc(*prgb++, f);
 	fputc(*prgb++, f);
@@ -2336,8 +2352,8 @@ PREBMAP prebmap;
 int i;
 int wx;
 int ny, sy, dy, wy;
-BYTE GVHUGE *line;
-BYTE GVFAR *line2;
+BYTE *line;
+BYTE *line2;
 LPBITMAP2 pbmi;
 int bsize;
 int bitoffset;
@@ -2383,8 +2399,8 @@ unsigned long size;
 	pbmi->biClrUsed = 0;		/* write out full palette */
 	pbmi->biClrImportant = 0;
 
-	line2 = (BYTE GVFAR *)malloc(prebmap.bytewidth);
-	if (line2 == (BYTE GVFAR *)NULL) {
+	line2 = (BYTE *)malloc(prebmap.bytewidth);
+	if (line2 == (BYTE *)NULL) {
 	   gserror(0, "not enough memory to copy bitmap", MB_ICONEXCLAMATION, SOUND_ERROR);
 	   return 1;
 	}
@@ -2392,9 +2408,9 @@ unsigned long size;
 
 	if (prebmap.bits) {
 	    if (prebmap.topleft)
-		line = (BYTE GVHUGE *)prebmap.bits + ((long)prebmap.bytewidth * (prebmap.height - pdevbbox->lly -1));
+		line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (prebmap.height - pdevbbox->lly -1));
 	    else
-		line = (BYTE GVHUGE *)prebmap.bits + ((long)prebmap.bytewidth * (pdevbbox->lly));
+		line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (pdevbbox->lly));
 	}
 	else {
 #if defined(_Windows) && !defined(EPSTOOL)
@@ -2454,7 +2470,7 @@ unsigned long size;
 	    for (i=0; i<ny; i++) {
 #if defined(_Windows) && !defined(EPSTOOL)
 		if (prebmap.bits == NULL)
-		    gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE GVFAR *)line, i+sy);
+		    gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, i+sy);
 #endif
 	        memmove(line2,  line, prebmap.bytewidth);
 		shift_preview(line2, prebmap.bytewidth, bitoffset);
@@ -2496,7 +2512,7 @@ unsigned long size;
 	for (i=0; i<wy; i++) {
 #if defined(_Windows) && !defined(EPSTOOL)
 	    if (prebmap.bits == NULL)
-		gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE GVFAR *)line, i+sy);
+		gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, i+sy);
 #endif
 
 	    memmove(line2,  line, prebmap.bytewidth);
@@ -2567,7 +2583,7 @@ CDSC *dsc = psfile.dsc;
 	    ps_copy(tpsfile, psfile.file, dsc->begindefaults, dsc->enddefaults);
 	    ps_copy(tpsfile, psfile.file, dsc->beginprolog, dsc->endprolog);
 	    ps_copy(tpsfile, psfile.file, dsc->beginsetup, dsc->endsetup);
-	    if (dsc->page_count > 0)
+	    if (dsc->page_count)
 		ps_copy(tpsfile, psfile.file, dsc->page[0].begin, dsc->page[0].end);
 	    ps_copy(tpsfile, psfile.file, dsc->begintrailer, dsc->endtrailer);
 	    fclose(tpsfile);

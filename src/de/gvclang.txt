@@ -12,7 +12,7 @@
  entwickelten PostScript Document Structuring Conventions
  (DSC-Konventionen) entsprechen, auf dem Bildschirm dargestellt und auf
  einen Drucker ausgegeben werden.
- Die Version GSview 3.4 erfordert Ghostscript in der Version 4.03 - 6.99.
+ Die Version GSview 3.5 erfordert Ghostscript in der Version 4.03 - 6.99.
 2Installation
 ?Installation
  Zur Installation von GSview verwenden Sie das Installationsprogramm
@@ -192,11 +192,11 @@ E
  Kopieren Sie gsview32.ini oder gvpm.ini aus dem Systemverzeichnis oder dem Benutzerprofil-Verzeichnis in
  das Gsview Verzeichnis und entfernen alle Einträge bis auf:
   [Options]
-  Version=3.4
-  GSversion=601
+  Version=3.5
+  GSversion=650
   Configured=1
-  GhostscriptDLL=E:\GSTOOLS\gs6.01\gsdll32.dll
-  GhostscriptInclude=E:\GSTOOLS\gs6.01;E:\GSTOOLS\fonts
+  GhostscriptDLL=E:\gs\gs6.50\gsdll32.dll
+  GhostscriptInclude=E:\gs\gs6.50;E:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Wenn ein Benutzer Gsview startet, dann wird normalerweise seine INI Datei benutzt.
  Startet Gsview das erste Mal oder die Version von Gsview stimmt nicht mit der in der INI Datei überein, dann
@@ -1275,7 +1275,7 @@ W
  Die Homepage von pstoedit ist
   http://www.geocities.com/SiliconValley/Network/1958/pstoedit/index.html
  Wegen Updates von pstoedit sehen Sie auf der Homepage nach oder auf
-  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.html
+  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
 
  `pstoedit` kann innerhalb von GSview aufgerufen werden, benutzen Sie
  `Bearbeiten | Konvertierung in Vektor Format`.

@@ -23,7 +23,6 @@
 #define _export
 #endif
 
-#ifdef __WIN32__
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
@@ -32,22 +31,4 @@ DllEntryPoint(HINSTANCE hInst, DWORD fdwReason, LPVOID lpReserved)
 {
 	return TRUE;
 }
-
-
-#else
-#ifdef __BORLANDC__
-#pragma argsused
-#endif
-int WINAPI _export
-LibMain(HINSTANCE hInstance, WORD wDataSeg, WORD wHeapSize, LPSTR lpszCmdLine)
-{
-	return 1;
-}
-
-int WINAPI _export
-WEP(int nParam)
-{
-	return 1;
-}
-#endif
 

@@ -18,11 +18,20 @@
 /* gvcmisc.c */
 /* Miscellaneous GSview routines common to Windows and PM */
 
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
+#include "gvc.h"
+
+/* returns error code from GS */
+void
+gs_addmessf(const char *fmt, ...)
+{
+va_list args;
+int count;
+char buf[1024];
+	va_start(args,fmt);
+	count = vsprintf(buf,fmt,args);
+        gs_addmess(buf);
+	va_end(args);
+}
 
 void
 make_cwd(const char *filename)
@@ -58,6 +67,7 @@ error_message(char *str)
     post_img_message(WM_CLOSE, 0);
 }
 
+#if defined(_Windows) || defined(OS2)
 void
 info_init(HWND hwnd)
 {
@@ -137,9 +147,9 @@ info_init(HWND hwnd)
 			buf[0] = '\0';
 	    }
 	    SetDlgItemText(hwnd, INFO_ORDER, buf);
-	    if (dsc->media && dsc->media->name) {
-		sprintf(buf,"%.200s %g %g",dsc->media->name,
-		    dsc->media->width, dsc->media->height);
+	    if (dsc->page_media && dsc->page_media->name) {
+		sprintf(buf,"%.200s %g %g",dsc->page_media->name,
+		    dsc->page_media->width, dsc->page_media->height);
 	    }
 	    else {
 		buf[0] = '\0';
@@ -170,6 +180,7 @@ info_init(HWND hwnd)
 	SetDlgItemText(hwnd, INFO_FILE, buf);
     }
 }
+#endif
 
 /* read settings fron INI file */
 void
@@ -177,8 +188,10 @@ read_profile(char *ininame)
 {
 int i, j;
 char profile[MAXSTR];
-char *section = INISECTION;
+const char *section = INISECTION;
 PROFILE *prf;
+    if (debug & DEBUG_GENERAL)
+	gs_addmessf("Reading profile \042%s\042\n", ininame);
     prf = profile_open(ininame);
     profile_read_string(prf, section, "Configured", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
@@ -362,7 +375,7 @@ PROFILE *prf;
 
     profile_read_string(prf, section, "PrintFixedMedia", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
-	    option.print_fixed_media = i;
+	option.print_fixed_media = i;
 
     profile_read_string(prf, section, "ConvertDevice", "", profile, sizeof(profile));
     if (strlen(profile)!=0)
@@ -373,15 +386,15 @@ PROFILE *prf;
 
     profile_read_string(prf, section, "ConvertFixedMedia", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
-	    option.convert_fixed_media = i;
+	option.convert_fixed_media = i;
 
     profile_read_string(prf, section, "PrintGDIDepth", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
-	    option.print_gdi_depth = i+IDC_MONO;
+	option.print_gdi_depth = i+IDC_MONO;
 
     profile_read_string(prf, section, "PrintGDIFixedMedia", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
-	    option.print_gdi_fixed_media = i;
+	option.print_gdi_fixed_media = i;
 
 
     profile_read_string(prf, section, "PrinterPort", "", profile, sizeof(option.printer_port)-1);
@@ -421,9 +434,11 @@ void
 write_profile(void)
 {
 char profile[MAXSTR];
-char *section = INISECTION;
+const char *section = INISECTION;
 int i;
 PROFILE *prf;
+	if (debug & DEBUG_GENERAL)
+	    gs_addmessf("Writing profile \042%s\042\n", szIniFile);
 	prf = profile_open(szIniFile);
 	if (prf == (PROFILE *)NULL) {
 	    message_box("profile_open() failed, no memory\n", 0);
@@ -574,7 +589,7 @@ PROFILE *prf;
 void
 write_profile_last_files(void)
 {
-char *section = INISECTION;
+const char *section = INISECTION;
 PROFILE *prf;
 	prf = profile_open(szIniFile);
 	profile_write_string(prf, section, "LastFile1", last_files[0]);
@@ -646,7 +661,7 @@ void * debug_realloc(void *block, size_t size)
 	    }
 	}
 	sprintf(buf, "realloc old %ld, new %ld, allocated = %ld\r\n",
-	    oldsize, size, allocated_memory);
+	    oldsize, (long)size, allocated_memory);
 	gs_addmess(buf);
 #ifdef DEBUG_MALLOC
 	if (malloc_file == (FILE *)NULL)

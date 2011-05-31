@@ -20,23 +20,23 @@
 CFLAGS=-D__WIN32__ -DEPSTOOL -I..\src -I.
 CC=cl
 
-OBJS=epstool.obj gvceps.obj gvcdsc.obj gvcfile.obj gvwgsver.obj
+OBJS=epstool.obj gvceps.obj dscparse.obj dscutil.obj gvwgsver.obj
 
 all: epstool.exe
 
 .cpp.obj:
 	$(CC) $(CFLAGS) -c $*.cpp
 
-epstool.obj: epstool.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h ../src/gvceps.cpp
+epstool.obj: epstool.cpp epstool.h ../src/dscparse.h ../src/gvceps.cpp
 	$(CC) -c $(CFLAGS) epstool.cpp
 
-gvcdsc.obj: ../src/gvcdsc.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
-	$(CC) -c $(CFLAGS) ../src/gvcdsc.cpp
+dscparse.obj: ../src/dscparse.cpp epstool.h ../src/dscparse.h
+	$(CC) -c $(CFLAGS) ../src/dscparse.cpp
 
-gvcfile.obj: ../src/gvcfile.cpp ../src/gvcfile.h
-	$(CC) -c $(CFLAGS) ../src/gvcfile.cpp
+dscutil.obj: ../src/dscutil.cpp epstool.h ../src/dscparse.h
+	$(CC) -c $(CFLAGS) ../src/dscutil.cpp
 
-gvceps.obj: ../src/gvceps.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
+gvceps.obj: ../src/gvceps.cpp epstool.h ../src/dscparse.h
 	$(CC) -c $(CFLAGS) ../src/gvceps.cpp
 
 gvwgsver.obj: ../src/gvwgsver.cpp
@@ -52,8 +52,8 @@ veryclean: clean
 clean:
 	-del epstool.map
 	-del epstool.obj
-	-del gvcdsc.obj
-	-del gvcfile.obj
+	-del dscparse.obj
+	-del dscutil.obj
 	-del gvceps.obj
 	-del gvwgsver.obj
 	-del epstool.ilk
@@ -72,10 +72,9 @@ files.txt: makefile.msc
 	echo src/LICENCE>>files.txt
 	echo src/gvceps.cpp>>files.txt
 	echo src/gvceps.h>>files.txt
-	echo src/gvcdsc.cpp>>files.txt
-	echo src/gvcdsc.h>>files.txt
-	echo src/gvcfile.cpp>>files.txt
-	echo src/gvcfile.h>>files.txt
+	echo src/dscparse.cpp>>files.txt
+	echo src/dscutil.cpp>>files.txt
+	echo src/dsc.h>>files.txt
 	echo src/gvwgsver.cpp>>files.txt
 	echo epstool.exe>>files.txt
 	echo epstool2.exe>>files.txt

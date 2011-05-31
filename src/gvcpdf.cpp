@@ -18,23 +18,101 @@
 /* gvcpdf.c */
 /* Code to display PDF files */
 
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
+#include "gvc.h"
 
 /* This code will work in single thread mode, but won't check message */
 /* queue */
 
+char pdf_pages_tag[] = "%GSVIEW_PDF_PAGES: ";
 char pdf_page_tag[] = "%GSVIEW_PDF_PAGE: ";
 char pdf_media_tag[] = "%GSVIEW_PDF_MEDIA: ";
 char pdf_crop_tag[] = "%GSVIEW_PDF_CROP: ";
 char pdf_rotate_tag[] = "%GSVIEW_PDF_ROTATE: ";
+char pdf_done_tag[] = "%GSVIEW_PDF_DONE: ";
 char pdf_mark_tag[] = "%GSVIEW_PDF_MARK: ";
-int pdf_rotate = IDM_PORTRAIT;
 void pdf_add_link(PDFLINK link);
 
+#define MAX_TAG_LEN 4096
+char pdf_tag_line[MAX_TAG_LEN];
+
+#ifdef UNIX
+int
+pdf_scan(void)
+{
+    if (debug & DEBUG_GENERAL)
+	gs_addmess("pdf_scan:\n");
+    pdf_head();
+
+    /* access every page to collect media, crop box and orientation */
+    gs_printf("/FirstPage where { pop FirstPage } { 1 } ifelse\n1\n");
+    gs_printf("/LastPage where { pop LastPage } { pdfpagecount } ifelse\n");
+    gs_printf("{GSview_PDFpage} for\n");
+    gs_printf("(%s) print (\\n) print flush\n", pdf_done_tag);
+    pdf_trailer();
+    return 0;
+}
+#endif
+
+int
+pdf_head(void)
+{
+int code;
+char filename[MAXSTR];
+char *p, *s;
+    pdf_tag_line[0] = '\0';
+
+    p = filename;
+    for (s = psfile_name(&psfile); *s; s++) {
+	*p++ = *s;
+	if (*s == '\\')
+	    *p++ = '\\';
+    }
+    *p = '\0';
+
+    /* Define our routine for preparing to show a page. */
+    /* This writes out some tags which we capture in the */
+    /* callback to obtain the page size and orientation. */
+    code = gs_printf("/GSview_PDFpage {\n\
+(%s) print dup == flush\n\
+pdfgetpage /Page exch store\n\
+Page /MediaBox pget\n\
+ { (%s) print == flush\n\
+ }\n\
+if\n\
+Page /CropBox pget\n\
+ { (%s) print == flush\n\
+ }\n\
+if\n\
+Page /Rotate pget not { 0 } if\n\
+   (%s) print == flush\n\
+} def\n", pdf_page_tag, pdf_media_tag, pdf_crop_tag, pdf_rotate_tag);
+
+
+    /* we will need to update this pdfmark code to handle */
+    /* embedded dictionaries */
+    if (!code)
+	code = pdf_add_pdfmark();
+
+    /* put these in userdict so we can write to them later */
+    if (!code)
+	code = gs_printf("/Page null def\n/Page# 0 def\n/PDFSave null def\n/DSCPageCount 0 def\n");
+    /* open PDF support dictionaries */
+    if (!code)
+        code = gs_printf("GS_PDF_ProcSet begin\npdfdict begin\n");
+    /* open PDF file */
+    if (!code)
+	code = gs_printf("(%s) (r) file pdfopen begin\n", filename);
+    if (!code)
+	code = gs_printf("/FirstPage where { pop FirstPage } { 1 } ifelse\n ");
+    if (!code)
+	code = gs_printf("/LastPage where { pop LastPage } { pdfpagecount } ifelse\n");
+    /* flush stdout and then send PDF page marker to stdout */
+    /* we capture the page numbers in the DLL callback */
+    if (!code)
+	code = gs_printf("flush (%s) print exch =only ( ) print =only (\n) print flush\n", pdf_pages_tag);
+    /* page numbers should now be captured and CDSC object created */
+    return code;
+}
 
 /* we will need to update this pdfmark code to handle */
 /* embedded dictionaries */
@@ -87,64 +165,6 @@ userdict /pdfmark { \
 \n", pdf_mark_tag);
 }
 
-int
-pdf_head(void)
-{
-int code;
-char filename[MAXSTR];
-char *p, *s;
-    pdf_rotate = IDM_PORTRAIT;
-    p = filename;
-    for (s = psfile_name(&psfile); *s; s++) {
-	*p++ = *s;
-	if (*s == '\\')
-	    *p++ = '\\';
-    }
-    *p = '\0';
-
-    /* Define our routine for preparing to show a page. */
-    /* This writes out some tags which we capture in the */
-    /* callback to obtain the page size and orientation. */
-    code = gs_printf("/GSview_PDFpage {\n\
-pdfgetpage /Page exch store\n\
-Page /MediaBox pget\n\
- { (%s) print == flush\n\
- }\n\
-if\n\
-Page /CropBox pget\n\
- { (%s) print == flush\n\
- }\n\
-if\n\
-Page /Rotate pget not { 0 } if\n\
-   (%s) print == flush\n\
-} def\n", pdf_media_tag, pdf_crop_tag, pdf_rotate_tag);
-
-
-    if (!code)
-	code = pdf_add_pdfmark();
-
-    /* put these in userdict so we can write to them later */
-    if (!code)
-	code = gs_printf("/Page null def\n/Page# 0 def\n/PDFSave null def\n/DSCPageCount 0 def\n");
-    /* open PDF support dictionaries */
-    if (!code)
-        code = gs_printf("GS_PDF_ProcSet begin\npdfdict begin\n");
-    /* open PDF file */
-    if (!code)
-	code = gs_printf("(%s) (r) file pdfopen begin\n", filename);
-    if (!code)
-	code = gs_printf("/FirstPage where { pop FirstPage } { 1 } ifelse\n ");
-    if (!code)
-	code = gs_printf("/LastPage where { pop LastPage } { pdfpagecount } ifelse\n");
-    /* flush stdout and then send PDF page marker to stdout */
-    /* we capture the page numbers in the DLL callback */
-    if (!code)
-	code = gs_printf("flush (%s) print exch =only ( ) print =only (\n) print flush\n", pdf_page_tag);
-    /* page numbers should now be captured and CDSC object created */
-    return code;
-}
-
-
 /* Create a CDSC object for PDF file */
 int 
 pdf_makedoc(int first, int last)
@@ -162,38 +182,22 @@ char tname[MAXSTR];
     strcpy(psfile.name, filename);
     strcpy(psfile.text_name, textname);
     strcpy(psfile.tname, tname);
-    psfile.dsc = new CDSC;
+    psfile.dsc = dsc_init(NULL);
     if (psfile.dsc == (CDSC *)NULL)
 	return FALSE;
     dsc = psfile.dsc;
-    dsc->SetDebug(gs_addmess);
+    dsc_set_debug_function(psfile.dsc, dsc_addmess);
     if (last != 0) {
-	if (dsc->PDFpages(first, last))
-	   return FALSE;
+	int i;
+	char buf[32];
+	for (i=first; i<=last; i++) {
+	   sprintf(buf, "%d", i);
+	   if (dsc_add_page(psfile.dsc, i, buf) == CDSC_ERROR)
+		return FALSE;
+	}
 	psfile.page_list.select = 
 		(BOOL *)malloc( dsc->page_count * sizeof(BOOL) );
     }
-    /* put in some dummy values for the page size and bounding box */
-    dsc->page_bbox = (CDSCBBOX *)malloc(sizeof(CDSCBBOX));
-    if (dsc->page_bbox == (CDSCBBOX *)NULL) {
-	delete dsc;
-	psfile.dsc = (CDSC *)NULL;
-	return FALSE;
-    }
-    dsc->bbox = (CDSCBBOX *)malloc(sizeof(CDSCBBOX));
-    if (dsc->bbox == (CDSCBBOX *)NULL) {
-	delete dsc;
-	psfile.dsc = (CDSC *)NULL;
-	return FALSE;
-    }
-
-    dsc->page_bbox->llx = dsc->page_bbox->lly = 0;
-    dsc->page_bbox->urx = get_paper_width();
-    dsc->page_bbox->ury = get_paper_height();
-
-    dsc->bbox->llx = dsc->bbox->lly = 0;
-    dsc->bbox->urx = dsc->page_bbox->urx;
-    dsc->bbox->ury = dsc->page_bbox->ury;
     psfile.ispdf = TRUE;
     return TRUE;
 }
@@ -210,9 +214,10 @@ pdf_page_init(int pagenum)
 {
     /* Prepare to show a page */
     /* This obtains the page size and orientation */
-    pdf_rotate = IDM_PORTRAIT;
     pdf_free_link();
+#if defined(_Windows) || defined(OS2)
     ignore_sync = TRUE;		/* ignore next GSDLL_SYNC */
+#endif
     return gs_printf("%d GSview_PDFpage\n", pagenum);
 }
 
@@ -318,8 +323,6 @@ int level;
     return p;
 }
 
-#define MAX_TAG_LEN 4096
-
 /* Check stdout for tag giving page range, pdfmarks etc. */
 int
 pdf_process_tag(char *line)
@@ -329,34 +332,62 @@ float x0, x1, y0, y1;
 float temp;
 int rotate;
 unsigned int len = strlen(line);
+static int pdf_page_number;
+static int pdf_page_first;
 
     if ( (len < 1) || (*line != '%') )
 	return FALSE;
 
-    if (psfile.ispdf && (len > sizeof(pdf_page_tag)) &&
-	(strncmp(line, pdf_page_tag, strlen(pdf_page_tag)) == 0) ) {
-	i = sscanf(line+strlen(pdf_page_tag), "%d %d", &first, &last);
+    if (psfile.ispdf && (len >= sizeof(pdf_pages_tag)) &&
+	(strncmp(line, pdf_pages_tag, strlen(pdf_pages_tag)) == 0) ) {
+	i = sscanf(line+strlen(pdf_pages_tag), "%d %d", &first, &last);
+        pdf_page_first = 1;
 	if (i==2) {
 	    if (debug)
-		gs_addmess("Found GSVIEW_PDF_PAGE tag\n");
-	    if (!pdf_makedoc(first, last)) {
-		/* stop processing ASAP */
-		request_mutex();
-		pending.abort = TRUE;
-		pending.now = FALSE;
-		release_mutex();
-		post_img_message(WM_COMMAND, IDM_GSMESS);
+		gs_addmess("Found GSVIEW_PDF_PAGES tag\n");
+	    if (psfile.dsc == (CDSC *)NULL) {
+		pdf_page_first = first;
+		if (!pdf_makedoc(first, last)) {
+		    /* stop processing ASAP */
+		    request_mutex();
+		    pending.abort = TRUE;
+		    pending.now = FALSE;
+		    release_mutex();
+		    post_img_message(WM_COMMAND, IDM_GSMESS);
+		}
 	    }
 	    return TRUE;
 	}
     }
-    if (psfile.ispdf && (len > sizeof(pdf_media_tag)) &&
+#ifdef UNIX
+    if (psfile.ispdf && (len >= sizeof(pdf_done_tag)-1) &&
+	(strncmp(line, pdf_done_tag, strlen(pdf_done_tag)) == 0) ) {
+	if (debug)
+	    gs_addmess("Found GSVIEW_PDF_DONE tag\n");
+extern int command_on_done;
+	command_on_done = IDM_REDISPLAY;
+	close_gs_stdin();	/* Tell GS to exit */
+	return TRUE;
+    }
+#endif
+    if (psfile.ispdf && (len >= sizeof(pdf_page_tag)-1) &&
+	(strncmp(line, pdf_page_tag, strlen(pdf_page_tag)) == 0) ) {
+        pdf_page_number = 0;
+	i = sscanf(line+strlen(pdf_page_tag), "%d", &pdf_page_number);
+	if (i==1) {
+	    pdf_page_number -= pdf_page_first;
+	    if (debug)
+		gs_addmess("Found GSVIEW_PDF_PAGE tag\n");
+	    return TRUE;
+	}
+    }
+    if (psfile.ispdf && (len >= sizeof(pdf_media_tag)) &&
 	(strncmp(line, pdf_media_tag, strlen(pdf_media_tag)) == 0) ) {
 	i = sscanf(line+strlen(pdf_media_tag), "[%f %f %f %f]", &x0, &y0, &x1, &y1);
 	if (i==4) {
 	    if (debug)
 		gs_addmess("Found GSVIEW_PDF_MEDIA tag\n");
-	    /* PDF page size is stored in default page bbox */
+	    /* PDF page size is stored in page media mediabox */
 	    if (x0 > x1) {
 		temp = x0;
 		x0 = x1;
@@ -367,23 +398,64 @@ unsigned int len = strlen(line);
 		y0 = y1;
 		y1 = temp;
 	    }
-	    if (psfile.dsc->page_bbox != (CDSCBBOX *)NULL) {
-		psfile.dsc->page_bbox->llx = (int)x0;
-		psfile.dsc->page_bbox->lly = (int)y0;
-		psfile.dsc->page_bbox->urx = (int)x1;
-		psfile.dsc->page_bbox->ury = (int)y1;
+	    if (psfile.dsc != (CDSC *)NULL) {
+		/* try to find page size in existing media */
+		char buf[MAXSTR];
+		CDSCBBOX bbox;
+		bbox.llx = (int)x0;
+		bbox.lly = (int)y0;
+		bbox.urx = (int)(x1+0.5);
+		bbox.ury = (int)(y1+0.5);
+		sprintf(buf, "%d,%d,%d,%d", bbox.llx, bbox.lly, 
+			bbox.urx, bbox.ury);
+		CDSCMEDIA *m = NULL;
+		for (i=0; i < (int)psfile.dsc->media_count; i++) {
+		    if ( psfile.dsc->media[i]->name &&
+			(strcmp(buf, psfile.dsc->media[i]->name)==0) )
+			m = psfile.dsc->media[i];
+		}
+		if (m == NULL) {
+		    /* add new media */
+		    CDSCMEDIA lm;
+		    lm.name = buf;
+		    lm.width = x1 - x0;
+		    lm.height = y1 - y0;
+		    lm.weight = 80.0;
+		    lm.colour = "";
+		    lm.type = "";
+		    lm.mediabox = &bbox;
+		    dsc_add_media(psfile.dsc, &lm);
+		    if (debug & DEBUG_GENERAL)
+			gs_addmessf("pdf_process_tag: adding media %s\n", buf);
+		}
+		else {
+		    /* known page size */
+		    if (debug & DEBUG_GENERAL)
+			gs_addmessf("pdf_process_tag: already know about media %s\n",
+			     buf);
+		}
+		/* find page size again, and attach to this page */
+		for (i=0; i < (int)psfile.dsc->media_count; i++) {
+		    if ( psfile.dsc->media[i]->name &&
+		      (strcmp(buf, psfile.dsc->media[i]->name)==0) &&
+		      (pdf_page_number < (int)psfile.dsc->page_count) &&
+		      (psfile.dsc->page[pdf_page_number].media == NULL)) {
+			psfile.dsc->page[pdf_page_number].media = 
+				psfile.dsc->media[i];
+			break;
+		    }
+		}
 	    }
 	    return TRUE;
 	}
     }
-    if (psfile.ispdf && (len > sizeof(pdf_crop_tag)) &&
+    if (psfile.ispdf && (len >= sizeof(pdf_crop_tag)) &&
 	(strncmp(line, pdf_crop_tag, strlen(pdf_crop_tag)) == 0) ) {
 	i = sscanf(line+strlen(pdf_crop_tag), "[%f %f %f %f]", &x0, &y0, &x1, &y1);
 	if (i==4) {
 	    if (debug)
 		gs_addmess("Found GSVIEW_PDF_CROP tag\n");
-	    /* perform clipping by using epsf clipping code */
-	    /* PDF crop box is stored in document bbox */
+	    /* PDF crop box size is stored in page bbox */
 	    if (x0 > x1) {
 		temp = x0;
 		x0 = x1;
@@ -394,17 +466,20 @@ unsigned int len = strlen(line);
 		y0 = y1;
 		y1 = temp;
 	    }
-	    psfile.dsc->bbox->llx = (int)x0;
-	    psfile.dsc->bbox->lly = (int)y0;
-	    psfile.dsc->bbox->urx = (int)x1;
-	    psfile.dsc->bbox->ury = (int)y1;
+	    if ((psfile.dsc != NULL) &&
+	        (pdf_page_number < (int)psfile.dsc->page_count) &&
+	        (psfile.dsc->page[pdf_page_number].bbox == NULL)) {
+		dsc_set_page_bbox(psfile.dsc, pdf_page_number, 
+			(int)x0, (int)y0, (int)x1, (int)y1);
+	    }
 	    return TRUE;
 	}
     }
-    if (psfile.ispdf && (len > sizeof(pdf_rotate_tag)) &&
+    if (psfile.ispdf && (len >= sizeof(pdf_rotate_tag)) &&
 	(strncmp(line, pdf_rotate_tag, strlen(pdf_rotate_tag)) == 0) ) {
 	i = sscanf(line+strlen(pdf_rotate_tag), "%d", &rotate);
 	if (i==1) {
+	    int pdf_rotate;
 	    if (debug)
 		gs_addmess("Found GSVIEW_PDF_ROTATE tag\n");
 	    while (rotate < 0)
@@ -413,23 +488,27 @@ unsigned int len = strlen(line);
 		rotate -= 360;
 	    switch (rotate) {
 		case 90:
-		    pdf_rotate = IDM_LANDSCAPE;
+		    pdf_rotate = CDSC_LANDSCAPE;
 		    break;
 		case 180:
-		    pdf_rotate = IDM_UPSIDEDOWN;
+		    pdf_rotate = CDSC_UPSIDEDOWN;
 		    break;
 		case 270:
-		    pdf_rotate = IDM_SEASCAPE;
+		    pdf_rotate = CDSC_SEASCAPE;
 		    break;
 		default:
-		    pdf_rotate = IDM_PORTRAIT;
+		    pdf_rotate = CDSC_PORTRAIT;
 		    break;
 	    }
 	    /* pdf_rotate is used if orientation is auto */
+	    if ((psfile.dsc != NULL) &&
+	        (pdf_page_number < (int)psfile.dsc->page_count)) {
+		psfile.dsc->page[pdf_page_number].orientation = pdf_rotate;
+	    }
 	    return TRUE;
 	}
     }
-    if ((len > sizeof(pdf_mark_tag)) &&
+    if ((len >= sizeof(pdf_mark_tag)) &&
 	(strncmp(line, pdf_mark_tag, strlen(pdf_mark_tag)) == 0) ) {
 	char *p, *key, *value;
 	PDFLINK link;
@@ -520,71 +599,93 @@ unsigned int len = strlen(line);
     return FALSE;
 }
 
-char pdf_tag_line[MAX_TAG_LEN];
 
 /* Check stdout for tag giving page range */
 int
 pdf_checktag(LPSTR str, int len)
 {
 char *p;
-BOOL quote_next = FALSE;
-BOOL inparen = FALSE;
-BOOL found_eol = FALSE;
+BOOL quote_next;
+BOOL inparen;
+BOOL found_eol;
 int code = FALSE;
 unsigned int tag_len;
+int count;
 
-    /* append to local copy */
-    tag_len = strlen(pdf_tag_line);
+    while (len) {
+	/* append to local copy */
+	tag_len = strlen(pdf_tag_line);
+	count = min(len, (int)(sizeof(pdf_tag_line) - 1 - tag_len));
+	len -= count;
+	if (count) {
+	    memcpy(pdf_tag_line+tag_len, str, count);
+	    tag_len += count;
+	    pdf_tag_line[tag_len] = '\0';
+        }
+	if (tag_len == 0)
+	    return 0;
 
-    if ( tag_len + len < sizeof(pdf_tag_line) ) {
-#if defined(__WIN32__) || defined(OS2)
-        memcpy(pdf_tag_line+tag_len, str, len);
-#else
-        _fmemcpy(pdf_tag_line+tag_len, str, len);
-#endif
-	pdf_tag_line[tag_len + len] = '\0';
-    }
-    else
-	pdf_tag_line[0] = '\0';
-
-    /* only lines starting with % are tags */
-    if (pdf_tag_line[0] != '%') {
-	pdf_tag_line[0] = '\0';
-	return FALSE;
-    }
-
-    /* check if line is complete */
-    for (p = pdf_tag_line; *p; p++) {
-	if (quote_next) {
+	do {
+	    if (tag_len == 0)
+		return 0;
+	    tag_len = strlen(pdf_tag_line);
+	    /* check if line is complete */
 	    quote_next = FALSE;
-	    continue;
-	}
+	    inparen = FALSE;
+	    found_eol = FALSE;
+	    for (p = pdf_tag_line; *p; p++) {
+		if (quote_next) {
+		    quote_next = FALSE;
+		    continue;
+		}
 
-	if (*p == '\\')
-	   quote_next = TRUE;
-	else if (*p == '(') 
-	   inparen = TRUE;
-	else if (*p == ')') 
-	   inparen = FALSE;
-	else if ((*p == '\n') && !inparen)
-	    found_eol = TRUE;
+		if (*p == '\\')
+		   quote_next = TRUE;
+		else if (*p == '(') 
+		   inparen = TRUE;
+		else if (*p == ')') 
+		   inparen = FALSE;
+		else if ((*p == '\n') && !inparen) {
+		    found_eol = TRUE;
+		    break;
+		}
+	    }
+
+
+	    if (found_eol) {
+		if (*p)
+		    *p++ = '\0';
+		if (*pdf_tag_line == '%') {
+		    code = pdf_process_tag(pdf_tag_line);
+	 	}
+		memmove(pdf_tag_line, p, 
+			pdf_tag_line+tag_len - pdf_tag_line + 1);
+	    }
+	    tag_len = strlen(pdf_tag_line);
+	} while (found_eol);
     }
 
-
-    if (!found_eol)
-	return FALSE; /* not yet complete */
-
-    if ( (len >= 1) && (*pdf_tag_line == '%') )
-	code = pdf_process_tag(pdf_tag_line);
-    pdf_tag_line[0] = '\0';
     return code;
 }
 	
 
 int
-pdf_orientation(void)
+pdf_orientation(int page)
 {
-    return pdf_rotate;
+    if (psfile.dsc == (CDSC *)NULL)
+	return IDM_PORTRAIT;
+    if ((page < 1) || (page >= (int)psfile.dsc->page_count))
+	return IDM_PORTRAIT;
+    switch (psfile.dsc->page[page-1].orientation) {
+	case CDSC_LANDSCAPE:
+	   return IDM_LANDSCAPE;
+	case CDSC_UPSIDEDOWN:
+	   return IDM_UPSIDEDOWN;
+	case CDSC_SEASCAPE:
+	   return IDM_SEASCAPE;
+	
+    }
+    return IDM_PORTRAIT;
 }
 
 /* Create DSC file to print selected pages of PDF file */

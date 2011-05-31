@@ -18,11 +18,7 @@
 /* gvccmd.c */
 /* Menu command module of PM and Windows GSview */
 
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
+#include "gvc.h"
 
 void gsview_drawmethod(int new_drawmethod);
 BOOL gsview_usersize(void);
@@ -116,10 +112,14 @@ gsview_command(int command)
 		}
 		return 0;
 	case IDM_NEXTHOME:
+#ifdef UNIX
+		set_scroll(-1, 0);
+#else
 #ifdef _Windows
 		PostMessage(hwnd_image ,WM_VSCROLL,SB_TOP,0L);
 #else
 		WinPostMsg(hwnd_frame, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_TOP));
+#endif
 #endif
 		/* fall thru */
 	case IDM_NEXT:
@@ -159,10 +159,14 @@ gsview_command(int command)
 		pending.now = TRUE;
 		return 0;
 	case IDM_PREVHOME:
+#ifdef UNIX
+		set_scroll(-1, 0);
+#else
 #ifdef _Windows
 		PostMessage(hwnd_image ,WM_VSCROLL,SB_TOP,0L);
 #else
 		WinPostMsg(hwnd_frame, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_TOP));
+#endif
 #endif
 		/* fall thru */
 	case IDM_PREV:
@@ -314,10 +318,10 @@ gsview_command(int command)
 	case IDM_CONVERT:
 		clip_convert();
 		return 0;
-	case IDM_CFG:
-		config_wizard();
+	case IDM_CFG:	// Easy configure
+		config_wizard(TRUE);
 		return 0;
-	case IDM_GSCOMMAND:
+	case IDM_GSCOMMAND:	// Advanced configure
 	        install_gsdll();
 		return 0;
 	case IDM_UNITPT:
@@ -330,6 +334,10 @@ gsview_command(int command)
 		check_menu_item(IDM_UNITMENU, IDM_UNITFINE, option.unitfine);
 		return 0;
 	case IDM_MEASURE:
+		if (gsdll.state == BUSY) {
+		    play_sound(SOUND_BUSY);
+		    return 0;
+		}
 	        measure_show();
 		return 0;
 	case IDM_LANGEN:
@@ -394,6 +402,9 @@ gsview_command(int command)
 	case IDM_SHOWBBOX:
 		option.show_bbox = !option.show_bbox;
 		check_menu_item(IDM_OPTIONMENU, IDM_SHOWBBOX, option.show_bbox);
+#ifdef UNIX
+		gtk_widget_draw(img, NULL);
+#else
 #ifdef _Windows
 		PostMessage(hwndimg, WM_GSSYNC, 0, 0L);
 #else
@@ -401,6 +412,7 @@ gsview_command(int command)
 			error_message("error invalidating rect");
   		if (!WinUpdateWindow(hwnd_bmp))
 			error_message("error updating window");
+#endif
 #endif
 		return 0;
 	case IDM_PSTOEPS:
@@ -418,11 +430,15 @@ gsview_command(int command)
 		     (option.auto_orientation == TRUE) ) {
 		    if (!dfreopen())
 			return 0;
+#ifndef UNIX
 		    if (gsdll.lock_device && gsdll.device)
 			gsdll.lock_device(gsdll.device, 1);
+#endif
 		    make_eps_interchange(FALSE);
+#ifndef UNIX
 		    if (gsdll.lock_device && gsdll.device)
 			gsdll.lock_device(gsdll.device, 0);
+#endif
 		    dfclose();
 	  	}
 		else
@@ -435,11 +451,15 @@ gsview_command(int command)
 		     (option.auto_orientation == TRUE) ) {
 		    if (!dfreopen())
 			return 0;
+#ifndef UNIX
 		    if (gsdll.lock_device && gsdll.device)
 			gsdll.lock_device(gsdll.device, 1);
+#endif
 		    make_eps_tiff(command, FALSE);
+#ifndef UNIX
 		    if (gsdll.lock_device && gsdll.device)
 			gsdll.lock_device(gsdll.device, 0);
+#endif
 		    dfclose();
 		}
 		else
@@ -450,11 +470,15 @@ gsview_command(int command)
 		     (option.auto_orientation == TRUE) ) {
 		    if (!dfreopen())
 			return 0;
+#ifndef UNIX
 		    if (gsdll.lock_device && gsdll.device)
 			gsdll.lock_device(gsdll.device, 1);
+#endif
 		    make_eps_metafile(FALSE);
+#ifndef UNIX
 		    if (gsdll.lock_device && gsdll.device)
 			gsdll.lock_device(gsdll.device, 0);
+#endif
 		    dfclose();
 		}
 		else
@@ -511,7 +535,7 @@ gsview_command(int command)
 		    return 0;
 		}
 		if (order_is_special()) {
-		    zoom = !zoom;
+		    zoom = FALSE;
 		    return 0;
 		}
 		if (! ((gsdll.state == PAGE) || (gsdll.state == IDLE)) ) {
@@ -560,17 +584,26 @@ gsview_command(int command)
 		gsview_media(command);
 		return 0;
 	case IDM_HELPCONTENT:
+#ifdef UNIX
+		nHelpTopic = IDS_TOPICROOT;
+		get_help();
+#else
 #ifdef _Windows
 		WinHelp(hwndimg,szHelpName,HELP_CONTENTS,(DWORD)NULL);
 #else
 		WinSendMsg(hwnd_help, HM_HELP_CONTENTS, 0L, 0L);
 #endif
+#endif
 		return 0;
 	case IDM_HELPSEARCH:
+#ifdef UNIX
+		gs_addmess("IDM_HELPSEARCH: not implemented\n");
+#else
 #ifdef _Windows
 		WinHelp(hwndimg,szHelpName,HELP_PARTIALKEY,(DWORD)"");
 #else
 		WinSendMsg(hwnd_help, HM_HELP_INDEX, 0L, 0L);
+#endif
 #endif
 		return 0;
 	case IDM_HELPKEYS:
@@ -634,7 +667,7 @@ not_dsc()
 }
 
 void
-gserror(UINT id, LPSTR str, UINT icon, int sound)
+gserror(UINT id, const char *str, UINT icon, int sound)
 {
 int i;
 char mess[MAXSTR+MAXSTR];
@@ -645,11 +678,7 @@ char mess[MAXSTR+MAXSTR];
 	i = load_string(id, mess, sizeof(mess)-1);
     mess[i] = '\0';
     if (str)
-#if defined(_Windows) && !defined(__WIN32__)
-	lstrcpyn(mess+i, str, sizeof(mess)-i-1);
-#else
 	strncpy(mess+i, str, sizeof(mess)-i-1);
-#endif
     message_box(mess, icon);
 }
 
@@ -677,13 +706,13 @@ char answer[MAXSTR];
     nHelpTopic = IDS_TOPICMEDIA;
     load_string(IDS_USERWIDTH, prompt, sizeof(prompt));
     sprintf(answer,"%d", option.user_width);
-    if (!get_string(prompt,answer) || atoi(answer)==0)
+    if (!query_string(prompt,answer) || atoi(answer)==0)
 	    return FALSE;
     option.user_width = atoi(answer);
     gsview_check_usersize();
     load_string(IDS_USERHEIGHT, prompt, sizeof(prompt));
     sprintf(answer,"%d", option.user_height);
-    if (!get_string(prompt,answer) || atoi(answer)==0)
+    if (!query_string(prompt,answer) || atoi(answer)==0)
 	    return FALSE;
     option.user_height = atoi(answer);
     if ((option.user_width==0) || (option.user_height == 0)) {

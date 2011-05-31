@@ -29,7 +29,6 @@
 #include <io.h>
 #include <ctype.h>
 
-#define GVFAR
 #define IDOK DID_OK
 #define IDYES MBID_YES
 #define IDCANCEL MBID_CANCEL
@@ -169,7 +168,7 @@ dialog(int resource, PFNWP dlgproc)
     return WinDlgBox(HWND_DESKTOP, HWND_DESKTOP, dlgproc, hlanguage, resource, 0);
 }
 
-int message_box(char *str, int icon)
+int message_box(const char *str, int icon)
 {
     return WinMessageBox(HWND_DESKTOP, HWND_DESKTOP,
                  (PCSZ)str, (PCSZ)szAppName, 0, icon);

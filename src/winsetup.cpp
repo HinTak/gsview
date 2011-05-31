@@ -53,7 +53,7 @@
 #include "gvcver.h"
 #include "gvcbeta.h"
 /* extern "C" { */
-    int message_box(char *str, int icon);
+    int message_box(const char *str, int icon);
     int load_string(int id, char *str, int len);
 /* } */
 #include "gvcrc.h"
@@ -142,11 +142,9 @@ void gs_addmess_update(void);
 char szIniName[]="gsview32.ini";
 const char * const bootdrive = "c:";
 
-#ifdef __WIN32__
 /* early versions of Win32s don't support lstrcpyn */
 #undef lstrcpyn
 #define lstrcpyn(d,s,n) strncpy(d,s,n)
-#endif
 
 HWND hwnd_current;
 HWND hwnd_previous;
@@ -347,6 +345,20 @@ gs_addmess(const char *str)
 
 //////////////////////////////////////////////////////////////////////
 
+int
+message_box(const char *str, int icon)
+{
+    return MessageBox(g_hMain, str, g_szAppName, icon);
+}
+
+void
+message_box(const char *str)
+{
+    MessageBox(g_hMain, str, g_szAppName, MB_OK);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 WIZPAGE *
 find_page_from_id(int id)
 {
@@ -445,7 +457,7 @@ char buf[MAXSTR];
 
     /* failed */ 
     load_string(IDS_MKDIRFAIL, buf, sizeof(buf)-1);
-    message_box(buf, MB_OK);
+    message_box(buf);
     return IDD_DIR;
 }
 
@@ -471,31 +483,13 @@ int flag;
     return flag;
 }
 
-/* extern "C" */ int message_box(char *str, int icon)
-{
-    return MessageBox(g_hMain, str, g_szAppName, icon);
-}
-
-void
-message_box(const char *str)
-{
-    MessageBox(g_hMain, str, g_szAppName, MB_OK);
-}
 
 
 /* change directory and drive */
 int
 gs_chdir(char *dirname)
 {
-#ifdef __WIN32__
     return !SetCurrentDirectory(dirname);
-#else
-    if (isalpha(dirname[0]) && (dirname[1]==':'))
-	(void)setdisk(toupper(dirname[0])-'A');
-    if (!((strlen(dirname)==2) && isalpha(dirname[0]) && (dirname[1]==':')))
-	return chdir(dirname);
-    return -1;
-#endif
 }
 
 /* extern "C" */ int
@@ -514,14 +508,9 @@ gs_addmess_update(void)
     DWORD linecount;
     SendMessage(hwndtext, WM_SETREDRAW, FALSE, 0);
     SetDlgItemText(hwndmess, TEXTWIN_MLE, twbuf);
-#ifdef __WIN32__
     /* EM_SETSEL, followed by EM_SCROLLCARET doesn't work */
     linecount = SendDlgItemMessage(hwndmess, TEXTWIN_MLE, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
     SendDlgItemMessage(hwndmess, TEXTWIN_MLE, EM_LINESCROLL, (WPARAM)0, (LPARAM)linecount-14);
-#else
-    linecount = SendDlgItemMessage(hwndmess, TEXTWIN_MLE, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
-    SendDlgItemMessage(hwndmess, TEXTWIN_MLE, EM_LINESCROLL, (WPARAM)0, MAKELPARAM(linecount-14, 0));
-#endif
     SendMessage(hwndtext, WM_SETREDRAW, TRUE, 0);
     InvalidateRect(hwndtext, (LPRECT)NULL, TRUE);
     UpdateWindow(hwndtext);
@@ -758,7 +747,6 @@ BOOL get_inipath(char *buf, int len)
 {
 	/* get path to INI file */
 	buf[0] = '\0';
-#ifdef __WIN32__
 	/* allow for user profiles */
 	if (is_win4) {
 	    LONG rc;
@@ -806,31 +794,6 @@ BOOL get_inipath(char *buf, int len)
 		    buf[0] = '\0';
 	    }
 	}
-#else
-	{
-	    char *p = getenv("USERPROFILE");
-	    DIR *d;
-	    if (p && *p) {
-		strcpy(buf, p); 
-#ifdef __BORLANDC__
-		OemToAnsiBuff(buf, buf, lstrlen(buf));
-#endif
-		p = buf + strlen(buf) - 1;
-		if ((*p == '\\') || (*p == '/'))
-		    *p = '\0';
-		/* check if USERPROFILE contains a directory name */
-		d = opendir(buf);
-		if (d) {
-		    closedir(d);
-		    strcat(buf, "\\");
-		}
-		else {
-		    /* If we didn't succeed, use the Windows directory */
-		    buf[0] = '\0';
-		}
-	    }
-	}
-#endif
 	if (strlen(buf) + strlen(szIniName) + 1 >= len)
 	   buf[0] = '\0';
 	strcat(buf, szIniName);
@@ -920,6 +883,10 @@ install_prog()
 	if (!cinst.Init(g_szSourceDir, "filelist.txt"))
 		return FALSE;
 	
+	// Uninstall any previous version in same directory
+	gs_addmess("Uninstalling previous version...\n");
+	cinst.Uninstall(UNINSTALLPROG);
+
 	// Get GS version number
 	gs_addmess("Installing GSview...\n");
 

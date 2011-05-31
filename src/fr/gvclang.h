@@ -27,6 +27,21 @@
 #define GS_COPYRIGHT3 "Voir le fichier PUBLIC pour plus d'informations."
 
 /* Buttons */
+#ifdef UNIX
+#define AAOK "Ok"
+#define AACANCEL "Annuler"
+#define AAEDIT "Edition"
+#define AADEFAULTS "Défauts"
+#define AAHELP "Aide"
+#define AANEW "Nouveau"
+#define AATEST "Test"
+#define AAYES "Oui"
+#define AANO "Non"
+#define AANEXTGT "Suivant >"
+#define AABACKLT "< Précédent"
+#define AAFINISHGT "Démarrer"
+#define AAEXIT "Fin"
+#else
 #ifdef _Windows
 #define AAOK "&Ok"
 #define AACANCEL "&Annuler"
@@ -56,10 +71,12 @@
 #define AAFINISHGT "~Démarrer"
 #define AAEXIT "~Fin"
 #endif
+#endif
 
 /* About dialog box */
 #define AAABOUTWIN "A propos de GSview pour Windows"
 #define AAABOUTPM "A propos de PM GSview"
+#define AAABOUTX11 "A propos de X11 GSview"
 #define AAABOUTGSV16SPL "A propos de GSV16SPL"
 #define AAABOUTGSVIEWPRINT "A propos de GSview Print"
 #define AACOPY1 "Version :"
@@ -158,6 +175,16 @@
 #define AAPSTOEPSREAD "Avez-vous lu la rubrique d'aide `Conversion PS en EPS` ?"
 #define AAPSTOEPSAUTO "Calculer automatiquement le cadre limite"
 
+#ifdef UNIX
+#define AAAPROPERTIES "Propriétés"
+#define AAALLPAGES "Toutes"
+#define AAODDPAGES "Impaires"
+#define AAEVENPAGES "Paires"
+#define AAALL "Toutes"
+#define AAODD "Impaires"
+#define AAEVEN "Paires"
+#define AAREVERSE "Ordre inverse"
+#else
 #ifdef _Windows
 #define AAAPROPERTIES "&Propriétés"
 #define AAALLPAGES "&Toutes"
@@ -176,6 +203,7 @@
 #define AAODD "I~mpaires"
 #define AAEVEN "Pai~res"
 #define AAREVERSE "~Ordre inverse"
+#endif
 #endif
 
 
@@ -219,6 +247,7 @@
 
 #define AAGSMESSWIN "GSview pour Windows - Messages de Ghostscript"
 #define AAGSMESSPM "PM GSview - Messages de Ghostscript"
+#define AAGSMESSX11 "X11 GSview - Messages de Ghostscript"
 #define AACOPY "Copier"
 
 /* Display Settings dialog box */
@@ -307,7 +336,6 @@
 #define AAINSTALLCONFIGPM5 "Faire une copie de sauvegarde de l'ancien fichier config.sys"
 #define AAINSTALLFINISH "L'installation peut maintenant commencer.  \r\rCliquez sur Démarrer pour poursuivre."
 #define AAINSTALLUNZIP1 "Décompression des fichiers..."
-#define AAINSTALLEA1 "Mise à jour des attributs étendus"
 #define AADIRNOTEXIST "Le répertoire '%s' n'existe pas.  Voulez-vous qu'il soit créé ?"
 #define AAMKDIRFAIL "Impossible de créer le répertoire"
 #define AABETAWARN "Ceci est une version BETA de GSview.  Elle cessera de fonctionner le %04d-%02d-%02d."

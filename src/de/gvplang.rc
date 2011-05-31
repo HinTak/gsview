@@ -29,6 +29,7 @@ BEGIN
 		MENUITEM "~Schlieﬂen\tS", IDM_CLOSE
 		MENUITEM "~Info...\tI", IDM_INFO
 		MENUITEM SEPARATOR
+		MENUITEM SEPARATOR
 		MENUITEM "Konvertierung...", IDM_CONVERTFILE
 		MENUITEM "~Extrahiere...\tE", IDM_EXTRACT
 		MENUITEM "PS zu EPS", IDM_PSTOEPS
@@ -68,9 +69,8 @@ BEGIN
 		    MENUITEM "~Vorschau", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
-/*
+		MENUITEM "Konvertierung in ~Vektor Format...", IDM_PSTOEDIT
 		MENUITEM "Messen", IDM_MEASURE
-*/
 		MENUITEM "~Text extrahieren...", IDM_TEXTEXTRACT
 		MENUITEM "~Suche...\tCtrl+S", IDM_TEXTFIND
 		MENUITEM "Suche ~N‰chsten\tF3", IDM_TEXTFINDNEXT
@@ -152,7 +152,7 @@ BEGIN
 	BEGIN
 		MENUITEM "~Anzeige Einstellungen...", IDM_DISPLAYSETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "&Rotiere Medium", IDM_MEDIAROTATE
+		MENUITEM "~Rotiere Medium", IDM_MEDIAROTATE
 		MENUITEM SEPARATOR
 		MENUITEM "11x17", IDM_11x17
 		MENUITEM "A3", IDM_A3
@@ -272,7 +272,7 @@ END
 
 STRINGTABLE
 BEGIN
-	IDS_FILTER_PSALL "*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|*.eps|*.epi|*.pdf|*.prn|*.ps|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz"
+	IDS_FILTER_PSALL "*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.psz;*.eps.gz;*.epi.gz;*.pdf.gz|*.eps|*.epi|*.pdf|*.prn|*.ps|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz"
 	IDS_FILTER_PS	"*.ps|*.ps;*.eps;*.epi;*.pdf|*.eps|*.epi|*.pdf"
 	IDS_FILTER_EPS	"*.eps|*.ps;*.eps;*.epi;*.pdf|*.ps|*.epi|*.pdf"
 	IDS_FILTER_EPI	"*.epi|*.ps;*.eps;*.epi;*.pdf|*.ps|*.eps|*.pdf"

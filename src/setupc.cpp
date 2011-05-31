@@ -145,11 +145,7 @@ int i, lfcount;
 void
 gs_addmess(LPSTR str)
 {
-#if defined(_Windows) && !defined(__WIN32__)
-    gs_addmess_count(str, lstrlen(str));
-#else
     gs_addmess_count(str, strlen(str));
-#endif
 }
 
 WIZPAGE *
@@ -490,11 +486,7 @@ char gstoolsdir[MAXSTR];
 #ifdef OS2
 		sprintf(zipname, "%sos2.zip", gs_zipprefix);
 #else
-#ifdef __WIN32__
 		sprintf(zipname, "%sw32.zip", gs_zipprefix);
-#else
-		sprintf(zipname, "%swin.zip", gs_zipprefix);
-#endif
 #endif
 		if (!rc)
 		    rc = unzip_to_dir(zipname, gstoolsdir);

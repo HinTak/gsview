@@ -1,0 +1,78 @@
+#
+# Spec file for GSview 3.5
+#
+# 3.5 release
+#  2000-12-16 Russell Lang <gsview@ghostgum.com.au>
+#
+Summary: PostScript and PDF previewer
+Name: gsview
+Version: 3.5
+Release: 1
+Copyright: Aladdin Free Public License, Ghostgum Software Pty Ltd
+Group: Applications/Graphics
+Source: ftp://ftp.cs.wisc.edu/ghost/ghostgum/gsv35src.zip
+URL: http://www.cs.wisc.edu/~ghost/gsview/
+#Icon: gsview.gif
+#Distribution: Unknown
+Vendor: Ghostgum Software Pty Ltd
+Packager: Russell Lang <gsview@ghostgum.com.au>
+Requires: ghostscript
+BuildRoot: /var/tmp/gsview-root
+
+%description
+GSview is a graphical interface for Ghostscript.
+Ghostscript is an interpreter for the PostScript page 
+description language used by laser printers.
+For documents following the Adobe PostScript Document Structuring 
+Conventions, GSview allows selected pages to be viewed or printed.
+GSview requires Ghostscript 4.03 - 6.99.
+
+Includes epstool for creating of extracting preview bitmaps
+in EPS files.
+
+Includes pstotext for extracting text from PostScript and PDF files.
+
+%prep
+# remove old directory
+rm -rf $RPM_BUILD_DIR/gsview-%{version}
+mkdir $RPM_BUILD_DIR/gsview-%{version}
+#
+# unpack main sources
+cd $RPM_BUILD_DIR/gsview-%{version}
+unzip -a $RPM_SOURCE_DIR/gsv35src.zip
+unzip -a epstool.zip
+unzip -a pstotext.zip
+unzip -a src.zip
+
+%build
+cd $RPM_BUILD_DIR/gsview-%{version}/src
+make -f gvx.mak GSVIEW_BASE=/usr/local RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
+
+%install
+rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT/usr/local/{bin,man}
+mkdir -p $RPM_BUILD_ROOT/usr/local/doc
+mkdir -p $RPM_BUILD_ROOT/usr/local/etc/gsview
+cd $RPM_BUILD_DIR/gsview-%{version}/src
+make -f gvx.mak GSVIEW_BASE=$RPM_BUILD_ROOT/usr/local install
+strip $RPM_BUILD_ROOT/usr/local/bin/gsview
+strip $RPM_BUILD_ROOT/usr/local/bin/pstotext
+strip $RPM_BUILD_ROOT/usr/local/bin/epstool
+
+
+%files
+%defattr(-, root, root)
+%dir /usr/local/doc/gsview-%{version}
+/usr/local/doc/gsview-%{version}/*
+/usr/local/bin/*
+%dir /usr/local/etc/gsview
+/usr/local/etc/gsview/*
+/usr/local/man/*/*
+
+%changelog
+* Sat Dec 16 2000 Russell Lang <gsview@ghostgum.com.au>
+- GSview 3.5 release
+* Fri Dec 08 2000 Russell Lang <gsview@ghostgum.com.au>
+- GSview 3.22-beta release
+- Why can't we use normal dates "08 Dec 2000" or "2000-12-08"
+  instead of backward "Month Day Year"?

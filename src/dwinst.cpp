@@ -875,6 +875,92 @@ BOOL CInstall::MakeLog()
 	return TRUE;
 }
 
+// Uninstall existing GSview
+
+void CInstall::Uninstall(const char *szProg)
+{
+    char ungsprog[MAXSTR];
+    char szFileName[MAXSTR];
+    char buf[MAXSTR+MAXSTR];
+    FILE *f;
+    BOOL bOK;
+    STARTUPINFO siStartInfo;
+    PROCESS_INFORMATION piProcInfo;
+    LPVOID env;
+
+    // check if uninstall program exists
+    strcpy(ungsprog, m_szTargetDir);
+    strcat(ungsprog, "\\");
+    strcat(ungsprog, m_szMainDir);
+    strcat(ungsprog, "\\");
+    strcat(ungsprog, szProg);
+    if ((f = fopen(ungsprog, "r")) == (FILE *)NULL)
+	return;	// no uninstall program
+    fclose(f);
+
+    // check if uninstall log exists
+    strcpy(szFileName, m_szTargetDir);
+    strcat(szFileName, "\\");
+    strcat(szFileName, m_szMainDir);
+    strcat(szFileName, "\\");
+    strcat(szFileName, UNINSTALL_FILE);
+    if ((f = fopen(szFileName, "r")) == (FILE *)NULL)
+	return;	// no uninstall log
+    fclose(f);
+
+    // run uninstall
+    strcpy(buf, "\042");
+    strcat(buf, ungsprog);
+    strcat(buf, "\042 \042");
+    strcat(buf, szFileName);
+    strcat(buf, "\042");
+
+    siStartInfo.cb = sizeof(STARTUPINFO);
+    siStartInfo.lpReserved = NULL;
+    siStartInfo.lpDesktop = NULL;
+    siStartInfo.lpTitle = NULL;  /* use executable name as title */
+    siStartInfo.dwX = siStartInfo.dwY = CW_USEDEFAULT;		/* ignored */
+    siStartInfo.dwXSize = siStartInfo.dwYSize = CW_USEDEFAULT;	/* ignored */
+    siStartInfo.dwXCountChars = 80;
+    siStartInfo.dwYCountChars = 25;
+    siStartInfo.dwFillAttribute = 0;			/* ignored */
+    siStartInfo.dwFlags = 0;
+    siStartInfo.wShowWindow = SW_SHOWNORMAL;		/* ignored */
+    siStartInfo.cbReserved2 = 0;
+    siStartInfo.lpReserved2 = NULL;
+    siStartInfo.hStdInput = NULL;
+    siStartInfo.hStdOutput = NULL;
+    siStartInfo.hStdError = NULL;
+
+    env = NULL;
+
+    /* Create the child process. */
+
+    if (!CreateProcess(NULL,
+        (char *)buf,  /* command line                       */
+        NULL,          /* process security attributes        */
+        NULL,          /* primary thread security attributes */
+        TRUE,          /* handles are inherited              */
+        0,             /* creation flags                     */
+        env,           /* environment                        */
+        NULL,          /* use parent's current directory     */
+        &siStartInfo,  /* STARTUPINFO pointer                */
+        &piProcInfo))  /* receives PROCESS_INFORMATION  */
+    {
+	MessageBox(HWND_DESKTOP, "Create Process failed", "uninstgs.exe", MB_OK);
+	return;
+    }
+
+    // Wait until uninstall finishes */
+    WaitForSingleObject(piProcInfo.hProcess, 300000);
+
+    CloseHandle(piProcInfo.hProcess);
+    CloseHandle(piProcInfo.hThread);
+
+}
+
+
+
 BOOL CInstall::GetPrograms(BOOL bUseCommon, char *buf, int buflen)
 {
 	// Get the directory for the Program menu. This is

@@ -27,6 +27,21 @@
 #define GS_COPYRIGHT3 "See the file PUBLIC for more details."
 
 /* Buttons */
+#ifdef UNIX
+#define AAOK "Ok"
+#define AACANCEL "Cancel"
+#define AAEDIT "Edit"
+#define AADEFAULTS "Defaults"
+#define AAHELP "Help"
+#define AANEW "New"
+#define AATEST "Test"
+#define AAYES "Yes"
+#define AANO "No"
+#define AANEXTGT "Next >"
+#define AABACKLT "< Back"
+#define AAFINISHGT "Finish >"
+#define AAEXIT "Exit"
+#else
 #ifdef _Windows
 #define AAOK "&Ok"
 #define AACANCEL "&Cancel"
@@ -56,10 +71,12 @@
 #define AAFINISHGT "Fi~nish >"
 #define AAEXIT "E~xit"
 #endif
+#endif
 
 /* About dialog box */
 #define AAABOUTWIN "About GSview for Windows"
 #define AAABOUTPM "About PM GSview"
+#define AAABOUTX11 "About X11 GSview"
 #define AAABOUTGSV16SPL "About GSV16SPL"
 #define AAABOUTGSVIEWPRINT "About GSview Print"
 #define AACOPY1 "Version:"
@@ -158,6 +175,16 @@
 #define AAPSTOEPSREAD "Have you read help `PS to EPS` ?"
 #define AAPSTOEPSAUTO "Automatically calculate Bounding Box"
 
+#ifdef UNIX
+#define AAAPROPERTIES "Properties"
+#define AAALLPAGES "All Pages"
+#define AAODDPAGES "Odd Pages"
+#define AAEVENPAGES "Even Pages"
+#define AAALL "All"
+#define AAODD "Odd"
+#define AAEVEN "Even"
+#define AAREVERSE "Reverse"
+#else
 #ifdef _Windows
 #define AAAPROPERTIES "&Properties"
 #define AAALLPAGES "&All Pages"
@@ -176,6 +203,7 @@
 #define AAODD "O~dd"
 #define AAEVEN "~Even"
 #define AAREVERSE "~Reverse"
+#endif
 #endif
 
 
@@ -219,6 +247,7 @@
 
 #define AAGSMESSWIN "GSview for Windows - Ghostscript Messages"
 #define AAGSMESSPM "PM GSview - Ghostscript Messages"
+#define AAGSMESSX11 "X11 GSview - Ghostscript Messages"
 #define AACOPY "Copy"
 
 /* Display Settings dialog box */
@@ -308,7 +337,6 @@
 #define AAINSTALLCONFIGPM5 "Keep backup of old config.sys"
 #define AAINSTALLFINISH "GSview Setup is now ready to start installation.  \r\rPress Finish to continue."
 #define AAINSTALLUNZIP1 "Unzipping files..."
-#define AAINSTALLEA1 "Updating Extended Attributes"
 #define AADIRNOTEXIST "Directory '%s' does not exist.  Create it?"
 #define AAMKDIRFAIL "Couldn't make directory"
 #define AABETAWARN "This is a BETA test version of GSview.  It will disable on %04d-%02d-%02d."

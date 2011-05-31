@@ -42,10 +42,6 @@ gs_clear_gsdll(void)
     gsdll.copy_palette = NULL;
     gsdll.draw = NULL;
     gsdll.get_bitmap_row = NULL;
-#ifndef __WIN32__
-    if (gsdll.callback)
-	FreeProcInstance((FARPROC)gsdll.callback);
-#endif
     gsdll.callback = NULL;
 }
 
@@ -71,7 +67,6 @@ load_error(HMODULE hmodule , const char *dllname)
 char *text_reason;
 char buf[MAXSTR+128];
 int reason;
-#ifdef __WIN32__
     reason = GetLastError() & 0xffff;
     switch (reason) {
 	case ERROR_FILE_NOT_FOUND:	/* 2 */
@@ -112,36 +107,6 @@ int reason;
 	gs_addmess("\r\n");
 	LocalFree(LocalHandle(lpMessageBuffer));
     }
-#else
-    reason = (int)hmodule;
-    switch (reason) {
-	case /* ERROR_FILE_NOT_FOUND */		2:
-	    text_reason = "File not found";
-	    break;
-	case /* ERROR_PATH_NOT_FOUND */		3:
-	    text_reason = "Path not found";
-	    break;
-	case /* ERROR_NOT_ENOUGH_MEMORY */	8:
-	    text_reason = "Not enough memory";
-	    break;
-	case /* ERROR_BAD_FORMAT */		11:
-	    text_reason = "Bad EXE or DLL format";
-	    break;
-	case 20:
-	    text_reason = "DLL was invalid";
-	    break;
-	case 21:
-	    text_reason = "Win32s is required";
-	    break;
-	default:
-	    text_reason = (char *)NULL;
-    }
-    if (text_reason)
-        sprintf(buf, "Failed to load %s, error %d = %s\n", dllname, (int)reason, text_reason);
-    else
-	sprintf(buf, "Failed to load %s, error %d\n", dllname, (int)reason);
-    gs_addmess(buf);
-#endif
 }
 
 /* load GS DLL if not already loaded */
@@ -305,11 +270,7 @@ Please upgrade to a later version.\n\
 	    gs_load_dll_cleanup();
 	    return FALSE;
 	}
-#ifdef __WIN32__
 	gsdll.callback = gsdll_callback;
-#else
-	gsdll.callback = (GSDLL_CALLBACK)MakeProcInstance((FARPROC)gsdll_callback, phInstance);
-#endif
 
     return TRUE;
 }
@@ -351,13 +312,8 @@ gsdll_close()
 }
 
 /* callback routine for GS DLL */
-#ifdef __WIN32__
 int _export 
 gsdll_callback(int message, char *str, unsigned long count)
-#else
-int _far _export
-gsdll_callback(int message, char FAR *str, unsigned long count)
-#endif
 {
 char buf[MAXSTR];
     switch (message) {
@@ -525,49 +481,39 @@ void
 begin_crit_section(void)
 {
     crit_count++;
-#ifdef __WIN32__
     if (multithread)
 	EnterCriticalSection(&crit_sec);
-#endif
 }
 
 void
 end_crit_section(void)
 {
     crit_count--;
-#ifdef __WIN32__
     if (multithread)
 	LeaveCriticalSection(&crit_sec);
-#endif
 }
 
 void
 wait_event(void)
 {
-#ifdef __WIN32__
     if (multithread) {
 	ResetEvent(display.event);
 	WaitForSingleObject(display.event, INFINITE);
     }
-#endif
 }
 
 void 
 request_mutex(void)
 {
-#ifdef __WIN32__
     if (multithread)
 	WaitForSingleObject(hmutex_ps, 120000);
-#endif
 }
 
 void 
 release_mutex(void)
 {
-#ifdef __WIN32__
     if (multithread)
 	ReleaseMutex(hmutex_ps);
-#endif
 }
 
 /* for pstotext */
@@ -586,11 +532,7 @@ char *p;
     if (p)
 	*(++p) = '\0';
     strcat(dllname, "pstotext\\");
-#ifdef __WIN32__
     strcat(dllname, "pstotxt3.dll");
-#else
-    strcat(dllname, "pstotxt1.dll");
-#endif
     pstotextModule = LoadLibrary(dllname);
     if (pstotextModule < (HINSTANCE)HINSTANCE_ERROR) {
 	gs_addmess("Can't load ");

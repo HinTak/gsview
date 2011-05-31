@@ -17,11 +17,7 @@
 
 /* gvcdisp.c */
 /* Display GSview routines common to Windows and PM */
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
+#include "gvc.h"
 
 FILE *debug_file;
 
@@ -398,19 +394,19 @@ PSFILE *tpsfile;
 	if ((tpsfile->dsc != (CDSC *)NULL) && !tpsfile->ispdf){
 	    CDSC *dsc = tpsfile->dsc;
 	    /* found DSC comments */
-	    if (dsc->media) {
+	    if (dsc->page_media != (CDSCMEDIA *)NULL) {
 		char thismedia[20];
 		for (i=IDM_MEDIAFIRST; i<IDM_USERSIZE; i++) {
 		    get_menu_string(IDM_MEDIAMENU, i, thismedia, sizeof(thismedia));
-		    if (!stricmp(thismedia, dsc->media->name)) {
+		    if (!stricmp(thismedia, dsc->page_media->name)) {
 			gsview_media(i);
 			break;
 		    }
 		}
 		if (i == IDM_USERSIZE) {
 		    gsview_media(IDM_USERSIZE);
-		    option.user_width  = (int)dsc->media->width;
-		    option.user_height = (int)dsc->media->height;
+		    option.user_width  = (int)dsc->page_media->width;
+		    option.user_height = (int)dsc->page_media->height;
 		    gsview_check_usersize();
 		}
 	    }
@@ -535,18 +531,24 @@ FILE *
 gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 {	char *temp;
 	if ( (temp = getenv("TEMP")) == NULL )
+#ifdef UNIX
+		strcpy(fname, "/tmp");
+#else
 		gs_getcwd(fname, MAXSTR-1);
+#endif
 	else
 		strncpy(fname, temp, MAXSTR-1);
 
 	/* Prevent X's in path from being converted by mktemp. */
 	for ( temp = fname; *temp; temp++ ) {
 		*temp = (char)tolower(*temp);
+#if defined(_Windows) || defined(OS2)
 		if (*temp == '/')
 		    *temp = '\\';
+#endif
 	}
-	if ( strlen(fname) && (fname[strlen(fname)-1] != '\\') )
-		strcat(fname, "\\");
+	if ( strlen(fname) && (fname[strlen(fname)-1] != PATHSEP[0]) )
+		strcat(fname, PATHSEP);
 
 	strncat(fname, prefix, MAXSTR-1-strlen(fname));
 	strncat(fname, "XXXXXX", MAXSTR-1-strlen(fname));
@@ -602,18 +604,20 @@ PSFILE temp_psfile;
 
 /* reopen psfile */
 /* psfile will then be locked until closed */
-/* return TRUE if OK */
-/* if psfile time/date or length has changed, return FALSE */
-/* return FALSE if file can not be opened */
-BOOL
+/* return 1 if OK */
+/* if psfile time/date or length has changed, return 0 */
+/* return -1 if file can not be opened */
+int
 dfreopen(void)
 {
 char *filename;
+	if (debug & DEBUG_GENERAL)
+	    gs_addmess("dfreopen:\n");
 	begin_crit_section();
 	if (psfile.locked) {
 	    end_crit_section();	/* someone else has it */
 	    delayed_message_box(IDS_DEBUG_DFISLOCKED, 0);
-	    return FALSE;
+	    return -1;
 	}
 	psfile.locked = TRUE;	/* stop others using it */
 	end_crit_section();
@@ -628,35 +632,37 @@ char *filename;
 	if (filename[0] == '\0') {
 	    psfile.locked = FALSE;
 	    delayed_message_box(IDS_NOTOPEN, 0);
-	    return FALSE;
+	    return -1;
 	}
 	if ( (psfile.file = fopen(filename, "rb")) == (FILE *)NULL ) {
 	    if (debug)
 	        delayed_message_box(IDS_DEBUG_DFISMISSING, 0);
 	    filename[0] = '\0';
 	    psfile.locked = FALSE;
-	    return FALSE;
+	    return -1;
 	}
 	if (psfile_changed(&psfile)) {  
 	    /* doesn't cope with pdf file changing */
 	    dfclose();
 	    if (debug)
 	        delayed_message_box(IDS_DEBUG_DFCHANGED, 0);
-	    return FALSE;
+	    return 0;
 	}
         if (psfile.ispdf) {
 	    /* We needed to open the PDF file to check for changes */
 	    /* but we don't need it open for displaying. */
 	    dfclose();
 	}
-	return TRUE;
+	return 1;
 }
 
 void
 dfclose()
 {
+	if (debug & DEBUG_GENERAL)
+	    gs_addmess("dfclose:\n");
 	if (debug) {
-	    if (psfile.file == (FILE *)NULL)
+	    if ((psfile.file == (FILE *)NULL) && !psfile.ispdf) 
 		delayed_message_box(IDS_DEBUG_DFISCLOSED, 0);
 	}
 	if (psfile.file != (FILE *)NULL)
@@ -719,7 +725,7 @@ int count;
     return TRUE;
 }
 
-#ifdef __WIN32__
+#if defined(_Windows) || defined(UNIX)
 /* Uncompress bzip2 to temporary file */
 BOOL
 dsc_bunzip2(PSFILE *psf)
@@ -773,6 +779,7 @@ int count;
 }
 #endif
 
+
 /* Debug for DSC comments */
 void
 dsc_dump(PSFILE *psf)
@@ -780,19 +787,52 @@ dsc_dump(PSFILE *psf)
 char buf[MAXSTR];
     sprintf(buf, "DSC dump for %.200s\n", psf->name);
     gs_addmess(buf);
-    psf->dsc->Display(gs_addmess);
+    dsc_display(psf->dsc, dsc_addmess);
 
     sprintf(buf, "End of DSC dump\n");
     gs_addmess(buf);
 }
 
-
 int 
-dsc_error(unsigned int explanation, unsigned int line_count, 
-	char *line, unsigned int line_len)
+show_dsc_error(void *caller_data, CDSC *dsc, unsigned int explanation, 
+	const char *line, unsigned int line_len)
 {
-    int response = CDSC_CANCEL;
-    int severity = dsc_severity[explanation];
+    int response = CDSC_RESPONSE_CANCEL;
+    int severity;
+    char buf[MAXSTR];
+    if (explanation > dsc->max_error)
+	return CDSC_RESPONSE_OK;
+
+    severity = dsc->severity[explanation];
+
+    /* If debug function provided, copy messages there */
+    if (dsc->debug_print_fn) {
+	switch (severity) {
+	    case CDSC_ERROR_INFORM:
+		dsc_debug_print(dsc, "\nDSC Information");
+		break;
+	    case CDSC_ERROR_WARN:
+		dsc_debug_print(dsc, "\nDSC Warning");
+		break;
+	    case CDSC_ERROR_ERROR:
+		dsc_debug_print(dsc, "\nDSC Error");
+	}
+	dsc_debug_print(dsc, "\n");
+	if (explanation <= dsc->max_error) {
+	    if (line && line_len) {
+		int length = min(line_len, sizeof(buf)-1);
+		sprintf(buf, "At line %d:\n", dsc->line_count);
+		dsc_debug_print(dsc, buf);
+		strncpy(buf, line, length);
+		buf[length]='\0';
+		dsc_debug_print(dsc, "  ");
+		dsc_debug_print(dsc, buf);
+	    }
+	    dsc_debug_print(dsc, dsc_message[explanation]);
+	}
+    }
+
+    /* Here you could prompt user for OK, Cancel, Ignore ALL DSC */
     int len;
     char title[MAXSTR];;
     char linefmt[MAXSTR];
@@ -832,7 +872,7 @@ dsc_error(unsigned int explanation, unsigned int line_count,
 
     if (line) {
         load_string(IDS_DSC_LINEFMT, linefmt, sizeof(linefmt));
-        sprintf(p, linefmt, title, line_count);
+        sprintf(p, linefmt, title, dsc->line_count);
 	strcat(p, "\n   ");
 	len = strlen(p);
 	strncpy(p+len, line, line_len);
@@ -843,12 +883,34 @@ dsc_error(unsigned int explanation, unsigned int line_count,
 	strcat(p, "\n");
     }
     len = strlen(p);
-    load_resource(CDSC_RESOURCE_BASE+explanation, p+len, 4096-len);
+    load_string(CDSC_RESOURCE_BASE+(explanation*2), p+len, 4096-len);
+    len = strlen(p);
+    load_string(CDSC_RESOURCE_BASE+(explanation*2)+1, p+len, 4096-len);
     
     response = get_dsc_response(p);
 
     free(p);
+
+    if (dsc->debug_print_fn) {
+	switch (response) {
+	    case CDSC_RESPONSE_OK:
+		dsc_debug_print(dsc, "Response = OK\n");
+		break;
+	    case CDSC_RESPONSE_CANCEL:
+		dsc_debug_print(dsc, "Response = Cancel\n");
+		break;
+	    case CDSC_RESPONSE_IGNORE_ALL:
+		dsc_debug_print(dsc, "Response = Ignore All DSC\n");
+		break;
+	}
+    }
+
     return response;
+}
+
+void dsc_addmess(void *caller_data, const char *str)
+{
+    gs_addmess(str);
 }
 
 
@@ -919,16 +981,21 @@ unsigned long file_length;
 
 	/* check for bzip2 */
 	if ( (line[0]=='B') && (line[1]=='Z') && (line[2]=='h')) { /* "BZh */
-#ifdef __WIN32__
 	    psf->bzip2 = TRUE;
 	    fclose(psf->file);
 	    psf->file = NULL;
+#if defined(_Windows) || defined(UNIX)
 	    if (!dsc_bunzip2(psf)) {
 /* ENGLISH */
 		message_box("Failed to uncompress bzip2 file", 0);
 		psf->locked = FALSE;
 		return FALSE;
 	    }
+#else
+	    message_box("This is a bzip2 file.  Please uncompress it first.", 0);
+	    psf->locked = FALSE;
+	    return FALSE;
+#endif
 	    if ( (psf->file = fopen(psfile_name(psf), "rb")) == (FILE *)NULL ) {
 		char buf[MAXSTR+MAXSTR];
 		sprintf(buf, "File '%.200s' does not exist", psfile_name(psf));
@@ -938,10 +1005,6 @@ unsigned long file_length;
 	    }
 	    fgets(line, sizeof(line)-1, psf->file);
             rewind(psf->file);
-#else
-	    message_box("This is a bzip2 file.  Please uncompress it first.", 0);
-	    return FALSE;
-#endif
 	}
 
 	/* save file date and length */
@@ -980,26 +1043,32 @@ unsigned long file_length;
 	if (option.ignore_dsc)
 	    psf->dsc = (CDSC *)NULL;
 	else  {
-	    psf->dsc = new CDSC;
-	    CFile cf;
-	    if (!cf.Open(psfile_name(psf), CFile::modeRead)) {
-		message_box("Failed to reopen file for DSC scanning", 0);
-		delete psf->dsc;
+	    int code = 0;
+	    int count;
+	    char *d;
+	    psf->dsc = NULL;
+	    if ( (d = (char *) malloc(COPY_BUF_SIZE)) == NULL)
+		return FALSE;
+   
+	    fseek(psf->file, 0, SEEK_SET);
+	    psf->dsc = dsc_init(NULL);
+	    dsc_set_debug_function(psf->dsc, dsc_addmess);
+	    dsc_set_error_function(psf->dsc, show_dsc_error);
+	    while ((count = fread(d, 1, COPY_BUF_SIZE, psf->file))!=0) {
+		code = dsc_scan_data(psf->dsc, d, count);
+	 	if ((code == CDSC_ERROR) || (code == CDSC_NOTDSC)) {
+		    /* not DSC or an error */
+		    break;
+		}
+	    }
+	    if ((code == CDSC_ERROR) || (code == CDSC_NOTDSC)) {
+		dsc_free(psf->dsc);
 		psf->dsc = NULL;
 	    }
 	    else {
-		psf->dsc->SetDebug(gs_addmess);
-		psf->dsc->SetErrorFunction(dsc_error);
-	    
-		gs_addmess("\nScanning file \042");
-		gs_addmess(psfile_name(psf));
-		gs_addmess("\042\n");
-		if ( (psf->dsc->Scan(&cf) != 0) || !psf->dsc->dsc ) {
-		    /* if error, or not DSC */
-		    delete psf->dsc;
-		    psf->dsc = NULL;
-		}
-		cf.Close();
+		dsc_fixup(psf->dsc);
+		if (debug & DEBUG_GENERAL)
+		    dsc_display(psf->dsc, dsc_addmess);
 	    }
 	}
 	fseek(psf->file, 0, SEEK_END);

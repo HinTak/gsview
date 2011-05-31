@@ -35,10 +35,15 @@
  *     doc2ipf gsview.doc gvpm.ipf
  *     ipfc gvpm.ipf
  *     ipfc /INF gvpm.ipf
+ *   for Linux/X11:
+ *     gvdoc X gvc.doc gsview.doc
+ *     doc2html gvx.txt GSview.htm
+ * 
  *     
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
 #define MAX_NAME_LEN	256
@@ -61,7 +66,7 @@ FILE * outfile;
 	infile = stdin;
 	outfile = stdout;
 	if (argc != 4) {
-		fprintf(stderr,"Usage: %s W|P infile outfile\n", argv[0]);
+		fprintf(stderr,"Usage: %s [W][P][X] infile outfile\n", argv[0]);
 		return 1;
 	}
 	start = argv[1][0];
@@ -76,10 +81,12 @@ FILE * outfile;
 	}
 	
 	while (fgets(line, MAX_LINE_LEN, infile)) {
-	    if ( (line[0] == start) || (line[0] == end) )
-		ignore = FALSE;
-	    else if (isalpha(line[0]))
-		ignore = TRUE;
+	    if (isalpha(line[0])) {
+		if (strchr(line, start) || (line[0] == end))
+		    ignore = FALSE;
+		else
+		    ignore = TRUE;
+	    }
 	    else if (!ignore)
 		fputs(line, outfile);
 	}

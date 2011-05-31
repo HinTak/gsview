@@ -21,14 +21,14 @@ RM=/bin/rm -f
 SHELL=/bin/sh
 
 BINDIR=/usr/local/bin
-INCLUDES=-I/usr/openwin/include
+INCLUDES=-I/usr/openwin/include -I../src -I.
 LIBS=
 # if you have a strict ANSI compiler, add -D__STDC__
 DEFINES=-DUNIX -DEPSTOOL -DHAVE_UNISTD_H
 OBJ=o
 CC=gcc
 
-OBJS=epstool.$(OBJ) gvceps.$(OBJ) gvcdsc.$(OBJ) gvcfile.$(OBJ)
+OBJS=epstool.$(OBJ) gvceps.$(OBJ) dscparse.$(OBJ) dscutil.$(OBJ)
 
 all: epstool
 
@@ -36,13 +36,17 @@ all: epstool
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $*.cpp
 
 
-epstool.$(OBJ): epstool.cpp epstool.h gvcdsc.h gvceps.h gvcfile.h
+epstool.$(OBJ): epstool.cpp epstool.h ../src/dscparse.h ../src/gvceps.h
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c epstool.cpp -o epstool.$(OBJ)
 
-gvcdsc.$(OBJ): gvcdsc.cpp epstool.h gvcdsc.h gvceps.h gvcfile.h
+dscparse.$(OBJ): ../src/dscparse.cpp epstool.h ../src/dscparse.h ../src/gvceps.h
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c ../src/dscparse.cpp -o dscparse.$(OBJ)
 
-gvceps.$(OBJ): gvceps.cpp epstool.h gvcdsc.h gvceps.h gvcfile.h
+dscutil.$(OBJ): ../src/dscutil.cpp ../src/dscparse.h
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c ../src/dscutil.cpp -o dscutil.$(OBJ)
 
-gvcfile.$(OBJ): gvcfile.cpp gvcfile.h
+gvceps.$(OBJ): ../src/gvceps.cpp epstool.h ../src/dscparse.h ../src/gvceps.h
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c ../src/gvceps.cpp -o gvceps.$(OBJ)
 
 epstool: $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) -o epstool $(OBJS) $(LIBS) 
@@ -50,8 +54,8 @@ epstool: $(OBJS)
 clean:
 	-$(RM) epstool.$(OBJ)
 	-$(RM) gvceps.$(OBJ)
-	-$(RM) gvcdsc.$(OBJ)
-	-$(RM) gvcfile.$(OBJ)
+	-$(RM) dscparse.$(OBJ)
+	-$(RM) dscutil.$(OBJ)
 
 veryclean: clean
 	-$(RM) epstool

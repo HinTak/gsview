@@ -43,7 +43,7 @@ typedef struct tagPROFILE {
 } PROFILE;
 
 
-PROFILE * profile_open(char *filename);
-int profile_read_string(PROFILE *prf, char *section, char GVFAR *entry, char *def, char *buffer, int len);
-BOOL profile_write_string(PROFILE *prf, char *section, char *entry, char *value);
+PROFILE * profile_open(const char *filename);
+int profile_read_string(PROFILE *prf, const char *section, const char *entry, const char *def, char *buffer, int len);
+BOOL profile_write_string(PROFILE *prf, const char *section, const char *entry, const char *value);
 BOOL profile_close(PROFILE *prf);

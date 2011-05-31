@@ -18,11 +18,7 @@
 /* gvcprn.c */
 /* Printer module of PM and Windows GSview */
 
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
+#include "gvc.h"
 
 #ifndef _MSC_VER  /* Brain damaged MSVC++ 5.0 doesn't support POSIX dirent.h */
 #include <dirent.h>
@@ -40,7 +36,7 @@ void add_copies(FILE *f, int copies)
 }
 
 struct prop_item_s *
-get_properties(char *device)
+get_properties(const char *device)
 {
 char *entries, *p, *q;
 int i, numentry;
@@ -91,7 +87,7 @@ get_devices(BOOL convert)
 {
 char *p;
 PROFILE *prf;
-char *section = convert ? CONVERTSECTION: DEVSECTION ;
+const char *section = convert ? CONVERTSECTION: DEVSECTION ;
 	if ( (prf = profile_open(szIniFile)) == (PROFILE *)NULL)
 	    return (char *)NULL;
 
@@ -330,7 +326,7 @@ psfile_extract(FILE *f, int copies)
     BOOL end_header;
     BOOL line_written;
 
-    if (neworder == CDSC_UNKNOWN)	/* No page order so assume ASCEND */
+    if (neworder == CDSC_ORDER_UNKNOWN)	/* No page order so assume ASCEND */
 	neworder = CDSC_ASCEND;
     /* Don't touch SPECIAL pageorder */
 
@@ -588,7 +584,7 @@ char *p;
     while ( (de = readdir(dirp)) != NULL) {
 	if (strlen(path) + strlen(de->d_name) + 1 < MAXSTR) {
 	    strcpy(name, path);
-	    strcat(name, "\\");
+	    strcat(name, PATHSEP);
 	    strcat(name, de->d_name);
 	    if (stat(name, &st) != -1) {
 		if  (st.st_mode & S_IFDIR) {
@@ -742,7 +738,7 @@ CDSC *dsc = psfile.dsc;
     ps_copy(f, psfile.file, dsc->beginprolog, dsc->endprolog);
     ps_copy(f, psfile.file, dsc->beginsetup, dsc->endsetup);
     for (int j=0; j<(int)dsc->page_count; j++)
-	ps_copy(f, psfile.file, dsc->page[j].begin, dsc->page[j].end);
+	    ps_copy(f, psfile.file, dsc->page[j].begin, dsc->page[j].end);
     ps_copy(f, psfile.file, dsc->begintrailer, dsc->endtrailer);
     fprintf(f, "\r\n%%%%EndDocument\r\n");
     fprintf(f, " count EPSTOOL_count sub {pop} repeat\r\n");
@@ -805,7 +801,7 @@ copy_for_printer(FILE *pcfile, BOOL convert)
 		if ((psfile.dsc->page_count == 0) || 
 		    (!convert && psfile.print_ignoredsc)) {
 			CDSC *dsc = psfile.dsc;
-			ps_copy(pcfile, psfile.file, dsc->begincomments, 
+		        ps_copy(pcfile, psfile.file, dsc->begincomments, 
 			    dsc->endcomments);
 			ps_copy(pcfile, psfile.file, dsc->begindefaults, 
 			    dsc->enddefaults);
@@ -848,8 +844,8 @@ int prectrld=0;
 int postctrld=0;
 char psprolog[MAXSTR];
 char psepilog[MAXSTR];
-char *device;
-char *resolution;
+const char *device;
+const char *resolution;
 int method = option.print_method;
     if (convert)
 	method = PRINT_CONVERT;
@@ -1017,10 +1013,10 @@ int method = option.print_method;
     }
 
     /* create options file */
-/*
+#ifdef UNIX
     if ((optname[0] != '\0') && !debug)
 	    unlink(optname);
-*/
+#endif
     optname[0] = '\0';
     if ( (optfile = gp_open_scratch_file(szScratch, optname, "w")) == (FILE *)NULL) {
 	    play_sound(SOUND_ERROR);
@@ -1053,11 +1049,7 @@ int method = option.print_method;
     else {
 	fprintf(optfile, "-sOutputFile=\042");
 	for (p=(printtofile) ? output : queue; *p != '\0'; p++)
-	    if (*p == '\\')
-		/* fputc('/',optfile); */
-		fputc('\\',optfile);
-	    else
-		fputc(*p,optfile);
+	    fputc(*p,optfile);
 	fputc('\042',optfile);
 	fputc('\n',optfile);
     }
@@ -1105,21 +1097,26 @@ int method = option.print_method;
 	free((char *)proplist);
     }
     p = option.gsother;
-    while ((p = gs_argnext(p, buf)) != NULL) {
-	fprintf(optfile, "%s\n", buf);
-    }
+    while ((p = gs_argnext(p, buf)) != NULL)
+        fprintf(optfile, "%s\n", buf);
 
-    if ( ((method==PRINT_GS || method==PRINT_GDI) && option.print_fixed_media)
+    if (   ((method==PRINT_GS) && option.print_fixed_media)
+        || ((method==PRINT_GDI) && option.print_gdi_fixed_media)
 	|| ((method==PRINT_CONVERT) && option.convert_fixed_media) ) {
 	/* Force page size to remain unchanged and let the
 	 * GS page matching code rotate the pages as needed.
 	 * Must do this after the device is opened.
 	 */
-    	fprintf(optfile, "-c << /Policies << /PageSize 5 >> \
-/PageSize [%d %d] \
-/InputAttributes << 0 << /PageSize [%d %d] >> >> >> setpagedevice \
--f\n",
-	widthpt, heightpt, widthpt, heightpt);
+	int fixed_media = option.print_fixed_media;
+	if (method == PRINT_GDI)
+	    fixed_media = option.print_gdi_fixed_media;
+	if (method == PRINT_CONVERT)
+	    fixed_media = option.convert_fixed_media;
+    	fprintf(optfile, 
+	    "-c << /Policies << /PageSize %d >> /PageSize [%d %d] ",
+	    (fixed_media == 1) ? 5 : 3, widthpt, heightpt);
+	fprintf(optfile, "/InputAttributes << 0 << /PageSize [%d %d] >> >> >> setpagedevice -f\n",
+		widthpt, heightpt);
     }
 
     if (strcmp(device, "pdfwrite")==0)

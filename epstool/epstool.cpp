@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "1.4  2000-06-30";
+char szVersion[] = "1.5  2000-12-16";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -70,6 +70,9 @@ int make_eps_copy(void);
 // in gvwgsver.cpp
 BOOL find_gs(char *gspath, int len, int minver, BOOL bDLL);
 
+// in dscutil.cpp
+void dsc_display(P2(CDSC *dsc, void (*dfn)(P2(void *ptr, const char *str))));
+
 /* KLUDGE functions */
 LPBITMAP2 get_bitmap(void)
 {
@@ -90,40 +93,59 @@ psfile_name(PSFILE *psf)
     return psf->name;
 }
 
-void debug_print(char *str)
+void debug_print(void *caller_data, const char *str)
 {
     fputs(str, stdout);
 }
 
-int derror(unsigned int explanation, unsigned int line_count, char *line, unsigned int line_len)
+
+int 
+show_dsc_error(P5(void *caller_data, CDSC *dsc, unsigned int explanation, 
+	const char *line, unsigned int line_len))
 {
-    int severity = dsc_severity[explanation];
-    if (severity <= CDSC_ERROR_WARN)
-	return CDSC_OK;
+    int response = CDSC_RESPONSE_CANCEL;
+    int severity;
+    char buf[MAXSTR];
+    if (explanation > dsc->max_error)
+	return CDSC_RESPONSE_OK;
 
-    switch (explanation) {
-	case CDSC_MESSAGE_EPS_NO_BBOX:
-	    if (calc_bbox)
-		return CDSC_OK;	// we will fix this
-	    break;
-	case CDSC_MESSAGE_EPS_PAGES:
-		return CDSC_OK;	// we will fix this
-    }
+    severity = dsc->severity[explanation];
 
-    if (line) {
-        fprintf(stdout, "DSC Error at line %d\n  ", line_count);
-	fwrite(line, 1, line_len, stdout);
-	fputc('\n', stdout);
+    /* If debug function provided, copy messages there */
+    if (dsc->debug_print_fn) {
+	switch (severity) {
+	    case CDSC_ERROR_INFORM:
+		dsc_debug_print(dsc, "\nDSC Information");
+		break;
+	    case CDSC_ERROR_WARN:
+		dsc_debug_print(dsc, "\nDSC Warning");
+		break;
+	    case CDSC_ERROR_ERROR:
+		dsc_debug_print(dsc, "\nDSC Error");
+	}
+	dsc_debug_print(dsc, "\n");
+	if (explanation <= dsc->max_error) {
+	    if (line && line_len) {
+		int length = min(line_len, sizeof(buf)-1);
+		sprintf(buf, "At line %d:\n", dsc->line_count);
+		dsc_debug_print(dsc, buf);
+		strncpy(buf, line, length);
+		buf[length]='\0';
+		dsc_debug_print(dsc, "  ");
+		dsc_debug_print(dsc, buf);
+	    }
+	    dsc_debug_print(dsc, dsc_message[explanation]);
+	}
     }
-    else
-        fprintf(stdout, "DSC Error\n");
 
     fputs(dsc_message[explanation], stdout);
     fprintf(stdout, "Assuming Cancel\n");
 
     got_dsc_error = TRUE;
-    return CDSC_CANCEL;
+    return response;
 }
+
+
 
 int
 main(int argc, char *argv[])
@@ -145,41 +167,58 @@ main(int argc, char *argv[])
 	strcpy(psfile.name, iname);
 
 	psfile.dsc = NULL;
-	dsc = new CDSC;
-	CFile cf;
-	if (!cf.Open(psfile.name, CFile::modeRead)) {
+	dsc = NULL;
+	if ( (psfile.file = fopen(psfile.name, READBIN)) == (FILE *)NULL ) {
 	    fprintf(stderr, "Can't open %s\n", psfile.name);
-	    delete dsc;
-	    dsc = NULL;
 	    return 1;
 	}
 	else {
-	    if (debug)
-	        dsc->SetDebug(debug_print);
-	    dsc->SetErrorFunction(derror);
-	    got_dsc_error = FALSE;
-	    if ( (dsc->Scan(&cf) != 0) || !dsc->dsc ) {
-		/* if error, or not DSC */
-		delete dsc;
-		dsc = NULL;
+	    int code = 0;
+	    int count;
+	    char *d;
+	    if ( (d = (char *) malloc(COPY_BUF_SIZE)) == NULL) {
+		fclose(psfile.file);
+		return 1;
 	    }
+
+	    dsc = dsc_init(NULL);
+	    if (dsc == (CDSC*)NULL) {
+		fprintf(stderr, "Failed to initalise DSC parser\n"); 
+		return 1;
+	    }
+	    dsc_set_debug_function(dsc, debug_print);
+	    dsc_set_error_function(dsc, show_dsc_error);
+	    while ((count = fread(d, 1, COPY_BUF_SIZE, psfile.file))!=0) {
+		code = dsc_scan_data(dsc, d, count);
+		if ((code == CDSC_ERROR) || (code == CDSC_NOTDSC)) {
+		    /* not DSC or an error */
+		    fclose(psfile.file);
+		    dsc_free(dsc);
+		    dsc = NULL;
+		    fprintf(stderr, "File %s does not contain DSC comments\n", 
+			psfile.name);
+		    return 1 ;
+		}
+	    }
+	    fclose(psfile.file);
+	    if ((code == CDSC_ERROR) || (code == CDSC_NOTDSC)) {
+		dsc_free(dsc);
+		dsc = NULL;
+		fprintf(stderr, "File %s does not contain DSC comments\n", 
+		    psfile.name);
+		return 1;
+	    }
+	    dsc_fixup(dsc);
 	    if (debug)
-		dsc->Display(debug_print);
-	    cf.Close();
+		dsc_display(dsc, debug_print);
 	}
 
         if (got_dsc_error) {
-	    delete dsc;
+	    dsc_free(dsc);
 	    dsc = NULL;
 	    fprintf(stderr, "\nAborting: EPS file has fatal errors");
 	    return 1;
         }
-
-	if (dsc == (CDSC *)NULL) {
-	    fprintf(stderr, "File %s does not contain DSC comments\n", 
-		psfile.name);
-	    return 1;
-	}
 
 	psfile.dsc = dsc;
 
@@ -267,24 +306,50 @@ char line[DSC_LINE_LENGTH+1];
 	    strcpy(psfile.name, ename);
 
 	    psfile.dsc = NULL;
-	    dsc = new CDSC;
-	    CFile cf;
-	    if (!cf.Open(psfile.name, CFile::modeRead)) {
+	    dsc = NULL;
+	    if ( (psfile.file = fopen(psfile.name, READBIN)) == (FILE *)NULL ) {
 		fprintf(stderr, "Can't open %s\n", psfile.name);
-		delete dsc;
-		dsc = NULL;
 		return 1;
 	    }
 	    else {
-		if (debug)
-		    dsc->SetDebug(debug_print);
-		dsc->SetErrorFunction(derror);
-		if ( (dsc->Scan(&cf) != 0) || !dsc->dsc ) {
-		    /* if error, or not DSC */
-		    delete dsc;
-		    dsc = NULL;
+		int code = 0;
+		int count;
+		char *d;
+		if ( (d = (char *) malloc(COPY_BUF_SIZE)) == NULL) {
+		    fclose(psfile.file);
+		    return 1;
 		}
-		cf.Close();
+
+		dsc = dsc_init(NULL);
+		if (dsc == (CDSC*)NULL) {
+		    fprintf(stderr, "Failed to initalise DSC parser\n"); 
+		    return 1;
+		}
+		dsc_set_debug_function(dsc, debug_print);
+		dsc_set_error_function(dsc, show_dsc_error);
+		while ((count = fread(d, 1, COPY_BUF_SIZE, psfile.file))!=0) {
+		    code = dsc_scan_data(dsc, d, count);
+		    if ((code == CDSC_ERROR) || (code == CDSC_NOTDSC)) {
+			/* not DSC or an error */
+			fclose(psfile.file);
+			dsc_free(dsc);
+			dsc = NULL;
+			fprintf(stderr, "File %s does not contain DSC comments\n", 
+			    psfile.name);
+			return 1 ;
+		    }
+		}
+		fclose(psfile.file);
+		if ((code == CDSC_ERROR) || (code == CDSC_NOTDSC)) {
+		    dsc_free(dsc);
+		    dsc = NULL;
+		    fprintf(stderr, "File %s does not contain DSC comments\n", 
+			psfile.name);
+		    return 1;
+		}
+		dsc_fixup(dsc);
+		if (debug)
+		    dsc_display(dsc, debug_print);
 	    }
 
 	    if (got_dsc_error) {
@@ -830,8 +895,8 @@ psfile_extract_page(FILE *f, int page)
     ps_copy(f, psfile.file, dsc->beginprolog, dsc->endprolog);
     ps_copy(f, psfile.file, dsc->beginsetup, dsc->endsetup);
 
+    /* map page number to zero based index */
     if (dsc->page_count > 0) {
-	/* map page number to zero based index */
 	if (dsc->page_order == CDSC_DESCEND) 
 	    i = dsc->page_count - page;
 	else
@@ -847,7 +912,7 @@ psfile_extract_page(FILE *f, int page)
 
     fseek(psfile.file, dsc->begintrailer, SEEK_SET);
     while (ps_copy_find(f, psfile.file, dsc->endtrailer, 
-	/* copy trailer, removing %%Pages: since it is now in comments */
+	/* copy trailer, removing %%%Pages: since it is now in comments */
 	line, sizeof(line), "%%Pages:")) {
     }
 }

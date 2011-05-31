@@ -73,6 +73,9 @@ LINK=$(COMPDIR)\tlink32
 HC=$(COMPDIR)\hc31
 !endif
 
+!if $(__MAKE__) >= 0x510
+WININSTALL=winsetup.exe uninstgs.exe
+!endif
 
 all: gsview$(WINEXT).exe\
   gsviewen.hlp\
@@ -80,11 +83,12 @@ all: gsview$(WINEXT).exe\
   gsvw$(WINEXT)es.dll gsviewes.hlp setp$(WINEXT)es.dll\
   gsvw$(WINEXT)fr.dll gsviewfr.hlp setp$(WINEXT)fr.dll\
   gsvw$(WINEXT)it.dll gsviewit.hlp setp$(WINEXT)it.dll\
-  gvwgs$(WINEXT).exe gsv16spl.exe\
-  winsetup.exe uninstgs.exe
+  gvwgs$(WINEXT).exe gsv16spl.exe $(WININSTALL)
 
 .cpp.obj:
 	$(CC) -c $(CFLAGS) {$< }
+
+ECHOGSV=echogsv.exe
 
 !include "gvcver.mak"
 !include "gvwinc.mak"
@@ -396,77 +400,4 @@ strip: all
 	$(COMPDIR)\tdstrp32 setp32fr.dll
 	$(COMPDIR)\tdstrp32 setp32it.dll
 	$(COMPDIR)\tdstrp32 uninstgs.exe
-
-	
-gsv$(GSVIEW_VERSION)w16.zip:
-	copy Readme.htm ..\Readme.htm
-	copy LICENCE ..\LICENCE
-	copy FILE_ID.DIZ ..\FILE_ID.DIZ
-	copy gsview16.exe ..\gsview16.exe
-	copy binary\gvwin1.ico ..\gsview32.ico
-	$(COMPDIR)\tdstrip ..\gsview16.exe
-	copy gsviewen.hlp ..\gsviewen.hlp
-	copy gsviewde.hlp ..\gsviewde.hlp
-	copy gsviewfr.hlp ..\gsviewfr.hlp
-	copy gsviewit.hlp ..\gsviewit.hlp
-	copy gsvw16de.dll ..\gsvw16de.dll
-	copy gsvw16fr.dll ..\gsvw16fr.dll
-	copy gsvw16it.dll ..\gsvw16it.dll
-	$(COMPDIR)\tdstrip ..\gsvw16de.dll
-	$(COMPDIR)\tdstrip ..\gsvw16fr.dll
-	$(COMPDIR)\tdstrip ..\gsvw16it.dll
-	copy gvwgs16.exe ..\gvwgs16.exe
-	copy printer.ini ..\printer.ini
-	copy winsetup.exe ..\setup16.exe
-	copy setp16de.dll ..\setp16de.dll
-	copy setp16fr.dll ..\setp16fr.dll
-	copy setp16it.dll ..\setp16it.dll
-	$(COMPDIR)\tdstrip ..\setup16.exe
-	$(COMPDIR)\tdstrip ..\setp16de.dll
-	$(COMPDIR)\tdstrip ..\setp16fr.dll
-	$(COMPDIR)\tdstrip ..\setp16it.dll
-	copy ungsview.exe ..\ungsvw16.exe
-	$(COMPDIR)\tdstrip ..\ungsvw16.exe
-	cd ..
-	# convert names to lower case
-	-rename gsview16.exe gsview16.exe
-	-rename gsvw16de.dll gsvw16de.dll
-	-rename gsvw16fr.dll gsvw16fr.dll
-	-rename gsvw16it.dll gsvw16it.dll
-	-rename gvwgs16.exe gvwgs16.exe
-	-rename setup16.exe setup16.exe
-	-rename ungsvw16.exe ungsvw16.exe
-	-del win16.zip
-	zip -9 -@ win16.zip < src\gvclist1.txt
-	echo You are advised to use the 32-bit version of GSview > README16.TXT
-	echo instead of this 16-bit version. >> README16.TXT
-	echo Redistribution of this Win16 GSview MUST be accompanied by the >> README16.TXT
-	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> README16.TXT
-	echo Do not ask the author any questions about the 16-bit version. >> README16.TXT
-	-del gsv$(GSVIEW_VERSION)w16.zip
-	zip -9 gsv$(GSVIEW_VERSION)w16.zip win16.zip setup16.exe wizunz16.dll setp16de.dll setp16fr.dll 
-#setp16it.dll
-	zip -9 gsv$(GSVIEW_VERSION)w16.zip README16.TXT Readme.htm FILE_ID.DIZ LICENCE
-	-del README16.TXT
-	-del Readme.htm
-	-del LICENCE
-	-del FILE_ID.DIZ
-	-del gsview16.exe
-	-del gsview32.ico
-	-del gsviewen.hlp
-	-del gsviewde.hlp
-	-del gsviewfr.hlp
-	-del gsviewit.hlp
-	-del gsvw16de.dll
-	-del gsvw16fr.dll
-	-del gsvw16it.dll
-	-del gvwgs16.exe
-	-del printer.ini
-	-del setup16.exe
-	-del setp16de.dll
-	-del setp16fr.dll
-	-del setp16it.dll
-	-del ungsvw16.exe
-	cd src
-	
 

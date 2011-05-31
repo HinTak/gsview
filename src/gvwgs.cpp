@@ -72,15 +72,9 @@ int message_box(char *str, int icon);
 void saveas(void);
 void gs_thread(void *arg);
 
-#ifdef __WIN32__
 #define GetNotification(wParam,lParam) (HIWORD(wParam))
 #define SendDlgNotification(hwnd, id, notice) \
     SendMessage((hwnd), WM_COMMAND, MAKELONG((id),(notice)), (LPARAM)GetDlgItem((hwnd),(id)))
-#else
-#define GetNotification(wParam,lParam) (HIWORD(lParam))
-#define SendDlgNotification(hwnd, id, notice) \
-    SendMessage((hwnd), WM_COMMAND, id, MAKELPARAM(GetDlgItem((hwnd),(id)),(notice)))
-#endif
 
 int PASCAL 
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmdShow)
@@ -96,11 +90,9 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 
     get_args(lpszCmdLine, &argc, &argv);
     if (parse_args(argc, argv)) {
-#ifdef __WIN32__
 	if (multithread)
 	    gstid = _beginthread(gs_thread, 131072, NULL);
 	else 
-#endif
         {
 	    /* process messages for window creation */
 	    while ((PeekMessage(&msg, (HWND)NULL, 0, 0, PM_REMOVE)) != 0) {
@@ -142,7 +134,6 @@ HMENU hmenu;
 RECT rect;
 
 	/* figure out which version of Windows */
-#ifdef __WIN32__
 DWORD version = GetVersion();
 	/* Win32s: bit 15 HIWORD is 1 and bit 14 is 0 */
 	/* Win95:  bit 15 HIWORD is 1 and bit 14 is 1 */
@@ -157,7 +148,6 @@ DWORD version = GetVersion();
 	/* Win32s */
 	if ( ((HIWORD(version) & 0x8000)!=0) && ((HIWORD(version) & 0x4000)==0) )
 	    multithread = FALSE;
-#endif
 
 	/* register the window class */
 	wndclass.style = 0;
@@ -260,11 +250,7 @@ ClientWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			MessageBeep(-1);
 			return(FALSE);
 		    }
-#ifdef __WIN32__
 		    strncpy(p, twbuf+start, end-start);
-#else
-		    lstrcpyn(p, twbuf+(int)start, (int)(end-start));
-#endif
 		    GlobalUnlock(hglobal);
 		    OpenClipboard(hwnd_client);
 		    EmptyClipboard();
@@ -289,14 +275,9 @@ text_update(void)
     DWORD linecount;
     SendMessage(hwnd_text, WM_SETREDRAW, FALSE, 0);
     SetWindowText(hwnd_text, twbuf);
-#ifdef __WIN32__
     /* EM_SETSEL, followed by EM_SCROLLCARET doesn't work */
     linecount = SendMessage(hwnd_text, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
     SendMessage(hwnd_text, EM_LINESCROLL, (WPARAM)0, (LPARAM)linecount-17);
-#else
-    linecount = SendMessage(hwnd_text, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
-    SendMessage(hwnd_text, EM_LINESCROLL, (WPARAM)0, MAKELPARAM(linecount-17, 0));
-#endif
     SendMessage(hwnd_text, WM_SETREDRAW, TRUE, 0);
     InvalidateRect(hwnd_text, (LPRECT)NULL, TRUE);
     UpdateWindow(hwnd_text);
@@ -518,14 +499,7 @@ AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 void
 show_about(void)
 {
-#ifdef __WIN32__
 	DialogBoxParam( phInstance, "AboutDlgBox", hwnd_client, AboutDlgProc, (LPARAM)NULL);
-#else
-	DLGPROC lpProcAbout;
-	lpProcAbout = (DLGPROC)MakeProcInstance((FARPROC)AboutDlgProc, phInstance);
-	DialogBoxParam( phInstance, "AboutDlgBox", hwnd_client, lpProcAbout, (LPARAM)NULL);
-	FreeProcInstance((FARPROC)lpProcAbout);
-#endif
 }
 
 
@@ -571,10 +545,6 @@ gs_clear_gsdll(void)
     gsdll.execute_cont = NULL;
     gsdll.execute_end = NULL;
     gsdll.exit = NULL;
-#ifndef __WIN32__
-    if (gsdll.callback)
-	FreeProcInstance((FARPROC)gsdll.callback);
-#endif
     gsdll.callback = NULL;
 }
 
@@ -610,13 +580,8 @@ char buf[MAXSTR];
 }
 
 /* callback routine for GS DLL */
-#ifdef __WIN32__
 int _export 
 gsdll_callback(int message, char *str, unsigned long count)
-#else
-int _far _export
-gsdll_callback(int message, char FAR *str, unsigned long count)
-#endif
 {
 char buf[MAXSTR];
     switch (message) {
@@ -730,11 +695,7 @@ char *gs_argv[3];
 	    gs_load_dll_cleanup();
 	    return FALSE;
 	}
-#ifdef __WIN32__
 	gsdll.callback = gsdll_callback;
-#else
-	gsdll.callback = (GSDLL_CALLBACK)MakeProcInstance((FARPROC)gsdll_callback, phInstance);
-#endif
 
 	gs_argv[0] = gsdllname;
 	gs_argv[1] = gsarg;

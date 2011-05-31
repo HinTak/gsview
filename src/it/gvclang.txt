@@ -8,7 +8,7 @@
  Per i documenti che si attengono all'Adobe Postscript Document Structiring
  Conventions, GSview permette alle pagine selezionate di essere viste o
  stampate.
- GSview 3.4 necessita di Ghostscript 4.03 - 6.99, con preferenza per la versione 6.0.
+ GSview 3.5 necessita di Ghostscript 4.03 - 6.99, con preferenza per la versione 6.0.
 2Installazione
 ?Installazione
  E' consigliabile usare lo specifico programma di installazione per
@@ -109,7 +109,7 @@ E
  di libreria e caratteri.
  E' necessaria la versione di Ghostscript elencata in `Panoramica Generale`.
  Questa versione di GSview non funzionerà con altre versioni di Ghostscript.
- Installare Ghostscript in una cartella c:\Aladdin\gsN.NN
+ Installare Ghostscript in una cartella c:\gs\gsN.NN
  (sostituisci N.NN con il numero di versione di Ghostscript.)
 
  Crea una directory c:\ghostgum\gsview
@@ -216,11 +216,11 @@ E
  cartella del profilo utente alla cartella di GSview, quindi modificarlo
  togliendo tutte le registrazioni, ad eccezione di:
   [Options]
-  Version=3.4
-  GSversion=601
+  Version=3.5
+  GSversion=650
   Configured=1
-  GhostscriptDLL=e:\Aladdin\gs6.01\bin\gsdll32.dll
-  GhostscriptInclude=e:\Aladdin\gs6.01\lib;e:\Aladdin\fonts
+  GhostscriptDLL=e:\gs\gs6.50\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs6.50\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Quando un utente avvia GSview, il suo file INI sarà usato normalmente.
  La prima volta che GSview viene avviato, o quando la versione di GSview non
@@ -772,7 +772,7 @@ P
  Essa sarà salvata e sarà la selezione predefinita per la prossima occorrenza.
 
  Alcune informazioni per la compatibilità delle stampanti sono disponibili presso
-  http://www.cs.wisc.edu/~ghost/printer.html
+  http://www.cs.wisc.edu/~ghost/doc/printer.htm
 3Stampante PostScript
 ?Stampante PostScript
 ?Avanzate
@@ -1178,7 +1178,7 @@ W
   http://www.geocities.com/SiliconValley/Network/1958/pstoedit/index.html
 
  Per aggiornamenti di pstoedit vedere presso la home page di pstoedit oppure presso
-  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.html
+  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
 
  Per usare `pstoedit` da GSview, usare
  `Modifica | Converti in formato vettoriale`.
@@ -1435,10 +1435,10 @@ E
  `DLL di Ghostcript` fa sapere a GSview dove trovare Ghostscript.
 W
  Il percorso predefinito per Win32 è
-  c:\Aladdin\gsN.NN\bin\gsdll32.dll
+  c:\gs\gsN.NN\bin\gsdll32.dll
 P
  Il percorso predefinito per OS/2 è
-  c:\Aladdin\gsN.NN\bin\gsdll2.dll
+  c:\gs\gsN.NN\bin\gsdll2.dll
 E
 
  Immettere il Path di Ghostscript nel campo
@@ -1447,9 +1447,9 @@ E
  (gs_*.ps e Fontmap) e i font di Ghostscript (*.pfb).
  Per esempio:
 P
-   c:\Aladdin\gsN.NN\lib;c:\Aladdin\fonts;c:\psfonts
+   c:\gs\gsN.NN\lib;c:\gs\fonts;c:\psfonts
 W
-   c:\Aladdin\gsN.NN\lib;c:\Aladdin\fonts
+   c:\gs\gsN.NN\lib;c:\gs\fonts
 E
  Non mettere un `-I` dopo il path incluso.
 

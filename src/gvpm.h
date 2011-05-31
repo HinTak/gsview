@@ -28,6 +28,7 @@
 #include <os2.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 #include <io.h>
@@ -50,8 +51,7 @@
 typedef unsigned short WORD;
 typedef unsigned long DWORD;
 
-#include "gvcfile.h"
-#include "gvcdsc.h"
+#include "dscparse.h"
 
 #ifndef NODEBUG_MALLOC
 void * debug_malloc(size_t size);
@@ -81,9 +81,7 @@ extern FILE *malloc_file;
 #define EOLSTR "\r\n"
 #define CW_USEDEFAULT 32768
 #define COPY_BUF_SIZE 4096
-/* don't have to worry about segments/selectors */
-#define GVFAR
-#define GVHUGE
+#define PATHSEP "\\"
 #define LPSTR char *
 #define IDYES MBID_YES
 #define IDNO MBID_NO
@@ -319,14 +317,14 @@ typedef struct tagOPTIONS {
         /* for printing to GS device */
 	char	printer_device[32];	/* Ghostscript device for printing */
 	char	printer_resolution[32];
-	BOOL	print_fixed_media;
+	int	print_fixed_media;
 	/* for converting with GS device */
 	char	convert_device[32];
 	char	convert_resolution[32];	/* Ghostscript device for converting */
-	BOOL	convert_fixed_media;
+	int	convert_fixed_media;
 	/* for printing to GDI device */
 	int	print_gdi_depth;	/* IDC_MONO, IDC_GREY, IDC_COLOUR */
-	BOOL	print_gdi_fixed_media;
+	int	print_gdi_fixed_media;
         /* general printing */
 #define PRINT_GDI 0
 #define PRINT_GS 1
@@ -508,6 +506,8 @@ extern POINTL info_page;
 extern RECTL info_coord;
 extern int on_link;			/* TRUE if we were or are over link */
 extern int on_link_page;		/* page number of link target */
+extern long gsbytes_size;		/* number of bytes for this page */
+extern long gsbytes_done;		/* number of byte written */
 MRESULT EXPENTRY ClientWndProc(HWND, ULONG, MPARAM, MPARAM);
 MRESULT EXPENTRY FrameWndProc(HWND, ULONG, MPARAM, MPARAM);
 MRESULT EXPENTRY StatusWndProc(HWND, ULONG, MPARAM, MPARAM);

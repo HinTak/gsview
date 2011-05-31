@@ -20,17 +20,12 @@
 #include "gvwin.h"
 #include <ddeml.h>
 
-#ifdef __WIN32__
 #define UNINSTALLKEY TEXT("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall")
 #define UNINSTALLSTRINGKEY TEXT("UninstallString")
 #define DISPLAYNAMEKEY TEXT("DisplayName")
 #define UNINSTALLPROG TEXT("ungsvw32.exe")
-#else
-#define UNINSTALLPROG "ungsvw16.exe"
-#endif
 
 
-#ifdef __WIN32__
 void
 win4_uninstall(char *gsviewpath, char *title)
 {
@@ -59,21 +54,13 @@ char buffer[MAXSTR];
 	  RegCloseKey(hkey);
      }
 }
-#endif
 
-#ifdef __WIN32__
 #define GSVIEW_NAME "GSview"
-#else
-#define GSVIEW_NAME "GSview 16"
-#endif
 
 #ifdef __BORLANDC__
 #pragma argsused	/* ignore warning for next function */
 #endif
 HDDEDATA CALLBACK 
-#ifndef __WIN32__
-_export
-#endif
 DdeCallback(UINT type, UINT fmt, HCONV hconv,
     HSZ hsz1, HSZ hsz2, HDDEDATA hData, DWORD dwData1, DWORD dwData2)
 {
@@ -159,7 +146,6 @@ HSZ hszGroupsItem;
 HCONV hConv;
 HDDEDATA hdata = NULL;
 char setup[MAXSTR+MAXSTR];
-char buffer[MAXSTR];
 DWORD dwResult;
 char groupfile[MAXSTR];
 int i;
@@ -185,14 +171,12 @@ char gsdocbuf[MAXSTR];
 	strcat(gsdocbuf, "\\");
     }
     strncpy(gsviewpathbuf, gsviewpath, sizeof(gsviewpathbuf));
-#ifdef __WIN32__
     if (!is_win32s) {
 	/* The DDE interface isn't reliable with long names */
 	/* Convert everything to short names */
 	GetShortPathName(gspath, gspathbuf, sizeof(gspathbuf));
 	GetShortPathName(gsviewpath, gsviewpathbuf, sizeof(gsviewpathbuf));
     }
-#endif
 
     /* Open ProgMan DDE undo file if it doesn't exist */
     strcpy(setup, gsviewpathbuf);
@@ -227,9 +211,6 @@ char gsdocbuf[MAXSTR];
 
     lpDdeProc = MakeProcInstance((FARPROC)DdeCallback, phInstance);
     if (DdeInitialize(&idInst, (PFNCALLBACK)lpDdeProc, CBF_FAIL_POKES, 0L)) {
-#ifndef __WIN32__
-	FreeProcInstance(lpDdeProc);
-#endif
 	return 1;
     }
     hszServName = DdeCreateStringHandle(idInst, "PROGMAN", CP_WINANSI);
@@ -326,13 +307,11 @@ char gsdocbuf[MAXSTR];
 // not used because new uninstall program is accessed via
 // the control panel, and doesn't work on Win32s anyway.
     /* Add the uninstall program */
-#ifdef __WIN32__
     if (is_win4) {
 	load_string(IDS_UNINSTALLTITLE, buffer, sizeof(buffer));
 	win4_uninstall(gsviewpathbuf, buffer);
     }
     else
-#endif
     {
 	/* Windows NT 3.5, Win32s or Win16 */
 	load_string(IDS_UNINSTALLITEM, buffer, sizeof(buffer));

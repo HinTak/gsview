@@ -85,10 +85,10 @@ LIBDIR=$(EMXPATH)/lib
 OBJS=gvpm.$(OBJ) gvpdlg.$(OBJ) gvpdisp.$(OBJ) gvpedit.$(OBJ) gvpeps.$(OBJ)\
    gvpgsver.$(OBJ) gvpinit.$(OBJ) gvpmeas.$(OBJ) gvpmisc.$(OBJ) gvpprn.$(OBJ)\
    gvccmd.$(OBJ) gvcdisp.$(OBJ) gvceps.$(OBJ) gvcinit.$(OBJ) gvcbeta.$(OBJ)\
-   gvcmeas.$(OBJ) gvcmisc.$(OBJ) gvcprf.$(OBJ) gvcprn.$(OBJ) gvctext.$(OBJ)\
-   gvpdll.$(OBJ) gvcdll.$(OBJ)  gvcpdf.$(OBJ) gvcfile.$(OBJ) gvcdsc.$(OBJ)\
-   gvcreg.$(OBJ) gvpreg.$(OBJ)
-HDRS=gsvver.h gvpm.h gvcdsc.h gvcfn.h gvcver.h
+   gvcmeas.$(OBJ) gvcmeas2.$(OBJ) gvcmisc.$(OBJ) gvcprf.$(OBJ) gvcprn.$(OBJ)\
+   gvctext.$(OBJ) gvpdll.$(OBJ) gvcdll.$(OBJ) gvcpdf.$(OBJ)\
+   dscparse.$(OBJ) dscutil.$(OBJ) gvcreg.$(OBJ) gvpreg.$(OBJ)
+HDRS=gsvver.h gvpm.h dscparse.h gvcfn.h gvcver.h
 
 
 all: gvpm.exe\
@@ -103,7 +103,12 @@ all: gvpm.exe\
 .cpp.$(OBJ):
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
+ECHOGSV=echogsv.exe
+
 !include "gvcver.mak"
+
+echogsv.exe: echogsv.c
+	$(COMP) $(FLAGS) echogsv.c
 
 gvpm.$(OBJ): gvpm.cpp $(HDRS)
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
@@ -150,10 +155,10 @@ gvcdisp.$(OBJ): gvcdisp.cpp $(HDRS)
 gvcdll.$(OBJ): gvcdll.cpp gvcrc.h gsdll.h $(HDRS)
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
-gvcdsc.$(OBJ): gvcdsc.cpp gvcdsc.h
+dscparse.$(OBJ): dscparse.cpp dscparse.h
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
-gvcfile.$(OBJ): gvcfile.cpp gvcfile.h
+dscutil.$(OBJ): dscutil.cpp dscparse.h
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
 gvcbeta.obj: gvcbeta.cpp gvcbeta.h $(HDRS)
@@ -166,6 +171,9 @@ gvcinit.$(OBJ): gvcinit.cpp $(HDRS) gvcrc.h
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
 gvcmeas.$(OBJ): gvcmeas.cpp gvcrc.h $(HDRS)
+	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
+
+gvcmeas2.$(OBJ): gvcmeas2.cpp gvcrc.h $(HDRS)
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
 gvcmisc.$(OBJ): gvcmisc.cpp gvcrc.h $(HDRS)
@@ -526,6 +534,7 @@ gvpgs.exe: gvpgs.$(OBJ) gvpgs.res gvpgs.def
 
 gsv$(GSVIEW_VERSION)os2.zip:
 	copy Readme.htm ..
+	copy gsview.css ..
 	copy cdorder.txt ..
 	copy regorder.txt ..
 	copy LICENCE ..
@@ -558,9 +567,10 @@ gsv$(GSVIEW_VERSION)os2.zip:
 	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> README2.TXT
 	-del gsv$(GSVIEW_VERSION)os2.zip
 	zip -9 gsv$(GSVIEW_VERSION)os2.zip os2.zip os2setup.exe unzip2.dll setup2de.dll setup2es.dll setup2fr.dll setup2it.dll
-	zip -9 gsv$(GSVIEW_VERSION)os2.zip README2.TXT Readme.htm cdorder.txt regorder.txt FILE_ID.DIZ LICENCE
+	zip -9 gsv$(GSVIEW_VERSION)os2.zip README2.TXT Readme.htm gsview.css cdorder.txt regorder.txt FILE_ID.DIZ LICENCE
 	-del README2.TXT
 	-del Readme.htm
+	-del gsview.css
 	-del cdorder.txt
 	-del LICENCE
 	-del FILE_ID.DIZ
@@ -615,13 +625,14 @@ clean: language
 	-del gvpreg.$(OBJ)
 	-del gvcbeta.$(OBJ)
 	-del gvccmd.$(OBJ)
-	-del gvcdsc.$(OBJ)
+	-del dscparse.$(OBJ)
+	-del dscutil.$(OBJ)
 	-del gvcdll.$(OBJ)
 	-del gvcdisp.$(OBJ)
 	-del gvceps.$(OBJ)
-	-del gvcfile.$(OBJ)
 	-del gvcinit.$(OBJ)
 	-del gvcmeas.$(OBJ)
+	-del gvcmeas2.obj
 	-del gvcmisc.$(OBJ)
 	-del gvcpdf.$(OBJ)
 	-del gvcprf.$(OBJ)
@@ -699,3 +710,4 @@ veryclean: clean
 	-del setup2es.dll
 	-del setup2fr.dll
 	-del setup2it.dll
+	-del echogsv.exe

@@ -18,13 +18,6 @@
 /* gvpmeas.c */
 /* Measure lengths on display */
 
-/* Bugs:
- - Crashes in measure_transform_point() (in gvcmeas.c) when frame 
-   window resized.  All variables are correct, but a floating point
-   underflow error occurs for no apparent reason.
- Currently disabled in language/gvplang.rc and gvpm.c
- */
-
 #include "gvpm.h"
 #include <math.h>
 

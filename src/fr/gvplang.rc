@@ -72,9 +72,8 @@ BEGIN
 			MENUITEM "la partie ~aperçu", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
-/*
+		MENUITEM "Conversion vers un format ~vectoriel...", IDM_PSTOEDIT
 		MENUITEM "Mesure", IDM_MEASURE
-*/
 		MENUITEM "Extraire le ~texte...", IDM_TEXTEXTRACT
 		MENUITEM "~Rechercher...\tCtrl+R", IDM_TEXTFIND
 		MENUITEM "Rechercher ~suivant\tF3", IDM_TEXTFINDNEXT
@@ -285,7 +284,7 @@ END
 STRINGTABLE
 BEGIN
 	/* default is first */
-	IDS_FILTER_PSALL "*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|*.eps|*.epi|*.pdf|*.prn|*.ps|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz"
+	IDS_FILTER_PSALL "*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.psz;*.eps.gz;*.epi.gz;*.pdf.gz|*.eps|*.epi|*.pdf|*.prn|*.ps|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz"
 	IDS_FILTER_PS	"*.ps|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf"
 	IDS_FILTER_EPS	"*.eps|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf"
 	IDS_FILTER_EPI	"*.epi|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf"

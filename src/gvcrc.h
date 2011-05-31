@@ -20,6 +20,12 @@
 
 #include "gvcver.h"
 
+#define DEBUG_GENERAL	0x01
+#define DEBUG_GDI	0x02	/* GDI printing */
+#define DEBUG_MEM	0x04	/* memory allocation */
+#define DEBUG_LOG	0x08	/* write gs_addmess() to file c:\gsview.txt */
+#define DEBUG_GSINPUT	0x10	/* log all input written to GS */
+
 #define ID_GSVIEW 1
 #define ID_GSVIEW2 2
 #define ID_GSVIEW3 3
@@ -100,11 +106,6 @@
 #define IDM_UNITCUSTOM	194
 #define IDM_UNITFINE	195
 
-#define IDM_DRAWMENU	196	/* OS/2 only */
-#define IDM_DRAWDEF	197
-#define IDM_DRAWGPI	198
-#define IDM_DRAWWIN	199
-
 #define IDM_VIEWMENU    200
 #define IDM_NEXT	201
 #define IDM_NEXTHOME	202
@@ -133,6 +134,17 @@
 #define IDM_MAGPLUS	252
 #define IDM_MAGMINUS	253
 
+/* OS/2 only */
+#define IDM_DRAWMENU	260
+#define IDM_DRAWDEF	261
+#define IDM_DRAWGPI	262
+#define IDM_DRAWWIN	263
+
+/* X11 only */			/* must use same values as OS/2 */
+#define IDM_DRAWPIXMAP	261	/* draw on pixmap */
+#define IDM_DRAWBACKING	262	/* draw on backing pixmap */
+#define IDM_DRAWSTORAGE	263	/* draw on window with backing storage */
+
 #define IDM_MEDIAMENU	300
 #define IDM_MEDIAFIRST	301
 #define IDM_11x17	301
@@ -145,8 +157,8 @@
 #define IDM_LEGAL	308
 #define IDM_LETTER	309
 #define IDM_NOTE	310
+#define IDM_MEDIALAST	310
 #define IDM_USERSIZE	311
-#define IDM_MEDIALAST	312
 #define MEDIA_USERDEFINED "User Defined"
 
 #define IDM_MEDIAROTATE	330
@@ -235,7 +247,8 @@
 #define ADVPS_PROLOGBROWSE	485
 #define ADVPS_EPILOG		486
 #define ADVPS_EPILOGBROWSE	487
-
+  
+#define IDD_PSTOEDIT	490
 #define EDIT_FORMAT	491
 #define EDIT_DT		492
 #define EDIT_LATIN1	493
@@ -442,6 +455,7 @@
 #define IDS_TOPICDOWNLOAD 725
 #define IDS_TOPICDSCWARN 726
 #define IDS_TOPICREG     727
+#define IDS_TOPICA2PS    728
 
 /* ps_to_eps */
 #define IDS_BBPROMPT	750
@@ -558,17 +572,24 @@
 #define IDS_PRN_HELP		905
 #define IDS_PRN_SELECTPAGES	906
 
-/* RCDATA resources */
-#define IDR_VIEWER	912
-#define IDR_EPSFWARN	913
-#define IDR_DEVICES	914
-#define IDR_PORTS	915
-#define IDR_BUTTON	916
-#define IDR_HELP	917
+/* PageSize policies */
+#define IDS_PAGESIZE_VARIABLE	911
+#define IDS_PAGESIZE_FIXED	912
+#define IDS_PAGESIZE_RESCALE	913
+
 
 /* cursors */
-#define IDP_CROSSHAIR  910
-#define IDP_HAND  911
+#define IDP_CROSSHAIR		940
+#define IDP_HAND		941
+
+/* RCDATA resources */
+#define IDR_VIEWER	951
+#define IDR_EPSFWARN	952
+#define IDR_DEVICES	953
+#define IDR_PORTS	954
+#define IDR_BUTTON	955
+#define IDR_HELP	956
+
 
 /* window messages */
 
@@ -656,46 +677,6 @@
 #define IDC_MEASURE_SETPOINT   2111
 
 
-#ifndef CDSC_MESSAGE_DEFINED
-#define CDSC_MESSAGE_DEFINED
-#define CDSC_MESSAGE_BBOX 0
-#define CDSC_MESSAGE_EARLY_TRAILER 1
-#define CDSC_MESSAGE_EARLY_EOF 2
-#define CDSC_MESSAGE_PAGE_IN_TRAILER 3
-#define CDSC_MESSAGE_PAGE_ORDINAL 4
-#define CDSC_MESSAGE_PAGES_WRONG 5
-#define CDSC_MESSAGE_EPS_NO_BBOX 6
-#define CDSC_MESSAGE_EPS_PAGES 7
-#define CDSC_MESSAGE_NO_MEDIA 8
-#define CDSC_MESSAGE_ATEND 9
-#define CDSC_MESSAGE_DUP_COMMENT 10
-#define CDSC_MESSAGE_DUP_TRAILER 11
-#define CDSC_MESSAGE_BEGIN_END 12
-#define CDSC_MESSAGE_BAD_SECTION 13
-#define CDSC_MESSAGE_LONG_LINE 14
-#define CDSC_MESSAGE_INCORRECT_USAGE 15
-#endif
-
-/* We must define these directly, without using arithmetic */
-/* because OS/2 Resource Compiler won't accept arithmetic */
-#define CDSC_RESOURCE_BASE 		2200
-#define CDSC_RESOURCE_BBOX 		2200
-#define CDSC_RESOURCE_EARLY_TRAILER 	2201
-#define CDSC_RESOURCE_EARLY_EOF 	2202
-#define CDSC_RESOURCE_PAGE_IN_TRAILER 	2203
-#define CDSC_RESOURCE_PAGE_ORDINAL 	2204
-#define CDSC_RESOURCE_PAGES_WRONG 	2205
-#define CDSC_RESOURCE_EPS_NO_BBOX 	2206
-#define CDSC_RESOURCE_EPS_PAGES 	2207
-#define CDSC_RESOURCE_NO_MEDIA 		2208
-#define CDSC_RESOURCE_ATEND 		2209
-#define CDSC_RESOURCE_DUP_COMMENT 	2210
-#define CDSC_RESOURCE_DUP_TRAILER 	2211
-#define CDSC_RESOURCE_BEGIN_END 	2212
-#define CDSC_RESOURCE_BAD_SECTION 	2213
-#define CDSC_RESOURCE_LONG_LINE 	2214
-#define CDSC_RESOURCE_INCORRECT_USAGE 	2215
-
 #define IDD_DSCERROR 		2230
 #define DSC_IGNORE_ALL		2231
 #define DSC_STATIC_TEXT		2232
@@ -741,7 +722,40 @@
 #define PRINT_PS	2
 #define PRINT_CONVERT	3
 
-#define DEBUG_GENERAL	0x01
-#define DEBUG_GDI	0x02	/* GDI printing */
-#define DEBUG_MEM	0x04	/* memory allocation */
-#define DEBUG_LOG	0x08	/* write gs_addmess() to file c:\gsview.txt */
+
+/* We must define these directly, without using arithmetic */
+/* because OS/2 Resource Compiler won't accept arithmetic */
+#define CDSC_RESOURCE_BASE 		2400
+#define CDSC_RESOURCE_BBOX 		2400
+#define CDSC_RESOURCE_BBOX2 		2401
+#define CDSC_RESOURCE_EARLY_TRAILER 	2402
+#define CDSC_RESOURCE_EARLY_TRAILER2 	2403
+#define CDSC_RESOURCE_EARLY_EOF 	2404
+#define CDSC_RESOURCE_EARLY_EOF2 	2405
+#define CDSC_RESOURCE_PAGE_IN_TRAILER 	2406
+#define CDSC_RESOURCE_PAGE_IN_TRAILER2 	2407
+#define CDSC_RESOURCE_PAGE_ORDINAL 	2408
+#define CDSC_RESOURCE_PAGE_ORDINAL2 	2409
+#define CDSC_RESOURCE_PAGES_WRONG 	2410
+#define CDSC_RESOURCE_PAGES_WRONG2 	2411
+#define CDSC_RESOURCE_EPS_NO_BBOX 	2412
+#define CDSC_RESOURCE_EPS_NO_BBOX2 	2413
+#define CDSC_RESOURCE_EPS_PAGES 	2414
+#define CDSC_RESOURCE_EPS_PAGES2 	2415
+#define CDSC_RESOURCE_NO_MEDIA 		2416
+#define CDSC_RESOURCE_NO_MEDIA2 	2417
+#define CDSC_RESOURCE_ATEND 		2418
+#define CDSC_RESOURCE_ATEND2 		2419
+#define CDSC_RESOURCE_DUP_COMMENT 	2420
+#define CDSC_RESOURCE_DUP_COMMENT2 	2421
+#define CDSC_RESOURCE_DUP_TRAILER 	2422
+#define CDSC_RESOURCE_DUP_TRAILER2 	2423
+#define CDSC_RESOURCE_BEGIN_END 	2424
+#define CDSC_RESOURCE_BEGIN_END2 	2425
+#define CDSC_RESOURCE_BAD_SECTION 	2426
+#define CDSC_RESOURCE_BAD_SECTION2 	2427
+#define CDSC_RESOURCE_LONG_LINE 	2428
+#define CDSC_RESOURCE_LONG_LINE2 	2429
+#define CDSC_RESOURCE_INCORRECT_USAGE 	2430
+#define CDSC_RESOURCE_INCORRECT_USAGE2 	2431
+

@@ -57,8 +57,9 @@ public:
 	void RegistryCloseKey();
 	BOOL RegistryEnd();
 
-	BOOL WriteUninstall(const char *prog, BOOL bNoCopy);
+	BOOL WriteUninstall(const char *szProg, BOOL bNoCopy);
 	BOOL MakeLog(void);
+	void Uninstall(const char *szProg);
 
 	void CleanUp(void);
 

@@ -21,12 +21,56 @@
 #include <windows.h>
 #include <stdio.h>
 #else
-// #include "gvwin.h"
 #include <windows.h>
 #endif
 #include <stdlib.h>
 
-#define GS_PRODUCT "Aladdin Ghostscript"
+#define GS_PRODUCT_AFPL "AFPL Ghostscript"
+#define GS_PRODUCT_ALADDIN "Aladdin Ghostscript"
+#define GS_PRODUCT_GNU "GNU Ghostscript"
+
+// Get Ghostscript versions for given product.
+// Store results starting at pver + 1 + offset.
+// Returns total number of versions in pver.
+static int get_gs_versions_product(int *pver, int offset, 
+    const char *gs_productfamily)
+{
+    // First find out how many versions of Ghostscript are available.
+    HKEY hkey;
+    DWORD cbData;
+    HKEY hkeyroot;
+    TCHAR key[256];
+    int ver;
+    TCHAR *p;
+    int n = 0;
+
+    wsprintf(key, TEXT("Software\\%s"), gs_productfamily);
+    hkeyroot = HKEY_LOCAL_MACHINE;
+    if (RegOpenKeyEx(hkeyroot, key, 0, KEY_READ, &hkey) == ERROR_SUCCESS) {
+	// Now enumerate the keys
+	cbData = sizeof(key) / sizeof(TCHAR);
+	while (RegEnumKey(hkey, n, key, cbData) == ERROR_SUCCESS) {
+	    n++;
+	    ver = 0;
+	    p = key;
+	    while (*p && (*p!='.')) {
+		ver = (ver * 10) + (*p - '0')*100;
+		p++;
+	    }
+	    if (*p == '.')
+		p++;
+	    if (*p) {
+		ver += (*p - '0') * 10;
+		p++;
+	    }
+	    if (*p)
+		ver += (*p - '0');
+	    if (n + offset < pver[0])
+		pver[n+offset] = ver;
+	}
+    }
+    return n+offset;
+}
 
 // Query registry to find which versions of Ghostscript are installed.
 // Return version numbers in an integer array.   
@@ -45,56 +89,28 @@
 // and set pver[0] to the number of Ghostscript versions installed.
 BOOL get_gs_versions(int *pver)
 {
-	// First find out how many versions of Ghostscript are available.
-	int n;
-	HKEY hkey;
-	DWORD cbData;
-	HKEY hkeyroot;
-	TCHAR key[256];
-	int ver;
-	TCHAR *p;
+    // First find out how many versions of Ghostscript are available.
+    int n;
+    if (pver == (int *)NULL)
+	    return FALSE;
 
-	if (pver == (int *)NULL)
-		return FALSE;
+    n = get_gs_versions_product(pver, 0, GS_PRODUCT_AFPL);
+    n = get_gs_versions_product(pver, n, GS_PRODUCT_ALADDIN);
+    n = get_gs_versions_product(pver, n, GS_PRODUCT_GNU);
 
-	wsprintf(key, TEXT("Software\\%s"), GS_PRODUCT);
-	hkeyroot = HKEY_LOCAL_MACHINE;
-	if (RegOpenKeyEx(hkeyroot, key, 0, KEY_READ, &hkey)
-		== ERROR_SUCCESS) {
-		// Now enumerate the keys
-		n = 0;
-		cbData = sizeof(key) / sizeof(TCHAR);
-		while (RegEnumKey(hkey, n, key, cbData) == ERROR_SUCCESS) {
-			n++;
-			ver = 0;
-			p = key;
-			while (*p && (*p!='.')) {
-				ver = (ver * 10) + (*p - '0')*100;
-				p++;
-			}
-			if (*p == '.')
-				p++;
-			if (*p) {
-				ver += (*p - '0') * 10;
-				p++;
-			}
-			if (*p)
-				ver += (*p - '0');
-			if (n < pver[0])
-				pver[n] = ver;
-		}
-		if (n >= pver[0]) {
-			pver[0] = n;
-			return FALSE;	// too small
-		}
-		pver[0] = n;
-		if (n == 0)
-			return FALSE;	// not installed
-		return TRUE;
-	}
+    if (n >= pver[0]) {
+	pver[0] = n;
+	return FALSE;	// too small
+    }
+
+    if (n == 0) {
 	pver[0] = 0;
-	return FALSE;
+	return FALSE;	// not installed
+    }
+    pver[0] = n;
+    return TRUE;
 }
+
  
 /*
  * Get a named registry value.
@@ -134,50 +150,64 @@ gp_getenv_registry(HKEY hkeyroot, const char *key, const char *name,
 }
 
 
-BOOL get_gs_string(int gs_revision, char *name, char *ptr, int len)
+static BOOL get_gs_string_product(int gs_revision, const char *name, 
+    char *ptr, int len, const char *gs_productfamily)
 {
-	/* If using Win32, look in the registry for a value with
-	 * the given name.  The registry value will be under the key
-	 * HKEY_CURRENT_USER\Software\Aladdin Ghostscript\N.NN
-	 * or if that fails under the key
-	 * HKEY_LOCAL_MACHINE\Software\Aladdin Ghostscript\N.NN
-	 * where "Aladdin Ghostscript" is actually gs_productfamily
-	 * and N.NN is obtained from gs_revision.
-	 */
+    /* If using Win32, look in the registry for a value with
+     * the given name.  The registry value will be under the key
+     * HKEY_CURRENT_USER\Software\AFPL Ghostscript\N.NN
+     * or if that fails under the key
+     * HKEY_LOCAL_MACHINE\Software\AFPL Ghostscript\N.NN
+     * where "AFPL Ghostscript" is actually gs_productfamily
+     * and N.NN is obtained from gs_revision.
+     */
 
-	int code;
-	char key[256];
-	char dotversion[16];
-	int length;
-	DWORD version = GetVersion();
+    int code;
+    char key[256];
+    char dotversion[16];
+    int length;
+    DWORD version = GetVersion();
 
-	if (((HIWORD(version) & 0x8000) != 0)
-	      && ((HIWORD(version) & 0x4000) == 0)) {
-	    /* Win32s */
-	    return FALSE;
-	}
-
-
-	if (gs_revision % 100 == 0)
-	    wsprintf(dotversion, "%d.0", (int)(gs_revision/100));
-	else
-	    wsprintf(dotversion, "%d.%02d", 
-		(int)(gs_revision / 100), (int)(gs_revision % 100));
-	wsprintf(key, "Software\\%s\\%s", GS_PRODUCT, dotversion);
-
-        length = len;
-	code = gp_getenv_registry(HKEY_CURRENT_USER, key, name, ptr, &length);
-	if ( code == 0 )
-	    return TRUE;	/* found it */
-
-        length = len;
-	code = gp_getenv_registry(HKEY_LOCAL_MACHINE, key, name, ptr, &length);
-
-	if ( code == 0 )
-	    return TRUE;	/* found it */
-
+    if (((HIWORD(version) & 0x8000) != 0)
+	  && ((HIWORD(version) & 0x4000) == 0)) {
+	/* Win32s */
 	return FALSE;
+    }
+
+
+    if (gs_revision % 100 == 0)
+	wsprintf(dotversion, "%d.0", (int)(gs_revision/100));
+    else
+	wsprintf(dotversion, "%d.%02d", 
+	    (int)(gs_revision / 100), (int)(gs_revision % 100));
+    wsprintf(key, "Software\\%s\\%s", gs_productfamily, dotversion);
+
+    length = len;
+    code = gp_getenv_registry(HKEY_CURRENT_USER, key, name, ptr, &length);
+    if ( code == 0 )
+	return TRUE;	/* found it */
+
+    length = len;
+    code = gp_getenv_registry(HKEY_LOCAL_MACHINE, key, name, ptr, &length);
+
+    if ( code == 0 )
+	return TRUE;	/* found it */
+
+    return FALSE;
 }
+
+BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len)
+{
+    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_AFPL))
+	return TRUE;
+    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_ALADDIN))
+	return TRUE;
+    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_GNU))
+	return TRUE;
+    return FALSE;
+}
+
+
 
 // Set the latest Ghostscript EXE or DLL from the registry
 BOOL
@@ -211,7 +241,7 @@ find_gs(char *gspath, int len, int minver, BOOL bDLL)
 	    gsver = ver[i];
     }
     free(ver);
-    if (gsver < minver)	// minimum version for gsprint
+    if (gsver < minver)	// minimum version (e.g. for gsprint)
 	return FALSE;
     
     if (!get_gs_string(gsver, "GS_DLL", buf, sizeof(buf)))
@@ -243,6 +273,7 @@ int main(int argc, char *argv[])
     int ver[6];
     int i;
     char buf[256];
+
     ver[0] = sizeof(ver) / sizeof(int);
     flag = get_gs_versions(ver);
     printf("Versions: %d\n", ver[0]);

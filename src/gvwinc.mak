@@ -24,13 +24,16 @@ WINZIPSE_XE="C:\Program Files\WinZip Self-Extractor\WZIPSE32.EXE"
 
 OBJ1=gvwin.obj gvwdde.obj gvwdde2.obj gvwdll.obj gvwdisp.obj gvwdlg.obj
 OBJ2=gvwclip.obj gvwedit.obj gvweps.obj gvwmeas.obj gvwmisc.obj gvwprf.obj 
-OBJ3=gvwprn.obj gvcmeas.obj gvcmisc.obj gvcdisp.obj gvccmd.obj 
-OBJ4=gvcprn.obj gvceps.obj gvcinit.obj gvctext.obj gvwfile.obj gvcdsc.obj
-OBJ5=gvcdll.obj gvcpdf.obj gvwinit.obj gvcbeta.obj gvwgsver.obj
-OBJ6=gvcreg.obj gvwreg.obj gvwdib.obj gvwpdib.obj gvwpgdi.obj
+OBJ3=gvwprn.obj gvcmeas.obj gvcmeas2.obj gvcmisc.obj gvcdisp.obj gvccmd.obj 
+OBJ4=gvcprn.obj gvceps.obj gvcinit.obj gvctext.obj dscparse.obj
+OBJ5=dscutil.obj gvcdll.obj gvcpdf.obj gvwinit.obj gvcbeta.obj gvwgsver.obj
+OBJ6=gvcreg.obj gvwreg.obj gvwfile.obj gvwdib.obj gvwpdib.obj gvwpgdi.obj
 OBJS=$(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ6)
 
-HDRS=gsvver.h gvwin.h gvcdsc.h gvcfn.h gvcver.h gvcfile.h gvwdib.h gvwpdib.h
+HDRS=gsvver.h gvwin.h dscparse.h gvcfn.h gvcver.h gvcfile.h gvwdib.h gvwpdib.h
+
+echogsv.exe: echogsv.c
+	$(CC) $(CFLAGS) echogsv.c
 
 gsvw$(WINEXT)de.res: $(HDRS) gvwin2.rc de\gvclang.h de\gvclang.rc de\gvwlang.rc
 	copy de\gvclang.h  gvclang.h
@@ -109,9 +112,9 @@ gvcdisp.obj: gvcdisp.cpp $(HDRS)
 
 gvcdll.obj: gvcdll.cpp gvcrc.h gsdll.h $(HDRS)
 
-gvwfile.obj: gvwfile.cpp gvcfile.h
+dscparse.obj: dscparse.cpp dscparse.h
 
-gvcdsc.obj: gvcdsc.cpp gvcdsc.h
+dscutil.obj: dscutil.cpp dscparse.h
 
 gvcbeta.obj: gvcbeta.cpp gvcbeta.h $(HDRS)
 
@@ -120,6 +123,8 @@ gvceps.obj: gvceps.cpp gvceps.h $(HDRS)
 gvcinit.obj: gvcinit.cpp gvcrc.h $(HDRS)
 
 gvcmeas.obj: gvcmeas.cpp gvcrc.h $(HDRS)
+
+gvcmeas2.obj: gvcmeas2.cpp gvcrc.h $(HDRS)
 
 gvcmisc.obj: gvcmisc.cpp gvcrc.h $(HDRS)
 
@@ -132,6 +137,8 @@ gvctext.obj: gvctext.cpp $(HDRS)
 gvcreg.obj: gvcreg.cpp $(HDRS)
 
 gvwreg.obj: gvwreg.cpp $(HDRS)
+
+gvwfile.obj: gvwfile.cpp gvcfile.h
 
 gvwdib.obj: gvwdib.cpp $(HDRS)
 
@@ -266,22 +273,22 @@ gsview.htm: doc2html.exe gsview.txt
 
 html: doc2html.exe en\gvclang.txt de\gvclang.txt es\gvclang.txt fr\gvclang.txt it\gvclang.txt
 	gvdoc W en\gvclang.txt gsview.txt
-	doc2html gsview.txt gsviewen.html
+	doc2html gsview.txt gsviewen.htm
 	-del gsview.txt
 	gvdoc W de\gvclang.txt gsview.txt
-	doc2html gsview.txt gsviewde.html
+	doc2html gsview.txt gsviewde.htm
 	-del gsview.txt
 	gvdoc W es\gvclang.txt gsview.txt
-	doc2html gsview.txt gsviewes.html
+	doc2html gsview.txt gsviewes.htm
 	-del gsview.txt
 	gvdoc W fr\gvclang.txt gsview.txt
-	doc2html gsview.txt gsviewfr.html
+	doc2html gsview.txt gsviewfr.htm
 	-del gsview.txt
 	gvdoc W it\gvclang.txt gsview.txt
-	doc2html gsview.txt gsviewit.html
+	doc2html gsview.txt gsviewit.htm
 	-del gsview.txt
 	gvdoc P en\gvclang.txt gsview.txt
-	doc2html gsview.txt os2help.html
+	doc2html gsview.txt os2help.htm
 	-del gsview.txt
 
 
@@ -294,6 +301,7 @@ src: gsv$(GSVIEW_VERSION)src.zip
 
 gsv$(GSVIEW_VERSION)src.zip:
 	copy Readme.htm ..
+	copy gsview.css ..
 	copy cdorder.txt ..
 	copy LICENCE ..
 	copy FILE_ID.DIZ ..
@@ -307,8 +315,9 @@ gsv$(GSVIEW_VERSION)src.zip:
 	zip -9 -@ src.zip     < gvclists.txt
 	-del gvclists.txt
 	-del gsv$(GSVIEW_VERSION)src.zip
-	zip -9 gsv$(GSVIEW_VERSION)src.zip epstool.zip pstotext.zip src.zip Readme.htm cdorder.txt FILE_ID.DIZ LICENCE
+	zip -9 gsv$(GSVIEW_VERSION)src.zip epstool.zip pstotext.zip src.zip Readme.htm gsview.css cdorder.txt FILE_ID.DIZ LICENCE
 	-del Readme.htm
+	-del gsview.css
 	-del cdorder.txt
 	-del LICENCE
 	-del FILE_ID.DIZ
@@ -318,6 +327,7 @@ prezip: gsv$(GSVIEW_VERSION)w$(WINEXT).exe
 
 zip: prezip gsv$(GSVIEW_VERSION)src.zip
 	copy Readme.htm ..\Readme.htm
+	copy gsview.css ..\gsview.css
 	copy cdorder.txt ..\cdorder.txt
 	copy LICENCE ..\LICENCE
 	copy FILE_ID.DIZ ..\FILE_ID.DIZ
@@ -329,8 +339,9 @@ zip: prezip gsv$(GSVIEW_VERSION)src.zip
 # gsv$(GSVIEW_VERSION)w16.zip 
 	zip -9 gsview$(GSVIEW_VERSION) gsv$(GSVIEW_VERSION)w32.exe
 # gsv$(GSVIEW_VERSION)wda.zip
-	zip -9 gsview$(GSVIEW_VERSION) Readme.htm cdorder.txt FILE_ID.DIZ LICENCE
+	zip -9 gsview$(GSVIEW_VERSION) Readme.htm gsview.css cdorder.txt FILE_ID.DIZ LICENCE
 	-del Readme.htm
+	-del gsview.css
 	-del cdorder.txt
 	-del LICENCE
 	-del FILE_ID.DIZ
@@ -398,6 +409,7 @@ distcopy:
 	copy FILE_ID.DIZ ..\FILE_ID.DIZ
 	copy LICENCE ..\gsview\LICENCE
 	copy Readme.htm ..\gsview\Readme.htm
+	copy gsview.css ..\gsview\gsview.css
 	copy cdorder.txt ..\gsview\cdorder.txt
 	copy regorder.txt ..\gsview\regorder.txt
 	copy gsview32.exe ..\gsview\gsview32.exe
@@ -411,7 +423,6 @@ distcopy:
 	copy gsvw32es.dll ..\gsview\gsvw32es.dll
 	copy gsvw32fr.dll ..\gsview\gsvw32fr.dll
 	copy gsvw32it.dll ..\gsview\gsvw32it.dll
-	copy gsv16spl.exe ..\gsview\gsv16spl.exe
 	copy gvwgs32.exe ..\gsview\gvwgs32.exe
 	copy printer.ini ..\gsview\printer.ini
 	copy uninstgs.exe ..\gsview\uninstgs.exe
@@ -426,6 +437,7 @@ distcopy:
 	copy gsprint.exe ..\gsview\gsprint.exe
 	copy ..\epstool\epstool.htm ..\gsview\epstool.htm
 	copy ..\epstool\epstool.exe ..\gsview\epstool.exe
+	copy gsv16spl.exe ..\gsview\gsv16spl.exe
 	echo GSview $(GSVIEW_DOT_VERSION)> filelist.tmp
 	echo gsview>> filelist.tmp
 	copy filelist.tmp+gvclist3.txt ..\filelist.txt
@@ -488,10 +500,10 @@ clean: language
 	-del gvwdll.obj
 	-del gvwedit.obj
 	-del gvweps.obj
+	-del gvwfile.obj
 	-del gvwinit.obj
 	-del gvwdde.obj
 	-del gvwdde2.obj
-	-del gvwfile.obj
 	-del gvwgsver.obj
 	-del gvwmeas.obj
 	-del gvwmisc.obj
@@ -502,11 +514,13 @@ clean: language
 	-del gvwreg.obj
 	-del gvcbeta.obj
 	-del gvccmd.obj
-	-del gvcdsc.obj
+	-del dscparse.obj
+	-del dscutil.obj
 	-del gvcdisp.obj
 	-del gvceps.obj
 	-del gvcinit.obj
 	-del gvcmeas.obj
+	-del gvcmeas2.obj
 	-del gvcmisc.obj
 	-del gvcdll.obj
 	-del gvcpdf.obj
@@ -707,9 +721,13 @@ clean: language
 	-del link.rsp
 	-del vc60.pdb
 	-del vc50.pdb
-	-del gsprint.obj
 	-del gsprint.ilk
+	-del gsprint.obj
 	-del gsprint.pdb
+	-del echogsv.exe
+	-del echogsv.ilk
+	-del echogsv.obj
+	-del echogsv.pdb
 
 veryclean: clean
 	-del gsview$(WINEXT).exe
@@ -732,9 +750,10 @@ veryclean: clean
 	-del setp$(WINEXT)it.dll
 	-del uninstgs.exe
 	-del files32.txt
-	-del gsviewen.html
-	-del gsviewde.html
-	-del gsviewes.html
-	-del gsviewfr.html
-	-del gsviewit.html
+	-del gsviewen.htm
+	-del gsviewde.htm
+	-del gsviewes.htm
+	-del gsviewfr.htm
+	-del gsviewit.htm
+	-del os2help.htm
 	-del gsprint.exe

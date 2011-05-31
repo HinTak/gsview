@@ -27,10 +27,25 @@
 #define GS_COPYRIGHT3 "Siehe Datei PUBLIC für mehr Details."
 
 /* Buttons */
+#ifdef UNIX
+#define AAOK "Ok"
+#define AACANCEL "Abbruch"
+#define AADEFAULTS "Standard"
+#define AAEDIT "Bearbeiten"
+#define AAHELP "Hilfe"
+#define AANEW "Neu"
+#define AATEST "Test"
+#define AAYES "Ja"
+#define AANO "Nein"
+#define AANEXTGT "Weiter >"
+#define AABACKLT "< Zurück"
+#define AAFINISHGT "Fertig>"
+#define AAEXIT "Ende"
+#else
 #ifdef _Windows
 #define AAOK "&Ok"
 #define AACANCEL "&Abbruch"
-#define AADEFAULTS "&Defaults"
+#define AADEFAULTS "&Standard"
 #define AAEDIT "&Bearbeiten"
 #define AAHELP "&Hilfe"
 #define AANEW "&Neu"
@@ -44,7 +59,7 @@
 #else
 #define AAOK "~Ok"
 #define AACANCEL "~Abbruch"
-#define AADEFAULTS "~Defaults"
+#define AADEFAULTS "~Standard"
 #define AAEDIT "~Bearbeiten"
 #define AAHELP "~Hilfe"
 #define AANEW "~Neu"
@@ -56,12 +71,14 @@
 #define AAFINISHGT "~Fertig>"
 #define AAEXIT "~Ende"
 #endif
+#endif
 
 /* About dialog box */
 #define AAABOUTWIN "Über GSview für Windows"
 #define AAABOUTPM "Über PM GSview"
+#define AAABOUTX11 "Über X11 GSview"
 #define AAABOUTGSV16SPL "Über GSV16SPL"
-#define AAABOUTGSVIEWPRINT "Über  GSview Print"
+#define AAABOUTGSVIEWPRINT "Über GSview Print"
 #define AACOPY1 "Version:"
 #define AACOPY2 "Grafische Bedienung von Ghostscript "
 #define AACOPY4 "Dieses Programm wird ohne jede Gewährleistung vertrieben."
@@ -87,8 +104,8 @@
 #define AAINPUT "Eingabe"
 
 /* DSC error dialog box */
-#define AADSC "Dokument Strukturierungs Konventionen" 
-#define AAIGNOREALLDSC "Alle DSC Kommentare ignorieren"
+#define AADSC "Dokument-Strukturierungskonventionen" 
+#define AAIGNOREALLDSC "Alle DSC-Kommentare ignorieren"
 
 /* Info dialog box */
 #define AAINFO  "Info"
@@ -117,21 +134,21 @@
 #define AASELECTPAGES "Auswahl Seiten"
 
 /* Printer Setup dialog box */
-#define AAPRINTERSETUP "Drucker Einstellung"
+#define AAPRINTERSETUP "Drucker-Einstellung"
 #define AADEVICEC "Gerät:"
 #define AARESOLUTIONC "Auflösung:"
 #define AAQUEUEC "Drucker:"
 #define AAPRINTTOFILE "Druck in Datei"
-#define AAPSPRINTER "PostScript Drucker"
+#define AAPSPRINTER "PostScript-Drucker"
 #define AAOPTIONSC "Optionen:"
 #define AAFIXEDMEDIA "Fixed Medium"
 #define AACONVERT "Konvertierung"
 #define AAWINPRINTERSETTINGS "Windows Druckereinstellungen" 
 #define AACOLOURS "Farben"
-#define AABANDW "Schwarz Weiss"
+#define AABANDW "Schwarz Weiß"
 #define AAGREY "Grau"
 #define AAFULLCOLOUR "Echtfarben"
-#define AASELECTGSDEVICE "Select Ghostscript device" /* ENGLISH */
+#define AASELECTGSDEVICE "Wähle Ghostscript-Gerät"
 
 #define AAODDEVEN "Ungerade/Gerade"
 #define AAIGNOREDSC "Ignoriere DSC"
@@ -143,20 +160,20 @@
 #define AAADVANCEDPSOPT "Fortgeschrittene PostScript Optionen"
 #define AASENDCTRLDBEFORE "Sende STRG+D vor jedem Auftrag"
 #define AASENDCTRLDAFTER "Sende STRG+D nach jedem Auftrag"
-#define AAPROLOGFILE "Prolog Datei"
-#define AAEPILOGFILE "Epilog Datei" 
+#define AAPROLOGFILE "Prolog-Datei"
+#define AAEPILOGFILE "Epilog-Datei" 
 #define AABROWSE "Durchsuchen"
 
 /* PDF2PS dialog box */
 #define AAPDFTOPS	"PDF zu PostScript"
-#define AABINARYOK	"Binary"
+#define AABINARYOK	"Binär"
 #define AAPSLEVEL1	"PostScript Level 1"
 #define AANOPROCSET	"Kein Prolog"
 
 /* PS2EPS dialog box */
 #define AAPSTOEPS "PS zu EPS"
 #define	AAPSTOEPSREAD  "Haben Sie die Hilfe `PS zu EPS` gelesen ?"
-#define AAPSTOEPSAUTO "Automatische Berechnung der Bounding Box"
+#define AAPSTOEPSAUTO "Automatische Berechnung der BoundingBox"
 
 #ifdef _Windows
 #define AAAPROPERTIES "&Einstellung"
@@ -182,7 +199,7 @@
 #define AAPROPERTIES "Einstellung"
 #define AAPROPERTYC "Einstellung:"
 #define AAVALUEC "Wert:"
-#define AAPAGEOFFSETPT "Seiten Offset (pts)"
+#define AAPAGEOFFSETPT "Seiten-Offset (Points)"
 #define AAXC "X:"
 #define AAYC "Y:"
 
@@ -191,33 +208,34 @@
 #define AAPROPERTYTYPEC "Einstellungstyp:"
 #define AANUMBER "Nummer"
 #define AASTRING "Text"
-#define AANAMEC "Name: z.B.  BitsPerPixel"
-#define AAVALUESC "Werte:  z.B.  1,3,8,16,24"
+#define AANAMEC "Name: z.B. BitsPerPixel"
+#define AAVALUESC "Werte:  z.B. 1,3,8,16,24"
 #define AADELETE "Löschen"
 
 #define AABOUNDINGBOX "BoundingBox"
 
 /* Advanced Configure dialog box */
 #define AACONFIGUREGS "Fortgeschrittene Konfigurierung"
-#define AAGHOSTSCRIPTDLLC "Ghostscript DLL:"
-#define AAGHOSTSCRIPTINCC "Ghostscript Suchpfad:"
-#define AAGHOSTSCRIPTOTHERC "Ghostscript Optionen:"
-#define AACOPYPRINTERDEF "Kopiere Drucker Defaults"
-#define AAASSOCIATEPS "Verknüpfe .ps Dateien"
-#define AAASSOCIATEPDF "Verknüpfe .pdf Dateien"
-#define AACREATESTARTMENU "Lege Start Menü Einträge an"
+#define AAGHOSTSCRIPTDLLC "Ghostscript-DLL:"
+#define AAGHOSTSCRIPTINCC "Ghostscript-Suchpfad:"
+#define AAGHOSTSCRIPTOTHERC "Ghostscript-Optionen:"
+#define AACOPYPRINTERDEF "Kopiere Druckervoreinstellungen"
+#define AAASSOCIATEPS "Verknüpfe .ps-Dateien"
+#define AAASSOCIATEPDF "Verknüpfe .pdf-Dateien"
+#define AACREATESTARTMENU "Lege Startmenü-Einträge"
 
 /* Easy Configure dialog box */
 #define AAEASYCONFIGURE "Einfache Konfigurierung"
 #define AAWHICHGS "Welche Version von Ghostscript wollen Sie einsetzen ?"
 
 /* Download Ghostscript dialog box */
-#define AADOWNLOADGS "Download Ghostscript"
-#define AADOWNLOADNOW "Download Jetzt"
+#define AADOWNLOADGS "Lade Ghostscript"
+#define AADOWNLOADNOW "Lade jetzt"
 #define AAGSNOTFOUND "Ghostscript kann nicht auf Ihrem Computer gefunden werden.  Sie müssen einen Download starten und Aladdin Ghostscript installieren von"
 
 #define AAGSMESSWIN "GSview für Windows - Ghostscript Meldungen"
 #define AAGSMESSPM "PM GSview - Ghostscript Meldungen"
+#define AAGSMESSX11 "X11 GSview - Ghostscript Meldungen"
 #define AACOPY "Kopiere"
 
 /* Display Settings dialog box */
@@ -236,7 +254,7 @@
 #define AAPT "pt"
 #define AAMM "mm"
 #define AAINCH "Zoll"
-#define AACUSTOM "Benutzerdefiniert"
+#define AACUSTOM "Nutzer"
 #define AAMEASURE "Messen"
 #define AAUNITC	"Einheit:"
 #define AASTARTC "Start:"
@@ -257,7 +275,7 @@
 #define AADRAWTASP "Zeichne Text als Polygone"
 #define AAMAPTOLATIN1 "Konvertiere zu ISO-Latin1"
 #define AAFLATNESSC "Flachheit:"
-#define AADEFAULTFONTC "Default Zeichensatz:"
+#define AADEFAULTFONTC "Standard-Zeichensatz:"
 #define AADRIVEROPTIONSC "Treiber Optionen:"
 
 /* Registration */

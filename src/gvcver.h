@@ -35,8 +35,8 @@
 /* undefine BETA for a final release */
 /*
 #define BETA
-#define BETA_YEAR    2000
-#define BETA_MONTH   7
+#define BETA_YEAR    2001
+#define BETA_MONTH   6
 #define BETA_DAY     30
 */
 
@@ -60,15 +60,15 @@
 
 
 /* Ghostscript */
-#define GS_PRODUCT  "Aladdin Ghostscript"
+#define GS_PRODUCT  "AFPL or Aladdin Ghostscript"
 #define GS_REVISION_MIN   403
-#if defined(_Windows) && !defined(__WIN32__)
-#define GS_REVISION	  403		/* this is the last 16-bit version */
-#define GS_REVISION_MAX   403
+#ifdef UNIX
+#define GS_REVISION	  550
 #else
 #define GS_REVISION	  600
-#define GS_REVISION_MAX   699
 #endif
+#define GS_REVISION_MAX   699
+
 #ifdef _Windows
 #ifdef DECALPHA
 #define GSVIEW_EXENAME "gsviewda.exe"
@@ -79,12 +79,16 @@
 #define GS_DLLNAME  "gsdll32.dll"
 #define INIFILE "gsview32.ini"
 #else
+#if X11
+#define INIFILE "gsview.ini"
+#else
 #define GS_DLLNAME  "gsdll2.dll"
 #define INIFILE "gvpm.ini"
+#endif
 #endif
 
 /* General */
 
 #define EMX_NEEDED "0.9d"
-#define INSTALL_DIR "\\gstools"
+#define INSTALL_DIR "\\gs"
 

@@ -35,7 +35,7 @@ BITMAPFILEHEADER bmfh;
 UINT palcolors;
 UINT palsize;
 DWORD bitmap_size;
-BYTE _huge *lpBits;
+BYTE *lpBits;
 static char output[MAXSTR];
 HFILE hfile;
 	if (!OpenClipboard(hwndimg)) {
@@ -64,10 +64,10 @@ HFILE hfile;
 
 	if ( get_filename(output, TRUE, FILTER_BMP, 0, IDS_TOPICCLIP)
 	    && ((hfile = _lcreat(output, 0)) != HFILE_ERROR) ) {
-		_hwrite(hfile, (const char GVHUGE *)&bmfh, sizeof(BITMAPFILEHEADER));
-		_hwrite(hfile, (const char GVHUGE *)pbmih, pbmih->biSize + palsize);
-		lpBits =  ((BYTE _huge *)pbmih) + pbmih->biSize + palsize;
-		_hwrite(hfile, (const char GVHUGE *)lpBits, bitmap_size);
+		_hwrite(hfile, (const char *)&bmfh, sizeof(BITMAPFILEHEADER));
+		_hwrite(hfile, (const char *)pbmih, pbmih->biSize + palsize);
+		lpBits =  ((BYTE *)pbmih) + pbmih->biSize + palsize;
+		_hwrite(hfile, (const char *)lpBits, bitmap_size);
 		_lclose(hfile);
 	}
 	GlobalUnlock(hglobal);
@@ -137,7 +137,7 @@ RGBTRIPLE FAR *prgbtriple;
 	    }
 	    logpalette->palVersion = 0x300;
 	    logpalette->palNumEntries = (WORD)palcolors;
-	    prgbquad = (RGBQUAD FAR *)(((BYTE _huge *)pbmih) + pbmih->biSize);
+	    prgbquad = (RGBQUAD FAR *)(((BYTE *)pbmih) + pbmih->biSize);
 	    if (pbmih->biSize == sizeof(BITMAPCOREHEADER)) {
 		/* OS2 format */
 	        prgbtriple = (RGBTRIPLE FAR *)prgbquad;
@@ -192,7 +192,7 @@ HBITMAP hbitmap;
 	    RealizePalette(hdc);
 	}
 	hbitmap = CreateDIBitmap(hdc, pbmih, CBM_INIT,
-		((BYTE _huge *)pbmih) + pbmih->biSize + palsize,
+		((BYTE *)pbmih) + pbmih->biSize + palsize,
 		(LPBITMAPINFO)pbmih, DIB_RGB_COLORS);
 	ReleaseDC(hwndimg, hdc);
 	GlobalUnlock(hglobal);

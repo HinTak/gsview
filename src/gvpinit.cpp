@@ -813,7 +813,7 @@ WIZPAGE pages[]={
 };
 
 int
-config_wizard(void)
+config_wizard(BOOL bVerbose)
 {
     /* main dialog box */
     /* we must use modeless dialog box to get the correct dialog control */

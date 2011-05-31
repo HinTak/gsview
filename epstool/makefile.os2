@@ -60,7 +60,7 @@ INCDIR=$(EMXPATH)/include
 LIBDIR=$(EMXPATH)/lib
 
 
-OBJS=epstool.$(OBJ) gvceps.$(OBJ) gvcdsc.$(OBJ) gvcfile.$(OBJ)
+OBJS=epstool.$(OBJ) gvceps.$(OBJ) dscparse.$(OBJ) dscutil.$(OBJ)
 
 all: epstool.exe
 
@@ -68,16 +68,16 @@ all: epstool.exe
 	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c $*.cpp
 
 
-epstool.$(OBJ): epstool.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
+epstool.$(OBJ): epstool.cpp epstool.h ../src/dscparse.h
 	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c $*.cpp
 
-gvcdsc.$(OBJ): ../src/gvcdsc.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
+dscparse.$(OBJ): ../src/dscparse.cpp epstool.h ../src/dscparse.h
 	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.cpp
 
-gvcfile.$(OBJ): ../src/gvcfile.cpp
+dscutil.$(OBJ): ../src/dscutil.cpp
 	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.cpp
 
-gvceps.$(OBJ): ../src/gvceps.cpp epstool.h ../src/gvcdsc.h
+gvceps.$(OBJ): ../src/gvceps.cpp epstool.h ../src/dscparse.h
 	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.cpp
 
 epstool.exe: $(OBJS) epstool.def
@@ -96,8 +96,8 @@ epstool.exe: $(OBJS) epstool.def
 clean:
 	-del epstool.$(OBJ)
 	-del gvceps.$(OBJ)
-	-del gvcdsc.$(OBJ)
-	-del gvcfile.$(OBJ)
+	-del dscparse.$(OBJ)
+	-del dscutil.$(OBJ)
 
 veryclean: clean
 	-del epstool.exe
@@ -116,10 +116,9 @@ EPSFILES=\
 
 SRCFILES1=\
  src/LICENCE\
- src/gvcfile.cpp\
- src/gvcfile.h\
- src/gvcdsc.cpp\
- src/gvcdsc.h\
+ src/dscutil.cpp\
+ src/dscparse.cpp\
+ src/dscparse.h\
  src/gvceps.cpp\
  src/gvceps.h\
  src/PUBLIC\

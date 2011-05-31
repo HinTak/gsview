@@ -21,7 +21,7 @@
 #include "gvwin.h"
 
 PROFILE *
-profile_open(char *filename)
+profile_open(const char *filename)
 {
 PROFILE *prf;
 	if ( (prf = (PROFILE *)malloc(sizeof(PROFILE))) == (PROFILE *)NULL )
@@ -35,13 +35,13 @@ PROFILE *prf;
 }
 
 int 
-profile_read_string(PROFILE *prf, char *section, char *entry, char *def, char *buffer, int len)
+profile_read_string(PROFILE *prf, const char *section, const char *entry, const char *def, char *buffer, int len)
 {
 	return GetPrivateProfileString(section, entry, def, buffer, len, prf->name);
 }
 
 BOOL
-profile_write_string(PROFILE *prf, char *section, char *entry, char *value)
+profile_write_string(PROFILE *prf, const char *section, const char *entry, const char *value)
 {
 	if (debug) {
 	    BOOL flag = WritePrivateProfileString(section, entry, 

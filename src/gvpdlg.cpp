@@ -58,7 +58,7 @@ InputDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 }
 
 BOOL
-get_string(char *prompt, char *answer)
+query_string(const char *prompt, char *answer)
 {
 	if (get_string_busy) {
 	    message_box("get_string is busy",0);
@@ -1503,7 +1503,7 @@ gs_showmess(void)
 
 /* Add string for Ghostscript message window */
 void
-gs_addmess_count(char *str, int count)
+gs_addmess_count(const char *str, int count)
 {
     /* if debugging, write to a log file */
     if (debug & DEBUG_LOG) {
@@ -1527,7 +1527,7 @@ gs_addmess_count(char *str, int count)
 }
 
 void
-gs_addmess(char *str)
+gs_addmess(const char *str)
 {
     gs_addmess_count(str, strlen(str));
 }
@@ -1559,13 +1559,13 @@ DSCErrorDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
         case WM_COMMAND:
             switch(SHORT1FROMMP(mp1)) {
                 case DID_OK:
-                    WinDismissDlg(hwnd, CDSC_OK);
+                    WinDismissDlg(hwnd, CDSC_RESPONSE_OK);
 		    return (MRESULT)TRUE;
                 case DID_CANCEL:
-                    WinDismissDlg(hwnd, CDSC_CANCEL);
+                    WinDismissDlg(hwnd, CDSC_RESPONSE_CANCEL);
 		    return (MRESULT)TRUE;
                 case DSC_IGNORE_ALL:
-                    WinDismissDlg(hwnd, CDSC_IGNORE_ALL);
+                    WinDismissDlg(hwnd, CDSC_RESPONSE_IGNORE_ALL);
 		    return (MRESULT)TRUE;
 		case ID_HELP:
 		    get_help();

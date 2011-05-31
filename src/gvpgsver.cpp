@@ -19,7 +19,7 @@
 #include <os2.h>
 
 /* not supported by OS/2 */
-BOOL get_gs_string(int gs_revision, char *name, char *ptr, int len)
+BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len)
 {
     return FALSE;
 }

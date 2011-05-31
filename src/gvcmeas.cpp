@@ -1,4 +1,4 @@
-/* Copyright (C) 1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1998-2000, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,18 +18,16 @@
 /* gvcmeas.c */
 /* Measure lengths on display */
 
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
+#include "gvc.h"
 #include <math.h>
+
+float fthreshold = 1e-12;
 
 #define radians(x) (2. * 3.14159265358979 * ((x)/ 360.))
 
 /* Rotate a matrix, possibly in place.  The angle is in degrees. */
 /* from Ghostscript */
-static int
+int
 matrix_rotate(const MATRIX *pm, float ang, MATRIX *pmr)
 {
   double mxx, mxy;
@@ -56,7 +54,7 @@ matrix_rotate(const MATRIX *pm, float ang, MATRIX *pmr)
 
 /* Invert a matrix.  Return -1 if not invertible. */
 /* from Ghostscript */
-static int
+int
 matrix_invert(const MATRIX *pm, MATRIX *pmr)
 {     /* We have to be careful about fetch/store order, */
       /* because pm might be the same as pmr. */
@@ -133,72 +131,12 @@ void matrix_set_unit(MATRIX *matrix, int unit)
   }
 }
 
-static char *ctmfmt = "%.5g" ;
-float fthreshold = 1e-12;
-
-void update_dialog_ctm(HWND hwnd, MATRIX *ctm)
+void
+measure_transform_point(float x, float y, float *px, float *py)
 {
-  char buf[16] ;
-  /* round small values to zero */
-  if (fabs(ctm->xx) < fthreshold)
-    ctm->xx = 0.0;
-  if (fabs(ctm->xy) < fthreshold)
-    ctm->xy = 0.0;
-  if (fabs(ctm->yx) < fthreshold)
-    ctm->yx = 0.0;
-  if (fabs(ctm->yy) < fthreshold)
-    ctm->yy = 0.0;
-  if (fabs(ctm->tx) < fthreshold)
-    ctm->tx = 0.0;
-  if (fabs(ctm->ty) < fthreshold)
-    ctm->ty = 0.0;
-
-  sprintf(buf, ctmfmt, ctm->xx) ;
-  SetDlgItemText(hwnd, IDC_CALCCTMA, buf) ;
-  sprintf(buf, ctmfmt, ctm->xy) ;
-  SetDlgItemText(hwnd, IDC_CALCCTMB, buf) ;
-  sprintf(buf, ctmfmt, ctm->yx) ;
-  SetDlgItemText(hwnd, IDC_CALCCTMC, buf) ;
-  sprintf(buf, ctmfmt, ctm->yy) ;
-  SetDlgItemText(hwnd, IDC_CALCCTMD, buf) ;
-  sprintf(buf, ctmfmt, ctm->tx) ;
-  SetDlgItemText(hwnd, IDC_CALCCTMTX, buf) ;
-  sprintf(buf, ctmfmt, ctm->ty) ;
-  SetDlgItemText(hwnd, IDC_CALCCTMTY, buf) ;
+    *px = x * option.ctm.xx + y * option.ctm.yx + option.ctm.tx;
+    *py = x * option.ctm.xy + y * option.ctm.yy + option.ctm.ty;
 }
-
-
-BOOL dialog_get_float(HWND hwnd, int field, float *fres)
-{
-  return dialog_get_float_error(hwnd, field, fres, TRUE);
-}
-
-
-void dialog_put_float(HWND hwnd, int field, float fx)
-{
-   char buf[64];
-   sprintf(buf, ctmfmt, fx);
-   SetDlgItemText(hwnd, field, buf);
-}
-
-BOOL dialog_get_ctm(HWND hwnd, MATRIX *ctm, BOOL error)
-{
-BOOL result = TRUE;
-   if (result)
-       result = dialog_get_float_error(hwnd, IDC_CALCCTMA, &ctm->xx, error);
-   if (result)
-       result = dialog_get_float_error(hwnd, IDC_CALCCTMB, &ctm->xy, error);
-   if (result)
-       result = dialog_get_float_error(hwnd, IDC_CALCCTMC, &ctm->yx, error);
-   if (result)
-       result = dialog_get_float_error(hwnd, IDC_CALCCTMD, &ctm->yy, error);
-   if (result)
-       result = dialog_get_float_error(hwnd, IDC_CALCCTMTX, &ctm->tx, error);
-   if (result)
-       result = dialog_get_float_error(hwnd, IDC_CALCCTMTY, &ctm->ty, error);
-   return result;
-}
-
 
 
 #define MEASURE_SECTION "Measure"
@@ -208,7 +146,7 @@ read_measure_profile(PROFILE *prf)
 int i;
 float fx;
 char profile[MAXSTR];
-char *section = MEASURE_SECTION;
+const char *section = MEASURE_SECTION;
     /* Calculator dialog settings  */
     profile_read_string(prf, section, "XX",  "1", profile, sizeof(profile)) ;
     if (sscanf(profile,"%g", &fx) == 1)
@@ -263,7 +201,7 @@ char *section = MEASURE_SECTION;
 void
 write_measure_profile(PROFILE *prf)
 {
-char *section = MEASURE_SECTION;
+const char *section = MEASURE_SECTION;
 char profile[MAXSTR];
     sprintf(profile, "%g", option.ctm.xx);
     profile_write_string(prf, section, "XX", profile);
@@ -291,181 +229,5 @@ char profile[MAXSTR];
     profile_write_string(prf, section, "ScaleX", profile);
     sprintf(profile, "%g", option.measure.sx);
     profile_write_string(prf, section, "ScaleY", profile);
-}
-
-
-BOOL
-calc_command(HWND hwnd, int message, MATRIX *ctm, int *unit)
-{
-float xx, yy ;
-  switch(message) {
-    case IDC_CALCPTS:
-      matrix_set_unit(ctm, *unit = IDM_UNITPT) ;
-      update_dialog_ctm(hwnd, ctm) ;
-      calc_enable_custom(hwnd, FALSE) ;
-      *unit = IDM_UNITPT;
-      return TRUE;
-			  
-    case IDC_CALCIN:
-      matrix_set_unit(ctm, *unit = IDM_UNITINCH) ;
-      update_dialog_ctm(hwnd, ctm) ;
-      calc_enable_custom(hwnd, FALSE) ;
-      *unit = IDM_UNITINCH;
-      return TRUE;
-			  
-    case IDC_CALCMM:
-      matrix_set_unit(ctm, *unit = IDM_UNITMM) ;
-      update_dialog_ctm(hwnd, ctm) ;
-      calc_enable_custom(hwnd, FALSE) ;
-      *unit = IDM_UNITMM;
-      return TRUE;
-			  
-    case IDC_CALCCUST:
-      *unit = IDM_UNITCUSTOM ;
-      calc_enable_custom(hwnd, TRUE) ;
-      return TRUE;
-
-    case IDC_CALCRO:
-      if (dialog_get_ctm(hwnd, ctm, TRUE) 
-	&& dialog_get_float(hwnd, IDC_CALCROTTH, &xx))
-      {
-	matrix_rotate(ctm, xx, ctm) ;
-	update_dialog_ctm(hwnd, ctm) ;
-      }
-      return TRUE;
-
-    case IDC_CALCINI:
-      matrix_set_unit(ctm, IDM_UNITPT) ;
-      update_dialog_ctm(hwnd, ctm) ;
-      return TRUE;
-      
-    case IDC_CALCINV:
-      if (!dialog_get_ctm(hwnd, ctm, TRUE))
-	return TRUE;
-      if (-1 == matrix_invert(ctm, ctm))
-	gserror(IDS_CANTINVERT, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER) ;
-      else
-	update_dialog_ctm(hwnd, ctm) ;
-      return TRUE;
-    case IDC_CALCTR:
-      if (dialog_get_ctm(hwnd, ctm, TRUE) 
-	  && dialog_get_float(hwnd, IDC_CALCTX, &xx)
-	  && dialog_get_float(hwnd, IDC_CALCTY, &yy))
-	{
-	  matrix_translate(ctm, xx, yy, ctm);
-	  update_dialog_ctm(hwnd, ctm) ;
-	}
-      return TRUE;
-    case IDC_CALCSC:
-      if (dialog_get_ctm(hwnd, ctm, TRUE) 
-          && dialog_get_float(hwnd, IDC_CALCSCX, &xx)
-	  && dialog_get_float(hwnd, IDC_CALCSCY, &yy))
-	{
-	  matrix_scale(ctm, xx, yy, ctm);
-	  update_dialog_ctm(hwnd, ctm) ;
-	}
-      return TRUE;
-  }
-  return FALSE;
-}
-
-float measure_lastx;
-float measure_lasty;
-
-void
-measure_transform_point(float x, float y, float *px, float *py)
-{
-    *px = x * option.ctm.xx + y * option.ctm.yx + option.ctm.tx;
-    *py = x * option.ctm.xy + y * option.ctm.yy + option.ctm.ty;
-}
-
-char measure_fmt[] = "%.5g";
-
-void
-measure_update_last(void)
-{
-char buf[64];
-float thisx, thisy;
-    measure_transform_point(measure_lastx, measure_lasty, &thisx, &thisy);
-    if (fabs(thisx) < fthreshold)
-        thisx = 0.0;
-    if (fabs(thisy) < fthreshold)
-        thisy = 0.0;
-    sprintf(buf, measure_fmt, thisx);
-    SetDlgItemText(hwnd_measure, IDC_MEASURE_LASTX, buf);
-    sprintf(buf, measure_fmt, thisy);
-    SetDlgItemText(hwnd_measure, IDC_MEASURE_LASTY, buf);
-}
-
-
-/* This is called on mouse click */
-void
-measure_setpoint(float x, float y)
-{
-    if (hwnd_measure == (HWND)NULL)
-	return;
-    measure_lastx = x;
-    measure_lasty = y;
-    measure_update_last();
-    measure_paint(x, y);
-}
-
-#define degrees(x) (x * 180.0 / 3.14159265358979)
-
-/* This is called from cursorpos_paint */
-void
-measure_paint(float x, float y)
-{
-float lastx, lasty;
-float thisx, thisy;
-float deltax, deltay;
-float radius, angle;
-char buf[64];
-    if (hwnd_measure == (HWND)NULL)
-	return;
-    measure_transform_point(x, y, &thisx, &thisy);
-    if (fabs(thisx) < fthreshold)
-        thisx = 0.0;
-    if (fabs(thisy) < fthreshold)
-        thisy = 0.0;
-    measure_transform_point(measure_lastx, measure_lasty, &lastx, &lasty);
-    if (fabs(lastx) < fthreshold)
-        lastx = 0.0;
-    if (fabs(lasty) < fthreshold)
-        lasty = 0.0;
-    deltax = thisx - lastx;
-    deltay = thisy - lasty;
-    if (fabs(deltax) < fthreshold)
-        deltax = 0.0;
-    if (fabs(deltay) < fthreshold)
-        deltay = 0.0;
-    radius = sqrt(deltax*deltax + deltay*deltay);
-    if ((deltax == 0.0) && (deltay == 0.0))
-	angle = 0.0;
-    else
-	angle = degrees( atan2(deltay, deltax) );
-
-    sprintf(buf, measure_fmt, thisx);
-    SetDlgItemText(hwnd_measure, IDC_MEASURE_X, buf);
-    sprintf(buf, measure_fmt, thisy);
-    SetDlgItemText(hwnd_measure, IDC_MEASURE_Y, buf);
-    sprintf(buf, measure_fmt, deltax);
-    SetDlgItemText(hwnd_measure, IDC_MEASURE_DELTAX, buf);
-    sprintf(buf, measure_fmt, deltay);
-    SetDlgItemText(hwnd_measure, IDC_MEASURE_DELTAY, buf);
-    sprintf(buf, measure_fmt, radius);
-    SetDlgItemText(hwnd_measure, IDC_MEASURE_RADIUS, buf);
-    sprintf(buf, "%.2f", angle);
-    SetDlgItemText(hwnd_measure, IDC_MEASURE_ANGLE, buf);
-}
-
-
-void
-measure_dialog_unit(void)
-{
-char buf[MAXSTR];
-    load_string(IDS_UNITNAME + option.measure.unit - IDM_UNITPT, 
-	    buf, sizeof(buf));
-    SetDlgItemText(hwnd_measure, IDC_MEASURE_UNIT, buf);
 }
 

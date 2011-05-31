@@ -28,6 +28,40 @@
 #define REGISTRATION_NUMBER "Number"
 #define REGISTRATION_NAME "Name"
 
+
+/* display error message if reading or writing a registry key fails */
+void registry_error(HKEY root, const char *name, const char *value, 
+    BOOL bRead, LONG rc)
+{
+    LPVOID lpMessageBuffer;
+    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+	FORMAT_MESSAGE_FROM_SYSTEM,
+	NULL, rc,
+	MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* user default language */
+	(LPTSTR) &lpMessageBuffer, 0, NULL);
+    if (lpMessageBuffer) {
+	gs_addmess( bRead ? "Failed to read registry\n" :
+	    "Failed to write registry\n");
+	if (root == HKEY_CLASSES_ROOT)
+	    gs_addmess("HKEY_CLASSES_ROOT\\");
+	else if (root == HKEY_LOCAL_MACHINE)
+	    gs_addmess("HKEY_LOCAL_MACHINE\\");
+	else if (root == HKEY_CURRENT_USER)
+	    gs_addmess("HKEY_CURRENT_USER\\");
+	else
+	    gs_addmess("???\\");
+	gs_addmess(name);
+	gs_addmess("\n");
+	if (value)
+	    gs_addmessf("  %s\n", value);
+	gs_addmessf("Error=%d\n", rc);
+	gs_addmess((LPTSTR)lpMessageBuffer);
+	gs_addmess("\r\n");
+	LocalFree(LocalHandle(lpMessageBuffer));
+    }
+    gs_showmess();
+}
+
 BOOL
 write_registration(unsigned int reg_receipt, unsigned int reg_number,
   char *reg_name)
@@ -35,6 +69,9 @@ write_registration(unsigned int reg_receipt, unsigned int reg_number,
     LONG rc;
     HKEY hkey;
     DWORD dwValue;
+    HKEY root;
+    char *name;
+    char *value;
    
     if (is_win32s) {
 	char profile[MAXSTR];
@@ -49,30 +86,40 @@ write_registration(unsigned int reg_receipt, unsigned int reg_number,
 	profile_close(prf);
     }
     else {
-	if ((rc = RegOpenKeyEx(HKEY_LOCAL_MACHINE, REG_KEY_NAME, 0, 
+	root = HKEY_LOCAL_MACHINE;
+	name = REG_KEY_NAME;
+	value = NULL;
+	if ((rc = RegOpenKeyEx(root, name, 0, 
 		KEY_ALL_ACCESS, &hkey)) != ERROR_SUCCESS) {
 	    /* failed to open key, so try to create it */
-	    rc = RegCreateKey(HKEY_LOCAL_MACHINE, REG_KEY_NAME, &hkey);
+	    rc = RegCreateKey(root, name, &hkey);
 	}
 
 	if (rc == ERROR_SUCCESS) {
 	    dwValue = (DWORD)reg_receipt;
-		rc = RegSetValueEx(hkey, REGISTRATION_RECEIPT, 0, REG_DWORD,
+	    value = REGISTRATION_RECEIPT;
+	    rc = RegSetValueEx(hkey, value, 0, REG_DWORD,
 			(CONST BYTE *)&dwValue, sizeof(DWORD));
 
 	    dwValue = (DWORD)(reg_number ^ 0xffff);
-	    if (rc == ERROR_SUCCESS)
-		rc = RegSetValueEx(hkey, REGISTRATION_NUMBER, 0, REG_DWORD,
+	    if (rc == ERROR_SUCCESS) {
+	        value = REGISTRATION_NUMBER;
+		rc = RegSetValueEx(hkey, value, 0, REG_DWORD,
 			(CONST BYTE *)&dwValue, sizeof(DWORD));
+	    }
 
-	    if (rc == ERROR_SUCCESS)
-		rc = RegSetValueEx(hkey, REGISTRATION_NAME, 0, REG_SZ,
+	    if (rc == ERROR_SUCCESS) {
+	        value = REGISTRATION_NAME;
+		rc = RegSetValueEx(hkey, value, 0, REG_SZ,
 			(CONST BYTE *)reg_name, lstrlen(reg_name)+1);
+	    }
 	    RegCloseKey(hkey);
 	}
 	
-	if (rc != ERROR_SUCCESS)
+	if (rc != ERROR_SUCCESS) {
+	    registry_error(root, name, value, FALSE, rc);
 	    return FALSE;
+	}
     }
     return TRUE;
 }
@@ -87,6 +134,9 @@ read_registration(unsigned int *preg_receipt, unsigned int *preg_number,
     DWORD dwValue;
     DWORD cbData;
     DWORD keytype;
+    HKEY root;
+    char *name;
+    char *value;
    
     if (is_win32s) {
 	unsigned int i;
@@ -107,65 +157,50 @@ read_registration(unsigned int *preg_receipt, unsigned int *preg_number,
 	profile_close(prf);
     }
     else {
-	rc = RegOpenKeyEx(HKEY_LOCAL_MACHINE, REG_KEY_NAME, 0, KEY_READ, &hkey);
+	root = HKEY_LOCAL_MACHINE;
+	name = REG_KEY_NAME;
+	value = NULL;
+	rc = RegOpenKeyEx(root, name, 0, KEY_READ, &hkey);
 
 	if (rc == ERROR_SUCCESS) {
 	    cbData = sizeof(dwValue);
 	    keytype =  REG_DWORD;
-	    if ( (rc == ERROR_SUCCESS) &&
-		 (rc = RegQueryValueEx(hkey, REGISTRATION_RECEIPT, 0, &keytype, 
-		    (LPBYTE)&dwValue, &cbData)) == ERROR_SUCCESS) {
-		*preg_receipt = dwValue;
+	    if (rc == ERROR_SUCCESS) {
+		value = REGISTRATION_RECEIPT;
+		if ((rc = RegQueryValueEx(hkey, value, 0, &keytype, 
+		    (LPBYTE)&dwValue, &cbData)) == ERROR_SUCCESS)
+		    *preg_receipt = dwValue;
 	    }
 
 	    cbData = sizeof(dwValue);
 	    keytype =  REG_DWORD;
-	    if ( (rc == ERROR_SUCCESS) &&
-		 (rc = RegQueryValueEx(hkey, REGISTRATION_NUMBER, 0, &keytype, 
-		    (LPBYTE)&dwValue, &cbData)) == ERROR_SUCCESS) {
-		*preg_number = dwValue ^ 0xffff;
+	    if (rc == ERROR_SUCCESS) {
+		value = REGISTRATION_NUMBER;
+		if ((rc = RegQueryValueEx(hkey, value, 0, &keytype, 
+		    (LPBYTE)&dwValue, &cbData)) == ERROR_SUCCESS)
+		    *preg_number = dwValue ^ 0xffff;
 	    }
 
 	    cbData = reg_len;
 	    keytype =  REG_SZ;
-	    if (rc == ERROR_SUCCESS)
-		rc = RegQueryValueEx(hkey, REGISTRATION_NAME, 0, &keytype, 
+	    if (rc == ERROR_SUCCESS) {
+		value = REGISTRATION_NAME;
+		rc = RegQueryValueEx(hkey, value, 0, &keytype, 
 		    (LPBYTE)reg_name, &cbData);
+	    }
 
 	    RegCloseKey(hkey);
+	    if ((rc != ERROR_SUCCESS) && (rc != ERROR_FILE_NOT_FOUND))
+		registry_error(root, name, value, TRUE, rc);
+	}
+	else {
+	    if (rc != ERROR_FILE_NOT_FOUND)
+		registry_error(root, name, value, TRUE, rc);
+
 	}
 	
-	if (rc != ERROR_SUCCESS) {
-	    /* couldn't read registration info */
-	    /* Try to read it from ini file in EXE directory */
-	    char sysini[MAXSTR];
-	    unsigned int i;
-	    char profile[MAXSTR];
-	    char *section = INISECTION;
-	    PROFILE *prf;
- 	    BOOL success = TRUE;
-	    strncpy(sysini, szExePath, MAXSTR-1);
-	    strncat(sysini, INIFILE, MAXSTR-1-strlen(sysini));
-	    prf = profile_open(sysini);
-	    profile_read_string(prf, section, "RegistrationReceipt", "", 
-		    profile, sizeof(profile));
-	    if (sscanf(profile,"%u", &i) == 1)
-		*preg_receipt = i;
-	    else
-		success = FALSE;
-	    profile_read_string(prf, section, "RegistrationNumber", "", 
-		    profile, sizeof(profile));
-	    if (sscanf(profile,"%u", &i) == 1)
-		*preg_number = i ^ 0xffff;
-	    else
-		success = FALSE;
-	    profile_read_string(prf, section, "RegistrationName", "", 
-		    reg_name, reg_len);
-	    if (strlen(reg_name) == 0)
-		success = FALSE;
-	    profile_close(prf);
-	    return success;
-	}
+	if (rc != ERROR_SUCCESS)
+	    return FALSE;
     }
     return TRUE;
 }
@@ -191,7 +226,7 @@ RegDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		    char buf[MAXSTR];
 		    GetDlgItemText(hDlg, REGDLG_NAME, buf, sizeof(buf));
 		    if ((reg_receipt != 0) && 
-			(reg_num == make_reg(reg_receipt)) &&
+			((unsigned int)reg_num == make_reg(reg_receipt)) &&
 			(strlen(buf) > 0)) {
 			strncpy(registration_name, buf, 
 			    sizeof(registration_name));
@@ -213,7 +248,7 @@ RegDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                     return(TRUE);
                 case REGDLG_ONLINE:
 		    ShellExecute(hDlg, NULL, 
-			"http://www.ghostgum.com.au/index.html", 
+			"http://www.ghostgum.com.au/index.htm", 
 			NULL, NULL, SW_SHOWNORMAL);
                     return(TRUE);
 		case ID_HELP:

@@ -103,7 +103,7 @@ int done(HWND hwnd);
 int finish(HWND hwnd);
 void goto_page(HWND hwnd, int id);
 void install_init(void);
-int message_box(char *str, int icon);
+int message_box(const char *str, int icon);
 int gs_chdir(char *dirname);
 int load_string(int id, char *str, int len);
 int update_config(void);

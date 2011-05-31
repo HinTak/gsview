@@ -128,12 +128,13 @@ extern char *getwd (char *pathname);
 #endif
 #endif
 
-#include "gvcfile.h"
-#include "gvcdsc.h"
+#include "dscparse.h"
 #include "gvceps.h"
 
+#ifndef TRUE
 #define TRUE 1
 #define FALSE 0
+#endif
 
 #ifndef min
 #define min(x,y)  ( (x) < (y) ? (x) : (y) )
@@ -170,7 +171,7 @@ char * gs_getcwd(char *dirname, int size);
 void play_sound(int i);
 char * psfile_name(PSFILE *psf);
 BOOL ps_copy_find(FILE *outfile, FILE *infile, long end, 
-	char *s, int n, char *comment);
+	char *s, int n, const char *comment);
 BOOL find_gsexe(char *gsexe, int len);
 
 /* temporary kludges */

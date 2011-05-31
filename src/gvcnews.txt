@@ -1,3 +1,122 @@
+---------------------------
+Version 3.5 2000-12-16
+---------------------------
+All:
+  German language updates from Tobias Burnus.
+
+  PDF page orientation for page n was using the orientation of page n+1.
+
+  Fixed initialisation problem with page[].viewing_orientation.
+
+Win32:
+  Prolog and Epilog fields didn't scroll.
+
+  Don't give a registry error message if GSview registry key exists
+  without GSview being registered.
+
+  Added *.psz as an alternative to *.ps.gz as the default file extension.
+
+OS/2:
+  Change default path to c:\gs\gsview\gvpm.exe
+
+  Added *.psz as an alternative to *.ps.gz as the default file extension.
+
+X11:
+  Change default draw method back to pixmap and added note in Readme.htm
+  about bug #124957 in GSview 6.50.
+
+---------------------------
+Version 3.42beta 2000-12-08
+---------------------------
+
+All:
+  DSC parser handles %%ViewerOrientation.
+  DSC parser doesn't flag an error if %%Pages absent but on %%Page is found.
+  DSC parser frees memory if initialisation fails.
+  Added const qualifier to string constants.
+  When updating the bounding box, correctly handle auto bounding box
+  in conjunction with EPSF clip.
+  
+Win32:
+  When printing, make the Pages range show the number of pages.
+
+  Increase the printer output port name length from 32 bytes
+  to 256 bytes.  It is the printer queue name that is limited
+  to 32 bytes, not the output port name.
+
+X11:
+  Set the numeric locale to "C" so that floating point
+  numbers writen to Ghostscript and the configuration 
+  file use a period not a comma.
+
+  Added dynamic loading of libz.so and libbz2.so for automatic
+  decompression of gzip and bzip2 files.
+
+  When printing, page selection was ignored and all pages were printed.
+  When extracting pages, page 1 was always extracted.
+
+  Now handles Ghostscript include directory correctly.
+
+  Makefile now builds epstool and pstotext.
+
+  get_filename() now changes directory to that of the selected file.
+
+  Change initialisation file name to .gsview.ini
+  Changed documentation location to /usr/local/doc/gsview-3.5/
+  Change printer.ini location to /usr/local/etc/gsview/printer.ini
+  Global initialisation file now /usr/local/etc/gsview/gsview.ini
+
+  Change default draw method to backing pixmap, since pixmap method 
+  is broken in GSview 6.50.
+
+---------------------------
+Version 3.41beta 2000-11-06
+---------------------------
+All:
+  This is based on 3.32 with a few bug fixes.
+
+  DSC parser didn't allow %%BeginData type or bytesorlines to
+  be omitted.
+
+  DSC parser updated to be compatible with Ghostscript.
+
+  Fixed parsing of Ghostscript options which didn't process
+  quotes correctly.
+
+  When printing, "Fixed Media" has been replaced by a choice of
+    Variable Page Size (don't restrict page size)
+    Fixed Page Size (PageSize policy 5)
+    Rescale to fit Page Size (PageSize policy 3)
+  This doesn't work with Aladdin Ghostscript 6.01 and AFPL 
+  Ghostscript 6.30 which do not adjust the page as required
+  by policy 3.
+  
+Win32:
+  Reverse page order was ignored for printing.
+
+  If reading or writing registration info fails,
+  display error message.
+
+  If you try to install GSview in the same directory
+  as a previous version, the setup program now launches 
+  uninstaller for the previous version.
+
+  When using pstoedit with a multipage document and a backend
+  that does not support multiple pages, process the selected
+  page instead of the currently displayed page.
+
+  Updated pstoedit to v3.21.
+
+  Easy Configure should always show a dialog, even if only
+  one version of Ghostscript installed.
+
+OS/2:
+  Added pstoedit code from Thomas Hoffmann.
+  This doesn't work yet - pstoedit DLL needs to be recompiled
+  with different link options.
+  
+  Enabled Edit | Measure.
+
 ----------------------
 Version 3.4 2000-07-29
 ----------------------
@@ -18,16 +137,77 @@ Win32:
   to use if only one version of Ghostscript installed.
   Don't forget to open file on command line.
 
+----------------------------
+Version 3.32alpha 2000-07-18
+----------------------------
+X11:
+  Added window for showing GS stdout while printing.
+  Added text extract and find.
+  Added Measure CTM.
+  Now supports all 5 languages.
+  Added Advanced PS Print dialog.
+
+----------------------------
+Version 3.31alpha 2000-07-08
+----------------------------
+All:
+  This is based on 3.21 alpha with the 3.3 fixes.
+
+  "gsview /F filename" didn't print any pages.
+
+  The pdfmark fix for user space coordinates was broken if
+  link had dashed border.
+
+Win32:
+  Pressing F4 when in fullscreen mode brought up overlapped
+  window and left it in front.
+
+  Fixed incorrect use of memset in gsprint.cpp main().
+  
+  Advanced PS print options were not saved correctly.
+
+  Removed Win16 code.
+
+  When configuring GSview, don't ask which version of Ghostscript
+  to use if only one version of Ghostscript installed.
+  Don't forget to open file on command line.
+
+X11:
+  Doesn't die if Ghostscript can't be found.
+
+  GS command can be set.
+
+  Changes to support multiple languages.
+
+  Set locale correctly.
+
 ----------------------
 Version 3.3 2000-07-01
 ----------------------
 All:
+  This is an out of sequence release to fix two bugs.
+  This is based on the GSview 3.1 sources and ignores any
+  changes introduced in 3.21 alpha.
+
   "gsview /F filename" now uses "File | Convert".
 
 Win32:
   Fixed yet another bug in Windows GDI printing, introduced
   in 3.2.  This bug caused the output to be horizontally
   shifted if black & white or colour rendering was used.
+
+----------------------------
+Version 3.21alpha 2000-06-30
+----------------------------
+All:
+  There should be no change to function.
+
+Win32:
+  Button bar moved from left to top, status bar from top to bottom.
+
+X11:
+  Alpha test of new port to X11/Unix using Gtk toolkit.
+  Many features not yet working.
 
 ----------------------
 Version 3.2 2000-06-30

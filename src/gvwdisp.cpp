@@ -142,15 +142,11 @@ exec_pgm(char *name, char *arg, PROG* prog)
 char command[MAXSTR*2];
 	prog->valid = FALSE;
 	command[0] = '\0';
-#ifdef __WIN32__
 	if (!is_win32s)
 	    strcat(command, "\042");
-#endif
 	strcat(command, name);
-#ifdef __WIN32__
 	if (!is_win32s)
 	    strcat(command, "\042");
-#endif
 	strcat(command, " ");
 	strcat(command, arg);
 	prog->hinst = (HINSTANCE)WinExec(command, SW_SHOWMINNOACTIVE);
@@ -167,7 +163,6 @@ stop_pgm(PROG* prog)
 	    cleanup_pgm(prog);
 	    return;
 	}
-#ifdef __WIN32__
 /* should really stop program by sending it a WM_CLOSE */
 /* figuring out which window is messy */
 	{
@@ -182,7 +177,6 @@ stop_pgm(PROG* prog)
 	    if (i >= 100)
 		gserror(0, "can't stop program", MB_ICONHAND, SOUND_ERROR);
 	}
-#endif
 /* cleanup should already have occurred */
 	cleanup_pgm(prog);
 }

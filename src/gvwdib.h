@@ -36,7 +36,6 @@
 
 #ifndef BITMAP1AND2
 #define BITMAP1AND2
-#define GVFAR	// not needed in 32-bit code
 
 typedef struct tagRGB3
 {
@@ -44,7 +43,7 @@ typedef struct tagRGB3
     BYTE    rgbtGreen;
     BYTE    rgbtRed;
 } RGB3;
-typedef RGB3 GVFAR* LPRGB3;
+typedef RGB3 * LPRGB3;
 
 typedef struct tagRGB4
 {
@@ -53,7 +52,7 @@ typedef struct tagRGB4
     BYTE    rgbRed;
     BYTE    rgbReserved;
 } RGB4;
-typedef RGB4 GVFAR* LPRGB4;
+typedef RGB4 * LPRGB4;
 #define SIZEOF_RGB4 4
 
 typedef struct tagBITMAP1
@@ -64,7 +63,7 @@ typedef struct tagBITMAP1
     WORD    bcPlanes;
     WORD    bcBitCount;
 } BITMAP1;
-typedef BITMAP1 GVFAR* LPBITMAP1;
+typedef BITMAP1 * LPBITMAP1;
 
 typedef struct tagBITMAP2
 {
@@ -80,7 +79,7 @@ typedef struct tagBITMAP2
     DWORD   biClrUsed;
     DWORD   biClrImportant;
 } BITMAP2;
-typedef BITMAP2 GVFAR* LPBITMAP2;
+typedef BITMAP2 * LPBITMAP2;
 #define SIZEOF_BITMAP2 40
 
 typedef struct tagBITMAP2INFO
@@ -88,7 +87,7 @@ typedef struct tagBITMAP2INFO
 	BITMAP2 bmp2;
 	RGB4 rgb4[256];
 } BITMAP2INFO;
-typedef BITMAP2INFO GVFAR LPBITMAP2INFO;
+typedef BITMAP2INFO * LPBITMAP2INFO;
 #define SIZEOF_BITMAP2INFO (SIZEOF_BITMAP2 + SIZEOF_RGB4 * 256)
 
 typedef struct tagBITMAPFILE
@@ -99,7 +98,7 @@ typedef struct tagBITMAPFILE
     WORD    bfReserved2;
     DWORD   bfOffBits;
 } BITMAPFILE;
-typedef BITMAPFILE GVFAR* LPBITMAPFILE;
+typedef BITMAPFILE * LPBITMAPFILE;
 #define SIZEOF_BITMAPFILE 14
 
 #endif /*  BITMAP1AND2 */

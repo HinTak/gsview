@@ -18,11 +18,7 @@
 /* gvcbeta.c */
 /* Initialisation routines for PM and Windows GSview */
 
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
+#include "gvc.h"
 
 #ifndef BETA
 

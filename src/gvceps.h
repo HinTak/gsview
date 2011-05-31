@@ -41,7 +41,7 @@ typedef struct tagRGB3
     BYTE    rgbtGreen;
     BYTE    rgbtRed;
 } RGB3;
-typedef RGB3 GVFAR* LPRGB3;
+typedef RGB3 * LPRGB3;
 
 #define RGB3_BLUE	0
 #define RGB3_GREEN	1
@@ -55,7 +55,7 @@ typedef struct tagRGB4
     BYTE    rgbRed;
     BYTE    rgbReserved;
 } RGB4;
-typedef RGB4 GVFAR* LPRGB4;
+typedef RGB4 * LPRGB4;
 
 #define RGB4_BLUE	0
 #define RGB4_GREEN	1
@@ -71,7 +71,7 @@ typedef struct tagBITMAP1
     WORD    bcPlanes;
     WORD    bcBitCount;
 } BITMAP1;
-typedef BITMAP1 GVFAR* LPBITMAP1;
+typedef BITMAP1 * LPBITMAP1;
 
 #define BITMAP1_WIDTH 4
 #define BITMAP1_HEIGHT 6
@@ -93,7 +93,7 @@ typedef struct tagBITMAP2
     DWORD   biClrUsed;
     DWORD   biClrImportant;
 } BITMAP2;
-typedef BITMAP2 GVFAR* LPBITMAP2;
+typedef BITMAP2 * LPBITMAP2;
 
 #define BITMAP2_WIDTH 4
 #define BITMAP2_HEIGHT 8
@@ -107,7 +107,7 @@ typedef struct tagBITMAP2INFO
 	BITMAP2 bmp2;
 	RGB4 rgb4[256];
 } BITMAP2INFO;
-typedef BITMAP2INFO GVFAR LPBITMAP2INFO;
+typedef BITMAP2INFO * LPBITMAP2INFO;
 
 typedef struct tagBITMAPFILE
 {
@@ -117,7 +117,7 @@ typedef struct tagBITMAPFILE
     WORD    bfReserved2;
     DWORD   bfOffBits;
 } BITMAPFILE;
-typedef BITMAPFILE GVFAR* LPBITMAPFILE;
+typedef BITMAPFILE * LPBITMAPFILE;
 #define BITMAPFILE_LENGTH 14
 #endif /*  BITMAP1AND2 */
 
@@ -145,7 +145,7 @@ typedef struct tagPREBMAP {
     int  height;
     int  depth;
     int  bytewidth;	/* length of each scan line in bytes */
-    BYTE GVHUGE* bits;
+    BYTE * bits;
     BOOL os2;
     BOOL topleft;
 } PREBMAP;
@@ -176,8 +176,10 @@ void copy_bbox_header(FILE *f);
 int scan_pbmplus(PREBMAP *ppbmap, unsigned char *pbitmap);
 int scan_dib(PREBMAP *ppbmap, unsigned char *pbitmap);
 void scan_bbox(PREBMAP *pprebmap, PSBBOX *devbbox);
+void write_dword(DWORD val, FILE *f);
+void write_word(WORD val, FILE *f);
 
 void ps_copy(FILE *outfile, FILE *infile, long begin, long end);
 char * ps_fgets(char *s, int n, FILE *stream);
 BOOL ps_copy_find(FILE *outfile, FILE *infile, long end, 
-	char *s, int n, char *comment);
+	char *s, int n, const char *comment);

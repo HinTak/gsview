@@ -11,6 +11,8 @@ pstoedit\changelog.htm
 pstoedit\WEMF.FMP
 pstoedit\SAFER.PS
 pstoedit\MPOST.FMP
+pstoedit\latex2e.fmp
+pstoedit\index.htm
 gsview\gsview32.exe
 gsview\gsview32.ico
 gsview\gsviewde.hlp
@@ -33,6 +35,7 @@ gsview\gsprint.htm
 gsview\epstool.exe
 gsview\epstool.htm
 gsview\Readme.htm
+gsview\gsview.css
 gsview\cdorder.txt
 gsview\regorder.txt
 gsview\LICENCE

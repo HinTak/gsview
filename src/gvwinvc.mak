@@ -94,6 +94,8 @@ all: gsview$(WINEXT).exe\
 .cpp.obj:
 	$(CC) -c $(CFLAGS) $< 
 
+ECHOGSV=echogsv.exe
+
 !include "gvcver.mak"
 !include "gvwinc.mak"
 
@@ -183,57 +185,6 @@ strip: gsview$(WINEXT).exe
 	echo Don't know how to strip EXE with MSVC++
 #	$(COMPDIR)\tdstrp32 gsview32.exe
 
-gsv$(GSVIEW_VERSION)wda.zip:
-	copy Readme.htm ..\Readme.htm
-	copy LICENCE ..\LICENCE
-	copy FILE_ID.DIZ ..\FILE_ID.DIZ
-	copy gsviewda.exe ..\gsviewda.exe
-	copy binary\gvwin1.ico ..\gsview32.ico
-	copy gsviewen.hlp ..\gsviewen.hlp
-	copy gsviewde.hlp ..\gsviewde.hlp
-	copy gsviewes.hlp ..\gsviewes.hlp
-	copy gsviewfr.hlp ..\gsviewfr.hlp
-	copy gsviewit.hlp ..\gsviewit.hlp
-	copy gsvwdade.dll ..\gsvwdade.dll
-	copy gsvwdaes.dll ..\gsvwdaes.dll
-	copy gsvwdafr.dll ..\gsvwdafr.dll
-	copy gsvwdait.dll ..\gsvwdait.dll
-	copy gvwgsda.exe ..\gvwgsda.exe
-	copy printer.ini ..\printer.ini
-	copy winsetup.exe ..\setupda.exe
-	copy setpdade.dll ..\setpdade.dll
-	copy setpdait.dll ..\setpdait.dll
-	cd ..
-	-del win32da.zip
-	zip -9 -@ win32da.zip < src\gvclist4.txt
-	echo Redistribution of this Win32 GSview MUST be accompanied by the> README32.TXT
-	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> README32.TXT
-	-del gsv$(GSVIEW_VERSION)wda.zip
-	zip -9 gsv$(GSVIEW_VERSION)wda.zip win32da.zip setupda.exe wizunzda.dll setpdade.dll setpdaes.dll setpdafr.dll setpdait.dll
-	zip -9 gsv$(GSVIEW_VERSION)wda.zip README32.TXT Readme.htm FILE_ID.DIZ LICENCE
-	-del README32.TXT
-	-del Readme.htm
-	-del LICENCE
-	-del FILE_ID.DIZ
-	-del gsviewda.exe
-	-del gsviewda.ico
-	-del gsviewen.hlp
-	-del gsviewde.hlp
-	-del gsviewes.hlp
-	-del gsviewfr.hlp
-	-del gsviewit.hlp
-	-del gsvwdade.dll
-	-del gsvwdaes.dll
-	-del gsvwdafr.dll
-	-del gsvwdait.dll
-	-del gvwgsda.exe
-	-del printer.ini
-	-del setupda.exe
-	-del setpdade.dll
-	-del setpdaes.dll
-	-del setpdafr.dll
-	-del setpdait.dll
-	cd src
 	
 gsv$(GSVIEW_VERSION)w16.zip:
 	echo Can't build Win16 GSview using MSVC++

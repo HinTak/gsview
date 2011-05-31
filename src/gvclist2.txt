@@ -17,6 +17,7 @@ gvpgs.exe
 zlib2.dll
 printer.ini
 Readme.htm
+gsview.css
 cdorder.txt
 regorder.txt
 LICENCE

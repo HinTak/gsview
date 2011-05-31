@@ -581,7 +581,6 @@ CDIB::ReadHeader(CFile *pFile)
     DWORD length;
     DWORD dwRead;
     HGLOBAL hglobal;
-    DWORD memlength;
 
     Lock();
     CleanupBitmap();
@@ -618,7 +617,7 @@ CDIB::ReadHeader(CFile *pFile)
 	// in case we want to change the bits per pixel of
 	// the bitmap.
 	// We are now responsible for freeing this memory
-	hglobal = GlobalAlloc(GHND, SIZEOF_BITMAP2INFO);
+	hglobal = GlobalAlloc(GHND, SIZEOF_BITMAP2INFO + 64);
 	m_bitmap = (LPBYTE)GlobalLock(hglobal);
 	ASSERT(m_bitmap != NULL);
 	

@@ -17,12 +17,7 @@
 
 /* gvcinit.c */
 /* Initialisation routines for PM and Windows GSview */
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
-
+#include "gvc.h"
 
 /* copy printer profiles */
 int
@@ -31,17 +26,30 @@ gsview_printer_profiles(void)
 char buf[MAXSTR];
 FILE *pf;
 char section[MAXSTR];
-char *key, *value;
+char *key;
+const char *value;
 PROFILE *prf;
     /* open an INI file and copy everything to user ini file
      * overwriting anything the user already had
      */
+#ifdef UNIX
+    strncpy(buf, szEtcPath, MAXSTR-1);
+#else
     strncpy(buf, szExePath, MAXSTR-1);
+#endif
     strncat(buf, "printer.ini", sizeof(buf)-1-strlen(buf));
+    if (debug & DEBUG_GENERAL)
+	gs_addmessf("Reading printer profiles from \042%s\042\n", buf);
     pf = fopen(buf, "r");
     if (!pf) {
-	gserror(IDS_NOPRINTERINI, NULL, 0, SOUND_ERROR);
-	return 1;
+        strcpy(buf, "printer.ini");
+	if (debug & DEBUG_GENERAL)
+	    gs_addmessf("Reading printer profiles from \042%s\042\n", buf);
+        pf = fopen(buf, "r");
+	if (!pf) {
+	    gserror(IDS_NOPRINTERINI, NULL, 0, SOUND_ERROR);
+	    return 1;
+	}
     }
     prf = profile_open(szIniFile);
     if (!prf) {
@@ -127,12 +135,12 @@ init_options(void)
     option.save_dir = TRUE;
     strcpy(option.printer_device, "djet500");
     strcpy(option.printer_resolution, "300");
-    option.print_fixed_media = TRUE;
+    option.print_fixed_media = 1;
     option.print_gdi_depth = IDC_MONO;
-    option.print_gdi_fixed_media = TRUE;
+    option.print_gdi_fixed_media = 1;
     strcpy(option.convert_device, "pdfwrite");
     strcpy(option.convert_resolution, "600");
-    option.convert_fixed_media = TRUE;
+    option.convert_fixed_media = 1;
     option.print_to_file = FALSE;
 #ifdef _Windows
     option.print_method = PRINT_GDI;
@@ -167,7 +175,7 @@ void
 init_check_menu(void)
 {
     int i;
-    char thismedia[20];
+    char thismedia[32];
     if (!stricmp(option.medianame, MEDIA_USERDEFINED)) {
 	option.media = IDM_USERSIZE;
     }
@@ -195,10 +203,12 @@ init_check_menu(void)
     check_menu_item(IDM_ORIENTMENU, IDM_SWAPLANDSCAPE, option.swap_landscape);
     check_menu_item(IDM_MEDIAMENU, option.media, TRUE);
     check_menu_item(IDM_MEDIAMENU, IDM_MEDIAROTATE, option.media_rotate);
+#if defined(_Windows) || defined(OS2)
+    check_menu_item(IDM_OPTIONMENU, IDM_FITPAGE, option.fit_page);
     check_menu_item(IDM_OPTIONMENU, IDM_QUICK_OPEN, option.quick_open);
+#endif
     check_menu_item(IDM_OPTIONMENU, IDM_SAVESETTINGS, option.settings);
     check_menu_item(IDM_OPTIONMENU, IDM_BUTTONSHOW, option.button_show);
-    check_menu_item(IDM_OPTIONMENU, IDM_FITPAGE, option.fit_page);
     check_menu_item(IDM_OPTIONMENU, IDM_SAFER, option.safer);
     check_menu_item(IDM_OPTIONMENU, IDM_SAVEDIR, option.save_dir);
     check_menu_item(IDM_OPTIONMENU, IDM_AUTOREDISPLAY, option.redisplay);
@@ -209,6 +219,20 @@ init_check_menu(void)
     check_menu_item(IDM_OPTIONMENU, IDM_SHOWBBOX, option.show_bbox);
 }
 
+#if UNIX
+void
+default_gsdll(char *buf)
+{
+    strcpy(buf, "gs");
+}
+
+void
+default_gsinclude(char *buf)
+{
+    buf[0] = '\0';
+}
+
+#else
 void
 default_gsdir(char *buf)
 {
@@ -291,16 +315,19 @@ char buf[MAXSTR];
     strcpy(buf, "-dNOPLATFONTS -sFONTPATH=\042c:\\psfonts\042");
     SetDlgItemText(hwnd, INSTALL_OTHER, buf);
 }
+#endif
 
 int
 gsview_changed(void)
 {
 char sysini[MAXSTR];
 
+#ifndef UNIX
     if (!getenv("TEMP")) {
 	gserror(IDS_NEEDTEMP, NULL, 0, 0);
 	putenv("TEMP=c:\\");   /* just in case the user ignores us */
     }
+#endif
 
     if (option.configured) {
 	if (beta())
@@ -313,7 +340,11 @@ char sysini[MAXSTR];
 	return 1;	/* don't run */
 
     /* check if the system administrator has pre-configured GSview */
+#ifdef UNIX
+    strncpy(sysini, szEtcPath, MAXSTR-1);
+#else
     strncpy(sysini, szExePath, MAXSTR-1);
+#endif
     strncat(sysini, INIFILE, MAXSTR-1-strlen(sysini));
     read_profile(sysini);
     if (option.configured) {
@@ -328,9 +359,7 @@ char sysini[MAXSTR];
 
     check_language();	/* offer to change language if doesn't match WIN.INI */
 
-    config_wizard();
-
-    post_command_line();
+    config_wizard(FALSE);
     
     return 0;
 }

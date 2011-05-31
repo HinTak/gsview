@@ -74,9 +74,7 @@ BOOL is_win98 = FALSE;		/* To allow selective use of Windows 98 features */
 BOOL is_win32s = FALSE;		/* To allow selective use of Win32s misfeatures */
 BOOL is_win4;			/* To allow selective use of Windows 4.0 features */
 BOOL multithread = FALSE;
-#ifdef __WIN32__
 CRITICAL_SECTION crit_sec;	/* for thread synchronization */
-#endif
 HANDLE hmutex_ps;		/* for protecting psfile and pending */
 char szHelpName[MAXSTR];	/* buffer for building help filename */
 int nHelpTopic;			/* topic for OFN_SHOWHELP */
@@ -95,6 +93,8 @@ RECT  info_coord;		/* position and size of coordinate information */
 RECT  button_rect;		/* position and size of button area */
 int on_link;			/* TRUE if we were or are over link */
 int on_link_page;		/* page number of link target */
+long gsbytes_size;		/* number of bytes for this page */
+long gsbytes_done;		/* number of byte written */
 BOOL ignore_sync = FALSE;	/* ignore next GSDLL_SYNC */
 BOOL fit_page_enabled = FALSE;	/* next WM_SIZE is allowed to resize window */
 
@@ -145,7 +145,6 @@ typedef int (WINAPI *PFN_SetScrollInfo)(HWND, int, LPSCROLLINFO, BOOL);
 PFN_SetScrollInfo pSetScrollInfo;
 HMODULE hmodule_user32;
 
-#ifdef __WIN32__
 BOOL
 load_SetScrollInfo(void)
 {
@@ -176,20 +175,6 @@ free_SetScrollInfo(void)
     FreeLibrary(hmodule_user32);
     hmodule_user32 = (HINSTANCE)NULL;
 }
-#else
-BOOL
-load_SetScrollInfo(void)
-{
-    pSetScrollInfo = (PFN_SetScrollInfo)NULL;
-    return FALSE;
-}
-
-void
-free_SetScrollInfo(void) 
-{
-    pSetScrollInfo = (PFN_SetScrollInfo)NULL;
-}
-#endif
 
 
 /* local functions */
@@ -224,7 +209,6 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
     /* copy the hInstance into a variable so it can be used */
     phInstance = hInstance;
 
-#ifdef __WIN32__
     command_line = GetCommandLine();
     while (*command_line && *command_line != ' ') {
 	/* skip over program name */
@@ -241,9 +225,6 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
     }
     while (*command_line == ' ')
 	command_line++;	/* skip until first argument */
-#else
-    command_line = lpszCmdLine;
-#endif
 
     dde_initialise();
 
@@ -273,18 +254,11 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	ShowWindow(hwndimg, SW_SHOWMINNOACTIVE);
     }
     else
-#ifdef __WIN32__
     {   STARTUPINFO sti;
 	GetStartupInfo(&sti);
 	ShowWindow(hwndimg, option.img_max && (sti.wShowWindow == SW_SHOWNORMAL) 
 	    ? SW_SHOWMAXIMIZED : SW_SHOWDEFAULT);
     }
-#else
-    {
-	ShowWindow(hwndimg, option.img_max && (cmdShow == SW_SHOWNORMAL) 
-	    ? SW_SHOWMAXIMIZED : cmdShow);
-    }
-#endif
     info_wait(IDS_NOWAIT);
     if (gsview_changed())
 	PostQuitMessage(0);
@@ -292,12 +266,10 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	// before changing following line, please see gvcreg.cpp
 	registration_check();
 
-#ifdef __WIN32__
     if (multithread) {
 	/* start thread for displaying */
 	display.tid = _beginthread(gs_thread, 131072, NULL);
     }
-#endif
     
     while (!(!multithread && quitnow)
 	     && GetMessage(&msg, (HWND)NULL, 0, 0)) {
@@ -309,14 +281,12 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 		DispatchMessage(&msg);
 	    }
 	}
-#ifdef __WIN32__
 	if (multithread) {
 	    /* release other thread if needed */
 	    if (pending.unload || pending.now || pending.next || quitnow)
 		SetEvent(display.event);
 	}
 	else 
-#endif
 	{
 	    if (pending.now) {
 		if (is_win95 || is_winnt)
@@ -336,9 +306,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	    }
 	}
 	if (
-#ifdef __WIN32__
 	    is_win32s && 
-#endif
 	    win32s_printer_pending) {
 	    /* Win32s can't load GS DLL twice */
 	    /* so we must run it while display GS DLL is unloaded */
@@ -584,19 +552,11 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				break;
 			case SB_THUMBPOSITION:
 			case SB_THUMBTRACK:
-#ifdef __WIN32__
 				nVscrollInc = HIWORD(wParam) - nVscrollPos;
-#else
-				nVscrollInc = LOWORD(lParam) - nVscrollPos;
-#endif
 				break;
 			case SB_FIND:
 				/* non standard */
-#ifdef __WIN32__
 				nVscrollInc = (short)HIWORD(wParam);
-#else
-				nVscrollInc = (short)LOWORD(lParam);
-#endif
 				break;
 			default:
 				nVscrollInc = 0;
@@ -660,19 +620,11 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				break;
 			case SB_THUMBPOSITION:
 			case SB_THUMBTRACK:
-#ifdef __WIN32__
 				nHscrollInc = HIWORD(wParam) - nHscrollPos;
-#else
-				nHscrollInc = LOWORD(lParam) - nHscrollPos;
-#endif
 				break;
 			case SB_FIND:
 				/* non standard */
-#ifdef __WIN32__
 				nHscrollInc = (short)HIWORD(wParam);
-#else
-				nHscrollInc = (short)LOWORD(lParam);
-#endif
 				break;
 			default:
 				nHscrollInc = 0;
@@ -815,9 +767,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				SendMessage(hwnd, WM_VSCROLL,SB_LINEDOWN,0L);
 			    if (pt.y < rect.top)
 				SendMessage(hwnd, WM_VSCROLL,SB_LINEUP,0L);
-#ifdef __WIN32__
 			    Sleep(100);
-#endif
 			}
 			if (get_cursorpos(&x, &y)) {
 			    if ( (iword = word_find((int)x, (int)y)) >= 0 ) {
@@ -1044,7 +994,6 @@ RECT rect;
 	return 0;
     } else
     switch(message) {
-#ifdef __WIN32__
 	case WM_MOUSEWHEEL:
 	    /* If Wheel Mice become available with a step size < WHEEL_DELTA,
 	     * this code will need to be rewritten */
@@ -1124,7 +1073,6 @@ RECT rect;
 		    MAKELONG(SB_FIND, scroll_increment), 0);
 	    }
 	    return 0;
-#endif
 	case WM_GSV16SPL:
 	    hwndspl = (HWND)lParam;	   /* gsv16spl.c window handle */
 	    return 0;
@@ -1278,10 +1226,8 @@ RECT rect;
 	    quitnow = TRUE;		 	/* exit from nested message loops */
 	    pending.unload = TRUE;
 	    pending.abort = TRUE;
-#ifdef __WIN32__
 	    if (multithread)
 		SetEvent(display.event);	/* unblock display thread */
-#endif
 	    if (gsdll.state != UNLOADED)
 		return 0;			/* don't close yet */
 	    PostQuitMessage(0);
@@ -1307,11 +1253,7 @@ RECT rect;
 		HGLOBAL hglobal;
 		int i, cFiles, length;
 		HDROP hdrop = (HDROP)wParam;
-#ifdef __WIN32__
 		cFiles = DragQueryFile(hdrop, 0xffffffff, (LPSTR)NULL, 0);
-#else
-		cFiles = DragQueryFile(hdrop, 0xffff, (LPSTR)NULL, 0);
-#endif
 		for (i=0; i<cFiles; i++) {
 		    length = DragQueryFile(hdrop, i, (LPSTR)NULL, 0);
 		    hglobal = GlobalAlloc(GHND | GMEM_SHARE, length+1);
@@ -1521,11 +1463,15 @@ RECT rect;
 	    return 0;
 	case WM_SIZE:
 	    /* make child window fill client area */
+	    {
+	    int cx, cy;
+	    calc_info_button_areas(LOWORD(lParam), HIWORD(lParam));
+	    cx = LOWORD(lParam)-img_offset.x;
+	    cy = info_rect.top - img_offset.y;
 	    if ((wParam != SIZE_MINIMIZED) && hwndimgchild !=(HWND)NULL)
 		SetWindowPos(hwndimgchild, (HWND)NULL, 
-		    img_offset.x, img_offset.y,
-		LOWORD(lParam)-img_offset.x, HIWORD(lParam)-img_offset.y, 
-		SWP_NOZORDER | SWP_NOACTIVATE);
+		    img_offset.x, img_offset.y, cx, cy, 
+		    SWP_NOZORDER | SWP_NOACTIVATE);
 	    /* save window size for INIFILE */
 	    if (wParam == SIZE_RESTORED) {
 		    GetWindowRect(hwnd,&rect);
@@ -1534,6 +1480,7 @@ RECT rect;
 	    }
 	    if (IsWindowVisible(hwnd))
 		option.img_max = (wParam == SIZE_MAXIMIZED);
+	    }
 	    return 0;
 	case WM_MOVE:
 	    /* save window position for INIFILE */
@@ -1636,18 +1583,26 @@ RECT rect;
 	    HDC hdc;
 	    PAINTSTRUCT ps;
 	    hdc = BeginPaint(hwnd, &ps);
-	    /* draw info area at top */
+	    /* draw info area at bottom */
 	    info_paint(hwnd, hdc);
+	    /* buttons at top */
 	    /* draw button background */
-	    if (button_rect.right) {
-		GetClientRect(hwnd, &rect);
-		rect.top = button_rect.top;
-		rect.left = button_rect.left;
-		rect.right = button_rect.right;
+	    GetClientRect(hwnd, &rect);
+	    rect.top = button_rect.top;
+	    rect.left = button_rect.left;
+	    rect.bottom = button_rect.bottom;
+	    if (rect.bottom - rect.top > 2)
 		FillRect(hdc, &rect, hbrush_menu);
-		SelectPen(hdc, hpen_btnshadow);
-		MoveTo(hdc, rect.right, rect.top);
+	    SelectPen(hdc, hpen_btnshadow);
+	    MoveTo(hdc, rect.left, rect.top);
+	    LineTo(hdc, rect.right, rect.top);
+
+	    if (rect.bottom - rect.top > 2) {
+		MoveTo(hdc, rect.left, rect.bottom);
 		LineTo(hdc, rect.right, rect.bottom);
+		SelectPen(hdc, hpen_btnhighlight);
+		MoveTo(hdc, rect.left, rect.top+1);
+		LineTo(hdc, rect.right, rect.top+1);
 	    }
 	    EndPaint(hwnd, &ps);
 	    }
@@ -1711,7 +1666,6 @@ char buf[20];
 		DeleteBrush(hbrush);
 		if ((i = LoadString(phInstance, lpdis->CtlID, buf, sizeof(buf)))
 		    != 0) {
-#ifdef __WIN32__
 		    COLORREF text_colour;
 		    SIZE sz;
 		    GetTextExtentPoint(hdc, buf, i, &sz);
@@ -1720,12 +1674,6 @@ char buf[20];
 		    TextOut(hdc, (rect.left+rect.right-sz.cx)/2,
 			(rect.top+rect.bottom-sz.cy)/2, buf, i);
 		    SetTextColor(hdc, text_colour);
-#else
-		    DWORD dw = GetTextExtent(hdc, buf, i);
-		    SetBkMode(hdc, TRANSPARENT);
-		    TextOut(hdc, (rect.left+rect.right-LOWORD(dw))/2,
-			(rect.top+rect.bottom-HIWORD(dw))/2, buf, i);
-#endif
 		}
 		else if ( (hicon = LoadIcon(phInstance, MAKEINTRESOURCE(lpdis->CtlID)))
 		    != (HICON)NULL )  {
@@ -1938,7 +1886,7 @@ COLORREF text_colour;
 	old_hfont = (HFONT)SelectObject(hdc, info_font);
     if (info_rect.bottom) {
 	GetClientRect(hwnd, &rect);
-	rect.top = 0;
+	rect.top = info_rect.top;
 	rect.left = info_rect.left;
 	rect.bottom = info_rect.bottom;
 	FillRect(hdc, &rect, hbrush_menu);
@@ -1946,12 +1894,12 @@ COLORREF text_colour;
 	MoveTo(hdc, rect.left, rect.bottom);
 	LineTo(hdc, rect.right, rect.bottom);
 	if (is_win4) {
-	    SelectPen(hdc, hpen_btnhighlight);
-	    MoveTo(hdc, rect.left, rect.top+1);
-	    LineTo(hdc, rect.right, rect.top+1);
 	    SelectPen(hdc, hpen_btnshadow);
 	    MoveTo(hdc, rect.left, rect.top);
 	    LineTo(hdc, rect.right, rect.top);
+	    SelectPen(hdc, hpen_btnhighlight);
+	    MoveTo(hdc, rect.left, rect.top+1);
+	    LineTo(hdc, rect.right, rect.top+1);
 	}
     }
     /* write file information */
@@ -2071,7 +2019,7 @@ MenuButtonProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    text_colour = SetTextColor(hdc, GetSysColor(COLOR_MENUTEXT));
 		    if (info_rect.bottom) {
 			GetClientRect(hwnd, &rect);
-			rect.top = 2;
+			rect.top = info_rect.top+2;
 			rect.left = info_rect.left;
 			rect.bottom = info_rect.bottom-1;
 			rect.right = info_rect.right;
@@ -2097,7 +2045,8 @@ update_scroll_bars(void)
     /* Cause update of scroll bars etc. */
     RECT rect;
     GetClientRect(hwnd_image, &rect);
-    SendMessage(hwnd_image, WM_SIZE, SIZE_RESTORED, MAKELONG(rect.right-rect.left, rect.bottom-rect.top));
+    SendMessage(hwnd_image, WM_SIZE, SIZE_RESTORED, 
+	MAKELONG(rect.right-rect.left, rect.bottom-rect.top));
 }
 
 /* Thread which loads Ghostscript DLL for display */
@@ -2127,10 +2076,8 @@ query_close(void)
     /* tell GS DLL to unload */
     quitnow = TRUE;
     pending.unload = TRUE;
-#ifdef __WIN32__
     if (multithread)
         SetEvent(display.event);	/* unblock display thread */
-#endif
     return TRUE;
 }
 
@@ -2152,13 +2099,11 @@ gsview_close()
 	DestroyCursor(hcCrossHair);
     if (hcHand)
 	DestroyCursor(hcHand);
-#ifdef __WIN32__
     if (multithread) {
 	CloseHandle(display.event);
 	CloseHandle(hmutex_ps);
 	DeleteCriticalSection(&crit_sec);
     }
-#endif
     unload_zlib();
     if (hpen_btnshadow)
 	DeletePen(hpen_btnshadow);
@@ -2281,18 +2226,10 @@ scroll_to_find(void)
 
     /* scroll to bring the middle left to the centre of the window */
     if ((rect.left < rect_client.left) || (rect.right > rect_client.right))
-#ifdef __WIN32__
 	PostMessage(hwnd_image, WM_HSCROLL, MAKELONG(SB_FIND, rect.left - ((rect_client.right-rect_client.left)/2)), 0);
-#else
-	PostMessage(hwnd_image, WM_HSCROLL, SB_FIND, MAKELONG(rect.left - ((rect_client.right-rect_client.left)/2), 0));
-#endif
 
     if ((rect.top < rect_client.top) || (rect.bottom > rect_client.bottom))
-#ifdef __WIN32__
 	PostMessage(hwnd_image, WM_VSCROLL, MAKELONG(SB_FIND, (rect.bottom+rect.top - rect_client.bottom-rect_client.top)/2), 0);
-#else
-	PostMessage(hwnd_image, WM_VSCROLL, SB_FIND, MAKELONG((rect.bottom+rect.top - rect_client.bottom-rect_client.top)/2, 0));
-#endif
     SendMessage(hwnd_image, WM_SETREDRAW, TRUE, 0);
     release_mutex();
 }
@@ -2312,7 +2249,7 @@ highlight_words(HDC hdc, int first, int last)
 	return;
 
 
-    if ((first > text_index_count) || (last > text_index_count)) {
+    if ((first > (int)text_index_count) || (last > (int)text_index_count)) {
 	gs_addmess("\nhighlight_words called with invalid arguments\n");
 	return;
     }
@@ -2510,6 +2447,7 @@ static BOOL class_registered;
 	    if (hwnd_fullscreen && IsWindow(hwnd_fullscreen)) {
 		hwnd_image = hwnd_fullscreen;
 		ShowWindow(hwnd_fullscreen, SW_SHOWNORMAL);
+		BringWindowToTop(hwnd_fullscreen);
 		gs_addmess("Full Screen started\r\n");
 	    }
 	    else {
@@ -2521,6 +2459,7 @@ static BOOL class_registered;
 	    hwnd_image = hwnd_fullscreen;
 	    ShowWindow(hwnd_fullscreen, SW_SHOWNORMAL);
 	    SetFocus(hwndimg);
+	    BringWindowToTop(hwnd_fullscreen);
 	    gs_addmess("Full Screen restarted\r\n");
 	}
 

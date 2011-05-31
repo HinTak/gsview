@@ -64,6 +64,8 @@ POINTL scroll_pos;
 RECTL info_coord;
 int on_link;			/* TRUE if we were or are over link */
 int on_link_page;		/* page number of link target */
+long gsbytes_size;		/* number of bytes for this page */
+long gsbytes_done;		/* number of byte written */
 BOOL ignore_sync = FALSE;	/* ignore next GSDLL_SYNC */
 BOOL fit_page_enabled = FALSE;	/* next WM_SIZE is allowed to resize window */
 BOOL quitnow = FALSE;		/* Used to cause exit from nested message loops */
@@ -1048,7 +1050,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 				  break;
 			      if (psfile.name[0] != '\0') {
 				  option.print_to_file = FALSE;
-				  gsview_print(FALSE);	/* print */
+				  gsview_print(FALSE);	/* Print */
 			      }
 			      dfclose();
 			      break;
@@ -1059,7 +1061,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 				  break;
 			      if (psfile.name[0] != '\0') {
 				  option.print_to_file = TRUE;
-				  gsview_print(TRUE);	/* convert */
+				  gsview_print(TRUE);	/* Convert */
 			      }
 			      dfclose();
 			      break;
@@ -1582,9 +1584,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 			    pending.now = TRUE;
 			}
 		    }
-/*  measure doesn't work yet
 		    measure_setpoint(x, y);
-*/
 		}
 		break;
 	case WM_BUTTON2DOWN:
@@ -1823,10 +1823,9 @@ int digits = option.unitfine ? 2 : 0;
 	pt.x = info_coord.xRight - 1;
 	pt.y = info_page.y;
 	GpiCharStringAt(hps, &pt, strlen(buf), (PBYTE)buf);
+
+        measure_paint(x, y);
     }
-/*  measure doesn't work yet
-    measure_paint(x, y);
-*/
     release_mutex();
 }
 

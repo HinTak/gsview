@@ -36,7 +36,7 @@ get_help()
 
 /* display message */
 int
-message_box(char *str, int icon)
+message_box(const char *str, int icon)
 {
   	return WinMessageBox(HWND_DESKTOP, hwnd_frame ? hwnd_frame : HWND_DESKTOP, 
 		(PCSZ)str, (PCSZ)szAppName, 0, icon | MB_MOVEABLE | MB_OK);
@@ -233,7 +233,7 @@ int code = -1;
 char tempbuf[8192];
 
 void
-profile_create_section(PROFILE *prf, char *section, int id)
+profile_create_section(PROFILE *prf, const char *section, int id)
 {
 char *rcdata, *entry, *value;
 char name[MAXSTR];

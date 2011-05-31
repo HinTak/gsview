@@ -237,7 +237,7 @@ STRINGTABLE
 BEGIN
 	/* filter strings */
 #ifdef __WIN32__
-	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz;*.ps.bz2;*.eps.bz2;*.pdf.bz2|PS Files (*.ps)|*.ps;*.ps.gz;*.ps.bz2|EPS Files (*.eps)|*.eps;*.eps.gz;*.eps.bz2|EPI Files (*.epi)|*.epi;*.epi.gz;*.epi.bz2|PDF Files (*.pdf)|*.pdf;*.pdf.gz;*.pdf.bz2|PRN Files (*.prn)|*.prn|All Files (*.*)|*.*|"
+	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.psz;*.eps.gz;*.epi.gz;*.pdf.gz;*.ps.bz2;*.eps.bz2;*.pdf.bz2|PS Files (*.ps)|*.ps;*.ps.gz;*.ps.bz2|EPS Files (*.eps)|*.eps;*.eps.gz;*.eps.bz2|EPI Files (*.epi)|*.epi;*.epi.gz;*.epi.bz2|PDF Files (*.pdf)|*.pdf;*.pdf.gz;*.pdf.bz2|PRN Files (*.prn)|*.prn|All Files (*.*)|*.*|"
 #else
 	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn|PS Files (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|PDF Files (*.pdf)|*.pdf|PRN Files (*.prn)|*.prn|All Files (*.*)|*.*|"
 #endif

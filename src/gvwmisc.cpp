@@ -35,7 +35,7 @@ get_help(void)
 }
 
 /* display message */
-int message_box(char *str, int icon)
+int message_box(const char *str, int icon)
 {
 	return MessageBox(hwndimg, str, szAppName, icon | MB_OK);
 }
@@ -147,26 +147,14 @@ POINT pt;
 int
 gs_chdir(char *dirname)
 {
-#ifdef __WIN32__
 	return !SetCurrentDirectory(dirname);
-#else
-	if (isalpha(dirname[0]) && (dirname[1]==':'))
-		(void) setdisk(toupper(dirname[0])-'A');
-	if (!((strlen(dirname)==2) && isalpha(dirname[0]) && (dirname[1]==':')))
-		return chdir(dirname);
-	return 0;
-#endif
 }
 
 char * 
 gs_getcwd(char *dirname, int size)
 {
-#ifdef __WIN32__
 	GetCurrentDirectory(size, dirname);
 	return dirname;
-#else
-	return getcwd(dirname, size);
-#endif
 }
 
 
@@ -186,7 +174,7 @@ int code = -1;
 }
 
 void
-profile_create_section(PROFILE *prf, char *section, int id)
+profile_create_section(PROFILE *prf, const char *section, int id)
 {  
 HGLOBAL hglobal;
 LPSTR entry, value;

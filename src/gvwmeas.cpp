@@ -34,11 +34,7 @@ BOOL dialog_get_float_error(HWND hwnd, int field, float *fres,
     HWND errfld = GetDlgItem(hwnd, field) ;
     gserror(IDS_INVALIDNUMBER, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER) ;
     SetFocus(errfld) ;
-#ifdef __WIN32__
     SendMessage(errfld, EM_SETSEL, (WPARAM)0, (LPARAM) -1) ;
-#else
-    SendMessage(errfld, EM_SETSEL, 0, MAKELONG(0, -1));
-#endif
   }
   else
   {
@@ -145,14 +141,7 @@ CalcDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 void
 show_calc_dialog(void)
 {
-#ifdef __WIN32__
 	DialogBoxParam(hlanguage, "CalcDlgBox", hwndimg, CalcDlgProc, (LPARAM)NULL);
-#else
-	DLGPROC lpProc;
-	lpProc = (DLGPROC)MakeProcInstance((FARPROC)CalcDlgProc, phInstance);
-	DialogBoxParam(hlanguage, "CalcDlgBox", hwndimg, lpProc, (LPARAM)NULL);
-	FreeProcInstance((FARPROC)lpProc);
-#endif
 }
 
 
@@ -197,10 +186,6 @@ float x, y;
 }
 
 
-#ifndef __WIN32__
-DLGPROC lpfnMeasureProc;
-#endif
-
 void 
 measure_show(void)
 {
@@ -210,13 +195,7 @@ measure_show(void)
     }
 
     /* display dialog box */
-#ifdef __WIN32__
     hwnd_measure = CreateDialogParam(hlanguage, "MeasureDlgBox", hwndimg, MeasureDlgProc, (LPARAM)NULL);
-#else
-    if (lpfnMeasureProc == (DLGPROC)NULL)
-	lpfnMeasureProc = (DLGPROC)MakeProcInstance((FARPROC)MeasureDlgProc, phInstance);
-    hwnd_measure = CreateDialogParam(hlanguage, "MeasureDlgBox", hwndimg, lpfnMeasureProc, (LPARAM)NULL);
-#endif
 
     /* Don't bother to clean up 16-bit thunk */
 }

@@ -29,7 +29,6 @@ struct buttonlist {
    struct buttonlist *next;
 };
 struct buttonlist *buttonhead, *buttontail;
-int real_button_width;
 HGLOBAL hglobal_command_line;
 BOOL use_existing = FALSE;	/* /E command line option */
 BOOL exit_existing = FALSE;	/* /X command line option */
@@ -85,16 +84,14 @@ gsview_init0(LPSTR lpszCmdLine)
 {
 	HWND hwnd = FindWindow(szClassName, NULL);
 	BringWindowToTop(hwnd);
-#ifdef UNUSED
+#ifdef NOTUSED
 #if __BORLANDC__ == 0x452
 	/* avoid bug in BC++ 4.0 */
-#ifdef __WIN32__
 	/* skip over EXE name */
 	while ( *lpszCmdLine && (*lpszCmdLine!=' ')) 
 		lpszCmdLine++;
 	while ( *lpszCmdLine && (*lpszCmdLine==' ')) 
 		lpszCmdLine++;
-#endif
 #endif
 #endif
 	drop_filename(hwnd, lpszCmdLine);
@@ -111,14 +108,10 @@ char langdll[MAXSTR];
 HINSTANCE hInstance;
     /* load language dependent resources */
     strcpy(langdll, szExePath);
-#ifdef __WIN32__
 #ifdef DECALPHA
     strcat(langdll, "gsvwda");
 #else
     strcat(langdll, "gsvw32");
-#endif
-#else
-    strcat(langdll, "gsvw16");
 #endif
     switch (language) {
 	case IDM_LANGDE:
@@ -223,14 +216,7 @@ int language;
       || ((option.language == IDM_LANGIT) && stricmp(winlang, "ITA"))
 	)
     {
-#ifdef __WIN32__
 	language = DialogBoxParam(hlanguage, "LanguageDlgBox", hwndimg, LanguageDlgProc, (LPARAM)NULL);
-#else
-	DLGPROC lpProcLanguage;
-	lpProcLanguage = (DLGPROC)MakeProcInstance((FARPROC)LanguageDlgProc, phInstance);
-	language = DialogBoxParam(hlanguage, "LanguageDlgBox", hwndimg, lpProcLanguage, (LPARAM)NULL);
-	FreeProcInstance((FARPROC)lpProcLanguage);
-#endif
 	switch (language) {
 	    case IDM_LANGEN:
 	    case IDM_LANGDE:
@@ -287,9 +273,7 @@ BOOL
 gsview_init1(LPSTR lpszCmdLine)
 {
 WNDCLASS wndclass;
-#ifdef __WIN32__
 DWORD version = GetVersion();
-#endif
 char *p;
 int length = 64;
 BOOL parse_correct;
@@ -301,7 +285,6 @@ BOOL parse_correct;
 	    exit(0);	/* panic */
 	
 	/* figure out which version of Windows */
-#ifdef __WIN32__
 	/* Win32s: bit 15 HIWORD is 1 and bit 14 is 0 */
 	/* Win95:  bit 15 HIWORD is 1 and bit 14 is 1 */
 	/* WinNT:  bit 15 HIWORD is 0 and bit 14 is 0 */
@@ -320,7 +303,6 @@ BOOL parse_correct;
 	    is_win4 = TRUE;
 	if (is_win95 && is_win4 && HIBYTE(LOWORD(version)) >= 10)
 	    is_win98 = TRUE;
-#endif
 
 	multithread = FALSE;
 	if (is_win95 || is_winnt)
@@ -349,7 +331,6 @@ BOOL parse_correct;
 	    return FALSE;
 	}
 
-#ifdef __WIN32__
 	if (is_win32s) {
 	    /* don't allow multiple copies under Win32s */
 	    HWND hwnd = FindWindow(szClassName, NULL);
@@ -375,12 +356,6 @@ BOOL parse_correct;
 		}
 	    }
 	}
-	else {
-#ifndef __WIN32__   /* OLD Win32s method */
-	   szSpoolPrefix = "";	/* no spooler in Win32s */
-#endif
-	}
-#endif
 
 	/* get path to EXE */
 	GetModuleFileName(phInstance, szExePath, sizeof(szExePath));
@@ -393,7 +368,6 @@ BOOL parse_correct;
 	/* get path to INI file */
 	szIniFile[0] = '\0';
 	/* strcpy(szIniFile, szExePath); */
-#ifdef __WIN32__
 	/* allow for user profiles */
 	if (is_win4) {
 	    LONG rc;
@@ -441,31 +415,6 @@ BOOL parse_correct;
 		    szIniFile[0] = '\0';
 	    }
 	}
-#else
-	{
-	    char *p = getenv("USERPROFILE");
-	    DIR *d;
-	    if (p && *p) {
-		strcpy(szIniFile, p); 
-#ifdef __BORLANDC__
-		OemToAnsiBuff(szIniFile, szIniFile, lstrlen(szIniFile));
-#endif
-		p = szIniFile + strlen(szIniFile) - 1;
-		if ((*p == '\\') || (*p == '/'))
-		    *p = '\0';
-		/* check if USERPROFILE contains a directory name */
-		d = opendir(szIniFile);
-		if (d) {
-		    closedir(d);
-		    strcat(szIniFile, "\\");
-		}
-		else {
-		    /* If we didn't succeed, use the Windows directory */
-		    szIniFile[0] = '\0';
-		}
-	    }
-	}
-#endif
 	strcat(szIniFile, INIFILE);
 
 	/* defaults if entry not in gsview.ini */
@@ -533,27 +482,19 @@ BOOL parse_correct;
 	/* load DLL for sounds */
 	/* MMSYSTEM.DLL requires Windows 3.1, so to allow gsview to run
 	   under Windows 3.0 we can't use the import library */
-#ifdef __WIN32__
 	hlib_mmsystem = LoadLibrary("WINMM.DLL");
 	if (hlib_mmsystem != NULL) {
 	    lpfnSndPlaySound = (FPSPS)GetProcAddress(hlib_mmsystem, "sndPlaySoundA");
 	}
-#else
-	hlib_mmsystem = LoadLibrary("MMSYSTEM.DLL");
-	if (hlib_mmsystem >= HINSTANCE_ERROR) {
-	    lpfnSndPlaySound = (FPSPS)GetProcAddress(hlib_mmsystem, "sndPlaySound");
-	}
-#endif
 	else {
 	    gserror(IDS_SOUNDNOMM, NULL, MB_ICONEXCLAMATION, -1);
 	    hlib_mmsystem = (HINSTANCE)NULL;
 	}
 
 
-#ifdef UNUSED
+#ifdef NOTUSED
 #if __BORLANDC__ == 0x452
 	/* avoid bug in BC++ 4.0 */
-#ifdef __WIN32__
 	/* skip over EXE name */
 	while ( *lpszCmdLine && (*lpszCmdLine!=' ')) 
 		lpszCmdLine++;
@@ -561,11 +502,8 @@ BOOL parse_correct;
 		lpszCmdLine++;
 #endif
 #endif
-#endif
 
-#ifdef __WIN32__
 	if (is_win32s)
-#endif
 	    multithread = FALSE;	/* Win32s doesn't support multithreading */
 
 	gsview_initc(lpszCmdLine);
@@ -786,6 +724,61 @@ delete_buttons(void)
     }
 }
 
+POINT button_size, button_shift;
+
+void
+calc_info_button_areas(int width, int height)
+{
+    HDC hdc;
+    TEXTMETRIC tm;
+    LOGFONT lf;
+    HFONT old_hfont;
+    POINT char_size;		/* size of default text characters */
+
+    /* get default text size */
+    hdc = GetDC(hwndimg);
+    memset(&lf, 0, sizeof(LOGFONT));
+    lf.lfHeight = 8;  /* 8 pts */
+    strcpy(lf.lfFaceName, "Helv");
+    info_font = CreateFontIndirect(&lf);
+    old_hfont = (HFONT)SelectObject(hdc, info_font);
+    GetTextMetrics(hdc,(LPTEXTMETRIC)&tm);
+    display.planes = GetDeviceCaps(hdc, PLANES);
+    display.bitcount = GetDeviceCaps(hdc, BITSPIXEL);
+    SelectObject(hdc, old_hfont);
+    ReleaseDC(hwndimg,hdc);
+    char_size.x = tm.tmAveCharWidth;
+    char_size.y = tm.tmHeight;
+
+    button_size.x = 24;
+    button_size.y = 24;
+    info_rect.left = 0;
+    info_rect.right = info_rect.left + 86 * char_size.x;
+    info_rect.bottom = height;
+    info_rect.top = info_rect.bottom - char_size.y - 4;
+    // buttons at top
+    button_shift.x = button_size.x - 1;
+    button_shift.y = 0;
+    button_rect.top = 0;
+    button_rect.left = 0;
+    button_rect.right = 0;	/* don't care */
+    button_rect.bottom = button_size.y+1;	
+    if (!option.button_show)
+	button_rect.bottom = 0;
+
+    img_offset.x = 0;
+    img_offset.y = button_rect.bottom + 1;
+
+    info_file.x = info_rect.left + 2;
+    info_file.y = info_rect.top + 3;
+    info_coord.left = info_rect.left + 32 * char_size.x;
+    info_coord.right = info_rect.left + 52 * char_size.x;
+    info_coord.top = info_rect.top + 3;
+    info_coord.bottom = info_coord.top + char_size.y+2;
+    info_page.x = info_rect.left + 54 * char_size.x + 2;
+    info_page.y = info_rect.top + 3;
+}
+
 /* create gsview window menu bar, buttons and child window */
 void
 gsview_create()
@@ -794,14 +787,8 @@ int i;
 WNDCLASS wndclass;
 HGLOBAL hglobal;
 short FAR *pButtonID;
-TEXTMETRIC tm;
-HDC hdc;
 HWND hbutton;
 WNDPROC	lpfnMenuButtonProc;
-POINT char_size;		/* size of default text characters */
-POINT button_size, button_shift;
-LOGFONT lf;
-HFONT old_hfont;
 RECT rect;
 
 	/* setup OPENFILENAME struct */
@@ -818,47 +805,9 @@ RECT rect;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_SHOWHELP;
 	nHelpTopic = IDS_TOPICROOT;
 
-	/* get default text size */
-	hdc = GetDC(hwndimg);
-	memset(&lf, 0, sizeof(LOGFONT));
-	lf.lfHeight = 8;  /* 8 pts */
-	strcpy(lf.lfFaceName, "Helv");
-	info_font = CreateFontIndirect(&lf);
-	old_hfont = (HFONT)SelectObject(hdc, info_font);
-	GetTextMetrics(hdc,(LPTEXTMETRIC)&tm);
-	display.planes = GetDeviceCaps(hdc, PLANES);
-	display.bitcount = GetDeviceCaps(hdc, BITSPIXEL);
-	SelectObject(hdc, old_hfont);
-	ReleaseDC(hwndimg,hdc);
-	char_size.x = tm.tmAveCharWidth;
-	char_size.y = tm.tmHeight;
-
 	/* set size of info area, buttons and offset to child window */
-	info_rect.left = 0;
-	info_rect.right = info_rect.left + 86 * char_size.x;
-	info_rect.top = 0;
-	info_rect.bottom = char_size.y+4;
-	button_size.x = 24;
-	button_size.y = 24;
-	button_shift.x = 0;
-	button_shift.y = button_size.y - 1;
-	button_rect.top = info_rect.bottom;
-	button_rect.left = -1;
-	button_rect.right = button_size.x - 2;
-	button_rect.bottom = 0;		/* don't care */
-	real_button_width = button_rect.right;
-	if (!option.button_show)
-	    button_rect.right = 0;
-	img_offset.x = button_rect.right + (option.button_show ? 1 : 0);
-	img_offset.y = info_rect.bottom + 1;
-	info_file.x = info_rect.left + 2;
-	info_file.y = 2;
-	info_coord.left = info_rect.left + 32 * char_size.x;
-	info_coord.right = info_rect.left + 52 * char_size.x;
-	info_coord.top = 2;
-	info_coord.bottom = char_size.y+4;
-	info_page.x = info_rect.left + 54 * char_size.x + 2;
-	info_page.y = 2;
+	GetClientRect(hwndimg, &rect);
+	calc_info_button_areas(rect.right-rect.left, rect.bottom-rect.top);
 
 	hcWait = LoadCursor((HINSTANCE)NULL, IDC_WAIT);
 	hcHand = LoadCursor(phInstance,MAKEINTRESOURCE(IDP_HAND)); 
@@ -872,24 +821,37 @@ RECT rect;
 	if ( (pButtonID = (short FAR *)LockResource(hglobal)) == (short FAR *)NULL)
 		return;
 	
+	int x = button_rect.left;
+        int y = button_rect.top+1;
+
 	for (i=0; pButtonID[i]; i++) {
-	    hbutton = CreateWindow("button", NULL,
-			WS_CHILD | (option.button_show ? WS_VISIBLE : 0) | BS_OWNERDRAW,
-			button_rect.left + i * button_shift.x,
-			button_rect.top  + i * button_shift.y,
-			button_size.x, button_size.y,
-			hwndimg, (HMENU)pButtonID[i],
-			phInstance, NULL);
-	    SetWindowLong(hbutton, GWL_WNDPROC, (LONG)lpfnMenuButtonProc);
-	    if (hbutton) {
-		if (buttonhead == (struct buttonlist *)NULL)
-		    buttontail = buttonhead = (struct buttonlist *)malloc(sizeof(struct buttonlist));
-		else {
-		    buttontail->next = (struct buttonlist *)malloc(sizeof(struct buttonlist)); 
-		    buttontail = buttontail->next;
+	    if (pButtonID[i] < 100) {
+		/* not a button, but a spacer */
+		x += pButtonID[i];
+		    
+	    }
+	    else {
+		hbutton = CreateWindow("button", NULL,
+		    WS_CHILD | BS_OWNERDRAW | 
+		    (option.button_show ? WS_VISIBLE : 0),
+		    x, y, button_size.x, button_size.y,
+		    hwndimg, (HMENU)pButtonID[i],
+		    phInstance, NULL);
+		SetWindowLong(hbutton, GWL_WNDPROC, (LONG)lpfnMenuButtonProc);
+		if (hbutton) {
+		    if (buttonhead == (struct buttonlist *)NULL)
+			buttontail = buttonhead = (struct buttonlist *)
+			    malloc(sizeof(struct buttonlist));
+		    else {
+			buttontail->next = (struct buttonlist *)
+			    malloc(sizeof(struct buttonlist)); 
+			buttontail = buttontail->next;
+		    }
+		    buttontail->hbutton = hbutton;
+		    buttontail->next = NULL;
 		}
-		buttontail->hbutton = hbutton;
-		buttontail->next = NULL;
+		x += button_shift.x;
+		y += button_shift.y;
 	    }
 	}
 	FreeResource(hglobal);
@@ -910,36 +872,18 @@ show_buttons(void)
 {
 struct buttonlist *bp = buttonhead;
 RECT rect;
-	button_rect.right = option.button_show ? real_button_width : 0;
-	img_offset.x = button_rect.right + (option.button_show ? 1 : 0);
-	if (!option.button_show) {
-	    while (bp) {
-	        ShowWindow(bp->hbutton, SW_HIDE);
-	        bp = bp->next;
-	    }
-	    if (hwndimgchild == (HWND)NULL) {
-/* what is this for????? */
-	        GetClientRect(hwndimg, &rect);
-	        rect.right = real_button_width + 1;
-	        rect.top = button_rect.top;
-	        InvalidateRect(hwndimg, &rect, TRUE);
-	        UpdateWindow(hwndimg);
-	    }
-	}
 	GetClientRect(hwndimg, &rect);
-	SetWindowPos(hwndimgchild, (HWND)NULL, rect.left+img_offset.x, rect.top+img_offset.y,
-		rect.right-img_offset.x, rect.bottom-img_offset.y, 
+	calc_info_button_areas(rect.right - rect.left, rect.bottom - rect.top);
+	SetWindowPos(hwndimgchild, (HWND)NULL, 
+		rect.left+img_offset.x, rect.top+img_offset.y,
+		rect.right-img_offset.x, info_rect.top-img_offset.y, 
 		SWP_NOZORDER | SWP_NOACTIVATE);
-	rect.right = real_button_width + 1;
-	rect.top = button_rect.top;
-	if (option.button_show) {
-	    InvalidateRect(hwndimg, &rect, FALSE);
-	    UpdateWindow(hwndimg);
-	    while (bp) {
-	        ShowWindow(bp->hbutton, SW_SHOWNA);
-	        bp = bp->next;
-	    }
+	while (bp) {
+	    ShowWindow(bp->hbutton, option.button_show ? SW_SHOWNA : SW_HIDE);
+	    bp = bp->next;
 	}
+	InvalidateRect(hwndimg, &rect, TRUE);
+	UpdateWindow(hwndimg);
 }
 
 
@@ -981,10 +925,8 @@ LONG lrc;
 BOOL
 reg_set_value(FILE *newfile, FILE *oldfile, HKEY hkey, char *name, char *value)
 {
-#ifdef __WIN32__
 DWORD keytype;
 DWORD cbData;
-#endif
 char buf[MAXSTR];
 char qbuf[MAXSTR];
 LONG lenbuf;
@@ -1001,7 +943,6 @@ LONG lenbuf;
 		}
 	    }
 	}
-#ifdef __WIN32__
 	else if (!is_win32s) {
 	    cbData = sizeof(buf);
 	    keytype =  REG_SZ;
@@ -1011,7 +952,6 @@ LONG lenbuf;
 	        fprintf(oldfile, "\042%s\042=\042%s\042\n", name, qbuf);
 	    }
 	}
-#endif
 	else {
 	    fprintf(oldfile, reg_win32s_error);
 	    return FALSE;
@@ -1025,7 +965,6 @@ LONG lenbuf;
 	    value, strlen(value)) != ERROR_SUCCESS)
 	    return FALSE;
     }
-#ifdef __WIN32__
     else if (!is_win32s) {
 	reg_quote(qbuf, value);
 	if (newfile)
@@ -1034,7 +973,6 @@ LONG lenbuf;
 	    (CONST BYTE *)value, strlen(value)+1) != ERROR_SUCCESS)
 	    return FALSE;
     }
-#endif
     else {
 	if (newfile)
 	    fprintf(newfile, reg_win32s_error);
@@ -1085,11 +1023,9 @@ BOOL flag = TRUE;
     strcat(kbuf, commandsubkey);
     if (flag)
 	flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
-#ifdef __WIN32__
     if (!is_win32s)
         sprintf(buf, "\042%s%s\042 \042%%1\042", szExePath, GSVIEW_EXENAME);
     else
-#endif
         sprintf(buf, "%s%s %%1", szExePath, GSVIEW_EXENAME);
     if (flag) {
 	flag = reg_set_value(newfile, oldfile, hkey, NULL, buf);
@@ -1106,11 +1042,9 @@ BOOL flag = TRUE;
     strcat(kbuf, commandsubkey);
     if (flag)
 	flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
-#ifdef __WIN32__
     if (!is_win32s)
         sprintf(buf, "\042%s%s\042 /p \042%%1\042", szExePath, GSVIEW_EXENAME);
     else
-#endif
         sprintf(buf, "%s%s /p %%1", szExePath, GSVIEW_EXENAME);
     if (flag) {
 	flag = reg_set_value(newfile, oldfile, hkey, NULL, buf);
@@ -1136,12 +1070,10 @@ BOOL flag = TRUE;
 int
 update_registry(BOOL ps, BOOL pdf)
 {
-#ifdef __WIN32__
 char *psmime="application/postscript";
 char *pdfmime="application/pdf";
 char *contentname="Content Type";
 char *extension="Extension";
-#endif
 char buf[MAXSTR];
 HKEY hkey;
 char *pskey="psfile";
@@ -1188,10 +1120,8 @@ const char regheader[]="REGEDIT4\n";
 	    flag = reg_open_key(newfile, oldfile, psext, &hkey);
 	if (flag) {
 	    flag = reg_set_value(newfile, oldfile, hkey, NULL, pskey);
-#ifdef __WIN32__
 	    if (flag && !is_win32s)
 		reg_set_value(newfile, oldfile, hkey, contentname, psmime);
-#endif
 	    reg_close_key(&hkey);
 	}
 
@@ -1199,16 +1129,13 @@ const char regheader[]="REGEDIT4\n";
 	    flag = reg_open_key(newfile, oldfile, epsext, &hkey);
 	if (flag) {
 	    flag = reg_set_value(newfile, oldfile, hkey, NULL, pskey);
-#ifdef __WIN32__
 	    if (flag && !is_win32s)
 		flag = reg_set_value(newfile, oldfile, hkey, 
 		    contentname, psmime);
-#endif
 	    reg_close_key(&hkey);
 	}
 
 
-#ifdef __WIN32__
 	/* Don't bother with undelete information for these */
 	if (!is_win32s) {
 	    sprintf(buf, "MIME\\Database\\%s\\%s", contentname, psmime);
@@ -1219,7 +1146,6 @@ const char regheader[]="REGEDIT4\n";
 		reg_close_key(&hkey);
 	    }
 	}
-#endif
 	if (flag) 
 	  flag = create_registry_type(newfile, oldfile, pskey, "PostScript");
     }
@@ -1229,14 +1155,11 @@ const char regheader[]="REGEDIT4\n";
 	    flag = reg_open_key(newfile, oldfile, pdfext, &hkey);
 	if (flag) {
 	    flag = reg_set_value(newfile, oldfile, hkey, NULL, pdfkey);
-#ifdef __WIN32__
 	    if (flag && !is_win32s)
 		reg_set_value(newfile, oldfile, hkey, contentname, pdfmime);
-#endif
 	    reg_close_key(&hkey);
 	}
 
-#ifdef __WIN32__
 	/* Don't bother with undelete information for these */
 	if (!is_win32s) {
 	    sprintf(buf, "MIME\\Database\\%s\\%s", contentname, pdfmime);
@@ -1247,7 +1170,6 @@ const char regheader[]="REGEDIT4\n";
 		reg_close_key(&hkey);
 	    }
 	}
-#endif
 
 	if (flag)
 	    flag = create_registry_type(newfile, oldfile, pdfkey, "Portable Document Format");
@@ -1307,14 +1229,10 @@ BOOL
 load_zlib(void)
 {   
 char buf[MAXSTR];
-#ifdef __WIN32__
 #ifdef DECALPHA
     char zlibname[] = "zlibda.dll";
 #else
     char zlibname[] = "zlib32.dll";
-#endif
-#else
-    char zlibname[] = "zlib16.dll";
 #endif
     if (zlib_hinstance != (HINSTANCE)NULL)
 	return TRUE;	/* already loaded */
@@ -1369,7 +1287,6 @@ char buf[MAXSTR];
 
 /***************************/
 
-#ifdef __WIN32__
 HINSTANCE bzip2_hinstance;
 PFN_bzopen bzopen;
 PFN_bzread bzread;
@@ -1444,7 +1361,6 @@ char buf[MAXSTR];
     return TRUE;
 }
 
-#endif
 
 /****************************************************/
 /* Easy Configure */
@@ -1504,12 +1420,12 @@ EasyConfigureDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 int
-config_easy(void)
+config_easy(BOOL bVerbose)
 {
 #ifndef __WIN32__
 #error Win16 is no longer supported
 #endif
-	int result = 0;
+	int result;
 	int *gsver;
 	int gs_count = 0;
 	get_gs_versions(&gs_count);
@@ -1521,7 +1437,7 @@ config_easy(void)
 	gsver[0] = gs_count+1;
 	nHelpTopic = IDS_TOPICEASYCFG;
 	if (get_gs_versions(gsver)) {
-	    if (gsver[0] == 1) {
+	    if (!bVerbose && (gsver[0] == 1)) {
 		/* Only one copy of Ghostscript installed */
 		/* Don't prompt user */
 		result = gsver[1];
@@ -1829,11 +1745,6 @@ config_finish(HWND hwnd)
 }
 
 
-#ifndef __WIN32__
-DLGPROC lpProcCfgMain;
-DLGPROC lpProcCfgChild;
-#endif
-
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
@@ -1862,7 +1773,7 @@ DownloadGSDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 int
-config_wizard(void)
+config_wizard(BOOL bVerbose)
 {
     /* We don't use a configure wizard anymore - this is done in
      * the setup program.
@@ -1888,7 +1799,7 @@ config_wizard(void)
     gscount = 0;
     get_gs_versions(&gscount);
     if (gscount > 0) {
-	if (config_easy() == 0)
+	if (config_easy(bVerbose) == 0)
 	    return 0;	/* success */
     }
 
@@ -1940,7 +1851,7 @@ config_wizard(void)
     if (DialogBoxParam(hlanguage, "DownloadGSDlgBox", hwndimg, 
 		DownloadGSDlgProc, (LPARAM)0)) {
 	/* download now */
-	ShellExecute(hwndimg, NULL, "http://www.cs.wisc.edu/~ghost/index.html",
+	ShellExecute(hwndimg, NULL, "http://www.cs.wisc.edu/~ghost/index.htm",
 	    NULL, NULL, SW_SHOWNORMAL);
     }
     
@@ -1965,11 +1876,7 @@ CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		char gsdir[MAXSTR];
 		char *p;
 		for (page=pages; page->id; page++) {
-#ifdef __WIN32__
 		    page->hwnd = CreateDialogParam(hlanguage, MAKEINTRESOURCE(page->id), hwnd, CfgChildDlgProc, (LPARAM)NULL);
-#else
-		    page->hwnd = CreateDialogParam(hlanguage, MAKEINTRESOURCE(page->id), hwnd, lpProcCfgChild, (LPARAM)NULL);
-#endif
 		    ShowWindow(page->hwnd, SW_HIDE);
 		}
 		ShowWindow(pages[0].hwnd, SW_SHOW);

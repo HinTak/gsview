@@ -1,7 +1,8 @@
-GSview 3.4 - PostScript previewer.
-Needs Ghostscript 6.01.  GSview is
-a graphical interface for Ghostscript 
-under OS/2 and MS-Windows Win32.  
+GSview 3.5 - PostScript previewer.
+Needs Ghostscript 6.01 or 6.50.  GSview 
+is a graphical interface for Ghostscript 
+under OS/2 and MS-Windows Win32
+and X11/Unix.  
 Free, registrations appreciated.
 The latest version can be obtained
 on CD-R.  See Readme.htm for details.

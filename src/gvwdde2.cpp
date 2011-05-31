@@ -35,9 +35,6 @@ BOOL server_enabled = FALSE;
 #pragma argsused	/* ignore warning for next function */
 #endif
 HDDEDATA CALLBACK
-#ifndef __WIN32__
-_export
-#endif
 GSviewDdeCallback(UINT type, UINT fmt, HCONV hconv,
     HSZ hsz1, HSZ hsz2, HDDEDATA hData, DWORD dwData1, DWORD dwData2)
 {
@@ -67,9 +64,6 @@ dde_initialise()
 {
     lpDdeProc = MakeProcInstance((FARPROC)GSviewDdeCallback, phInstance);
     if (DdeInitialize(&idInst, (PFNCALLBACK)lpDdeProc, CBF_FAIL_POKES, 0L)) {
-#ifndef __WIN32__
-	FreeProcInstance(lpDdeProc);
-#endif
 	return FALSE;
     }
     hszService = DdeCreateStringHandle(idInst, (LPSTR)szServiceName, 0);
@@ -86,10 +80,6 @@ dde_uninitialise()
     DdeFreeStringHandle(idInst, hszTopic);
     DdeUninitialize(idInst);
     idInst = 0;
-#ifndef __WIN32__
-    FreeProcInstance(lpDdeProc);
-    lpDdeProc = NULL;
-#endif
 }
 
 void

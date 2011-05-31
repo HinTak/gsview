@@ -46,6 +46,7 @@ IDP_HAND CURSOR "binary/gvwhand.cur"
 /* The button contents is given by a BITMAP with the same identifier */
 /* or a STRINGTABLE entry with the same identifier, or an ICON with */
 /* the same identifier */
+/* A value of n < 100 means a space of n pixels */
 /* The table ends with a NULL */
 IDR_BUTTON RCDATA
 BEGIN
@@ -53,13 +54,19 @@ BEGIN
 	IDM_PRINT,
 	IDM_INFO,
 	IDM_HELPCONTENT,
+	8,
 	IDM_GOTO,
-	IDM_NEXT,
-	IDM_PREV,
-	IDM_NEXTSKIP,
 	IDM_PREVSKIP,
+	IDM_PREV,
+	IDM_NEXT,
+	IDM_NEXTSKIP,
+	8,
+	IDM_GOBACK,
+	IDM_GOFWD,
+	8,
 	IDM_MAGPLUS,
 	IDM_MAGMINUS,
+	8,
 	IDM_TEXTFIND,
 	IDM_TEXTFINDNEXT,
 	0
@@ -288,6 +295,10 @@ IDM_PREV BITMAP "binary/gvwprev.bmp"
 IDM_NEXTSKIP BITMAP "binary/gvwnexts.bmp"
 
 IDM_PREVSKIP BITMAP "binary/gvwprevs.bmp"
+
+IDM_GOBACK BITMAP "binary/gvwback.bmp"
+
+IDM_GOFWD BITMAP "binary/gvwfwd.bmp"
 
 IDM_MAGPLUS BITMAP "binary/gvwmagp.bmp"
 

@@ -498,10 +498,9 @@ int pagenum;
     }
 
     
-    /* will need to the the remaining items on the GS thread */
+    /* will need to do the remaining items on the GS thread */
 
-#ifdef __WIN32__
-#ifdef UNUSED
+#ifdef NOTUSED
     /* If pstoedit.dll calls gswin32c.exe, then it uses GS in
      * a separate process.  In that case we can start another
      * thread without out disturbing our instance of the GS DLL.
@@ -513,7 +512,6 @@ int pagenum;
     pending.now = TRUE;	
 
     pending.pstoedit = TRUE;
-#endif
 #endif
 
     return flag;

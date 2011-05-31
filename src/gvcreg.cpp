@@ -35,11 +35,7 @@
 
 // #define NONAG
 
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
+#include "gvc.h"
 
 char registration_name[MAXSTR];
 unsigned int registration_receipt;

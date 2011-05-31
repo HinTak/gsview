@@ -18,11 +18,7 @@
 /* gvctext.c */
 /* Text Extract and Search module of PM and Windows GSview */
 
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
+#include "gvc.h"
 
 
 /* forward declarations */
@@ -375,7 +371,7 @@ int thispage = psfile.pagenum;
     strcpy(answer, szFindText);
     nHelpTopic = IDS_TOPICTEXT;
 
-    if (!get_string(prompt,answer))
+    if (!query_string(prompt,answer))
 	return;
     strcpy(szFindText, answer);
     if (!get_page(&thispage, TRUE, TRUE))	/* search all pages */
@@ -470,25 +466,27 @@ text_grab_word(char *line)
 {
 char *p, *q;
     p = line;
-    /* skip llx */
-    while (*p && *p!=' ')
+    while (*p && ((*p == ' ') || (*p == '\t')))
       p++;
-    if (*p)
+    /* skip llx */
+    while (*p && !((*p == ' ') || (*p == '\t')))
+      p++;
+    while (*p && ((*p == ' ') || (*p == '\t')))
       p++;
     /* skip lly */
-    while (*p && *p!=' ')
+    while (*p && !((*p == ' ') || (*p == '\t')))
       p++;
-    if (*p)
+    while (*p && ((*p == ' ') || (*p == '\t')))
       p++;
     /* skip urx */
-    while (*p && *p!=' ')
+    while (*p && !((*p == ' ') || (*p == '\t')))
       p++;
-    if (*p)
+    while (*p && ((*p == ' ') || (*p == '\t')))
       p++;
     /* skip ury */
-    while (*p && *p!=' ')
+    while (*p && !((*p == ' ') || (*p == '\t')))
       p++;
-    if (*p)
+    while (*p && ((*p == ' ') || (*p == '\t')))
       p++;
     /* remove trailing newline */
     q = p;
@@ -576,10 +574,10 @@ gsview_text_extract_slow()
 /* w may contain wildcards * and ? in any position */
 /* return TRUE if match */
 BOOL
-wildmatch(char *w, char *s)
+wildmatch(const char *w, const char *s)
 {
-char *lastw = "";	/* location of last possible '*' */
-char *lasts = s;	/* location of character after the last matched by '*' */
+const char *lastw = "";	/* location of last possible '*' */
+const char *lasts = s;	/* location of character after the last matched by '*' */
 BOOL nomatch;
     while (*s && *w) {
 	nomatch = FALSE;
@@ -644,7 +642,7 @@ text_find_slow(FILE *infile, char *str, BOOL all)
 char line[MAXSTR];
 char *lineword;
 char sbuf[MAXSTR];
-char *strword;
+const char *strword;
 BOOL thispage;
 char *words[MAX_FIND_WORD+1];
 int i;

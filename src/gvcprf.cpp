@@ -25,11 +25,7 @@
 /* INI files compatible with Windows. */
 /* Since the INI files are plain text, they are easy to edit */
 
-#ifdef _Windows
-#include "gvwin.h"
-#else
-#include "gvpm.h"
-#endif
+#include "gvc.h"
 
 /* free keys in the section, but not the section itself */
 void
@@ -72,7 +68,7 @@ struct prfsection *ps, *ns;
 }
 
 PROFILE *
-profile_open(char *filename)
+profile_open(const char *filename)
 {
 char line[256];
 PROFILE *prf;
@@ -156,7 +152,8 @@ char *p;
 }
 
 int 
-profile_read_string(PROFILE *prf, char *section, char *entry, char *def, char *buffer, int len)
+profile_read_string(PROFILE *prf, const char *section, const char *entry, 
+    const char *def, char *buffer, int len)
 {
 struct prfsection *ps;
 struct prfentry *pe;
@@ -226,7 +223,8 @@ char *p;
 }
 
 BOOL
-profile_write_string(PROFILE *prf, char *section, char *entry, char *value)
+profile_write_string(PROFILE *prf, const char *section, const char *entry, 
+    const char *value)
 {
 struct prfsection *ps, *ns;
 struct prfentry *pe, *ne;

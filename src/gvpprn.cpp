@@ -948,6 +948,26 @@ AdvPSDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     return WinDefDlgProc(hwnd, msg, mp1, mp2);
 }
 
+void init_fixed_media(HWND hwnd, int id, int fixed_media)
+{
+    char buf[MAXSTR];
+    // Fill in Page Size combo box
+    strcpy(buf, "Variable");
+    load_string(IDS_PAGESIZE_VARIABLE, buf, sizeof(buf));
+    WinSendMsg( WinWindowFromID(hwnd, id),
+	LM_INSERTITEM, MPFROMLONG(LIT_END), MPFROMP(buf) );
+    strcpy(buf, "Fixed");
+    load_string(IDS_PAGESIZE_FIXED, buf, sizeof(buf));
+    WinSendMsg( WinWindowFromID(hwnd, id),
+	LM_INSERTITEM, MPFROMLONG(LIT_END), MPFROMP(buf) );
+    strcpy(buf, "Rescale");
+    load_string(IDS_PAGESIZE_RESCALE, buf, sizeof(buf));
+    WinSendMsg( WinWindowFromID(hwnd, id),
+	LM_INSERTITEM, MPFROMLONG(LIT_END), MPFROMP(buf) );
+    WinSendMsg( WinWindowFromID(hwnd, id),
+	LM_SELECTITEM, MPFROMLONG(fixed_media), MPFROMLONG(TRUE) );
+}
+
 
 char *device_queue_list;
 int device_queue_index;
@@ -1091,8 +1111,7 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		LM_INSERTITEM, MPFROMLONG(LIT_END), MPFROMP("All") );
 	    WinEnableWindow(WinWindowFromID(hwnd, PAGE_LIST), FALSE);
 	}
-	WinSendMsg( WinWindowFromID(hwnd, DEVICE_FIXEDMEDIA), BM_SETCHECK, 
-	    MPFROMLONG(option.print_fixed_media ? 1 : 0), MPFROMLONG(0));
+	init_fixed_media(hwnd, DEVICE_FIXEDMEDIA, option.print_fixed_media);
 	break;
       case WM_CONTROL:
 	if (mp1 == MPFROM2SHORT(DEVICE_NAME, CBN_LBSELECT)) {
@@ -1268,7 +1287,7 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		/* Fixed Media */
 		option.print_fixed_media = (int)WinSendMsg( 
 		    WinWindowFromID(hwnd, DEVICE_FIXEDMEDIA),
-		    BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+		    LM_QUERYSELECTION, MPFROMLONG(LIT_FIRST), MPFROMLONG(0));
 		/* save pages numbers */
 		if ( (psfile.dsc != (CDSC *)NULL) 
 		    && (psfile.dsc->page_count != 0)) {

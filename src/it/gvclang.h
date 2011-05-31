@@ -27,6 +27,21 @@
 #define GS_COPYRIGHT3 "Vedere il file PUBLIC per maggiori dettagli."
 
 /* Buttons */
+#ifdef UNIX
+#define AAOK "Ok"
+#define AACANCEL "Annulla"
+#define AAEDIT "Modifica"
+#define AADEFAULTS "Predefinite"
+#define AAHELP "Guida"
+#define AANEW "Nuovo"
+#define AATEST "Test"
+#define AAYES "Si"
+#define AANO "No"
+#define AANEXTGT "Successiva >"
+#define AABACKLT "< Precedente"
+#define AAFINISHGT "Fine >"
+#define AAEXIT "Esci"
+#else
 #ifdef _Windows
 #define AAOK "&Ok"
 #define AACANCEL "&Annulla"
@@ -56,10 +71,12 @@
 #define AAFINISHGT "~Fine >"
 #define AAEXIT "~Esci"
 #endif
+#endif
 
 /* About dialog box */
 #define AAABOUTWIN "Informazioni su GSview per Windows"
 #define AAABOUTPM "Informazioni su PM GSview"
+#define AAABOUTX11 "Informazioni su X11 GSview"
 #define AAABOUTGSV16SPL "Informazioni su GSV16SPL"
 #define AAABOUTGSVIEWPRINT "Informazioni su GSview Print"
 #define AACOPY1 "Versione:"
@@ -219,6 +236,7 @@
 
 #define AAGSMESSWIN "GSview per Windows - Messaggi di Ghostscript"
 #define AAGSMESSPM "PM GSview - Messaggi di Ghostscript"
+#define AAGSMESSX11 "X11 GSview - Messaggi di Ghostscript"
 #define AACOPY "Copia"
 
 /* Display Settings dialog box */
@@ -308,7 +326,6 @@
 #define AAINSTALLCONFIGPM5 "Mantieni una copia di backup del vecchio file config.sys"
 #define AAINSTALLFINISH "L'installazione di GSview è adesso pronta per la partenza.  \r\rPremi Fine per continuare."
 #define AAINSTALLUNZIP1 "Decomprimi i files..."
-#define AAINSTALLEA1 "Aggiorna Attributi Estesi"
 #define AADIRNOTEXIST "La Cartella '%s' non esiste.  Vuoi crearla?"
 #define AAMKDIRFAIL "Couldn't make directory"
 #define AABETAWARN "Questa è una versione BETA Test di GSview.  Il programma sarà disabilitato il %04d-%02d-%02d."
