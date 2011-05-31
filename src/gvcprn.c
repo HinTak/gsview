@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2004, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -23,6 +23,7 @@
 #ifndef _MSC_VER  /* Brain damaged MSVC++ 5.0 doesn't support POSIX dirent.h */
 #include <dirent.h>
 #endif
+#include <sys/types.h>
 #include <sys/stat.h>
 
 void copy_setup(FILE *f, GFile *infile, int copies) ;
@@ -567,7 +568,11 @@ enum_upp(char *path, char *buffer, int len, int offset)
 {    
 DIR *dirp;
 struct dirent* de;
+#ifdef _WIN64
+struct _stat st;
+#else
 struct stat st;
+#endif
 char name[MAXSTR];
 char *p;
     dirp = opendir(path);
@@ -1146,10 +1151,12 @@ int method = option.print_method;
 	if (method == PRINT_CONVERT)
 	    fixed_media = option.convert_fixed_media;
     	fprintf(optfile, 
-	    "-c << /Policies << /PageSize %d >> /PageSize [%d %d] ",
+	    "-c \042<< /Policies << /PageSize %d >> /PageSize [%d %d] ",
 	    (fixed_media == 1) ? 5 : 3, widthpt, heightpt);
-	fprintf(optfile, "/InputAttributes << 0 << /PageSize [%d %d] >> >> >> setpagedevice -f\n",
-		widthpt, heightpt);
+	fprintf(optfile, "/InputAttributes currentpagedevice \
+/InputAttributes get mark exch {1 index /Priority eq not \
+ {pop << /PageSize [%d %d] >>} if } forall >> \
+>> setpagedevice\042 -f\n", widthpt, heightpt);
     }
 
     if (strcmp(device, "pdfwrite")==0) {

@@ -495,7 +495,10 @@ dsc_display(CDSC *dsc, void (*dfn)(void *ptr, const char *str))
     sprintf(buf, fmtbuf, dsc->begintrailer, dsc->endtrailer);
     (*dfn)(ptr, buf);
     if (pdcs) {
-	sprintf(buf, "DCS 2.0 separations\n");
+	if (dsc->dcs1)
+	    sprintf(buf, "DCS 1.0 separations\n");
+	else
+	    sprintf(buf, "DCS 2.0 separations\n");
 	(*dfn)(ptr, buf);
     }
     while (pdcs) {

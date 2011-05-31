@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -30,7 +30,7 @@ GtkWidget *statusbar;
 GtkWidget *statusfile;
 GtkWidget *statuscoord;
 GtkWidget *statuspage;
-char *pszLocale;
+char szLocale[64];
 BOOL have_selection;
 
 #ifdef MULTITHREAD
@@ -200,7 +200,7 @@ do_img_message(int message, int param)
 	/* don't do draw on any windows */
     }
     else if (message == WM_COMMAND) {
-	gsview_wcmd(NULL, (gpointer)param);
+	gsview_wcmd(NULL, (gpointer)((size_t)param));
     }
     else if (message == WM_GSDEVICE) {
 	/* hide window if closed */
@@ -577,7 +577,7 @@ void set_menu_sensitive(void)
 /* callback from menu to gsview_command */
 void gsview_wcmd(GtkWidget *w, gpointer data)
 {
-    int command = (int)data;
+    int command = (int)((size_t)data);
     command_on_done = 0;
     if (disable_gsview_wcmd)
        return;
@@ -1984,6 +1984,7 @@ int main( int argc, char *argv[] )
      */
     char lang[MAXSTR];
     char *p;
+    const char *pszLocale;
     gchar *xdisplay;
     memset(lang, 0, sizeof(lang));
     strncpy(lang, "LANG=", 5);
@@ -1997,6 +1998,8 @@ int main( int argc, char *argv[] )
  	putenv(lang);
     }
     pszLocale = gtk_set_locale();
+    memset(szLocale, 0, sizeof(szLocale));
+    strncpy(szLocale, pszLocale, sizeof(szLocale)-1);
     setlocale(LC_NUMERIC, "C");
     gtk_init (&argc, &argv);
     gdk_rgb_init();

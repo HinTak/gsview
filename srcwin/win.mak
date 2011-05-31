@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -20,29 +20,67 @@
 # Windows
 
 # Edit VCVER and DEVBASE as required
+
+!if defined(_NMAKE_VER) && !defined(VCVER)
+!if "$(_NMAKE_VER)" == "162"
+VCVER=5
+!endif
+!if "$(_NMAKE_VER)" == "6.00.8168.0"
+VCVER=6
+!endif
+!if "$(_NMAKE_VER)" == "7.00.9466"
+VCVER=7
+!endif
+!if "$(_NMAKE_VER)" == "7.10.3077"
+VCVER=71
+!endif
+!if "$(_NMAKE_VER)" == "8.00.40607.16"
+VCVER=8
+!endif
+!endif
+
 !ifndef VCVER
 VCVER=71
 !endif
 
+# DEBUG=1 for Debugging options
+DEBUG=1
+
+# Win64 requires Microsoft Visual Studio 8 (.NET 2005)
+# or Microsoft Visual Studio .NET 2003 with Windows Server 2003 DDK.
+!ifdef WIN64
+WIN32=0
+WIN64=1
+!else
+WIN32=1
+WIN64=0
+!endif
+
+# XP defines this as an environment variable.
+# 32-bit is C:\Program Files, 64-bit is C:\Program Files (x86)
+!ifndef PROGRAMFILES
+PROGRAMFILES=C:\Program Files
+!endif
+
 !ifndef DEVBASE
 !if $(VCVER) <= 5
-DEVBASE=C:\Program Files\devstudio
+DEVBASE=$(PROGRAMFILES)\devstudio
 !endif
 !if $(VCVER) == 6
-DEVBASE=C:\Program Files\Microsoft Visual Studio
+DEVBASE=$(PROGRAMFILES)\Microsoft Visual Studio
 !endif
 !if $(VCVER) == 7
-DEVBASE=C:\Program Files\Microsoft Visual Studio .NET
+DEVBASE=$(PROGRAMFILES)\Microsoft Visual Studio .NET
 !endif
 !if $(VCVER) == 71
-DEVBASE=C:\Program Files\Microsoft Visual Studio .NET 2003
+DEVBASE=$(PROGRAMFILES)\Microsoft Visual Studio .NET 2003
+DDKBASE=c:\winddk\3790
+!endif
+!if $(VCVER) == 8
+DEVBASE=$(PROGRAMFILES)\Microsoft Visual Studio 8
 !endif
 !endif
 
-# DEBUG=1 for Debugging options
-DEBUG=1
-# WIN32 is the default - don't change this
-WIN32=1
 
 NUL=
 D=\$(NUL)
@@ -75,30 +113,80 @@ COMPBASE = $(DEVBASE)\vc98
 COMPBASE = $(DEVBASE)\Vc7
 PLATLIBDIR=$(COMPBASE)\PlatformSDK\lib
 !endif
+!if ($(VCVER) == 8)
+COMPBASE = $(DEVBASE)\VC
+PLATLIBDIR=$(COMPBASE)\PlatformSDK\lib
+!endif
 
 COMPDIR = $(COMPBASE)\bin
 INCDIR = $(COMPBASE)\include
 LIBDIR = $(COMPBASE)\lib
-!ifndef PLATLIBDIR
-PLATLIBDIR=$(LIBDIR)
+
+
+# MSVC 8 (2005) warns about deprecated common functions like fopen.
+!if $(VCVER) == 8
+VC8WARN=/wd4996
+!else
+VC8WARN=
 !endif
 
 !if $(WIN32)
 CDEFS=-D_Windows -D__WIN32__ -I"$(INCDIR)"
 WINEXT=32
-CFLAGS=$(CDEFS) /MT /nologo
+CFLAGS=$(CDEFS) /MT /nologo $(VC8WARN)
 LINKMACHINE=IX86
 !if $(DEBUG)
 DEBUGLINK=/DEBUG
 CDEBUG=/Zi
 !endif
-CCAUX = "$(COMPDIR)\cl" -I"$(INCDIR)"
 MODEL=32
+CCAUX = "$(COMPDIR)\cl" -I"$(INCDIR)" $(VC8WARN) /nologo
 CC = "$(COMPDIR)\cl" $(CDEBUG)
 CPP = "$(COMPDIR)\cl" $(CDEBUG)
 LINK = "$(COMPDIR)\link"
+
+!else if $(WIN64)
+CDEFS=-D_Windows -D__WIN32__ -I"$(INCDIR)"
+WINEXT=64
+CFLAGS=$(CDEFS) /MT /nologo $(VC8WARN)
+!if $(VCVER) == 71
+LINKMACHINE=X86
 !else
-    echo Only Win32 is supported
+LINKMACHINE=X64
+!endif
+!if $(DEBUG)
+DEBUGLINK=/DEBUG
+CDEBUG=/Zi
+!endif
+MODEL=64
+
+!if $(VCVER) == 71
+# Microsoft Visual Studio .NET 2003 + Windows Server 2003 DDK
+CCAUX = "$(COMPDIR)\cl" -I"$(INCDIR)" $(VC8WARN) /nologo
+CC = "$(DDKBASE)\bin\win64\x86\amd64\cl" $(CDEBUG)
+CPP = "$(DDKBASE)\bin\win64\x86\amd64\cl" $(CDEBUG)
+LINK = "$(DDKBASE)\bin\win64\x86\amd64\link"
+LIBDIR=$(DDKBASE)\lib\wnet\amd64
+PLATLIBDIR=$(DDKBASE)\lib\wnet\amd64
+!else if $(VCVER) == 8
+# Microsoft Visual Studio .NET 2005, AMD64 cross compiler
+# Native AMD64 compiler is in $(COMPDIR)\amd64\cl
+CCAUX = "$(COMPDIR)\cl" -I"$(INCDIR)" $(VC8WARN) /nologo
+CC = "$(COMPDIR)\x86_amd64\cl" $(CDEBUG)
+CPP = "$(COMPDIR)\x86_amd64\cl" $(CDEBUG)
+LINK = "$(COMPDIR)\x86_amd64\link"
+LIBDIR=$(COMPBASE)\lib\amd64
+PLATLIBDIR=$(COMPBASE)\PlatformSDK\Lib\AMD64
+!else
+!message Win64 compilation needs a different compiler
+!endif
+
+!else
+!message Only Win32 or Win64 is supported
+!endif
+
+!ifndef PLATLIBDIR
+PLATLIBDIR=$(LIBDIR)
 !endif
 
 CLFLAG=
@@ -117,6 +205,10 @@ RCOMP="$(DEVBASE)\common\msdev98\bin\rc" -D_MSC_VER $(CDEFS) $(RIFLAGS)
 !if (($(VCVER) == 7) || ($(VCVER) == 71))
 HC="$(DEVBASE)\Common7\Tools\hcw" /C /E
 RCOMP="$(DEVBASE)\Vc7\bin\rc" -D_MSC_VER $(CDEFS) $(RIFLAGS)
+!endif
+!if $(VCVER) == 8
+HC="$(DEVBASE)\VC\bin\hcw" /C /E
+RCOMP="$(DEVBASE)\VC\bin\rc" -D_MSC_VER $(CDEFS) $(RIFLAGS)
 !endif
 
 !if $(VIEWONLY)
@@ -155,11 +247,6 @@ HDRSPLAT=$(SRCWIN)gvwin.h $(SRCWIN)gvwdib.h $(SRCWIN)gvwpdib.h $(SRCWIN)gvwgsver
 
 CP=copy
 RM=del
-
-# if you have a strict ANSI compiler, add -D__STDC__
-EPSDEF=-I$(SRC) -D__WIN32__ -DEPSTOOL -DSTDIO
-EPSLIBS="$(PLATLIBDIR)\advapi32.lib"
-EPSOBJ2=$(OD)gvwgsver$(OBJ)
 
 
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -49,7 +49,7 @@ char * get_queues(void);
 
 PRINTDLG pd;	/* global */
 
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 NewDeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
 
 void
@@ -67,7 +67,7 @@ char *d = s;
 char editpropname[MAXSTR];
 
 /* dialog for adding or editing properties */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 EditPropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
 static char device[MAXSTR];	/* contains printer device name */
@@ -165,7 +165,7 @@ PROFILE *prf;
 }
 
 /* dialog box for selecting printer properties */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
     char buf[128];
@@ -379,7 +379,7 @@ GetUPPname(HWND hwnd, LPSTR uppname, int upplen)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 UniDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
     WORD notify_message;
@@ -513,7 +513,7 @@ UniDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 AdvPSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
 
@@ -652,7 +652,7 @@ int result;
 #pragma argsused
 #endif
 /* Modeless dialog box - Cancel printing */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 CancelDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -674,7 +674,7 @@ CancelDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 /* Dialog box to select printer port */
 /* For Win32s this selects a port */
 /* For Win95 or WinNT, this selects a queue */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 SpoolDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 LPSTR entry;
@@ -1187,7 +1187,7 @@ start_gvwgs(void)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 PageRangeDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
     int i;
@@ -1364,7 +1364,7 @@ void init_fixed_media(HWND hDlg, int id, int fixed_media)
 }
 
 /* dialog box for selecting print/convert device and resolution */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 NewDeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
     char buf[128];
@@ -1607,7 +1607,7 @@ NewDeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 #define GDI_ENTRY "GDI"
 
 /* dialog box for GDI print settings*/
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 GDIDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
     char buf[128];
@@ -1721,7 +1721,12 @@ get_method(HWND hDlg)
     return print_method;
 }
 
-UINT APIENTRY 
+#ifdef _WIN64
+UINT_PTR
+#else
+UINT 
+#endif
+APIENTRY 
 PrintHookProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     if (message == WM_INITDIALOG) {

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -324,8 +324,7 @@ typedef struct tagDISPLAY_INFO {
     int height;
 } DISPLAY_INFO;
 extern int number_of_displays; /* number of active displays */
-extern DISPLAY_INFO first_display;
-extern DISPLAY_INFO last_display;
+extern DISPLAY_INFO win_display[4];	/* active displays */
 
 /* PRINT_GDI */
 extern int print_gdi_width;
@@ -338,11 +337,25 @@ extern HANDLE print_gdi_write_handle;
 #define MoveTo(hdc,x,y) MoveToEx((hdc),(x),(y),(LPPOINT)NULL)
 #define SetWindowOrg(hdc, x, y) SetWindowOrgEx(hdc, x, y, (LPPOINT)NULL)
 #define	SetWindowExt(hdc, x, y) SetWindowExtEx(hdc, x, y, (LPSIZE)NULL)
-#define SetClassCursor(hwnd, hcursor) SetClassLong((hwnd), GCL_HCURSOR, (LONG)(hcursor))
-#define GetClassCursor(hwnd) ((HCURSOR)GetClassLong((hwnd), GCL_HCURSOR))
 #define GetNotification(wParam,lParam) (HIWORD(wParam))
 #define SendDlgNotification(hwnd, id, notice) \
     SendMessage((hwnd), WM_COMMAND, MAKELONG((id),(notice)), (LPARAM)GetDlgItem((hwnd),(id)))
+#ifdef _WIN64
+#define SetClassCursor(hwnd, hcursor) SetClassLongPtr((hwnd), GCLP_HCURSOR, (LONG)(hcursor))
+#define GetClassCursor(hwnd) ((HCURSOR)GetClassLongPtr((hwnd), GCLP_HCURSOR))
+#else
+#define SetClassCursor(hwnd, hcursor) SetClassLong((hwnd), GCL_HCURSOR, (LONG)(hcursor))
+#define GetClassCursor(hwnd) ((HCURSOR)GetClassLong((hwnd), GCL_HCURSOR))
+#define unlink(s) _unlink(s)
+#endif
+
+/* Dialogs have different return types in Win32 and Win64 */
+#ifdef _WIN64
+#define DLGRETURN INT_PTR
+#else
+#define DLGRETURN BOOL
+#endif
+
 
 int load_string_a(int id, LPSTR str, int len);
 int message_box_a(LPCSTR str, int icon);
@@ -419,8 +432,8 @@ void stop_pgm(PROG* prog);
 void cleanup_pgm(PROG *prog);
 
 /* in gvwdlg.c */
-BOOL CALLBACK _export PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK _export PageMultiDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
+DLGRETURN CALLBACK _export PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
+DLGRETURN CALLBACK _export PageMultiDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
 
 /* in gvwprn.c */
 BOOL get_portname(char *portname, char *port);
@@ -436,5 +449,14 @@ HGLOBAL image_copy_dib(IMAGE *img);
 void image_draw(IMAGE *img, HDC hdc, int dx, int dy, int wx, int wy,
     int sx, int sy);
 
+#ifdef _WIN64
+#define unlink(cs) _unlink(cs)
+#define stricmp(cs,ct) _stricmp(cs,ct)
+#define strnicmp(cs,ct,n) _strnicmp(cs,ct,n)
+#define mktemp(s) _mktemp(s)
+#define getcwd(s,n) _getcwd(s,n)
+#define putenv(cs) _putenv(cs)
+#define stat(cs,st) _stat(cs,st)
+#endif
 
 #endif

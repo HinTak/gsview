@@ -40,7 +40,7 @@ BEGIN
         MENUITEM "~Печать...\tP", IDM_PRINT
         MENUITEM "Печатать ~файл...", IDM_SPOOL
 		MENUITEM SEPARATOR
-        MENUITEM "По~казать сообщения\tM", IDM_GSMESS 
+        MENUITEM "Соо~бщения Ghostscript...\tM", IDM_GSMESS 
 		MENUITEM SEPARATOR
 		MENUITEM SEPARATOR
         MENUITEM "~Выход", IDM_EXIT
@@ -52,7 +52,7 @@ BEGIN
 		MENUITEM SEPARATOR
         MENUITEM "~Вставить в...", IDM_PASTETO
 /*
-        MENUITEM "Конвертировать ~битмэп", IDM_CONVERT
+        MENUITEM "Конвертировать ~битовый образ", IDM_CONVERT
 */
 		MENUITEM SEPARATOR
         SUBMENU "~Добавить EPS превью", IDM_ADDEPSMENU
@@ -145,7 +145,7 @@ BEGIN
 		MENUITEM SEPARATOR
         MENUITEM "~Книжная", IDM_PORTRAIT
         MENUITEM "А~льбомная", IDM_LANDSCAPE
-        MENUITEM "~Вниз головой", IDM_UPSIDEDOWN
+        MENUITEM "П~еревернутая книжная", IDM_UPSIDEDOWN
         MENUITEM "~Обратная альбомная", IDM_SEASCAPE
 		MENUITEM SEPARATOR
         MENUITEM "~Поменять альбомные", IDM_SWAPLANDSCAPE

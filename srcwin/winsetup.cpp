@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -45,6 +45,13 @@
 #define MAXSTR MAX_PATH
 #else
 #define MAXSTR 256
+#endif
+
+#ifdef _WIN64
+#define unlink _unlink
+#define mktemp _mktemp
+#define stricmp _stricmp
+#define strnicmp _strnicmp
 #endif
 
 #include "dwinst.h"
@@ -145,13 +152,22 @@ BOOL installing;
 BOOL init();
 void check_language(void);
 BOOL make_filelist(int argc, char *argv[]);
-BOOL CALLBACK _export ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK _export MainDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+#ifdef _WIN64
+#define DLGRETURN INT_PTR
+#else
+#define DLGRETURN BOOL
+#endif
+DLGRETURN CALLBACK _export ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+DLGRETURN CALLBACK _export MainDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 void gs_addmess_update(void);
 
 
 
+#ifdef _WIN64
+char szIniName[]="gsview64.ini";
+#else
 char szIniName[]="gsview32.ini";
+#endif
 const char * const bootdrive = "c:";
 
 /* early versions of Win32s don't support lstrcpyn */
@@ -253,7 +269,7 @@ char szDirName[MAXSTR];
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK 
+DLGRETURN CALLBACK 
 DirDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	WORD notify_message;
@@ -920,7 +936,11 @@ install_prog()
 	strcpy(szProgram, g_szTargetDir);
 	strcat(szProgram, "\\");
 	strcat(szProgram, cinst.GetMainDir());
+#ifdef _WIN64
+	strcat(szProgram, "\\gsview64.exe");
+#else
 	strcat(szProgram, "\\gsview32.exe");
+#endif
 	strcpy(szArguments, "");
 	
 	// write registry entries
@@ -952,7 +972,11 @@ install_prog()
 	// Write App Paths to registry
 	sprintf(buf, 
 	    "Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\%s",
+#ifdef _WIN64
+	     "gsview64.exe");
+#else
 	     "gsview32.exe");
+#endif
    
 	flag = cinst.RegistryOpenKey(HKEY_LOCAL_MACHINE, buf);
 	if (flag) {
@@ -1590,7 +1614,7 @@ HINSTANCE hInstance;
 #pragma argsused
 #endif
 /* language dialog box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -1662,7 +1686,7 @@ int language;
 #pragma argsused	/* ignore warning for next function */
 #endif
 /* input string dialog box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -1689,7 +1713,7 @@ InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 #pragma argsused	/* ignore warning for next function */
 #endif
 /* Modeless Dialog Box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 MainDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 static BOOL initialised;
@@ -1731,7 +1755,7 @@ static BOOL initialised;
 #pragma argsused	/* ignore warning for next function */
 #endif
 /* Modeless Dialog Box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {

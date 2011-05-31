@@ -53,4 +53,8 @@
 
 #define MAXSTR 256
 
+#ifdef _WIN64
+#define unlink _unlink
+#endif
+
 #endif

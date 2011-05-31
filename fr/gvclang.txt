@@ -9,7 +9,7 @@
  Pour les documents respectant les conventions de structure du langage Adobe
  PostScript, GSview permet de visualiser ou d'imprimer des pages
  sélectionnées.
- GSview 4.6 nécessite Ghostscript version 7.04 - 9.19.
+ GSview 4.7 nécessite Ghostscript version 7.04 - 9.19.
 2Installation
 ?Installation
  Pour installer GSview il est recommandé d'utiliser le programme
@@ -205,12 +205,12 @@ E
  de copier le fichier gsview32.ini ou gvpm.ini du répertoire système vers le répertoire de GSview
  puis d'éditer ce fichier
  en supprimant toutes les entrées sauf :
-  [GSview-4.6]
-  Version=4.6
-  GSversion=813
+  [GSview-4.7]
+  Version=4.7
+  GSversion=850
   Configured=1
-  GhostscriptDLL=e:\gs\gs8.13\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs8.13\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs8.50\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs8.50\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Lorsqu'un utilisateur lance GSview, son fichier INI sera utilisé normalement.
  La première fois que GSview est exécuté ou
@@ -1965,7 +1965,7 @@ W
 P
   GVPM.EXE - Une interface graphique pour Ghostscript
 E
-  Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  Tous droits réservés.
+  Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  Tous droits réservés.
   Copyright (C) 1997-2000, Cyrille Chevallet, pour la traduction française.
 
  Ce fichier fait partie de GSview.

@@ -847,15 +847,14 @@ gsview_usersize()
     if (!query_string(prompt,answer))
 	return FALSE;
     option.user_width = (int)(get_points(answer) + 0.5);
-    gsview_check_usersize();
     load_string(IDS_USERHEIGHT, prompt, sizeof(prompt)/sizeof(TCHAR)-1);
     put_points(answer, sizeof(answer), (float)option.user_height);
     if (!query_string(prompt,answer))
 	return FALSE;
     option.user_height = (int)(get_points(answer) + 0.5);
     if ((option.user_width==0) || (option.user_height == 0)) {
-	option.user_width = 640;
-	option.user_width = 480;
+	option.user_width = 595;
+	option.user_width = 842;
     }
     gsview_check_usersize();
     return TRUE;
@@ -864,7 +863,8 @@ gsview_usersize()
 void
 gsview_check_usersize()
 {
-    if ( (option.user_width > 5669) || (option.user_height > 5669) ) {
+    if ( (option.user_width > option.user_width_warn) || 
+	(option.user_height > option.user_width_warn) ) {
 	gserror(IDS_LARGEMEDIA, NULL, 0, SOUND_ERROR);
     }
 }

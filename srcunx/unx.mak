@@ -1,4 +1,4 @@
-#  Copyright (C) 2000-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 2000-2004, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -33,7 +33,7 @@ SRCUNXDIR=./srcunx
 GSVIEW_BINDIR=$(GSVIEW_BASE)/bin
 # Man page for pstotext placed here
 GSVIEW_MANDIR=$(GSVIEW_BASE)/man
-# GSview help files and epstool Readme placed here
+# GSview help files placed here
 GSVIEW_DOCPATH=$(GSVIEW_BASE)/share/doc
 # GSview printer.ini and system wide gsview.ini
 GSVIEW_ETCPATH=$(prefix)/etc
@@ -149,8 +149,8 @@ OBJPLAT1=$(OD)gvx$(OBJ) $(OD)gvxdlg$(OBJ) $(OD)gvxdisp$(OBJ) \
 OBJS=$(OBJCOM1) $(OBJCOM2) $(OBJPLAT1)
 
 
-#all: gsview html epstool pstotext
-all: $(BD)gsview$(EXE) html $(BD)epstool$(EXE)
+#all: gsview html pstotext
+all: $(BD)gsview$(EXE) html
 
 GSVIEW_DOCDIR=$(GSVIEW_DOCPATH)/gsview-$(GSVIEW_DOT_VERSION)
 
@@ -164,7 +164,6 @@ install: all
 	chmod 755 $(GSVIEW_BINDIR)
 	$(INSTALL_EXE) $(BD)gsview$(EXE) $(GSVIEW_BINDIR)/gsview
 	$(INSTALL_EXE) $(SRCUNX)gvxhelp.txt $(GSVIEW_BINDIR)/gsview-help
-	$(INSTALL_EXE) $(BD)epstool$(EXE) $(GSVIEW_BINDIR)/epstool
 	-mkdir -p $(GSVIEW_MANDIR)
 	chmod 755  $(GSVIEW_MANDIR)
 	-mkdir -p $(GSVIEW_MANDIR)/man1
@@ -190,7 +189,6 @@ install: all
 	$(INSTALL) $(BD)gvxru.htm  $(GSVIEW_DOCDIR)/gvxru.htm
 	$(INSTALL) $(BD)gvxse.htm  $(GSVIEW_DOCDIR)/gvxse.htm
 	$(INSTALL) $(BD)gvxsk.htm  $(GSVIEW_DOCDIR)/gvxsk.htm
-	$(INSTALL) epstool.htm $(GSVIEW_DOCDIR)/epstool.htm
 	-mkdir -p $(GSVIEW_ETCPATH)
 	chmod 755  $(GSVIEW_ETCPATH)
 	-mkdir -p $(GSVIEW_ETCPATH)/gsview
@@ -408,5 +406,4 @@ veryclean: clean
 	-$(RM) $(BD)gvxru.htm
 	-$(RM) $(BD)gvxse.htm
 	-$(RM) $(BD)gvxsk.htm
-	-$(RM) $(BD)epstool$(EXE)
 

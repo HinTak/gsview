@@ -34,7 +34,6 @@ gsview\zlib32.dll
 gsview\libbz2.dll
 gsview\gsprint.exe
 gsview\gsprint.htm
-gsview\epstool.exe
 gsview\epstool.htm
 gsview\Readme.htm
 gsview\gsview.css

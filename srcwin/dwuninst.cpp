@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1999-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -29,6 +29,9 @@
 #include <direct.h>
 #include "dwuninst.h"
 
+#ifdef _WIN64
+#define unlink _unlink
+#endif
 
 #ifdef _MSC_VER
 #define _export
@@ -64,6 +67,12 @@ BOOL registry_import(void);
 BOOL shell_new(void);
 BOOL shell_old(void);
 BOOL doEOF(void);
+
+#ifdef _WIN64
+#define DLGRETURN INT_PTR
+#else
+#define DLGRETURN BOOL
+#endif
 
 // #define gs_addmess(str) fputs(str, stdout)	// for debug 
 #define gs_addmess(str)
@@ -712,7 +721,7 @@ BOOL shell_old(void)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 RemoveDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   switch(message) {

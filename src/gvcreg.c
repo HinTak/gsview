@@ -40,7 +40,8 @@
 TCHAR registration_name[MAXSTR];
 unsigned int registration_receipt;
 
-unsigned int noreg[] = {10011, 10144, 10206, 20587, 20899, 22291, 
+unsigned int noreg[] = {10011, 10144, 10206, 10654,
+    20587, 20899, 22291, 
     23762, 23874, 23970, 
     24063, 24068, 24160, 24352, 24353, 
     24447, 24493, 24522, 24979, 24980, 

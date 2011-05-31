@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -336,6 +336,12 @@ PROFILE *prf;
     profile_read_string(prf, section, "MediaRotate", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
 	    option.media_rotate = i;
+    profile_read_string(prf, section, "UserSizeWarn", "", profile, sizeof(profile));
+    if (sscanf(profile,"%d %d", &option.user_width_warn, 
+	&option.user_height_warn) != 2) {
+	    option.user_width_warn = 5669;	/* 2 metres */
+	    option.user_height_warn = 5669;
+    }
     profile_read_string(prf, section, "UserSize", "", profile, sizeof(profile));
     if (sscanf(profile,"%d %d", &option.user_width, &option.user_height) != 2) {
 	    /* this gives 640x480 pixels at 96dpi */
@@ -560,6 +566,9 @@ char secver[MAXSTR];
 	profile_write_string(prf, section, "MediaRotate", profile);
 	sprintf(profile, "%u %u", option.user_width, option.user_height);
 	profile_write_string(prf, section, "UserSize", profile);
+	sprintf(profile, "%u %u", option.user_width_warn, 
+		option.user_height_warn);
+	profile_write_string(prf, section, "UserSizeWarn", profile);
 	sprintf(profile, "%d", (int)option.epsf_clip);
 	profile_write_string(prf, section, "EpsfClip", profile);
 	sprintf(profile, "%d", (int)option.epsf_warn);
@@ -684,12 +693,12 @@ void * debug_malloc(size_t size)
 	    allocated_memory += size;
 	    pl++;
 	}
+#ifdef NOTUSED
 if (size == 4096)
 gs_addmess("\r\nstop here\r\n");
-#ifdef NOTUSED
 #endif
-	sprintf(buf, "malloc(%ld) 0x%x, allocated = %ld\r\n", 
-	    (long)size, (int)pl, allocated_memory);
+	sprintf(buf, "malloc(%ld) %p, allocated = %ld\r\n", 
+	    (long)size, pl, allocated_memory);
 	gs_addmess(buf);
 #ifdef DEBUG_MALLOC
 	if (malloc_file == (FILE *)NULL)
@@ -723,8 +732,8 @@ void * debug_realloc(void *block, size_t size)
 		pl++;
 	    }
 	}
-	sprintf(buf, "realloc old %ld 0x%x, new %ld 0x%x, allocated = %ld\r\n",
-	    oldsize, (int)block, (long)size, (int)pl, allocated_memory);
+	sprintf(buf, "realloc old %ld %p, new %ld %p, allocated = %ld\r\n",
+	    oldsize, block, (long)size, pl, allocated_memory);
 	gs_addmess(buf);
 #ifdef DEBUG_MALLOC
 	if (malloc_file == (FILE *)NULL)
@@ -752,8 +761,8 @@ void debug_free(void *block)
 	    allocated_memory -= oldsize;
 	    free((void *)pl);
 	}
-	sprintf(buf, "free %ld 0x%x, allocated = %ld\r\n",
-	    oldsize, (int)block, allocated_memory);
+	sprintf(buf, "free %ld %p, allocated = %ld\r\n",
+	    oldsize, block, allocated_memory);
 	gs_addmess(buf);
 #ifdef DEBUG_MALLOC
 	if (malloc_file == (FILE *)NULL)

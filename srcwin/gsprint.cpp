@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -50,8 +50,8 @@ PROCESS_INFORMATION piProcInfo;
 #endif
 BOOL global_debug;
 
-#define COPYRIGHT TEXT("Copyright (C) 2003, Ghostgum Software Pty Ltd.  All Rights Reserved.\n")
-#define VERSION TEXT("2003-09-03 gsprint 1.6\n")
+#define COPYRIGHT TEXT("Copyright (C) 2003-2008, Ghostgum Software Pty Ltd.  All Rights Reserved.\n")
+#define VERSION TEXT("2005-03-01 gsprint 1.8\n")
 
 #define MAXSTR 256
 
@@ -66,12 +66,18 @@ typedef struct tagGSPRINT_OPTION {
 #define PORTRAIT 1
 #define LANDSCAPE 2
 
-    BOOL duplex;
+    int duplex;
+#define DUPLEX_UNKNOWN 0
+#define DUPLEX_SIMPLEX 1
+#define DUPLEX_VERTICAL 2
+#define DUPLEX_HORIZONTAL 3
+
     int copies;
 
     BOOL query;		// true if printer setup to be shown
     BOOL printer;	// printer specified
     char printer_name[MAXSTR];
+    char printer_port[MAXSTR];	// optional
 
     char args[4096];	// all arguments for gsprint and gs
     int args_end;	// character index to end of args
@@ -141,6 +147,7 @@ Usage:  gsprint [options] filename\n\
  -colour or -color      Render in colour as 24bits/pixel\n\
  -query                 Show printer setup dialog\n\
  -printer \042name\042        Print to the specified printer\n\
+ -port \042name\042           Print to the specified printer port\n\
  -ghostscript \042name\042    Path and filename of command line Ghostscript\n\
  -config \042name\042         Read options from this file instead of gsprint.cfg\n\
  -odd                   Print only odd pages\n\
@@ -151,7 +158,9 @@ Usage:  gsprint [options] filename\n\
  -twoup                 2 pages per sheet\n\
  -portrait              Portrait orientation\n\
  -landscape             Landscape orientation\n\
- -duplex                Duplex (vertical axis)\n\
+ -duplex_simplex        No duplex\n\
+ -duplex_vertical       Duplex (binding on long edge)\n\
+ -duplex_horizontal     Duplex (binding on short edge)\n\
  -copies NN             Print NN copies (if supported)\n\
  \042filename\042             The PostScript/PDF file to print\n\
 ");
@@ -307,7 +316,20 @@ BOOL process_args(GSPRINT_OPTION *opt)
 	    opt->colour = COLOUR;
 	}
 	else if (strcmp(thisarg, "-duplex") == 0) {
-	    opt->duplex = TRUE;
+	    /* for backward compatibility */
+	    opt->duplex = DUPLEX_VERTICAL;
+	}
+	else if (strcmp(thisarg, "-duplex_unknown") == 0) {
+	    opt->duplex = DUPLEX_UNKNOWN;
+        }
+	else if (strcmp(thisarg, "-duplex_simplex") == 0) {
+	    opt->duplex = DUPLEX_SIMPLEX;
+	}
+	else if (strcmp(thisarg, "-duplex_vertical") == 0) {
+	    opt->duplex = DUPLEX_VERTICAL;
+	}
+	else if (strcmp(thisarg, "-duplex_horizontal") == 0) {
+	    opt->duplex = DUPLEX_HORIZONTAL;
 	}
 	else if (strcmp(thisarg, "-portrait") == 0) {
 	    opt->orientation = PORTRAIT;
@@ -401,6 +423,25 @@ BOOL process_args(GSPRINT_OPTION *opt)
 	}
 	else if (strcmp(thisarg, "-noprinter") == 0) {
 	    opt->printer = FALSE;
+	}
+	else if (strcmp(thisarg, "-port") == 0) {
+	    if (*nextarg) {
+		if (strlen(thisarg) + 1 < sizeof(opt->printer_port)) {
+		    strcpy(opt->printer_port, nextarg);
+		    thisarg = nextarg;
+		}
+		else  {
+		    fprintf(stdout, "Argument of -port is too long\n");
+		    return FALSE;
+		}
+	    }
+	    else {
+		missing_arg(thisarg);
+		return FALSE;
+	    }
+	}
+	else if (strcmp(thisarg, "-noport") == 0) {
+	    opt->printer_port[0] = '\0';
 	}
 	else if (strcmp(thisarg, "-query") == 0) {
 	    opt->query = TRUE;
@@ -597,9 +638,17 @@ BOOL get_devmode(GSPRINT_OPTION *opt, HANDLE *hdevmode, HANDLE *hdevnames)
 
     pidevmode->dmFields = 0;
 
-    if (opt->duplex) {
+    if (opt->duplex == DUPLEX_SIMPLEX) {
+	pidevmode->dmFields |= DM_DUPLEX;
+	pidevmode->dmDuplex = DMDUP_SIMPLEX;
+    }
+    else if (opt->duplex == DUPLEX_VERTICAL) {
 	pidevmode->dmFields |= DM_DUPLEX;
 	pidevmode->dmDuplex = DMDUP_VERTICAL;
+    }
+    else if (opt->duplex == DUPLEX_HORIZONTAL) {
+	pidevmode->dmFields |= DM_DUPLEX;
+	pidevmode->dmDuplex = DMDUP_HORIZONTAL;
     }
 
     if (opt->copies) {
@@ -781,6 +830,34 @@ HDC open_printer(GSPRINT_OPTION *opt)
     return hdc;
 }
 
+void
+show_available_printers(void)
+{
+    LPBYTE data = NULL;
+    DWORD needed, returned;
+    int rc;
+    unsigned int i;
+    PRINTER_INFO_2 *pri2;
+    rc = EnumPrinters(PRINTER_ENUM_CONNECTIONS | PRINTER_ENUM_LOCAL, 
+	  NULL, 2, data, 0, &needed, &returned);
+    if (rc == 0) {
+	data = (LPBYTE)malloc(needed);
+	rc = EnumPrinters(PRINTER_ENUM_CONNECTIONS | PRINTER_ENUM_LOCAL, 
+	      NULL, 2, data, needed, &needed, &returned);
+    }
+    pri2 = (PRINTER_INFO_2 *)data;
+    fprintf(stderr, "Available printers:\n");
+    if (rc) {
+	for (i=0; i<returned; i++) {
+           fprintf(stderr, "  \042%s\042\n", pri2[i].pPrinterName);
+	}
+    }
+    else
+	printf("EnumPrinters() failed\n");
+    if (data)
+	free(data);
+}
+
 
 #ifdef NOTUSED
 void CheckProcess( void *dummy )
@@ -879,8 +956,10 @@ int main(int argc, char *argv[])
     }
     if (hdc == (HDC)NULL) {
 	fprintf(stderr, "Couldn't open Windows GDI printer driver\n");
-	if (!opt.query)
-	    fprintf(stderr, "Printer name: \042%s\042\n", opt.printer_name);
+	if (!opt.query) {
+	    fprintf(stderr, "Requested printer: \042%s\042\n", opt.printer_name);
+	    show_available_printers();
+	}
 	return 1;
     }
     
@@ -915,6 +994,8 @@ int main(int argc, char *argv[])
     di.cbSize = sizeof(DOCINFO);
     di.lpszDocName = strlen(opt.document_name) ? opt.document_name : "gsprint";
     di.lpszOutput = NULL;
+    if (opt.printer_port[0])
+	di.lpszOutput = opt.printer_port; /* use specified port */
     if (StartDoc(hdc, &di) == SP_ERROR) {
 	DWORD err = GetLastError();
 	fprintf(stderr, "StartDoc failed, error code %ld\n", err);

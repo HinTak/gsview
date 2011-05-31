@@ -119,8 +119,7 @@ all: $(BD)gvpm.exe $(BD)gvpmen.hlp \
   $(BD)gvpmru.dll $(BD)gvpmru.hlp $(BD)setup2ru.dll \
   $(BD)gvpmse.dll $(BD)gvpmse.hlp $(BD)setup2se.dll \
   $(BD)gvpmsk.dll $(BD)gvpmsk.hlp $(BD)setup2sk.dll \
-  $(BD)gvpgs.exe $(BD)os2setup.exe \
-  $(BD)epstool$(EXE)
+  $(BD)gvpgs.exe $(BD)os2setup.exe
 
 
 $(BD)gvpm.exe: $(OBJS) $(OD)gvpm.res $(SRCOS2)gvpm.def

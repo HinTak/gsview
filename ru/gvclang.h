@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,11 +20,11 @@
 
 #define AARUSSIAN "Russian"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2003 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2005 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Все права сохранены."
 #define GSVIEW_COPYRIGHT3 "Подробности см. файл LICENCE."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2002 artofcode LLC,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2005 artofcode LLC,"
 #define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Все права сохранены."
 #define GS_COPYRIGHT3 "Подробности см. файл PUBLIC."
 
@@ -115,13 +115,13 @@
 #define AATYPEC "Тип:"
 #define AATITLEC "Заголовок:"
 #define AADATEC "Дата:"
-#define AABOUNDINGBOXC "BoundingBox:"
+#define AABOUNDINGBOXC "Габариты:"
 #define AAORIENTATIONC "Ориентация:"
 #define AADEFAULTMEDIAC "Размер бумаги:"
 #define AAPAGEORDERC "Порядок страниц:"
 #define AAPAGESC "Всего страниц:"
 #define AAPAGEC "Страница:"
-#define AABITMAPC "Битмэп:"
+#define AABITMAPC "Битовый образ:"
 
 /* Sounds dialog box */
 #define AASOUNDS "Звуки"
@@ -296,7 +296,7 @@
 #define AAONLINEREG "Регистрация по сети"
 #define AAREG1 "Пожалуйста, введите Ваше имя и регистрационный номер"
 #define AAREG2 ""
-#define AANAG1 "GSview is Copyright 2003 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview is Copyright 2005 Ghostgum Software Pty Ltd."
 #define AANAG2 "Пожалуйста, поддержите регистрацией разработку GSview."
 #define AANAG3 ""
 #define AANAG4 "GSview можно зарегистрировать в Интернет по адресу"
@@ -324,12 +324,12 @@
 #define AAINSTALLMISSING1 "Установка GSview - отсутствует ZIP-файл"
 #define AAINSTALLMISSING2 "Не могу найти ZIP-файл. Вставьте диск с указанным файлом."
 #define AAINSTALLCONFIG1 "Для временных файлов GSview и Ghostscript используют каталог, указанный в переменной окружения TEMP."
-#define AAINSTALLCONFIG2 "У вас не определена переменная TEMP."
+#define AAINSTALLCONFIG2 "Переменная TEMP не определена."
 #define AAINSTALLCONFIG3 "В autoexec.bat будет добавлена строка\r    SET TEMP=C:\\"
 #define AAINSTALLCONFIG4 "Обновить autoexec.bat"
 #define AAINSTALLCONFIG5 "Сохранить старый autoexec.bat"
 #define AAINSTALLCONFIGPM1 "Для временных файлов GSview и Ghostscript используют каталог, указанный в переменной окружения TEMP."
-#define AAINSTALLCONFIGPM2 "У вас не определена переменная TEMP или вам нужно установить EMX."
+#define AAINSTALLCONFIGPM2 "Переменная TEMP не определена или необходимо установить EMX."
 #define AAINSTALLCONFIGPM3 "В config.sys будет добавлена строка 'SET TEMP=C:\\', а PATH и/или LIBPATH будут обновлены для указания на EMX."
 #define AAINSTALLCONFIGPM4 "Обновить config.sys"
 #define AAINSTALLCONFIGPM5 "Сохранить старый config.sys"
@@ -338,7 +338,7 @@
 #define AADIRNOTEXIST "Каталог не существует. Создать?"
 #define AAMKDIRFAIL "Не могу создать каталог"
 #define AABETAWARN "Это BETA-версия GSview. Срок тестирования заканчивается %04d-%02d-%02d."
-#define AAINSTALLOK "Установка успешна."
+#define AAINSTALLOK "Установка успешно завершена."
 #define AAINSTALLFAILED "Установка не удалась."
 #define AAPROGMANGROUP1 "Установка GSview может создать группу в Диспетчере программ или пункт Главного меню."
 #define AAPROGMANGROUP2 "Создать группу или пункт"
@@ -350,7 +350,7 @@
 #define AAPMOBJECT2 "Создать программный объект GSview."
 #define AADONEBAK "Старый autoexec.bat будет переименован в %s"
 #define AACANTLOAD "Не могу загрузить %s"
-#define AACANTCREATETEMPFILE "Не могу создать временное имя файла"
+#define AACANTCREATETEMPFILE "Не могу создать временный файл с именем"
 #define AACANTOPENREAD "Не могу открыть для чтения %s"
 #define AACANTOPENWRITE "Не могу открыть для записи %s"
 #define AAERRORRENAME "Ошибка при переименовании %s в %s"
@@ -358,7 +358,7 @@
 #define AAINSERTDISK "Вставьте диск с %s"
 #define AAZIPNOTFOUND "Zip-файл не найден"
 #define AAUNZIPCANCELLED "Распаковка прервана\n"
-#define AACANTALLOCBUF "Нет памяти для буфера копирования"
+#define AACANTALLOCBUF "Недостаточно памяти для буфера копирования"
 #define AAPROGRAMOBJECTFAILED "Не могу создать программный объект на рабочем столе"
 #define AAUNINSTALLTITLE "GSview и AFPL Ghostscript"
 #define AAUNINSTALLITEM "Удалить GSview и AFPL Ghostscript"
@@ -384,15 +384,15 @@
 #define AACFG1 "Конфигурация GSview"
 #define AACFG10 "Мастер поможет сконфигурировать GSview."
 #define AACFG11 "Если вы не понимаете некоторые пункты на следующих страницах,\
- не изменяйте их. По умолчанию будут разумные значения."
+ не изменяйте их. По умолчанию будут установлены разумные значения."
 #define AACFG20 "GSview нужно знать какую версию Ghostscript использовать\
  и где он находится."
 #define AACFG21 "Какую версию Ghostscript вы хотите использовать?"
 #define AACFG22 "В каком каталоге находится Ghostscript?"
-#define AACFG23 "Найти шрифты Type 1 в"
+#define AACFG23 "Искать шрифты Type 1 в"
 #define AACFG30 "GSview хранит список принтеров Ghostscript и\
  их разрешения в своём инициализационном файле."
-#define AACFG31 "По умолчанию список устройств и их разрешения берутся из стандартной\
+#define AACFG31 "По умолчанию список устройств и их разрешение вывода берутся из стандартной\
  версии Ghostscript 5.50 и может быть неполным."
 #define AACFG32 "Обновить список принтеров GSview" 
 #define AACFG33 "Обновление списка принтеров GSview перезапишет все существующие значения." 

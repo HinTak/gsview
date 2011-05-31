@@ -186,6 +186,8 @@ typedef struct tagOPTIONS {
 	BOOL	media_rotate;
 	int	user_width;
 	int	user_height;
+	int	user_width_warn;
+	int	user_height_warn;
 	BOOL	epsf_clip;
 	BOOL	epsf_warn;
 	BOOL	redisplay;

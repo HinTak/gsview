@@ -1,4 +1,4 @@
-/* Copyright (C) 2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2001-2005, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -19,7 +19,7 @@
 #include "gvx.h"
 #include "gvxres.h"
 #include "gvxlang.h"
-#include "nl/gvclang.h"
+#include "gvclang.h"
 
 /* string table ids must be in order since we use a binary search */
 STRING_ENTRY string_nl[] = {

@@ -1,4 +1,4 @@
-/* Copyright (C) 2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -230,7 +230,7 @@ read_registration(unsigned int *preg_receipt, unsigned int *preg_number,
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 RegDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -286,7 +286,7 @@ RegDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 NagDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {

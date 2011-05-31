@@ -1,4 +1,4 @@
-/* Copyright (C) 1998-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1998-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -339,7 +339,7 @@ BOOL pstoedit_dialog(void)
     if (rc == IDOK) {
 	GList *l = GTK_CLIST(format)->selection;
 	i = 0;
-	index = (int)(l->data);
+	index = (int)((size_t)(l->data));
 	dd = p2e.driver_info;
 	p2e.format = dd;
 	while(dd && (dd->symbolicname) ) {

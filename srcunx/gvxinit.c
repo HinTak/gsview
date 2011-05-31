@@ -1,4 +1,4 @@
-/* Copyright (C) 2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2001-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -487,7 +487,8 @@ void add_main_menu(GtkWidget *window)
 
 void button_enter(GtkButton *button, gpointer user_data)
 {
-    gtk_label_set_text(GTK_LABEL(statusfile), get_string((int)user_data));
+    gtk_label_set_text(GTK_LABEL(statusfile), 
+	get_string((int)((size_t)user_data)));
    
 /* The following doesn't work for magplus/magminus which don't
  * have menu items
@@ -546,11 +547,11 @@ GtkWidget *bitmap_button(GtkWidget *bar, const char **xpm, int id)
     gtk_container_add(GTK_CONTAINER(button), pixmapwid);
     gtk_box_pack_start(GTK_BOX(bar), button, FALSE, FALSE, 0);
     gtk_signal_connect(GTK_OBJECT(button), "clicked",
-		  GTK_SIGNAL_FUNC(gsview_wcmd), (gpointer)id);
+		  GTK_SIGNAL_FUNC(gsview_wcmd), (gpointer)((size_t)id));
     gtk_signal_connect(GTK_OBJECT(button), "enter",
-		  GTK_SIGNAL_FUNC(button_enter), (gpointer)id);
+		  GTK_SIGNAL_FUNC(button_enter), (gpointer)((size_t)id));
     gtk_signal_connect(GTK_OBJECT(button), "leave",
-		  GTK_SIGNAL_FUNC(button_leave), (gpointer)id);
+		  GTK_SIGNAL_FUNC(button_leave), (gpointer)((size_t)id));
     GTK_WIDGET_UNSET_FLAGS(button, GTK_CAN_FOCUS);
     gtk_widget_show(button);
     button_settips();
@@ -986,7 +987,7 @@ int language_value;
 
 void language_select(GtkWidget *w, gpointer data)
 {
-    language_value = (int)data;
+    language_value = (int)((size_t)data);
     gtk_main_quit();
 }
 
@@ -1100,8 +1101,8 @@ int get_language(void)
 
 int check_locale(const char *lang)
 {
-    if ((tolower(pszLocale[0]) == lang[0]) &&
-        (tolower(pszLocale[1]) == lang[1]))
+    if ((tolower(szLocale[0]) == lang[0]) &&
+        (tolower(szLocale[1]) == lang[1]))
 	return 0;	/* match */
     return 1;	/* mismatch */
 }
@@ -1247,16 +1248,22 @@ char buf[MAXSTR];
     bzip2_hinstance = dlopen(buf, RTLD_NOW);
     if (bzip2_hinstance != (void *)NULL) {
         bzopen = (PFN_bzopen) dlsym(bzip2_hinstance, "bzopen");
+	if (bzopen == NULL)
+           bzopen = (PFN_bzopen) dlsym(bzip2_hinstance, "BZ2_bzopen");
 	if (bzopen == NULL) {
 	    unload_bzip2();
 	}
 	else {
 	    bzread = (PFN_bzread) dlsym(bzip2_hinstance, "bzread");
+	    if (bzread == NULL)
+	        bzread = (PFN_bzread) dlsym(bzip2_hinstance, "BZ2_bzread");
 	    if (bzread == NULL) {
 		unload_bzip2();
 	    }
 	    else {
 		bzclose = (PFN_bzclose) dlsym(bzip2_hinstance, "bzclose");
+		if (bzclose == NULL)
+		    bzclose = (PFN_bzclose) dlsym(bzip2_hinstance, "BZ2_bzclose");
 		if (bzclose == NULL) {
 		    unload_bzip2();
 		}

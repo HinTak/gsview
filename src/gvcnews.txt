@@ -1,4 +1,79 @@
 ---------------------------
+Version 4.7 2005-03-26
+---------------------------
+Win:
+  Create 64-bit distribution.
+
+  Updated libbz2 and zlib DLLs to latest versions.
+
+  Increase stack space to avoid stack overflow caused by TortoiseSVN.
+
+---------------------------
+Version 4.62beta 2005-03-01
+---------------------------
+
+All:
+  Use %%ViewingOrientation if auto orientation is selected.
+  Allow language set in global gsview.ini to change the language.
+  Fix crash if length of filename near limit.
+
+Win:
+  Add gsprint -duplex_simplex option.  Don't set duplex field
+  unless specifically requested.
+
+  Allow 64-bit compilation with Microsoft Visual Studio .NET 2003
+  and Windows Server 2003 DDK, or Microsoft Visual Studio .NET 2005
+  beta.
+
+X11:
+  Fix some compiler warnings on 64-bit Linux, but it will only work 
+  with GS if pointers have top 32-bits zero.  DisplayHandle
+  needs to be changed from an integer to a string.
+
+  Fixed page offset for displaying EPS with different orientations.
+  This only works if using GS 8.15 or later.
+
+---------------------------
+Version 4.61beta 2004-11-27
+---------------------------
+Win:
+  Add gsprint option -port for specifying the output port name.
+  Change gsprint -duplex to -duplex_vertical and 
+  add -duplex_horizontal.
+  If printer name is unknown, give list of known printers.
+
+  Fix multiple monitor operation.
+  Make sure that main window is created on a current display.
+  Centre dialogs on the display with the main window.
+  Make full screen on the display with the main window.
+
+  Allow compilation with MSVC 8.
+
+X11:
+  If bzip2 library doesn't include bzopen(), also try BZ2_bzopen().
+
+All:
+  Add a save after opening the display device, to prevent
+  grestoreall from destroying the graphics state, leaving
+  a blank page.
+  This also prevents grestore without a preceeding gsave
+  from doing the same thing.
+  
+  Use language header file with the correct code page,
+  not the reference copy in the language directory.
+
+  Allow the maximum user defined page size (before warning)
+  to be changed with UserSizeWarn in the INI file.
+
+  Modify the "Fixed Page Size" and "Shrink to fit page"
+  code to work with recent versions of ghostscript,
+  which now populate the input attributes directory
+  with all known page sizes.  This is needed for 
+  GS 8.14 and later.
+
+  Remove the old epstool.  The later version 3 should be used instead.
+
+---------------------------
 Version 4.6 2004-01-11
 ---------------------------
 All:
@@ -29,7 +104,7 @@ Win:
 Version 4.5 2003-10-18
 ---------------------------
 All:
-  Allow PostScript code runs another file with an absolute path,
+  When PostScript code runs another file with an absolute path,
   permit ghostscript to read the file if it is in the same
   directory as the main file.
 

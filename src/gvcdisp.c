@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -555,6 +555,7 @@ gsview_display()
 {
 char buf[MAXSTR];
 	strncpy(buf, psfile.name, MAXSTR-1);
+	buf[sizeof(buf)-1] = '\0';
 	if (get_filename(buf, FALSE, FILTER_PSALL, 0, IDS_TOPICOPEN))
 		gsview_displayfile(buf);
 }

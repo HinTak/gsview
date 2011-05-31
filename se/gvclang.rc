@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -30,16 +30,16 @@ BEGIN
 	GSVS(IDM_INFO, "Info...")
 	GSVS(IDM_PRINT, "Skriv ut...")
 	GSVS(IDM_TEXTFIND, "Finn...")
-	GSVS(IDM_TEXTFINDNEXT, "Finn Nästa")
-	GSVS(IDM_NEXT, "Nästa Sida")
+	GSVS(IDM_TEXTFINDNEXT, "Finn nästa")
+	GSVS(IDM_NEXT, "Nästa sida")
 	GSVS(IDM_NEXTSKIP, "Hoppa över 5 sidor framåt")
-	GSVS(IDM_PREV, "Föregående Sida")
+	GSVS(IDM_PREV, "Föregående sida")
 	GSVS(IDM_PREVSKIP, "Hoppa över 5 sidor bakåt")
-	GSVS(IDM_GOTO, "Gå till Sida...")
-	GSVS(IDM_GOBACK, "Gå Bakåt")
-	GSVS(IDM_GOFWD, "Gå Framåt")
-	GSVS(IDM_MAGPLUS, "Öka Upplösning")
-	GSVS(IDM_MAGMINUS, "Minska Upplösning")
+	GSVS(IDM_GOTO, "Gå till sida...")
+	GSVS(IDM_GOBACK, "Gå bakåt")
+	GSVS(IDM_GOFWD, "Gå framåt")
+	GSVS(IDM_MAGPLUS, "Öka upplösning")
+	GSVS(IDM_MAGMINUS, "Minska upplösning")
 	GSVS(IDM_HELPCONTENT, "Hjälp")
 END
 
@@ -49,10 +49,10 @@ BEGIN
 	GSVS(IDS_LANGUAGE, AASVENSKA)
 	GSVS(IDS_ELANGUAGE, "Swedish")
 	GSVS(IDS_FILE, "Fil: ")
-	GSVS(IDS_NOFILE, "Ingen Fil")
+	GSVS(IDS_NOFILE, "Ingen fil")
 	GSVS(IDS_PAGE, "Sida: ")
 	GSVS(IDS_NOPAGE, "Ingen sidnumrering tillgänglig")
-	GSVS(IDS_PAGESPECIAL, "Sidonumreringen är Special.  Sidorna kan inte ordnas om tillförlitligt.  Se hjälp 'Vanliga Problem'.  Fortsätt?")
+	GSVS(IDS_PAGESPECIAL, "Sidonumreringen är special.  Sidorna kan inte ordnas om tillförlitligt.  Se hjälp 'Vanliga problem'.  Fortsätt?")
 	GSVS(IDS_LANDSCAPE, "Landskap")
 	GSVS(IDS_PORTRAIT, "Porträtt")
 	GSVS(IDS_ASCEND, "Stigande")
@@ -63,12 +63,12 @@ BEGIN
 	GSVS(IDS_DEFAULT, "Standard")
 	GSVS(IDS_NOTDEFTAG, "[Inte definierad]")
 	GSVS(IDS_EPSF, "EPS")
-	GSVS(IDS_EPSI, "EPS med Interchange Förhandsvisning")
-	GSVS(IDS_EPST, "EPS med TIFF Förhandsvisning")
-	GSVS(IDS_EPSW, "EPS med Metafil Förhandsvisning")
+	GSVS(IDS_EPSI, "EPS med Interchange förhandsvisning")
+	GSVS(IDS_EPST, "EPS med TIFF förhandsvisning")
+	GSVS(IDS_EPSW, "EPS med Metafil förhandsvisning")
 	GSVS(IDS_DSC, "DSC")
 	GSVS(IDS_NOTDSC, "Inga DSC kommentarer")
-	GSVS(IDS_PDF, "Portabelt Dokument Format")
+	GSVS(IDS_PDF, "Portabelt dokument format")
 	GSVS(IDS_IGNOREDSC, "Ignorera DSC kommentarer")
 	GSVS(IDS_CTRLD, "Ctrl-D följt av ")
 	GSVS(IDS_PJL, "PJL följt av ")
@@ -79,9 +79,9 @@ STRINGTABLE
 BEGIN
 	GSVS(IDS_OUTPUTFILE, "Utfilnamn")
 	GSVS(IDS_PRINTINGALL, "Inga DSC kommentarer\nSkriv ut all sidor")
-	GSVS(IDS_PRINTFILE, "Skriv ut Fil")
-	GSVS(IDS_SELECTPAGE, "Välj Sida")
-	GSVS(IDS_SELECTPAGES, "Välj Sidor")
+	GSVS(IDS_PRINTFILE, "Skriv ut fil")
+	GSVS(IDS_SELECTPAGE, "Välj sida")
+	GSVS(IDS_SELECTPAGES, "Välj sidor")
 	GSVS(IDS_NOTOPEN, "Inga dokument öppna")
 	GSVS(IDS_CANNOTRUN, "Kan inte köras ")
 	GSVS(IDS_TOOLONG, "Kommandoraden för lång: ")
@@ -95,27 +95,27 @@ BEGIN
 	GSVS(IDS_BADEPS, "Problem att tillverka EPS fil")
 	GSVS(IDS_NOPREVIEW, "Inte någon DOS EPS fil eller\nIngen binär förhandsvisning")
 	GSVS(IDS_NOTDFNAME, "Kan inte använda samma namn som ett öppet dokument")
-	GSVS(IDS_NOTEMP, "Kan inte öppna temporär fil.\nKatalogen kan vara Skrivskyddad.\nTEMP miljövariabeln kanske inte är satt.")
+	GSVS(IDS_NOTEMP, "Kan inte öppna temporär fil.\nKatalogen kan vara skrivskyddad.\nTEMP miljövariabeln kanske inte är satt.")
 	GSVS(IDS_CANCELDONE, "%d%% klart")
 	GSVS(IDS_BADCLI, "Felaktigt kommandoradsargument: ")
 	GSVS(IDS_DUPOPT, "Kan endast specificera en av /F /P /S optioner.  Fel vid: %s")
 	GSVS(IDS_TEXTFIND, "Finn text ?")
 	GSVS(IDS_TEXTNOTFIND, "Texten hittades inte")
-	GSVS(IDS_PRINTPDFPS, "Kan inte skriva ut PDF till en PostScript skrivare.  Använd Fil | Extrahera")
-	GSVS(IDS_NOPDFQUICKTEXT, "Kan inte göra snabb textextrahering eller finn på PDF fil.  Använd Optionerna | PStillText")
+	GSVS(IDS_PRINTPDFPS, "Kan inte skriva ut PDF till en PostScript skrivare.  Använd fil | Extrahera")
+	GSVS(IDS_NOPDFQUICKTEXT, "Kan inte göra snabb textextrahering eller finn på PDF fil.  Använd alternativen | PStillText")
 	GSVS(IDS_BAD_DOSEPS_HEADER, "DOS EPS header är felaktig.  Ignorerar DSC kommentarer.")
 	GSVS(IDS_PROBABLY_PCL, "Detta verkar vara PCL, avsett för HP LaserJet eller DeskJet skrivare.  Är du säker på att detta är PostScript?")
-	GSVS(IDS_BUSYPRINTING, "GSview är upptagen med att skriva ut.  Tryck Ångra eller vänta tills GSview är klar.")
+	GSVS(IDS_BUSYPRINTING, "GSview är upptagen med att skriva ut.  Tryck ångra eller vänta tills GSview är klar.")
 END
 
 STRINGTABLE
 BEGIN
 	/* sound type types*/
 	GSVS(IDS_SOUNDNAME, "Ljudfil")
-	GSVS(IDS_SNDPAGE, "Ut Sida")
-	GSVS(IDS_SNDNOPAGE, "Ingen Sida")
+	GSVS(IDS_SNDPAGE, "Ut sida")
+	GSVS(IDS_SNDNOPAGE, "Ingen sida")
 	GSVS(IDS_SNDNONUMBER, "Ingen numrering")
-	GSVS(IDS_SNDNOTOPEN, "Inte Öppen")
+	GSVS(IDS_SNDNOTOPEN, "Inte öppen")
 	GSVS(IDS_SNDERROR, "Fel")
 	GSVS(IDS_SNDTIMEOUT, "Timeout")
 	GSVS(IDS_SNDSTART, "Start")
@@ -132,28 +132,28 @@ BEGIN
 	GSVS(IDS_TOPICOPEN,  "Öppen")
 	GSVS(IDS_TOPICPRINT, "Skriv ut")
 	GSVS(IDS_TOPICPROP, "Egenskaper")
-	GSVS(IDS_TOPICEDITPROP, "Editera Egenskaper")
+	GSVS(IDS_TOPICEDITPROP, "Redigera egenskaper")
 	GSVS(IDS_TOPICCONVERT, "Konvertera")
 	GSVS(IDS_TOPICCLIP, "Klippbord")
-	GSVS(IDS_TOPICPREVIEW, "EPS Förhandsvisning")
+	GSVS(IDS_TOPICPREVIEW, "EPS förhandsvisning")
 	GSVS(IDS_TOPICSOUND, "Ljud")
-	GSVS(IDS_TOPICDSET, "Display Inställningar")
+	GSVS(IDS_TOPICDSET, "Display inställningar")
 	GSVS(IDS_TOPICMEDIA, "Media")
 	GSVS(IDS_TOPICPSTOEPS, "PS till EPS")
 	GSVS(IDS_TOPICGOTO, "Sidoval")
 	GSVS(IDS_TOPICINSTALL, "Installation")
-	GSVS(IDS_TOPICTEXT, "Text Extrahering och Finn")
+	GSVS(IDS_TOPICTEXT, "Text extrahering och finn")
 	GSVS(IDS_TOPICKEYS, "Tangenter")
-	GSVS(IDS_TOPICMESS, "Visa Meddelanden")
+	GSVS(IDS_TOPICMESS, "Visa meddelanden")
 	GSVS(IDS_TOPICSPOOL, "Spooler")
 	GSVS(IDS_TOPICZLIB, "zlib")
 	GSVS(IDS_TOPICBZIP2, "bzip2")
 	GSVS(IDS_TOPICPSTOEDIT, "PStillEdit")
 	GSVS(IDS_TOPICMEASURE, "Mät")
-	GSVS(IDS_TOPICEASYCFG, "Enkel Konfiguration")
-	GSVS(IDS_TOPICADVANCEDCFG, "Avancerad Konfiguration")
+	GSVS(IDS_TOPICEASYCFG, "Enkel konfiguration")
+	GSVS(IDS_TOPICADVANCEDCFG, "Avancerad konfiguration")
 	GSVS(IDS_TOPICDOWNLOAD, "Hämta Ghostscript")
-	GSVS(IDS_TOPICDSCWARN, "DSC Varningar")
+	GSVS(IDS_TOPICDSCWARN, "DSC varningar")
 	GSVS(IDS_TOPICREG, "Registrering")
 END
 
@@ -167,9 +167,9 @@ BEGIN
 	GSVS(IDS_EPSQPAGES, "Är detta ett enkelsidigt dokument ?")
 	GSVS(IDS_EPSNOBBOX, "Kunde inte hämta Bounding Box")
 	GSVS(IDS_EPSUSERINVALID, "Förhandsvisad fil är inte TIFF eller Windows Metafil")
-	GSVS(IDS_EPSUSERTITLE, "Öppen Förhandsvisad Fil")
-	GSVS(IDS_EPS_OFF_PAGE, "EPS Bounding Box är helt utanför sidan.  Föreslår att du använder 'Optioner | EPS Klipp'")
-	GSVS(IDS_MUSTUSEPORTRAIT, "Du måste använda Porträtt orientering.")
+	GSVS(IDS_EPSUSERTITLE, "Öppen förhandsvisad fil")
+	GSVS(IDS_EPS_OFF_PAGE, "EPS Bounding Box är helt utanför sidan.  Föreslår att du använder 'Alternativ | EPS klipp'")
+	GSVS(IDS_MUSTUSEPORTRAIT, "Du måste använda porträttorientering.")
 END
 
 STRINGTABLE
@@ -184,7 +184,7 @@ BEGIN
 	GSVS(IDS_WAITGSCLOSE,  "Stänger Ghostscript...")
 	GSVS(IDS_WAITPRINT,  "Skriver ut...")
 	GSVS(IDS_WAITSEARCH,  "Söker...")
-	GSVS(IDS_WAITTEXT, "Extraherar Text %d%%")
+	GSVS(IDS_WAITTEXT, "Extraherar text %d%%")
 END
 
 
@@ -231,11 +231,11 @@ BEGIN
 	GSVS(IDS_NOPRINTERINI, "Kan inte öppna printer.ini")
 	GSVS(IDS_NOINI, "Kan inte öppna INI fil")
 	GSVS(IDS_NEEDTEMP, "Du måste sätta miljövariabeln TEMP till en skrivbar katalog.  Utan den, kommer GSview inte att kunna skriva ut")
-	GSVS(IDS_GSNOTINSTALLED, "Du har inte installerat Ghostscript.  Var vänlig läs GSview Readme.htm filen.")
-	GSVS(IDS_GSLIBNOTINSTALLED, "Du har inte installerat Ghostscript katalogfiler.  Var vänlig läs GSview Readme.htm filen.")
+	GSVS(IDS_GSNOTINSTALLED, "Du har inte installerat Ghostscript.  Var vänlig läs filen GSview Readme.htm.")
+	GSVS(IDS_GSLIBNOTINSTALLED, "Du har inte installerat Ghostscript katalogfiler.  Var vänlig läs filen GSview Readme.htm.")
 	GSVS(IDS_NOPROGMAN, AANODDEPROGMAN)
 	GSVS(IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED)
-	GSVS(IDS_INVALIDREG, "Ogiltigt Registreringsnamn eller Nummer")
+	GSVS(IDS_INVALIDREG, "Ogiltigt registreringsnamn eller nummer")
 	GSVS(IDS_UNREGISTERED, "Oregistrerad")
 	GSVS(IDS_WRONGEMX, "Du har emx %s.\rDu behöver emx %s eller senare.\rPM GSview kommer inte att köras korrekt.")
 	GSVS(IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION)
@@ -252,12 +252,12 @@ BEGIN
 	GSVS(IDS_PRN_PSPRINTER, AAPSPRINTER)		// "PostScript Printer"
 	GSVS(IDS_PRN_SETTINGS, "Inställningar")
 	GSVS(IDS_PRN_HELP, AAHELP)			// "Help"
-	GSVS(IDS_PRN_SELECTPAGES, "Välj Sidor")
+	GSVS(IDS_PRN_SELECTPAGES, "Välj sidor")
 	GSVS(IDS_ALL, AAALL)
 	// PageSize policies
-	GSVS(IDS_PAGESIZE_VARIABLE, "Variabel Sidstorlek")
-	GSVS(IDS_PAGESIZE_FIXED, "Fast Sidstorlek")
-	GSVS(IDS_PAGESIZE_SHRINK, "Krymp för att passa Sidstorlek")
+	GSVS(IDS_PAGESIZE_VARIABLE, "Variabel sidstorlek")
+	GSVS(IDS_PAGESIZE_FIXED, "Fast sidstorlek")
+	GSVS(IDS_PAGESIZE_SHRINK, "Krymp för att passa sidstorlek")
 END
 
 STRINGTABLE
@@ -273,9 +273,9 @@ END
 
 STRINGTABLE
 BEGIN
-	GSVS(IDS_DSC_INFO, "DSC Information")
-	GSVS(IDS_DSC_WARN, "DSC Varning")
-	GSVS(IDS_DSC_ERROR, "DSC Fel")
+	GSVS(IDS_DSC_INFO, "DSC information")
+	GSVS(IDS_DSC_WARN, "DSC varning")
+	GSVS(IDS_DSC_ERROR, "DSC fel")
         GSVS(IDS_DSC_LINEFMT, "%.40s vid rad %d:")
 END
 

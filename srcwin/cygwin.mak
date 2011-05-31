@@ -54,7 +54,7 @@ SRCOS2DIR=./srcos2
 SRCUNXDIR=./srcunx
 
 ifeq ($(WIN32),1)
-	CDEFS=-D_Windows -D__WIN32__ -D_MSC_VER
+	CDEFS=-D_Windows -D__WIN32__
 	WINEXT=32
 	CFLAGS=$(CDEFS) -mno-cygwin -O2
 	ifeq ($(DEBUG),1)

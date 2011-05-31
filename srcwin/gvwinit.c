@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -400,7 +400,7 @@ int i;
 #pragma argsused
 #endif
 /* language dialog box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     int i;
@@ -509,8 +509,13 @@ LOGBRUSH lb;
     hbrush_menu =  CreateBrushIndirect(&lb);
 
     /* change class background brush of main and image windows */
+#ifdef _WIN64
+    SetClassLongPtr(hwndimg, GCLP_HBRBACKGROUND, (LONG_PTR)hbrush_window);
+    SetClassLongPtr(hwndimgchild, GCLP_HBRBACKGROUND, (LONG_PTR)hbrush_window);
+#else
     SetClassLong(hwndimg, GCL_HBRBACKGROUND, (LONG)hbrush_window);
     SetClassLong(hwndimgchild, GCL_HBRBACKGROUND, (LONG)hbrush_window);
+#endif
 }
 
 /* main initialisation */
@@ -521,6 +526,7 @@ WNDCLASS wndclass;
 DWORD version = GetVersion();
 int length = 64;
 int badarg;
+int ndisp;
 	getcwd(workdir, sizeof(workdir));
 
 	while (length && !SetMessageQueue(length))
@@ -719,7 +725,11 @@ int badarg;
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;
 	wndclass.lpfnWndProc = WndImgChildProc;
 	wndclass.cbClsExtra = 0;
+#ifdef _WIN64
+	wndclass.cbWndExtra = sizeof(LONG_PTR);
+#else
 	wndclass.cbWndExtra = sizeof(LONG);
+#endif
 	wndclass.hInstance = phInstance;
 	wndclass.hIcon = LoadIcon(phInstance,MAKEINTRESOURCE(ID_GSVIEW));
 /*
@@ -735,7 +745,11 @@ int badarg;
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;
 	wndclass.lpfnWndProc = WndImgProc;
 	wndclass.cbClsExtra = 0;
+#ifdef _WIN64
+	wndclass.cbWndExtra = sizeof(LONG_PTR);
+#else
 	wndclass.cbWndExtra = sizeof(LONG);
+#endif
 	wndclass.hInstance = phInstance;
 	wndclass.hIcon = LoadIcon(phInstance,MAKEINTRESOURCE(ID_GSVIEW));
 	wndclass.hCursor = LoadCursor((HINSTANCE)NULL, IDC_ARROW);
@@ -744,11 +758,12 @@ int badarg;
 	wndclass.lpszClassName = szClassName;
 	RegisterClass(&wndclass);
 
-	/* do not allow window to be entirely off-screen */
-	if (option.img_size.x + option.img_origin.x < 16)
-	    option.img_origin.x = 0;
-	if (option.img_size.y + option.img_origin.y < 16)
-	    option.img_origin.y = 0;
+	/* Make sure window origin is on a current display */
+	ndisp = find_display(option.img_origin.x, option.img_origin.y);
+	if (ndisp < 0) {
+	    option.img_origin.x = win_display[0].left;
+	    option.img_origin.y = win_display[0].top;
+	}
 
 	/* create parent window */
 	hwndimg = CreateWindow(szClassName, szAppName,
@@ -838,7 +853,7 @@ parse_args(GSVIEW_ARGS *args)
 	    strcpy(filedir, filename);
 	    if ( (t = strrchr(filedir, '\\')) != (char *)NULL ) {
 		*(++t) = '\0';
-#ifndef _MSC_VER
+#ifdef __BORLANDC__
 		if (isalpha(filedir[0]) && (filedir[1]==':'))
 		    (void) setdisk(toupper(filedir[0])-'A');
 		if (!((strlen(filedir)==2) && isalpha(filedir[0]) && 
@@ -996,7 +1011,11 @@ int x, y;
 		    x, y, button_size.x, button_size.y,
 		    hwndimg, (HMENU)(int)pButtonID[i],
 		    phInstance, NULL);
+#ifdef _WIN64
+		SetWindowLongPtr(hbutton, GWLP_WNDPROC, (LONG_PTR)lpfnMenuButtonProc);
+#else
 		SetWindowLong(hbutton, GWL_WNDPROC, (LONG)lpfnMenuButtonProc);
+#endif
 		if (hbutton) {
 		    if (buttonhead == (struct buttonlist *)NULL)
 			buttontail = buttonhead = (struct buttonlist *)
@@ -1391,8 +1410,8 @@ load_zlib(void)
 {   
     char buf[MAXSTR];
     char exepath[MAXSTR];
-#ifdef DECALPHA
-    char zlibname[] = "zlibda.dll";
+#ifdef _WIN64
+    char zlibname[] = "zlib64.dll";
 #else
     char zlibname[] = "zlib32.dll";
 #endif
@@ -1538,7 +1557,7 @@ load_bzip2(void)
 #pragma argsused
 #endif
 /* easy configure dialog box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 EasyConfigureDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     WORD notify_message;
@@ -1660,8 +1679,8 @@ int gsver = GS_REVISION;
 int wiz_exit(HWND hwnd);
 int check_gsver(HWND hwnd);
 int config_finish(HWND hwnd);
-BOOL CALLBACK _export CfgChildDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK _export CfgMainDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+DLGRETURN CALLBACK _export CfgChildDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+DLGRETURN CALLBACK _export CfgMainDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 /* hDlgModeless */
 typedef struct tagWIZPAGE {
@@ -1928,7 +1947,7 @@ config_finish(HWND hwnd)
 #pragma argsused
 #endif
 /* Download GS dialog box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 DownloadGSDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -2041,7 +2060,7 @@ config_wizard(BOOL bVerbose)
 #pragma argsused	/* ignore warning for next function */
 #endif
 /* Modeless Dialog Box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -2141,7 +2160,7 @@ CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 #pragma argsused	/* ignore warning for next function */
 #endif
 /* Modeless Dialog Box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 CfgChildDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -2218,6 +2237,7 @@ init_displays(void)
     DISPLAY_DEVICE dd;
     DEVMODE dm;
     int dev = 0; /* device index */
+    int ndisp = 0;
  
     /* Get the function's address. We could use the new platform SDK, but 
      * this code also works with the old one and on older Windozes (NT/95)
@@ -2229,18 +2249,19 @@ init_displays(void)
 
     /* Defaults if we don't have or support multiple monitors */
     number_of_displays = 1;
-    first_display.left   = last_display.left = 0;
-    first_display.top    = last_display.top = 0;
-    first_display.width  = last_display.width = GetSystemMetrics(SM_CXSCREEN);
-    first_display.height = last_display.height = GetSystemMetrics(SM_CYSCREEN);
+    win_display[0].left   = 0;
+    win_display[0].top    = 0;
+    win_display[0].width  = GetSystemMetrics(SM_CXSCREEN);
+    win_display[0].height = GetSystemMetrics(SM_CYSCREEN);
 
+#ifdef _MSC_VER /* cygwin doesn't have the necessary header files */
     if (huser32!=NULL)
 	pEnumDisplayDevices=(LUENUMDISPLAYDEVICES)
 		GetProcAddress(huser32,"EnumDisplayDevicesA");
 
-    /* If we support multiple monitors, get dimensions of first and last */
+    /* If we support multiple monitors, get dimensions of first few */
     if (pEnumDisplayDevices!=NULL) {
-	number_of_displays = 0;
+	ndisp = 0;
 	while ((*pEnumDisplayDevices)(0, dev, &dd, 0)) {
 	    if (!(dd.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER)) {
 		memset(&dm, 0, sizeof(dm));
@@ -2250,24 +2271,23 @@ init_displays(void)
 			ENUM_CURRENT_SETTINGS, &dm) == TRUE)) {
 		    EnumDisplaySettings(dd.DeviceName, 
 			ENUM_REGISTRY_SETTINGS, &dm);
-		    last_display.left = dm.dmPosition.x;
-		    last_display.top = dm.dmPosition.y;
-		    last_display.width =  dm.dmPelsWidth;
-		    last_display.height = dm.dmPelsHeight;
-		    if (number_of_displays == 0) {
-			first_display.left   = last_display.left;
-			first_display.top    = last_display.top;
-			first_display.width  = last_display.width;
-			first_display.height = last_display.height;
+		    if (ndisp < sizeof(win_display)/sizeof(win_display[0])) {
+			win_display[ndisp].left = dm.dmPosition.x;
+			win_display[ndisp].top = dm.dmPosition.y;
+			win_display[ndisp].width =  dm.dmPelsWidth;
+			win_display[ndisp].height = dm.dmPelsHeight;
+			ndisp++;
 		    }
-		    number_of_displays++;
 		}
 	    }
 	    dev++;
 	}
     }
-    if (number_of_displays == 0)
-	number_of_displays = 1;
+#endif
+    if (ndisp == 0)
+	ndisp = 1;
+    number_of_displays = ndisp;
+
     if (huser32 != NULL)
 	FreeLibrary(huser32);
 }

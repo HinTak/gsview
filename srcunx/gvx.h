@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, 2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -68,7 +68,7 @@ extern GtkWidget *statusbar;
 extern GtkWidget *statusfile;
 extern GtkWidget *statuscoord;
 extern GtkWidget *statuspage;
-extern char *pszLocale;
+extern char szLocale[64];
 
 #ifdef NOTUSED
 extern GdkPixmap *pixmap;

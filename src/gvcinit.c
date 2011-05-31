@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -322,8 +322,32 @@ init_options(void)
     option.media = IDM_A4;
     strcpy(option.medianame, "A4");
     option.media_rotate = FALSE;
-    option.user_width = 610;
-    option.user_height = 792;
+    option.user_width_warn = 5669;	/* 2 metres */
+    option.user_height_warn = 5669;
+    option.user_width = 595;		/* A4 width 210mm */
+    option.user_height = 842;		/* A4 height 297mm */
+    option.epsf_clip = FALSE;
+    option.epsf_warn = FALSE;
+    option.ignore_dsc = FALSE;
+    option.dsc_warn = IDM_DSC_WARN;
+    option.show_bbox = FALSE;
+    option.redisplay = TRUE;
+    option.auto_orientation = TRUE;	/* Added after 2.1 */
+    option.orientation = IDM_PORTRAIT;
+    option.swap_landscape = FALSE;
+    option.xdpi = DEFAULT_RESOLUTION;
+    option.ydpi = DEFAULT_RESOLUTION;
+    option.zoom_xdpi = 300;
+    option.zoom_ydpi = 300;
+    option.depth = 0;
+    option.alpha_text = 4;
+    option.alpha_graphics = 4;
+    option.save_dir = TRUE;
+    strcpy(option.printer_device, "djet500");
+    strcpy(option.printer_resolution, "300");
+    option.print_fixed_media = 1;
+    option.user_width = 595;
+    option.user_height = 842;
     option.epsf_clip = FALSE;
     option.epsf_warn = FALSE;
     option.ignore_dsc = FALSE;
@@ -566,6 +590,7 @@ int
 gsview_changed(void)
 {
 char sysini[MAXSTR];
+int language;
 
 #ifndef UNIX
     if (!getenv("TEMP")) {
@@ -591,10 +616,14 @@ char sysini[MAXSTR];
     convert_widechar(sysini, szExePath, sizeof(sysini)-1);
 #endif
     strncat(sysini, INIFILE, sizeof(sysini)-1-strlen(sysini));
+    language = option.language;
     read_profile(sysini);
     if (option.configured) {
 	/* pre configured INI file was found */
 	gsview_printer_profiles();	/* trust sys admin to have it correct */
+	/* check if language changed */
+	if (option.language != language)
+	    change_language();
 	/* don't bother running the configure wizard */
 	post_args();
 	return 0;

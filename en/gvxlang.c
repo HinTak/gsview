@@ -19,7 +19,7 @@
 #include "gvx.h"
 #include "gvxres.h"
 #include "gvxlang.h"
-#include "en/gvclang.h"
+#include "gvclang.h"
 
 /* string table ids must be in order since we use a binary search */
 STRING_ENTRY string_en[] = {

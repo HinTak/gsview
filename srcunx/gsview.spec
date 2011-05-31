@@ -1,16 +1,16 @@
 #
-# Spec file for GSview 4.6
+# Spec file for GSview 4.7
 #
-# 4.6 release
-#  2004-01-11 Russell Lang <gsview@ghostgum.com.au>
+# 4.7 release
+#  2005-03-25 Russell Lang <gsview@ghostgum.com.au>
 #
 Summary: PostScript and PDF previewer
 Name: gsview
-Version: 4.6
+Version: 4.7
 Release: 1
 Copyright: Aladdin Free Public License, Ghostgum Software Pty Ltd
 Group: Applications/Graphics
-Source: ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/gsview-4.6.tar.gz
+Source: ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/gsview-4.7.tar.gz
 URL: http://www.cs.wisc.edu/~ghost/gsview/
 #Icon: gsview.gif
 #Distribution: Unknown
@@ -29,9 +29,6 @@ description language used by laser printers.
 For documents following the Adobe PostScript Document Structuring 
 Conventions, GSview allows selected pages to be viewed or printed.
 GSview requires Ghostscript 7.04 - 9.19.
-
-Includes epstool for creating of extracting preview bitmaps
-in EPS files.
 
 %prep
 # remove old directory
@@ -88,6 +85,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Apr 25 2005 Russell Lang <gsview@ghostgum.com.au>
+- GSview 4.7 release
+  Minor bug fixes.
 * Sun Jan 11 2004 Russell Lang <gsview@ghostgum.com.au>
 - GSview 4.6 release
   Minor bug fixes.

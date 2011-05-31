@@ -1,4 +1,4 @@
- GSview Hjälp
+ GSview hjälp
 1Översikt
 ?Översikt
  `GSview` är ett grafiskt interface för Ghostscript under MS-Windows,
@@ -7,7 +7,7 @@
  som används av laserskrivare.
  För dokument som följer Adobe's PostScript Document Structuring Conventions,
  tillåter GSview att valda sidor visas eller skrivs ut.
- GSview 4.6 kräver Ghostscript 7.04 - 9.19.
+ GSview 4.7 kräver Ghostscript 7.04 - 9.19.
 2Installation
 ?Installation
 W
@@ -21,16 +21,16 @@ X
 E
  Du måste installera Ghostscript separat.
 
- Om du vill installera GSview manuellt, titta i ämnet `Manuell Installation`.
+ Om du vill installera GSview manuellt, se ämnet `Manuell installation`.
 
  Konfiguration kommer att dyka upp första gången GSview körs.
  Om du vill ändra konfigurationen senare, använd
 WP
- `Optioner` | `Enkel Konfiguration` eller
+ `ALternativ` | `Enkel konfiguration` eller
 E
- `Optioner` | `Avancerad Konfiguration`.
+ `Alternativ` | `Avancerad konfiguration`.
 
- Se också `Optioner` | `Språk`.
+ Se också `Alternativ` | `Språk`.
 3Hämta Ghostscript
 ?Hämta Ghostscript
  GSview kräver AFPL Ghostscript.  GSview eller Ghostscript
@@ -38,8 +38,8 @@ E
   http://www.cs.wisc.edu/~ghost/
  För att konfigurera GSview, hämta och installera både Ghostscript
  och GSview, kör sedan GSview.
-3Ghostscript Installation
-?Ghostscript Installation
+3Ghostscript installation
+?Ghostscript installation
 W
  AFPL Ghostscript för Win32 är tillgängligt som ett självuppackade
  arkiv som installerar sig själv.
@@ -56,7 +56,7 @@ E
 ?Avinstallera GSview
 W
  För att avinstallera GSview från Windows 95 eller NT 4.0,
- använd `Lägg till/Ta bort Program` från Windows `Kontrollpanel`.
+ använd `Lägg till/Ta bort program` från Windows `Kontrollpanel`.
 E
 4Manuell avinstallation
 ?Manuell avinstallation
@@ -81,7 +81,7 @@ W
 
  Ta bort gruppen `Ghostgum` från Programhanteraren eller Startmenyn
 
- Om du vet hur man editerar registret, ta bort följande nycklar:
+ Om du vet hur man redigerar registret, ta bort följande nycklar:
   HKEY_CLASSES_ROOT\psfile
   HKEY_CLASSES_ROOT\.eps
   HKEY_CLASSES_ROOT\.ps
@@ -92,7 +92,7 @@ W
   HKEY_CLASSES_ROOT\MIME\Database\Content Type\application/pdf
 
  Den bästa metoden att avinstallera Ghostscript är att
- använda `Lägg till/Ta bort Program` från Windows `Kontrollpanel`.
+ använda `Lägg till/Ta bort program` från Windows `Kontrollpanel`.
 
  För att avinstallera Ghostscript manuellt, ta bort filerna i `gsN.NN`
  katalogen där N.NN är versionsnumret för Ghostscript.
@@ -105,8 +105,8 @@ X
  och `/usr/etc/gsview/printer.ini`.
  De exakta sökvägarna kan variera beroende på hur GSview kompilerades.
 E
-3Manuell Installation
-?Manuell Installation
+3Manuell installation
+?Manuell installation
 X
  Kopiera `gsview`, `gsview-help`, `epstool` och `pstotext` till en katalog
  i din sökväg.
@@ -128,7 +128,7 @@ WP
  Installera Ghostscript i en katalog c:\gs\gsN.NN
  (Byt ut N.NN med Ghostscript's versions nummer.)
 
- Gör en katalog c:\ghostgum\gsview
+ Tillverka en katalog c:\ghostgum\gsview
 
  Nästa installation av
 P
@@ -146,27 +146,27 @@ WP
 
 P
  Starta GSview och följ sedan de instruktioner som ges i
- konfigurations guiden.  Detta kommer att automatisk konfigurera
- `Optioner` | `Avancerad Konfiguration`, kopiera en lista över
+ konfigurationsguiden.  Detta kommer att automatisk konfigurera
+ `Alternativ` | `Avancerad konfiguration`, kopiera en lista över
  skrivare till INI filen,
  och skapa ett GSview programobjekt på skrivbordet.
 
  Om du vill köra konfigurationsguiden senare, använd
- `Optioner` | `Enkel Konfiguration`.
+ `Alternativ` | `Enkel konfiguration`.
 W
  Starta GSview och välj tillämplig version av Ghostscript
  (normalt den senaste).  För att ändra detta senare, använd
- `Optioner` | `Enkel Konfiguration`.
+ `Alternativ` | `Enkel konfiguration`.
 E
 
- För större kontroll över konfigurationen, se `Avancerad Manuell Installation`.
-3Avancerad Manuell Installation
-?Avancerad Manuell Installation
+ För större kontroll över konfigurationen, se `Avancerad manuell installation`.
+3Avancerad manuell installation
+?Avancerad manuell installation
 WP
- Istället för att använda `Optioner` | `Enkel Konfiguration`, använd
- `Optioner` | `Avancerad Konfiguration`.
+ Istället för att använda `Alternativ` | `Enkel konfiguration`, använd
+ `Alternativ` | `Avancerad konfiguration`.
 
- Sätt först de tre textfälten korrekt (se `Avancerad Konfiguration`).
+ Sätt först de tre textfälten korrekt (se `Avancerad konfiguration`).
 
 P
  Avsluta GSview, och gör sedan en append av printer.ini till GSview INI filen
@@ -176,9 +176,9 @@ P
  med filtyperna .ps, .eps och .pdf.
 
 W
- I dialogen `Avancerad Konfiguration`, välj antingen checkboxarna
+ I dialogen `Avancerad konfiguration`, välj antingen checkboxarna
  `Kopiera skrivarstandard`, `Associera .ps filer med GSview` och
- `Skapa objekt på Startmenyn`, eller utför följande tre steg.
+ `Skapa objekt på startmenyn`, eller utför följande tre steg.
 
  1. Avsluta GSview, gör sedan en append av printer.ini till GSview INI filen
  (c:\windows\gsview32.ini)
@@ -187,20 +187,20 @@ W
 
  3. Skapa ett Program Manager objekt eller lägg till GSview i Startmenyn.
 X
- Efter start av GSview, använd `Optioner` | `Avancerad Konfiguration`.
- Sätt Ghostscript's versions nummer så att det matchar din kopia av Ghostscript.
+ Efter start av GSview, använd `Alternativ` | `Avancerad konfiguration`.
+ Sätt Ghostscript's versionsnummer så att det matchar din kopia av Ghostscript.
  Om `gs -h` rapporterar 5.50, ange 550.  Om `gs -h` rapporterar 6.50, ange 650.
- Sätt följande tre textfält korrekt (se `Avancerad Konfiguration`).
+ Sätt följande tre textfält korrekt (se `Avancerad konfiguration`).
 E
 
  Om du har några Typ 1 fonter i ditt system, är det möjligt att tala om för
  Ghostscript att använda dom.  Se `Fontmap.os2` och `Fontmap.atm`
  som är bifogade med Ghostscript för exempel.  Se ämnet `Fonter`.
 
- Om du har problem, försök läsa ämnet `Vanliga Problem` i hjälpen.
+ Om du har problem, försök läsa ämnet `Vanliga problem` i hjälpen.
 WP
-3Nätverk Installation
-?Nätverk Installation
+3Nätverk installation
+?Nätverk installation
 ?Användarprofiler
  Installera GSview till en nätverkskatalog.
 
@@ -218,28 +218,28 @@ W
  som specificerats i registret.  Om den inte kan hittas,
  och miljövariabeln USERPROFILE är definierad och är en katalog,
  kommer GSview att spara INI filen i den katalogen.
- Om det skulle misslyckas, kommer GSview att spara INI filen på en standard
- plats, i Windows katalog.
+ Om det skulle misslyckas, kommer GSview att spara INI filen på en standardplats, 
+ i Windows-katalogen.
  Om användarens profilkatalog existerar, men är skrivskyddad,
  kommer GSview att få problem.
 
 WP
- Om du önskar hindra GSview från att visa `Enkel Konfiguration`
+ Om du önskar hindra GSview från att visa `Enkel konfiguration`
  när GSview startas första gången, eller när GSview uppgraderas,
- placera en INI fil i GSview katalogen.
+ placera en INI fil i GSview-katalogen.
  `Kom ihåg att ta bort filen innan du uppgraderar GSview i framtiden.`
  Den skall endast innehålla poster som du vill skall bytas ut i
  användarnas konfigurationer.
  Den förslagna tekniken är att installera GSview, och sedan konfigurera den.
  Kopiera gsview32.ini eller gvpm.ini från systemkatalogen eller din
- användares profilkatalog till GSview katalogen, editera den sedan och ta bort
+ användares profilkatalog till GSview-katalogen, redigera den sedan och ta bort
  alla poster utom för:
-  [GSview-4.6]
-  Version=4.6
-  GSversion=813
+  [GSview-4.7]
+  Version=4.7
+  GSversion=850
   Configured=1
-  GhostscriptDLL=e:\gs\gs8.13\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs8.13\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs8.50\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs8.50\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  När en användare startar GSview, kommer deras INI fil normalt att användas.
  Den första gången GSview körs, eller när GSview versionen inte
@@ -252,14 +252,14 @@ WP
  GSview katalogen.
 
  3. Filassociationer (.ps, .eps, .pdf) kommer INTE att utföras eller ändras.
- Om du vill ändra dessa måste du använda `Optioner` | `Avancerad Konfiguration`.
+ Om du vill ändra dessa måste du använda `Alternativ` | `Avancerad konfiguration`.
 
  4. Program Manager grupper / Startmeny objekt / Program objekt
  kommer INTE att ändras.
- Om du vill ändra dessa måste du använda `Optioner` | `Avancerad Konfiguration`.
+ Om du vill ändra dessa måste du använda `Alternativ` | `Avancerad konfiguration`.
 W
 
- Om du installerar på Windows NT4/2000, och väljer "Alla Användare",
+ Om du installerar på Windows NT4/2000, och väljer "Alla användare",
  kommer installationsprogrammet att skriva gsview32.ini till din GSview
  katalog.  Du måste installera Ghostscript först.
 
@@ -273,13 +273,13 @@ W
  Alternativt, om du vill installera GSview på varje dator utan
  några frågor, gör en unzip av det självuppackande arkivet och kör sedan setup
  programmet på följande sätt:
-  setup -namn "Ditt Namn" -nummer XXXXX-XXXXX "c:\ghostgum"
+  setup -namn "Ditt namn" -nummer XXXXX-XXXXX "c:\ghostgum"
 E
 W
-3Köra GSview från Filhanteraren eller Windows Utforskaren
-?Registrerings Info Editorn
+3Köra GSview från filhanteraren eller Windows utforskaren
+?Registrerings Inforedigeraren
 ?Filhanteraren
-?Windows Utforskaren
+?Windows utforskaren
 ?Registret
  Om du använde GSview's setup.exe program och svarade `ja` på
  alla frågor, har följande konfiguration redan ägt rum.
@@ -290,9 +290,9 @@ W
  Filhanteraren, måste följande sekvens användas för att lära
  Filhanteraren att använda PostScriptfiler.
 
- Från `Program Manager`, kör Registrerings Info Editor genom att använda
+ Från `Program Manager`, kör Registrerings inforedigeraren genom att använda
  `Arkiv `| `Kör...` skriv sedan `regedit`.
- Från `Registrerings Info Editor` välj `Editera `| `Lägg till Filtyp...`
+ Från `Registrerings inforedigeraren` välj `Redigera `| `Lägg till filtyp...`
  och lägg till värden i följande fält:
   Identifier = psfile
   Filetype = PostScript
@@ -314,13 +314,13 @@ W
  kan `Filhanteraren` köra GSview.  När du släpper en PostScript
  fil på `Utskriftshanteraren`, kommer GSview att skriva ut filen.
  Om du har en PostScriptskrivare, är detta inte användbart.
- I det fallet måste du ta bort Utskriftshanteringen från registret.
+ I det fallet måste du ta bort utskriftshanteringen från registret.
 
  För Windows 95, utförs konfigurationen istället genom att använda Windows
- Utforskaren.
+ utforskaren.
 
- Starta `Windows Utforskaren`.  Välj `Visa `| `Optioner `.  Välj
- tabben `Filtyper`.  Välj knappen `Ny Typ`.
+ Starta `Windows utforskaren`.  Välj `Visa `| `Alternativ `.  Välj
+ tabben `Filtyper`.  Välj knappen `Ny typ`.
  Ange värden i följande fält:
   Description of type = PostScript
   Associated Extension = PS EPS
@@ -378,7 +378,7 @@ E
  GSview kommer korrekt att rapportera att dessa filer inte är DSC konforma,
  men kommer fortfarande att presentera dom med sidovalsalternativen tillgängliga.
  Klaga hos författaren av programmet som producerade PostScriptfilen.
- För att göra filen DSC konform, editera den eller ta bort control-D tecknet.
+ För att göra filen DSC konform, redigera den eller ta bort control-D tecknet.
 
  DSC konforma filer innehåller rader som:
   %%Pages: 24
@@ -407,12 +407,12 @@ E
  startande med
   %%BeginPreview: bredd höjd djup rader
  En EPS fil med förhandsvisning kan skapas från en EPS fil utan förhandsvisning
- med hjälp av `Lägg till EPS Förhandsvisning`.
+ med hjälp av `Lägg till EPS förhandsvisning`.
 
  GSview kan ge varningar när dokument innehåller felaktiga DSC
- kommentarer.  Detta kan ändras med `Optioner` | `DSC Varningar`.
-2Portabelt Dokument Format
-?Portabelt Dokument Format
+ kommentarer.  Detta kan ändras med `Alternativ` | `DSC varningar`.
+2Portabelt dokument format
+?Portabelt dokument format
 ?PDF
 ?pdf2ps
 ?ps2pdf
@@ -421,11 +421,11 @@ E
 
  Under visningen, ignorerar GSview sidstorleken på Media menyn,
  och använder istället /MediaBox från PDF filen.
- Om `Optioner` | `EPS Klipp` är aktiverat, kommer GSview att använda /CropBox
+ Om `Alternativ` | `EPS klipp` är aktiverat, kommer GSview att använda /CropBox
  från PDF filen.
 
  GSview behöver `Öppna` en PDF fil för att räkna sidorna.  Om du
- `Väljer` filen, kommer GSview inte att kunna göra `Text Extrahering`,
+ `Väljer` filen, kommer GSview inte att kunna göra `Text extrahering`,
  `Finn`, `Gå till Sida` eller några andra operationen som behövs för att
  veta hur många sidor som finns i dokumentet.
 
@@ -456,33 +456,33 @@ WP
  istället för gs.exe.  Du kanske också behöver sätta Ghostscript's
  include sökväg med `-I` eller miljövariabeln `GS_LIB`.
 E
-2Öppna ett Dokument
+2Öppna ett dokument
 ?Arkiv
 ?Öppna
-?Välj Fil
-?Spara Som
+?Välj fil
+?Spara som
 ?Stäng
  `Öppna` kommandot i `Arkiv` menyn öppnar en fil och visar
  första sidan.
 
  Om filen innehåller `DSC` kommentarer, kan sidor väljas genom att använda
- `Nästa Sida`, `Föregående Sida` och `Gå till Sida`.
+ `Nästa sida`, `Föregående sida` och `Gå till sida`.
 
- Om filen inte innehåller `DSC` kommentarer, kommer `Föregående Sida` och `Gå till Sida`
+ Om filen inte innehåller `DSC` kommentarer, kommer `Föregående sida` och `Gå till sida`
  inte att fungera.  Ingen annan fil skall väljas innan sista sidan på
  filen har visats.
 
  När en fil är öppen, kommer GSview att visa dokumentets filnamn,
  den aktuella sidan (om tillgängligt) och när muspekaren förs över
  bilden, visas placeringen av muspekaren i koordinater specificerade
- med `Optioner` | `Enheter`.  Koordinaterna kan vara PostScript punkter
+ med `Alternativ` | `Enheter`.  Koordinaterna kan vara PostScript punkter
  (1/72"), millimeter eller inches.
  Positionen hos muspekaren är användbar för beräkning av bounding boxes.
 
  `Välj fil` kommandot är liknande `Öppna` men visar inte dokumentet.
  Kommandot är användbart för att öppna ett dokument innan det skrivs ut.
 
- `Spara Som` kommandot sparar en kopia av den aktuella dokumentet.
+ `Spara som` kommandot sparar en kopia av den aktuella dokumentet.
  Detta är användbart om GSview används som en PostScript visare av
  någon annan applikation och om du vill spara den aktuella visade filen.
 
@@ -493,52 +493,52 @@ E
  har ändrats, kommer den att stänga Ghostscript och scanna om dokumentet.
 
  Se också `Skriv ut`.
-2Sid Val
-?Sid Val
-?Nästa Sida
-?Föregående Sida
+2Sid val
+?Sid val
+?Nästa sida
+?Föregående sida
 ?Uppdatera
-?Gå till Sidan
+?Gå till sidan
 ?Visa
-?Anpassa Fönster
-?Full Skärm
- `Visa` | `Nästa Sida` eller `+` knappen flyttar till nästa sida hos ett
+?Anpassa fönster
+?Fullskärm
+ `Visa` | `Nästa sida` eller `+` knappen flyttar till nästa sida hos ett
  dokument.
  Detta fungerar även om ett dokument inte innehåller några `DSC` kommentarer.
 
- `Visa` | `Föregående Sida` eller `-` knappen flyttar till den föregående sidan.
+ `Visa` | `Föregående sida` eller `-` knappen flyttar till den föregående sidan.
 
  `Visa` | `Uppdatera` eller `F5` tangenten uppdaterar den aktuella sidan.
 
- `Visa` | `Gå till Sidan` eller `pekande hand` knappen visar en dialog box
+ `Visa` | `Gå till sidan` eller `pekande hand` knappen visar en dialog box
  som tillåter val av nästa sidonummer för visning.
- `Vald Sida` dialogen visar sidoetiketteten eftersom den troligtvis
+ `Vald sida` dialogen visar sidoetiketteten eftersom den troligtvis
  är mer användbar än sekvensiellt numrerade sidor.
 
- `Visa` | `Nästa Sida och Hem` eller mellanslagstangenten flyttar till toppen av
+ `Visa` | `Nästa sida och hem` eller mellanslagstangenten flyttar till toppen av
  nästa sida av dokumentet.
 
- `Visa` | `Föregående Sida och Hem` eller BackSpace tangenten flyttar till
+ `Visa` | `Föregående sida och hem` eller BackSpace tangenten flyttar till
  toppen av föregående sida.
 
- `Föregående Sida`, `Uppdatera` och `Gå till Sida` kommandona fungerar endast om
+ `Föregående sida`, `Uppdatera` och `Gå till sida` kommandona fungerar endast om
  dokumenten innehåller `DSC` kommentarer.
 
- `Visa` | `Anpassa Fönster` eller `F6` tangenten ändrar display upplösningen
+ `Visa` | `Anpassa fönster` eller `F6` tangenten ändrar display upplösningen
  att anpassar hela sidan inom aktuellt fönster.  Upprepad användning
  orskar att antingen bredden eller höjden på sidan kommer att anpassas till det aktuella
  fönstret.
 
- `Visa` | `Full Skärm` eller `F4` tangenten visar full skärm
+ `Visa` | `Fullskärm` eller `F4` tangenten visar full skärm
  (utan titelrad, scrollningslister etc.).
  För att återgå till normal visning, tryck Escape tangenten.
-2Dokument Information
+2Dokument information
 ?Info
  En informationsarea i toppen av fönstret används av GSview för att
  visa dokumentets filnamn, det aktuella sidnumret och etikett
  (om tillgängligt) och när muspekaren förs över bilden, visas
  placeringen av muspekaren (relativt till det nedre vänstra hörnet av
- papperet) i koordinater specificerade med `Optioner` | `Enheter`.
+ papperet) i koordinater specificerade med `Alternativ` | `Enheter`.
  Positionen hos muspekaren är användbar för beräkning av bounding boxes.
 
  `Info` kommandet i `Arkiv `menyn visar en dialog box med följande
@@ -546,16 +546,16 @@ E
 
  `Arkiv `är den fulla sökvägen till dokumentet.
 
- `Typ` är` DSC`,` EPS`, `Inga DSC kommentarer` eller `Ignorera DSC Kommentarer`.
+ `Typ` är` DSC`,` EPS`, `Inga DSC kommentarer` eller `Ignorera DSC kommentarer`.
  `EPS` är en Encapsulated PostScriptfil - ett enkelsidigt dokument
  som innehåller ett subset av `DSC` kommentarer och PostScript kommandon.
  `EPS `filer är vanligtvis inkluderade i andra dokument.
- `Ignorera DSC Kommentar` visas om `Optioner` | `Ignorera DSC`
+ `Ignorera DSC kommentar` visas om `Alternativ` | `Ignorera DSC`
  är valt.
  Detta kan förmarkeras med `Ctrl-D följt av` eller `PJL följt av`.
  Båda dessa indikerar att dokumentet inte överensstämmer med
  DSC på grund av att det finns skräp i början av dokumentet.  För att åtgärda det föregående,
- se `Vanliga Problem`.
+ se `Vanliga problem`.
  För att lösa det senare, använd ingen HP LaserJet skrivare när du skapar
  PostScript dokument för distribution till andra.
 
@@ -577,14 +577,14 @@ E
  Under extrahering eller utskrift, kan GSview instrueras att skriva ut sidorna i fallande (omvänd) ordning.
  `Special` betyder att sidorna inte skall ordnas om.
 
- `Standard Media` ges media namnet följt av bredden och
+ `Standard media` ges medianamnet följt av bredden och
  höjden i standard användar koordinater (1/72 inch).
 
  `Sidor` är det totala antalet sidor i ett dokument.
 
  `Sida` ger sidoetikett och sidonummer.
 
- `Bitmap `är storleken på visad bitmap i pixels vilket kan vara
+ `Bitmapp `är storleken på visad bitmapp i pixels vilket kan vara
  användbart om du kopierar den visade bilden till klippbordet.
 W
 2Utskrift
@@ -613,14 +613,14 @@ W
  Mer detaljer ges i följande ämnen.
 
  Se också `Konverteringar` och `Konvertera`.
-3Välj Sidor
-?Välj Sidor
+3Välj sidor
+?Välj sidor
  Vid utskrift, kan ett område av sidor väljas.
  Inom detta område, kan du välja alla sidor, udda eller jämna sidor.
  Om du väljer udda sidor i området 10 till 20, kommer den första som skrivs ut
  att bli nummer 11.
 
- Knappen `Välj Sidor` kan avaktiveras om den inte stöds av
+ Knappen `Välj sidor` kan avaktiveras om den inte stöds av
  utskriftsmetoden.
 
  Checkboxen `Omvänt` gör att sidorna skrivs ut i sjunkande
@@ -641,9 +641,9 @@ W
  av knappen `Inställningar`.
 
  För att kontrollera hur GSview hanterar begäran från PostScript eller
- PDF dokument att ändra sidstorleken, se ämnet `Sidstorlek Matching`.
+ PDF dokument att ändra sidstorleken, se ämnet `Sidstorlek matching`.
 
- `Optioner `är vanligtvis tomt, men kan innehålla Ghostscript kommandoradsoptioner.
+ `Alternativ `är vanligtvis tomt, men kan innehålla Ghostscript kommandoradsalternativ.
  Används med försiktighet!
 
  Denna utskriftsmetod tillåter att valda sidor skrivs ut, även om
@@ -653,7 +653,7 @@ W
 3Ghostscript device
 ?Ghostscript device
 ?uniprint
- Dialogboxen `Välj Ghostscript Device` tillåter val av ett
+ Dialogboxen `Välj Ghostscript device` tillåter val av ett
  Ghostscript skrivardevice och upplösning.
  Standardlistan över tillgängliga devicer och upplösningar är lagrad
  i [Devices] sektionen hos gsview32.ini och tas ifrån standard
@@ -663,20 +663,20 @@ W
  För att kontrollera hur GSview hanterar begäran från PostScript eller
  PDF dokuments för att ändra sidstorlekarna, se ämnet `Sidstorlek Matchning`.
 
- Vissa Ghostscript optioner kan läggas till antingen från` Optioner`
+ Vissa Ghostscript alternativ kan läggas till antingen från` Alternativ`
  fältet eller knappen `Inställningar`.
 
- Knappen `uniprint` väljer uniprintdevice och visar en lista på
+ Knappen `Uniprint` väljer uniprintdevice och visar en lista på
  tillgängliga konfigurationsfiler (*.upp) för uniprintdevicet.
  Om du väljer en av dessa konfigurationsfiler, kommer konfigurationfilnamnet
- att placeras i fältet `Optioner `för Skrivarinställningar.
+ att placeras i fältet `Alternativ `för skrivarinställningar.
  Se Ghostscript filen `Devices.htm` för detaljer om hur ett uniprintdevice
  skall konfigureras.
 3PostScript skrivare
 ?PostScript skrivare
- Om `PostScript Skrivare` är vald, kommer de valda sidorna att
+ Om `PostScript skrivare` är vald, kommer de valda sidorna att
  skickas direkt till skrivarkön, utan att använda Ghostscript.
- Detta är liknande `Arkiv `| `Skriv ut Fil`, undantaget att du kan specificera
+ Detta är liknande `Arkiv `| `Skriv ut fil`, undantaget att du kan specificera
  vilka sidor som skall skrivas ut.
 
  När en PostScript skrivare är ansluten via en seriell port, kräver den ibland
@@ -704,23 +704,23 @@ W
 
  Om dokumentet är ett `PDF`, kommer Ghostscript att användas för att konvertera
  dokumentet till PostScript vilket sedan kommer att skickas över till skrivaren.
-3Skriv ut Fil
-?Skriv ut Fil
- `Arkiv | Skriv ut Fil` skickar en fil till en lokal port, och blandar inte in
+3Skriv ut fil
+?Skriv ut fil
+ `Arkiv | Skriv ut fil` skickar en fil till en lokal port, och blandar inte in
  Windows skrivardrivrutin.
  Detta är användbart för att skicka ett dokument till en PostScript skrivare,
  eller för att skicka en utfil producerad av Ghostscript till en skrivare.
 PX
 2Skriva ut
 ?Skriva
-?Skriva ut Till Fil
-?Skriv ut Fil
+?Skriva ut till fil
+?Skriv ut fil
 ?uniprint
  `Skriv ut` kommandot i `Arkiv `menyn tillåter att dokumentet skrivs ut
  med användning av Ghostscript.
  `Skriv ut` kommandot används också för att skapa bitmapsfiler och
  `PDF` filer.
- En dialogbox med `Skrivare Inställningar` tillåter val av
+ En dialogbox med `Skrivare inställningar` tillåter val av
  en Ghostscript skrivardrivrutin och upplösning, sidomfånget
  och
 P
@@ -737,22 +737,22 @@ E
 
 P
  `os2prn` skrivardrivrutinen använder OS/2's skrivardrivrutiner
- och bör fungerar med någon skrivare som har rastermöjligheter.
+ och bör fungera med någon skrivare som har rastermöjligheter.
  Utskriftsupplösning kan inte väljas inifrån GSview; använd
  Skrivarobjektet istället.  Skrivarens standardinställningar
  måste matcha de som förväntas av Ghostscript; skrivarens sidorientering
- måste vara Porträtt, skrivarens sidstorlek måste matcha Ghostscript's
+ måste vara porträtt, skrivarens sidstorlek måste matcha Ghostscript's
  sidstorlek.  Inställning av egenskapen -dBitsPerPixel=1 bör snabba upp
  utskrifterna något.
 
  Med alla andra skrivardrivrutiner, skickar Ghostscript den tillverkade sidan
  direkt till en utskriftskö. Om du har problem med att skriva ut kan du behöva använda
- `Skriv ut Till Fil` och sedan `Skriv ut Fil` eller använda OS/2 kommandot `COPY /B FILENAME PRN`.
+ `Skriv ut till fil` och sedan `Skriv ut fil` eller använda OS/2 kommandot `COPY /B FILENAME PRN`.
 PX
 
- Om `PostScript Skrivare` är markerad, kommer de valda sidorna att skickas
+ Om `PostScript skrivare` är markerad, kommer de valda sidorna att skickas
  direkt till utskriftskön, utan att använda Ghostscript.
- Detta är likadant som `Arkiv | Skriv ut Fil`, undantaget att du kan specificera
+ Detta är likadant som `Arkiv | Skriv ut fil`, undantaget att du kan specificera
  vilka sidor som skall skrivas ut.  Knappen `Avancerad` tillåter att prolog och
  epilog filer placerade runt PostScript att skickas till en PostScript skrivare.
 
@@ -769,9 +769,9 @@ PX
  komplett.
 
  För att skriva ut ett dokument utan att titta på det, öppna dokumentet
- genom att använda `Välj Fil`.
+ genom att använda `Välj fil`.
 
- Om du vill producera en bitmap, är några användbara drivrutiner
+ Om du vill producera en bitmapp, är några användbara drivrutiner
  `bmpmono`, `bmp16`, `bmp16m` och `bmp256`.
 
  `Arkiv | Skriv ut Fil` skickar en fil till en lokal port
@@ -784,15 +784,15 @@ PX
  eller för att skicka en utfil producerad av Ghostscript till en skrivare.
 
  För att kontrollera hur GSview hanterar begäran från PostScript eller
- PDF dokument om att ändra sidstorlek, se ämnet `Sidstorlek Matchning`.
+ PDF dokument om att ändra sidstorlek, se ämnet `Sidstorlek matchning`.
 
- Fältet `Optioner `innehåller en Ghostscript kommandoradsoption
+ Fältet `Alternativ `innehåller en Ghostscript kommandoradsoption
  för det valda devicet.
 
  `Uniprint` knappen väljer uniprintdevice och visar en lista
  över tillgängliga konfigurationsfiler (*.upp) för uniprintdevicet.
  Om du väljer en av dessa konfigurationsfiler, kommer konfigurationsfilen
- namn att bli placerad i fältet `Optioner `i Skrivarinställningar.
+ namn att bli placerad i fältet `Alternativ `i Skrivarinställningar.
  Se Ghostscript filen `Devices.htm` för detaljer om hur ett uniprintdevice
  skall konfigureras.
 
@@ -802,8 +802,8 @@ PX
 
  Viss information om kompatibilitet hos skrivare är tillgänglig från
   http://www.cs.wisc.edu/~ghost/doc/printer.htm
-3PostScript Skrivare
-?PostScript Skrivare
+3PostScript skrivare
+?PostScript skrivare
 ?Avancerad
  När en PostScript skrivare är ansluten via en seriell port, kräver den ibland
  att ett Ctrl+D tecken skall sändas efter PostScriptfilen, och beroende på
@@ -815,7 +815,7 @@ PX
 
  Vissa PostScript skrivare förstår multipla språk, och
  fordrar en prolog för att aktivera PostScript läge.
- till exempel, HP LaserJet skrivare (med PostScript option)
+ till exempel, HP LaserJet skrivare (med PostScript alternativ)
  erfordrar följande prolog
   ^[%-12345X@PJL JOB
   @PJL ENTER LANGUAGE = POSTSCRIPT
@@ -828,7 +828,7 @@ E
 3Inställningar
 ?Inställningar
  Knappen `Inställningar` tillåter vissa Ghostcript devicer att konfigurera
- extra inställningar och en sido offset kan specificeras.
+ extra inställningar och en sidooffset kan specificeras.
 
  En sidooffset kan specificeras för varje device.
  Sidooffset är användbar för att korrigera en missanpassning mellan sidoursprung
@@ -856,34 +856,34 @@ E
  filen.
 
  Vissa `Inställningar` är fördefinierade i GSview, men dessa kanske inte
- matchar de som är tillgängliga i Ghostscript.  Knapparna `Editera` och `Ny`
+ matchar de som är tillgängliga i Ghostscript.  Knapparna `Redigera` och `Ny`
  tillåter dig att modifiera tillgängliga `Inställningar` för devicet.
- Se ämnet `Editera Inställningar` för fler detaljer.
-4Editera Inställningar
-?Editera Inställningar
+ Se ämnet `Redigera inställningar` för fler detaljer.
+4Redigera inställningar
+?Redigera inställningar
  Alla device stöder inte användningen av ytterligare `Inställningar`.  För att ta
  reda på vilka devicer som stöder `Inställningar` och vilka `Egenskaper` känns
  igen av varje device, läs Ghostscript filen Devices.htm eller titta i
  Ghostscript's källkod.
 
- Det finns två sätt att lägga till eller editera `Inställningar`.
+ Det finns två sätt att lägga till eller redigera `Inställningar`.
 
- Den första metoden använder knapparna `Editera` eller `Ny` i dialogboxen
+ Den första metoden använder knapparna `Redigera` eller `Ny` i dialogboxen
  `Inställningar`.
 
  Varje egenskap måste vara antingen ett nummer eller en sträng.  Nummeregenskaper
- är ekvivalenta med Ghostscript `-d` kommandoradsoptionen.  Strängegenskaper är ekvivalenta
+ är ekvivalenta med Ghostscript `-d` kommandoradsalternativet.  Strängegenskaper är ekvivalenta
  med Ghostscript `-s` kommandoradsoption.
  Varje egenskap består av ett `Namn` och `Värde`.  Dessa används som
  `-dNAME=VALUE` eller `-sNAME=VALUE`.
  `Värdet` tas från en kommaseparerad lista av `Värden`
- angiven i dialogboxen `Editera Egenskaper`.  Mellanslag får inte
+ angiven i dialogboxen `Redigera egenskaper`.  Mellanslag får inte
  bäddas in i `Namn` eller `Värden`.
 
  För att radera en egenskap, välj den i dialogboxen `Inställningar`,
- tryck `Editera`, och tryck sedan knappen `Radera` i dialogboxen `Editera Egenskaper`.
+ tryck `Redigera`, och tryck sedan knappen `Radera` i dialogboxen `Redigera egenskaper`.
 
- Den andra metoden är att manuellt editera GSview's INI fil.
+ Den andra metoden är att manuellt redigera GSview's INI fil.
 
  För varje device, måste du lägga till två sektioner till
 W
@@ -897,7 +897,7 @@ E
  Följande exempel visar hur egenskapsinformation läggs till
  för cdjcolor drivrutinen.
  Lägg först till en sektion vilken ger de nuvarande värdena.
- Den sektionen, efter att det första tecknet är avlägsnat, ger de optioner
+ Den sektionen, efter att det första tecknet är avlägsnat, ger de Alternativ
  som kommer att uppträda i listboxen `Egenskaper`.
  Det första tecknet är `s` för sträng eller `d` för nummer.
   [cdjcolor]
@@ -928,26 +928,26 @@ E
   -dBitsPerPixel=24 -dDepletion=1 -dShingling=2 -dBlackCorrect=4
  Om värdet av egenskapen är `[Not defined]`, kommer egenskapen inte
  att sändas till Ghostscript.
-3Sidstorlek Matchning
-?Sidstorlek Matchning
-?Fast Media
-?Fast Sidstorlek
-?Variabel Sidstorlek
-?Krymp för att passa Sidstorlek
- Om `Fast Sidstorlek` är vald (standard), kommer GSview att använda
- sidstorleken på Mediamenyn och kommer att ignorera försök från PostScript
+3Sidstorlek matchning
+?Sidstorlek matchning
+?Fast media
+?Fast sidstorlek
+?Variabel sidstorlek
+?Krymp för att passa sidstorlek
+ Om `Fast sidstorlek` är vald (standard), kommer GSview att använda
+ sidstorleken på mediamenyn och kommer att ignorera försök från PostScript
  eller PDF dokument att ändra sidstorlek.
  Detta är användbart för PDF filer som innehåller en mix av porträtt och
  landskapssidor.
 
- Om `Krymp för att passa Sidstorlek` är vald, kommer vilken sidstorlek som
+ Om `Krymp för att passa sidstorlek` är vald, kommer vilken sidstorlek som
  helst som är vald av dokumentet, och är större än det valda mediat, att bli
- krympt för att passa till sidstorleken i Mediamenyn.
+ krympt för att passa till sidstorleken i mediamenyn.
  Detta är användbart om du vill skriva ut en A4 sida på
- letter papper (det är dock en bättre idé att köpa A4 papper).
+ letter-papper (det är dock en bättre idé att köpa A4-papper).
 
- Om `Variabel Sidstorlek` används kommer GSview att sätta standardstorleken
- från Mediamenyn, men tillåter sidan att ändras.
+ Om `Variabel sidstorlek` används kommer GSview att sätta standardstorleken
+ från mediamenyn, men tillåter sidan att ändras.
 2Konverteringar
 ?Konverteringar
  Det finns åtskilliga sätt att konvertera PostScript och PDF filer.
@@ -962,21 +962,21 @@ E
  och tillåter att headern blir ändrad från PS till EPS.
  Läs dokumentationen ordentligt innan du använder det.
 
- `Editera `| `Lägg till EPS Förhandsvisning` lägger till bitmap förhandsvisning hos en EPS fil.
+ `Redigera `| `Lägg till EPS förhandsvisning` lägger till bitmapp förhandsvisning hos en EPS fil.
 
- `Editera `| `Extrahera EPS` extraherar PostScript eller Förhandsvisning
+ `Redigera `| `Extrahera EPS` extraherar PostScript eller förhandsvisning
  från en DOS EPS fil.
 
- `Editera `| `Konvertera till vektorformat` använder pstoedit för att konvertera
- PostScript eller PDF till ett editerbart vektorformat.
+ `Redigera `| `Konvertera till vektorformat` använder pstoedit för att konvertera
+ PostScript eller PDF till ett redigeringsbart vektorformat.
 
- `Editera `| `Text Extrahera` använder pstotext för att extrahera text från
+ `Redigera `| `Text extrahera` använder pstotext för att extrahera text från
  ett PostScript eller PDF dokument.
 WP
 
- `Editera `| `Kopiera` kopierar den visade bitmappen till klippbordet.
- `Editera `| `Klistra in Till` kopierar en klippbord DIB bitmap till en fil.
- `Editera `| `Konvertera Bitmap` konverterar en klippbords DIB bitmap
+ `Redigera `| `Kopiera` kopierar den visade bitmappen till klippbordet.
+ `Redigera `| `Klistra in till` kopierar en klippbord DIB bitmapp till en fil.
+ `Redigera `| `Konvertera bitmap` konverterar en klippbords DIB bitmapp
  till en klippbords deviceberoende bitmap.
 E
 3Filkonvertering och tricks
@@ -999,34 +999,34 @@ E
  Istället för 300dpi, bör du använda upplösningen hos din
  skrivare.
 
- Konvertera till en bitmap.
+ Konvertera till en bitmapp.
  Arkiv | `Konvertera`, välj bmp16m, 72dpi.
 
 WP
- Konvertera till ett editerbart vektorformat (pstoedit).
- Editera | `Konvertera till vektorformat` ELLER konvertera till PDF
+ Konvertera till ett redigeringsbart vektorformat (pstoedit).
+ Redigera | `Konvertera till vektorformat` ELLER konvertera till PDF
  med metoden ovanför.
 
 E
  Extrahera text (pstotext).
- Editera | `Text Extrahera`
+ Redigera | `Text Extrahera`
 
  Lägg förhandsvisning till en EPS fil.
- Editera | `Lägg till EPS Förhandsvisning`.   Se `Lägg till EPS Förhandsvisning` för
+ Redigera | `Lägg till EPS förhandsvisning`.   Se `Lägg till EPS förhandsvisning` för
  fler detaljer.
 
  Ta bort förhandsvisning från en EPS fil.
- Editera | `Extrahera EPS` | PostScript
+ Redigera | `Extrahera EPS` | PostScript
 
  Visa med jämna kanter.
- Media | `Display Inställningar`.  Sätt `Text Alpha` och
+ Media | `Display inställningar`.  Sätt `Text Alpha` och
  `Grafik Alpha` till 4.  Du behöver en display med
  åtminstone 8 bitar per pixel.
 WP
 
  Spara den visade bitmappen.
- Editera | `Kopiera` till kopia i klippbordet.
- För att spara till en BMP fil, använd Editera | `Kopiera` sedan `Klistra in Till`...
+ Redigera | `Kopiera` till kopia i klippbordet.
+ För att spara till en BMP fil, använd Redigera | `Kopiera` sedan `Klistra in till`...
 E
 
  Skapa en bitmap med jämna kanter (anti-aliasing).
@@ -1035,7 +1035,7 @@ WP
  ELLER
  2.
 E
- `Konvertera` med ett bitmapdevice och sätt följande i inställningar.
+ `Konvertera` med ett bitmappsdevice och sätt följande i inställningar.
     -dTextAlphaBits=4 -dGraphicsAlphaBits=4
 3Konvertera
 ?Konvertera
@@ -1055,8 +1055,8 @@ E
  och är tagen från standard distributionsversionen av Ghostscript 6.01.
  Du kan använda andra devicer eller upplösningar.
 
- Vissa Ghostscript optioner kan läggas till antingen via
- fältet `Optioner `eller knappen `Inställningar`.
+ Vissa Ghostscript alternativ kan läggas till antingen via
+ fältet `Alternativ `eller knappen `Inställningar`.
 
  Alla sidor, individuella sidor eller någon kombination kan konverteras.
  Knapparna `Alla`, `Udda` och `Jämna` erbjuder snabbval av sidor.
@@ -1065,7 +1065,7 @@ E
  Checkboxen `Omvänt` gör att sidorna konverteras i sjunkande ordning.
 
  För att kontrollera hur GSview hanterar begäran från PostScript eller
- PDF dokument att ändra sidstorlek, se ämnet `Sidstorlek Matchning`.
+ PDF dokument att ändra sidstorlek, se ämnet `Sidstorlek matchning`.
 
  Se också `Konverteringar`.
 3Extrahera
@@ -1101,7 +1101,7 @@ E
  ett `enkelsidigt` dokument.  Om dokumentet innehåller `DSC` kommentarer
  och är ett mångsidigt, extrahera den önskade sidan med `Arkiv` | `Extrahera`.
  Om dokumentet inte innehåller `DSC` kommentarer, kommer du att behöva
- editera filen för hand för att extrahera den önskade sidan.
+ Redigera filen för hand för att extrahera den önskade sidan.
 
  `EPS` dokument `får inte` använda någon av följade operatorer:
   banddevice   clear         cleardictstack  copypage
@@ -1118,13 +1118,13 @@ E
  Det är `ditt` ansvar att se till att ovanstående krav är uppfyllda.
 
  För att testa om ett dokument innehåller någon av ovanstående operatorer, välj
- `Optioner` | `EPS Varningar` och `Öppna` sedan det önskade dokumentet.
+ `Alternativ` | `EPS varningar` och `Öppna` sedan det önskade dokumentet.
  Efter att sidan har visats, `Stäng` dokumentet och visa sedan
- Ghostscript meddelandena med `Arkiv` | `Visa Meddelanden`.
+ Ghostscript meddelandena med `Arkiv` | `Visa meddelanden`.
  Om någon av ovanstående operatorer har använts bör du se rader som:
   Warning: EPS files must not use ...
  Om du hittar dessa varningar, använd `inte` `PS till EPS`.
- Kom ihåg att stänga av `EPS Varningar` efteråt.
+ Kom ihåg att stänga av `EPS varningar` efteråt.
 
  Ett dokument måste visas innan `PS till EPS` används.
 
@@ -1143,43 +1143,43 @@ E
  Att göra så skulle kräva en ändring av själva PostScriptkoden.
  `PS till EPS` ändrar endast `DSC` kommentarerna.
 
- Om `Automatisk beräkning av Bounding Box` är förkryssad, kommer GSview
+ Om `Automatisk beräkning av bounding box` är förkryssad, kommer GSview
  att beräkna bounding box från de icke-vita pixlarna.
  Om den inte är förkryssad, kan du välja bounding box genom att klicka till
  vänster, botten, höger eller toppen.
 
  `PS till EPS` lägger inte till någon förhandsvisning till ett dokument.
- Om du vill ha förhandsvisning lägger du till den med `Editera `| `Lägg till EPS Förhandvisning` efter
+ Om du vill ha förhandsvisning lägger du till den med `Redigera `| `Lägg till EPS förhandvisning` efter
  först han skapat  en `EPS` fil med en korrekt `%%BoundingBox`.
 
- Se också `Lägg till EPS Förhandsvisning`, `Extrahera`, `EPS Varning` och `Konverteringar`.
-3EPS Förhandsvisning
-?EPS Förhandsvisning
-?Lägg till EPS Förhandsvisning
+ Se också `Lägg till EPS förhandsvisning`, `Extrahera`, `EPS varning` och `Konverteringar`.
+3EPS förhandsvisning
+?EPS förhandsvisning
+?Lägg till EPS förhandsvisning
 ?Extrahera EPS
 ?Förhandsvisa
- `Lägg till EPS Förhandsvisning` tar en bitmap från
+ `Lägg till EPS förhandsvisning` tar en bitmapp från
  displayen och använder den för att lägga till förhandsvisning till en EPS fil.
- `Lägg till EPS Förhandsvisning` kan skapa en DOS EPS fil med en
+ `Lägg till EPS förhandsvisning` kan skapa en DOS EPS fil med en
  Windows Metafil eller TIFF förhandsvisning, eller en EPSI fil med en Interchange förhandsvisning.
- För att använda `Lägg till EPS Förhandsvisning` kommandot måste följande steg följas.
+ För att använda `Lägg till EPS förhandsvisning` kommandot måste följande steg följas.
 
- 1. Avmarkera `Optioner | Ignorera DSC`
+ 1. Avmarkera `Alternativ | Ignorera DSC`
 
  2. Se till att dokumentet har en korrekt bounding box.
- `Optioner` | `Visa Bounding Box` är användbart för att kontrollera en
+ `Alternativ` | `Visa bounding box` är användbart för att kontrollera en
  bounding box.
  En bounding box kan läggas till eller ändras med `Arkiv` | `PS till EPS`.
 
  3. Välj `Orientering` | `Porträtt`.
 
- 4. Välj `Media `| `Display Inställningar` och ställ in en lämplig upplösning
+ 4. Välj `Media `| `Display inställningar` och ställ in en lämplig upplösning
  för förhandsvisningen.  Om upplösningen är för hög
  kommer den att göra EPS filen orimligt stor.
 
  5. `Öppna` en EPS fil som inte innehåller någon förhandsvisning.
 
- 6.  Välj `Editera `| `Lägg till EPS Förhandsvisning`, sedan förhandsvisningsformatet,
+ 6.  Välj `Redigera `| `Lägg till EPS förhandsvisning`, sedan förhandsvisningsformatet,
  och det nya EPS filnamnet.  GSview kommer att skriva en ny fil innehållande
  original PostScript EPS filen och en förhandsvisning skapad från den
  visade bitmappen.
@@ -1197,28 +1197,28 @@ E
  eller en Baseline RGB Full Colour Image (24 bits/pixel)
  i överenstämmelse med TIFF 6.0 specifikationen.
  TIFF 6 förhandsvisning är antingen okomprimerad eller komprimerad med packbitar.
- En Windows Metafil förhandsvisning innehåller en okomprimerad bitmap.
+ En Windows Metafil förhandsvisning innehåller en okomprimerad bitmapp.
 
  7.
  Återställ `Orientering` | `Porträtt`, och
- `Media `| `Display Inställningar` till sina föregående värden.
+ `Media `| `Display inställningar` till sina föregående värden.
 
- För att extrahera PostScript eller Förhandsvisningssektionen från en DOS EPS
- fil, använd `Arkiv` | `Välj Fil` följt av `Editera `| `Extrahera EPS`
+ För att extrahera PostScript eller förhandsvisningssektionen från en DOS EPS
+ fil, använd `Arkiv` | `Välj fil` följt av `Redigera `| `Extrahera EPS`
  och sedan `PostScript` eller `Förhandsvisning`.
 
  Se också `PS till EPS`.
-3Användardefinierad Förhandsvisning
-?Användardefinierad Förhandsvisning
- Kommandot `Editera `| `Lägg till EPS Förhandsvisning` | `Användardefinierad Förhandsvisning` tillåter
+3Användardefinierad förhandsvisning
+?Användardefinierad förhandsvisning
+ Kommandot `Redigera `| `Lägg till EPS förhandsvisning` | `Användardefinierad förhandsvisning` tillåter
  en existerande TIFF eller WMF fil att adderas till en EPS fil
  för att skapa en DOS EPS fil.
  Detta är användbart om en applikation kan exportera till en EPS fil och till en
  WMF fil, men kan inte skapa en DOS EPS fil med WMF förhandsvisning.
  EPS filen `måste` innehålla en bounding box som överensstämmer med
  TIFF eller WMF förhandsvisningsfilen.
- Det är inte nödvändigt att visa EPS filen. `Användardefinierad Förhandsvisning`
- kan användas efter att en EPS fil har öppnats med `Välj Fil`.
+ Det är inte nödvändigt att visa EPS filen. `Användardefinierad förhandsvisning`
+ kan användas efter att en EPS fil har öppnats med `Välj fil`.
 
  Du kan också lägga till förhandsvisning som inte har något gemensamt med PostScript,
  vilket är mycket ovälkommet.
@@ -1226,7 +1226,7 @@ WP
 3Konvertera till vektorformat
 ?Konvertera till vektorformat
 ?PStillEdit
- Du kan konvertera en PostScript eller PDF fil till ett editerbart vektorformat
+ Du kan konvertera en PostScript eller PDF fil till ett redigeringsbart vektorformat
  med användning av `pstoedit` av Wolfgang Glunz.
  `pstoedit` är licensierad med GNU Public Licensen och är inte
  inkluderad med GSview.  Du måste ladda ner den separat
@@ -1236,7 +1236,7 @@ WP
   http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
 
  För att använda `pstoedit` infrån GSview, använd
- `Editera | Konvertera till vektorformat`.
+ `Redigera | Konvertera till vektorformat`.
  Tre dialogboxar kommer att visas.
 
  Den första dialogen är för pstoedit inställningar.
@@ -1247,14 +1247,14 @@ WP
  innehåller text och utformatet inte stöder det, t.ex. gnuplot.
  Den kanske producerar en stor utfil.
 
- När `Mappa till ISO-Latin1` är valt, mappar pstoedit alla teckenkoder
+ När `Mappa till ISO-latin1` är valt, mappar pstoedit alla teckenkoder
  till de som definierats av ISO-Latin1 encoding, vilken används av
  HTML och MS-Windows.  Detta är standard.
  Om du avmarkerad valet, kommer encoding från informatet PostScript
  att passera oförändrat till utformatet.
 
  Om utformatet inte stöder kurvor på det sätt som PostScript gör,
- kommer alla kurvor att approximeras av linjer. Optionen `Flathet`
+ kommer alla kurvor att approximeras av linjer. alternativet `Flathet`
  används för att kontrollera approximeringen. Den parametern är direkt
  konverterad till ett PostScript setflat kommando. Små värden producerar
  en mer noggrann approximering, men med fler linjesegment.
@@ -1263,12 +1263,12 @@ WP
  fontnamn. Till exempel, händer det i en PostScriptfil genererad
  med dvips. I ett sådant fall använder pstoedit en ersättningsfont.
  Standarden för detta är Courier.  En annan font kan specificeras
- med `Standard Font` optionen.
+ med `Standard font` alternativet.
  Vissa alternativa fontnamn är Courier, Helvetica och Times-Roman.
 
- Vissa av utformaten stöder extra optioner.  Se pstoedit
+ Vissa av utformaten stöder extra alternativ.  Se pstoedit
  manualen för fler detaljer.  Till exempel, java utformatet
- använder `Drivrutiner Optioner` för att specificera namnet på java classes.
+ använder `Drivrutiner alternativ` för att specificera namnet på java classes.
 
  Den andra dialogen (utesluten ifall ingen sidonumrering är tillgänglig)
  specificerar att sidan kan konverteras, eller om det stöds av utformatet,
@@ -1283,13 +1283,13 @@ WP
 
  Se också `Konverteringar`.
 E
-3Text Extrahera och Finn
-?Text Extrahera och Finn
+3Text extrahera och finn
+?Text extrahera och finn
 ?Text
-?Text Extrahera
+?Text extrahera
 ?Sök
 ?Finn
-?Finn Nästa
+?Finn nästa
  I allmänhet, är extrahering av text från ett PostScript dokument inte någon
  trivial operation.  Ord kan bli brutna.  Text kan vara kodad.
  Ligaturer kan ha använts (t.ex. utbyte av 'fi' med ett enstaka tecken).
@@ -1305,28 +1305,28 @@ E
  Den andra metoden använder pstotext och Ghostscript för att mera exakt
  extrahera text från ett PostScriptdokument.
 
- De använda metoden väljs från `Optioner` | `PStillText`.
+ De använda metoden väljs från `Alternativ` | `PStillText`.
  Se tillämpligt ämne nedanför:
 
  Se också `Konverteringar`.
-4Snabb Text Extrahering och Finn
-?Snabb Text Extrahering och Finn
+4Snabb text extrahering och finn
+?Snabb text extrahering och finn
  Det är vanligt för PostScriptdokument att innehålla text i samma
  ordning som den förekommer på sidan, och för att anges i
  PostScriptsträngar, omgivna av parenteser.  Kompletta rader
  kan ges i en sträng, eller ett ord per sträng.  För den sortens
  dokument, kan extrahering av text utföras med ett rimligt resultat.
 
- `Editera `| `Text Extrahera` kommer att extrahera text inom strängar från
+ `Redigera `| `Text extrahera` kommer att extrahera text inom strängar från
  specificerade sidor och skriva dom till en textfil.
  Radbrytningar i textfilen överensstämmer med de i dokumentet.
  Mellanslag i textfilen överensstämmer med mellanslag inom strängar, eller till
  separata strängar.  En mera effektiv metod att extrahera text är att
  använda ps2ascii.ps levererad med Ghostscript, eller att använda `PStillText`
  program listade på Ghostscript's `WWW` sida.  `PStillText` kan användas
- från GSview genom att använda `Optioner` | `PStillText`.
+ från GSview genom att använda `Alternativ` | `PStillText`.
 
- `Editera `| `Finn` kommer att söka efter text och visa den första
+ `Redigera `| `Finn` kommer att söka efter text och visa den första
  sida som innehåller texten.  `Finn` frågar efter en söktext och ett
  område av sidor inom vilket sökningen skall ske.
  De föregående kommentarerna om extrahering av text från ett PostScriptdokument
@@ -1340,9 +1340,9 @@ E
  `Finn` kommer inte att fungera för icke DSC dokument eller DSC dokument med
  special sidordning.
 
- `Editera `| `Finn Nästa` kommer att fortsätta sökningen från nästa sida.
-4PStillText Text Extrahera och Finn
-?PStillText Text Extrahera och Finn
+ `Redigera `| `Finn nästa` kommer att fortsätta sökningen från nästa sida.
+4PStillText text extrahera och finn
+?PStillText text extrahera och finn
  Den här metod använder pstotext och Ghostscript för att extrahera text från
  ett PostScript dokument.  Innan någon text extrahering eller sökning utförs,
  kommer hela PostScript dokumentet att processas av
@@ -1357,12 +1357,12 @@ E
  `Orientering` måste vara satt att matcha textordningen hos
  dokumentet.
 
- `Editera `| `Text Extrahera` kommer att extrahera text från specificerade sidor
+ `Redigera `| `Text extrahera` kommer att extrahera text från specificerade sidor
  och skriva den till en textfil.
 
- Ord kan kopieras till klippbordet med användning av` Editera` | `Kopiera`.
+ Ord kan kopieras till klippbordet med användning av` Redigera` | `Kopiera`.
 
- `Editera `| `Finn` kommer att söka efter text och visa den första sida
+ `Redigera `| `Finn` kommer att söka efter text och visa den första sida
  som innehåller texten.  `Finn` frågar efter en söktext och ett
  område av sidor inom vilken sökningen skall ske.
  Söktexten bryts först upp i ord.  För varje sökord,
@@ -1378,12 +1378,12 @@ E
  `Finn` kommer inte att fungera för icke-DSC dokument eller DSC dokument med
  special sidordning.
 
- `Editera `| `Finn Nästa` kommer att fortsätta sökningen.
+ `Redigera `| `Finn nästa` kommer att fortsätta sökningen.
 
  För de flesta PostScriptfilerna skall du använda
- `Optioner` | `PStillText` | `Normal`.
+ `Alternativ` | `PStillText` | `Normal`.
 
- `Optioner` | `PStillText` | `Dvips Cork Encoding`
+ `Alternativ` | `PStillText` | `Dvips Cork Encoding`
  är endast relevant för PostScriptfiler producerade av
  dvips från TeX eller LaTeX dokument; det talar om för `pstotext` att använda
  Cork encoding snarare än den gamla TeX text encodingen. Olyckligtvis
@@ -1392,55 +1392,55 @@ E
 3Klippbord
 ?Klippbord
 ?Kopiera
-?Klistra in Till
-?Konvertera Bitmap
+?Klistra in till
+?Konvertera bitmapp
 ?Bitmap
 WP
- GSview fönstret kan kopieras till Klippbordet som en bitmap
- genom att välja `Kopiera` från menyn `Editera`.
+ GSview fönstret kan kopieras till Klippbordet som en bitmapp
+ genom att välja `Kopiera` från menyn `Redigera`.
  Bitmappen kommer att vara en Device Independent Bitmap (DIB/BMP format).
 
- Ett alternativt sätt att få ut en bitmap från Ghostscript är
+ Ett alternativt sätt att få ut en bitmapp från Ghostscript är
  att använda en av dess BMP drivrutiner.  Se `Skriv ut`.
 
 W
- `Klistra in Till` kopierar en Device Independent Bitmap från Klippbordet
+ `Klistra in till` kopierar en Device Independent Bitmap från klippbordet
  (om tillgängligt) till en BMP fil.
 
- `Konvertera Bitmap` konverterar mellan en Device Independent Bitmap och en
+ `Konvertera bitmapp` konverterar mellan en Device Independent Bitmap och en
  Device Dependent Bitmap.
  Om klippbordet innehåller en Device Independent Bitmap (BMP format),
  kommer den att konverteras till en Device Dependent Bitmap och läggas till klippbordet.
  Om klippbordet inte innehåller någon färgpalett, kommer en att skapas
  från Device Independent Bitmap och läggas till klippbordet.
- Optionen finns för att vissa applikationer (speciellt Windows
+ alternativet finns för att vissa applikationer (speciellt Windows
  Paintbrush) inte känner igen en Device Independent Bitmap i klippbordet.
 P
- `Klistra in Till` kopierar den aktuella visade bilden (om tillgängligt)
+ `Klistra in till` kopierar den aktuella visade bilden (om tillgängligt)
  till en BMP fil.
 X
  Det finns inga klippbordsoperationer implementerade i X11 versionen av GSview.
 
- `Spara Bild som BMP` kommer att spara den aktuella visade sidan
- som en Windows bitmap.
+ `Spara bild som BMP` kommer att spara den aktuella visade sidan
+ som en Windows bitmapp.
 E
 
- Om `Text Extrahera` eller `Finn` används på ett dokument med `PStillText` aktiverad,
+ Om `Text extrahera` eller `Finn` används på ett dokument med `PStillText` aktiverad,
  skapar GSview ett index av orden i dokumentet.  Om några ord är
  markerade med musen,
 WP
  kommer `Kopiera` att kopiera orden till klippbordet istället
- för att kopiera en bitmap.
+ för att kopiera en bitmapp.
 X
  dessa kommer att vara det aktuella X valet.
 E
- Text kan inte markeras förrän `Text Extrahera`
- eller `Finn` har använts med `Optioner` | `PStillText` aktiverad.
+ Text kan inte markeras förrän `Text extrahera`
+ eller `Finn` har använts med `Alternativ` | `PStillText` aktiverad.
 2Mäta
 ?Mäta
-?Beräkna Transformerade Enheter
+?Beräkna transformerade enheter
  Längden kan mätas genom att använda musmarkörens placering visad på
- statusraden, eller med dialogboxen `Editera |` `Mäta`.
+ statusraden, eller med dialogboxen `Redigera |` `Mäta`.
 
  Dialogboxen visar början av placeringen, avslutningen på placeringen,
  skillnaden mellan dessa placeringar och längden och vinkeln
@@ -1471,11 +1471,11 @@ E
  (översätt, rotera, skala) har valts.
 
  Se också `Enheter`.
-2Optioner
-?Optioner
- Menyn `Optioner` har följande val:
-3Enkel Konfiguration
-?Enkel Konfiguration
+2Alternativ
+?Alternativ
+ Menyn `Alternativ` har följande val:
+3Enkel konfiguration
+?Enkel konfiguration
 W
  Enkel konfiguration tillåter dig att välja vilken version av Ghostscript
  som används.  Det antas att du redan har installerat
@@ -1483,7 +1483,7 @@ W
  Om du inte har Ghostscript installerad, se ämnet
  `Hämta Ghostscript`.
  För större kontroll över konfigurationen av GSview, se
- `Avancerad Konfiguration`.
+ `Avancerad konfiguration`.
 
  Enkel konfiguration kommer att sätta korrekta sökvägar för Ghostscript
  och kopiera vissa skrivarstandarder till INI filen.
@@ -1492,13 +1492,13 @@ P
  Enkel konfiguration startar en konfigurationsguide för att välja
  Ghostscript version och filassociationer.
 E
-3Avancerad Konfiguration
-?Avancerad Konfiguration
+3Avancerad konfiguration
+?Avancerad konfiguration
 ?Ghostscript DLL
 ?Ghostscript Include Path
-?Ghostscript Optioner
+?Ghostscript alternativ
 X
- `Ghostscript Version` talar om för GSview vilken version av Ghostscript
+ `Ghostscript version` talar om för GSview vilken version av Ghostscript
  som används.  5.50 skall anges som 550, 6.50 som 650.
 
  `Ghostscript EXE` talar om för GSview var Ghostscript finns.
@@ -1516,7 +1516,7 @@ E
  Ange den korrekta Ghostscript include sökvägen i
  `Ghostscript Include Path` fältet.
  Include sökvägen måste innehålla katalogerna där Ghostscript's
- katalogfiler (gs_*.ps och Fontmap) och Ghostscript's fonter (*.pfb)
+ katalogfiler (gs_*.ps och Fontmapp) och Ghostscript's fonter (*.pfb)
  finns. Till exempel:
 P
    c:\gs\gsN.NN\lib;c:\gs\fonts;c:\psfonts
@@ -1550,10 +1550,10 @@ W
  Val av `Associate .pdf filer med GSview` kommer att uppdatera registret
  för att associera Portabelt Dokument Format filer med GSview.
 
- Val av `Skapa Startmenyobjekt` kommera att lägga till GSview på startmenyn.
+ Val av `Skapa Startmenyobjekt` kommer att lägga till GSview på startmenyn.
 
  Det finns ingen ångrafunktion för dessa fyra checkboxar med händelser.
- Alternativen Associera och Startmeny utförs normalt
+ Alternativen associera och startmeny utförs normalt
  (med en ångrafunktion) av GSview's setupprogram.
 E
 
@@ -1561,7 +1561,7 @@ E
 WP
 3Ljud
 ?Ljud
- Optionen `Ljud` tilldelar ljud till olika händelser.
+ Alternativet `Ljud` tilldelar ljud till olika händelser.
  För varje händelse kan ljudet sättas till `Inget`, ett `Högtalarljud` eller
  en `Wave` fil.
 
@@ -1572,18 +1572,18 @@ WP
 
  `Utsida`: PostScript's showpage operator exekverades.
 
- `Ingen Sida`: en ogiltig sida valdes.
+ `Ingen sida`: en ogiltig sida valdes.
  Till exempel, tryck av `Förhandsvisning` på första sidan hos ett dokument
  med `DSC` kommentarer.
 
- `Inget Nummer`: ett kommando som behöver sidnumrering och ett dokument som
+ `Inget nummer`: ett kommando som behöver sidnumrering och ett dokument som
  inte har sidnumrering.
- Till exempel, tryck på `Gå till Sidan` när du tittar på ett dokument utan
+ Till exempel, tryck på `Gå till sidan` när du tittar på ett dokument utan
  `DSC` kommentarer.
 
- `Inte Öppen`:  ett kommando behövde ett dokument som var öppet och det var
+ `Inte öppen`:  ett kommando behövde ett dokument som var öppet och det var
  inte fallet.
- Till exempel, tryck på `Gå till Sida` när inget dokument är öppet.
+ Till exempel, tryck på `Gå till sida` när inget dokument är öppet.
 
  `Fel`: många typer av fel.
 
@@ -1591,28 +1591,28 @@ WP
 
  `Avsluta`: GSview stängt.
 
- `Upptagen`: upptagen för ögonblicket, kan inte utföra vad du frågar efter.
+ `Upptagen`: Upptagen för ögonblicket, kan inte utföra vad du frågar efter.
 
- Standard är `Ingen Sida`, `Fel` och `Upptagen` som ger ett
+ Standard är `Ingen sida`, `Fel` och `Upptagen` som ger ett
  `Högtalarljud` och alla andra händelser är `Inget`.
 E
 3Enheter
 ?Enheter
- Optionen `Enheter` sätter vilken enhet som skall användas för att visa
+ Alternativet `Enheter` sätter vilken enhet som skall användas för att visa
  muspekarens placering på statusraden.  Tillgängliga enheter är PostScriptpunkter (`pt` = 1/72"),
  millimeter (`mm`) och inches (`in`).
  Standard är `pt`.
 
  Upplösningen på enheter kan ökas genom att välja
- `Enheter `| `Hög Upplösning`.
+ `Enheter `| `Hög upplösning`.
 
  Se också `Mäta`.
 3Språk
 ?Språk
 ?Internationell
- GSview är tillgängligt på Engelska, Franska, Grekiska, Holländska, Italienska,
- Spanska, Svenska och Tyska.
- För att ändra språk använd `Optioner` | `Språk`.
+ GSview är tillgängligt på engelska, franska, grekiska, holländska, italienska,
+ spanska, svenska och tyska.
+ För att ändra språk använd `Alternativ` | `Språk`.
 
  På Windows NT, är alla existerande språk tillgängliga för att
  väljas, oberoende av regionala inställningar,
@@ -1623,11 +1623,11 @@ E
 ?PStillText
  GSview har två metoder för att extrahera och söka text.
 
- Metoden `Snabb Text Extrahering och Finn` gör en enkel extrahering
+ Metoden `Snabb textextrahering och finn` gör en enkel extrahering
  av PostScriptsträngar.  Den metoden är enkel att förvirra.
  Den väljs från menyn `PStillText` | `Avaktiverad`.
 
- `PStillText Text Extrahera och Finn` metoden använder det externa pstotext
+ `PStillText text extrahera och finn` metoden använder det externa pstotext
  verktyget och Ghostscript för att extrahera ord och deras koordinater.
  Metoden är mera exakt, men det kan bli en lång paus innan
  pstotext och Ghostscript initialiserar processen.
@@ -1638,35 +1638,35 @@ E
  använder Cork Encoding.
 
  Standard är `Normal`.
-3DSC Varningar
-?DSC Varningar
+3DSC varningar
+?DSC varningar
  Vissa dokument innehåller fel i Document Structuring Conventions.
  Nivån för varningar från GSview kan ställas in med användning av
- `Optioner` | `DSC Varningar`.
+ `Alternativ` | `DSC varningar`.
  Om du anger` Av`, kommer GSview att anta att DSC kommentarerna är korrekta.
  `Fel` kommer att meddela dig ifall några fel finns i DSC kommentarerna .
  `Varningar` meddelar dig om varningar och fel i DSC kommentarerna.
  `Alla` kommer att meddela dig om några konstigheter, varningar eller fel i
  DSC kommentarerna.  Standard är `Varningar`.
 
- Om du ber om att bli meddelad om fel och varningar, kommer dialogboxen
+ Om du ber att bli underrättad om fel och varningar, kommer dialogboxen
  DSC varningar att tillåta dig att göra följande val:
  `OK` talar om för GSview att göra en gissning om vad som troligtvis menades
  (snarare än vad DSC kommentaren verkligen talade om),
  `Ångra` talar om för GSview att behandla DSC som om den vore korrekt,
  `Ignorera DSC ` talar om för GSview att ignorera alla DSC kommentarer.
 
- Om `DSC Varningar` är `Av`, kommer GSview att anta att `Ångra` gäller.
+ Om `DSC varningar` är `Av`, kommer GSview att anta att `Ångra` gäller.
  Dokument med felaktiga DSC kommentarer kommer troligtvis att orsaka problem.
-3Spara Inställningar
-?Spara Inställningar
-?Spara Inställningar Nu
-?Spara Inställningar vid Avslutning
+3Spara inställningar
+?Spara inställningar
+?Spara inställningar nu
+?Spara inställningar vid avslutning
 ?Inställningar
 ?INI fil
- Optionen `Spara Inställningar Nu` sparar GSview's fönsterposition,
+ alternativet `Spara inställningar nu` sparar GSview's fönsterposition,
  fönsterstorlek, senast använda skrivare, senaste katalog,
- alla val i menyn `Optioner` och alla val i menyn `Media`
+ alla val i menyn `Alternativ` och alla val i menyn `Media`
  till initialiseringsfilen
 W
  gsview32.ini i Windows systemkatalog (eller för Windows
@@ -1679,30 +1679,30 @@ X
 E
  GSview läser filen vid starten.
 
- När optionen `Spara Inställningar vid Avslutning` är `markerad`, kommer GSview att
+ När alternativet `Spara inställningar vid avslutning` är `markerad`, kommer GSview att
  spara ovanstående inställningar automatiskt när du avslutar GSview.
 3Säkrare
 ?Säkrare
- När optionen `Säkrare` är `markerad`, kommer GSview att ge Ghostscript
+ När alternativet `Säkrare` är `markerad`, kommer GSview att ge Ghostscript
  flaggan `-dSAFER`, vilken avaktiverar deletefile och renamefile operatorerna,
  och möjligheten att öppna filer i något annat läge än read-only.
  Detta är standard.
 
- När optionen `Säkrare` är `ej markerad` kan Ghostscript ändra filer.
-3Spara Senaste Kalalog
-?Spara Senaste Katalog
- När optionen `Spara Senaste Katalog` är `markerad`, kommer GSview
+ När alternativet `Säkrare` är `ej markerad` kan Ghostscript ändra filer.
+3Spara senaste katalog
+?Spara senaste katalog
+ När alternativet `Spara senaste katalog` är `markerad`, kommer GSview
  att spara den aktuella katalogen när du avslutar GSview.
  När GSview startas nästa gång, kommer det att ske i aktuell katalog.
  Detta är standard.
 
- När optionen `Spara Senaste Katalog` är `ej markerad`, kommer den aktuella
+ När alternativet `Spara senaste katalog` är `ej markerad`, kommer den aktuella
  katalogen när GSview startas att bli den aktuella katalogen hos programmet
  som startade GSview.
 3Knapprad
 ?Knapprad
 ?Förstora
- När optionen `Knapprad` är `markerad`, kommer GSview att visa
+ När alternativet `Knapprad` är `markerad`, kommer GSview att visa
  en Knapprad
 WX
  i toppen
@@ -1740,7 +1740,7 @@ E
 W
  {bmlwd gvwgoto.bmp}
 E
- `Visa` | `Gå till Sida`
+ `Visa` | `Gå till sida`
 
 W
  {bmlwd gvwprevs.bmp}
@@ -1750,12 +1750,12 @@ E
 W
  {bmlwd gvwprev.bmp}
 E
- `Visa` | `Föregående Sida`
+ `Visa` | `Föregående sida`
 
 W
  {bmlwd gvwnext.bmp}
 E
- `Visa` | `Nästa Sida`
+ `Visa` | `Nästa sida`
 
 W
  {bmlwd gvwnexts.bmp}
@@ -1765,12 +1765,12 @@ E
 W
  {bmlwd gvwback.bmp}
 E
- `Visa` | `Gå Tillbaka`
+ `Visa` | `Gå tillbaka`
 
 W
  {bmlwd gvwfwd.bmp}
 E
- `Visa` | `Gå Framåt`
+ `Visa` | `Gå framåt`
 
 W
  {bmlwd gvwmagp.bmp}
@@ -1785,22 +1785,22 @@ E
 W
  {bmlwd gvwfind.bmp}
 E
- `Editera `| `Finn`
+ `Redigera `| `Finn`
 
 W
  {bmlwd gvwfindn.bmp}
 E
- `Editera `| `Finn Nästa`
+ `Redigera `| `Finn nästa`
 
- Om du använder knapparna öka/minska för upplösning, skall `Automatisk Uppdatering`
+ Om du använder knapparna öka/minska för upplösning, skall `Automatisk uppdatering`
  användas.  Istället för att använda dessa knappar kan
- `Media `| `Display Inställningar` kommandon användas.
- När optionen `Knapprad` är `ej markerad`, kommer GSview inte att
- visa någon Knapprad.
+ `Media `| `Display inställningar` kommandon användas.
+ När alternativet `Knapprad` är `ej markerad`, kommer GSview inte att
+ visa någon knapprad.
 WP
-3Anpassa Fönster till Sida
-?Anpassa Fönster till Sida
- När optionen `Anpassa Fönster till Sida` är `markerad`, kommer ändingar av sidstorlek
+3Anpassa fönster till sida
+?Anpassa fönster till sida
+ När alternativet `Anpassa fönster till Sida` är `markerat`, kommer ändringar av sidstorlek
  eller orientering att orsaka att fönstret blir förstorat eller förminskat
  för att passa sidstorleken.
  När fönstret ritas om, kommer GSview att tvinga det till att inte bli större
@@ -1808,60 +1808,60 @@ WP
 
  Ändringar av fönsterstorleken kommer endast att uppträda när fönstret
  ritas om eller när sidstorleken ändras; den kommer inte att utföras omedelbart efter att
- optionen är ändrad.
- Anpassa Fönster till Sida ignoreras för ett maximerat fönster.
+ alternativet är ändrat.
+ Anpassa ´fönster till sida ignoreras för ett maximerat fönster.
 
- Om optionen `Anpassa Fönster till Sida` är `ej markerad`, kommer GSview inte att rita om
+ Om alternativet `Anpassa fönster till sida` är `ej markerat`, kommer GSview inte att rita om
  fönstret och ytorna utanför fönstret kommer att ritas i ljusgrå nyans.
  Detta är användbart om du inte vill att fönstret skall krympas när du ser på
  sidor med låg upplösning.  Detta är standard.
 
- Se också `Visa` | `Anpassa Fönster`.
+ Se också `Visa` | `Anpassa fönster`.
 E
-3Automatisk Uppdatering
-?Automatisk Uppdatering
- När optionen `Automatisk Uppdatering` är `markerad`, kommer GSview att
+3Automatisk uppdatering
+?Automatisk uppdatering
+ När alternativet `Automatisk uppdatering` är `markerad`, kommer GSview att
  uppdatera `DSC` dokument när `Orientering`, `Upplösning`,
  `Djup` eller `Media` är ändrat.
  Detta är standard.
 
- För `icke-DSC dokument`, kommer GSview om `Automatisk Uppdatering` är
+ För `icke-DSC dokument`, kommer GSview om `Automatisk uppdatering` är
  `markerad`, att `starta med första sidan`.
 
- Om `Automatisk Uppdatering` är `ej markerad`, måste `Visa` | `Uppdatera` kommandot
+ Om `Automatisk uppdatering` är `ej markerat`, måste `Visa` | `Uppdatera` kommandot
  användas för att updatera ett dokument efter ändring av
  `Orientering`, `Upplösning`, `Djup` eller `Media`.
-3EPS Klipp
-?EPS Klipp
+3EPS klipp
+?EPS klipp
 ?PDF Crop
- När optionen `EPS Klipp` är `markerad`, kommer GSview att klippa
+ När alternativet `EPS klipp` är `markerad`, kommer GSview att klippa
  den visade bitmappen till en bounding box hos en EPS fil istället för att använda
  den sidstorlek som specificerats i `Media` menyn.  Det kan vara användbart när en
- bitmap förhandsvisning läggs till en EPS fil.
- Om en PDF fil visas, kommer `EPS Klipp` att orsaka att displayen blir klippt
+ bitmapp förhandsvisning läggs till en EPS fil.
+ Om en PDF fil visas, kommer `EPS klipp` att orsaka att displayen blir klippt
  till en PDF crop box.
 
- Om `EPS Klipp` är `ej markerad`, kommer GSview att använda sidstorleken som
+ Om `EPS klipp` är `ej markerad`, kommer GSview att använda sidstorleken som
  specificerades i `Media` menyn för EPS filer.  Detta är standard.
 
- `EPS Klipp` ändrar inte originaldokumentet, det påverkar bara
+ `EPS klipp` ändrar inte originaldokumentet, det påverkar bara
  hur stor del av dokumentet som visas av GSview.
  Det påverkar inte utskrifter.
 
- Se också `Editera `| `Lägg till EPS Förhandsvisning`
-3EPS Varning
-?EPS Varning
- När optionen `EPS Varning` är `markerad`, kommer GSview att skriva en
+ Se också `Redigera `| `Lägg till EPS förhandsvisning`
+3EPS varning
+?EPS varning
+ När alternativet `EPS varning` är `markerad`, kommer GSview att skriva en
  prolog till Ghostscript när varje fil öppnas.  Prologen kommer att
- producera varningsmeddelanden i `Arkiv `| `Visa Meddelanden`
+ producera varningsmeddelanden i `Arkiv `| `Visa meddelanden`
  fönstret om några PostScript operatorer som inte skulle användas i `EPS`
  är använda.  Ett exempel på varningsmeddelanden är:
   Varning: EPS filer får inte använda /initgraphics
- `EPS Varning` är inte ofelbar.  Det är möjligt att accessa operatorer
- med restriktioner utan att `EPS Varning` producerar en varning.
+ `EPS varning` är inte ofelbar.  Det är möjligt att accessa operatorer
+ med restriktioner utan att `EPS varning` producerar en varning.
  Om du får en varning, använd INTE `PS till EPS`.
 
- Som standard är `EPS Varning` inte `markerad`.
+ Som standard är `EPS varning` inte `markerad`.
 
  Se också `PS till EPS`.
 3Ignorera DSC
@@ -1876,7 +1876,7 @@ E
  Standard för `Ignorera DSC` är `ej markerad`.
 3Visa Bounding Box
 ?Visa Bounding Box
- Val av optionen gör att en rektangel läggs över bilden,
+ Val av alternativet gör att en rektangel läggs över bilden,
  visande placeringen av bounding box. Bounding box ritas endast på displayen,
  och har ingen effekt på utskriften.
  Bounding box visas endast för `DSC` dokument (icke-konforma
@@ -1884,46 +1884,46 @@ E
 
  Standard för `Visa Bounding Box` är `ej markerad`.
 2Sidorientering
-?Automatisk Orientering
+?Automatisk orientering
 ?Orientering
 ?Porträtt
 ?Landskap
 ?Upp-och-ner
-?Omvänt Landskap
-?Skifta Landskap
- `Porträtt`, `Landskap`, `Upp-och-ner` och `Omvänt Landskap`
- (spegelvänt Landskap) kommandona på `Orientering `Menyn väljer
+?Omvänt landskap
+?Skifta landskap
+ `Porträtt`, `Landskap`, `Upp-och-ner` och `Omvänt landskap`
+ (spegelvänt landskap) kommandona på `Orientering `Menyn väljer
  den sidorientering som används av displayen.
  `Landskap` utför en klockvis rotering av papperet med 90 grader.
- `Omvänt Landskap` utför en anti-klockvis rotering av ett papper med 90 grader.
- Dessa orientingsoptioner påverkar endast displayen och har ingen effect
+ `Omvänt landskap` utför en anti-klockvis rotering av ett papper med 90 grader.
+ Dessa orientingsalternativ påverkar endast displayen och har ingen effect
  på utskriftskommandona.
 
  Om `Auto` kommandot på orienteringsmenyn är markerad och en
  `DSC` sido-orienteringskommando är funnet (%%Orientation or
  %%PageOrientation), kommer orienteringen att väljas automatiskt.
 
- När optionen `Skifta Landskap` är `markerad`, kommer GSview att skifta
- betydelsen av Landskap och Omvänt Landskap.
- De flesta Landskapsdokument som jag har kommit i kontakt med har erfordrat en
+ När alternativet `Skifta landskap` är `markerad`, kommer GSview att skifta
+ betydelsen av landskap och omvänt landskap.
+ De flesta landskapsdokument som jag har kommit i kontakt med har erfordrat en
  90 graders klockvis rotation av papperet för att visas.
  Emellertid, det finns ingen standard och vissa dokument måste roteras tvärtemot.
- `Skifta Landskap` knappen tillåter GSview att automatiskt rotera dokumentet
+ `Skifta landskap` knappen tillåter GSview att automatiskt rotera dokumentet
  på rätt sätt i överenstämmelse med `%%Orientation` kommentaren i
  PostScriptfilen.
 
- Se också `Sidstorlek` och `Display Inställningar`.
-2Display Inställningar
-?Display Inställningar
+ Se också `Sidstorlek` och `Display inställningar`.
+2Display inställningar
+?Display inställningar
 ?Upplösning
-?Zoom Upplösning
+?Zoom uplösning
 ?Djup
 ?Alpha
 ?Anti-aliasing
 ?TextAlphaBits
 ?GraphicsAlphaBits
 ?Ritmetod
- Vissa inställningar för display kan endast sättas med `Media` | `Display Inställningar`.
+ Vissa inställningar för display kan endast sättas med `Media` | `Display inställningar`.
 
  Fältet `Upplösning` sätter displayupplösningen i punkter per inch.
  Standard för en VGA display är 96 punkter per inch.
@@ -1934,14 +1934,14 @@ E
  `Zooma` in sidan med vad som är vanlig skrivarupplösning.
  Ett nytt tryck på höger musknapp kommer att zooma tillbaka mot
  normal displayupplösning.
- Fältet `Zoom Upplösning` sätter zoomupplösningen i punkter per inch.
+ Fältet `Zoom upplösning` sätter zoomupplösningen i punkter per inch.
 
- Fältet `Djup` sätter sidans bitmapsdjup i bits per pixels
+ Fältet `Djup` sätter sidans bitmappsdjup i bits per pixels
  för displayen.
  Standard kommer att välja det högsta djupet som stöds av din displaydrivrutin.
  I allmänhet, skall du inte ställa in den högre än ditt aktuella
  displaydjup eftersom det leder till att du använder extra minne för sidans
- bitmap men det kommer inte att förbättra din display.
+ bitmapp men det kommer inte att förbättra din display.
 
  Fältet `Text Alpha` sätter anti-aliasing för fonter.  Standard
  (använd anti-aliasing) är 4 bits.  För att avaktivera anti-aliasing för fonter,
@@ -1951,7 +1951,7 @@ W
  `VIKTIGT`: Om du använder `Text Alpha`, kommer GSview att avaktivera
  `Platform Fonts` genom att göra samma sak via tillägget
    -dNOPLATFONTS
- till `Optioner `| `Avancerad Konfiguration` i Ghostscript's Optionsfält.
+ till `Alternativ `| `Avancerad konfiguration` i Ghostscript's alternativfält.
 E
 
  Fältet `Graphics Alpha` sätter anti-aliasing för grafik och också
@@ -1984,20 +1984,20 @@ E
  zoom upplösning och statusraden kommer att få `Zoomad` tillagd.
  Det zoomade partiet kommer att bli i centrum på fönstret.
  För att ångra `Zoom`, tryck höger musknapp igen eller välj
- något kommando som ritar om sidan (t.ex. `Uppdatera`, `Nästa Sida`).
+ något kommando som ritar om sidan (t.ex. `Uppdatera`, `Nästa sida`).
  Som standard är zoomupplösningen 300 punkter per inch men den kan
- ändras med dialogboxen `Media` | `Display Inställningar`.
+ ändras med dialogboxen `Media` | `Display inställningar`.
 
  `Zoom` kommer endast att fungera för `DSC` konforma dokument.
 
  För att förstora eller krympa hela sidan, använd `Upplösning`
- på dialoboxen `Media` | `Display Inställningar`, eller använd knapparna
+ på dialoboxen `Media` | `Display inställningar`, eller använd knapparna
  med förstoringsglas på knappraden.
 2Sidstorlek
 ?Sidstorlek
 ?Media
 ?Användardefinerad
-?Rotera Media
+?Rotera media
  `Media` menyn tillåter också val av sidstorlek.
  Tillgängliga sidor är:
   11x17          11   x 17   inch
@@ -2025,13 +2025,13 @@ E
  Om media specificationen inte är någon av de ovanstående typerna,
  kommer `Användardefinierad` storlek att sättas.
 
- Om `Rotera Media` är markerad, kommer bredden och höjden på sidan
+ Om `Rotera media` är markerad, kommer bredden och höjden på sidan
  att byta plats.  Den ritade bilden på sidan kommer inte att roteras.
  Detta påverkar både display och utskrift.
- Val av `A4` och `Rotera Media` är lika som att välja
+ Val av `A4` och `Rotera media` är lika som att välja
  `Användardefinierad` med en storlek på 842 x 595 pt.
  Det är mera vanligt att använda inställningarna på menyn `Orientering` än
- `Rotera Media`.
+ `Rotera media`.
 2Tangenter
 ?Tangenter
  Följande är de tilldelade tangentkombinationerna för GSview.
@@ -2044,23 +2044,23 @@ E
 
  `T`, `t`  Stäng fil.  (`Arkiv` | `Stäng`)
 
- `N`, `n`, `+`  Nästa Sida.  (`Visa` | `Nästa Sida`)
+ `N`, `n`, `+`  Nästa sida.  (`Visa` | `Nästa sida`)
 
- Space     Nästa Sida och Hem.  (`Visa` | `Nästa Sida och Hem`)
+ Space     Nästa sida och hem.  (`Visa` | `Nästa sida och hem`)
 
- `V`, `v`, `-`  Föregående Sida.  (`Visa` | `Föregående Sida`)
+ `V`, `v`, `-`  Föregående sida.  (`Visa` | `Föregående sida`)
 
- BackSpace  Föregående Sida och Hem.  (`Visa` | `Föregående Sida och Hem`)
+ BackSpace  Föregående sida och hem.  (`Visa` | `Föregående sida och hem`)
 
- `G`, `g`  Gå till Sida.  (`Visa` | `Gå till Sida`)
+ `G`, `g`  Gå till sida.  (`Visa` | `Gå till sida`)
 
  `I`, `i`  Filinformation.  (`Arkiv` | `Info`)
 
  `U`, `u`, `F5`  Uppdatera sida.  (`Visa` | `Uppdatera`)
 
- `F`, `f`  Välj fil: öppna men visa inte.  (`Arkiv` | `Välj Fil`)
+ `F`, `f`  Välj fil: Öppna men visa inte.  (`Arkiv` | `Välj fil`)
 
- `P`, `p`  Spara Som. (`Arkiv` | `Spara Som`)
+ `P`, `p`  Spara som. (`Arkiv` | `Spara som`)
 
  `S`, `s`  Skriv ut alla eller några sidor till en skrivare.  (`Arkiv` | `Skriv ut`)
 
@@ -2069,7 +2069,7 @@ E
 
  `E`, `e` Vissa sidor till en annan Fil.  (`Arkiv` | `Extrahera`)
 
- `M`, `m`  Visa Ghostscript Meddelanden.  (`Arkiv` | `Visa Meddelanden`)
+ `M`, `m`  Visa Ghostscript meddelanden.  (`Arkiv` | `Visa meddelanden`)
 
  `<` Minska upplösning med 1/1.2
 
@@ -2077,15 +2077,15 @@ E
 
  `F1`  Hjälp.  (`Hjälp` | `Innehåll`)
 
- `Ctrl+C`, `Ctrl+Insert`  Kopiera visad bitmap till klippbordet.  (`Editera` | `Kopiera`)
+ `Ctrl+C`, `Ctrl+Insert`  Kopiera visad bitmapp till klippbordet.  (`Redigera` | `Kopiera`)
 
- `Ctrl+F`, Finn Text. (`Edit` | `Find`)
+ `Ctrl+F`, Finn text. (`Redigera` | `Finn`)
 
- `F3`, Finn Nästa. (`Editera` | `Finn Nästa`)
+ `F3`, Finn nästa. (`Redigera` | `Finn Nästa`)
 
- `F4`  Full Skärm.  (`Visa` | `Full Skärm`)
+ `F4`  Full skärm.  (`Visa` | `Full Skärm`)
 
- `F6`  Anpassa Fönster.  (`Visa` | `Anpassa Fönster`)
+ `F6`  Anpassa fönster.  (`Visa` | `Anpassa Fönster`)
 
  `Piltangenter`  Scrolla en 1/16 av skärmen.
 
@@ -2104,9 +2104,9 @@ E
  `Home`  Scrolla till högst upp på sidan.
 
  `End`  Scrolla till längst ner på sidan.
-2Kommandorads optioner
-?Kommandorads optioner
- GSview ignorerar följande fall av optioner:
+2Kommandorad alternativ
+?Kommandorad alternativ
+ GSview ignorerar följande fall av alternativ:
  -p är samma som -P.  På Windows eller OS/2, kan du också
  använda /p eller /P.  I exemplen ovanför, byt ut `gsview` med
  `gsview32` för Windows och `gvpm` för OS/2.
@@ -2116,7 +2116,7 @@ E
     [-mPAPERSIZE] [-oORIENTATION] [-rXDPIxYDPI]
     [-geometry WIDTHxHEIGHT[+XOFF+YOFF]] filnamn
 
- Optioner:
+ Alternativ:
 
  `filnamn` För att starta GSview och visa filnamn.ps:
   gsview filnamn.ps
@@ -2147,7 +2147,7 @@ E
  `-d` Debugläge.
  I debugläge kommer GSview `inte` att ta bort sina temporära filer.
  Det är för att tillåta inspektion av filerna efter att GSview avslutats.
- Debugläge producerar också en mera utförlig output för `Arkiv `| `Visa Meddelanden`.
+ Debugläge producerar också en mera utförlig output för `Arkiv `| `Visa meddelanden`.
  För att skriva en debug output till
 WP
  c:\gsview.txt
@@ -2162,7 +2162,7 @@ E
  enkel-trådat alternativ och `-t1` för att välja multi-trådat alternativ.
 
 W
- Windows stöder ett fåtal ytterligare kommandoradsoptioner.
+ Windows stöder ett fåtal ytterligare kommandoradsalternativ.
 
  `-s` spoolar en fil direkt till skrivaren, utan att använda Ghostscript.
  GSview kommer att avslutas när filen har skickats till spoolern.
@@ -2206,10 +2206,10 @@ W
  togs emot.  Om du behöver skicka multipla kommandon, skicka dom
  separat med pauser mellan.
 
- Det finns två kommandoradsoptioner som förorsakar GSview att skicka ett DDE
+ Det finns två kommandoradsalternativ som förorsakar GSview att skicka ett DDE
  kommando till en annan kopia av GSview.
- /E kommandoradsoptionen använder [Command("kommandorad")][ShowWindow(1)].
- /X kommandoradsoptionen använder [FileExit()].
+ /E kommandoradsalternativet använder [Command("kommandorad")][ShowWindow(1)].
+ /X kommandoradsalternativet använder [FileExit()].
 E
 2World Wide Web
 ?World Wide Web
@@ -2241,7 +2241,7 @@ P
 X
   gsview - Ett grafiskt Ghostscript interface
 E
-  Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  Alla rättigheter reserverade.
+  Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  Alla rättigheter reserverade.
 
  Denna fil är en del av GSview.
 
@@ -2251,15 +2251,15 @@ E
  eller hon uttryckligen sagt så i skrift.  Referera till GSview Free Public Licence
  ("Licence") för alla detaljer.
 
- Varje kopia av GSview måste inkludera en kopia av Licensen, normalt i en
+ Varje kopia av GSview måste inkludera en kopia av licensen, normalt i en
  ren ASCII textfil kallad LICENCE.  Licensen ger dig rättigheter att kopiera,
  modifiera och återdistribuera GSview, men endast under vissa villkor
- som beskrivs i Licensen.  Bland annat, kräver Licensen att copyright notisen
+ som beskrivs i licensen.  Bland annat, kräver licensen att copyright notisen
  och den här notisen skall finnas med hos varje kopia.
 
  Författare: Russell Lang, Ghostgum Software Pty Ltd
    Internet: gsview@ghostgum.com.au
- Var vänlig läs ämnet `Vanliga Problem`, GSview Readme.htm och sök igenom
+ Var vänlig läs ämnet `Vanliga problem`, GSview Readme.htm och sök igenom
  `WWW` sidan innan ni skickar mail till författaren.
 
  GSview använder pstotext i en extern DLL. pstotext skrevs av
@@ -2279,7 +2279,7 @@ WP
  Detta felmeddelande uppträder vanligtvis om du inte har Ghostscript,
  eller om GSview inte kan hitta Ghostscript.
 
- Från GSview menyn välj `Optioner` | `Avancerad Konfiguration`
+ Från GSview menyn välj `Alternativ` | `Avancerad konfiguration`
  och ange korrekt `Ghostscript DLL` sökväg. Till exempel
 P
   c:\gs\gsN.NN\bin\gsdll2.dll
@@ -2299,13 +2299,13 @@ WP
  Om du inte kan få GSview att köra Ghostscript's DLL korrekt, se till att
  du kan konfigurera och köra Ghostscript på egen hand.
 
- `Problem:` Ghostscript's Meddelandefönster säger
+ `Problem:` Ghostscript's meddelandefönster säger
  `Can't find initialization file gs_init.ps`.
 
  Sätt `Ghostscript Include Path` så att den pekar på katalogen som innehåller
  den riktiga gs_init.ps.
 
- `Problem:` Ghostscript's Meddelandefönster säger
+ `Problem:` Ghostscript's meddelandefönster säger
  `gs: Interpreter revision (XXX) does not match gs_init.ps revision (YYY)`.
 
  Sätt `Ghostscript Include Path` så att den pekar på katalogen som innehåller
@@ -2314,7 +2314,7 @@ WP
  version av Ghostscript (vilket kommer att förorsaka att den gamla gs_init.ps laddas
  utan hänsyn till `Ghostscript Include Path`).
 
- `Problem:` Ghostscript's Meddelandefönster säger
+ `Problem:` Ghostscript's meddelandefönster säger
  `Wrong version of DLL found.  Found version XXX  Need version YYY`.
 
  GSview hittade fel version av Ghostscript DLL.  Installera den nödvändiga
@@ -2326,13 +2326,13 @@ E
  på MS-Windows innehåller 0 sidor och vill endast visa första sidan.
 
  Det beror på att dokumentet inte har rätt DSC kommentarer.
- Från Kontrollpanelen, välj `Skrivare`, `Optioner...`, klicka sedan i
+ Från kontrollpanelen, välj `Skrivare`, `Alternativ...`, klicka sedan i
  gruppboxen `Skriv ut till` på radioknappen `Skrivare`.  Du kan inte
  använda `Skriv ut till` `Encapsulated PostScriptfil` för utskrift
  av flersidiga filer.  Den korrekta metoden är att ansluta skrivaren
  till `FILE:`.
  Som tillägg,
- välj sedan från Kontrollpanelen `Skrivare`, `Optioner...`, `Avancerad` och
+ välj sedan från kontrollpanelen `Skrivare`, `Alternativ...`, `Avancerad` och
  kryssa sedan för `Conform to Adobe Document Structuring Convention`.
 
  DSC kommentaren `%%Pages: 0` betyder att dokumentet inte producerar
@@ -2354,7 +2354,7 @@ E
  PostScript tabben, ange sedan PostScript Output Format =
  `PostScript (optimera för portabilitet - ADSC)`.
 
- `Problem:` GSview påstår att "Sidordning är Special..."
+ `Problem:` GSview påstår att "Sidordning är special..."
 
  Ditt dokument använder DSC kommentaren `%%PageOrder: Special` vilket betyder
  att sidorna inte kan ordnas om tillförlitligt.  Det kan förhindra GSview
@@ -2374,9 +2374,9 @@ E
 
  Då detta uppträder även när PostScriptskrivarens checkbox
  `Anpassa till Document Structuring Convention` är markerad, måste detta
- anses vara en bug MS-Windows PostScript skrivardrivrutin.
- Bugfixen är dokumenterad i MS-Windows PRINTERS.WRI fil.
- Editera win.ini filen och sök efter PostScript skrivarsektion.
+ anses vara en bugg i MS-Windows PostScript skrivardrivrutin.
+ Buggfixen är dokumenterad i MS-Windows PRINTERS.WRI fil.
+ Redigera win.ini filen och sök efter PostScript skrivarsektion.
  Det kan finnas mer än en.  I var och en av dessa sektioner läggs
  `CTRLD=0` som visas nedanför.
 
@@ -2385,7 +2385,7 @@ E
 
  För Windows 95:
 
- PostScript skrivardrivrutinssetup har en option
+ PostScript skrivardrivrutinssetup har ett alternativ
  (Inställningar, PostScript, Avancerad) för undertryckande av
  ett ^D vid starten av ett dokument.
  Lyckligtvis är det standard att inte skicka något ^D före jobbet.
@@ -2406,9 +2406,9 @@ E
 
  I det här läget, har du två lösningar:
 
- 1. Välj `Optioner` | `Ignorera DSC`
+ 1. Välj `Alternativ` | `Ignorera DSC`
 
- 2. Editera PostScriptfilen för att korrigera DSC kommentarerna.
+ 2. Redigera PostScriptfilen för att korrigera DSC kommentarerna.
  Sök i PostScriptfilen efter alla rader innehållande
   %MSEPS Preamble
  Från varje sådan rad, sök framåt efter starten på den
@@ -2427,7 +2427,7 @@ E
  `Problem:` GSview känner inte igen DSC kommentarer i filer
  producerade med Adobe PostScript drivrutin 4.10 för Windows 32-bit.
 
- Använd inte något Taggat binärt kommunikationsprotokoll.
+ Använd inte något taggat binärt kommunikationsprotokoll.
  Ändra detta till "Skrivare | PostScript tab | Avancerad... |
  Data format grupp box | ASCII data"
 
@@ -2442,18 +2442,18 @@ E
  djupet eller en kombination av alla tre.
  Alternativt, kan du ha använt `-dFIXEDMEDIA` i Ghostscript's
  miljövariabel GS_OPTIONS.  När du använder GSview, är det säkrast
- att inte använda GS_OPTIONS alls och att använda `Optioner` |
- `Avancerad Konfiguration` | `Ghostscript Optioner` istället.
+ att inte använda GS_OPTIONS alls och att använda `Alternativ` |
+ `Avancerad konfiguration` | `Ghostscript alternativ` istället.
 
  `Problem:` GSview hänger eller tar väldigt lång tid på sig för att visa en fil.
 
  Upplösningen kan ha satts för högt eller sidan är för stor.
  Reducera upplösningen till standard 96dpi genom att använda
- `Media `| `Display Inställningar`.
+ `Media `| `Display inställningar`.
  Ändra storleken på sidan via `Media` menyn.
 W
-2Andra Användbara Program
-?Andra Användbara Program
+2Andra användbara program
+?Andra användbara program
 ?RedMon
 ?PrintFile
  `RedMon` är en Windows 95 och NT port monitor, som låter dig
@@ -2472,24 +2472,24 @@ W
 
  Se Ghostscript's `WWW` sida för fler användbara program.
 E
-2Andra Hjälp Ämnen
-?Andra Hjälp Ämnen
+2Andra hjälpämnen
+?Andra hjälpämnen
  Dessa ämnen nås vanligtvis genom att trycka på `Hjälp` knappen
  i en dialogbox.
-3Visa Meddelanden
-?Visa Meddelanden
+3Visa meddelanden
+?Visa meddelanden
  GSview använder Ghostscript för att visa eller skriva ut PostScriptfiler.
- `Visa Meddelanden` visar konsollutmatningen från Ghostscript,
+ `Visa meddelanden` visar konsollutmatningen från Ghostscript,
  och är mycket användbar när ett PostScriptfel uppstår.
  Du kanske måste scrolla bakåt för att se starten på felmeddelandet.
 
- Texten i `Visa Meddelanden` fönstret kan kopieras till klippbordet.
+ Texten i `Visa meddelanden` fönstret kan kopieras till klippbordet.
  Om ingen text har valts, kommer hela texten att kopieras till klippbordet.
  Om någon del av texten markerats, kommer endast den delen att bli kopierad till
  klippbordet.
 
- Förklaringar till vissa felmeddelanden som inte visas i `Visa Meddelande`
- ges i `Allmänna Problem` ämnet.
+ Förklaringar till vissa felmeddelanden som inte visas i `Visa meddelande`
+ ges i `Allmänna problem` ämnet.
 WX
 3bzip2
 ?bzip2
@@ -2548,7 +2548,7 @@ WP
  När du använder Win32s, måste GSview först ladda ur GS DLL medan den
  används av gvwgs.exe för utskrifter.
 
- gsv16spl.exe är en 16 bitars Windows applikation som används av GSview för att spoola
+ gsv16spl.exe är en 16 bitars Windowsapplikation som används av GSview för att spoola
  filer från GSview Win32s.  gsv16spl kan inte användas självständigt - den
  måste startas av GSview.  Den används inte av Windows 95 eller NT.
 

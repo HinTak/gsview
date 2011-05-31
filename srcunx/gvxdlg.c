@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -38,7 +38,7 @@ void cfg_defaults(GtkWidget *w, gpointer data);
 
 void width_percent(GtkWidget *w, GtkRequisition *req, gpointer data)
 {
-    req->width = req->width * ((int)data) / 100;
+    req->width = req->width * ((int)((size_t)data)) / 100;
 }
 
 gint modal_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
@@ -506,8 +506,8 @@ get_page(int *ppage, BOOL multiple, BOOL allpages)
 	for (i = 0; i < (int)psfile.dsc->page_count; i++)
 	    psfile.page_list.select[i] = FALSE;
 	while (l) {
-	    psfile.page_list.current = (int)(l->data);
-	    psfile.page_list.select[(int)(l->data)] = TRUE;
+	    psfile.page_list.current = (int)((size_t)(l->data));
+	    psfile.page_list.select[(int)((size_t)(l->data))] = TRUE;
 	    l = g_list_next(l);
 	}
 	if (psfile.page_list.current >= 0)

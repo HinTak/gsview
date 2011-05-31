@@ -145,7 +145,7 @@ BEGIN
     GSVS(IDS_TOPICINSTALL, "Установка")
     GSVS(IDS_TOPICTEXT, "Извлечение и поиск текста")
     GSVS(IDS_TOPICKEYS, "Клавиатура")
-    GSVS(IDS_TOPICMESS, "Показать сообщения")
+    GSVS(IDS_TOPICMESS, "Сообщения Ghostscript")
     GSVS(IDS_TOPICSPOOL, "Спулер")
 	GSVS(IDS_TOPICZLIB, "zlib")
 	GSVS(IDS_TOPICBZIP2, "bzip2")

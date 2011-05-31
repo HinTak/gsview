@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -244,9 +244,12 @@ const char * viewer_resource =
 "  }\015\012"
 "  ifelse\015\012"
 "  dup /DisplayFormat known\015\012"
-"  { dup /DisplayFormat get 131072 and 0 eq }\015\012"
-"  { matrix defaultmatrix 3 get 0 lt }\015\012"
+"  { dup /DisplayFormat get }\015\012"
+"  { currentpagedevice dup /DisplayFormat known\015\012"
+"    {/DisplayFormat get}{pop 0} ifelse\015\012"
+"  }\015\012"
 "  ifelse\015\012"
+"  131072 and 0 eq\015\012"
 "  {flush GSview /PageOffset get dup 1 get neg 1 exch put} if\015\012"
 "  dup /TextAlphaBits GSview /TextAlphaBits get put\015\012"
 "  dup /GraphicsAlphaBits GSview /GraphicsAlphaBits get put\015\012"

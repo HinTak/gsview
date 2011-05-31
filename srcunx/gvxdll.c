@@ -559,7 +559,7 @@ int gs_process_pstotext(void)
     else {
 	/* parent */
 	/* Check every second if pstotext has finished */
-	gtk_timeout_add(1000, check_pstotext, (gpointer)pstotext_pid);
+	gtk_timeout_add(1000, check_pstotext, (gpointer)((size_t)pstotext_pid));
     } 
     return 0;	/* all is well */
 }

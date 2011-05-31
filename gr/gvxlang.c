@@ -74,7 +74,7 @@ MENU_ENTRY menu_gr[] = {
   { "/Αρχείο/3LASTFILE",     	NULL, 	GS_CMD,	IDM_LASTFILE3, NULL },
   { "/Αρχείο/4LASTFILE",     	NULL, 	GS_CMD,	IDM_LASTFILE4, NULL },
   { "/Αρχείο/sep5",     		NULL,   NULL, 		0, "<Separator>" },
-  { "/Αρχείο/Έξο_δος",     		NULL, 	GS_CMD,	IDM_EXIT, NULL },
+  { "/Αρχείο/Έξο_δος",     		"<control>Q", 	GS_CMD,	IDM_EXIT, NULL },
 
   { "/_Επεξεργασία",      		NULL,   NULL, 	IDM_EDITMENU, "<Branch>" },
 /*

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -19,6 +19,22 @@
 /* Dialog boxes for Windows GSview */
 #include "gvwin.h"
 
+/* Find which display is used by the window at origin x,y */
+/* Return -1 if we can't find it */
+int
+find_display(int x, int y)
+{
+    int i;
+    for (i=0; i<number_of_displays; i++) {
+	if ((x >= win_display[i].left) && 
+	    (x <  win_display[i].left + win_display[i].width) &&
+	    (y >= win_display[i].top) && 
+	    (y <  win_display[i].top + win_display[i].height))
+	    return i;
+    }
+    return -1;
+}
+
 
 void
 centre_dialog(HWND hwnd)
@@ -29,13 +45,22 @@ centre_dialog(HWND hwnd)
     int width = GetSystemMetrics(SM_CXFULLSCREEN);
     int height = GetSystemMetrics(SM_CYFULLSCREEN);
     RECT rect;
-    if (number_of_displays > 1) {
+    int disp;
+
+    /* Find display of parent */
+    GetWindowRect(GetParent(hwnd), &rect);
+    disp = find_display((rect.left+rect.right)/2, (rect.top+rect.bottom)/2);
+    if (disp < 0)
+        disp = find_display(rect.left, rect.top);
+    if (disp >= 0) {
 	/* Put it on the first display */
-	left = first_display.left;
-	top = first_display.top;
-	width = first_display.width;
-	height = first_display.height;
+	left =   win_display[disp].left;
+	top =    win_display[disp].top;
+	width =  win_display[disp].width;
+	height = win_display[disp].height;
     }
+
+    /* Centre on parent */
     GetWindowRect(hwnd, &rect);
     MoveWindow(hwnd, left+(width - (rect.right - rect.left))/2,
 	    top+(height - (rect.bottom - rect.top))/2,
@@ -121,7 +146,7 @@ struct input_param {
 
 
 /* input string dialog box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -210,7 +235,7 @@ DWORD end = start + 70;
 }
 
 /* copyright dialog box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -309,7 +334,7 @@ show_about()
 #pragma argsused
 #endif
 /* information about document dialog box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 InfoDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -350,7 +375,7 @@ TCHAR *sound_entry[MAX_SYSTEM_SOUND];
 TCHAR szNone[32];
 TCHAR szSpeaker[32];
 int system_num;
-BOOL CALLBACK _export SoundDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
+DLGRETURN CALLBACK _export SoundDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
 
 int
 load_sounds(void)
@@ -463,7 +488,7 @@ change_sounds(void)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 SoundDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
 	TCHAR buf[MAXSTR];
@@ -639,7 +664,7 @@ BOOL selected;
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
 	int i;
@@ -728,7 +753,7 @@ PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 PageMultiDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
 	int i;
@@ -868,7 +893,7 @@ int i;
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 BoundingBoxDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 static int bboxindex;
@@ -942,7 +967,7 @@ get_bbox(void)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 PSTOEPSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (wmsg) {
@@ -989,7 +1014,7 @@ int flag;
 #pragma argsused
 #endif
 /* input string dialog box */
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 InstallDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -1095,7 +1120,7 @@ enable_alpha(HWND hDlg)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 DisplaySettingsDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
     char buf[128];
@@ -1268,7 +1293,7 @@ int twend;
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 TextDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
@@ -1397,7 +1422,7 @@ gs_addmess(const char *str)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 DSCErrorDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {

@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2004, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* $Id: dscparse.c,v 1.32 2004/01/11 08:15:14 ghostgum Exp $ */
+/* $Id: dscparse.c,v 1.36 2005/01/20 11:19:00 ghostgum Exp $ */
 
 /*
  * This is a DSC parser, based on the DSC 3.0 spec, 
@@ -157,33 +157,33 @@ dsc_private const int dsc_severity[] = {
 
 const CDSCMEDIA dsc_known_media[CDSC_KNOWN_MEDIA] = {
     /* These sizes taken from Ghostscript gs_statd.ps */
-    {"11x17", 792, 1224, 0, NULL, NULL},
-    {"A3", 842, 1190, 0, NULL, NULL},
-    {"A4", 595, 842, 0, NULL, NULL},
-    {"A5", 421, 595, 0, NULL, NULL},
-    {"B4", 709, 1002, 0, NULL, NULL}, /* ISO, but not Adobe standard */
-    {"B5", 501, 709, 0, NULL, NULL},  /* ISO, but not Adobe standard */
-    {"Ledger", 1224, 792, 0, NULL, NULL},
-    {"Legal", 612, 1008, 0, NULL, NULL},
-    {"Letter", 612, 792, 0, NULL, NULL},
-    {"Note", 612, 792, 0, NULL, NULL},
+    {"11x17", 792, 1224, 0, NULL, NULL, NULL},
+    {"A3", 842, 1190, 0, NULL, NULL, NULL},
+    {"A4", 595, 842, 0, NULL, NULL, NULL},
+    {"A5", 421, 595, 0, NULL, NULL, NULL},
+    {"B4", 709, 1002, 0, NULL, NULL, NULL}, /* ISO, but not Adobe standard */
+    {"B5", 501, 709, 0, NULL, NULL, NULL},  /* ISO, but not Adobe standard */
+    {"Ledger", 1224, 792, 0, NULL, NULL, NULL},
+    {"Legal", 612, 1008, 0, NULL, NULL, NULL},
+    {"Letter", 612, 792, 0, NULL, NULL, NULL},
+    {"Note", 612, 792, 0, NULL, NULL, NULL},
     /* Other standard sizes */
-    {"A0", 2384, 3370, 0, NULL, NULL},
-    {"A1", 1684, 2384, 0, NULL, NULL},
-    {"A2", 1190, 1684, 0, NULL, NULL},
+    {"A0", 2384, 3370, 0, NULL, NULL, NULL},
+    {"A1", 1684, 2384, 0, NULL, NULL, NULL},
+    {"A2", 1190, 1684, 0, NULL, NULL, NULL},
     /* Other non-standard sizes */
-    {"AnsiA", 612, 792, 0, NULL, NULL},  /* 8.5 x 11" */
-    {"AnsiB", 792, 1224, 0, NULL, NULL}, /* 11 x 17" */
-    {"AnsiC", 1224, 1584, 0, NULL, NULL}, /* 17 x 22" */
-    {"AnsiD", 1584, 2448, 0, NULL, NULL}, /* 22 x 34" */
-    {"AnsiE", 2448, 3168, 0, NULL, NULL}, /* 34 x 44" */
-    {"ArchA", 648, 864, 0, NULL, NULL},  /* 9 x 12" */
-    {"ArchB", 864, 1296, 0, NULL, NULL}, /* 12 x 18" */
-    {"ArchC", 1296, 1728, 0, NULL, NULL}, /* 18 x 24" */
-    {"ArchD", 1728, 2592, 0, NULL, NULL}, /* 24 x 36" */
-    {"ArchE", 2592, 3456, 0, NULL, NULL}, /* 36 x 48" */
-    {"ArchF", 2160, 3024, 0, NULL, NULL}, /* 30 x 42" */
-    {NULL, 0, 0, 0, NULL, NULL}
+    {"AnsiA", 612, 792, 0, NULL, NULL, NULL},  /* 8.5 x 11" */
+    {"AnsiB", 792, 1224, 0, NULL, NULL, NULL}, /* 11 x 17" */
+    {"AnsiC", 1224, 1584, 0, NULL, NULL, NULL}, /* 17 x 22" */
+    {"AnsiD", 1584, 2448, 0, NULL, NULL, NULL}, /* 22 x 34" */
+    {"AnsiE", 2448, 3168, 0, NULL, NULL, NULL}, /* 34 x 44" */
+    {"ArchA", 648, 864, 0, NULL, NULL, NULL},  /* 9 x 12" */
+    {"ArchB", 864, 1296, 0, NULL, NULL, NULL}, /* 12 x 18" */
+    {"ArchC", 1296, 1728, 0, NULL, NULL, NULL}, /* 18 x 24" */
+    {"ArchD", 1728, 2592, 0, NULL, NULL, NULL}, /* 24 x 36" */
+    {"ArchE", 2592, 3456, 0, NULL, NULL, NULL}, /* 36 x 48" */
+    {"ArchF", 2160, 3024, 0, NULL, NULL, NULL}, /* 30 x 42" */
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
 };
 
 /* parser state */
@@ -983,6 +983,8 @@ dsc_reset(CDSC *dsc)
     if (dsc->macbin)
 	dsc_memfree(dsc, dsc->macbin);
     dsc->macbin = NULL;
+
+    dsc->worst_error = CDSC_ERROR_NONE;
 }
 
 /* 
@@ -3771,6 +3773,7 @@ dsc_parse_page(CDSC *dsc)
     page_ordinal = dsc_get_int(p, dsc->line_length - 7 - i, NULL);
 
     if ( (page_ordinal == 0) || (strlen(page_label) == 0) ||
+       ((dsc->page_count == 0) && (page_ordinal != 1)) ||
        (dsc->page_count && 
 	    (page_ordinal != dsc->page[dsc->page_count-1].ordinal+1)) ) {
 	int rc = dsc_error(dsc, CDSC_MESSAGE_PAGE_ORDINAL, dsc->line, 
@@ -3887,6 +3890,10 @@ dsc_private int
 dsc_error(CDSC *dsc, unsigned int explanation, 
 	char *line, unsigned int line_len)
 {
+    if (explanation > DSC_MAX_ERROR)
+	return CDSC_RESPONSE_CANCEL;
+    if ((int)dsc->worst_error < (int)dsc_severity[explanation])
+	dsc->worst_error = dsc_severity[explanation];
     /* if error function provided, use it */
     if (dsc->dsc_error_fn)
 	return dsc->dsc_error_fn(dsc->caller_data, dsc, 
@@ -4093,6 +4100,17 @@ dsc_parse_platefile(CDSC *dsc)
 	    if (i) {
 		filename = dsc->line+n;
 		filename_length = dsc->line_length-n;
+		if (filename[0] == '(') {
+		    /* Filename in parentheses like a PS string */
+		    int j;
+		    for (j=0; j<filename_length; j++)
+			if (filename[j] == ')')
+			    break;
+		    if (j < filename_length) {
+			filename++;
+			filename_length = j-1;
+		    }
+		}
 	    }
 	}
 	if (i==0)
@@ -4215,6 +4233,8 @@ dsc_parse_dcs1plate(CDSC *dsc)
 		    this_dcs2 = this_dcs2->next;
 		this_dcs2->next = pdcs2;
 	    }
+	    /* We've set the DCS 2.0 data, but it really is DCS 1.0 */
+	    dsc->dcs1 = TRUE;
 	}
     }
     return CDSC_OK;

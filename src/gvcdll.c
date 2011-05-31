@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2004, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -134,22 +134,77 @@ gsview_page_orientation(int page)
     return orientation;
 }
 
+typedef struct viewing_orient_s {
+    int orientation;
+    CDSCCTM viewing;
+} viewing_orient_t;
+
+const viewing_orient_t viewing_orients[] = {
+    {IDM_PORTRAIT, {1,0,0,1}},
+    {IDM_LANDSCAPE, {0,1,-1,0}},
+    {IDM_UPSIDEDOWN, {-1,0,0,-1}},
+    {IDM_SEASCAPE, {0,-1,1,0}}
+};
+
+static int find_viewing_orientation(CDSCCTM *viewing)
+{
+    int i;
+    if (viewing == NULL)
+	return 0;
+    for (i=0; i<sizeof(viewing_orients)/sizeof(viewing_orients[0]); i++) {
+	if  ((viewing->xx == viewing_orients[i].viewing.xx) &&
+	     (viewing->xy == viewing_orients[i].viewing.xy) &&
+	     (viewing->yx == viewing_orients[i].viewing.yx) &&
+	     (viewing->yy == viewing_orients[i].viewing.yy))
+	    return viewing_orients[i].orientation;    
+    }
+    return 0;
+}
+
+/* Get auto viewing orientation for specified page */
+/* Return 0 if unknown, of IDM_PORTRAIT etc if known */
+static int
+gsview_viewing_orientation(int page)
+{
+    CDSC *dsc = psfile.dsc;
+    int viewing = 0;
+    
+    if (psfile.ispdf)
+	return viewing;	/* do nothing */
+
+    if (dsc == (CDSC *)NULL)
+	return viewing;
+
+    if ((page >=1) && (page <= (int)dsc->page_count)) {
+	viewing = find_viewing_orientation(
+			dsc->page[map_page(page-1)].viewing_orientation);
+    }
+    if (viewing == 0)
+	viewing = find_viewing_orientation(dsc->viewing_orientation);
+    return viewing;
+}
+
 /* get orientation for display of given page */
 int
 d_orientation(int pagenum)
 {
 int orientation;
-    if (option.auto_orientation == TRUE)
+int viewing = CDSC_ORIENT_UNKNOWN;
+    if (option.auto_orientation == TRUE) {
 	orientation = gsview_page_orientation(pagenum);
+	viewing = gsview_viewing_orientation(pagenum);
+	if (viewing != 0)
+	    orientation = viewing;
+    }
     else
 	orientation = option.orientation;
     switch (orientation) {
 	case IDM_LANDSCAPE:
-	    if (option.swap_landscape)
+	    if (option.swap_landscape && !viewing)
 		return 1;
 	    return 3;
 	case IDM_SEASCAPE:
-	    if (option.swap_landscape)
+	    if (option.swap_landscape && !viewing)
 		return 3;
 	    return 1;
 	case IDM_PORTRAIT:
@@ -371,8 +426,11 @@ int code;
     code = gs_printf("userdict /gsview_eps_countcheck known {gsview_eps_countcheck} if flush\n");
     if (!code)
         code = gs_printf("//systemdict /clear get exec //systemdict /cleardictstack get exec\n");
+#ifdef NOTUSED
+    /* Don't do a restore, because we are within a stopped and it won't work */
     if (!code)
         code = gs_printf("GSview_Save restore\n");
+#endif
     display.saved = FALSE;
     return code;
 }
@@ -525,9 +583,28 @@ long dmode;
 
     if (!code) 	/* local/global bug in GS, see note above */
 	code = gs_printf("currentglobal true setglobal\n");
-    if (!code)
-	code = gs_printf("<< /OutputDevice /%s /DisplayFormat %ld /DisplayHandle %ld\n",
-	    DEVICENAME, dmode, &view);
+    if (!code) {
+	/* 64-bit support required changed from -dDisplayFormat
+	 * to -sDisplayFormat
+	 */
+#ifdef _Windows
+#define HEX64 "%I64x"
+#else
+#define HEX64 "%llx"
+#endif
+	if ( (gsdll.revision_number >= 851) ||
+	  ((gsdll.revision_number >= 816) && (gsdll.revision_number < 830)) ||
+	  (sizeof(&view) == 8)
+	) {
+	    char fmt[MAXSTR];
+	    sprintf(fmt, "<< /OutputDevice /%%s /DisplayFormat 16#%%lx /DisplayHandle (16#%s)\n", sizeof(&view) == 4 ? "%lx" : HEX64);
+	    code = gs_printf(fmt, DEVICENAME, dmode, &view);
+	}
+	else 
+	    code = gs_printf("<< /OutputDevice /%s /DisplayFormat 16#%lx /DisplayHandle %ld\n",
+		DEVICENAME, dmode, &view);
+#undef HEX64
+    }
     if (!code && option.safer && (gsdll.revision_number > GS_UNSAFE))
 	code = gs_printf("/.LockSafetyParams true\n");
     if (!code)
@@ -586,6 +663,14 @@ long dmode;
 	    post_img_message(WM_COMMAND, IDM_A4);
 	}
     }
+
+    /* We need to have one level of save after opening the display device
+     * with setpagedevice, to avoid problems with grestoreall.
+     * We can't do a restore because we are inside the stopped,
+     * but that doesn't matter because we are closing ghostscript
+     * anyway at that stage.
+     */
+    d_save();
 
     if (!code)
 	/* run Ghostscript with a stopped */
@@ -727,7 +812,7 @@ int
 send_document(void)
 {
 char filename[MAXSTR];
-char buf[MAXSTR];
+char buf[MAXSTR+50];
 char *p;
 CDSC *dsc = psfile.dsc;
 GSDLL_INPUT *input = &view.input;

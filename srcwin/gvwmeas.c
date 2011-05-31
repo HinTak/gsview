@@ -1,4 +1,4 @@
-/* Copyright (C) 1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1998-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -65,7 +65,7 @@ void calc_enable_custom(HWND hwnd, BOOL enab)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 CalcDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
   static MATRIX tempmtx ;
@@ -149,7 +149,7 @@ show_calc_dialog(void)
 #ifdef __BORLANDC__
 #pragma argsused
 #endif
-BOOL CALLBACK _export
+DLGRETURN CALLBACK _export
 MeasureDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 float x, y;

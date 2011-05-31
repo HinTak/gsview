@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -24,7 +24,7 @@
  *   Readme.htm
  *   FILE_ID.DIZ
  *   src/gvcnews.txt
- *   srcunx/gvxspec.txt
+ *   srcunx/gsview.spec
  *   epstool.htm
  *   language/gvclang.txt
  *   language/gvclang.h    (for Copyright dates)
@@ -34,8 +34,8 @@
 /* undefine BETA for a final release */
 /*
 #define BETA
-#define BETA_YEAR    2003
-#define BETA_MONTH   11
+#define BETA_YEAR    2005
+#define BETA_MONTH   4
 #define BETA_DAY     30
 */
 
@@ -46,11 +46,7 @@
 #define GSVIEW_PRODUCT "GSview"
 
 #ifdef _Windows
-#ifdef DECALPHA
-#define GSVIEW_BASEDIR "gsviewda"
-#else
 #define GSVIEW_BASEDIR "gsview"
-#endif
 #define GSVIEW_ZIP     "win32.zip"
 #else
 #define GSVIEW_ZIP     "os2.zip"
@@ -65,14 +61,17 @@
 #define GS_REVISION_MAX   919
 
 #ifdef _Windows
-#ifdef DECALPHA
-#define GSVIEW_EXENAME "gsviewda.exe"
+#ifdef _WIN64
+#define GSVIEW_EXENAME "gsview64.exe"
+#define GS_EXENAME  "gswin64c.exe"
+#define GS_DLLNAME  "gsdll64.dll"
+#define INIFILE "gsview64.ini"
 #else
 #define GSVIEW_EXENAME "gsview32.exe"
-#endif
 #define GS_EXENAME  "gswin32c.exe"
 #define GS_DLLNAME  "gsdll32.dll"
 #define INIFILE "gsview32.ini"
+#endif
 #else
 #if X11
 #define INIFILE "gsview.ini"

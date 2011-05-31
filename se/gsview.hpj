@@ -1,5 +1,5 @@
 [OPTIONS]
-TITLE=GSview Hjälp
+TITLE=GSview hjälp
 BMROOT=../binary
 [FILES]
 gsview.rtf

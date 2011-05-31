@@ -49,7 +49,16 @@ CFLAGS=$(DEFS) /W4
 #DEFS=/D__WIN32__ /DDECALPHA
 #CFLAGS=$(DEFS) /W4
 
+NULL=
+D=\$(NUL)
 
+!if $(VCVER) == 0
+# No paths specified
+COMPBASE=
+RCOMP=rc -D_MSC_VER $(DEFS)
+COMPDIR=
+INCDIR=.
+!else
 !if $(VCVER) <= 5
 COMPBASE = $(DEVBASE)\vc
 RCOMP="$(DEVBASE)\sharedide\bin\rc" -D_MSC_VER $(DEFS)
@@ -62,11 +71,12 @@ RCOMP="$(DEVBASE)\common\msdev98\bin\rc" -D_MSC_VER $(DEFS)
 COMPBASE = $(DEVBASE)\vc7
 RCOMP="$(DEVBASE)\Vc7\bin\rc" -D_MSC_VER $(DEFS)
 !endif
-COMPDIR = $(COMPBASE)\bin
+COMPDIR = $(COMPBASE)\bin$(D)
 INCDIR = $(COMPBASE)\include
 LIBDIR = $(COMPBASE)\lib
+!endif
 
-CC="$(COMPDIR)\cl" -DNEED_PROTO $(CFLAGS) $(CDEBUG) "-I$(INCDIR)"
+CC="$(COMPDIR)cl" -DNEED_PROTO $(CFLAGS) $(CDEBUG) "-I$(INCDIR)"
 CCAUX=$(CC)
 
 all:	$(DEST).dll $(DEST).exe
@@ -96,7 +106,7 @@ $(DEST).res: pstotxt3.rc
 	$(RCOMP) "-i$(INCDIR)" -r $(DEST).rc
 
 $(DEST).dll: $(DEST).obj $(DEST).res
-	"$(COMPDIR)\link" $(DEBUGLINK) /DLL /DEF:pstotxt3.def /OUT:$(DEST).dll $(DEST).obj $(DEST).res
+	"$(COMPDIR)link" $(DEBUGLINK) /DLL /DEF:pstotxt3.def /OUT:$(DEST).dll $(DEST).obj $(DEST).res
 
 $(DEST).exe: pstotxtd.c
 	$(CC) /D_Windows /Fe$(DEST).exe pstotxtd.c /link $(DEBUGLINK)

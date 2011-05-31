@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2004, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -59,13 +59,14 @@ all: $(BD)gsview$(WINEXT).exe \
   $(BD)gsvw$(WINEXT)se.dll $(BD)gsviewse.hlp $(BD)setp$(WINEXT)se.dll \
   $(BD)gsvw$(WINEXT)sk.dll $(BD)gsviewsk.hlp $(BD)setp$(WINEXT)sk.dll \
   $(BD)gvwgs$(WINEXT).exe $(BD)setup.exe $(BD)uninstgs.exe \
-  $(BD)epstool$(EXE) $(BD)gsprint.exe 
+  $(BD)gsprint.exe 
 
-$(OD)lib.rsp: makefile
-	echo "$(PLATLIBDIR)$(D)shell32.lib" > $(OD)lib.rsp
-	echo "$(PLATLIBDIR)$(D)comdlg32.lib" >> $(OD)lib.rsp
-	echo "$(PLATLIBDIR)$(D)gdi32.lib" >> $(OD)lib.rsp
+$(OD)lib.rsp: makefile srcwin/win.mak srcwin/wincom.mak
+	echo "$(PLATLIBDIR)$(D)kernel32.lib" > $(OD)lib.rsp
 	echo "$(PLATLIBDIR)$(D)user32.lib" >> $(OD)lib.rsp
+	echo "$(PLATLIBDIR)$(D)gdi32.lib" >> $(OD)lib.rsp
+	echo "$(PLATLIBDIR)$(D)shell32.lib" >> $(OD)lib.rsp
+	echo "$(PLATLIBDIR)$(D)comdlg32.lib" >> $(OD)lib.rsp
 	echo "$(PLATLIBDIR)$(D)winspool.lib" >> $(OD)lib.rsp
 	echo "$(PLATLIBDIR)$(D)advapi32.lib" >> $(OD)lib.rsp
 	echo "$(PLATLIBDIR)$(D)ole32.lib" >> $(OD)lib.rsp
@@ -488,6 +489,7 @@ clean: commonclean
 	-$(RM) $(OD)gsview.txt
 	-$(RM) $(OD)gsview.rtf
 	-$(RM) $(OD)files32.txt
+	-$(RM) $(OD)files64.txt
 	-$(RM) $(OD)viewlist.txt
 	-$(RM) $(OD)viewlist.tmp
 
@@ -602,21 +604,21 @@ viewonlydist:
 	$(CP) gsview.css dist$(D)gsview$(D)gsview.css
 	$(CP) cdorder.txt dist$(D)gsview$(D)cdorder.txt
 	$(CP) regorder.txt dist$(D)gsview$(D)regorder.txt
-	$(CP) $(BD)gsview32.exe dist$(D)gsview$(D)gsview32.exe
-	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(D)gsview32.ico
+	$(CP) $(BD)gsview$(WINEXT).exe dist$(D)gsview$(D)gsview$(WINEXT).exe
+	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(D)gsview$(WINEXT).ico
 	$(CP) $(BD)gsviewen.hlp dist$(D)gsview$(D)gsviewen.hlp
 	$(CP) $(SRC)printer.ini dist$(D)gsview$(D)printer.ini
-	$(CP) NUL dist$(D)gsview$(D)gsview32.ini
+	$(CP) NUL dist$(D)gsview$(D)gsview$(WINEXT).ini
 	$(CP) $(BD)uninstgs.exe dist$(D)gsview$(D)uninstgs.exe
 	$(CP) $(BD)setup.exe dist$(D)setup.exe
-	$(CP) gsview$(D)zlib32.dll dist$(D)gsview$(D)zlib32.dll
-	$(CP) gsview$(D)libbz2.dll dist$(D)gsview$(D)libbz2.dll
-	echo gsview$(D)gsview32.exe> $(OD)viewlist.txt
-	echo gsview$(D)gsview32.ico>> $(OD)viewlist.txt
+	$(CP) gsview$(WINEXT)$(D)zlib$(WINEXT).dll dist$(D)gsview$(D)zlib$(WINEXT).dll
+	$(CP) gsview$(WINEXT)$(D)libbz2.dll dist$(D)gsview$(D)libbz2.dll
+	echo gsview$(D)gsview$(WINEXT).exe> $(OD)viewlist.txt
+	echo gsview$(D)gsview$(WINEXT).ico>> $(OD)viewlist.txt
 	echo gsview$(D)uninstgs.exe>> $(OD)viewlist.txt
 	echo gsview$(D)printer.ini>> $(OD)viewlist.txt
-	echo gsview$(D)gsview32.ini>> $(OD)viewlist.txt
-	echo gsview$(D)zlib32.dll>> $(OD)viewlist.txt
+	echo gsview$(D)gsview$(WINEXT).ini>> $(OD)viewlist.txt
+	echo gsview$(D)zlib$(WINEXT).dll>> $(OD)viewlist.txt
 	echo gsview$(D)libbz2.dll>> $(OD)viewlist.txt
 	echo gsview$(D)Readme.htm>> $(OD)viewlist.txt
 	echo gsview$(D)gsview.css>> $(OD)viewlist.txt
@@ -626,28 +628,28 @@ viewonlydist:
 	echo GSview $(GSVIEW_DOT_VERSION)> $(OD)$(D)viewlist.tmp
 	echo gsview>> $(OD)viewlist.tmp
 	$(CP) $(OD)viewlist.tmp+$(OD)viewlist.txt dist$(D)filelist.txt
-	$(CP) $(OD)viewlist.txt $(OD)files32.txt
-	echo Readme.htm>> $(OD)files32.txt
-	echo FILE_ID.DIZ>> $(OD)files32.txt
-	echo filelist.txt>> $(OD)files32.txt
-	echo setup.exe>> $(OD)files32.txt
+	$(CP) $(OD)viewlist.txt $(OD)files$(WINEXT).txt
+	echo Readme.htm>> $(OD)files$(WINEXT).txt
+	echo FILE_ID.DIZ>> $(OD)files$(WINEXT).txt
+	echo filelist.txt>> $(OD)files$(WINEXT).txt
+	echo setup.exe>> $(OD)files$(WINEXT).txt
 	cd dist
-	-$(RM) ..$(D)gsv$(GSVIEW_VERSION)w32.zip
-	-$(RM) ..$(D)gsv$(GSVIEW_VERSION)w32.exe
-	zip -X -9 -@ ..$(D)gsv$(GSVIEW_VERSION)w32.zip < ..$(D)$(OD)files32.txt
+	-$(RM) ..$(D)gsv$(GSVIEW_VERSION)w$(WINEXT).zip
+	-$(RM) ..$(D)gsv$(GSVIEW_VERSION)w$(WINEXT).exe
+	zip -X -9 -@ ..$(D)gsv$(GSVIEW_VERSION)w$(WINEXT).zip < ..$(D)$(OD)files$(WINEXT).txt
 	cd ..
 	cd dist
 	echo -win32 -setup > setup.rsp
-	echo -st "GSview $(GSVIEW_DOT_VERSION) for Win32" >> setup.rsp
-	echo -i gsview$(D)gsview32.ico >> setup.rsp
+	echo -st "GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT)" >> setup.rsp
+	echo -i gsview$(D)gsview$(WINEXT).ico >> setup.rsp
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .$(D)setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2004 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2005 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview$(D)LICENCE >> about.txt
-	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win32. > dialog.txt
+	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT). > dialog.txt
 	echo GSview uses Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
-	$(WINZIPSE_XE) ..$(D)gsv$(GSVIEW_VERSION)w32 @setup.rsp
+	$(WINZIPSE_XE) ..$(D)gsv$(GSVIEW_VERSION)w$(WINEXT) @setup.rsp
 # Don't delete temporary files, because make continues
 # before these files are used.
 #	-$(RM) setup.rsp 
@@ -656,6 +658,7 @@ viewonlydist:
 	cd ..
 
 distcopy:
+	-rmdir /s /q dist
 	-mkdir dist
 	-mkdir dist$(D)gsview
 	-mkdir dist$(D)pstotext
@@ -667,8 +670,8 @@ distcopy:
 	$(CP) gsview.css dist$(D)gsview$(D)gsview.css
 	$(CP) cdorder.txt dist$(D)gsview$(D)cdorder.txt
 	$(CP) regorder.txt dist$(D)gsview$(D)regorder.txt
-	$(CP) $(BD)gsview32.exe dist$(D)gsview$(D)gsview32.exe
-	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(D)gsview32.ico
+	$(CP) $(BD)gsview$(WINEXT).exe dist$(D)gsview$(D)gsview$(WINEXT).exe
+	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(D)gsview$(WINEXT).ico
 	$(CP) $(BD)gsviewen.hlp dist$(D)gsview$(D)gsviewen.hlp
 	$(CP) $(BD)gsviewde.hlp dist$(D)gsview$(D)gsviewde.hlp
 	$(CP) $(BD)gsviewes.hlp dist$(D)gsview$(D)gsviewes.hlp
@@ -680,87 +683,86 @@ distcopy:
 	$(CP) $(BD)gsviewse.hlp dist$(D)gsview$(D)gsviewse.hlp
 	$(CP) $(BD)gsviewsk.hlp dist$(D)gsview$(D)gsviewsk.hlp
 	$(CP) $(BD)gsviewct.hlp dist$(D)gsview$(D)gsviewct.hlp
-	$(CP) $(BD)gsvw32de.dll dist$(D)gsview$(D)gsvw32de.dll
-	$(CP) $(BD)gsvw32es.dll dist$(D)gsview$(D)gsvw32es.dll
-	$(CP) $(BD)gsvw32fr.dll dist$(D)gsview$(D)gsvw32fr.dll
-	$(CP) $(BD)gsvw32gr.dll dist$(D)gsview$(D)gsvw32gr.dll
-	$(CP) $(BD)gsvw32it.dll dist$(D)gsview$(D)gsvw32it.dll
-	$(CP) $(BD)gsvw32nl.dll dist$(D)gsview$(D)gsvw32nl.dll
-	$(CP) $(BD)gsvw32ru.dll dist$(D)gsview$(D)gsvw32ru.dll
-	$(CP) $(BD)gsvw32se.dll dist$(D)gsview$(D)gsvw32se.dll
-	$(CP) $(BD)gsvw32sk.dll dist$(D)gsview$(D)gsvw32sk.dll
-	$(CP) $(BD)gsvw32ct.dll dist$(D)gsview$(D)gsvw32ct.dll
-	$(CP) $(BD)gvwgs32.exe dist$(D)gsview$(D)gvwgs32.exe
+	$(CP) $(BD)gsvw$(WINEXT)de.dll dist$(D)gsview$(D)gsvw$(WINEXT)de.dll
+	$(CP) $(BD)gsvw$(WINEXT)es.dll dist$(D)gsview$(D)gsvw$(WINEXT)es.dll
+	$(CP) $(BD)gsvw$(WINEXT)fr.dll dist$(D)gsview$(D)gsvw$(WINEXT)fr.dll
+	$(CP) $(BD)gsvw$(WINEXT)gr.dll dist$(D)gsview$(D)gsvw$(WINEXT)gr.dll
+	$(CP) $(BD)gsvw$(WINEXT)it.dll dist$(D)gsview$(D)gsvw$(WINEXT)it.dll
+	$(CP) $(BD)gsvw$(WINEXT)nl.dll dist$(D)gsview$(D)gsvw$(WINEXT)nl.dll
+	$(CP) $(BD)gsvw$(WINEXT)ru.dll dist$(D)gsview$(D)gsvw$(WINEXT)ru.dll
+	$(CP) $(BD)gsvw$(WINEXT)se.dll dist$(D)gsview$(D)gsvw$(WINEXT)se.dll
+	$(CP) $(BD)gsvw$(WINEXT)sk.dll dist$(D)gsview$(D)gsvw$(WINEXT)sk.dll
+	$(CP) $(BD)gsvw$(WINEXT)ct.dll dist$(D)gsview$(D)gsvw$(WINEXT)ct.dll
+	$(CP) $(BD)gvwgs$(WINEXT).exe dist$(D)gsview$(D)gvwgs$(WINEXT).exe
 	$(CP) $(SRC)printer.ini dist$(D)gsview$(D)printer.ini
-	$(CP) NUL dist$(D)gsview$(D)gsview32.ini
+	$(CP) NUL dist$(D)gsview$(D)gsview$(WINEXT).ini
 	$(CP) $(BD)uninstgs.exe dist$(D)gsview$(D)uninstgs.exe
 	$(CP) $(BD)setup.exe dist$(D)setup.exe
-	$(CP) $(BD)setp32de.dll dist$(D)setp32de.dll
-	$(CP) $(BD)setp32es.dll dist$(D)setp32es.dll
-	$(CP) $(BD)setp32fr.dll dist$(D)setp32fr.dll
-	$(CP) $(BD)setp32gr.dll dist$(D)setp32gr.dll
-	$(CP) $(BD)setp32it.dll dist$(D)setp32it.dll
-	$(CP) $(BD)setp32nl.dll dist$(D)setp32nl.dll
-	$(CP) $(BD)setp32ru.dll dist$(D)setp32ru.dll
-	$(CP) $(BD)setp32se.dll dist$(D)setp32se.dll
-	$(CP) $(BD)setp32sk.dll dist$(D)setp32sk.dll
-	$(CP) $(BD)setp32ct.dll dist$(D)setp32ct.dll
+	$(CP) $(BD)setp$(WINEXT)de.dll dist$(D)setp$(WINEXT)de.dll
+	$(CP) $(BD)setp$(WINEXT)es.dll dist$(D)setp$(WINEXT)es.dll
+	$(CP) $(BD)setp$(WINEXT)fr.dll dist$(D)setp$(WINEXT)fr.dll
+	$(CP) $(BD)setp$(WINEXT)gr.dll dist$(D)setp$(WINEXT)gr.dll
+	$(CP) $(BD)setp$(WINEXT)it.dll dist$(D)setp$(WINEXT)it.dll
+	$(CP) $(BD)setp$(WINEXT)nl.dll dist$(D)setp$(WINEXT)nl.dll
+	$(CP) $(BD)setp$(WINEXT)ru.dll dist$(D)setp$(WINEXT)ru.dll
+	$(CP) $(BD)setp$(WINEXT)se.dll dist$(D)setp$(WINEXT)se.dll
+	$(CP) $(BD)setp$(WINEXT)sk.dll dist$(D)setp$(WINEXT)sk.dll
+	$(CP) $(BD)setp$(WINEXT)ct.dll dist$(D)setp$(WINEXT)ct.dll
 	$(CP) gsprint.htm dist$(D)gsview$(D)gsprint.htm
 	$(CP) $(BD)gsprint.exe dist$(D)gsview$(D)gsprint.exe
 	$(CP) epstool.htm dist$(D)gsview$(D)epstool.htm
-	$(CP) $(BD)epstool.exe dist$(D)gsview$(D)epstool.exe
-	$(CP) gsview$(D)gsv16spl.exe dist$(D)gsview$(D)gsv16spl.exe
-	$(CP) gsview$(D)zlib32.dll dist$(D)gsview$(D)zlib32.dll
-	$(CP) gsview$(D)libbz2.dll dist$(D)gsview$(D)libbz2.dll
+	-$(CP) gsview$(WINEXT)$(D)gsv16spl.exe dist$(D)gsview$(D)gsv16spl.exe
+	$(CP) gsview$(WINEXT)$(D)zlib$(WINEXT).dll dist$(D)gsview$(D)zlib$(WINEXT).dll
+	$(CP) gsview$(WINEXT)$(D)libbz2.dll dist$(D)gsview$(D)libbz2.dll
 	$(CP) pstotext$(D)pstotext.1 dist$(D)pstotext$(D)pstotext.1
 	$(CP) pstotext$(D)pstotext.txt dist$(D)pstotext$(D)pstotext.txt
-	$(CP) pstotext$(D)pstotxt3.dll dist$(D)pstotext$(D)pstotxt3.dll
-	$(CP) pstotext$(D)pstotxt3.exe dist$(D)pstotext$(D)pstotxt3.exe
+	$(CP) gsview$(WINEXT)$(D)pstotxt3.dll dist$(D)pstotext$(D)pstotxt3.dll
+	$(CP) gsview$(WINEXT)$(D)pstotxt3.exe dist$(D)pstotext$(D)pstotxt3.exe
 	echo GSview $(GSVIEW_DOT_VERSION)> $(OD)filelist.tmp
 	echo gsview>> $(OD)filelist.tmp
-	$(CP) $(OD)filelist.tmp+$(SRCWIN)distlist.txt dist$(D)filelist.txt
+	$(CP) $(OD)filelist.tmp+$(SRCWIN)dist$(WINEXT).txt dist$(D)filelist.txt
 	$(RM) $(OD)filelist.tmp
 
-$(OD)files32.txt: $(SRCWIN)distlist.txt $(SRCWIN)win.mak makefile
-	$(CP) $(SRCWIN)distlist.txt $(OD)files32.txt
-	echo Readme.htm >> $(OD)files32.txt
-	echo FILE_ID.DIZ >> $(OD)files32.txt
-	echo filelist.txt >> $(OD)files32.txt
-	echo setup.exe >> $(OD)files32.txt
-	echo setp32de.dll >> $(OD)files32.txt
-	echo setp32es.dll >> $(OD)files32.txt
-	echo setp32fr.dll >> $(OD)files32.txt
-	echo setp32gr.dll >> $(OD)files32.txt
-	echo setp32it.dll >> $(OD)files32.txt
-	echo setp32nl.dll >> $(OD)files32.txt
-	echo setp32ru.dll >> $(OD)files32.txt
-	echo setp32se.dll >> $(OD)files32.txt
-	echo setp32sk.dll >> $(OD)files32.txt
-	echo setp32ct.dll >> $(OD)files32.txt
+$(OD)files$(WINEXT).txt: $(SRCWIN)dist$(WINEXT).txt $(SRCWIN)win.mak makefile
+	$(CP) $(SRCWIN)dist$(WINEXT).txt $(OD)files$(WINEXT).txt
+	echo Readme.htm >> $(OD)files$(WINEXT).txt
+	echo FILE_ID.DIZ >> $(OD)files$(WINEXT).txt
+	echo filelist.txt >> $(OD)files$(WINEXT).txt
+	echo setup.exe >> $(OD)files$(WINEXT).txt
+	echo setp$(WINEXT)de.dll >> $(OD)files$(WINEXT).txt
+	echo setp$(WINEXT)es.dll >> $(OD)files$(WINEXT).txt
+	echo setp$(WINEXT)fr.dll >> $(OD)files$(WINEXT).txt
+	echo setp$(WINEXT)gr.dll >> $(OD)files$(WINEXT).txt
+	echo setp$(WINEXT)it.dll >> $(OD)files$(WINEXT).txt
+	echo setp$(WINEXT)nl.dll >> $(OD)files$(WINEXT).txt
+	echo setp$(WINEXT)ru.dll >> $(OD)files$(WINEXT).txt
+	echo setp$(WINEXT)se.dll >> $(OD)files$(WINEXT).txt
+	echo setp$(WINEXT)sk.dll >> $(OD)files$(WINEXT).txt
+	echo setp$(WINEXT)ct.dll >> $(OD)files$(WINEXT).txt
 
-gsv$(GSVIEW_VERSION)w32.zip: distcopy $(OD)files32.txt
-	-$(RM) gsv$(GSVIEW_VERSION)w32.zip 
+gsv$(GSVIEW_VERSION)w$(WINEXT).zip: distcopy $(OD)files$(WINEXT).txt
+	-$(RM) gsv$(GSVIEW_VERSION)w$(WINEXT).zip 
 	cd dist
-	zip -X -9 -@ ..$(D)gsv$(GSVIEW_VERSION)w32.zip < ..$(D)$(OD)files32.txt
+	zip -X -9 -@ ..$(D)gsv$(GSVIEW_VERSION)w$(WINEXT).zip < ..$(D)$(OD)files$(WINEXT).txt
 	cd ..
 
 
 
 # Now convert to a self extracting archive.
 # This involves making a few temporary files.
-gsv$(GSVIEW_VERSION)w32.exe: distcopy gsv$(GSVIEW_VERSION)w32.zip
+gsv$(GSVIEW_VERSION)w$(WINEXT).exe: distcopy gsv$(GSVIEW_VERSION)w$(WINEXT).zip
 	cd dist
 	echo -win32 -setup > setup.rsp
-	echo -st "GSview $(GSVIEW_DOT_VERSION) for Win32" >> setup.rsp
-	echo -i gsview$(D)gsview32.ico >> setup.rsp
+	echo -st "GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT)" >> setup.rsp
+	echo -i gsview$(D)gsview$(WINEXT).ico >> setup.rsp
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .$(D)setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2004 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2005 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview$(D)LICENCE >> about.txt
-	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win32. > dialog.txt
+	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT). > dialog.txt
 	echo GSview uses Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
-	$(WINZIPSE_XE) ..$(D)gsv$(GSVIEW_VERSION)w32 @setup.rsp
+	$(WINZIPSE_XE) ..$(D)gsv$(GSVIEW_VERSION)w$(WINEXT) @setup.rsp
 # Don't delete temporary files, because make continues
 # before these files are used.
 #	-$(RM) setup.rsp 
@@ -768,5 +770,5 @@ gsv$(GSVIEW_VERSION)w32.exe: distcopy gsv$(GSVIEW_VERSION)w32.zip
 #	-$(RM) dialog.txt
 	cd ..
 
-zip: gsv$(GSVIEW_VERSION)w32.exe
+zip: gsv$(GSVIEW_VERSION)w$(WINEXT).exe
 

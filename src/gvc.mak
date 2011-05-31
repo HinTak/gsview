@@ -357,8 +357,6 @@ gsv$(GSVIEW_VERSION)src.zip:
 	copy LICENCE ..
 	copy FILE_ID.DIZ ..
 	cd ..
-	-del epstool.zip
-	zip -9 -@ epstool.zip < src\gvcliste.txt
 	-del pstotext.zip
 	zip -9 -@ pstotext.zip     < src\gvclistp.txt
 	-del src.zip
@@ -366,7 +364,7 @@ gsv$(GSVIEW_VERSION)src.zip:
 	zip -9 -@ src.zip     < gvclists.txt
 	-del gvclists.txt
 	-del gsv$(GSVIEW_VERSION)src.zip
-	zip -9 gsv$(GSVIEW_VERSION)src.zip epstool.zip pstotext.zip src.zip Readme.htm gsview.css cdorder.txt FILE_ID.DIZ LICENCE
+	zip -9 gsv$(GSVIEW_VERSION)src.zip pstotext.zip src.zip Readme.htm gsview.css cdorder.txt FILE_ID.DIZ LICENCE
 	-del Readme.htm
 	-del gsview.css
 	-del cdorder.txt
@@ -511,7 +509,6 @@ distcopy:
 	copy gsprint.htm ..\gsview\gsprint.htm
 	copy gsprint.exe ..\gsview\gsprint.exe
 	copy ..\epstool\epstool.htm ..\gsview\epstool.htm
-	copy ..\epstool\epstool.exe ..\gsview\epstool.exe
 	copy gsv16spl.exe ..\gsview\gsv16spl.exe
 	echo GSview $(GSVIEW_DOT_VERSION)> filelist.tmp
 	echo gsview>> filelist.tmp

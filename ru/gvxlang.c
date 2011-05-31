@@ -19,7 +19,7 @@
 #include "gvx.h"
 #include "gvxres.h"
 #include "gvxlang.h"
-#include "ru/gvclang.h"
+#include "gvclang.h"
 
 /* string table ids must be in order since we use a binary search */
 STRING_ENTRY string_ru[] = {
@@ -67,7 +67,7 @@ MENU_ENTRY menu_ru[] = {
   { "/Файл/_Печать...",      "P",    GS_CMD, IDM_PRINT, NULL },
   { "/Файл/Печатать _файл...",      NULL,   GS_CMD, IDM_SPOOL, NULL },
   { "/Файл/sep3",           NULL,   NULL,       0, "<Separator>" },
-  { "/Файл/По_казать сообщения",      "M",    GS_CMD, IDM_GSMESS, NULL },
+  { "/Файл/Соо_бщения Ghostscript...",      "M",    GS_CMD, IDM_GSMESS, NULL },
   { "/Файл/sep4",           NULL,   NULL,       0, "<Separator>" },
   { "/Файл/1LASTFILE",      NULL,   GS_CMD, IDM_LASTFILE1, NULL },
   { "/Файл/2LASTFILE",      NULL,   GS_CMD, IDM_LASTFILE2, NULL },
@@ -80,7 +80,7 @@ MENU_ENTRY menu_ru[] = {
 /*
   { "/Правка/_Копировать",          "<control>C", GS_CMD, IDM_COPYCLIP, NULL },
   { "/Правка/sep1",           NULL,   NULL,       0, "<Separator>" },
-  { "/Правка/Конвертировать _битмэп",    NULL,   GS_CMD, IDM_CONVERT, NULL },
+  { "/Правка/Конвертировать _бититовый образ",    NULL,   GS_CMD, IDM_CONVERT, NULL },
 */
   { "/Правка/Сохранить картинку как BMP",      NULL,   GS_CMD, IDM_PASTETO, NULL },
   { "/Правка/sep2",           NULL,   NULL,       0, "<Separator>" },
@@ -168,7 +168,7 @@ MENU_ENTRY menu_ru[] = {
   { "/Ориентация/sep1",            NULL,   NULL,       0, "<Separator>" },
   { "/Ориентация/_Книжная",       NULL,   GS_CMD,     IDM_PORTRAIT, "<CheckItem>" },
   { "/Ориентация/А_льбомная",      NULL,   GS_CMD,     IDM_LANDSCAPE, "<CheckItem>" },
-  { "/Ориентация/_Вниз головой",    NULL,   GS_CMD,     IDM_UPSIDEDOWN, "<CheckItem>" },
+  { "/Ориентация/П_еревернутая книжная",    NULL,   GS_CMD,     IDM_UPSIDEDOWN, "<CheckItem>" },
   { "/Ориентация/_Обратная альбомная",       NULL,   GS_CMD,     IDM_SEASCAPE, "<CheckItem>" },
   { "/Ориентация/sep2",            NULL,   NULL,       0, "<Separator>" },
   { "/Ориентация/_Поменять альбомные",     NULL,   GS_CMD,     IDM_SWAPLANDSCAPE, "<CheckItem>" },

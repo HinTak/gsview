@@ -126,8 +126,7 @@ int percent_done;		/* percentage of document processed */
 int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
 
 int number_of_displays = 1; /* number of active displays */
-DISPLAY_INFO first_display;
-DISPLAY_INFO last_display;
+DISPLAY_INFO win_display[4];
 
 #if (WINVER < 0x0400)
 /* Windows 4.0 scroll bar extras */
@@ -2551,6 +2550,9 @@ WNDCLASS wndclass;
 int width, height;
 TCHAR class_name[MAXSTR];
 static BOOL class_registered;
+DISPLAY_INFO *di;
+int ndisp;
+RECT rect;
 
 	if (!image.open)
 	    return;
@@ -2579,12 +2581,21 @@ static BOOL class_registered;
 	    width = GetSystemMetrics(SM_CXSCREEN);
 	    height = GetSystemMetrics(SM_CYSCREEN);
 */
+	    /* Put full screen on current display */
+	    GetWindowRect(hwndimg, &rect);
+	    ndisp = find_display((rect.left+rect.right)/2, 
+		(rect.top+rect.bottom)/2);
+	    if (ndisp < 0)
+		ndisp = find_display(rect.left, rect.top);
+	    if (ndisp < 0)
+		ndisp = 0;
+ 	    di = &win_display[ndisp];
 
 	    fullscreen = TRUE;
 	    hwnd_fullscreen = CreateWindow(class_name, szAppName,
 		      WS_POPUP,
-		      last_display.left, last_display.top, 
-		      last_display.width, last_display.height,
+		      di->left, di->top, 
+		      di->width, di->height,
 		      NULL /* parent = desktop */, 
 		      NULL, phInstance, (void FAR *)NULL);
 

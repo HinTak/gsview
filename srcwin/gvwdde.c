@@ -212,9 +212,15 @@ char gsdocbuf[MAXSTR];
         fprintf(ddefile, "[ShowGroup(\042%s\042,8)]\n",groupname);
     sprintf(setup, "[ReplaceItem(\042%s\042)]", GSVIEW_NAME);
     DDEEXECUTE(setup);
+#ifdef _WIN64
+#define GSVIEW_ICON "gsview64.ico"
+#else
+#define GSVIEW_ICON "gsview32.ico"
+#endif
     if (!is_win4)
-       sprintf(setup, "[AddItem(\042%s%s\042,\042%s\042, \042%sgsview32.ico\042)]", 
-	  gsviewpathbuf, GSVIEW_EXENAME, GSVIEW_NAME, gsviewpathbuf);
+       sprintf(setup, "[AddItem(\042%s%s\042,\042%s\042, \042%s%s\042)]", 
+	  gsviewpathbuf, GSVIEW_EXENAME, GSVIEW_NAME, gsviewpathbuf, 
+	  GSVIEW_ICON);
     else
        sprintf(setup, "[AddItem(\042%s%s\042,\042%s\042)]", 
 	  gsviewpathbuf, GSVIEW_EXENAME, GSVIEW_NAME);

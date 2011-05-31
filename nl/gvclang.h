@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -20,11 +20,11 @@
 
 #define AANEDERLANDS "Nederlands"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2003 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2005 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Alle rechten voorbehouden"
 #define GSVIEW_COPYRIGHT3 "Zie het LICENCE bestand voor meer details."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2002 artofcode LLC,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2005 artofcode LLC,"
 #define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Alle rechten voorbehouden."
 #define GS_COPYRIGHT3 "Zie het bestand PUBLIC voor meer details"
 
@@ -294,7 +294,7 @@
 #define AAONLINEREG "Online Registreren"
 #define AAREG1 "Voer uw naam en registratienummmer in"
 #define AAREG2 ""
-#define AANAG1 "GSview is Copyright 2003 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview is Copyright 2005 Ghostgum Software Pty Ltd."
 #define AANAG2 "Ondersteun de ontwikkeling van GSview door het programma te registreren."
 #define AANAG3 ""
 #define AANAG4 "GSview kan online worden geregistreerd bij:"
@@ -338,26 +338,26 @@
 #define AABETAWARN "Dit is een BETA testversie van GSview.  De werking vervalt op %04d-%02d-%02d."
 #define AAINSTALLOK "Installatie met succes afgewerkt."
 #define AAINSTALLFAILED "Installatie mislukt!"
-#define AAPROGMANGROUP1 "GSview Setup kan een Programmagroep of Start Menu Item aanmaken."
-#define AAPROGMANGROUP2 "Aanmaken van Groep / Item"
+#define AAPROGMANGROUP1 "GSview kan een programmaobject (eCS) of snelkoppeling (Windows) aanmaken."
+#define AAPROGMANGROUP2 "Aanmaken van programmaobject / snelkoppeling"
 #define AAPROGMANGROUP3 "Naam"
 #define AAPROGMANGROUP4 "GS Tools"
-#define AAPROGMANGROUP5 "Een Programmagroep met de naam \042%s\042 is aangemaakt."
-#define AAPROGMANGROUP6 "Een snelkoppeling met de naam \042GSview\042 is op het bureaublad geplaatst."
+#define AAPROGMANGROUP5 "Een programmaobject met de naam \042%s\042 werd aangemaakt."
+#define AAPROGMANGROUP6 "Een snelkoppeling met de naam \042GSview\042 werd aangemaakt."
 #define AAPMOBJECT1 "GSview Setup kan een snelkoppeling aanmaken voor GSview."
-#define AAPMOBJECT2 "GSview snelkoppeling wordt aangemaakt."
+#define AAPMOBJECT2 "Programmaobject (eCS) of snelkoppeling (Windows)"
 #define AADONEBAK "Het vorige autoexec.bat werd hernoemd tot %s"
 #define AACANTLOAD "kan %s kan niet laden"
 #define AACANTCREATETEMPFILE "Kan naam van tijdelijk bestand niet maken."
 #define AACANTOPENREAD "Kan %s kan niet openen."
 #define AACANTOPENWRITE "Kan %s niet opslaan."
-#define AAERRORRENAME "Fout bij het hernoemen van %s tot %s."
+#define AAERRORRENAME "Fout bij het herbenoemen van %s tot %s."
 #define AANODDEPROGMAN "Kon DDE verbinding met de Program Manager niet openen.  Start Windows opnieuw op."
 #define AAINSERTDISK "Plaats de schijf met %s."
 #define AAZIPNOTFOUND "Zipbestand niet gevonden."
 #define AAUNZIPCANCELLED "Uitpakken gestopt\n"
 #define AACANTALLOCBUF "Kan geen geheugen toewijzen voor een kopieerbuffer."
-#define AAPROGRAMOBJECTFAILED "Snelkoppeling op bureablad kon niet worden gemaakt."
+#define AAPROGRAMOBJECTFAILED "De snelkoppeling of het programmaobject kon niet worden gemaakt."
 #define AAUNINSTALLTITLE "GSview en AFPL Ghostscript"
 #define AAUNINSTALLITEM "GSview en AFPL Ghostscript de-installeren."
 
@@ -392,8 +392,8 @@
  printerresoluties bij in het initialisatiebestand."
 #define AACFG31 "De standaardlijst van apparaten en resoluties komt uit\
  de standaard distributieversie van Ghostscript 5.50 versie en kan incompleet zijn."
-#define AACFG32 "GSview printerlijst wordt bijgewerkt."
-#define AACFG33 "Bij het bijwerken van de GSview printerlijst worden alle bestaande gegevens overschreven."
+#define AACFG32 "Lijst met afdrukapparaten  bijwerken."
+#define AACFG33 "Tijdens het bijwerken van de GSview lijst met afdrukapparaten worden alle bestaande gegevens overschreven."
 #define AACFG40 "GSview kan koppelingen aanmaken voor PostScript en\
  Portable Document Format (PDF) bestanden."
 #define AACFG43 "Door deze koppelingen zal GSview worden opgestart\
@@ -402,13 +402,13 @@
   GSview ook als viewer gebruiken voor PostScript en PDF bestanden."
 #define AACFG41 "Koppel PostScript (*.ps and *.eps) bestanden met GSview."
 #define AACFG42 "Koppel PDF (*.pdf) bestanden met GSview."
-#define AACFG50 "GSview kan een Programmagroep of\
- Snelkoppeling in het Start Menu aanmaken voor GSview en AFPL Ghostscript."
-#define AACFG51 "Groep/Snelkoppeling wordt aangemaakt"
+#define AACFG50 "GSview kan een programmaobject of\
+ snelkoppeling in het Start Menu aanmaken voor GSview en AFPL Ghostscript."
+#define AACFG51 "Programmaobject/Snelkoppeling aanmaken"
 #define AACFG52 "Naam"
-#define AACFG53 "GSview kan een Snelkoppeling aanmaken op het Bureaublad. \
+#define AACFG53 "GSview kan een programmaobject of snelkoppeling aanmaken. \
  Hierbij worden extensies van PostScript (*.ps, *.eps) en PDF (*.pdf) gekoppeld aan GSview."
-#define AACFG54 "Snelkoppeling wordt aangemaakt."
+#define AACFG54 "Programmaobject of snelkoppeling aanmaken."
 #define AACFG60 "GSview is nu klaar om met de configuratie te beginnen. \r\rKlik op Afsluiten om verder te gaan."
 #define AACFG70 "Configuratie met succes uitgevoerd."
 #define AACFG72 "Indien het later nodig zou zijn de configuratie wijzigen,\

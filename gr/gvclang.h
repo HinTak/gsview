@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -20,11 +20,11 @@
 
 #define AAGREEK "Ελληνικά"
 
-#define GSVIEW_COPYRIGHT1 "Πνευματικά δικαιώματα (C) 1993-2003 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Πνευματικά δικαιώματα (C) 1993-2005 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Με επιφύλαξη κάθε νόμιμου δικαιώματος."
 #define GSVIEW_COPYRIGHT3 "Για περισσότερες πληροφορίες ανατρέξτε στο αρχείο LICENCE."
 
-#define GS_COPYRIGHT1 "Πνευματικά δικαιώματα (C) 1994-2002 artofcode LLC,"
+#define GS_COPYRIGHT1 "Πνευματικά δικαιώματα (C) 1994-2005 artofcode LLC,"
 #define GS_COPYRIGHT2 "Benicia, California, U.S.A. Με επιφύλαξη κάθε νόμιμου δικαιώματος."
 #define GS_COPYRIGHT3 "Για περισσότερες πληροφορίες ανατρέξτε στο αρχείο PUBLIC."
 
@@ -296,7 +296,7 @@
 #define AAONLINEREG "Ηλεκτρονική δήλωση"
 #define AAREG1 "Παρακαλώ πληκτρολογήστε το όνομά σας και τον αριθμό"
 #define AAREG2 "δήλωσης του προγράμματος."
-#define AANAG1 "GSview - Πνευματικά δικαιώματα 2003 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview - Πνευματικά δικαιώματα 2005 Ghostgum Software Pty Ltd."
 #define AANAG2 "Υποστηρίξτε τη συνέχιση της ανάπτυξης του προγράμματος"
 #define AANAG3 "GSview δηλώνοντας τη χρήση του."
 #define AANAG4 "Η δήλωση του GSview μπορεί να γίνει ηλεκτρονικά στη διεύθυνση"
@@ -364,7 +364,7 @@
 #define AAUNINSTALLITEM "Κατάργηση εγκατάστασης GSview και AFPL Ghostscript"
 
 /* setup program */
-#define AAINSTALLSPACE "Για την εγκατάσταση αυτή απαιτείται χώρος 5 Mbytes στο μόνιμο δίσκο."
+#define AAINSTALLSPACE "Για την εγκατάσταση αυτή απαιτείται χώρος 7 Mbytes στο μόνιμο δίσκο."
 #define AAGSVIEWREQUIRES "Το GSview επίσης απαιτεί την ύπαρξη του μεταγλωττιστή "
 #define AAVIEWREADMEDETAILS "Διαβάστε το αρχείο Readme για τον τρόπο προμήθειας του συνόλου των προγραμμάτων Ghostscript."
 #define AACOPYRIGHTNOTICE "Πνευματικά δικαιώματα"

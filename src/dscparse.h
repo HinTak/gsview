@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* $Id: dscparse.h,v 1.15 2004/01/08 09:15:41 ghostgum Exp $ */
+/* $Id: dscparse.h,v 1.18 2005/01/14 08:15:52 ghostgum Exp $ */
 /* Interface for the DSC parser. */
 
 #ifndef dscparse_INCLUDED
@@ -361,8 +361,9 @@ typedef enum CDSC_MESSAGE_ERROR_e {
 
 /* severity */
 typedef enum CDSC_MESSAGE_SEVERITY_e {
-  CDSC_ERROR_INFORM	= 0,	/* Not an error */
-  CDSC_ERROR_WARN	= 1,	/* Not a DSC error itself,  */
+  CDSC_ERROR_NONE	= -1,	/* Not an error */
+  CDSC_ERROR_INFORM	= 0,	/* Not an error, but a common abuse */
+  CDSC_ERROR_WARN	= 1,	/* Not a DSC error itself */
   CDSC_ERROR_ERROR	= 2	/* DSC error */
 } CDSC_MESSAGE_SEVERITY;
 
@@ -501,6 +502,12 @@ char dummy[1024];
     /* public data */
     /* Added 2003-07-15 */
     CDSCMACBIN *macbin;		/* Mac Binary header */
+    /* Added 2004-04-28 */
+    GSBOOL dcs1;		/* True if dcs2 set but really DCS 1.0 */
+
+    /* public data */
+    /* Added 2005-01-14 */
+    CDSC_MESSAGE_SEVERITY worst_error;	/* CDSC_MESSAGE_SEVERITY */
 };
 
 

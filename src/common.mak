@@ -40,7 +40,7 @@ OBJCOM2=$(OD)gvcedit$(OBJ) $(OD)gvcmeas$(OBJ) \
 OBJCOM=$(OBJCOM1) $(OBJCOM2)
 
 HDRSGS=$(SRC)iapi.h $(SRC)errors.h $(SRC)gdevdsp.h
-HDRSCOM=$(OD)gsvver.h $(SRC)dscparse.h $(SRC)gvcfn.h $(SRC)gvcver.h $(SRC)gvcfile.h
+HDRSCOM=$(OD)gsvver.h $(SRC)dscparse.h $(SRC)gvcfn.h $(SRC)gvcver.h $(SRC)gvcfile.h $(SRC)gvctype.h
 
 HDRS=$(HDRSGS) $(HDRSCOM) $(HDRSPLAT)
 
@@ -153,19 +153,9 @@ $(OD)gvcbetaa$(OBJ): $(SRC)gvcbeta.c $(SRC)gvcbeta.h $(HDRS)
 
 
 #################################################################
-# epstool files
+# epstool has been removed from this version of GSview
+# Please use the later epstool 3.x
 
-EPSOBJS=$(OD)epstool$(OBJ) $(OD)gvcepse$(OBJ) $(OD)gvcfile$(OBJ) $(OD)dscparse$(OBJ) $(OD)dscutil$(OBJ) $(EPSOBJ2)
-
-
-$(OD)epstool$(OBJ): $(SRC)epstool.c $(SRC)epstool.h $(SRC)dscparse.h $(SRC)gvceps.h
-	$(COMP) $(EPSDEF) $(FOO)epstool$(OBJ) $(CO) $(SRC)epstool.c
-
-$(OD)gvcepse$(OBJ): $(SRC)gvceps.c $(SRC)gvceps.h $(HDRS)
-	$(COMP) $(EPSDEF) $(FOO)gvcepse$(OBJ) $(CO) $(SRC)gvceps.c
-
-$(BD)epstool$(EXE): $(EPSOBJS)
-	$(COMP) $(EPSDEF) $(FE)$(BD)epstool$(EXE) $(EPSOBJS) $(EPSLIBS) 
 
 
 #################################################################

@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1996-2005, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -510,7 +510,12 @@ It is intended that gvwgs be called with temporary files\n";
 
 
 /* copyright dialog box */
-BOOL CALLBACK _export
+#ifdef _WIN64
+INT_PTR
+#else
+BOOL
+#endif
+CALLBACK _export
 AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {

@@ -216,7 +216,7 @@ END
 
 STRINGTABLE
 BEGIN
-	GSVS(IDS_LARGEMEDIA, "Warning: media size is wider than 2 metres or higher than 2 metres.  Please check 'Media | User Defined'")
+	GSVS(IDS_LARGEMEDIA, "Warning: media size is very large.  Please check 'Media | User Defined'")
 	GSVS(IDS_NOTIMPLEMENTED, "Not implemented")
 	GSVS(IDS_NOLINKTARGET, "Unknown target for link")
 	GSVS(IDS_PARSEERROR, "Error parsing command line")
