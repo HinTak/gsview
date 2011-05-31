@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -25,6 +25,7 @@
 #endif
 
 void gsview_depth(int new_depth);
+void gsview_gsversion(int new_version);
 BOOL gsview_usersize(void);
 void gsview_unzoom(void);
 
@@ -51,7 +52,7 @@ char answer[MAXSTR];		/* input dialog box answer string */
 			free(page_list.select);
 		page_list.select = NULL;
 		if (doc)
-			dsc_scan_clean(doc);
+			psfree(doc);
 		doc = (PSDOC *)NULL;
 		return 0;
 	case IDM_NEXT:
@@ -178,6 +179,14 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	case IDM_SPOOL:
 		gsview_spool((char *)NULL, (char *)NULL);
 		return 0;
+	case IDM_SAVEAS:
+		if (psfile.name[0] == '\0')
+		    gsview_select();
+		dfreopen();
+		if (psfile.name[0] != '\0')
+		    gsview_saveas();
+		dfclose();
+		return 0;
 	case IDM_EXTRACT:
 		if (psfile.name[0] == '\0')
 		    gsview_select();
@@ -201,7 +210,7 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		gsview_text_findnext();
 		return 0;
 	case IDM_EXIT:
-		PostQuitMessage(0);
+		post_close();
 		return 0;
 	case IDM_COPYCLIP:
 		copy_clipboard();
@@ -220,6 +229,10 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		    strcpy(option.gscommand, answer);
 		if (option.gscommand[0]=='\0')
 		    strcpy(option.gscommand, DEFAULT_GSCOMMAND);
+		return 0;
+	case IDM_GS3:
+	case IDM_GS261:
+		gsview_gsversion(command);
 		return 0;
 	case IDM_UNITPT:
 	case IDM_UNITMM:
@@ -270,6 +283,18 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		    else
 		        gsview_selectfile(psfile.name);
 		}
+		return 0;
+	case IDM_SHOWBBOX:
+		option.show_bbox = !option.show_bbox;
+		check_menu_item(IDM_OPTIONMENU, IDM_SHOWBBOX, option.show_bbox);
+#ifdef _Windows
+		PostMessage(hwndimg, WM_GSVIEW, SYNC_OUTPUT, 0L);
+#else
+		if (!WinInvalidateRect(hwnd_bmp, (PRECTL)NULL, TRUE))
+			error_message("error invalidating rect");
+  		if (!WinUpdateWindow(hwnd_bmp))
+			error_message("error updating window");
+#endif
 		return 0;
 	case IDM_PSTOEPS:
 		if (psfile.name[0] == '\0')
@@ -501,7 +526,7 @@ char mess[300];
 	message_box(mess, icon);
 }
 
-/* for gvcdsc.c errors instead of fprintf(stderr,...)! */
+/* for ps.c errors instead of fprintf(stderr,...)! */
 void
 pserror(char *str)
 {
@@ -528,14 +553,28 @@ char answer[MAXSTR];
 	if (!get_string(prompt,answer) || atoi(answer)==0)
 		return FALSE;
 	option.user_width = atoi(answer);
+        gsview_check_usersize();
 	load_string(IDS_USERHEIGHT, prompt, sizeof(prompt));
 	sprintf(answer,"%d", option.user_height);
 	if (!get_string(prompt,answer) || atoi(answer)==0)
 		return FALSE;
 	option.user_height = atoi(answer);
+	if ((option.user_width==0) || (option.user_height == 0)) {
+	    option.user_width = 640;
+	    option.user_width = 480;
+	}
+        gsview_check_usersize();
 	return TRUE;
 }
 
+void
+gsview_check_usersize()
+{
+	if ( (option.user_width > 2880) || (option.user_height > 4100) ) {
+	    play_sound(SOUND_ERROR);
+	    message_box("Warning: media size is wider than 1 metre or higher than 1 metre.  Please check 'Media | User Defined'", 0);
+	}
+}
 
 int
 gsview_depth_to_menu(int depth)
@@ -604,5 +643,16 @@ gsview_unzoom(void)
 		gs_resize();
 		zoom = FALSE;
 	}
+}
+
+/* allow GS 2.6.1 to be used with 16-bit GSview */
+void
+gsview_gsversion(int new_version)
+{
+	check_menu_item(IDM_GSVERMENU, option.gsversion, FALSE);
+	option.gsversion = new_version;
+	check_menu_item(IDM_GSVERMENU, option.gsversion, TRUE);
+	info_wait(FALSE);
+	return;
 }
 

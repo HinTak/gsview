@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -101,6 +101,7 @@ PFNWP OldFrameWndProc;
 BOOL scan_bitmap(BMAP *pbm);
 HBITMAP make_bitmap(BMAP *, ULONG, ULONG, ULONG, ULONG, ULONG);
 void cursorpos_paint(HPS hps);
+void map_pt_to_pixel(float *x, float *y);
 MRESULT DragOver(PDRAGINFO);
 MRESULT Drop(PDRAGINFO);
 
@@ -496,7 +497,8 @@ HBITMAP hbmp;
     }
     if (WinOpenClipbrd(hab)) {
 	/* get bmp mutex to stop gs.exe changing bitmap while we copy it */
-	DosRequestMutexSem(gsview.bmp_mutex, 10000);
+	if (DosRequestMutexSem(gsview.bmp_mutex, 10000) == ERROR_TIMEOUT)
+	    message_box("copy_clipboard: mutex timeout", 0);
 	if (scan_bitmap(&bitmap)) {
 	    /* bitmap has changed */
 	    update_scroll_bars();
@@ -651,6 +653,7 @@ paint_bitmap(HPS ps, PRECTL prect, int scrollx, int scrolly)
     apts[1].y = apts[0].y + wy - 1;
 #endif
 
+#ifdef NOTUSED
     if ( (display.bitcount == 4)  /* standard VGA is buggy */
 	|| ( (os_version==201100) && (display.bitcount==8) && (bitmap.depth==1)) /* S3 and ATI GU are buggy */
          ) {
@@ -669,6 +672,7 @@ paint_bitmap(HPS ps, PRECTL prect, int scrollx, int scrolly)
 	}
     }
     else {
+#endif
 	/* fast code which doesn't always work */
 	/* This code works on the Trident SVGA and 8514 in 256 color mode,
  	 * but GpiDrawBits fails with a SYS3175 on the standard VGA.
@@ -676,8 +680,9 @@ paint_bitmap(HPS ps, PRECTL prect, int scrollx, int scrolly)
 	/* This won't work for version 2.11, S3 or ATI GU, 8bit/pixel display, 1bit/pixel bitmap */
 	GpiDrawBits(ps, bitmap.bits, bitmap.pbmi, 4, apts, 
 		(bitmap.depth != 1) ? ROP_SRCCOPY : ROP_NOTSRCCOPY, 0);
+#ifdef NOTUSED
     }
-
+#endif
     /* Fill areas around page */
     if (prect->yBottom < display.offset.y) {	/* bottom centre */
 	rect.yBottom = prect->yBottom;
@@ -707,6 +712,42 @@ paint_bitmap(HPS ps, PRECTL prect, int scrollx, int scrolly)
 	rect.xRight = prect->xRight;
 	WinFillRect(ps, &rect, SYSCLR_BUTTONMIDDLE);
     }
+
+    /* draw bounding box */
+    if ((doc != (PSDOC *)NULL) && option.show_bbox) {
+        POINTL pt;
+	float x, y;
+	/* map bounding box to device coordinates */
+	x = doc->boundingbox[LLX];
+	y = doc->boundingbox[LLY];
+	map_pt_to_pixel(&x, &y);
+	rect.xLeft   = (int)x;
+	rect.yBottom = (int)y;
+	x = doc->boundingbox[URX];
+	y = doc->boundingbox[URY];
+	map_pt_to_pixel(&x, &y);
+	rect.xRight  = (int)x;
+	rect.yTop    = (int)y;
+
+	/* draw it inverted */
+	GpiSetColor(ps, CLR_TRUE);
+	GpiSetLineType(ps, LINETYPE_SHORTDASH);
+	GpiSetMix(ps, FM_XOR);
+	pt.x = rect.xLeft; pt.y = rect.yBottom;
+	GpiMove(ps, &pt);
+	pt.x = rect.xRight; /* might be better to use GpiPolyLine */
+	GpiLine(ps, &pt);
+	pt.y = rect.yTop;
+	GpiLine(ps, &pt);
+	pt.x = rect.xLeft;
+	GpiLine(ps, &pt);
+	pt.y = rect.yBottom;
+	GpiLine(ps, &pt);
+	GpiSetLineType(ps, LINETYPE_DEFAULT);
+	GpiSetMix(ps, FM_DEFAULT);
+	GpiSetColor(ps, CLR_TRUE);
+    }
+
     return 0;
 }
 
@@ -798,7 +839,9 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	case WM_GSSYNC:
 		display.page = FALSE;
 		display.sync = TRUE;
+/* don't clear display.end since this stops us noticing end of non DSC document
 		display.end = FALSE;
+*/
 		if (!WinInvalidateRect(hwnd_bmp, (PRECTL)NULL, TRUE))
 			error_message("error invalidating rect");
   		if (!WinUpdateWindow(hwnd_bmp))
@@ -824,7 +867,8 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		display.sync = FALSE;
 		bitmap.valid = FALSE;
 		/* mark bitmap as unused */
-		DosRequestMutexSem(gsview.bmp_mutex, 10000);
+		if (DosRequestMutexSem(gsview.bmp_mutex, 10000) == ERROR_TIMEOUT)
+	    	    message_box("ClientWndProc: WM_CLOSE: mutex timeout", 0);
 		DosEnterCritSec();
 		if (bitmap.pbmi)
 		    DosFreeMem((PVOID)bitmap.pbmi);
@@ -1047,7 +1091,8 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	    /* Refresh the window each time the WM_PAINT message is received */
 
 	    /* get bmp mutex to stop gs.exe changing bitmap while we paint */
-	    DosRequestMutexSem(gsview.bmp_mutex, 10000);
+	    if (DosRequestMutexSem(gsview.bmp_mutex, 10000) == ERROR_TIMEOUT)
+	    	message_box("ClientWndProc: WM_PAINT: mutex timeout", 0);
 	    if (scan_bitmap(&bitmap))
 		update_scroll_bars(); /* bitmap has changed */
 
@@ -1173,6 +1218,17 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		case SB_PAGEDOWN:
 			nVscrollInc = max(1,cyClient);
 			break;
+#ifdef NOTUSED
+		case SB_SLIDERTRACK:
+		    /* only do this for fast redraw modes */
+		    /* these are 8bit/pixel and 1bit/pixel */
+	            if ( (bitmap.depth == 1) ||
+		       ((bitmap.depth == 8) && display.hasPalMan && display.hpal_exists) ) {
+			nVscrollInc = SHORT1FROMMP(mp2) - nVscrollPos;
+		    }
+		    else
+			nVscrollInc = 0;
+#endif
 		case SB_SLIDERPOSITION:
 			nVscrollInc = SHORT1FROMMP(mp2) - nVscrollPos;
 			break;
@@ -1227,6 +1283,17 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		case SB_PAGERIGHT:
 			nHscrollInc = max(1,cxClient);
 			break;
+#ifdef NOTUSED
+		case SB_SLIDERTRACK:
+		    /* only do this for fast redraw modes */
+		    /* these are 8bit/pixel and 1bit/pixel */
+	            if ( (bitmap.depth == 1) ||
+		       ((bitmap.depth == 8) && display.hasPalMan && display.hpal_exists) ) {
+			nHscrollInc = SHORT1FROMMP(mp2) - nHscrollPos;
+		    }
+		    else
+			nHscrollInc = 0;
+#endif
 		case SB_SLIDERPOSITION:
 			nHscrollInc = SHORT1FROMMP(mp2) - nHscrollPos;
 			break;
@@ -1282,10 +1349,16 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		    	WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_LINEDOWN));
 		    	break;
 		    case VK_PAGEUP:
-		    	WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGEUP));
+	    		if (SHORT1FROMMP(mp1) & KC_CTRL)
+		    	    WinSendMsg(hwnd, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGELEFT));
+		 	else
+		    	    WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGEUP));
 		    	break;
 		    case VK_PAGEDOWN:
-		    	WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGEDOWN));
+	    		if (SHORT1FROMMP(mp1) & KC_CTRL)
+		    	    WinSendMsg(hwnd, WM_HSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGERIGHT));
+		 	else
+		    	    WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_PAGEDOWN));
 		    	break;
 		    case VK_LEFT:
 	    		if (SHORT1FROMMP(mp1) & KC_CTRL)
@@ -1313,7 +1386,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		        display.zoom_yoffset = y;
 			x = (scroll_pos.x+cxClient/2)*72.0/option.xdpi;
 			y = (scroll_pos.y+cyClient/2)*72.0/option.ydpi;
-			transform_cursorpos(&x, &y);
+			transform_point(&x, &y);
 			x *= option.xdpi/72.0;
 			y *= option.ydpi/72.0;
 			display.zoom_xoffset -= (int)(x*72.0/option.zoom_xdpi);
@@ -1356,6 +1429,34 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
   return WinDefWindowProc(hwnd, mess, mp1, mp2);
 }
 
+/* map from a coordinate in points, to a coordinate in pixels */
+/* This is the opposite of the transform part of get_cursorpos */
+/* Used when showing bbox */
+void
+map_pt_to_pixel(float *x, float *y)
+{
+	if (zoom) {
+	    /* WARNING - this doesn't cope with EPS Clip */
+	    *x = (*x - display.zoom_xoffset) * option.zoom_xdpi / 72.0;
+	    *y = (*y - display.zoom_yoffset) * option.zoom_ydpi / 72.0;
+	    *x = (*x * 72.0 / option.xdpi);
+	    *y = (*y * 72.0 / option.ydpi);
+	    itransform_point(x, y);
+	    *x = (*x * option.xdpi / 72.0) - scroll_pos.x + display.offset.x;
+	    *y = (*y * option.ydpi / 72.0) - scroll_pos.y + display.offset.y;
+	}
+	else {
+	    *x = *x - (display.epsf_clipped ? doc->boundingbox[LLX] : 0);
+	    *y = *y - (display.epsf_clipped ? doc->boundingbox[LLY] : 0);
+	    itransform_point(x, y);
+	    *x = *x * option.xdpi/72.0
+		  - scroll_pos.x + display.offset.x;
+	    *y = *y * option.ydpi/72.0
+		  - scroll_pos.y + display.offset.y;
+	}
+}
+
+
 /* return coordinates in pts from origin of page */
 /* For Portrait, this is the bottom left */
 /* For rotated pages, this is NOT the bottom left */
@@ -1372,24 +1473,9 @@ POINTL pt;
 	WinQueryWindowRect(hwnd_bmp, &rect);
 	if (!WinPtInRect(hab, &rect, &pt))
 	    return FALSE;
-	if (zoom) {
-            /* first figure out number of pixels to zoom origin point */
-	    *x = (scroll_pos.x+pt.x-display.offset.x)*72.0/option.xdpi;
-	    *y = (scroll_pos.y+pt.y-display.offset.y)*72.0/option.ydpi;
-	    transform_cursorpos(x,y);
-	    *x = *x * option.xdpi/72;
-	    *y = *y * option.ydpi/72;
-	    /* now convert to pts and offset it */
-	    *x = *x * 72/option.zoom_xdpi + display.zoom_xoffset;
-	    *y = *y * 72/option.zoom_ydpi + display.zoom_yoffset;
-	}
-	else {
-	    *x = (scroll_pos.x+pt.x-display.offset.x)*72.0/option.xdpi 
-		      + (display.epsf_clipped ? doc->bbox.llx : 0);
-	    *y = (scroll_pos.y+pt.y-display.offset.y)*72.0/option.ydpi
-		      + (display.epsf_clipped ? doc->bbox.lly : 0);
-	    transform_cursorpos(x, y);
-	}
+	*x = scroll_pos.x+pt.x-display.offset.x;
+	*y = scroll_pos.y+pt.y-display.offset.y;
+	transform_cursorpos(x, y);
 	return TRUE;
 }
 

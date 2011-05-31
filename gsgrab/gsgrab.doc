@@ -17,8 +17,8 @@
  of the file.
 2Installation
 ?Installation
- This version of GSgrab works best with Ghostscript for Windows 3.0,
- but will work with Ghostscript 2.6.1.
+ This version of GSgrab works best with Ghostscript for Windows 3.12 
+ or later, but will work with Ghostscript 2.6.1.
 
  Install GSgrab by copying gsgrab.exe and gsgrab.hlp to your
  Ghostscript directory.
@@ -42,7 +42,7 @@
 
  Now start up the `Control Panel`, then `Printers`, add
  a PostScript printer (Apple Laserwriter II NT is suitable) and
- then `Connect` it to `GSGRAB`.
+ then `Connect` it to `D:\WINDOWS\GSGRAB`.
 
  GSgrab should now work.
  Try it by printing to the PostScript printer which should
@@ -55,7 +55,7 @@
  To uninstall GSview, remove the files you installed above, then remove
  c:\windows\gsgrab.ini from the appropriate windows directory.
  Next edit win.ini, find the section [ports] and remove
- the line `GSGRAB=`
+ the line `D:\WINDOWS\GSGRAB=`
 
  If you have problems, try reading the help topic `Common Problems`.
 
@@ -118,12 +118,10 @@
  the copyright notice and this notice be preserved on all copies.
 
      Author: Russell Lang
-   Internet: rjl@monu1.cc.monash.edu.au
+   Internet: rjl@aladdin.com
 
 2Problems and Tasks
 ?Problems and Tasks
- I think GSGRAB is always written to c:\windows.  Need to check this.
-
  16bit Ghostscript for Windows is a large model program.  Only one
  copy can be running at a time.  If a user tries to print while
  Ghostscript is already running (e.g. for preview with GSview)

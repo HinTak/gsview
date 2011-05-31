@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -32,7 +32,7 @@
 #include <io.h>
 #include <time.h>
 #define NeedFunctionPrototypes 1
-#include "gvcdsc.h"
+#include "ps.h"
 #include "gvcrc.h"
 
 
@@ -59,10 +59,15 @@
 
 #define MAXSTR 80	/* maximum file name length and general string length */
 #define PROFILE_SIZE 2048
+#ifdef WIN32
+#define DEFAULT_GSCOMMAND "gswin32.exe"
+#define INIFILE "gsview32.ini"
+#else
 #define DEFAULT_GSCOMMAND "gswin"
+#define INIFILE "gsview.ini"
+#endif
 #define DEFAULT_RESOLUTION 96.0
 #define DEFAULT_ZOOMRES 300.0
-#define INIFILE "gsview.ini"
 #define INISECTION "Options"
 #define DEVSECTION "Devices"
 #define EOLSTR "\r\n"
@@ -79,12 +84,23 @@ typedef struct tagPROG {
     FILE	*input;		/* pipe to stdin */
 } PROG;
 
+typedef struct document PSDOC;
+
+typedef struct tagPSBBOX {
+	int	llx;
+	int	lly;
+	int	urx;
+	int	ury;
+	int	valid;
+} PSBBOX;
+
 typedef struct tagPSFILE {
 	BOOL	ignore_dsc;	/* true if DSC to be ignored */
 	PSDOC	*doc;		/* DSC structure.  NULL if not DSC */
 	int 	pagenum;	/* current page number */
 	char 	name[MAXSTR];	/* name of selected document file */
 	FILE 	*file;		/* selected file */
+	BOOL	ctrld;		/* TRUE if file starts with ^D */
 	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
 #ifdef _Windows
 	struct	ftime datetime;	/* time/date of selected file */
@@ -102,6 +118,7 @@ typedef struct tagPSFILE {
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
 	char	gscommand[MAXSTR];
+	int	gsversion;
 	POINT	img_origin;
 	POINT	img_size;
 	BOOL	img_max;
@@ -119,6 +136,7 @@ typedef struct tagOPTIONS {
 	BOOL	epsf_warn;
 	BOOL	redisplay;
 	BOOL    ignore_dsc;
+	BOOL	show_bbox;
 	int	orientation;
 	BOOL	swap_landscape;
 	float	xdpi;
@@ -220,6 +238,7 @@ extern HWND hwndtext;			/* gswin text window */
 extern HWND hwndimgchild;		/* gswin image child window */
 extern HINSTANCE phInstance;		/* instance of gsview */
 extern BOOL is_win31;			/* To allow selective use of win 3.1 features */
+extern BOOL is_winnt;			/* To allow selective use of Windows NT features */
 extern HMENU hmenu;			/* main menu */
 extern HACCEL haccel;			/* menu accelerators */
 extern HCURSOR hcWait;
@@ -251,10 +270,6 @@ extern PSBBOX bbox;
 
 
 #ifdef __WIN32__
-/* Windows NT has never been tried, but these macros fix up the */
-/* known differences from Windows 3.1 */
-/* Imitation pipes will need to be rewritten to use real pipes */
-/* similar to OS/2 */
 #define _huge
 #define MoveTo(hdc,x,y) MoveToEx((hdc),(x),(y),(LPPOINT)NULL)
 #define SetWindowOrg(hdc, x, y) SetWindowOrgEx(hdc, x, y, (LPPOINT)NULL);
@@ -289,7 +304,7 @@ void write_profile(void);
 
 /* in gvwmisc.c */
 /* BOOL SetDlgItemText(HWND hwnd, int id, char *str); */
-/* void PostQuitMessage(int dummy); */
+void post_close(void);
 void get_help(void);
 int message_box(char *str, int icon);
 void check_menu_item(int menuid, int itemid, BOOL checked);
@@ -304,6 +319,8 @@ void profile_create_section(PROFILE *prf, char *section, int id);
 
 /* in gvcdisp.c */
 void transform_cursorpos(float *x, float *y);
+void transform_point(float *x, float *y);
+void iransform_point(float *x, float *y);
 int get_paper_size_index(void);
 void gs_size(void);
 void gs_resize(void);
@@ -350,6 +367,7 @@ BOOL not_dsc(void);
 void gserror(UINT id, char *str, UINT icon, int sound);
 void pserror(char *str);
 int not_implemented(void);
+void gsview_check_usersize(void);
 int gsview_depth_to_menu(int depth);
 
 /* in gvwdlg.c */
@@ -381,6 +399,7 @@ void gsview_spool(char *, char *);
 void psfile_extract(FILE *f);
 char *get_devices(void);
 void print_cleanup(void);
+void gsview_saveas(void);
 void gsview_extract(void);
 BOOL gsview_cprint(BOOL to_file, char *cfname, char *optfname);
 

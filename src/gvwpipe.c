@@ -43,6 +43,7 @@ extern BOOL is_pipe_done(void);	/* true if pipe has just been reset */
  * and the HIWORD contained the byte count.
  * This was changed in gsview 1.1, Ghostscript 3.0 so that
  * 32 bit handle could be used for Win32  */
+/* In gsview 1.2, Windows NT uses a memory mapped file */
 
 char pipe_name[MAXSTR];		/* pipe filename */
 FILE *pipe_file;		/* pipe file */
@@ -51,6 +52,8 @@ fpos_t pipe_rpos;
 BOOL pipe_empty;
 int piperead(char *buf, int size);
 char *pipebuf;
+HANDLE pipe_hmapfile;
+LPBYTE pipe_mapptr;
 
 /* this is called before gswin is started */
 /* so we can tell when we get the first piperequest */
@@ -69,6 +72,26 @@ pipeopen(void)
 	    unlink(pipe_name);
 	    pipe_name[0] = '\0';
 	}
+#ifdef __WIN32__
+	if (is_winnt) {
+	    char buf[64];
+	    if (pipe_hmapfile != 0) {
+		if (pipe_mapptr != NULL)
+		    UnmapViewOfFile(pipe_mapptr);
+		pipe_mapptr = NULL;
+		CloseHandle(pipe_hmapfile);
+		pipe_hmapfile = 0;
+	    }
+	    sprintf(buf,"gsview_%d", hwndimg);
+	    pipe_hmapfile = CreateFileMapping((HANDLE)0xFFFFFFFF, NULL, PAGE_READWRITE, 0, 
+				PIPE_DATASIZE+sizeof(WORD), buf);
+	    pipe_mapptr = MapViewOfFile(pipe_hmapfile, FILE_MAP_WRITE, 0, 0, 0);
+	    if (pipe_mapptr == NULL) {
+		message_box("Can't memory map file",0);
+		return NULL;
+	    }
+	}
+#endif
 	if ((pipe_file = gp_open_scratch_file(szScratch, pipe_name, "w+b")) == (FILE *)NULL) {
 	    gserror(IDS_PIPE_EOPEN, NULL, NULL, SOUND_ERROR);
 	    unlink(pipe_name);
@@ -96,7 +119,8 @@ LPBYTE lpb;
 	    pipe_name[0] = '\0';
 	}
 	if (hwndtext != (HWND)NULL) {
-#ifdef GS261
+#if !defined(__WIN32__) && defined(GS261)
+	  if (option.gsversion == IDM_GS261) {
 	    /* send an EOF (zero length block) */
 	    hglobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, 1);
 	    if (hglobal == (HGLOBAL)NULL) {
@@ -104,17 +128,31 @@ LPBYTE lpb;
 	        return;
 	    }
 	    PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, MAKELPARAM(hglobal,0));
-#else
-	    /* send an EOF (zero length block) */
-	    hglobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, sizeof(WORD));
-	    if (hglobal == (HGLOBAL)NULL) {
-	        gserror(IDS_PIPE_EMEM, NULL, NULL, SOUND_ERROR);
-	        return;
+	  }
+	  else {
+#endif
+#ifdef __WIN32__
+	    if (is_winnt) {
+		/* send an EOF (zero length block) */
+		*((WORD *)pipe_mapptr) = 0;
+		PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, (LPARAM)hwndimg);
 	    }
-	    lpb = GlobalLock(hglobal);
-	    *((WORD FAR *)lpb) = 0;
-	    GlobalUnlock(hglobal);
-	    PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, (LPARAM)hglobal);
+	    else
+#endif
+	    {
+		/* send an EOF (zero length block) */
+		hglobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, sizeof(WORD));
+		if (hglobal == (HGLOBAL)NULL) {
+		    gserror(IDS_PIPE_EMEM, NULL, NULL, SOUND_ERROR);
+		    return;
+		}
+		lpb = GlobalLock(hglobal);
+		*((WORD FAR *)lpb) = 0;
+		GlobalUnlock(hglobal);
+		PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, (LPARAM)hglobal);
+	    }
+#if !defined(__WIN32__) && defined(GS261)
+	  }
 #endif
 	}
 	pipe_empty = TRUE;
@@ -153,27 +191,42 @@ UINT count;
 
 	count = piperead(pipebuf, PIPE_DATASIZE);
 	if (count==0)
-	    return;
+	    return; 
 
-	hglobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, PIPE_DATASIZE + sizeof(WORD));
-	if (hglobal == (HGLOBAL)NULL) {
-	    gserror(IDS_PIPE_EMEM, NULL, NULL, SOUND_ERROR);
-	    return;
+#ifdef __WIN32__
+	if (is_winnt) {
+	    memcpy(pipe_mapptr+sizeof(WORD), pipebuf, count);
+	    *((WORD *)pipe_mapptr) = (WORD)count;
+	    PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, (LPARAM)hwndimg);
 	}
-#ifdef GS261
-	lpb = GlobalLock(hglobal);
-	_fmemcpy(lpb, pipebuf, count);
-	GlobalUnlock(hglobal);
-	/* we may be processing SendMessage so use PostMessage to avoid lockups */
-	PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, MAKELPARAM(hglobal,count));
-#else
-	lpb = GlobalLock(hglobal);
-	*((WORD FAR *)lpb) = (WORD)count;
-	_fmemcpy(lpb+sizeof(WORD), pipebuf, count);
-	GlobalUnlock(hglobal);
-	/* we may be processing SendMessage so use PostMessage to avoid lockups */
-	PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, (LPARAM)hglobal);
+	else
 #endif
+ 	{
+	    hglobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, PIPE_DATASIZE + sizeof(WORD));
+	    if (hglobal == (HGLOBAL)NULL) {
+		gserror(IDS_PIPE_EMEM, NULL, NULL, SOUND_ERROR);
+		return;
+	    }
+#if !defined(__WIN32__) && defined(GS261)
+	  if (option.gsversion == IDM_GS261) {
+	    lpb = GlobalLock(hglobal);
+	    _fmemcpy(lpb, pipebuf, count);
+	    GlobalUnlock(hglobal);
+	    /* we may be processing SendMessage so use PostMessage to avoid lockups */
+	    PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, MAKELPARAM(hglobal,count));
+	  }
+	  else {
+#endif
+	    lpb = GlobalLock(hglobal);
+	    *((WORD FAR *)lpb) = (WORD)count;
+	    _fmemcpy(lpb+sizeof(WORD), pipebuf, count);
+	    GlobalUnlock(hglobal);
+	    /* we may be processing SendMessage so use PostMessage to avoid lockups */
+	    PostMessage(hwndtext, WM_GSVIEW, PIPE_DATA, (LPARAM)hglobal);
+#if !defined(__WIN32__) && defined(GS261)
+	  }
+#endif
+	}
 }
 
 /* write pipe_file to pipe */

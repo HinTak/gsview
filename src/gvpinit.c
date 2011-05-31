@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -510,6 +510,7 @@ init2(void)
 	if (option.epsf_clip) check_menu_item(IDM_OPTIONMENU, IDM_EPSFCLIP, TRUE);
 	if (option.epsf_warn) check_menu_item(IDM_OPTIONMENU, IDM_EPSFWARN, TRUE);
 	if (option.ignore_dsc) check_menu_item(IDM_OPTIONMENU, IDM_IGNOREDSC, TRUE);
+	if (option.show_bbox) check_menu_item(IDM_OPTIONMENU, IDM_SHOWBBOX, TRUE);
 	check_menu_item(IDM_UNITMENU, option.unit, TRUE);
 	check_menu_item(IDM_ORIENTMENU, option.orientation, TRUE);
 	check_menu_item(IDM_MEDIAMENU, option.media, TRUE);
@@ -540,6 +541,7 @@ int i;
 	option.img_size.x = CW_USEDEFAULT;
 	option.img_size.y = CW_USEDEFAULT;
 	option.img_max = FALSE;
+	option.gsversion = IDM_GS3;
 	option.unit = IDM_UNITPT;
 	option.quick = TRUE;
 	option.settings = TRUE;
@@ -553,6 +555,7 @@ int i;
 	option.epsf_clip = FALSE;
 	option.epsf_warn = FALSE;
 	option.ignore_dsc = FALSE;
+	option.show_bbox = FALSE;
 	option.redisplay = TRUE;
 	option.orientation = IDM_PORTRAIT;
 	option.swap_landscape = FALSE;

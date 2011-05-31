@@ -1,4 +1,4 @@
-INCOMPLETE DRAFT      30 May 1994
+INCOMPLETE DRAFT      27 Oct 1994
 
 Specifications for GSview.
 
@@ -6,10 +6,11 @@ Platform:
  - Three variants exist.  Variants will run under
    - OS/2 2.0, 2.1, 2.11
    - MS-DOS or DRDOS with MS-Windows 3.0 or 3.1.
-   - MS-DOS or DRDOS with MS-Windows 3.1 and Win32s.
+   - MS-DOS or DRDOS with MS-Windows 3.1 and Win32s, or Windows NT 3.5.
 
 Prerequisites:
  - Ghostscript 3.0
+ - Later than Ghostscript 3.12 for Windows NT.
  - 386 or higher processor for OS/2 or Win32s.  286 otherwise.
  - 250k bytes disk space per GSview variant.
  - 6M bytes free disk space for GSview, Ghostscript and 

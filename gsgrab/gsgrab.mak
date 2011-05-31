@@ -15,12 +15,12 @@
 # the copyright notice and this notice be preserved on all copies.
 
 # Makefile for GSgrab
-# Russell Lang 1994-06-08
-# using Borland C++ 3.1 or Borland C++ 4.0
+# Russell Lang 1994-04-10
+# using Borland C++ 3.1 or Borland C++ 4.5
 # 'make -fgsgrab.mak'
 #
-COMPBASE = d:\bc4
-#COMPBASE = c:\borlandc
+COMPBASE = f:\bc45
+#COMPBASE = d:\borlandc
 #
 COMPDIR = $(COMPBASE)\bin
 INCDIR = $(COMPBASE)\include

@@ -28,25 +28,53 @@ FILE *debug_file;
 void
 gs_puts(char *str, FILE *f)
 {
+    if (str != NULL) {
 	fputs(str, f);
 	if (debug_file != (FILE *)NULL)
 	   fputs(str, debug_file);
+    }
 }
 
 void 
 gs_copy(FILE *from, FILE *to, long begin, long end)
 {
-	dsc_copy(from, to, begin, end, NULL);
+	pscopyuntil(from, to, begin, end, NULL);
 	if (debug_file != (FILE *)NULL)
-	   dsc_copy(from, debug_file, begin, end, NULL);
+	   pscopyuntil(from, debug_file, begin, end, NULL);
 }
 
-/* transform cursorpos from coordinates relative to bottom left
+/* transform cursor position from device coordinates to points */
+/* taking into account rotated pages */
+void
+transform_cursorpos(float *x, float *y)
+{
+	  if (zoom) {
+            /* first figure out number of pixels to zoom origin point */
+	    *x = *x * 72.0/option.xdpi;
+	    *y = *y * 72.0/option.ydpi;
+	    transform_point(x,y);
+	    *x = *x * option.xdpi/72;
+	    *y = *y * option.ydpi/72;
+	    /* now convert to pts and offset it */
+	    *x = *x * 72/option.zoom_xdpi + display.zoom_xoffset;
+	    *y = *y * 72/option.zoom_ydpi + display.zoom_yoffset;
+	  }
+	  else {
+	    *x = *x * 72.0/option.xdpi 
+		+ (display.epsf_clipped ? doc->boundingbox[LLX] : 0);
+	    *y = *y * 72.0/option.ydpi
+		+ (display.epsf_clipped ? doc->boundingbox[LLY] : 0);
+	    transform_point(x,y);
+	  }
+}
+
+
+/* transform point from coordinates relative to bottom left
  * corner of paper to bottom left corner of rotated coordinate
  * system
  */
 void
-transform_cursorpos(float *x, float *y)
+transform_point(float *x, float *y)
 {
 float oldx, oldy;
 int real_orientation;
@@ -81,13 +109,53 @@ int width, height;
 	return;
 }
 
+/* inverse transform point from coordinates relative 
+ * to bottom left corner of rotated coordinate system
+ * to bottom left corner of paper 
+ */
+void
+itransform_point(float *x, float *y)
+{
+float oldx, oldy;
+int real_orientation;
+int width, height;
+	oldx = *x;
+	oldy = *y;
+	width  = (unsigned int)(display.width  * 72.0 / option.xdpi);
+	height = (unsigned int)(display.height * 72.0 / option.ydpi);
+	real_orientation = option.orientation;
+	if (option.swap_landscape) {
+	    if (option.orientation == IDM_LANDSCAPE)
+		real_orientation = IDM_SEASCAPE;
+	    else if (option.orientation == IDM_SEASCAPE)
+		real_orientation = IDM_LANDSCAPE;
+	}
+	switch (real_orientation) {
+	    case IDM_PORTRAIT:
+		break;
+	    case IDM_LANDSCAPE:
+	    	*y = height - oldx;
+	    	*x = oldy;
+	    	break;
+	    case IDM_UPSIDEDOWN:
+	    	*x = width - oldx;
+	    	*y = height - oldy;
+		break;
+	    case IDM_SEASCAPE:
+	    	*y = oldx;
+	    	*x = width - oldy;
+	    	break;
+	}
+	return;
+}
+
 /* get current media index to paper_size[], or -1 if no match */
 int
 get_paper_size_index(void)
 {
 int i;
-	for (i=0; paper_size[i].name != (char *)NULL; i++) {
-	    if (!stricmp(paper_size[i].name, option.medianame))
+	for (i=0; papersizes[i].name != (char *)NULL; i++) {
+	    if (!stricmp(papersizes[i].name, option.medianame))
 		return i;
 	}
 	return -1;
@@ -109,24 +177,24 @@ int i = get_paper_size_index();
 		    display.height = option.user_width;
 		}
 		else {
-		    display.width = paper_size[i].height;
-		    display.height = paper_size[i].width;
+		    display.width = papersizes[i].height;
+		    display.height = papersizes[i].width;
 		}
 		break;
 	    default:
 		if ((doc != (PSDOC *)NULL) && doc->epsf
 		    && option.epsf_clip) {
 		    display.epsf_clipped = TRUE;
-		    display.width = doc->bbox.urx - doc->bbox.llx;
-		    display.height = doc->bbox.ury - doc->bbox.lly;
+		    display.width = doc->boundingbox[URX] - doc->boundingbox[LLX];
+		    display.height = doc->boundingbox[URY] - doc->boundingbox[LLY];
 		}
 		else if (i < 0) {
 		    display.width = option.user_width;
 		    display.height = option.user_height;
 		}
 		else {
-		    display.width = paper_size[i].width;
-		    display.height = paper_size[i].height;
+		    display.width = papersizes[i].width;
+		    display.height = papersizes[i].height;
 		}
 	}
 	display.width  = (unsigned int)(display.width  / 72.0 * option.xdpi);
@@ -275,6 +343,7 @@ int i;
 		    gsview_media(IDM_USERSIZE);
 		    option.user_width  = doc->default_page_media->width;
 		    option.user_height = doc->default_page_media->height;
+		    gsview_check_usersize();
 		}
 	    }
 	}
@@ -344,7 +413,7 @@ char buf[MAXSTR];
 	}
 	else if (display.epsf_clipped)
 	    sprintf(buf,"/gsview_offset {%d %d translate} def\r\n",
-	        -doc->bbox.llx, -doc->bbox.lly);
+	        -doc->boundingbox[LLX], -doc->boundingbox[LLY]);
 	else
 	    sprintf(buf,"/gsview_offset {} def\r\n");
 	gs_puts(buf, f);
@@ -367,6 +436,10 @@ char buf[MAXSTR];
 	sprintf(buf,"/gsview_zoom %s def\r\n", zoom ? "true" : "false");
 	gs_puts(buf, f);
 	send_prolog(f, IDR_ORIENT);
+#if !defined(__WIN32__) && defined(GS261)
+	if (option.gsversion != IDM_GS261)
+#endif
+	    send_prolog(f, IDR_ORIENT3);
 	if (option.epsf_warn)
 	    send_prolog(f, IDR_EPSFWARN);
 }
@@ -450,12 +523,14 @@ dsc_scan(char *filename)
 		free(page_list.select);
 	page_list.select = NULL;
 	if (doc)
-		dsc_scan_clean(doc);
+		psfree(doc);
 	psfile.preview = 0;
+	psfile.ctrld = (fgetc(psfile.file) == '\004');
+        rewind(psfile.file);
 	if (option.ignore_dsc)
 	    doc = (PSDOC *)NULL;
 	else 
-	    doc = dsc_scan_file(psfile.file);
+	    doc = psscan(psfile.file);
 	if (doc == (PSDOC *)NULL) {
 	    dfclose();
 	    return FALSE;
@@ -485,12 +560,20 @@ char buf[MAXSTR];
 	    if (doc->pages) {
 	        sprintf(buf,"(Page: %s %d\\n) print flush\r\n", doc->pages[page].label ? doc->pages[page].label : " ", page+1);
 		gs_puts(buf, f);
+    		if (debug)
+		    gs_puts("%GSview beginpage\r\n", gsprog.input);
 		gs_copy(psfile.file, f, doc->pages[page].begin, doc->pages[page].end);
+    		if (debug)
+		    gs_puts("%GSview endpage\r\n", gsprog.input);
 	    }
 	    else {
 	        sprintf(buf,"(Page: %d\\n) print flush\r\n",page); 
 		gs_puts(buf, f);
+    		if (debug)
+		    gs_puts("%GSview endsetup\r\n", gsprog.input);
 		gs_copy(psfile.file, f, doc->endsetup, doc->endtrailer);
+    		if (debug)
+		    gs_puts("\n%GSview endtrailer\r\n", gsprog.input);
 	    }
 	}
 }
@@ -513,10 +596,20 @@ char buf[MAXSTR];
 	*d = '\0';
 	gs_puts(buf, f);
 	gs_puts("\\n) print flush\r\n", f);
-	gs_copy(psfile.file, f, doc->begincomments, doc->endcomments);
+	if (debug)
+	    gs_puts("%GSview beginheader\r\n", gsprog.input);
+	gs_copy(psfile.file, f, doc->beginheader, doc->endheader);
+	if (debug)
+	    gs_puts("%GSview endheader\r\n%GSview begindefaults\r\n", gsprog.input);
 	gs_copy(psfile.file, f, doc->begindefaults, doc->enddefaults);
+	if (debug)
+	    gs_puts("%GSview enddefaults\r\n%GSview beginprolog\r\n", gsprog.input);
 	gs_copy(psfile.file, f, doc->beginprolog, doc->endprolog);
+	if (debug)
+	    gs_puts("%GSview endprolog\r\n%GSview beginsetup\r\n", gsprog.input);
 	gs_copy(psfile.file, f, doc->beginsetup, doc->endsetup);
+	if (debug)
+	    gs_puts("%GSview endsetup\r\n", gsprog.input);
 }
 
 
@@ -583,10 +676,16 @@ do_output()
     if (gsprog.valid && display.page)
 	next_page();
 
-#ifndef GS261
+#if !defined(__WIN32__) && defined(GS261)
+    if (option.gsversion != IDM_GS261) {
+#endif
 	/* Cause a GS_BEGIN message to be sent to GSview */
-/*	gs_puts("(Begin\n) print flush\r\n", gsprog.input); */
+/*
+	gs_puts("(Begin\\n) print flush\r\n", gsprog.input);
+*/
 	gs_puts("-1 false .outputpage\r\n", gsprog.input);
+#if !defined(__WIN32__) && defined(GS261)
+    }
 #endif
 
     if (display.do_endfile && gsprog.valid) {
@@ -594,7 +693,11 @@ do_output()
 	    /* send trailer if needed */
 	    FILE *f;
 	    if ( (f = fopen(psfile.previous_name, "rb")) != (FILE *)NULL ) {
+    		if (debug)
+		    gs_puts("%GSview begintrailer\r\n", gsprog.input);
 	        gs_copy(f, gsprog.input, psfile.previous_begintrailer, psfile.previous_endtrailer);
+    		if (debug)
+		    gs_puts("%GSview endtrailer\r\n", gsprog.input);
 		fclose(f);
 	    }
 	}
@@ -667,18 +770,26 @@ do_output()
 	}
     }
 
+#if !defined(__WIN32__) && defined(GS261)
+    if (option.gsversion != IDM_GS261) {
+#endif
+	/* Cause a GS_END message to be sent to GSview */
+/*
+	gs_puts("(End\\n) print flush\r\n", gsprog.input);
+*/
+	gs_puts("-2 false .outputpage\r\n", gsprog.input);
+#if !defined(__WIN32__) && defined(GS261)
+    }
+#endif
+
     if (gsprog.valid)
         gs_puts("flushpage\r\n",gsprog.input);
+
     dfclose();
     if (debug_file)
         fclose(debug_file);
     debug_file = (FILE *)NULL;
 
-#ifndef GS261
-	/* Cause a GS_END message to be sent to GSview */
-/*	gs_puts("(End\n) print flush\r\n", gsprog.input); */
-	gs_puts("-2 false .outputpage\r\n", gsprog.input);
-#endif
 
     return TRUE;	/* all done */
 }

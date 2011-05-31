@@ -143,8 +143,10 @@ BOOL force = FALSE;
 #ifdef __WIN32__
 	    {   /* TEMPORARY KLUDGE */
 		int i;
-		for (i=0; i<100; i++)
+		for (i=0; i<10; i++) {
 		    do_message();	/* wait for gswin to close */
+		    Sleep(50);
+		}
 	    }
 #else
 	    while (GetModuleUsage(gsprog.hinst) &&  !bTimeout)

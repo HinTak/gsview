@@ -28,13 +28,9 @@ SetDlgItemText(HWND hwnd, int id, char *str)
 }
 
 void
-PostQuitMessage(int dummy)
+post_close(void)
 {
-/*
-	WinPostMsg(hwnd_frame, WM_QUIT, MPFROMLONG(0), MPFROMLONG(0));
-*/
 	WinPostMsg(hwnd_bmp, WM_CLOSE, MPFROMLONG(0), MPFROMLONG(0));
-	dummy = dummy;
 }
 
 void
@@ -116,7 +112,11 @@ ULONG rc;
 	if (isdigit(*sound[num].file))
 	    play_system_sound(sound[num].file);
 	else {
-	    if ((*pfnMciPlayFile)(hwnd_frame, sound[num].file, 0, 0, 0))
+	    char buf[MAXSTR];
+	    buf[0] = '\042';
+	    strcpy(buf+1, sound[num].file);
+	    strcat(buf, "\042");
+	    if ((*pfnMciPlayFile)(hwnd_frame, buf, 0, 0, 0))
 	        DosBeep(200,200);
 	}
 }

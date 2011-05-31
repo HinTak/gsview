@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,7 +18,7 @@
 /* gvcrc.h */
 /* Common Resource header file */
 
-#define GSVIEW_VERSION "1994-08-03  1.1"
+#define GSVIEW_VERSION "1995-04-18  1.2"
 #define EMX_NEEDED "0.8h"
 
 #define ID_GSVIEW 42
@@ -31,23 +31,17 @@
 
 #define IDM_FILEMENU	100
 #define IDM_OPEN	101
-#define IDM_CLOSE	102
-#define IDM_NEXT	103
-#define IDM_NEXTSKIP	104
-#define IDM_REDISPLAY   105
-#define IDM_PREV	106
-#define IDM_PREVSKIP	107
-#define IDM_GOTO	108
-#define IDM_INFO	109
-#define IDM_SELECT	110
-#define IDM_PRINT	111
-#define IDM_PRINTTOFILE 112
-#define IDM_SPOOL	113
-#define IDM_EXTRACT	114
-#define IDM_PSTOEPS	115
-#define IDM_EXIT	117
-#define IDM_DROP	118
-#define IDM_SKIP	119
+#define IDM_SELECT	102
+#define IDM_SAVEAS	103
+#define IDM_EXTRACT	104
+#define IDM_PSTOEPS	105
+#define IDM_CLOSE	106
+#define IDM_INFO	107
+#define IDM_PRINT	110
+#define IDM_PRINTTOFILE 111
+#define IDM_SPOOL	112
+#define IDM_EXIT	113
+#define IDM_DROP	114
 
 #define IDM_EDITMENU	150
 #define IDM_COPYCLIP	151
@@ -79,18 +73,32 @@
 #define IDM_EPSFCLIP	  185
 #define IDM_EPSFWARN	  186
 #define IDM_IGNOREDSC	  187
+#define IDM_SHOWBBOX      188
 
 #define IDM_UNITMENU	190
 #define IDM_UNITPT	191
 #define IDM_UNITMM	192
 #define IDM_UNITINCH	193
 
-#define IDM_ORIENTMENU	200
-#define IDM_PORTRAIT	201
-#define IDM_LANDSCAPE   202
-#define IDM_UPSIDEDOWN  203
-#define IDM_SEASCAPE	204
-#define IDM_SWAPLANDSCAPE 205
+#define IDM_GSVERMENU	195
+#define IDM_GS261	196
+#define IDM_GS3		197
+
+#define IDM_VIEWMENU    200
+#define IDM_NEXT	201
+#define IDM_NEXTSKIP	202
+#define IDM_PREV	203
+#define IDM_PREVSKIP	204
+#define IDM_GOTO	205
+#define IDM_REDISPLAY   206
+#define IDM_SKIP	207
+
+#define IDM_ORIENTMENU	220
+#define IDM_PORTRAIT	221
+#define IDM_LANDSCAPE   222
+#define IDM_UPSIDEDOWN  223
+#define IDM_SEASCAPE	224
+#define IDM_SWAPLANDSCAPE 225
 
 #define IDM_MEDIAMENU	250
 #define IDM_RESOLUTION  251
@@ -308,10 +316,11 @@
 
 /* RCDATA resources */
 #define IDR_ORIENT	900
-#define IDR_EPSFWARN	901
-#define IDR_DEVICES	902
-#define IDR_PORTS	903
-#define IDR_BUTTON	904
+#define IDR_ORIENT3	901
+#define IDR_EPSFWARN	903
+#define IDR_DEVICES	904
+#define IDR_PORTS	905
+#define IDR_BUTTON	906
 
 /* cursors */
 #define IDP_CROSSHAIR  910

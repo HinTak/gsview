@@ -1,4 +1,109 @@
 ----------------------------
+Version 1.2 1995-04-18
+----------------------------
+All:
+ Changed email address to rjl@aladdin.com.  This is an alias provided
+ by Aladdin Enterprises.  Russell Lang is not an employee or agent
+ of Aladdin Enterprises.
+ Aladdin Ghostscript 3.33 is now the preferred version for use with GSview.
+ Disabled changing HWResolution via setpagedevice.
+ Fixed bug in handling %%BeginBinary or %%BeginData with lines > 255
+ characters (which is incorrect DSC).
+ Now deals with incorrect DSC usage whereby code is included
+ after %%EndSetup and before %%Page:  (Microsoft Windows).
+ Added warning if User Defined Media dimensions exceed 1 metre.
+ Updated documentation to suit GS 3.33.
+ Updated printer devices list to suit GS 3.33.
+PM:
+ Removed double mutex request which may have been causing mutex timeout.
+ Show Bounding Box now works in orientations other than portrait
+ and when zoomed.
+ Sound files with spaces in filename will now play.  Required quotes
+ around filename for MciPlayFile().
+Win:
+ Now compiled using BC++ 4.5.
+Win16:
+ Add "Options | Ghostscript Version" to allow GNU Ghostscript 2.6.1 
+ to be used by GSview.  Support for this is likely to be dropped
+ in the future.
+Win32:
+ Modified get_filename() to deal with buggy Win32 GetOpenFileName
+ which didn't change current directory.
+
+----------------------------
+Version 1.13 beta 1995-01-09
+----------------------------
+All:
+ Fixed bug which caused looping in ps.c when reading DOS EPS file.
+ Added reference to WWW home page.
+ Add ghostscript installation instructions to help file.
+PM:
+ Added small black and white icons for OS/2 Warp.
+ Fixed check marks on Orientation menu.
+ Added Ctrl+PgDn and Ctrl+PgUp to page left and right as per IBM CUA.
+Win32:
+ Fixed bug which stopped gsview32.exe working as a NCSA Mosaic viewer.
+ This bug was caused by a buggy BC4 setdisk() function which was incorrectly 
+ changing the directory on selected disk.
+ Changed INI filename to GSVIEW32.INI
+
+----------------------------
+Version 1.12 beta 1994-12-08
+----------------------------
+All:
+ Prevent user entering 0 for width or height of user defined media.
+ Created doc2html for making GSview on-line help available via the
+ World Wide Web.
+ Fixed printing with User Defined page size.
+ Reverted to using Tim Theisen's ps.c module, but with a non GNU licence.
+ Modified ps.c to support %%BeginData lines > 254 char, atend instead
+ of (atend), %!PS-Adobe instead of %!PS-Adobe-, DOS EPS files.
+Win:
+ If ghostscript window in existence, don't erase background of
+ GSview.  This is to avoid an NT bug which resulted in GSview
+ being told to erase the background after Ghostscript had drawn 
+ the child window.
+ Treat Windows 95 (version > 4.0) as being like Windows NT.
+ When creating default Ghostscript Command, use gswin32.exe for 32bit
+ version, not gswin.
+PM:
+ Added new option "Show Bounding Box" which draws a dashed rectangle 
+ over the image to show the bounding box.  Only works in portrait
+ orientation.
+
+----------------------------
+Version 1.11 beta 1994-10-27
+----------------------------
+All:
+ Changed "Save Settings" to "Save Settings Now" for consistency with 
+ WinNT program manager.
+ Changed DSC recognition string from "%!PS-Adobe-" to "%!PS-Adobe"
+ to allow it to recognise OS/2 2.99 (Warp Beta) PostScript driver files.
+ Allow "%%Pages: atend" and "%%BoundingBox: atend" which are both
+ incorrect because they should be "(atend)" not "atend".  Still
+ gives warning message about these lines, but accepts them anyway.
+ Allow documents that claim DSC conformance to incorrectly include
+ a setup section without using %%Begin/EndSetup.  Warning given.
+ Allow documents that claim DSC conformance to incorrectly include
+ code between %%EndSetup and the first %%Page.
+ Add debug messages "%GSview sectionname".
+ Moved Page selection menu items to new View menu.
+ Added "File | Save As" to save the current document when GSview
+ is used as a WWW viewer.
+Win:
+ Under WinNT, registry entry for [sounds] includes "Enable=1" which caused
+ Options|Sounds to crash.  Added code to ignore this entry.
+Win32:
+ Fixed sounds. Was looking for MMSYSTEM.DLL instead of WINMM.DLL.
+ Imitation pipe code changed to use memory mapped files instead
+ of shared memory under WinNT.
+ WinNT cannot mix 16 and 32 bit versions of Ghostscript and GSview.
+ Under WinNT, scroll bars are not redrawn properly, and cursor over
+ child window is not correct.
+ This problem may be an artifact of the image window
+ not being owned by the same process as the parent window.
+
+----------------------------
 Version 1.1 1994-08-03
 ----------------------------
 All:

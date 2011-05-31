@@ -1,7 +1,7 @@
 ===============================================================
-README.GV         1994-08-03
+README.GV         1995-04-18
 ===============================================================
-PM GSview and GSview for Windows. Needs Ghostscript 3.0.
+PM GSview and GSview for Windows. Needs Ghostscript 3.33.
 
 ========
 Overview
@@ -12,7 +12,7 @@ Ghostscript is an interpreter for the PostScript page description language
 used by laser printers.
 For documents following the Adobe PostScript Document Structuring 
 Conventions, GSview allows selected pages to be viewed or printed.
-Ghostscript 3.0 or later is required.  
+Ghostscript is required, preferably version 3.33 or later.  
 
 Features include:
  - view pages in arbitrary order (Next, Previous, Goto).
@@ -40,22 +40,26 @@ New features in version 1.1:
  - buttons to change resolution by 1.2 or 1/1.2.
  - cursor position displayed in pt, mm or inch.
  - extract text from postscript.
- - find text
+ - find text.
+New features in version 1.2:
+ - Works under Windows NT 3.5.
+ - Draw bounding box over image (OS/2 only).
+ - Works with GS 2.6.1 under MS-Windows, but not recommended.
 
 PM GSview and GSview for Windows were written by 
-Russell Lang <rjl@monu1.cc.monash.edu.au>
+Russell Lang <rjl@aladdin.com>
 
 ===========
 Compilation
 ===========
 To compile PM GSview you need IBM NMAKE.EXE and EMX/GCC 0.8h
-with emxfix05.
+with emxfix05 or later.
 To create the PM GSview online help you need the IBM toolkit.
 Copy gvpm.mak to Makefile and edit COMPBASE and EMXPATH as required.
 Type 'nmake'
 
-To compile GSview for Windows you need Borland C++ 3.1 or 4.0.
-To compile GSview for Windows Win32s you need Borland C++ 4.0.
+To compile GSview for Windows you need Borland C++ 3.1 or 4.5.
+To compile GSview for Windows Win32s you need Borland C++ 4.5.
 Copy gvwin.mak to Makefile then edit COMPBASE and WIN32 as required.
 Type 'make'.
 
@@ -68,15 +72,19 @@ Start GSview then select "Options | Ghostscript Command",
 and enter the correct executable path and include path for Ghostscript.
 For example "c:\gs\gsos2.exe -Ic:\gs;c:\psfonts"
 
-PM GSview will run under OS/2 2.1 and may run under OS/2 2.0.
-PM GSview has been compiled with EMX/GCC 0.8h and requires
-the emx 0.8h DLL's.  These are available from
-  ftp.cdrom.com:pub/os2/2_x/unix/emx08h/emxrt.zip
+PM GSview will run under OS/2 2.1 and OS/2 Warp.  
+It may run under OS/2 2.0.
+PM GSview has been compiled with EMX/GCC 0.9a and requires
+the emx 0.9a DLL's.  These are available from
+  ftp://ftp.cdrom.com/pub/os2/unix/emx09a/emxrt.zip
 
-GSview will run under Windows 3.1.
+GSview for Windows will run under Windows 3.1.
 GSview will probably run under Windows 3.0, but you need a special
 version of commdlg.dll, shell.dll and winhelp.exe.  This version has never 
 been tested with Windows 3.0.  If it works at all consider yourself lucky.
+
+gsview32.exe will work with Ghostscript under Windows 3.1/Win32s and
+Windows NT 3.5, but may have a few problems with the latter.
 
 See the on-line help for more details.
 The 'Common Problems' topic is worth reading if GSview won't work.
@@ -84,13 +92,17 @@ The 'Common Problems' topic is worth reading if GSview won't work.
 ====
 Bugs
 ====
-This is PM GSview and GSview for Windows 1.1.
-Send bug reports to Russell Lang <rjl@monu1.cc.monash.edu.au>.
+This is PM GSview and GSview for Windows 1.2.
+Send bug reports to Russell Lang <rjl@aladdin.com>.
+(This is an alias provided by Aladdin Enterprises.  Russell Lang is not 
+an employee or agent of Aladdin Enterprises).
 When reporting bugs, please include the version number and date of 
 GSview (from the Help | About box), the version number of Ghostscript, 
 and the exact wording of any error messages.
+Do not send me large files unless requested.
 If you get a SYS3175 or GPF, please send the address of the GPF - I can 
 use this to help locate the bug.
+Please distinguish between bugs in GSview and bugs in Ghostscript.
 Don't expect a fast response - the work I'm paid to do has a higher
 priority.
 
@@ -99,8 +111,11 @@ Updates
 =======
 The latest version of PM GSview and GSview for Windows should 
 be available from
-  ftp.cs.wisc.edu:pub/ghost/rjl/gsview*.zip
+  ftp://ftp.cs.wisc.edu/pub/ghost/rjl/gsview*.zip
 or by mail (see next section).
+
+A World Wide Web home page for Ghostscript, Ghostview and GSview is at
+  http://www.cs.wisc.edu/~ghost/index.html
 
 ==================================
 Copyright, Licensing and Donations
@@ -118,7 +133,8 @@ involved in developing and maintaining GSview.  These may be sent to
 Donations are preferred in Australian dollars because it costs AUS$5
 to bank an overseas currency cheque.
 If the donation is over AUS$40 or US$40 then the author will mail 
-the next update to you on a 3.5" HD disk (it won't fit on my 5.25" DD).
+the next update to you on a 3.5" HD disk (it won't fit on my 5.25" DD),
+provided you supply the information below.
 Updates are not likely to be frequent.
 Please accompany donations with the following information:
     Your name.
@@ -128,6 +144,10 @@ Please accompany donations with the following information:
     Where you obtained or heard about GSview.
     Version number of Ghostscript.
     Donation amount and currency.
+    Do you want updates to be mailed to you on disk?
+
+The ps.c module is copyright by Tim Theisen and is covered by the
+licence in the file PUBLIC.
 
 GSview uses Ghostscript to display the contents of the PostScript
 files.  Ghostscript is a separate program from GSview; it is
@@ -142,7 +162,8 @@ that accompanies Aladdin Ghostscript for more details.
 Acknowledgements
 ================
 Tim Theisen, who wrote Ghostview for X11 which provided the inspiration
-for PM GSview and GSview for Windows.
+for PM GSview and GSview for Windows.  Also for permission to use his
+ps.c module from Ghostview.
 
 L. Peter Deutsch, for writing Ghostscript and for making changes to 
 Ghostscript to support GSview for Windows.

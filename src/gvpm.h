@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -45,7 +45,7 @@
 
 typedef unsigned short WORD;
 typedef unsigned long DWORD;
-#include "gvcdsc.h"
+#include "ps.h"
 
 #define MAXSTR 256	/* maximum file name length and general string length */
 #define PROFILE_SIZE 2048
@@ -114,6 +114,16 @@ typedef struct tagBM {
     int		old_palimportant;
 } BMAP;
 
+typedef struct document PSDOC;
+
+typedef struct tagPSBBOX {
+	int	llx;
+	int	lly;
+	int	urx;
+	int	ury;
+	int	valid;
+} PSBBOX;
+
 typedef struct tagGV {
 	PID		pid;		/* process id of GSview */
 	char		id[MAXSTR];	/* string id of GSview */
@@ -130,6 +140,7 @@ typedef struct tagPSFILE {
 	int 	pagenum;	/* current page number */
 	char 	name[MAXSTR];	/* name of selected document file */
 	FILE 	*file;		/* selected file */
+	BOOL	ctrld;		/* TRUE if file starts with ^D */
 	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
 #ifdef _Windows
 	struct	ftime datetime;	/* time/date of selected file */
@@ -147,6 +158,7 @@ typedef struct tagPSFILE {
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
 	char	gscommand[MAXSTR];
+	int	gsversion;
 	POINTL	img_origin;
 	POINTL	img_size;
 	BOOL	img_max;
@@ -164,6 +176,7 @@ typedef struct tagOPTIONS {
 	BOOL	epsf_warn;
 	BOOL	redisplay;
 	BOOL    ignore_dsc;
+	BOOL	show_bbox;
 	int	orientation;
 	BOOL	swap_landscape;
 	float	xdpi;
@@ -344,7 +357,7 @@ void write_profile(void);
 
 /* in gvpmisc.c */
 BOOL SetDlgItemText(HWND hwnd, int id, char *str);
-void PostQuitMessage(int dummy);
+void post_close(void);
 void get_help(void);
 int message_box(char *str, int icon);
 void check_menu_item(int menuid, int itemid, BOOL checked);
@@ -360,6 +373,8 @@ char * _getcwd(char *dirname, int size);
 
 /* in gvcdisp.c */
 void transform_cursorpos(float *x, float *y);
+void transform_point(float *x, float *y);
+void itransform_point(float *x, float *y);
 int get_paper_size_index(void);
 void gs_size(void);
 void gs_resize(void);
@@ -405,6 +420,7 @@ BOOL not_dsc(void);
 void gserror(UINT id, char *str, UINT icon, int sound);
 void pserror(char *str);
 int not_implemented(void);
+void gsview_check_usersize(void);
 int gsview_depth_to_menu(int depth);
 
 /* in gvpdlg.c */
@@ -438,6 +454,7 @@ void gsview_spool(char *, char *);
 void psfile_extract(FILE *f);
 char *get_devices(void);
 void print_cleanup(void);
+void gsview_saveas(void);
 void gsview_extract(void);
 struct prop_item_s * get_properties(char *device);
 BOOL gsview_cprint(BOOL to_file, char *cfname, char *optfname);

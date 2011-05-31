@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -30,15 +30,16 @@ POINTER IDP_CROSSHAIR  "binary/gvpcross.ptr"
 
 DLGTEMPLATE IDD_ABOUT 
 BEGIN
-	DIALOG "About PM GSview", IDD_ABOUT, 24, 12, 328, 146, FS_DLGBORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_SAVEBITS, FCF_SYSMENU | FCF_TITLEBAR
+	DIALOG "About PM GSview", IDD_ABOUT, 24, 12, 328, 154, FS_DLGBORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_SAVEBITS, FCF_SYSMENU | FCF_TITLEBAR
 	BEGIN
-		ICON ID_GSVIEW, ID_GSVIEW, 8, 124, 20, 16, WS_GROUP
-		DEFPUSHBUTTON "OK", DID_OK, 276, 126, 40, 14
-		LTEXT "GVPM.EXE", -1, 32, 132, 64, 8
-		RTEXT "Version:", -1, 92, 132, 36, 8
-		CONTROL "", ABOUT_VERSION, 130, 132, 128, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE
-		LTEXT "A Ghostscript graphical interface", -1, 32, 124, 160, 8
-		LTEXT "Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.", -1, 8, 112, 316, 8
+		ICON ID_GSVIEW, ID_GSVIEW, 8, 132, 20, 16, WS_GROUP
+		DEFPUSHBUTTON "OK", DID_OK, 276, 134, 40, 14
+		LTEXT "GVPM.EXE", -1, 32, 140, 64, 8
+		RTEXT "Version:", -1, 92, 140, 36, 8
+		CONTROL "", ABOUT_VERSION, 130, 140, 128, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE
+		LTEXT "A Ghostscript graphical interface", -1, 32, 132, 160, 8
+		LTEXT "Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.", -1, 8, 120, 316, 8
+		LTEXT "Portions Copyright (C) 1994, Timothy O. Theisen.  All rights reserved.", -1, 8, 112, 316, 8
 		LTEXT "This program is distributed with NO WARRANTY OF ANY KIND.", -1, 8, 104, 316, 8
 		LTEXT "No author or distributor accepts any responsibility for the", -1, 8, 96, 316, 8
 		LTEXT "consequences of using it, or for whether it serves any particular", -1, 8, 88, 316, 8
@@ -50,7 +51,7 @@ BEGIN
 		LTEXT "certain conditions described in the Licence.  Among other things,", -1, 8, 36, 316, 8
 		LTEXT "the Licence requires that the copyright notice and this notice be", -1, 8, 28, 316, 8
 		LTEXT "preserved on all copies.", -1, 8, 20, 316, 8
-		LTEXT "Author: Russell Lang  (rjl@monu1.cc.monash.edu.au)", -1, 8, 8, 224, 8
+		LTEXT "Author: Russell Lang  (rjl@aladdin.com)", -1, 8, 8, 224, 8
 	END
 END
 
@@ -59,19 +60,16 @@ BEGIN
 	SUBMENU "~File", IDM_FILEMENU
 	BEGIN
 		MENUITEM "~Open...\tO", IDM_OPEN
+		MENUITEM "~Select File...\tS", IDM_SELECT
+		MENUITEM "Save ~As...\tA", IDM_SAVEAS
+		MENUITEM "~Extract...\tE", IDM_EXTRACT
+		MENUITEM "PS to EPS", IDM_PSTOEPS 
 		MENUITEM "~Close\tC", IDM_CLOSE
-		MENUITEM "~Next Page\t+", IDM_NEXT
-		MENUITEM "Pre~vious Page\t-", IDM_PREV
-		MENUITEM "~Goto Page...\tG", IDM_GOTO
-		MENUITEM "~Redisplay\tR", IDM_REDISPLAY
 		MENUITEM "~Info...\tI", IDM_INFO
 		MENUITEM SEPARATOR
-		MENUITEM "~Select File...\tS", IDM_SELECT
 		MENUITEM "~Print...\tP", IDM_PRINT
 		MENUITEM "Print To ~File...\tF", IDM_PRINTTOFILE
 		MENUITEM "Print File...", IDM_SPOOL
-		MENUITEM "~Extract...\tE", IDM_EXTRACT
-		MENUITEM "PS to EPS", IDM_PSTOEPS 
 		MENUITEM SEPARATOR
 		MENUITEM "E~xit", IDM_EXIT
 	END
@@ -116,9 +114,9 @@ BEGIN
 			MENUITEM "~mm", IDM_UNITMM
 			MENUITEM "~inch", IDM_UNITINCH
 		END
-		MENUITEM "~Save Settings", IDM_SETTINGS
+		MENUITEM "Save Settings ~Now", IDM_SETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "Save Settings on ~Exit", IDM_SAVESETTINGS
+		MENUITEM "~Save Settings on Exit", IDM_SAVESETTINGS
 		MENUITEM "Sa~fer", IDM_SAFER
 		MENUITEM "Save Last ~Directory", IDM_SAVEDIR
 		MENUITEM "~Button Bar", IDM_BUTTONSHOW
@@ -128,6 +126,15 @@ BEGIN
 		MENUITEM "EPS ~Clip", IDM_EPSFCLIP
 		MENUITEM "EPS ~Warn", IDM_EPSFWARN
 		MENUITEM "~Ignore DSC", IDM_IGNOREDSC
+		MENUITEM "Show Bounding Bo~x", IDM_SHOWBBOX
+	END
+
+	SUBMENU "~View", IDM_VIEWMENU
+	BEGIN
+		MENUITEM "~Next Page\t+", IDM_NEXT
+		MENUITEM "Pre~vious Page\t-", IDM_PREV
+		MENUITEM "~Goto Page...\tG", IDM_GOTO
+		MENUITEM "~Redisplay\tR", IDM_REDISPLAY
 	END
 
 	SUBMENU "~Orientation", IDM_ORIENTMENU
@@ -218,6 +225,10 @@ BEGIN
 	"S", IDM_SELECT, SHIFT
 	"s", IDM_SELECT
 	"s", IDM_SELECT, SHIFT
+	"A", IDM_SAVEAS
+	"A", IDM_SAVEAS, SHIFT
+	"a", IDM_SAVEAS
+	"a", IDM_SAVEAS, SHIFT
 	"P", IDM_PRINT
 	"P", IDM_PRINT, SHIFT
 	"p", IDM_PRINT
@@ -477,30 +488,52 @@ BEGIN
 	"cdjcolor,300x300,150x150,100x100,75x75\0"
 	"cdjmono,300x300,150x150,100x100,75x75\0"
 	"cdj550,300x300,150x150,100x100,75x75\0"
-	"paintjet,180x180,90x90\0"
-	"pjetxl,180x180,90x90\0"
+	"pj,180x180,90x90\0" /* guess */
+	"pjxl,180x180,90x90\0" /* guess */
+	"pjxl300,300x300\0"
+	"djet500c,300x300,150x150,100x100,75x75\0"
+	"declj250,180x180\0"
+	"lj250,180x180,90x90\0" /* guess */
+	"jetp3852,84x84\0"
+	"r4081,300x300\0"
+	"t4693d2,100x100\0"
+	"t4693d4,100x100\0"
+	"t4693d8,100x100\0"
+	"tek4696,120x120\0"
+	"lbp8,300x300\0"
 	"epson,360x180,240x180,180x180,120x180,60x180,180x60,120x60,60x60,240x72,120x72,60x72\0"
+	"eps9mid,240x216,120x216,60x216\0"  /* guess */
 	"eps9high,240x216,120x216,60x216\0"
+	"epsonc,360x180,240x180,180x180,120x180,60x180,180x60,120x60,60x60,240x72,120x72,60x72\0"
 	"ibmpro,360x180,240x180,180x180,120x180,60x180,180x60,120x60,60x60,240x72,120x72,60x72\0"
 	"st800,360x360,360x180,180x180\0"
 	"bj10e,360x360,360x180,180x360,180x180\0"
 	"bj200,360x360,360x180,180x360,180x180\0"
+	"m8510,160x144\0"
+	"neccp6,360x360,360x180,180x360,180x180\0" /* guess */
+	"dfaxhigh,204x196\0"
+	"dfaxlow,204x98\0"
+	"tiffg3,204x196,204x98\0"
+	"tiffg4,204x196,204x98\0"
 	"bmpmono,72,96,120\0"
 	"bmp16,72,96,120\0"
 	"bmp256,72,96,120\0"
 	"bmp16m,72,96,120\0"
-	"gifmono,72,96,120\0"
-	"gif8,72,96,120\0"
 	"pcxmono,72,96,120\0"
+	"pcxgray,72,96,120\0"
 	"pcx16,72,96,120\0"
 	"pcx256,72,96,120\0"
-	"pbm,72,96,120\0"
-	"pbmraw,72,96,120\0"
-	"pgm,72,96,120\0"
-	"pgmraw,72,96,120\0"
-	"ppm,72,96,120\0"
-	"ppmraw,72,96,120"
-	"tiffg3,204x196,204x98\0"
+	"pcx24b,72,96,120\0"
+	"psmono,72,96\0"
+	"bit,72,96\0"
+	"bitrgb,72,96\0"
+	"bitcmyk,72,96\0"
+	"tiffcrle,204x196\0"
+	"tiffg3,204x196\0"
+	"tiffg32d,204x196\0"
+	"tiffg4,204x196\0"
+	"tifflzw,204x196\0"
+	"tiffpack,204x196\0"
 	"\0"
 END
 
@@ -543,6 +576,14 @@ BEGIN
 	"/halfletter {396 612 gsview_setpagesize} def\015\012"
 	"/11x17 {792 1224 gsview_setpagesize} def\015\012"
 	"/ledger {1224 792 gsview_setpagesize} def\015\012"
+	"\0"
+END
+
+/* header to control page orientation - extras for GS 3.x */
+RCDATA IDR_ORIENT3
+BEGIN
+	"/setpagedevice\015\012"
+	"{dup length dict copy dup /HWResolution undef setpagedevice} bind odef\015\012"
 	"\0"
 END
 

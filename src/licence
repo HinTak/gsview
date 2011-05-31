@@ -1,5 +1,5 @@
                    GSVIEW FREE PUBLIC LICENCE
-                  (Version 1, 1st August 1994)
+                  (Version 2, 4th October 1994)
 
 
 This Licence applies to the computer program known as "GSview."  
@@ -39,10 +39,22 @@ This licence is subject to the following restrictions:
 commercial organization to any third party is prohibited if any payment is
 made in connection with such distribution, whether directly (as in payment
 for a copy of the Program) or indirectly (as in payment for some service
-related to the Program); provided, however, that the fact that the Program
-is posted on a public access information storage and retrieval service for
-which a fee is received (such as an on-line service) shall not in and of
-itself be a violation of this restriction.
+related to the Program, or payment for some product or service that
+includes a copy of the Program "without charge"; these are only examples,
+and not an exhaustive enumeration of prohibited activities).  However, the
+following methods of distribution involving payment shall not in and of
+themselves be a violation of this restriction:
+
+	(i) Posting the Program on a public access information storage and
+retrieval service for which a fee is received for retrieving information
+(such as an on-line service), provided that the fee is not
+content-dependent (i.e., the fee would be the same for retrieving the same
+volume of information consisting of random data).
+
+	(ii) Distributing the Program on a CD-ROM, provided that the files
+containing the Program are reproduced entirely and verbatim on such
+CD-ROM, and provided further that all information on such CD-ROM be
+redistributable for non-commercial purposes without charge.
 
 (b) Activities other than copying, distribution and modification of the
 Program are not subject to this Licence and they are outside its scope.

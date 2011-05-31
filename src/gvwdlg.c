@@ -26,6 +26,7 @@ LPSTR old_lpstrFile;
 LPCSTR old_lpstrTitle;
 char szTitle[MAXSTR];
 BOOL flag;
+char temp[MAXSTR];
 	if (help)
 	    LoadString(phInstance, help, szHelpTopic, sizeof(szHelpTopic));
 	old_lpstrTitle = ofn.lpstrTitle;
@@ -49,6 +50,28 @@ BOOL flag;
 	    gserror(IDS_NOTDFNAME, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    flag = FALSE;
 	}
+#if defined(__WIN32__)
+	/* GetOpenFileName() should change current directory */
+	/* Deal with broken Win32 that doesn't do this */
+	if (flag) {
+	    char *p;
+	    char temp[MAXSTR];
+	    strcpy(temp, filename);
+	    p = strrchr(temp, '\\');
+	    if (p == NULL) {
+		if (strlen(temp) > 2) {
+		    if (isalpha(temp[0]) && (temp[1]==':')) {
+			temp[2] = '\0';
+			_chdir(temp);
+		    }
+		}
+	    }
+	    else {
+		*p = '\0';
+		_chdir(temp);
+	    }
+	}
+#endif
 	return flag;
 }
 
@@ -153,7 +176,7 @@ AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	    RECT rect; POINT pt;
 	    pt.x = LOWORD(lParam); pt.y = HIWORD(lParam);
 	    rect.left   =   8 * LOWORD(dwUnit) / 4;
-	    rect.top    = 138 * HIWORD(dwUnit) / 8;
+	    rect.top    = 146 * HIWORD(dwUnit) / 8;
 	    rect.right  = 240 * LOWORD(dwUnit) / 4 + rect.left;
 	    rect.bottom =   8 * HIWORD(dwUnit) / 8 + rect.top;
 	    if (PtInRect(&rect,pt)) {
@@ -265,7 +288,12 @@ load_sounds(void)
 	}
 	p = system_sounds;
 	for (j=2; p!=(char *)NULL && j<MAX_SYSTEM_SOUND && strlen(p)!=0; j++) {
-	    sound_entry[j] = p;	
+	    /* Windows NT uses "Enable=1" in the sounds section */
+	    /* We need to prevent this from appearing in the list of sounds */
+	    if (strcmp(p, "Enable") == 0)
+		j--;
+	    else
+	        sound_entry[j] = p;	
 	    p += strlen(p) + 1;
 	}
 	system_num = j;
@@ -309,9 +337,13 @@ void
 add_sounds(HWND hDlg)
 {
 int ifile;
-	for (ifile=system_num-1; ifile>=0; ifile--)
-	    SendDlgItemMessage(hDlg, SOUND_FILE, LB_INSERTSTRING, 0,
-	         (LPARAM)(LPSTR)get_sound_name(ifile));
+char *p;
+	for (ifile=system_num-1; ifile>=0; ifile--) {
+	    p = get_sound_name(ifile);
+	    if (p != (char *)NULL)
+	        SendDlgItemMessage(hDlg, SOUND_FILE, LB_INSERTSTRING, 0,
+	            (LPARAM)(LPSTR)p);
+	}
 }
 
 void

@@ -10,12 +10,26 @@ E
  For documents following the Adobe PostScript Document Structuring
  Conventions,
  GSview allows selected pages to be viewed or printed.
- GSview can be used with Ghostscript 3.0 or later.
+W
+ GSview should be used with Ghostscript 3.33 or later.
+P
+ GSview should be used with Ghostscript 3.33 or later.
+E
  GSview was inspired by Tim Theisen's X11 Ghostview program.
 2Installation
 ?Installation
- First you need to install Ghostscript 3.0.
+W
+ First you need to install Ghostscript.
+ It is recommended that Ghostscript 3.33 or later be used.
+ (If you wish to use 16-bit Ghostscript 2.6.1, see the 
+ `Ghostscript Version` topic.
+ If using the 32-bit versions of GSview or Ghostscript, you must use
+ Ghostscript 3.12 or later.)
+P
+ First you need to install Ghostscript 3.12 or later.
  This version of GSview will not work with earlier versions of Ghostscript.
+ Ghostscript 3.33 or later is preferred.
+E
 
  Next install
 P
@@ -44,6 +58,16 @@ E
  or it will start and then immediately exit with an
  error code.
 
+W
+ Under Windows NT, the 32 bit version of GSview (gsview32.exe)
+ requires the 32 bit version of Ghostscript (gswin32.exe), and
+ the 16 bit version of GSview (gsview.exe) requires the 16 bit
+ version of Ghostscript (gswin.exe).  Under Windows NT you
+ need a version of Ghostscript later than 3.12.
+ Under Windows 3.1 with Win32s, the 16 and 32 bit versions can
+ be intermixed.
+
+E
  Set the environment variable TEMP to point to a directory for
  temporary files.  For example:
    SET TEMP=c:\temp
@@ -59,9 +83,316 @@ E
 P
  c:\os2\gvpm.ini
 W
- c:\windows\gsview.ini
+ c:\windows\gsview.ini and c:\windows\gsview32.ini
 E
  from the appropriate system directory.
+3Ghostscript Installation
+?Ghostscript Installation
+ The following describes how to install Ghostscript, not GSview.
+ The primary documentation on installing Ghostscript is found in
+ the Ghostscript file use.doc.
+
+ Aladdin Ghostscript for the PC is available on the Internet from
+  ftp://ftp.cs.wisc.edu/pub/ghost/aladdin/gsNNNxxx.zip
+ Where NNN is the version number.   
+ For Ghostscript 3.33, the files requires to run Ghostscript are:
+  gs333ini.zip
+ plus one or more of
+  gs333dos.zip   (MS-DOS 386 EXE)
+  gs333os2.zip   (OS/2 2.0 or later EXE)
+  gs333win.zip   (MS-Windows 3.1 16bit EXE)
+  gs333w32.zip   (MS-Windows 3.1/Win32s or MS-Windows NT EXE)
+ If you do not already have a set of Type 1 fonts, you will
+ also need
+  gs333fn1.zip
+
+ The following assumes that Ghostscript is to be installed on
+ drive d:.
+ Unzip the INI zip file and the required EXE zip files from the
+ root directory.  This should put the files into the directory d:\gs3.33.
+
+ If you also need the fonts, change to the d:\gs3.33 directory and
+ then unzip gs333fn1.zip.  This will put font files into .\fonts.
+ To run Ghostscript, set the GS_LIB environment variable as follows
+  SET GS_LIB=d:\gs3.33;d:\gs3.33\fonts
+ then start the appropriate EXE.  To run Ghostscript without using
+ the environment variable, use the following command
+  d:\gs3.33\gs -Id:\gs3.33;d:\gs3.33\fonts
+ where the EXE name needs to be replaced with the appropriate name
+ (gs, gs386, gswin, gswin32 or gsos2).
+
+ If you already have some Type 1 fonts, there are two ways to tell
+ Ghostscript about these fonts: editing/replacing the `Fontmap` file,
+ or the `GS_FONTPATH` environment variable.  See the Ghostscript
+ use.doc and the sample Fontmap files for details.
+
+ See the `Include Path` and `Fonts` topics for more details.
+3Include Path
+?Include Path
+ Ghostscript needs to read some initialisation files during startup,
+ and needs to read font files before drawing text.
+ When used on a PC with GSview, it is normal to tell Ghostscript where to
+ find these files using the Ghostscript `-I` command line switch.
+ Alternatively, the `GS_LIB` environment variable can be used.
+ See below for details for Unix or VMS.
+
+ The `-I` switch or `GS_LIB` environment variable contains a list of 
+ directories to search for the required initialisation files.
+ On a PC, it is normal to put the initialisation files in the
+ same directory as the Ghostscript program.  If Ghostscript is in
+ c:\gs, then `-Ic:\gs` would be used as a command line option to
+ Ghostscript.
+
+ Ghostscript also needs to find font files.  The list of fonts known to
+ Ghostscript is contained in the `Fontmap` file.  The directories which
+ contain these fonts should be added to the `-I` switch.
+ If the Ghostscript *.gsf fonts are in c:\gs\fonts, and some other
+ *.pfb fonts are in c:\psfonts, then `-Ic:\gs;c:\gs\fonts;c:\psfonts`
+ would be used as a command line option to Ghostscript on a PC.
+
+ Under Unix or VMS with Ghostview, the include path should have been
+ configured when Ghostscript was compiled.
+ If not,  and Ghostview is being used, use the `GS_LIB` environment
+ variable instead of `-I`.
+ The Ghostscript include files are generally not put in the same
+ directory as the executable under Unix.  Instead the executable
+ might be in
+  /usr/local/bin
+ while the include files are in
+  /usr/local/lib/ghostscript/gs3.33
+ and the fonts in
+  /usr/local/lib/ghostscript/fonts
+ Consequently, the `GS_LIB` environment variable would need to
+ be set to
+  /usr/local/lib/ghostscript/gs3.33:/usr/local/lib/ghostscript/fonts
+ It is to be hoped that these were set as the default when Ghostscript
+ was compiled, and that it is unnecessary to use `GS_LIB`.
+
+ For more information, see the following topic.
+4File searching
+?File searching
+ (from Ghostscript use.doc)
+
+ When looking for the initialisation files (gs_*.ps), the files related to
+ fonts (Fontmap, *.pfa, *.pfb, *.gsf), or the file for the 'run' operator,
+ Ghostscript first checks whether
+ the file name specifies an explicit directory or drive (i.e., doesn't begin
+ with '/' on Unix systems; doesn't contain a ':' or begin with a '/' or '\'
+ on MS-DOS systems; doesn't contain a ':' or a square bracket on VMS
+ systems).  If it does, Ghostscript simply tries to open the file using the
+ given name.  Otherwise, Ghostscript will try directories in the following
+ order:
+
+ 1. The directory/ies specified by the -I switch(es) in the command
+ line (see below), if any;
+
+ 2. The directory/ies specified by the GS_LIB environment variable,
+ if any;
+
+ 3. The directory/ies specified by the GS_LIB_DEFAULT macro in the
+ Ghostscript makefile, if any.
+
+ Each of these (GS_LIB_DEFAULT, GS_LIB, and -I parameter) may be either a
+ single directory, or a list of directories separated by a character
+ appropriate for the operating system (':' on Unix systems, ';' on VMS
+ systems, ';' on MS-DOS systems).
+ Ghostscript 3.12 use.doc states that:
+  Note that Ghostscript does *not* attempt to open the file
+  in the current directory.  This is consistent with common
+  practice on Unix, but it is different from the usual 
+  practice on MS-DOS.
+ This is incorrect.  Ghostscript does search in the current directory.
+3Fonts
+?Fonts
+ Ghostscript locates fonts in two ways:
+
+ 1. Those listed explicitly in `Fontmap`
+
+ 2. Font files found in directories listed in the `GS_FONTPATH` environment
+ variable.
+
+ Those listed in the `Fontmap` file should be locatable on the Ghostscript
+ include path, or should have fully qualified paths.  Note that
+ you must use / or \\ and must not use \ within a directory name.
+
+ Ghostscript comes with a number of free fonts, most with a .gsf
+ extension.  These are ordinary Type 1 fonts (although they cannot
+ be used with Adobe Type Manager).  The Ghostscript fonts can be
+ broken into three main classes:
+
+ 1. Type 1 outline fonts with hinting (most *.pfa).  These produce
+ good quality output.  The standard Fontmap file uses these in
+ preference to the other font types.  There are relatively few of
+ these fonts.
+
+ 2. Type 1 outline fonts that have been created from bitmap fonts
+ (p*.gsf, z*.gsf, etc.).  These produce poor quality output.
+ Avoid them if at all possible.
+ A full set of the common 35 PostScript fonts is available.
+
+ 3. Type 1 stroked fonts created from the public domain Hershey fonts
+ (h*.gsf, h*.pfa).  These produce moderate quality output, but do
+ not correspond to standard PostScript fonts.
+
+ If you have some other Type 1 outline fonts (*.pfa, *.pfb), it is
+ possible to use these with Ghostscript.  Whether or not you are
+ allowed to do this depends on the font licence.  If you do use
+ these fonts with Ghostscript, it is `your` responsibility to make
+ sure that the font licence permits this use.
+ To use the other Type 1 fonts, you will need to replace or edit
+ the `Fontmap` file.  The reason for using these other Type 1 fonts
+ is that they are almost certainly of better quality than the Type 1
+ bitmap derived fonts supplied with Ghostscript.  However, good
+ quality fonts are not usually free.
+4Fontmap
+?Fontmap
+ The `Fontmap` file tells Ghostscript what fonts are available
+ and where to find them.
+ Each line in `Fontmap` may be one of the following:
+
+ 1. A comment.  These are lines that start with a %
+    % fontmap aka Fontmap - standard font catalog for Ghostscript.
+
+
+ 2. A font name and file name.  For example
+    /Courier                (ncrr.pfa)      ;
+    /Courier-Italic         (ncrri.pfa)     ;
+ The first of these lines says that the font name `Courier` is to
+ be found in the file `ncrr.pfa`.
+ The file `ncrr.pfa` must contain a font named Courier.
+ If the name is not Courier then a font alias must be used.
+ This is described later.
+ Note that the file name is a PostScript string and so \ has a 
+ special meaning.  
+ If `ncrr.pfa` was in the c:\gs\fonts directory, you would need to 
+ have `c:\gs\fonts` as one of the directories listed in the include path, 
+ or you would need to use the file name (c:/gs/fonts/ncrr.pfa) or
+ (c:\\gs\\fonts\\ncrr.pfa).  Using / is preferred to \\.
+
+ 3. A font alias. For example
+    /Courier-Oblique                /Courier-Italic         ;
+ This tells Ghostscript that if Courier-Oblique is requested,
+ Courier-Italic is to be used instead.
+ The standard Fontmap file uses aliases to replace poor quality
+ bitmap-derived fonts with good quality hinted outline fonts.
+ Ghostscript has a bitmap derived version of the Helvetica font
+ in the file phvr.gsf.  The Fontmap file could instruct Ghostscript
+ to use this with the following line:
+    /Helvetica                      (phvr.gsf)      ;
+ However, the NimbusSansL-Regular font looks like Helvetica and is
+ a better quality font, so the default Fontmap file actually uses
+    /Helvetica                      /NimbusSansL-Regular    ;
+    /NimbusSansL-Regular            (n019003l.gsf)  ;
+
+ A description of the required formatting for each line is near
+ the top of each `Fontmap` file.
+
+ Ghostscript comes with a number of alternate `Fontmap` files.
+ These include
+  Fontmap        The standard fontmap file
+  Fontmap.ATB    For Adobe Type Basics (65 Type 1 fonts)
+  Fontmap.ATM    For Adobe Type Manager (13 fonts)
+  Fontmap.OS2    For Type 1 fonts shipped with OS/2 (13 fonts)
+  Fontmap.OSF    For DEC OSF/1 systems
+  Fontmap.Ult    For DEC Ultrix systems
+  Fontmap.VMS    For VAX/VMS systems with DECwindows/Motif
+ If you want to use one of the alternate Fontmap files, the procedure
+ is as follows:
+
+ 1. Copy Fontmap to Fontmap.old
+
+ 2. Copy Fontmap.??? (your selected Fontmap file) to Fontmap
+
+ 3. Add the directory that contains the Type 1 fonts to the
+ include path (`-I` or `GS_LIB`)
+4GS_FONTPATH
+?GS_FONTPATH
+ (From Ghostscript use.doc)
+
+ When Ghostscript starts up, it also looks at the `GS_FONTPATH` environment
+ variable, which is also a list of directories.  It goes to those
+ directories and looks for all files that appear to contain PostScript
+ fonts; it then effectively adds all those files and fonts to its internal
+ copy of the Fontmap (the catalog of fonts and the files that contain
+ them).  If you are using one of the following types of computer, you may
+ wish to set `GS_FONTPATH` to the indicated value so that Ghostscript will
+ automatically acquire all the installed Type 1 fonts:
+
+    System type             GS_FONTPATH
+    -----------             -----------
+    AIX                     /usr/lpp/DPS/fonts/outlines
+    NeXT                    /NextLibrary/Fonts/outline
+    OSF/1                   /usr/lib/X11/fonts/Type1Adobe
+    Silicon Graphics        /usr/lib/DPS/outline/base
+    Sun (Solaris 2.3)       /usr/openwin/lib/X11/fonts/Type1/outline
+    Ultrix                  /usr/lib/DPS/outline/decwin
+
+ See also `Fontmap`.
+4Platform Fonts
+?Platform Fonts
+ Platform fonts are described in Ghostscript fonts.doc.
+
+ The bitmap derived fonts used by Ghostscript are of poor quality.  
+ The computer hosting Ghostscript may have the same fonts in better 
+ quality versions, either as scalable fonts (e.g. Type 1 or TrueType) 
+ or as bitmaps.
+ To improve the display of documents, Ghostscript can use these
+ `platform fonts` instead of using the low quality fonts.
+
+ This can be illustrated with an example.  The default /Helvetica-Bold
+ font is phvb.gsf, an outline font derived from a bitmap.  When the
+ /Helvetica-Bold font is requested, phvb.gsf is read.  When a character
+ is to be rendered to the display, Ghostscript instead asks MS-Windows
+ for the Helvetica-Bold font at the appropriate size.  MS-Windows then
+ draws the requested character from the TrueType Arial Bold font, and
+ Ghostscript puts it on the display.  The resulting output is of better
+ quality than the /Helvetica-Bold bitmap derived font.
+
+ In another example, the same request for /Helvetica-Bold under 
+ Unix/X11 might instead display characters using a prebuilt bitmap
+ font if one is available in the requested size.
+
+ There are some limitations to using `Platform fonts`.
+
+ 1. Platform fonts are only used for upright (Portrait) characters.  
+ Rotated characters will be displayed using the original PostScript font.
+
+ 2. A PostScript version of the required font must be available.
+ This is needed to obtain character bounding box information,
+ encoding vector for character sets, and drawing rotated characters.
+
+ 3. Platform fonts may only used for a limited range of sizes.
+ For example, MS-Windows only uses platform fonts for 6 to 36 point
+ fonts.
+
+ 4. MS-Windows lies about the available font sizes.  Ghostscript asks for
+ a particular font size and MS-Windows returns a font that it claims
+ is the same size.  However MS-Windows may instead return a font
+ of a different size that it thinks will look better.  Often it
+ looks worse because the intercharacter spacing is out of proportion
+ to the character size.  If this happens, platform fonts can be
+ disabled by adding -dNOPLATFONTS to the Ghostscript Command Line.
+
+ 5. Platform fonts will only be used for the display.  Output to
+ printer devices will continue to use the PostScript font.
+ 
+ MS-Windows Ghostscript has a fixed alias table for fonts.
+ In the table below, the name on the left is the name of the 
+ PostScript font, and the name on the right is the name that
+ Ghostscript will try if MS-Windows doesn't know the PostScript 
+ name.
+  Courier         Courier New
+  Helvetica       Arial
+  Helvetica       Helv
+  Times           Times New Roman
+  Times           Tms Rmn
+
+ Platform fonts are not supported under OS/2.
+
+ Not yet written:
+ Unix/X11 Ghostscript may have an ability to use Xresources to
+ specify font aliases.  If this is the case, then the method should
+ be described here.
 2Document Structuring Conventions
 ?Document Structuring Conventions
 ?DSC
@@ -122,6 +453,8 @@ E
 ?File
 ?Open
 ?Select File
+?Save As
+?Extract
 ?Close
  The `Open` command on the `File` menu opens a file and displays
  the first page.
@@ -144,6 +477,15 @@ E
  the document.
  This command is useful for opening a document prior to printing it.
 
+ The `Save As` command saves a copy of the current document.
+ This is useful if GSview is being used as a PostScript viewer by
+ another application and you wish to save the currently displayed file.
+
+ `Extract` allows a range of pages to be copied from the current
+ document to a new document.  For example, ten pages can be extracted
+ from the middle of the current document and written to another file,
+ which will later be sent to a printer.
+
  The `Close` command closes the currently open document.
  This should be used before the current file is changed by another
  program.
@@ -151,203 +493,6 @@ E
  have changed, it will close Ghostscript and rescan the document.
 
  See also `Print`.
-2Page Selection
-?Page Selection
-?Next Page
-?Previous Page
-?Redisplay
-?Goto Page
- `Next Page` moves to the next page of a document.
- This works even if the document does not contain `DSC` comments.
-
- `Previous Page` moves to the previous page.
-
- `Redisplay` redisplays the current page.
-
- `Goto Page` shows a dialog box which allows selection of the next page
- number to display.  The `Select Page` dialog box shows page labels
- since these are likely to be more useful than a sequential page number.
-
- The `Previous Page`, `Redisplay` and `Goto Page` commands work only if the
- document contains `DSC` comments.
-2Zoom
-?Zoom
- To enlarge a displayed feature, position the cross-hair mouse pointer
- over the feature then press the right mouse button.
- The window will swap from normal display resolution to zoom
- resolution and the status line will have the word `Zoomed` appended to it.
- The zoomed feature will be in the centre of the window.
- To cancel `Zoom`, press the right mouse button again or select
- any command that redraws the page (e.g. `Redisplay`, `Next Page`).
- By default the zoom resolution is 300 dots per inch but this can
- be changed with the `Media` | `Zoom Resolution` command.
-
- `Zoom` will only work for `DSC` conforming documents.
-2Document Information
-?Info
- A brief information area at the top of the window is used by
- GSview to display the document filename, the current page number
- and label (if available) and while the cursor is over the image, the
- location of the cursor in coordinates specified by `Options` | `Units`.
- The cursor location is useful for calculating bounding boxes.
-
- The `Info` command on the `File `menu shows a dialog box with the
- following information about the `DSC` comments in the current document.
-
- `File `is the full pathname to the document.
-
- `Type` is` DSC`,` EPS`, `No DSC comments` or 'Ignoring DSC Comments'.
- `EPS` is an Encapsulated PostScript File - a single page document
- that contains a subset of the `DSC` comments and PostScript commands.
- `EPS `files are commonly used for inclusion in other documents.
- `Ignoring DSC Comments` is displayed if `Options` | `Ignore DSC`
- is selected.
-
- `Title` is a text title that can be used when printing banner
- pages and for routing or recognising documents.
-
- `Date` is the time the document was created.
-
- `BoundingBox` specifies a box that encloses all the marks painted
- on the page.  The four integer values are the coordinates of the
- lower left and upper right corners of the bounding box in default
- user coordinates (1/72 inch).
-
- `Orientation `is either `Portrait `or` Landscape`.
-
- `Default Media` gives the media name followed by the width and
- height of that media in default user coordinates (1/72 inch).
-
- `Page Order` is either `Ascending`, `Descending` or `Special`
-
- `Pages` is the total number of pages in the document.
-
- `Page` gives the page label and page number.
-
- `Bitmap `is the size of the display bitmap in pixels which may be
- useful if you are copying the displayed image to the clipboard.
-2Printing
-?Print
-?Print To File
-?Print File
-?Extract
- The `Print` command on the `File `menu allows printing of the document
- using Ghostscript.
- The Ghostscript printer driver and resolution are selected using the
- `Select Device` dialog box.   Pages are selected using the `Select Pages`
- dialog box.  The `All`, `Odd` and `Even` buttons provide quick selection
- of pages.
-
-W
- The `mswinprn` printer driver uses the windows printer drivers
- and should work with any printer with raster capabilities.
- Printer resolution cannot be selected from within GSview; use
- the Control Panel instead.  This driver is very slow and should
- be considered a last resort if no other Ghostscript printer
- driver is available.
-
- With all other printer drivers, Ghostscript sends the output direct
- to the printer, without passing through a Windows printer driver.
- If you have trouble printing you may have to `Print To File`
- and then `Print File` or use the DOS command `COPY /B FILENAME PRN`.
-
- The Win32s versions of GSview and Ghostscript can't send output
- directly to a printer port so an attempt is made to pass the output
- unchanged through a Windows printer driver.  This does not work
- with some Windows printer drivers.  Use 'Print To File' if you
- have problems.
-E
-
- This list of available devices and resolutions is stored in the
- [Devices] section of
-W
- gsview.ini.
-P
- gvpm.ini.
-E
- The default list of devices and resolutions is taken from the
- standard distribution version of Ghostscript 3.0 and may not
- be complete.
-
- To print a document without displaying it, open the document
- using `Select File`.
-
- `Print To File` is similar to the `Print` command except that Ghostscript
- will write the output to a file instead of sending it to a printer.
-
- If you want to produce a bitmap, some useful drivers are
- `bmpmono`, `bmp16`, `bmp16m` and `bmp256`.
-
- `Print File` sends a file to a local port, bypassing the
-W
- Windows
-P
- Presentation Manager
-E
- printer drivers.
- This is useful for sending a document to a PostScript printer,
- or for sending an output file produced by Ghostscript to a printer.
-
- `Extract` allows a range of pages to be copied from the current
- document to a new document.  For example, ten pages can be extracted
- from the middle of the current document and written to another file,
- which will later be sent to a printer.
-3Properties
-?Properties
- Some printer drivers allow extra properties to be specified.
- If two sections are added to the
-W
- gsview.ini
-P
- gvpm.ini
-E
- file for these printer
- drivers, GSview will enable the `Properties` button which will
- display the `Edit Properties` dialog box.
- The following example shows how to add property information
- for the cdjcolor driver.
- First add a section which gives the current values.
- This section, after the first character is removed, gives the options
- that will appear in the `Property` list box.
- The first character is `s` for string or `d` for number.
-  [cdjcolor]
-  dBitsPerPixel=24
-  dDepletion=1
-  dShingling=2
-  dBlackCorrect=4
-
- Next add a section which gives the values to display in the
- `Value` list box.
-  [cdjcolor values]
-  dBitsPerPixel=1,3,8,16,24
-  dDepletion=1,2,3
-  dShingling=0,1,2
-  dBlackCorrect=0,1,2,3,4,5,6,7,8,9
- GSview will also add the value `[Not defined]` to the listbox.
-
- When you press the `OK` button in the `Edit Properties` dialog
- box, the current settings are written to the
-W
- gsview.ini
-P
- gvpm.ini
-E
- file.
-
- When GSview prints a file, it will give Ghostscript the contents
- of the [cdjcolor] section of
-W
- gsview.ini
-P
- gvpm.ini
-E
- as follows:
-  -dBitsPerPixel=24 -dDepletion=1 -dShingling=2 -dBlackCorrect=3
- If the value of a property is `[Not defined]`, that property will
- not be sent to Ghostscript.
-
- Some entries for the cdj family of drivers are supplied in the
- property.ini file that comes with GSview.
 3PS to EPS
 ?PS to EPS
  In general, it is not possible to convert a PostScript file to `EPS`.
@@ -414,6 +559,200 @@ E
  first creating an `EPS` file with a correct `%%BoundingBox`.
 
  See also `Add EPS Preview`, `Extract`, `EPS Warn`.
+2Page Selection
+?Page Selection
+?Next Page
+?Previous Page
+?Redisplay
+?Goto Page
+?View
+ `View` | `Next Page` or the `+` button moves to the next page of a 
+ document.
+ This works even if the document does not contain `DSC` comments.
+
+ `View` | `Previous Page` or the `-` button moves to the previous page.
+
+ `View` | `Redisplay` redisplays the current page.
+
+ `View` | `Goto Page` or the `pointing hand` button shows a dialog box 
+ which allows selection of the next page number to display.  
+ The `Select Page` dialog box shows page labels since these are likely 
+ to be more useful than a sequential page number.
+
+ The `Previous Page`, `Redisplay` and `Goto Page` commands work only if the
+ document contains `DSC` comments.
+2Zoom
+?Zoom
+ To enlarge a displayed feature, position the cross-hair mouse pointer
+ over the feature then press the right mouse button.
+ The window will swap from normal display resolution to zoom
+ resolution and the status line will have the word `Zoomed` appended to it.
+ The zoomed feature will be in the centre of the window.
+ To cancel `Zoom`, press the right mouse button again or select
+ any command that redraws the page (e.g. `Redisplay`, `Next Page`).
+ By default the zoom resolution is 300 dots per inch but this can
+ be changed with the `Media` | `Zoom Resolution` command.
+
+ `Zoom` will only work for `DSC` conforming documents.
+2Document Information
+?Info
+ A brief information area at the top of the window is used by
+ GSview to display the document filename, the current page number
+ and label (if available) and while the cursor is over the image, the
+ location of the cursor in coordinates specified by `Options` | `Units`.
+ The cursor location is useful for calculating bounding boxes.
+
+ The `Info` command on the `File `menu shows a dialog box with the
+ following information about the `DSC` comments in the current document.
+
+ `File `is the full pathname to the document.
+
+ `Type` is` DSC`,` EPS`, `No DSC comments` or 'Ignoring DSC Comments'.
+ `EPS` is an Encapsulated PostScript File - a single page document
+ that contains a subset of the `DSC` comments and PostScript commands.
+ `EPS `files are commonly used for inclusion in other documents.
+ `Ignoring DSC Comments` is displayed if `Options` | `Ignore DSC`
+ is selected.
+
+ `Title` is a text title that can be used when printing banner
+ pages and for routing or recognising documents.
+
+ `Date` is the time the document was created.
+
+ `BoundingBox` specifies a box that encloses all the marks painted
+ on the page.  The four integer values are the coordinates of the
+ lower left and upper right corners of the bounding box in default
+ user coordinates (1/72 inch).
+
+ `Orientation `is either `Portrait `or` Landscape`.
+
+ `Default Media` gives the media name followed by the width and
+ height of that media in default user coordinates (1/72 inch).
+
+ `Page Order` is either `Ascending`, `Descending` or `Special`
+
+ `Pages` is the total number of pages in the document.
+
+ `Page` gives the page label and page number.
+
+ `Bitmap `is the size of the display bitmap in pixels which may be
+ useful if you are copying the displayed image to the clipboard.
+2Printing
+?Print
+?Print To File
+?Print File
+ The `Print` command on the `File `menu allows printing of the document
+ using Ghostscript.
+ The Ghostscript printer driver and resolution are selected using the
+ `Select Device` dialog box.   Pages are selected using the `Select Pages`
+ dialog box.  The `All`, `Odd` and `Even` buttons provide quick selection
+ of pages.
+
+W
+ The `mswinprn` printer driver uses the windows printer drivers
+ and should work with any printer with raster capabilities.
+ Printer resolution cannot be selected from within GSview; use
+ the Control Panel instead.  This driver is very slow and should
+ be considered a last resort if no other Ghostscript printer
+ driver is available.
+
+ With all other printer drivers, Ghostscript sends the output direct
+ to the printer, without passing through a Windows printer driver.
+ If you have trouble printing you may have to `Print To File`
+ and then `Print File` or use the DOS command `COPY /B FILENAME PRN`.
+
+ The Win32 versions of GSview and Ghostscript can't send output
+ directly to a printer port so an attempt is made to pass the output
+ unchanged through a Windows printer driver.  This does not work
+ with some Windows printer drivers.  Use 'Print To File' if you
+ have problems.
+E
+
+ This list of available devices and resolutions is stored in the
+ [Devices] section of
+W
+ gsview.ini (or gsview32.ini for gsview32.exe).
+P
+ gvpm.ini.
+E
+ The default list of devices and resolutions is taken from the
+ standard distribution version of Ghostscript 3.33 and may not
+ be complete.
+
+ To print a document without displaying it, open the document
+ using `Select File`.
+
+ `Print To File` is similar to the `Print` command except that Ghostscript
+ will write the output to a file instead of sending it to a printer.
+
+ If you want to produce a bitmap, some useful drivers are
+ `bmpmono`, `bmp16`, `bmp16m` and `bmp256`.
+
+ `Print File` sends a file to a local port, bypassing the
+W
+ Windows
+P
+ Presentation Manager
+E
+ printer drivers.
+ This is useful for sending a document to a PostScript printer,
+ or for sending an output file produced by Ghostscript to a printer.
+3Properties
+?Properties
+ Some printer drivers allow extra properties to be specified.
+ If two sections are added to the
+W
+ gsview.ini (or gsview32.ini for gsview32.exe)
+P
+ gvpm.ini
+E
+ file for these printer
+ drivers, GSview will enable the `Properties` button which will
+ display the `Edit Properties` dialog box.
+ The following example shows how to add property information
+ for the cdjcolor driver.
+ First add a section which gives the current values.
+ This section, after the first character is removed, gives the options
+ that will appear in the `Property` list box.
+ The first character is `s` for string or `d` for number.
+  [cdjcolor]
+  dBitsPerPixel=24
+  dDepletion=1
+  dShingling=2
+  dBlackCorrect=4
+
+ Next add a section which gives the values to display in the
+ `Value` list box.
+  [cdjcolor values]
+  dBitsPerPixel=1,3,8,16,24
+  dDepletion=1,2,3
+  dShingling=0,1,2
+  dBlackCorrect=0,1,2,3,4,5,6,7,8,9
+ GSview will also add the value `[Not defined]` to the listbox.
+
+ When you press the `OK` button in the `Edit Properties` dialog
+ box, the current settings are written to the
+W
+ gsview.ini (or gsview32.ini for gsview32.exe)
+P
+ gvpm.ini
+E
+ file.
+
+ When GSview prints a file, it will give Ghostscript the contents
+ of the [cdjcolor] section of
+W
+ gsview.ini (or gsview32.ini for gsview32.exe)
+P
+ gvpm.ini
+E
+ as follows:
+  -dBitsPerPixel=24 -dDepletion=1 -dShingling=2 -dBlackCorrect=3
+ If the value of a property is `[Not defined]`, that property will
+ not be sent to Ghostscript.
+
+ Some entries for the cdj family of drivers are supplied in the
+ property.ini file that comes with GSview.
 2Text Extract and Find
 ?Text Extract and Find
 ?Text
@@ -467,7 +806,7 @@ E
 W
  The bitmap may be a Device Independent Bitmap or it may be a Device
  Dependent Bitmap, depending on how Ghostscript was compiled.
- The default for Ghostscript 3.0 is a Device Independent Bitmap
+ The default for Ghostscript 3.33 is a Device Independent Bitmap
  (BMP format).
 E
 
@@ -595,6 +934,22 @@ W
 E
  Only the Ghostscript EXE and include path may be specified -
  other items will confuse GSview.
+W
+3Ghostscript Version
+?Ghostscript Version
+ GSview is best used with Ghostscript version 3.12 or later,
+ preferably version 3.33 or later.
+ The 16-bit version of GSview can be used with the 16-bit
+ Ghostscript 2.6.1 by setting this option to `Ghostscript 2.6.1`.
+
+ The default is `Ghostscript 3.12 or later`.
+
+ The `Ghostscript Version` option is not available from 32-bit
+ GSview.
+
+ See `Common Problems` for a description of what happens if you
+ set the `Ghostscript Version` to the wrong setting.
+E
 3Sounds
 ?Sounds
  The `Sounds` option assigns sounds to various events.
@@ -640,10 +995,11 @@ E
  The default is `pt`.
 3Save Settings
 ?Save Settings
+?Save Settings Now
+?Save Settings on Exit
 ?Settings
 ?INI file
-?Save Settings on Exit
- The `Save Settings` option saves the GSview window position,
+ The `Save Settings Now` option saves the GSview window position,
  window size, last used printer, last directory,
  `Sounds`, `Units`, `Save Last Directory`,
  `User Defined`, `Ghostscript Command`, `Button Bar`,
@@ -651,10 +1007,14 @@ P
  `Fit Window To Page`,
 E
  `Quick Open`, `Auto Redisplay`, `EPS Clip`, `EPS Warn`, `Ignore DSC`,
- `Depth`, `Orientation`, `Media`, `Resolution` and `Zoom Resolution`
- options to the initialisation file
+P
+ `Show Bounding Box`,
+E
+ `Depth`, `Orientation`, `Media`, `Resolution` 
+ and `Zoom Resolution` options to the initialisation file
 W
- gsview.ini in the Windows system directory.
+ gsview.ini (or gsview32.ini for gsview32.exe) in the Windows system 
+ directory.
 P
  gvpm.ini in the OS/2 system directory.
 E
@@ -698,11 +1058,11 @@ E
 
  `Help` | `Contents`
 
- `File` | `Goto Page`
+ `View` | `Goto Page`
 
- `File` | `Next Page`
+ `View` | `Next Page`
 
- `File` | `Previous Page`
+ `View` | `Previous Page`
 
  `Go forward 5 pages`
 
@@ -754,7 +1114,7 @@ E
  `Depth` or `Media` are changed.
  This is the default.
 
- If `Auto Redisplay` is `unchecked`, the `File` | `Redisplay` command
+ If `Auto Redisplay` is `unchecked`, the `View` | `Redisplay` command
  must be used to redisplay a document after changing the
  `Orientation`, `Resolution`, `Depth` or `Media`.
 3EPS Clip
@@ -769,6 +1129,7 @@ E
 
  `EPS Clip` does not alter the original document, it only affects
  how much of the document is displayed by GSview.
+ `EPS Clip` will only work in Portrait orientation.
 
  See also `Clipboard` | `Add EPS Preview`
 3EPS Warn
@@ -795,6 +1156,18 @@ E
  and will only display the pages in the original order.
 
  The default for `Ignore DSC` is `unchecked`.
+P
+3Show Bounding Box
+?Show Bounding Box
+ Selecting this option causes a dashed rectangle to drawn over
+ the image, showing the location of the bounding box.
+ This bounding box is only drawn on the display, and does not
+ affect printer output.
+ The bounding box will only be shown for `DSC` documents (non
+ conforming documents don't have a bounding box).
+
+ The default for `Show Bounding Box` is `unchecked`.
+E
 2Page Orientation
 ?Orientation
 ?Portrait
@@ -877,17 +1250,19 @@ E
 
  `C`, `c`  Close file.  (`File` | `Close`)
 
- `N`, `n`, `+`  Next Page.  (`File` | `Next Page`)
+ `N`, `n`, `+`  Next Page.  (`View` | `Next Page`)
 
- `V`, `v`, `-`  Previous Page.  (`File` | `Previous Page`)
+ `V`, `v`, `-`  Previous Page.  (`View` | `Previous Page`)
 
- `G`, `g`  Goto Page.  (`File` | `Goto Page`)
+ `G`, `g`  Goto Page.  (`View` | `Goto Page`)
 
  `I`, `i`  File information.  (`File` | `Info`)
 
- `R`, `r`  Redisplay page.  (`File` | `Redisplay`)
+ `R`, `r`  Redisplay page.  (`View` | `Redisplay`)
 
  `S`, `s`  Select file: open but don't display.  (`File` | `Select File`)
+
+ `A`, `a`  Save As. (`File` | `Save As`)
 
  `P`, `p`  Print all or some pages to a printer.  (`File` | `Print`)
 
@@ -913,6 +1288,10 @@ P
  `Ctrl+Left`  Scroll left one screen.
 
  `Ctrl+Right`  Scroll right one screen.
+
+ `Ctrl+Page Up`  Scroll left one screen.
+
+ `Ctrl+Page Down`  Scroll right one screen.
 E
 
  `Page Up`  Scroll up one screen (window height).
@@ -1009,6 +1388,16 @@ E
 
  GSview ignores the case of option:
  /p is the same as /P.
+2World Wide Web
+?World Wide Web
+?WWW
+?HTML
+ The World Wide Web home page for Ghostscript, Ghostview and GSview 
+ is at
+  http://www.cs.wisc.edu/~ghost/index.html
+
+ GSview can be used as a PostScript file viewer for several OS/2
+ and MS-Windows Web browsers.  See the GSview home page for details.
 2Copyright
 ?Copyright
  The `About` menu item shows the GSview copyright message
@@ -1020,6 +1409,7 @@ P
   GVPM.EXE - A Ghostscript graphical interface
 E
   Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+  Portions Copyright (C) 1994, Timothy O. Theisen.  All rights reserved.
 
  This file is part of GSview.
 
@@ -1036,7 +1426,7 @@ E
  the copyright notice and this notice be preserved on all copies.
 
      Author: Russell Lang
-   Internet: rjl@monu1.cc.monash.edu.au
+   Internet: rjl@aladdin.com
 2Common Problems
 ?Common Problems
 ?Problems
@@ -1091,9 +1481,12 @@ E
  Read the file use.doc that comes with Ghostscript.
 
 W
- Alternatively, you may be using an incompatible version of Ghostscript.
- This version of GSview requires Ghostscript version `3.0` or later.
- If you are using an incompatible version of Ghostscript, the
+ Alternatively, you may be using an incompatible version of Ghostscript,
+ or you may have the `Options` | `Ghostscript Version` set incorrectly.
+ This version of GSview should be used with Ghostscript version `3.12` 
+ or later.
+ If you are using an incompatible version of Ghostscript or you
+ have `Options` | `Ghostscript Version` set incorrectly, the
  Ghostscript text window will show one of the following error messages
   undefined in ear
   undefined in XXclear
@@ -1102,7 +1495,7 @@ W
  `Problem:` Message Box says `Incompatible Windows Ghostscript`
 
  You probably have an earlier version of Ghostscript.
- Make sure you have Ghostscript version 3.0 or later.
+ Get Ghostscript version 3.12 or later.
 
  `Problem:` GSview says 'Drawing...' or 'Printing...' and shows an
  hourglass cursor.  When the cursor is moved off the GSview window
@@ -1122,7 +1515,13 @@ W
  Press the 'Yes' button on the 'gsview is busy' message box.
  GSview should then revert to the non-waiting mode.
 
- `Problem:` Ghostscript displays a "Pipe error" message box.
+ `Problem:` Message Box says `Imitation pipe handle is zero`
+
+ If you are running Windows NT, this is probably caused by a mismatch
+ between GSview and Ghostscript. Make sure you are running both GSview32 
+ and gswin32.
+
+ `Problem:` GSview displays a "Pipe error" message box.
 
  GSview could not open a temporary file.  GSview requires a temporary
  file for `piping` commands to Ghostscript.  This temporary file is
@@ -1235,8 +1634,8 @@ W
  GSview interacts with Ghostscript by sending messages between
  the GSview and Ghostscript windows.
  GSview creates an imitation pipe to Ghostscript by writing
- into a shareable global memory block and then passing the handle
- to Ghostscript.
+ into a shareable global memory block (or memory mapped file
+ under Windows NT) and then passing the handle to Ghostscript.
 
  GSview starts Ghostscript for displaying using
   gswin -dBitsPerPixel=x -dSAFER -rXDPIxYDPI -gWIDTHxHEIGHT -sGSVIEW=xxxx -

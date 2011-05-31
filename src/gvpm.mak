@@ -36,7 +36,7 @@ EMXPATH=$(DRIVE)/emx
 FLAGS=-Zomf -Zmts -g
 OBJ=obj
 !else
-FLAGS=-Zmts -g
+FLAGS=-Zmts -g -O
 OBJ=o
 !endif
 !else
@@ -62,7 +62,7 @@ LIBDIR=$(EMXPATH)/lib
 
 OBJS=gvpm.$(OBJ) gvpdlg.$(OBJ) gvpdisp.$(OBJ) gvpeps.$(OBJ) gvpinit.$(OBJ)\
    gvpmisc.$(OBJ) gvpprn.$(OBJ)\
-   gvccmd.$(OBJ) gvcdisp.$(OBJ) gvcdsc.$(OBJ) gvceps.$(OBJ) gvcmisc.$(OBJ)\
+   gvccmd.$(OBJ) gvcdisp.$(OBJ) ps.$(OBJ) gvceps.$(OBJ) gvcmisc.$(OBJ)\
    gvcprf.$(OBJ) gvcprn.$(OBJ) gvctext.$(OBJ)
 
 all: gvpm.exe gvpm.hlp gvpm.inf gvpm.tex
@@ -71,35 +71,35 @@ all: gvpm.exe gvpm.hlp gvpm.inf gvpm.tex
 	$(COMP) $(FLAGS) -DOS2 -c $*.c
 
 
-gvpm.$(OBJ): gvpm.c gvpm.h gvcdsc.h gvpm.ipf
+gvpm.$(OBJ): gvpm.c gvpm.h ps.h gvpm.ipf
 
-gvpdlg.$(OBJ): gvpdlg.c gvpm.h gvcdsc.h gvcrc.h
+gvpdlg.$(OBJ): gvpdlg.c gvpm.h ps.h gvcrc.h
 
-gvpdisp.$(OBJ): gvpdisp.c gvpm.h gvcdsc.h
+gvpdisp.$(OBJ): gvpdisp.c gvpm.h ps.h
 
-gvpeps.$(OBJ): gvpeps.c gvpm.h gvceps.h gvcdsc.h
+gvpeps.$(OBJ): gvpeps.c gvpm.h gvceps.h ps.h
 
-gvpinit.$(OBJ): gvpinit.c gvpm.h gvcdsc.h
+gvpinit.$(OBJ): gvpinit.c gvpm.h ps.h
 
-gvpmisc.$(OBJ): gvpmisc.c gvpm.h gvcdsc.h
+gvpmisc.$(OBJ): gvpmisc.c gvpm.h ps.h
 
-gvpprn.$(OBJ): gvpprn.c gvpm.h gvcdsc.h
+gvpprn.$(OBJ): gvpprn.c gvpm.h ps.h
 
-gvccmd.$(OBJ): gvccmd.c gvpm.h gvcdsc.h gvcrc.h
+gvccmd.$(OBJ): gvccmd.c gvpm.h ps.h gvcrc.h
 
-gvcdisp.$(OBJ): gvcdisp.c gvpm.h gvcdsc.h
+gvcdisp.$(OBJ): gvcdisp.c gvpm.h ps.h
 
-gvcdsc.$(OBJ): gvcdsc.c gvpm.h gvcdsc.h
+ps.$(OBJ): ps.c gvpm.h ps.h
 
-gvceps.$(OBJ): gvceps.c gvpm.h gvcdsc.h
+gvceps.$(OBJ): gvceps.c gvpm.h ps.h
 
-gvcmisc.$(OBJ): gvcmisc.c gvpm.h gvcdsc.h gvcrc.h
+gvcmisc.$(OBJ): gvcmisc.c gvpm.h ps.h gvcrc.h
 
-gvcprn.$(OBJ): gvcprn.c gvpm.h gvcdsc.h
+gvcprn.$(OBJ): gvcprn.c gvpm.h ps.h
 
 gvcprf.$(OBJ): gvcprf.c gvpm.h
 
-gvctext.$(OBJ): gvctext.c gvpm.h gvcdsc.h
+gvctext.$(OBJ): gvctext.c gvpm.h ps.h
 
 gvpm.res: gvpm.rc gvpm.h binary\gvpm.ico
 	rc -i $(COMPBASE)\include -r $*.rc
@@ -137,6 +137,15 @@ doc2ipf.exe: doc2ipf.c
 	$(COMP) $*.c
 !endif
 
+doc2html.exe: doc2html.c
+!if $(USE_EMX)
+	$(COMP) -o $* $*.c
+	emxbind $(COMPDIR)\emxl.exe $* $*.exe
+	del $*
+!else
+	$(COMP) $*.c
+!endif
+
 gvpm.doc: gvc.doc gvdoc.exe
 	gvdoc P gvc.doc gvpm.doc
 
@@ -150,6 +159,19 @@ gvpm.hlp: gvpm.ipf
 gvpm.inf: gvpm.ipf
 	ipfc /INF gvpm.ipf
 	rename gvpm.INF gvpm.inf
+
+html: gvpm.htm gsview.htm
+
+gvpm.htm: doc2html.exe gvpm.doc
+	doc2html gvpm.doc GSview.htm
+	-del gvpm.htm
+	rename GSview.htm gvpm.htm
+
+gsview.doc: gvc.doc gvdoc.exe
+	gvdoc W gvc.doc gsview.doc
+
+gsview.htm: doc2html.exe gsview.doc
+	doc2html gsview.doc GSview.htm
 
 gvpm.ps: gvpm.dvi
 	dvips gvpm
@@ -171,7 +193,7 @@ doc2tex.exe: doc2tex.c
 !endif
 
 
-prezip:
+prezip: gvpm.exe gvpm.hlp gvpm.inf README.GV LICENCE
 	copy gvpm.exe ..
 	emxbind -s ../gvpm.exe
 	copy gvpm.hlp ..
@@ -196,7 +218,7 @@ clean:
 	-del gvpprn.$(OBJ)
 	-del gvccmd.$(OBJ)
 	-del gvcdisp.$(OBJ)
-	-del gvcdsc.$(OBJ)
+	-del ps.$(OBJ)
 	-del gvceps.$(OBJ)
 	-del gvcmisc.$(OBJ)
 	-del gvcprf.$(OBJ)
@@ -204,6 +226,8 @@ clean:
 	-del gvctext.$(OBJ)
 	-del doc2ipf.$(OBJ)
 	-del doc2ipf.exe
+	-del doc2html.$(OBJ)
+	-del doc2html.exe
 	-del doc2tex.$(OBJ)
 	-del doc2tex.exe
 	-del gvdoc.$(OBJ)
@@ -215,9 +239,12 @@ clean:
 	-del gvpm.log
 	-del gvpm.toc
 	-del gvphelp.h
+	-del gsview.doc
 
 veryclean: clean
 	-del gvpm.exe
 	-del gvpm.hlp
 	-del gvpm.inf
 	-del gvpm.tex
+	-del gvpm.htm
+	-del gsview.htm

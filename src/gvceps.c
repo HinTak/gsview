@@ -137,22 +137,23 @@ long here;
 	    load_string(IDS_WAITWRITE, szWait, sizeof(szWait));
 	    info_wait(TRUE);
 	    dfreopen();
-	    fseek(psfile.file, doc->begincomments, SEEK_SET);
+	    fseek(psfile.file, doc->beginheader, SEEK_SET);
 	    fgets(text, PSLINELENGTH, psfile.file);
 	    if (doc->epsf)
 	        fputs(text,f);
 	    else
 	        fputs("%!PS-Adobe-3.0 EPSF-3.0\r\n",f);
-	    if (doc->bbox.valid) {
-	        if ( (comment = dsc_copy(psfile.file, f, -1,
-			   doc->endcomments, "%%BoundingBox:")) != (char *)NULL ) {
+	    if (!( (doc->boundingbox[LLX]==0) &&  (doc->boundingbox[LLY]==0) 
+             &&  (doc->boundingbox[URX]==0) &&  (doc->boundingbox[URY]==0) )) {
+	        if ( (comment = pscopyuntil(psfile.file, f, -1,
+			   doc->endheader, "%%BoundingBox:")) != (char *)NULL ) {
 		    free(comment);
 	        }
 	    }
 	    fprintf(f, "%%%%BoundingBox: %d %d %d %d\r\n",
 		bbox.llx, bbox.lly, bbox.urx, bbox.ury);
 	    here = ftell(psfile.file);
-	    dsc_copy(psfile.file, f, here, doc->endtrailer, NULL);
+	    pscopyuntil(psfile.file, f, here, doc->endtrailer, NULL);
 	    dfclose();
 	    fclose(f);
 	    info_wait(FALSE);
@@ -262,9 +263,9 @@ unsigned int filter;
 	    mfh.key = reorder_dword(0x9ac6cdd7L);
 	    mfh.hmf = 0;
 	    mfh.bbox.left = 0;
-	    mfh.bbox.right = reorder_word((WORD)(doc->bbox.urx - doc->bbox.llx));
+	    mfh.bbox.right = reorder_word((WORD)(doc->boundingbox[URX] - doc->boundingbox[LLX]));
 	    mfh.bbox.top = 0;
-	    mfh.bbox.bottom = reorder_word((WORD)(doc->bbox.ury - doc->bbox.lly));
+	    mfh.bbox.bottom = reorder_word((WORD)(doc->boundingbox[URY] - doc->boundingbox[LLY]));
 	    mfh.inch = reorder_word(72);	/* PostScript points */
 	    mfh.reserved = 0L;
 	    mfh.checksum =  0;
@@ -830,7 +831,7 @@ struct eps_header_s eps_header;
 	eps_header.tiff_length = reorder_dword(eps_header.tiff_length);
 	fwrite(&eps_header, sizeof(eps_header), 1, epsfile);
 	rewind(psfile.file);
-	dsc_copy(psfile.file, epsfile, doc->begincomments, doc->endtrailer, NULL);
+	pscopyuntil(psfile.file, epsfile, doc->beginheader, doc->endtrailer, NULL);
 	
 	/* copy tiff file */
 	rewind(tiff_file);
@@ -887,7 +888,7 @@ write_interchange(FILE *f, LPBITMAP2 pbm, BOOL calc_bbox)
 	    devbbox.urx = prebmap.width;
 	    devbbox.ury = prebmap.height;
 	    devbbox.llx = devbbox.lly = 0;
-	    dsc_copy(psfile.file, f, doc->begincomments, doc->endcomments, NULL);
+	    pscopyuntil(psfile.file, f, doc->beginheader, doc->endheader, NULL);
 	}
 
 	bwidth = (((devbbox.urx-devbbox.llx) + 7) & ~7) >> 3; /* byte width with 1 bit/pixel */
@@ -928,7 +929,7 @@ write_interchange(FILE *f, LPBITMAP2 pbm, BOOL calc_bbox)
 	fputs("%%EndPreview",f);
 	fputs(EOLSTR, f);
 	free(preview);
-	dsc_copy(psfile.file, f, doc->endpreview, doc->endtrailer, NULL);
+	pscopyuntil(psfile.file, f, doc->endpreview, doc->endtrailer, NULL);
 }
 
 /* make an EPSI file with an Interchange Preview */
@@ -1008,7 +1009,7 @@ scan_bbox(PREBMAP *pprebmap, PSBBOX *devbbox)
 	    chline = preview;
 	    ch = 0;
 	    for (j=0; j<bwidth; j++)
-	        ch |= ~(*chline++);	/* check for black pixels */
+	        ch |= (BYTE)(~(*chline++));	/* check for black pixels */
 	    if (ch) {
 		/* adjust y coordinates of bounding box */
 		if (i < devbbox->lly)
@@ -1080,7 +1081,7 @@ int i;
 	       shifter += 0xff;	/* can't access preview[bwidth] */
 	   else
 	       shifter += preview[i+1];  
-	   preview[i] = shifter>>bitoffset;
+	   preview[i] = (unsigned char)(shifter>>bitoffset);
 	}
 }
 
@@ -1094,11 +1095,12 @@ copy_bbox_header(FILE *f)
     BOOL bbox_written = FALSE;
     long position;
 
-    fseek(psfile.file, doc->begincomments, SEEK_SET);
-    if (doc->bbox.valid) {
+    fseek(psfile.file, doc->beginheader, SEEK_SET);
+      if (!( (doc->boundingbox[LLX]==0) &&  (doc->boundingbox[LLY]==0) 
+          && (doc->boundingbox[URX]==0) &&  (doc->boundingbox[URY]==0) )) {
       position = ftell(psfile.file);
-      while ( (comment = dsc_copy(psfile.file, f, position,
-			   doc->endcomments, "%%BoundingBox:")) != (char *)NULL ) {
+      while ( (comment = pscopyuntil(psfile.file, f, position,
+			   doc->endheader, "%%BoundingBox:")) != (char *)NULL ) {
 	position = ftell(psfile.file);
 	if (bbox_written) {
 	    free(comment);
@@ -1116,7 +1118,7 @@ copy_bbox_header(FILE *f)
       fprintf(f, "%%%%BoundingBox: %d %d %d %d\r\n",
 	    bbox.llx, bbox.lly, bbox.urx, bbox.ury);
       position = ftell(psfile.file);
-      comment = dsc_copy(psfile.file, f, position, doc->endcomments, NULL);
+      comment = pscopyuntil(psfile.file, f, position, doc->endheader, NULL);
     }
 }
 

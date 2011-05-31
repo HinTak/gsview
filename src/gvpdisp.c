@@ -220,7 +220,8 @@ gs_close()
 	display.page = FALSE;
 	display.sync = FALSE;
 	/* mark bitmap as unused */
-	DosRequestMutexSem(gsview.bmp_mutex, 10000);
+	if (DosRequestMutexSem(gsview.bmp_mutex, 10000) == ERROR_TIMEOUT)
+	    message_box("gs_close: mutex timeout", 0);
 	DosEnterCritSec();
 	DosFreeMem((PVOID)bitmap.pbmi);
 	bitmap.valid = FALSE;

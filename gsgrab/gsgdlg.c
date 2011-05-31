@@ -255,7 +255,7 @@ setup(void)
 	WritePrivateProfileString(szOptionSection, "Resolution", szResolution,  szIniName);
 	WritePrivateProfileString(szOptionSection, "Port", szPort,  szIniName);
 	WritePrivateProfileString(szOptionSection, "Interval", szInterval,  szIniName);
-        WriteProfileString("ports", "GSGRAB", "");
+        WriteProfileString("ports", szGrabFile, "");
 	WritePrivateProfileString(szOptionSection, "Version", GSGRAB_VERSION,  szIniName);
 	return TRUE;
 }

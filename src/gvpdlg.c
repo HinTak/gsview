@@ -200,7 +200,7 @@ MRESULT EXPENTRY AboutDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	HPS hps;
 	HBITMAP hbm;
 	rect.xLeft = 8; rect.xRight = rect.xLeft+216;
-	rect.yBottom = 8; rect.yTop = rect.yBottom + 8;
+	rect.yBottom = 10 /* 8 */; rect.yTop = rect.yBottom + 8;
 	pt.x = SHORT1FROMMP(mp1);  pt.y = SHORT2FROMMP(mp1);
 	WinMapDlgPoints(hwnd, &pt, 1, FALSE);
 	if (WinPtInRect(hab, &rect, &pt)) {
@@ -653,7 +653,10 @@ MRESULT EXPENTRY SoundDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			if (isdigit(*dsound[ievent].file))
 			    play_system_sound(dsound[ievent].file);
 			else {
-			    if ((*pfnMciPlayFile)(hwnd_frame, dsound[ievent].file, 0, 0, 0))
+			    buf[0] = '\042';
+			    strcpy(buf+1, dsound[ievent].file);
+			    strcat(buf, "\042");
+			    if ((*pfnMciPlayFile)(hwnd_frame, buf, 0, 0, 0))
 			        DosBeep(200,200);
 			}
 			return (MRESULT)FALSE;

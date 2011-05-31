@@ -57,6 +57,7 @@ struct sound_s sound[NUMSOUND] = {
 
 /* initialised in init.c */
 BOOL is_win31 = FALSE;		/* To allow selective use of win 3.1 features */
+BOOL is_winnt = FALSE;		/* To allow selective use of Windows NT features */
 char szHelpName[MAXSTR];	/* buffer for building help filename */
 char szHelpTopic[MAXSTR];	/* topic for OFN_SHOWHELP */
 UINT help_message;		/* message sent by OFN_SHOWHELP */
@@ -482,7 +483,7 @@ RECT rect;
 		        display.zoom_yoffset = y;
 			x = (bitmap_scrollx + (rect.right - rect.left)/2)*72.0/option.xdpi;
 			y = ((display.height-1) - (bitmap_scrolly + (rect.bottom - rect.top)/2))*72.0/option.ydpi;
-			transform_cursorpos(&x, &y);
+			transform_point(&x, &y);
 			x *= option.xdpi/72.0;
 			y *= option.ydpi/72.0;
 			display.zoom_xoffset -= (int)(x*72.0/option.zoom_xdpi);
@@ -493,6 +494,12 @@ RECT rect;
 		    }
 		    PostMessage(hwndimg, WM_COMMAND, IDM_ZOOM, (LPARAM)0);
 		}
+		break;
+	case WM_ERASEBKGND:
+		/* when ghostscript window is valid */
+		/* don't bother erasing background */
+		if (hwndimgchild && IsWindow(hwndimgchild))
+		    return 1;	/* say we have erased it */
 		break;
 	case WM_PAINT:
 		{
@@ -701,24 +708,9 @@ POINT pt;
 	GetCursorPos(&pt);
 	ScreenToClient(hwndimgchild, &pt);
 	if (PtInRect(&rect, pt)) {
-	  if (zoom) {
-            /* first figure out number of pixels to zoom origin point */
-	    *x = (bitmap_scrollx+pt.x)*72.0/option.xdpi;
-	    *y = ((display.height-1) -(bitmap_scrolly+pt.y))*72.0/option.ydpi;
-	    transform_cursorpos(x,y);
-	    *x = *x * option.xdpi/72;
-	    *y = *y * option.ydpi/72;
-	    /* now convert to pts and offset it */
-	    *x = *x * 72/option.zoom_xdpi + display.zoom_xoffset;
-	    *y = *y * 72/option.zoom_ydpi + display.zoom_yoffset;
-	  }
-	  else {
-	    *x = (bitmap_scrollx+pt.x)*72.0/option.xdpi 
-		+ (display.epsf_clipped ? doc->bbox.llx : 0);
-	    *y = ((display.height-1)-(bitmap_scrolly+pt.y))*72.0/option.ydpi
-		+ (display.epsf_clipped ? doc->bbox.lly : 0);
-	    transform_cursorpos(x,y);
-	  }
+	    *x = bitmap_scrollx+pt.x;
+	    *y = display.height-1 - (bitmap_scrolly+pt.y);
+	    transform_cursorpos(x, y);
 	    return TRUE;
 	}
     }
@@ -898,7 +890,7 @@ gsview_close()
 		free(page_list.select);
 	page_list.select = NULL;
 	if (doc)
-		dsc_scan_clean(doc);
+		psfree(doc);
 	doc = (PSDOC *)NULL;
 	if (option.settings)
 		write_profile();

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -45,7 +45,7 @@ int instring;
 	    if (sscanf(linebuf+14, "%ld", &count) != 1)
 		count = 0;
 	    while (count) {
-		read = fread(buf, 1, sizeof(buf), inf);
+		read = fread(buf, 1, min(count, sizeof(buf)), inf);
 		count -= read;
 		if (read == 0)
 		    count = 0;
@@ -68,7 +68,7 @@ int instring;
 	    }
 	    else {
 		while (count) {
-		    read = fread(buf, 1, sizeof(buf), inf);
+		    read = fread(buf, 1, min(count, sizeof(buf)), inf);
 		    count -= read;
 		    if (read == 0)
 			count = 0;
@@ -190,7 +190,7 @@ gsview_text_extract()
 	    }
 	  }
 	  else {
-	    fseek(psfile.file, doc->begincomments, SEEK_SET);
+	    fseek(psfile.file, doc->beginheader, SEEK_SET);
 	    text_extract(f, psfile.file, doc->endtrailer);
 	  }
 	}
@@ -251,7 +251,7 @@ int count;
 	    if (slength > PSLINELENGTH/4)
 		return NULL;
 	    if (str[count] != ' ')			/* ignore spaces */
-	        sbuf[slength++] = toupper(str[count]);	/* searches are case insensitive */
+	        sbuf[slength++] = (char)toupper(str[count]);	/* searches are case insensitive */
 	}
 	sbuf[slength] = '\0';
 	if (slength==0)

@@ -20,9 +20,11 @@
 #
 
 # Edit COMPBASE and WIN32 as required
-COMPBASE = d:\bc4
+COMPBASE = f:\bc45
 # WIN32=1 for Win32s version
 WIN32=0
+# DEBUG=1 for Debugging options
+DEBUG=0
 
 # Shouldn't need editing below here
 COMPDIR = $(COMPBASE)\bin
@@ -34,18 +36,22 @@ CC = bcc32
 CCAUX = bcc
 MODEL=32
 CFLAGS=-v -W -w -H=gsview32.sym -I$(INCDIR)
+!if $(DEBUG)
+DEBUGLINK=-v
+!endif
 !else
 WINEXT=
 CC = bcc
 CCAUX = bcc
 MODEL=m
 CFLAGS=-v -m$(MODEL) -W -2 -h -w -H=gsview.sym -I$(INCDIR) $(OLD)
+DEBUGLINK=/v
 # uncomment following line if using GSview with gs 2.6.1
-#OLD=-DGS261
+OLD=-DGS261
 !endif
 OBJS=gvwin.obj gvwinit.obj gvwclip.obj gvwdisp.obj gvwdlg.obj\
   gvweps.obj gvwmisc.obj gvwpipe.obj gvwprf.obj gvwprn.obj\
-  gvcmisc.obj gvcdisp.obj gvcdsc.obj gvccmd.obj gvcprn.obj\
+  gvcmisc.obj gvcdisp.obj ps.obj gvccmd.obj gvcprn.obj\
   gvceps.obj gvctext.obj
 
 all: gsview$(WINEXT).exe gsview.hlp doc2tex.exe
@@ -55,7 +61,7 @@ all: gsview$(WINEXT).exe gsview.hlp doc2tex.exe
 
 	
 gsview32.exe: $(OBJS) gvwin32.res gvwin32.def
-	$(COMPDIR)\tlink32 -Tpe -c -m -s -v @&&!
+	$(COMPDIR)\tlink32 -Tpe -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0w32 +
 $(OBJS) +
 ,gsview32.exe,gsview32, +
@@ -66,7 +72,7 @@ gvwin32.res
 !
 
 gsview.exe: $(OBJS) gvwin.res gvwin.def
-	$(COMPDIR)\tlink /Twe /c /m /s /v /l @&&!
+	$(COMPDIR)\tlink /Twe /c /m /s /l $(DEBUGLINK) @&&!
 $(LIBDIR)\c0w$(MODEL) +
 $(OBJS) +
 ,gsview.exe,gsview, +
@@ -81,40 +87,40 @@ gvwin32.res: gvwin.rc gvwin2.rc gvcrc.h $(ICONS)
 	$(COMPDIR)\brcc32 -i$(INCDIR) -r -fogvwin32 gvwin
 
 gvwin.res: gvwin.rc gvwin2.rc gvcrc.h $(ICONS)
-	$(COMPDIR)\brcc -i$(INCDIR) -r gvwin
+	$(COMPDIR)\brcc -i$(INCDIR) $(OLD) -r gvwin
 
 
-gvwin.obj: gvwin.c gvwin.h gvcdsc.h
+gvwin.obj: gvwin.c gvwin.h ps.h
 
-gvwclip.obj: gvwclip.c gvwin.h gvcdsc.h
+gvwclip.obj: gvwclip.c gvwin.h ps.h
 
-gvwdisp.obj: gvwdisp.c gvwin.h gvcdsc.h
+gvwdisp.obj: gvwdisp.c gvwin.h ps.h
 
-gvwdlg.obj: gvwdlg.c gvwin.h gvcdsc.h gvcrc.h
+gvwdlg.obj: gvwdlg.c gvwin.h ps.h gvcrc.h
 
-gvweps.obj: gvweps.c gvceps.h gvwin.h gvcdsc.h
+gvweps.obj: gvweps.c gvceps.h gvwin.h ps.h
 
-gvwinit.obj: gvwinit.c gvwin.h gvcdsc.h
+gvwinit.obj: gvwinit.c gvwin.h ps.h
 
-gvwmisc.obj: gvwmisc.c gvwin.h gvcdsc.h
+gvwmisc.obj: gvwmisc.c gvwin.h ps.h
 
-gvwpipe.obj: gvwpipe.c gvwin.h gvcdsc.h
+gvwpipe.obj: gvwpipe.c gvwin.h ps.h
 
-gvwprn.obj: gvwprn.c gvwin.h gvcdsc.h
+gvwprn.obj: gvwprn.c gvwin.h ps.h
 
-gvccmd.obj: gvccmd.c gvwin.h gvcdsc.h gvcrc.h
+gvccmd.obj: gvccmd.c gvwin.h ps.h gvcrc.h
 
-gvcdisp.obj: gvcdisp.c gvwin.h gvcdsc.h
+gvcdisp.obj: gvcdisp.c gvwin.h ps.h
 
-gvcdsc.obj: gvcdsc.c gvwin.h gvcdsc.h
+ps.obj: ps.c gvwin.h ps.h
 
-gvceps.obj: gvceps.c gvceps.h gvwin.h gvcdsc.h
+gvceps.obj: gvceps.c gvceps.h gvwin.h ps.h
 
-gvcmisc.obj: gvcmisc.c gvwin.h gvcdsc.h gvcrc.h
+gvcmisc.obj: gvcmisc.c gvwin.h ps.h gvcrc.h
 
-gvcprn.obj: gvcprn.c gvwin.h gvcdsc.h
+gvcprn.obj: gvcprn.c gvwin.h ps.h
 
-gvctext.obj: gvctext.c gvwin.h gvcdsc.h
+gvctext.obj: gvctext.c gvwin.h ps.h
 
 gvdoc.exe: gvdoc.c
 	$(COMPDIR)\$(CCAUX) -w-pro -I$(INCDIR) -L$(LIBDIR) gvdoc.c
@@ -124,6 +130,9 @@ gsview.doc: gvc.doc gvdoc.exe
 
 doc2rtf.exe: doc2rtf.c
 	$(COMPDIR)\$(CCAUX) -w-pro -I$(INCDIR) -L$(LIBDIR) doc2rtf.c
+
+doc2html.exe: doc2html.c
+	$(COMPDIR)\$(CCAUX) -w-pro -I$(INCDIR) -L$(LIBDIR) doc2html.c
 
 gsview.dvi: gsview.tex titlepag.tex
 	-latex gsview
@@ -139,6 +148,9 @@ gsview.hlp: doc2rtf.exe gsview.doc gsview.hpj
 	doc2rtf gsview.doc gsview.rtf
 	$(COMPDIR)\hc31 gsview.hpj
 
+gsview.htm: doc2html.exe gsview.doc
+	doc2html gsview.doc gsview.htm
+
 strip: gsview$(WINEXT).exe
 !if $(WIN32)
 	$(COMPDIR)\tdstrp32 gsview32.exe
@@ -149,7 +161,8 @@ strip: gsview$(WINEXT).exe
 prezip:
 	copy gsview$(WINEXT).exe ..\gsview$(WINEXT).exe
 !if $(WIN32)
-	$(COMPDIR)\tdstrp32 ..\gsview32.exe
+	# do nothing, rely on  gsview32 being without symbol table
+	# $(COMPDIR)\tdstrp32 ..\gsview32.exe
 !else
 	$(COMPDIR)\tdstrip ..\gsview.exe
 !endif
@@ -177,7 +190,7 @@ clean:
 	del gvwprn.obj
 	del gvcmisc.obj
 	del gvcdisp.obj
-	del gvcdsc.obj
+	del ps.obj
 	del gvccmd.obj
 	del gvceps.obj
 	del gvwprf.obj
@@ -190,6 +203,8 @@ clean:
 	del gvwin.res
 	del gvwin32.res
 	del gsview.rtf
+	del doc2html.obj
+	del doc2html.exe
 	del doc2rtf.obj
 	del doc2rtf.exe
 	del doc2tex.obj
@@ -206,3 +221,4 @@ clean:
 veryclean: clean
 	del gsview$(WINEXT).exe
 	del gsview.hlp
+	del gsview.htm

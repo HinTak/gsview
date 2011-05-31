@@ -116,6 +116,63 @@ gsview_spool(char *fname, char *port)
 }
 
 
+/* save entire file */
+/* added to save files when GSview used as a WWW viewer */
+void
+gsview_saveas()
+{
+FILE *f;
+char output[MAXSTR];
+FILE *infile;
+UINT count;
+char *buffer;
+
+	output[0] = '\0';
+	if (psfile.name[0] == '\0') {
+		gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
+		return;
+	}
+
+	load_string(IDS_TOPICOPEN, szHelpTopic, sizeof(szHelpTopic));
+	if (!get_filename(output, TRUE, FILTER_PS, 0, IDS_TOPICOPEN))
+		return;
+
+	if ((f = fopen(output, "wb")) == (FILE *)NULL) {
+		return;
+	}
+
+	/* create buffer for PS file copy */
+	buffer = malloc(COPY_BUF_SIZE);
+	if (buffer == (char *)NULL) {
+	    play_sound(SOUND_ERROR);
+	    fclose(f);
+	    unlink(output);
+	    return;
+	}
+
+	infile = fopen(psfile.name, "rb");
+	if (infile == (FILE *)NULL) {
+	    play_sound(SOUND_ERROR);
+	    free(buffer);
+	    fclose(f);
+	    unlink(output);
+	    return;
+	}
+
+	load_string(IDS_WAITWRITE, szWait, sizeof(szWait));
+	info_wait(TRUE);
+
+        while ( (count = fread(buffer, 1, COPY_BUF_SIZE, infile)) != 0 ) {
+	    fwrite(buffer, 1, count, f);
+	}
+	free(buffer);
+	fclose(infile);
+	fclose(f);
+
+	info_wait(FALSE);
+	return;
+}
+
 /* extract a range of pages for later printing */
 void
 gsview_extract()
@@ -134,12 +191,12 @@ gsview_extract()
 		return;
 	}
 	
-	load_string(IDS_TOPICPRINT, szHelpTopic, sizeof(szHelpTopic));
+	load_string(IDS_TOPICOPEN, szHelpTopic, sizeof(szHelpTopic));
 	if (doc->numpages != 0)
 	    if (!get_page(&thispage, TRUE))
 	        return;
 
-	if (!get_filename(output, TRUE, FILTER_PS, 0, IDS_TOPICPRINT))
+	if (!get_filename(output, TRUE, FILTER_PS, 0, IDS_TOPICOPEN))
 		return;
 
 	if ((f = fopen(output, "wb")) == (FILE *)NULL) {
@@ -152,7 +209,7 @@ gsview_extract()
 	    psfile_extract(f);
 	else {
 	    dfreopen();
-	    dsc_copy(psfile.file, f, doc->begincomments, doc->endtrailer, NULL);
+	    pscopyuntil(psfile.file, f, doc->beginheader, doc->endtrailer, NULL);
 	    dfclose();
 	}
 
@@ -180,9 +237,9 @@ psfile_extract(FILE *f)
 	    if (page_list.select[i]) pages++;
     }
 
-    position = doc->begincomments;
-    while ( (comment = dsc_copy(psfile.file, f, position,
-			   doc->endcomments, "%%Pages:")) != (char *)NULL ) {
+    position = doc->beginheader;
+    while ( (comment = pscopyuntil(psfile.file, f, position,
+			   doc->endheader, "%%Pages:")) != (char *)NULL ) {
 	position = ftell(psfile.file);
 	if (pages_written || pages_atend) {
 	    free(comment);
@@ -205,25 +262,25 @@ psfile_extract(FILE *f)
 	}
 	free(comment);
     }
-    dsc_copy(psfile.file, f, doc->beginpreview, doc->endpreview, NULL);
-    dsc_copy(psfile.file, f, doc->begindefaults, doc->enddefaults, NULL);
-    dsc_copy(psfile.file, f, doc->beginprolog, doc->endprolog, NULL);
-    dsc_copy(psfile.file, f, doc->beginsetup, doc->endsetup, NULL);
+    pscopyuntil(psfile.file, f, doc->beginpreview, doc->endpreview, NULL);
+    pscopyuntil(psfile.file, f, doc->begindefaults, doc->enddefaults, NULL);
+    pscopyuntil(psfile.file, f, doc->beginprolog, doc->endprolog, NULL);
+    pscopyuntil(psfile.file, f, doc->beginsetup, doc->endsetup, NULL);
 
     page = 1;
     for (i = 0; i < doc->numpages; i++) {
 	if (page_list.select[map_page(i)])  {
-	    comment = dsc_copy(psfile.file, f, doc->pages[i].begin,
+	    comment = pscopyuntil(psfile.file, f, doc->pages[i].begin,
 				  doc->pages[i].end, "%%Page:");
 	    fprintf(f, "%%%%Page: %s %d\r\n",
 		    doc->pages[i].label, page++);
 	    free(comment);
-	    dsc_copy(psfile.file, f, -1, doc->pages[i].end, NULL);
+	    pscopyuntil(psfile.file, f, -1, doc->pages[i].end, NULL);
 	}
     }
 
     position = doc->begintrailer;
-    while ( (comment = dsc_copy(psfile.file, f, position,
+    while ( (comment = pscopyuntil(psfile.file, f, position,
 			   doc->endtrailer, "%%Pages:")) != (char *)NULL ) {
 	position = ftell(psfile.file);
 	if (pages_written) {
@@ -291,7 +348,7 @@ static char output[MAXSTR]; /* output filename for printing */
 	        psfile_extract(pcfile);
 	    else {
 	        dfreopen();
-	        dsc_copy(psfile.file, pcfile, doc->begincomments, doc->endtrailer, NULL);
+	        pscopyuntil(psfile.file, pcfile, doc->beginheader, doc->endtrailer, NULL);
 	        dfclose();
 	    }
 	    fclose(pcfile);
@@ -315,11 +372,11 @@ static char output[MAXSTR]; /* output filename for printing */
 	i = get_paper_size_index();
 	if (i < 0) {
 	    width = option.user_width;
-	    width = option.user_height;
+	    height = option.user_height;
 	}
 	else {
-	    width = paper_size[i].width;
-	    height = paper_size[i].height;
+	    width = papersizes[i].width;
+	    height = papersizes[i].height;
 	}
 	width  = (unsigned int)(width  / 72.0 * print_xdpi);
 	height = (unsigned int)(height / 72.0 * print_ydpi);

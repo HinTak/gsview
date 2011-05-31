@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -64,7 +64,7 @@ void
 gsview_init1(LPSTR lpszCmdLine)
 {
 WNDCLASS wndclass;
-WORD version = LOWORD(GetVersion());
+DWORD version = GetVersion();
 char *p;
 char workdir[MAXSTR];
 char filedir[MAXSTR];
@@ -75,8 +75,16 @@ int length = 64;
 	if (length == 0)
 	    exit(0);	/* panic */
 	
-	if ((LOBYTE(version)<<8) + HIBYTE(version) >= 0x30a)
+	if ((LOBYTE(LOWORD(version))<<8) + HIBYTE(LOWORD(version)) >= 0x30a)
 	    is_win31 = TRUE;
+#ifdef __WIN32__
+	/* check if Windows NT */
+	if ((HIWORD(version) & 0x8000)==0)
+	    is_winnt = TRUE;
+	/* check if Windows 95 (Windows 4.0) */
+	if ((LOBYTE(LOWORD(version))<<8) + HIBYTE(LOWORD(version)) >= 0x400)
+	    is_winnt = TRUE;
+#endif
 
 	/* get path to EXE */
 	GetModuleFileName(phInstance, szExePath, sizeof(szExePath));
@@ -127,6 +135,7 @@ int length = 64;
 	option.img_origin.y = CW_USEDEFAULT;
 	option.img_size.x = CW_USEDEFAULT;
 	option.img_size.y = CW_USEDEFAULT;
+	option.gsversion = IDM_GS3;
 	option.unit = IDM_UNITPT;
 	option.quick = TRUE;
 	option.settings = TRUE;
@@ -140,6 +149,7 @@ int length = 64;
 	option.epsf_clip = FALSE;
 	option.epsf_warn = FALSE;
 	option.ignore_dsc = FALSE;
+	option.show_bbox = FALSE;
 	option.redisplay = TRUE;
 	option.orientation = IDM_PORTRAIT;
 	option.swap_landscape = FALSE;
@@ -163,14 +173,17 @@ int length = 64;
 	if (is_win31) {
 	    /* MMSYSTEM.DLL requires Windows 3.1, so to allow gsview to run
 	       under Windows 3.0 we can't use the import library */
-	    hlib_mmsystem = LoadLibrary("MMSYSTEM.DLL");
 #ifdef __WIN32__
+	    hlib_mmsystem = LoadLibrary("WINMM.DLL");
 	    if (hlib_mmsystem != NULL) {
+		lpfnSndPlaySound = (FPSPS)GetProcAddress(hlib_mmsystem, "sndPlaySoundA");
+	    }
 #else
+	    hlib_mmsystem = LoadLibrary("MMSYSTEM.DLL");
 	    if (hlib_mmsystem >= HINSTANCE_ERROR) {
-#endif
 		lpfnSndPlaySound = (FPSPS)GetProcAddress(hlib_mmsystem, "sndPlaySound");
 	    }
+#endif
 	    else {
 		gserror(IDS_SOUNDNOMM, NULL, MB_ICONEXCLAMATION, -1);
 		hlib_mmsystem = (HINSTANCE)NULL;
@@ -221,10 +234,10 @@ int length = 64;
 	    }
 	    else
 		*(++p) = '\0';
-	    if (!((strlen(filedir)==2) && isalpha(filedir[0]) && (filedir[1]==':')))
-	        chdir(filedir);
 	    if (isalpha(filedir[0]) && (filedir[1]==':'))
 		(void) setdisk(toupper(filedir[0])-'A');
+	    if (!((strlen(filedir)==2) && isalpha(filedir[0]) && (filedir[1]==':')))
+	        chdir(filedir);
 	}
 	play_sound(SOUND_START);
         if (changed_version) {
@@ -288,7 +301,7 @@ char thismedia[20];
 
 	/* set size of info area, buttons and offset to child window */
 	info_rect.left = 0;
-	info_rect.right = info_rect.left + 60 * char_size.x;
+	info_rect.right = info_rect.left + 64 * char_size.x;
 	info_rect.top = 0;
 	info_rect.bottom = char_size.y;
 	button_size.x = 24;
@@ -323,6 +336,9 @@ char thismedia[20];
 	option.media = i;
 	strncpy(option.medianame,thismedia,sizeof(option.medianame));
 	CheckMenuItem(hmenu, option.unit, MF_BYCOMMAND | MF_CHECKED);
+#if !defined(__WIN32__) && defined(GS261)
+	check_menu_item(IDM_GSVERMENU, option.gsversion, TRUE);
+#endif
 	CheckMenuItem(hmenu, option.media, MF_BYCOMMAND | MF_CHECKED);
 	CheckMenuItem(hmenu, option.orientation, MF_BYCOMMAND | MF_CHECKED);
 	CheckMenuItem(hmenu, gsview_depth_to_menu(option.depth), MF_BYCOMMAND | MF_CHECKED);
@@ -332,6 +348,8 @@ char thismedia[20];
 		CheckMenuItem(hmenu, IDM_EPSFWARN, MF_BYCOMMAND | MF_CHECKED);
 	if (option.ignore_dsc)
 		CheckMenuItem(hmenu, IDM_IGNOREDSC, MF_BYCOMMAND | MF_CHECKED);
+	if (option.show_bbox)
+		CheckMenuItem(hmenu, IDM_SHOWBBOX, MF_BYCOMMAND | MF_CHECKED);
 	if (option.swap_landscape)
 		CheckMenuItem(hmenu, IDM_SWAPLANDSCAPE, MF_BYCOMMAND | MF_CHECKED);
 	if (option.save_dir) 

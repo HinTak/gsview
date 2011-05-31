@@ -21,7 +21,12 @@
 #include "gvwin.h"
 
 /* SetDlgItemText is a Windows API */
-/* PostQuitMessage is a Windows API */
+
+void
+post_close(void)
+{
+	PostMessage(hwndimg, WM_CLOSE, (WPARAM)0, (LPARAM)0);
+}
 
 void
 get_help(void)
@@ -112,17 +117,25 @@ POINT pt;
 int
 _chdir(char *dirname)
 {
+#ifdef __WIN32__
+	SetCurrentDirectory(dirname);
+#else
 	if (isalpha(dirname[0]) && (dirname[1]==':'))
 		(void) setdisk(toupper(dirname[0])-'A');
 	if (!((strlen(dirname)==2) && isalpha(dirname[0]) && (dirname[1]==':')))
 		chdir(dirname);
+#endif
 	return 0;
 }
 
 char * 
 _getcwd(char *dirname, int size)
 {
+#ifdef __WIN32__
+	GetCurrentDirectory(size, dirname);
+#else
 	return getcwd(dirname, size);
+#endif
 }
 
 

@@ -17,7 +17,7 @@
 
 /* gsgrab.h */
 
-#define GSGRAB_VERSION	"0.1alpha 1994-06-09"
+#define GSGRAB_VERSION	"0.2alpha 1994-04-10"
 
 #define GRABICON	100
 

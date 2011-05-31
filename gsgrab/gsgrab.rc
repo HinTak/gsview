@@ -60,7 +60,7 @@ CAPTION "About GSgrab"
  LTEXT "described in the Licence.  Among other things, the Licence requires that ", -1, 7, 116, 240, 8
  LTEXT "the copyright notice and this notice be preserved on all copies.", -1, 7, 124, 240, 8
  LTEXT "", -1, 7, 132, 240, 8
- LTEXT "Author: Russell Lang  (rjl@monu1.cc.monash.edu.au)", -1, 7, 146, 240, 8
+ LTEXT "Author: Russell Lang  (rjl@aladdin.com)", -1, 7, 146, 240, 8
  ICON GRABICON, GRABICON, 8, 8, 16, 16
  LTEXT "and print with Ghostscript", -1, 32, 24, 160, 8
 }

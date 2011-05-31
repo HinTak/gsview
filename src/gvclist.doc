@@ -1,6 +1,5 @@
 src/gvccmd.c
 src/gvcdisp.c
-src/gvcdsc.c
 src/gvceps.c
 src/gvcmisc.c
 src/gvcprf.c
@@ -23,7 +22,8 @@ src/gvwmisc.c
 src/gvwpipe.c
 src/gvwprf.c
 src/gvwprn.c
-src/gvcdsc.h
+src/ps.c
+src/ps.h
 src/gvceps.h
 src/gvcrc.h
 src/gvpm.def
@@ -49,8 +49,9 @@ src/binary/gvpprint.bmp
 src/gvc.doc
 src/gvdoc.c
 src/doc2ipf.c
-src/doc2tex.c
+src/doc2html.c
 src/doc2rtf.c
+src/doc2tex.c
 src/gvwin.def
 src/gvwin32.def
 src/gvwin.h
@@ -59,7 +60,7 @@ src/gvwin.rc
 src/gvwin2.rc
 src/gsview.hpj
 src/property.ini
-src/gvpbugs.doc
+src/gvcbugs.doc
 src/gvclist.doc
 src/gvcnews.doc
 src/gvcspecs.doc
@@ -67,6 +68,7 @@ src/gdevpm.h
 src/titlepag.tex
 src/README.GV
 src/LICENCE
+src/PUBLIC
 epstool/epstool.c
 epstool/epstool.def
 epstool/epstool.doc
@@ -83,6 +85,8 @@ gsgrab/gsgrab.h
 gsgrab/gsgrab.hpj
 gsgrab/gsgrab.mak
 gsgrab/gsgrab.rc
+gsgrab/gsgrab.exe
+gsgrab/gsgrab.hlp
 gvpm.exe
 gvpm.hlp
 gvpm.inf

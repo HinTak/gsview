@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -29,7 +29,7 @@ void
 error_message(char *str)
 {
 	message_box(str, MB_ICONHAND);
-	PostQuitMessage(0);
+	post_close();
 }
 
 void
@@ -40,7 +40,7 @@ info_init(HWND hwnd)
     if (psfile.name[0] != '\0') {
 	SetDlgItemText(hwnd, INFO_FILE, psfile.name);
 	if (doc) {
-	    if (doc->ctrld)
+	    if (psfile.ctrld)
 		load_string(IDS_NOTDSC, buf, sizeof(buf));
 	    else  {
 		if (doc->epsf) {
@@ -64,8 +64,8 @@ info_init(HWND hwnd)
 	    SetDlgItemText(hwnd, INFO_TYPE, buf);
 	    SetDlgItemText(hwnd, INFO_TITLE, doc->title ? doc->title : "");
 	    SetDlgItemText(hwnd, INFO_DATE, doc->date ? doc->date : "");
-	    sprintf(buf, "%d %d %d %d", doc->bbox.llx, doc->bbox.lly, 
-		doc->bbox.urx, doc->bbox.ury);
+	    sprintf(buf, "%d %d %d %d", doc->boundingbox[LLX], doc->boundingbox[LLY], 
+		doc->boundingbox[URX], doc->boundingbox[URY]);
 	    SetDlgItemText(hwnd, INFO_BBOX, buf);
 	    switch(doc->orientation) {
 		case LANDSCAPE:
@@ -198,6 +198,7 @@ PROFILE *prf;
 		option.user_width = 480;
 		option.user_height = 360;
 	}
+	gsview_check_usersize();
 	profile_read_string(prf, section, "EpsfClip", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
 		option.epsf_clip = i;
@@ -207,6 +208,9 @@ PROFILE *prf;
 	profile_read_string(prf, section, "IgnoreDSC", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
 		option.ignore_dsc = i;
+	profile_read_string(prf, section, "ShowBBox", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+		option.show_bbox = i;
 	profile_read_string(prf, section, "Orientation", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
 		option.orientation = i+IDM_PORTRAIT;
@@ -231,10 +235,14 @@ PROFILE *prf;
 	if (option.save_dir) {
 	    profile_read_string(prf, section, "LastDir", "", profile, sizeof(profile));
 	    _chdir(profile);
+_getcwd(profile, sizeof(profile));
 	}
 	profile_read_string(prf, section, "Ghostscript", "", profile, sizeof(profile));
 	if (profile[0] != '\0')	/* don't copy a default - assume already set */
 		strcpy(option.gscommand, profile);
+	profile_read_string(prf, section, "GS261", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+		option.gsversion = i ? IDM_GS261 : IDM_GS3;
 	profile_read_string(prf, section, "Printer", ",", profile, sizeof(profile));
 	device_ptr = strtok(profile, ",");
 	if (device_ptr != (char *)NULL) {
@@ -294,6 +302,8 @@ PROFILE *prf;
 	profile_write_string(prf, section, "EpsfWarn", profile);
 	sprintf(profile, "%d", option.ignore_dsc);
 	profile_write_string(prf, section, "IgnoreDSC", profile);
+	sprintf(profile, "%d", option.show_bbox);
+	profile_write_string(prf, section, "ShowBBox", profile);
 	sprintf(profile, "%d", option.orientation - IDM_PORTRAIT);
 	profile_write_string(prf, section, "Orientation", profile);
 	sprintf(profile, "%d", option.swap_landscape);
@@ -313,6 +323,8 @@ PROFILE *prf;
 	    profile_write_string(prf, section, "LastDir", profile);
 	}
 	profile_write_string(prf, section, "Ghostscript", option.gscommand);
+	sprintf(profile, "%d", (option.gsversion == IDM_GS261 ? 1 : 0));
+	profile_write_string(prf, section, "GS261", profile);
 	if (option.device_name[0] != '\0') {
 	    sprintf(profile,"%s,%s",option.device_name,option.device_resolution);
 	    profile_write_string(prf, section, "Printer", profile);

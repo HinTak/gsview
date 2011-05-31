@@ -1,4 +1,31 @@
-/* gvpbugs.doc */
+/* gvcbugs.doc */
+Known problems with GSview  1995-04-18
+
+ALL
+===
+
+Zoom doesn't work in anything but Portrait orientation with
+Ghostscript 3.12.  Works correctly with Ghostscript 2.6.1.
+This is a problem with Ghostscript 3.12, not GSview.
+Works correctly with Ghostscript 3.33
+
+Filenames with spaces probably won't work on the command line.
+
+
+MS-WINDOWS
+==========
+
+
+MS-WINDOWS NT
+=============
+
+Occasionally gives "pipe handle is zero" errors.
+This will be fixed when I rewrite the GSview/Ghostscript interface.
+
+OS/2
+====
+
+
 List of known or suspected display driver bugs for PM.
 Russell Lang  1994-05-19
 

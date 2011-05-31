@@ -1,13 +1,13 @@
-                   GSVIEW FREE PUBLIC LICENCE
-                  (Version 2, 4th October 1994)
+		GHOSTVIEW FREE PUBLIC LICENSE
+		(Version 1, November 28, 1994)
 
 
-This Licence applies to the computer program known as "GSview."  
-The "Program", below, refers to such program, and a "work
-based on the Program" means either the Program or any derivative work of
-the Program, such as a translation or a modification.  
-The Program is a copyrighted work whose copyright is held by Russell
-Lang (the "Licensor").
+This License applies to the computer program known as "Ghostview."
+The "Program", below, refers to such program, and a "work based on
+the Program" means either the Program or any derivative work of the
+Program, as defined in the United States Copyright Act of 1976, such
+as a translation or a modification.  The Program is a copyrighted
+work whose copyright is held by Timothy O.  Theisen (the "Licensor").
 
 BY MODIFYING OR DISTRIBUTING THE PROGRAM (OR ANY WORK BASED ON THE
 PROGRAM), YOU INDICATE YOUR ACCEPTANCE OF THIS LICENSE TO DO SO, AND ALL
@@ -17,11 +17,11 @@ PERMISSION TO MODIFY OR DISTRIBUTE THE PROGRAM OR ITS DERIVATIVE WORKS.
 THESE ACTIONS ARE PROHIBITED BY LAW.  IF YOU DO NOT ACCEPT THESE TERMS AND
 CONDITIONS, DO NOT MODIFY OR DISTRIBUTE THE PROGRAM.
 
-1.  Licences.
+1.  Licenses.
 
 Licensor hereby grants you the following rights, provided that you comply
-with all of the restrictions set forth in this Licence and provided,
-further, that you distribute an unmodified copy of this Licence with the
+with all of the restrictions set forth in this License and provided,
+further, that you distribute an unmodified copy of this License with the
 Program:
 
 (a) You may copy and distribute literal (i.e., verbatim) copies of the
@@ -33,7 +33,7 @@ distribute copies of such throughout the world, in any medium.
 
 2.  Restrictions.
 
-This licence is subject to the following restrictions:
+This license is subject to the following restrictions:
 
 (a) Distribution of the Program or any work based on the Program by a
 commercial organization to any third party is prohibited if any payment is
@@ -57,9 +57,9 @@ CD-ROM, and provided further that all information on such CD-ROM be
 redistributable for non-commercial purposes without charge.
 
 (b) Activities other than copying, distribution and modification of the
-Program are not subject to this Licence and they are outside its scope.
+Program are not subject to this License and they are outside its scope.
 Functional use (running) of the Program is not restricted, and any output
-produced through the use of the Program is subject to this licence only if
+produced through the use of the Program is subject to this license only if
 its contents constitute a work based on the Program (independent of having
 been made by running the Program).
 
@@ -73,7 +73,7 @@ and the date of any change;
 	(ii) You must cause any work that you distribute or publish, that
 in whole or in part contains or is derived from the Program or any part
 thereof, to be licensed as a whole and at no charge to all third parties
-under the terms of this Licence;
+under the terms of this License;
 
 	(iii) If the modified program normally reads commands
 interactively when run, you must cause it, at each time the modified
@@ -81,7 +81,7 @@ program commences operation, to print or display an announcement including
 an appropriate copyright notice and a notice that there is no warranty (or
 else, saying that you provide a warranty).  Such notice must also state
 that users may redistribute the Program only under the conditions of this
-Licence and tell the user how to view the copy of this Licence included
+License and tell the user how to view the copy of this License included
 with the Program.  (Exception: if the Program itself is interactive but
 does not normally print such an announcement, your work based on the
 Program is not required to print an announcement.);
@@ -108,27 +108,27 @@ equivalent ability to copy the source code from the same place counts as
 distribution of the source code, even though third parties are not
 compelled to copy the source code along with the object code.
 
-3.  Reservation of Rights.
+3.	Reservation of Rights.
 
 No rights are granted to the Program except as expressly set forth herein.
 You may not copy, modify, sublicense, or distribute the Program except as
-expressly provided under this Licence.  Any attempt otherwise to copy,
+expressly provided under this License.  Any attempt otherwise to copy,
 modify, sublicense or distribute the Program is void, and will
-automatically terminate your rights under this Licence.  However, parties
-who have received copies, or rights, from you under this Licence will not
-have their licences terminated so long as such parties remain in full
+automatically terminate your rights under this License.  However, parties
+who have received copies, or rights, from you under this License will not
+have their licenses terminated so long as such parties remain in full
 compliance.
 
-4.  Other Restrictions.
+4.	Other Restrictions.
 
 If the distribution and/or use of the Program is restricted in certain
 countries for any reason, Licensor may add an explicit geographical
 distribution limitation excluding those countries, so that distribution is
 permitted only in or among countries not thus excluded.  In such case,
-this Licence incorporates the limitation as if written in the body of this
-Licence.
+this License incorporates the limitation as if written in the body of this
+License.
 
-5.  Limitations.
+5.	Limitations.
 
 THE PROGRAM IS PROVIDED TO YOU "AS IS," WITHOUT WARRANTY.  THERE IS NO
 WARRANTY FOR THE PROGRAM, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT
@@ -148,8 +148,15 @@ PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
 EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGES.
 
-6.  General.  
+6.	General.  
 
-This Agreement is governed by the laws of the State of Victoria, 
-Australia, excluding choice of law rules.
+This Agreement is governed by the laws of the State of Wisconsin, U.S.A.,
+excluding choice of law rules.
 
+For government users, the Program is provided with RESTRICTED RIGHTS.
+Use, duplication or disclosure by the Government is subject to
+restrictions as set forth in subparagraph (c)(1)(ii) of The Rights in
+Technical Data and Computer Software clause at DFARS 252.227-7013 or
+subparagraphs (c)(1) and (2) of the Commercial Computer
+Software-Restricted Rights 48 CFR 52.227-19, as appropriate.
+
