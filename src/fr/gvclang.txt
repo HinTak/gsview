@@ -9,7 +9,7 @@
  Pour les documents respectant les conventions de structure du langage Adobe
  PostScript, GSview permet de visualiser ou d'imprimer des pages
  sélectionnées.
- GSview 2.75beta nécessite Ghostscript version 4.03 - 6.99, de préférence 6.0.
+ GSview 2.9 nécessite Ghostscript version 4.03 - 6.99, de préférence 6.0.
  GSview s'est inspiré du programme Ghostview pour X11 de Tim Theisen.
 2Installation
 ?Installation
@@ -207,7 +207,7 @@ E
  puis d'éditer ce fichier
  en supprimant toutes les entrées sauf :
   [Options]
-  Version=2.8
+  Version=2.9
   GSversion=600
   Configured=1
   GhostscriptDLL=e:\Aladdin\gs6.0\bin\gsdll32.dll

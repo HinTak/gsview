@@ -1,4 +1,84 @@
 ----------------------
+Version 2.9 2000-03-20
+----------------------
+All:
+  This is an out of sequence bug fix release to handle an 
+  installation problem with using Ghostscript #.01 - #.09.
+  This is based on the GSview 2.8 sources and ignores nearly all
+  changes in GSview 2.81 beta.
+
+  Italian translation updates.
+
+  Fixed version numbers in help files.
+
+  When using the pdfwrite device, add "-c save pop -f" to avoid 
+  a font bug in Ghostscript 6.0.
+
+Win32:
+  When compiling gvceps.h with MSVC++, you must use #pragma pack(1).
+  epstool would crash because this was not used.
+
+  Correctly handle GS 6.01 - 6.09 when accessing registry variables.
+
+---------------------------
+Version 2.81beta 2000-03-17
+---------------------------
+Win32:
+  When compiling gvceps.h with MSVC++, you must use #pragma pack(1).
+  epstool would crash because this was not used.
+
+  Change print dialog to use a modified version of the common
+  print dialog.  Options added to this for printing GDI, GS device
+  or PostScript printer.  Select page button added.
+  Printing of even/odd is possible for non DSC files.
+  Printing with GDI tells Ghostscript to render the pages to bitmaps,
+  and then sends the bitmaps to the GDI.  It is more optimised
+  than mswinpr2.  
+
+  Fixed BC++ 4.5 makefile.  This can't build the setup program
+  since BC++ 4.5 predates the shell explorer interface.
+
+  VC++ makefile now calls BC++ 4.5 makefile to compile the
+  16-bit gsv16spl.exe.
+
+  Distribute gsprint with GSview.  Added -twoup to gsprint.
+
+All:
+  Tim Theisen's ps.c module has been replaced by a new
+  DSC parser written in C++.
+  This new code attempts to recognise incorrectly embedded
+  EPS files (i.e. missing %%BeginDocument: / %%EndDocument).
+
+  Compile all sources as C++.
+
+  Changed gvceps.cpp so it works if byte packing of structures
+  is not used.  It might now work with big endian architectures.
+
+  Italian translation updates.
+  
+  Modified gvceps.cpp so that it should work with big-endian
+  architecture and non byte packing.
+  
+  When opening a file from the command line, or dropping a file
+  on GSview, change the current directory to match the file.
+  Needed to display \aladdin\gs6.0\examples\chess.ps.
+
+  Added registration nag dialog.
+
+  Debug /d now supports some bitfield qualifiers.
+  /d1 is default
+  /d2 is debug Windows GDI printing.
+
+  Accept PDF files with UNC names, by duplicating backslashes
+  instead of converting them to forward slashes.
+
+  Rearranged printing topics to separate printing and conversion.
+  Hopefully this makes things a little clearer.
+
+  When using the pdfwrite device, add "-c save pop -f" to avoid 
+  a font bug in Ghostscript 6.0.
+
+----------------------
 Version 2.8 2000-02-17
 ----------------------
 All:

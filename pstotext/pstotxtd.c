@@ -7,7 +7,8 @@
 /* Copyright (C) 1995, Digital Equipment Corporation.         */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Fri Oct 16 16:30:54 PDT 1998 by mcjones   */
+/* Last modified on Sat Mar 11 09:16:00 AEST 2000 by rjl      */
+/*      modified on Fri Oct 16 16:30:54 PDT 1998 by mcjones   */
 /*      modified on Thu Nov 16 13:33:13 PST 1995 by deutsch   */
 
 #ifndef MSDOS
@@ -67,6 +68,7 @@ static char *gscommand = "gswin32c.exe";
 static char *gscommand = "gsos2.exe";
 #endif
 #endif
+static char *outfile = "";
 
 static char *cmd; /* = argv[0] */
 
@@ -93,6 +95,7 @@ void usage(void) {
   fprintf(stderr, "  -bboxes          output one word per line with bounding box\n");
   fprintf(stderr, "  -debug           show Ghostscript output and error messages\n");
   fprintf(stderr, "  -gs \042command\042    Ghostscript command\n");
+  fprintf(stderr, "  -output file     output results to \042file\042 (default is stdout)\n");
   fprintf(stderr, "  -                read from stdin (default if no files specified)\n");
 }
 
@@ -424,10 +427,17 @@ static void do_it(char *path) {
   char gs_cmd[2*MAXPATHLEN];
   char input[MAXPATHLEN];
   int status;
+  FILE *fileout;
 #ifdef MSDOS
   char *gsargtemp;
   FILE *gsargfile;
 #endif
+
+  fileout = stdout;
+  if (strlen(outfile) != 0) {
+    fileout = fopen(outfile, "w");
+    if (fileout == NULL) {perror(cmd); exit(1);}
+  }
 
   signal(SIGINT, handler);
   signal(SIGTERM, handler);
@@ -549,13 +559,14 @@ static void do_it(char *path) {
     }
     if (word!=NULL)
       if (!bboxes) {
-        fputs(pre, stdout); fputs(word, stdout); fputs(post, stdout);
+        fputs(pre, fileout); fputs(word, fileout); fputs(post, fileout);
 	if (debug)
 	    fputc('\n', stdout);
       }
       else
-        fprintf(stdout, "%6d\t%6d\t%6d\t%6d\t%s\n", llx, lly, urx, ury, word);
+        fprintf(fileout, "%6d\t%6d\t%6d\t%6d\t%s\n", llx, lly, urx, ury, word);
   }
+  if (fileout != stdout) fclose(fileout);
   status = cleanup();
   if (status!=0) exit(status);
 }
@@ -576,6 +587,11 @@ main(argc, argv) int argc; char *argv[]; {
 	i++;
 	if (i<argc)
 	    gscommand = argv[i];
+    }
+    else if (strcasecmp(arg, "-output") == 0) {
+	i++;
+	if (i>=argc) {usage(); exit(1);}
+	outfile = argv[i];
     }
     else if (strcmp(arg, "-")==0) do_it(NULL);
     else if (arg[0] == '-') {usage(); exit(1);}

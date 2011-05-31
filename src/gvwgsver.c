@@ -145,6 +145,7 @@ BOOL get_gs_string(int gs_revision, char *name, char *ptr, int len)
 
 	int code;
 	char key[256];
+	char dotversion[16];
 	int length;
 	DWORD version = GetVersion();
 
@@ -155,8 +156,12 @@ BOOL get_gs_string(int gs_revision, char *name, char *ptr, int len)
 	}
 
 
-	sprintf(key, "Software\\%s\\%d.%d", GS_PRODUCT,
+	if (gs_revision % 100 == 0)
+	    wsprintf(dotversion, "%d.0", (int)(gs_revision/100));
+	else
+	    wsprintf(dotversion, "%d.%02d", 
 		(int)(gs_revision / 100), (int)(gs_revision % 100));
+	wsprintf(key, "Software\\%s\\%s", GS_PRODUCT, dotversion);
 
         length = len;
 	code = gp_getenv_registry(HKEY_CURRENT_USER, key, name, ptr, &length);

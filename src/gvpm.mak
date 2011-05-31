@@ -16,7 +16,7 @@
 
 # gvpm.mak
 # PM GSview 
-# requires emx 0.9b or later
+# requires emx 0.9c or later
 #
 # edit COMPBASE and EMXPATH as required.
 

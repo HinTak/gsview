@@ -13,7 +13,7 @@
  entwickelten PostScript Document Structuring Conventions
  (DSC-Konventionen) entsprechen, auf dem Bildschirm dargestellt und auf
  einen Drucker ausgegeben werden.
- Die Version GSview 2.7 erfordert Ghostscript in der Version 4.03 - 6.99.
+ Die Version GSview 2.9 erfordert Ghostscript in der Version 4.03 - 6.99.
  Grundlage für GSview ist das von Tim Theisen entwickelte Programm
  Ghostview für X11.
 2Installation
@@ -195,7 +195,7 @@ E
  Kopieren Sie gsview32.ini oder gvpm.ini aus dem Systemverzeichnis oder dem Benutzerprofil-Verzeichnis in
  das Gsview Verzeichnis und entfernen alle Einträge bis auf:
   [Options]
-  Version=2.7
+  Version=2.9
   GSversion=600
   Configured=1
   GhostscriptDLL=E:\GSTOOLS\gs6.0\gsdll32.dll
@@ -2271,7 +2271,7 @@ W
 P
   GVPM.EXE - Bedienung von Ghostscript über graphische Oberfläche
 E
-  Copyright (C) 1993-1999, Ghostgum Software Pty Ltd.  Alle Rechte vorbehalten.
+  Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  Alle Rechte vorbehalten.
   Partielles Copyright (C) 1994, Timothy O. Theisen.  Alle Rechte
   vorbehalten.
 

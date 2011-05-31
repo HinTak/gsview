@@ -66,7 +66,7 @@
 #define GS_REVISION	  403		/* this is the last 16-bit version */
 #define GS_REVISION_MAX   403
 #else
-#define GS_REVISION	  600
+#define GS_REVISION	  601
 #define GS_REVISION_MAX   699
 #endif
 #ifdef _Windows

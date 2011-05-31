@@ -25,7 +25,7 @@
 /* RGB3 = Windows RGBTRIPLE and PM RGB */
 /* RGB4 = Windows RGBQUAD and PM RGB2 */
 
-#ifdef __EMX__
+#if defined(__EMX__) || defined(_MSC_VER)
 #pragma pack(1)		/* align structures to byte boundaries */
 #endif
 
@@ -95,7 +95,7 @@ struct eps_header_s {
 };
 #define EPS_HEADER_SIZE 30
 
-#ifdef __EMX__
+#if defined(__EMX__) || defined(_MSC_VER)
 #pragma pack()
 #endif
 

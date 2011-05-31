@@ -959,8 +959,12 @@ char psepilog[MAXSTR];
     	fprintf(optfile, "-c << /Policies << /PageSize 5 >> \
 /PageSize [%d %d] \
 /InputAttributes << 0 << /PageSize [%d %d] >> >> >> setpagedevice \
--f",
+-f\n",
 	widthpt, heightpt, widthpt, heightpt);
+
+    if (strcmp(option.device_name, "pdfwrite")==0)
+	fprintf(optfile, "-c save pop -f\n");
+
 
     fclose(optfile);
     return TRUE;

@@ -8,8 +8,7 @@
  Per i documenti che si attengono all'Adobe Postscript Document Structiring
  Conventions, GSview permette alle pagine selezionate di essere viste o
  stampate.
- GSview 2.76beta necessita di Ghostscript 4.03 - 6.99, con preferenza per la versione 6.0.
- GSview si è ispirato al programma X11 Ghostview di Tim Theisen.
+ GSview 2.9 necessita di Ghostscript 4.03 - 6.99, con preferenza per la versione 6.0.
 2Installazione
 ?Installazione
  E' consigliabile usare lo specifico programma di installazione per
@@ -214,7 +213,7 @@ E
  cartella del profilo utente alla cartella di GSview, quindi modificarlo
  togliendo tutte le registrazioni, ad eccezione di:
   [Options]
-  Version=2.76beta
+  Version=2.9
   GSversion=600
   Configured=1
   GhostscriptDLL=e:\Aladdin\gs6.0\bin\gsdll32.dll
@@ -496,10 +495,10 @@ E
  I comandi `Pagina Precedente`, `Rivisualizza` e `Vai a Pagina` funzionano solo se
  il documento contiene comandi `DSC`.
 
- `Visualizza` | `Adatta Finestra` oppure il tasto`F6` cambiano la 
- risoluzione della visualizzazione in modo che l'intera pagina sia 
- adattata alla finestra corrente.  
- L'uso ripetuto fa in modo che sia la larghezza che l'altezza della 
+ `Visualizza` | `Adatta Finestra` oppure il tasto`F6` cambiano la
+ risoluzione della visualizzazione in modo che l'intera pagina sia
+ adattata alla finestra corrente.
+ L'uso ripetuto fa in modo che sia la larghezza che l'altezza della
  pagina siano adattate alla finestra corrente.
 
  `Visualizza` | `A tutto Schermo` oppure il tasto `F4` visualizza la pagina a tutto schermo
@@ -837,7 +836,59 @@ E
  Conversione di PostScript in PDF.
  File | `Stampa`, seleziona pdfwrite, 300dpi, Stampa su File.
  Con Ghostscript 5.50 i caratteri con una codifica non standard
- saranno inclusi come bitmaps.  Se si sceglie 72dpi il contorno dei 958/pstoedit/index.html
+ saranno inclusi come bitmaps.  Se si sceglie 72dpi il contorno dei caratteri non sarà visto in modo perfetto.
+
+ Conversione di PDF in PostScript.
+ File | `Stampa`, seleziona pswrite, 300dpi, Stampa su File.
+
+ Conversione di PostScript Livello 2 in PostScript Livello 1.
+ File | `Stampa`, seleziona psmono, 300dpi, Stampa su File.
+ Al posto di 300dpi si può usare la risoluzione della propria
+ stampante.
+
+ Conversione in bitmap.
+ File | `Stampa`, seleziona bmp16m, 72dpi, Stampa su File.
+
+ Conversione in formato vettoriale modificabile (pstoedit).
+ Modifica | `Converti in formato vettoriale` oppure converti in PDF
+ usando il metodo sopraccitato.
+
+ Estrazione testo (PStoText).
+ Modifica | `Estrai Testo`
+
+ Aggiungere un'anteprima ad un file EPS.
+ Modifica | `Aggiungi Anteprima EPS`.  Vedere `Aggiungi Anteprima EPS` per
+ ulteriori dettagli.
+
+ Rimuovere l'anteprima da un file EPS.
+ Modifica | `Estrai EPS` | PostScript
+
+ Visualizzare con i contorni definiti.
+ Carta | `Impostazioni di Visualizzazione`.  Impostare `Text Alpha` e
+ `Graphics Alpha` a 4.  E' necessario un video con almeno
+ 8 bits per pixel.
+
+ Salvare il bitmap visualizzato.
+ Modifica | `Copia` per copiare sugli Appunti.
+ Per salvare in un file BMP, usare Modifica | `Copia` e quindi `Incolla su`...
+
+ Creare un bitmap con i contorni definiti (anti-aliasing).
+ 1. Visualizzare con i contorni definiti e salvare il bitmap visualizzato
+ oppure
+ 2. Stampare in una periferica bitmap impostare le proprietà come segue:
+  -dTextAlphaBits=4 -dGraphicsAlphaBits=4
+W
+2Conversione in un formato vettoriale
+?Conversione in un formato vettoriale
+?PStoEdit
+ E' possibile convertire un file PostScript o PDF in formato vettoriale modificabile
+ usando `pstoedit` di Wolfgang Glunz.
+ `pstoedit` è licenziato con la 'GNU Public Licence'.
+ I dati binari sono inclusi in GSview con il permesso di Wolfgang Glunz.
+ La versione a linea di comando `pstoedit.exe` e il manuale `pstoedit.htm`
+ sono inclusi nella cartella pstoedit.
+ La home page di pstoedit è
+  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/index.html
 
  Per aggiornamenti di pstoedit vedere presso la home page di pstoedit oppure presso
   http://www.cs.wisc.edu/~ghost/gsview/pstoedit.html
@@ -1593,7 +1644,7 @@ E
 ?Dimensioni della Pagina
 ?Carta
 ?Definite dall'Utente
-?Gira Carta
+?Ruota Carta
  Il menu `Carta` permette anche la selezione delle dimensioni della pagina.
  Le pagine disponibili sono:
   Letter          8.5 x 11   inch
@@ -1622,16 +1673,16 @@ E
  Se le impostazioni di pagina non sono una di quelle già previste
  saranno impostate in `Definite dall'Utente`.
 
- Se `Gira Carta` è attivato, la larghezza e l'altezza della pagina
+ Se `Ruota Carta` è attivato, la larghezza e l'altezza della pagina
  vengono scambiate.  L'immagine disegnata sulla pagina non viene ruotata.
  Questo influisce sia la visualizzazione che la stampa.
- La selezione di `A4` e `Gira Carta` è equivalente a selezionare
+ La selezione di `A4` e `Ruota Carta` è equivalente a selezionare
  `Definite dall'Utente` con le dimensioni di 842 x 595 punti.
  E' più comune l'uso delle impostazioni nel menu `Orientamento`
- che non `Gira Carta`.
-2Chiavi
-?Chiavi
- Qui di seguito vengono riportate le chiavi assegnate per GSview.
+ che non `Ruota Carta`.
+2Tasti
+?Tasti
+ Qui di seguito vengono riportati i tasti assegnati per GSview.
 
  `A`, `a`  Apre e visualizza un file.  (`File` | `Apri`)
 

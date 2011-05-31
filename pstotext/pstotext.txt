@@ -37,8 +37,9 @@ You can contact the authors at <mcjones@pa.dec.com> and
 For Windows and OS, contact gsview@ghostgum.com.au;
 for VMS, contact <goathunter@PROCESS.COM>.
 
-This version 1.8g is a modification of the original 1.8 to allow 
-operation with Aladdin Ghostscript 6.0.  Modifications made
+Version 1.8g is a modification of the original 1.8 to allow 
+operation with Aladdin Ghostscript 6.0 and to add -output to 
+Windows and OS/2 executables.  Modifications made 2000-03-11 
 by Russell Lang at Ghostgum Software Pty Ltd.
 
                       ==========================
