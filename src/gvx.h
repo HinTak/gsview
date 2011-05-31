@@ -300,6 +300,7 @@ typedef struct tagOPTIONS {
 	char	gsother[MAXSTR];
 	BOOL	configured;
 	int	drawmethod;
+	char	helpcmd[MAXSTR];
 	POINT	img_origin;
 	POINT	img_size;
 	BOOL	img_max;

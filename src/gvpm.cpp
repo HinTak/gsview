@@ -805,7 +805,9 @@ paint_bitmap(HPS ps, PRECTL prect, int scrollx, int scrolly)
     /* highlight marked words */
     highlight_words(ps, text_mark_first, text_mark_last);
 
-    highlight_links(ps);
+    /* GS 6.50 highlights links itself for PDF files */
+    if ((option.gsversion < 650) || !psfile.ispdf)
+	highlight_links(ps);
 
     GpiSetClipRegion(ps, NULLHANDLE, &hrgnold);
     if (hrgnold)

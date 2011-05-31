@@ -73,3 +73,7 @@ to reveal the dialog.  Find a way to keep the dialog in front,
 or bring it to the front when the parent is selected.
 
 X11 PDF links not implemented.
+
+"currentfile fileposition ==" gives an error in GSview.
+When an error occurs, display page rendered at time of error.
+

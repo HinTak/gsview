@@ -1534,6 +1534,18 @@ char **argv;
 	    *p = '\0';
 	}
 
+	if ((option.gsversion >= 650) || (gsdll.revision_number >=650)) {
+	    /* Ghostscript 6.50 won't execute pdfmark for links unless
+	     * the device has /pdfmark as a parameter.  This doesn't 
+	     * work for GSview so we need a patched version of pdf_main.ps
+	     * which has "systemdict /WRITEPDFMARKS or" added at the
+	     * the end of .writepdfmarks
+	     */
+	    strcpy(p, "-dWRITEPDFMARKS");
+	    p += strlen(p)+1;
+	    *p = '\0';
+	}
+
 	if (pending.text) {
 	    /* pstotext needs to make some changes to the systemdict */
 	    strcpy(p, "-dDELAYBIND");

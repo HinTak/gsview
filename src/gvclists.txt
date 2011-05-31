@@ -232,6 +232,7 @@ src/gvclistp.txt
 src/gvclists.txt
 src/gvcnews.txt
 src/gvxspec.txt
+src/gvxhelp.txt
 src/titlepag.tex
 src/gvpgs.cpp
 src/gvpgs.h
@@ -280,4 +281,3 @@ src/regorder.txt
 src/LICENCE
 src/FILE_ID.DIZ
 src/tasks
-src/x11.htm

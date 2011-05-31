@@ -18,9 +18,7 @@
 # X11 GSview 
 #
 
-ifndef GSVIEW_BASE
 GSVIEW_BASE=/usr/local
-endif
 
 # binaries placed here
 GSVIEW_BINDIR=$(GSVIEW_BASE)/bin
@@ -31,8 +29,11 @@ GSVIEW_DOCPATH=$(GSVIEW_BASE)/doc
 # GSview printer.ini and system wide gsview.ini
 GSVIEW_ETCPATH=$(GSVIEW_BASE)/etc
 
+MAKE=make
 COMP=gcc
 OBJ=o
+INSTALL=install -m 644
+INSTALL_EXE=install -m 755
 #CDEBUG=
 #LDEBUG=
 CDEBUG=-g
@@ -53,8 +54,8 @@ HDRS=gsvver.h gvx.h dscparse.h gvcfn.h gvcver.h gvxres.h
 
 all: gsview html epstool pstotext
 
-.cpp.$(OBJ):
-	$(COMP) $(CFLAGS) -c $*.cpp
+#.cpp.$(OBJ):
+#	$(COMP) $(CFLAGS) -c $*.cpp
 
 ECHOGSV=./echogsv
 
@@ -63,75 +64,67 @@ include gvcver.mak
 GSVIEW_DOCDIR=$(GSVIEW_DOCPATH)/gsview-$(GSVIEW_DOT_VERSION)
 
 install: all
-	install -m 755 gsview $(GSVIEW_BINDIR)/gsview
-	install -m 755 ../pstotext/pstotext $(GSVIEW_BINDIR)/pstotext
-	install -m 755 ../epstool/epstool $(GSVIEW_BINDIR)/epstool
+	$(INSTALL_EXE) gsview $(GSVIEW_BINDIR)/gsview
+	$(INSTALL_EXE) gvxhelp.txt $(GSVIEW_BINDIR)/gsview-help
+	$(INSTALL_EXE) ../pstotext/pstotext $(GSVIEW_BINDIR)/pstotext
+	$(INSTALL_EXE) ../epstool/epstool $(GSVIEW_BINDIR)/epstool
 	-mkdir $(GSVIEW_MANDIR)
 	chmod 755  $(GSVIEW_MANDIR)
-	install -m 644 ../pstotext/pstotext.1 $(GSVIEW_MANDIR)/pstotext.1
+	$(INSTALL) ../pstotext/pstotext.1 $(GSVIEW_MANDIR)/pstotext.1
 	-mkdir $(GSVIEW_DOCDIR)
 	chmod 755  $(GSVIEW_DOCDIR)
-	install -m 644 Readme.htm  $(GSVIEW_DOCDIR)/Readme.htm
-	install -m 644 LICENCE $(GSVIEW_DOCDIR)/LICENCE
-	install -m 644 gvxde.htm  $(GSVIEW_DOCDIR)/gvxde.htm
-	install -m 644 gvxen.htm  $(GSVIEW_DOCDIR)/gvxen.htm
-	install -m 644 gvxes.htm  $(GSVIEW_DOCDIR)/gvxes.htm
-	install -m 644 gvxfr.htm  $(GSVIEW_DOCDIR)/gvxfr.htm
-	install -m 644 gvxit.htm  $(GSVIEW_DOCDIR)/gvxit.htm
-	install -m 644 ../epstool/epstool.htm $(GSVIEW_DOCDIR)/epstool.htm
-	-mkdir $(GSVIEW_DOCPATH)
+	$(INSTALL) Readme.htm  $(GSVIEW_DOCDIR)/Readme.htm
+	$(INSTALL) LICENCE $(GSVIEW_DOCDIR)/LICENCE
+	$(INSTALL) gvxde.htm  $(GSVIEW_DOCDIR)/gvxde.htm
+	$(INSTALL) gvxen.htm  $(GSVIEW_DOCDIR)/gvxen.htm
+	$(INSTALL) gvxes.htm  $(GSVIEW_DOCDIR)/gvxes.htm
+	$(INSTALL) gvxfr.htm  $(GSVIEW_DOCDIR)/gvxfr.htm
+	$(INSTALL) gvxit.htm  $(GSVIEW_DOCDIR)/gvxit.htm
+	$(INSTALL) ../epstool/epstool.htm $(GSVIEW_DOCDIR)/epstool.htm
+	-mkdir $(GSVIEW_ETCPATH)
 	chmod 755  $(GSVIEW_ETCPATH)
-	install -m 644 printer.ini  $(GSVIEW_ETCPATH)/gsview/printer.ini
+	-mkdir $(GSVIEW_ETCPATH)/gsview
+	chmod 755  $(GSVIEW_ETCPATH)/gsview
+	$(INSTALL) printer.ini  $(GSVIEW_ETCPATH)/gsview/printer.ini
 
-TARNAME=../gsview$(GSVIEW_VERSION)b_linux.tar
-tar: all
-	-rm ./pstotext
-	cp ../pstotext/pstotext ./pstotext
-	cp ../pstotext/pstotext.1 ./pstotext.1
-	cp ../epstool/epstool ./epstool
-	cp ../epstool/epstool.htm ./epstool.htm
-	tar -cvf $(TARNAME) gsview Readme.htm LICENCE gvxde.htm gvxen.htm gvxes.htm gvxfr.htm gvxit.htm printer.ini pstotext pstotext.1 epstool epstool.htm
-	-rm $(TARNAME).gz
-	gzip $(TARNAME)
-
-echogsv: echogsv.c
+./echogsv: echogsv.c
 	$(COMP) -o echogsv echogsv.c
 
 epstool: ../epstool/epstool.cpp ../epstool/epstool.h gvceps.cpp gvceps.h dscparse.cpp
 	cd ../epstool
-	make -C ../epstool -f makefile.unx
+	$(MAKE) -C ../epstool -f makefile.unx
 	cd ../src
 
 pstotext: ../pstotext/bundle.c ../pstotext/bundle.h ../pstotext/main.c \
   ../pstotext/mkbundle.c ../pstotext/mkrch.c \
   ../pstotext/ocr.ps ../pstotext/rot270.ps ../pstotext/rot90.ps
 	cd ../pstotext
-	make -C ../pstotext -f Makefile
+	$(MAKE) -C ../pstotext -f Makefile
 	cd ../src
 
 gvx.$(OBJ): gvx.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvx.cpp
 
 gvxdlg.$(OBJ): gvxdlg.cpp gvcrc.h $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxdlg.cpp
 
 gvxdll.$(OBJ): gvxdll.cpp gvcrc.h gsdll.h $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxdll.cpp
 
 gvxdisp.$(OBJ): gvxdisp.cpp  $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxdisp.cpp
 
 gvxedit.$(OBJ): gvxedit.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxedit.cpp
 
 gvxeps.$(OBJ): gvxeps.cpp gvceps.h $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxeps.cpp
 
 gvxgsver.$(OBJ): gvxgsver.cpp $(HDRS) gvcrc.h
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxgsver.cpp
 
 gvxinit.$(OBJ): gvxinit.cpp $(HDRS) gvcrc.h
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxinit.cpp
 
 gvxl_de.$(OBJ): de/gvxlang.cpp $(HDRS) gvxlang.h gvxlangh.rc de/gvclang.h de/gvclang.rc  
 	$(COMP) $(CFLAGS) -I. -c -o gvxl_de.$(OBJ) de/gvxlang.cpp
@@ -149,64 +142,64 @@ gvxl_it.$(OBJ): it/gvxlang.cpp $(HDRS) gvxlang.h gvxlangh.rc it/gvclang.h it/gvc
 	$(COMP) $(CFLAGS) -I. -c -o gvxl_it.$(OBJ) it/gvxlang.cpp
 
 gvxmeas.$(OBJ): gvxmeas.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxmeas.cpp
 
 gvxmisc.$(OBJ): gvxmisc.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxmisc.cpp
 
 gvxprn.$(OBJ): gvxprn.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxprn.cpp
 
 gvxreg.$(OBJ): gvxreg.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxreg.cpp
 
 gvxres.$(OBJ): gvxres.cpp $(HDRS) gvxlang.h
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvxres.cpp
 
 gvccmd.$(OBJ): gvccmd.cpp gvcrc.h $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvccmd.cpp
 
 gvcdisp.$(OBJ): gvcdisp.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvcdisp.cpp
 
 gvcdll.$(OBJ): gvcdll.cpp gvcrc.h gsdll.h $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvcdll.cpp
 
 dscparse.$(OBJ): dscparse.cpp dscparse.h
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c dscparse.cpp
 
 dscutil.$(OBJ): dscutil.cpp dscparse.h
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c dscutil.cpp
 
-gvcbeta.obj: gvcbeta.cpp gvcbeta.h $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+gvcbeta.$(OBJ): gvcbeta.cpp gvcbeta.h $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcbeta.cpp
 
 gvceps.$(OBJ): gvceps.cpp gvceps.h $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvceps.cpp
 
 gvcinit.$(OBJ): gvcinit.cpp $(HDRS) gvcrc.h
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvcinit.cpp
 
 gvcmeas.$(OBJ): gvcmeas.cpp gvcrc.h $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvcmeas.cpp
 
 gvcmisc.$(OBJ): gvcmisc.cpp gvcrc.h $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvcmisc.cpp
 
 gvcpdf.$(OBJ): gvcpdf.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvcpdf.cpp
 
 gvcprn.$(OBJ): gvcprn.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvcprn.cpp
 
 gvcprf.$(OBJ): gvcprf.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvcprf.cpp
 
 gvcreg.$(OBJ): gvcreg.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvcreg.cpp
 
 gvctext.$(OBJ): gvctext.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c $*.cpp
+	$(COMP) $(CFLAGS) -c gvctext.cpp
 
 gsview: $(OBJS)
 	$(COMP) $(CFLAGS) -o gsview $(OBJS) $(LFLAGS)

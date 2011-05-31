@@ -40,14 +40,24 @@
 char registration_name[MAXSTR];
 unsigned int registration_receipt;
 
+unsigned int noreg[] = {20587, 20899};
+
 BOOL registration_check(void)
 {
     unsigned int registration_number;
+    int i;
+    int n = sizeof(noreg) / sizeof(int);
     if (read_registration(&registration_receipt, &registration_number,
 	registration_name, sizeof(registration_name)-1)) {
 	if ((registration_receipt !=0) &&
-	    (registration_number == make_reg(registration_receipt)))
-	    return TRUE;
+	    (registration_number == make_reg(registration_receipt))) {
+	    for (i=0; i < n; i++) {
+		if (registration_receipt == noreg[i])
+		    break;
+	    }
+	    if (i >= n)
+	        return TRUE;
+	}
     }
 
     load_string(IDS_UNREGISTERED, registration_name, sizeof(registration_name));

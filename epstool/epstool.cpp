@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "1.5  2000-12-16";
+char szVersion[] = "1.6  2000-12-28";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -904,8 +904,8 @@ psfile_extract_page(FILE *f, int page)
 	fseek(psfile.file, dsc->page[i].begin, SEEK_SET);
 	ps_copy_find(f, psfile.file, dsc->page[i].end, 
 	    line, sizeof(line), "%%Page:");
-	fprintf(f, "%%%%Page: %s %d\r\n",
-		dsc->page[i].label, page++);
+	fprintf(f, "%%%%Page: %s 1\r\n",
+		dsc->page[i].label);
 	position = ftell(psfile.file);
 	ps_copy(f, psfile.file, position, dsc->page[i].end);
     }

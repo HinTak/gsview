@@ -8,7 +8,7 @@
  Per i documenti che si attengono all'Adobe Postscript Document Structiring
  Conventions, GSview permette alle pagine selezionate di essere viste o
  stampate.
- GSview 3.5 necessita di Ghostscript 4.03 - 6.99, con preferenza per la versione 6.0.
+ GSview 3.6 necessita di Ghostscript 4.03 - 6.99, con preferenza per la versione 6.0.
 2Installazione
 ?Installazione
  E' consigliabile usare lo specifico programma di installazione per
@@ -216,7 +216,7 @@ E
  cartella del profilo utente alla cartella di GSview, quindi modificarlo
  togliendo tutte le registrazioni, ad eccezione di:
   [Options]
-  Version=3.5
+  Version=3.6
   GSversion=650
   Configured=1
   GhostscriptDLL=e:\gs\gs6.50\bin\gsdll32.dll
@@ -1175,7 +1175,7 @@ W
  La versione a linea di comando `pstoedit.exe` e il manuale `pstoedit.htm`
  sono inclusi nella cartella pstoedit.
  La home page di pstoedit è
-  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/index.html
+  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/
 
  Per aggiornamenti di pstoedit vedere presso la home page di pstoedit oppure presso
   http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm

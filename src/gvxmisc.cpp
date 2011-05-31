@@ -22,65 +22,48 @@
 
 /* SetDlgItemText is a Windows API */
 
+
+/*
+ * Help is an HTML file.  Topic names are the topic title with 
+ * spaces converted to underscores.
+ * Run the script "gsview-help helpfile.htm topic"
+ */
 void
 get_help(void)
 {
-    /* Help will be in an HTML file */
-    /* Use either gnome-help-browser or netscape */
-    char prog[] = "netscape";
-    char remote[] = "-remote";
-    char openbuf[MAXSTR];
-    char buf[MAXSTR];
     char topic[MAXSTR];
-    int status;
-    int pid;
+    char * nargv[10];
     char *p;
-    gs_addmess("get_help: not implemented fully\n");
-    strcpy(buf, szHelpName);
-    strcat(buf, "#");
+    int i;
+    int pid;
+
     load_string(nHelpTopic, topic, sizeof(topic));
     for (p = topic; *p; p++)
 	if (*p == ' ')
 	    *p = '_';
-    strcat(buf, topic);
-
-    if (debug & DEBUG_GENERAL)
-	gs_addmessf("Display help topic %s\n", buf);
 
     pid = fork();
     if (pid == -1)
 	return;		/* error */
     if (pid == 0) {
-	/* replace child process with prog */
-        char * nargv[5];
-	nargv[0] = prog;
-	nargv[1] = remote;
-	strcpy(openbuf, "openFile(");
-	strcat(openbuf, buf);
-	strcat(openbuf, ")");
-	nargv[2] = openbuf;
+	/* replace child process with help command */
+	memset(nargv, 0, sizeof(nargv));
+	nargv[0] = option.helpcmd;
+	nargv[1] = szHelpName;
+	nargv[2] = topic;
 	nargv[3] = NULL;
-	nargv[4] = NULL;
 	if (execvp(nargv[0], nargv) == -1) {
-	    fprintf(stdout, "child: failed to start \042%s\042 \042%s\042 \042%s\042 , errno=%d\n", nargv[0], nargv[1], nargv[2], errno);
+	    fprintf(stdout, "child: failed to start: errno=%d\n", errno);
+	    for (i=0; nargv[i] != NULL; i++)
+		gs_addmessf("  argv[%d]=\042%s\042\n", i, nargv[i]);
 	    /* exit without calling atexit functions */
 	    _exit(1);
 	}
     }
     else {
 	/* parent */
-	/* wait until netscape tells us if it succeeded */
-	if (waitpid(pid, &status, 0) !=  -1) {
-	    if (WIFEXITED(status)) {
-		if (WEXITSTATUS(status) == 0) {
-		    return;	/* existing netscape will display new topic */
-		}
-	    }
-	}
+	/* do nothing */
     }
-
-    /* netscape not running - start it now */
-    exec_program(prog, buf);
 }
 
 void

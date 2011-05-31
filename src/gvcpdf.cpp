@@ -674,7 +674,7 @@ pdf_orientation(int page)
 {
     if (psfile.dsc == (CDSC *)NULL)
 	return IDM_PORTRAIT;
-    if ((page < 1) || (page >= (int)psfile.dsc->page_count))
+    if ((page < 1) || (page > (int)psfile.dsc->page_count))
 	return IDM_PORTRAIT;
     switch (psfile.dsc->page[page-1].orientation) {
 	case CDSC_LANDSCAPE:

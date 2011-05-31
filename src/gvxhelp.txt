@@ -1,0 +1,12 @@
+#!/bin/sh
+# This script runs the GSview help
+# $1 is the help file name
+# $2 is the topic name
+
+if netscape -remote openFile\($1\#$2\) ; then
+    exit 0
+else
+    netscape $1\#$2
+fi 
+exit 0
+

@@ -433,6 +433,7 @@ distcopy:
 	copy setp32it.dll ..\setp32it.dll
 # assume zlib32.dll is in ..\gsview\zlib32.dll
 # assume libbz2.dll is in ..\gsview\libbz2.dll
+	copy pstoedit.htm ..\gsview\pstoedit.htm
 	copy gsprint.htm ..\gsview\gsprint.htm
 	copy gsprint.exe ..\gsview\gsprint.exe
 	copy ..\epstool\epstool.htm ..\gsview\epstool.htm

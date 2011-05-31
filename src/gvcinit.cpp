@@ -96,7 +96,11 @@ init_options(void)
     default_gsdll(option.gsdll);
     default_gsinclude(option.gsinclude);
     option.gsother[0] = '\0';
-
+#ifdef X11
+    strcpy(option.helpcmd, "gsview-help");
+#else
+    option.helpcmd[0] = '\0';
+#endif
     option.img_origin.x = CW_USEDEFAULT;
     option.img_origin.y = CW_USEDEFAULT;
     option.img_size.x = CW_USEDEFAULT;

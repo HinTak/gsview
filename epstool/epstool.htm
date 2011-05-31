@@ -11,7 +11,7 @@ epstool
 <p>
 EPSTOOL - Create or extract preview bitmaps in EPS files.
 <br>
-Release date: 2000-12-16
+Release date: 2000-12-27
 </p>
 <h2>
 Table of contents
@@ -200,6 +200,13 @@ Notes
 </h2>
 
 <p>
+When extracting a page number with "-n", it is your responsibility
+to make sure that the PostScript file does not use any operators
+that are forbidden in EPS files.
+This can be tested with GSview "EPS Warn".
+</p>
+
+<p>
 Under OS/2 or MS-DOS, epstool requires Ghostscript 3.51 or later.
 If you have command line length problems, try setting the Ghostscript
 include path using the GS_LIB environment variable instead of using
@@ -341,6 +348,17 @@ Other tools that can add previews to EPS files are
 Revision History
 </h2>
 <h3>
+1.6 2000-12-28
+</h3>
+<p>
+  Release with GSview 3.6.
+<br>
+  Write correct page ordinal when extracting a page.
+<br>
+  Correctly handle DOS EPS files again.
+</p>
+<h3>
+<h3>
 1.5 2000-12-16
 </h3>
 <p>
@@ -351,6 +369,7 @@ Revision History
 </h3>
 <p>
   Updated DSC parser.
+<br>
   Release with GSview 3.41 beta.
 </p>
 <h3>

@@ -229,6 +229,9 @@ PROFILE *prf;
 	option.language = IDM_LANGIT;
     else if (strcmp(profile, "en") == 0)
 	option.language = IDM_LANGEN;
+    profile_read_string(prf, section, "HelpCmd", "", profile, sizeof(profile));
+    if (profile[0] != '\0')	/* don't copy a default - assume already set */
+	    strncpy(option.helpcmd, profile, MAXSTR-1);
     profile_read_string(prf, section, "Origin", "", profile, sizeof(profile));
     option.img_origin.x = option.img_origin.y = CW_USEDEFAULT;
     if (sscanf(profile,"%d %d", &i, &j) == 2) {
@@ -471,6 +474,7 @@ PROFILE *prf;
 	profile_write_string(prf, section, "GhostscriptInclude", option.gsinclude);
 	profile_write_string(prf, section, "GhostscriptOther", option.gsother);
 	sprintf(profile, "%d %d", (int)option.img_origin.x, (int)option.img_origin.y);
+	profile_write_string(prf, section, "HelpCmd", option.helpcmd);
 	profile_write_string(prf, section, "Origin", profile);
 	sprintf(profile, "%d %d", (int)option.img_size.x, (int)option.img_size.y);
 	profile_write_string(prf, section, "Size", profile);

@@ -64,6 +64,8 @@ char szFindText[MAXSTR];
 char szIniFile[MAXSTR];
 char previous_filename[MAXSTR];
 char selectname[MAXSTR];
+char szDisplay[MAXSTR];			/* environment variable DISPLAY= */
+char szGhostview[MAXSTR];		/* environment variable GHOSTVIEW= */
 const char szScratch[] = "gsvx";	/* temporary filename prefix */
 
 #ifdef NOTUSED
@@ -712,19 +714,23 @@ int start_gs(void)
 
     /* tell Ghostscript which X Window to draw on */
     if (option.drawmethod == IDM_DRAWPIXMAP) {
-	sprintf(buf, "%d %d", (int)GDK_WINDOW_XWINDOW(img->window),
-		(int)GDK_WINDOW_XWINDOW(pixmap));
+	sprintf(szGhostview, "GHOSTVIEW=%d %d", 
+	    (int)GDK_WINDOW_XWINDOW(img->window), 
+	    (int)GDK_WINDOW_XWINDOW(pixmap));
     }
     else {
-	sprintf(buf, "%d", (int)GDK_WINDOW_XWINDOW(img->window));
+	sprintf(szGhostview, "GHOSTVIEW=%d", 
+	    (int)GDK_WINDOW_XWINDOW(img->window));
     }
+    putenv(szGhostview);
+    if (debug & DEBUG_GENERAL)
+	gs_addmessf("%s\n", szGhostview);
 
-    setenv("GHOSTVIEW", buf, TRUE);
-    setenv("DISPLAY", XDisplayString(GDK_WINDOW_XDISPLAY(img->window)), TRUE);
+    sprintf(szDisplay, "DISPLAY=%s", 
+	XDisplayString(GDK_WINDOW_XDISPLAY(img->window)));
+    putenv(szDisplay);
     if (debug & DEBUG_GENERAL)
-	gs_addmessf("GHOSTVIEW=%s\n", buf);
-    if (debug & DEBUG_GENERAL)
-	gs_addmessf("DISPLAY=%s\n", XDisplayString(GDK_WINDOW_XDISPLAY(img->window)));
+	gs_addmessf("%s\n", szDisplay);
 
     if (XGetWindowAttributes(dpy, (int)GDK_WINDOW_XWINDOW(img->window),
 	    &attrib)) {
@@ -1451,7 +1457,9 @@ expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
     /* highlight marked words */
     highlight_words(text_mark_first, text_mark_last, TRUE);
 
-    highlight_links();
+    /* GS 6.50 highlights links itself for PDF files */
+    if ((option.gsversion < 650) || !psfile.ispdf)
+	highlight_links();
 
     return FALSE; 
 }

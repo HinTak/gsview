@@ -1,16 +1,16 @@
 #
-# Spec file for GSview 3.5
+# Spec file for GSview 3.6
 #
-# 3.5 release
-#  2000-12-16 Russell Lang <gsview@ghostgum.com.au>
+# 3.6 release
+#  2000-12-29 Russell Lang <gsview@ghostgum.com.au>
 #
 Summary: PostScript and PDF previewer
 Name: gsview
-Version: 3.5
+Version: 3.6
 Release: 1
 Copyright: Aladdin Free Public License, Ghostgum Software Pty Ltd
 Group: Applications/Graphics
-Source: ftp://ftp.cs.wisc.edu/ghost/ghostgum/gsv35src.zip
+Source: ftp://ftp.cs.wisc.edu/ghost/ghostgum/gsv36src.zip
 URL: http://www.cs.wisc.edu/~ghost/gsview/
 #Icon: gsview.gif
 #Distribution: Unknown
@@ -39,7 +39,7 @@ mkdir $RPM_BUILD_DIR/gsview-%{version}
 #
 # unpack main sources
 cd $RPM_BUILD_DIR/gsview-%{version}
-unzip -a $RPM_SOURCE_DIR/gsv35src.zip
+unzip -a $RPM_SOURCE_DIR/gsv36src.zip
 unzip -a epstool.zip
 unzip -a pstotext.zip
 unzip -a src.zip
@@ -70,6 +70,8 @@ strip $RPM_BUILD_ROOT/usr/local/bin/epstool
 /usr/local/man/*/*
 
 %changelog
+* Fri Dec 29 2000 Russell Lang <gsview@ghostgum.com.au>
+- GSview 3.6 release
 * Sat Dec 16 2000 Russell Lang <gsview@ghostgum.com.au>
 - GSview 3.5 release
 * Fri Dec 08 2000 Russell Lang <gsview@ghostgum.com.au>

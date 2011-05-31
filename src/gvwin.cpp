@@ -961,7 +961,9 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    /* highlight marked words */
 		    highlight_words(hdc, text_mark_first, text_mark_last);
 
-		    highlight_links(hdc);
+		    /* GS 6.50 highlights links itself for PDF files */
+		    if ((option.gsversion < 650) || !psfile.ispdf)
+			highlight_links(hdc);
 
 		    EndPaint(hwnd, &ps);
 		    release_mutex();
@@ -1546,12 +1548,8 @@ RECT rect;
 		    zoom = !zoom;
 		    display.zoom_xoffset = x;
 		    display.zoom_yoffset = y;
-		    if (option.quick_open) {
-			scrollx = bitmap.scrollx;
-			scrolly = bitmap.scrolly;
-		    }
-		    else
-			scrollx = scrolly = 0;
+		    scrollx = bitmap.scrollx;
+		    scrolly = bitmap.scrolly;
 		    if (rect.right - rect.left > bitmap.width)
 		        zwidth = bitmap.width;
 		    else
@@ -2516,6 +2514,8 @@ float dpi, xdpi, ydpi, xdpi2, ydpi2;
 	    GetClientRect(hwndimg, &rect);
 	    rect.left += img_offset.x;
 	    rect.top += img_offset.y;
+	    /* substract height of status bar */
+	    rect.bottom -= (info_rect.bottom - info_rect.top);
 	}
 	xdpi = (rect.right - rect.left) * 72.0 / width;
 	ydpi = (rect.bottom - rect.top) * 72.0 / height;

@@ -1119,8 +1119,12 @@ int method = option.print_method;
 		widthpt, heightpt);
     }
 
-    if (strcmp(device, "pdfwrite")==0)
-	fprintf(optfile, "-c save pop -f\n");
+    if (strcmp(device, "pdfwrite")==0) {
+	if (option.gsversion >= 650)
+	    fprintf(optfile, "-c .setpdfwrite -f\n");
+	else
+	    fprintf(optfile, "-c save pop -f\n");
+    }
 
     fclose(optfile);
     return TRUE;

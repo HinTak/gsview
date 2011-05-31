@@ -7,7 +7,7 @@
  utilizado por las impresoras láser.
  Para los documentos construidos siguiendo las especificaciones de Adobe acerca
  de la estructura de los documentos PostScript (DSC), GSview permite
- seleccionar las páginas que serán visualizadas o impresas. GSview 3.5 requiere
+ seleccionar las páginas que serán visualizadas o impresas. GSview 3.6 requiere
  Ghostscript 4.03 - 6.99, siendo preferible la versión 6.0 o superior.
 2Instalación
 ?Instalación
@@ -215,7 +215,7 @@ E
  desde el directorio del perfil de usuario, al directorio de GSview, edítelo y
  elimine todas las entradas excepto:
   [Options]
-  Version=3.5
+  Version=3.6
   GSversion=650
   Configured=1
   GhostscriptDLL=e:\gs\gs6.50\bin\gsdll32.dll
@@ -1181,7 +1181,7 @@ W
  El ejecutable `pstoedit.exe`, en modo línea de comandos, y el
  manual `pstoedit.htm` están incluidos en el directorio pstoedit.
  La página principal de pstoedit se encuentra en
-  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/index.html
+  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/
  Para actualizaciones de pstoedit, además de dicha página, puede usar
   http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
 

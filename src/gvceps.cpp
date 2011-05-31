@@ -1650,7 +1650,18 @@ int code;
 	}
 	else {
 	    /* don't use ftell(), because we may already have an eps preview */
-	    eps_header.ps_length = psfile.dsc->endtrailer - psfile.dsc->begincomments;
+	    long end = psfile.dsc->begincomments;
+	    if (psfile.dsc->endcomments)
+	       end = psfile.dsc->endcomments;
+	    if (psfile.dsc->enddefaults)
+	       end = psfile.dsc->enddefaults;
+	    if (psfile.dsc->endprolog)
+	       end = psfile.dsc->endprolog;
+	    if (psfile.dsc->endsetup)
+	       end = psfile.dsc->endsetup;
+	    if (psfile.dsc->endtrailer)
+	       end = psfile.dsc->endtrailer;
+	    eps_header.ps_length = end - psfile.dsc->begincomments;
 	}
 	eps_header.mf_begin = 0;
 	eps_header.mf_length = 0;
@@ -2077,6 +2088,7 @@ int type = 0;
 #define WMF 2
 char id[4];
 CDSC *dsc = psfile.dsc;
+long end;
 
 	/* get user supplied preview */
 #ifdef EPSTOOL
@@ -2148,7 +2160,18 @@ CDSC *dsc = psfile.dsc;
 	eps_header.id[2] = 0xd3;
 	eps_header.id[3] = 0xc6;
 	eps_header.ps_begin = EPS_HEADER_SIZE;
-	eps_header.ps_length = psfile.dsc->endtrailer - psfile.dsc->begincomments;
+	end = psfile.dsc->begincomments;
+	if (dsc->endcomments)
+	   end = dsc->endcomments;
+	if (dsc->enddefaults)
+	   end = dsc->enddefaults;
+	if (dsc->endprolog)
+	   end = dsc->endprolog;
+	if (dsc->endsetup)
+	   end = dsc->endsetup;
+	if (dsc->endtrailer)
+	   end = dsc->endtrailer;
+	eps_header.ps_length = end - psfile.dsc->begincomments;
 	if (type == WMF) {
 	    eps_header.mf_begin = eps_header.ps_begin + eps_header.ps_length;
 	    eps_header.mf_length = preview_length;

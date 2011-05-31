@@ -201,8 +201,19 @@ gsview_text_extract_quick()
 	}
       }
       else {
+	long end = psfile.dsc->begincomments;
 	fseek(psfile.file, psfile.dsc->begincomments, SEEK_SET);
-	text_extract(f, psfile.file, psfile.dsc->endtrailer);
+	if (psfile.dsc->endcomments)
+	   end = psfile.dsc->endcomments;
+	if (psfile.dsc->enddefaults)
+	   end = psfile.dsc->enddefaults;
+	if (psfile.dsc->endprolog)
+	   end = psfile.dsc->endprolog;
+	if (psfile.dsc->endsetup)
+	   end = psfile.dsc->endsetup;
+	if (psfile.dsc->endtrailer)
+	   end = psfile.dsc->endtrailer;
+	text_extract(f, psfile.file, end);
       }
     }
 

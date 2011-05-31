@@ -1,4 +1,54 @@
 ---------------------------
+Version 3.6 2000-12-29
+---------------------------
+All:
+  Skip over DOSEPS header correctly.
+
+  When adding EPS preview, handle files without a trailer.
+
+  Use correct orientation for last page of a PDF document.
+
+  Tell Readme.htm that pstoedit.htm is in the current directory
+  so it works when Readme.htm is placed on the web site.
+  Place a refresh pstoedit.htm to redirect to ../pstoedit/pstoedit.htm
+  for the GSview Win32 installation.  
+
+  Added some of the more common distiller parameters to the
+  pdfwrite properties in printer.ini.
+
+  If using GS 6.50 or later and pdfwrite, use -c .setpdfwrite -f
+  not -c save pop -f.
+
+  pdfmark is broken in GS 6.50.  Unless you are writing to pdfwrite,
+  Ghostscript won't process links.  Add -dWRITEPDFMARKS if GS >= 6.50.
+  A patch is needed to GS 6.50 pdf_main.ps to add
+   systemdict /WRITEPDFMARKS or
+  as the last line of .writepdfmarks (line 35).
+
+  Don't highlight links in PDF files if GS >= 6.50.  Ghostscript
+  now does this itself.
+
+Win32:
+  Widened listboxes in property dialog.
+
+  Zoom now centres correctly if scroll position not top left.
+
+X11:
+  Added AAGSMESSX11 message to resources.
+
+  Made makefile less dependant on gnu make.
+
+  Use putenv not setenv because it is more widely supported.
+
+  Allow the help program to be configured using the INI file,
+  but not from the user interface.  Default help command is 
+  "gsview-help".  See the script gvxhelp.txt for implementation.
+
+OS/2:
+  Fixed position of "Fixed Media" listbox in Convert and
+  Print dialogs.
+
+---------------------------
 Version 3.5 2000-12-16
 ---------------------------
 All:
