@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2007, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -1022,6 +1022,11 @@ InstallDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	    SetDlgItemTextA(hDlg, INSTALL_DLL, option.gsdll);
 	    SetDlgItemTextA(hDlg, INSTALL_INCLUDE, option.gsinclude);
 	    SetDlgItemTextA(hDlg, INSTALL_OTHER, option.gsother);
+	    if (portable_app) {
+    		EnableWindow(GetDlgItem(hDlg, IDC_CONFIGADV_START), FALSE);
+    		EnableWindow(GetDlgItem(hDlg, IDC_CONFIGADV_PS), FALSE);
+    		EnableWindow(GetDlgItem(hDlg, IDC_CONFIGADV_PDF), FALSE);
+	    }
             return( TRUE);
         case WM_COMMAND:
             switch(LOWORD(wParam)) {

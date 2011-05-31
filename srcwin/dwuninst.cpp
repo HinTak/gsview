@@ -917,7 +917,7 @@ MSG msg;
 
     if (fLog)
 	fclose(fLog);
-	
+
     CoUninitialize();
 
     return 0;

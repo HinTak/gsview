@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2007, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -640,9 +640,12 @@ int ndisp;
 
 	/* get path to INI file */
 	szIniFile[0] = '\0';
-	/* strcpy(szIniFile, szExePath); */
-	/* allow for user profiles */
-	if (is_win4) {
+	if (portable_app) {
+	    /* Store INI file in same directory as executable */
+	    strcpy(szIniFile, szExePath);
+	}
+	else if (is_win4) {
+	    /* allow for user profiles */
 	    LONG rc;
 	    HKEY hkey;
 	    DWORD keytype;
@@ -815,6 +818,7 @@ parse_args(GSVIEW_ARGS *args)
     char *filename = args->filename;
     debug = args->debug;
     multithread = args->multithread;
+    portable_app = args->portable;
     if (is_win32s)
 	multithread = FALSE;
     if (args->print || args->convert) {
@@ -1265,6 +1269,9 @@ char *p;
 FILE *oldfile, *newfile;
 BOOL flag = TRUE;
 const char regheader[]="REGEDIT4\n";
+
+    if (portable_app)
+	return 0;	/* never write to registry when portable */
 
     if (!ps && !pdf)
 	return 0;
@@ -1995,12 +2002,14 @@ config_wizard(BOOL bVerbose)
     char *p;
     FILE *f;
 
-    /* 1. If GS installed, easy configure */
-    gscount = 0;
-    get_gs_versions(&gscount);
-    if (gscount > 0) {
-	if (config_easy(bVerbose) == 0)
-	    return 0;	/* success */
+    if (!portable_app) {
+	/* 1. If GS installed, easy configure */
+	gscount = 0;
+	get_gs_versions(&gscount);
+	if (gscount > 0) {
+	    if (config_easy(bVerbose) == 0)
+		return 0;	/* success */
+	}
     }
 
     /* 2. GS not installed.  Look for GS in adajacent directory */
@@ -2016,7 +2025,10 @@ config_wizard(BOOL bVerbose)
     p = gsdir + strlen(gsdir);
 
 
-    gs_addmess("Ghostscript registry entries not present.\n");
+    if (portable_app)
+        gs_addmess("GSview Portable\n");
+    else
+        gs_addmess("Ghostscript registry entries not present.\n");
 
     gsver = GS_REVISION;
     while (gsver <= GS_REVISION_MAX) {

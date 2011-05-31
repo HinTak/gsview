@@ -125,6 +125,7 @@ typedef struct tagGSDLL_INPUT {
 
 typedef struct gsview_args_s {
     int debug;			/* /d */
+    int portable;		/* /a */
     int multithread;		/* /t */
     int help;			/* -help */
     int version;		/* -version */

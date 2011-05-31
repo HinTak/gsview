@@ -328,6 +328,8 @@ convert(FILE *a,FILE *b)
     strtok(line, "\n");
     if (charset)
         fprintf(b,"<meta http-equiv=\042Content-Type\042 content=\042text/html; charset=%s\042>\n", charset);
+    else
+        fprintf(b,"<meta http-equiv=\042Content-Type\042 content=\042text/html; charset=ISO-8859-1\042>\n");
     fprintf(b,"<title>%s</title>\n", line+1);
     fprintf(b,"</head>\n");
     fprintf(b,"<body>\n");

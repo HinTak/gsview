@@ -37,6 +37,9 @@ VCVER=71
 !if "$(_NMAKE_VER)" == "8.00.50727.42"
 VCVER=8
 !endif
+!if "$(_NMAKE_VER)" == "8.00.50727.762"
+VCVER=8
+!endif
 !endif
 
 !ifndef VCVER
@@ -44,7 +47,9 @@ VCVER=71
 !endif
 
 # DEBUG=1 for Debugging options
-DEBUG=1
+!ifndef DEBUG
+DEBUG=0
+!endif
 
 # Win64 requires Microsoft Visual Studio 8 (.NET 2005)
 # or Microsoft Visual Studio .NET 2003 with Windows Server 2003 DDK.

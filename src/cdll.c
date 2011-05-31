@@ -112,6 +112,8 @@ gsapi_revision_t rv;
   Found version %ld\n  Need version  %ld - %ld\n", 
 	    dll->revision_number, 
 	    (long)GS_REVISION_MIN, (long)GS_REVISION_MAX);
+	if (dll->revision_number > 70000)
+	  gs_addmessf("\nThis is a modified version of ghostscript that is broken.  It should be replaced by the official ghostscript release.\n");
 	return_error(-1);
     }
 

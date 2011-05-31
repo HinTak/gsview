@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2007, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -918,6 +918,11 @@ install_prog()
 	char szReadme[MAXSTR];
 	char szArguments[MAXSTR];
 	char szDescription[MAXSTR];
+#ifdef _WIN64
+	char *szExeName = "gsview64.exe";
+#else
+	char *szExeName = "gsview32.exe";
+#endif
 	
 	if (g_bQuit)
 		return FALSE;
@@ -949,11 +954,8 @@ install_prog()
 	strcpy(szProgram, g_szTargetDir);
 	strcat(szProgram, "\\");
 	strcat(szProgram, cinst.GetMainDir());
-#ifdef _WIN64
-	strcat(szProgram, "\\gsview64.exe");
-#else
-	strcat(szProgram, "\\gsview32.exe");
-#endif
+	strcat(szProgram, "\\");
+	strcat(szProgram, szExeName);
 	strcpy(szArguments, "");
 	
 	// write registry entries
@@ -980,17 +982,15 @@ install_prog()
 	    return FALSE;
 	}
 
+	sprintf(buf, "SOFTWARE\\Microsoft\Windows\\CurrentVersion\\App Paths\\%s", szExeName);
+        
+
 	cinst.RegistryCloseKey();
 
 	// Write App Paths to registry
 	sprintf(buf, 
 	    "Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\%s",
-#ifdef _WIN64
-	     "gsview64.exe");
-#else
-	     "gsview32.exe");
-#endif
-   
+		szExeName);
 	flag = cinst.RegistryOpenKey(HKEY_LOCAL_MACHINE, buf);
 	if (flag) {
 	    flag = cinst.RegistrySetValue(NULL, szProgram);

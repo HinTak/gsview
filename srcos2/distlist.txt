@@ -26,7 +26,6 @@ gvpmse.hlp
 gvpmsk.hlp
 gvpm.ico
 gvpgs.exe
-zlib2.dll
 printer.ini
 Readme.htm
 gsview.css

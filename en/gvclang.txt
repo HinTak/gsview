@@ -7,7 +7,7 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 4.8 requires Ghostscript 7.04 - 9.99.
+ GSview 4.9 requires Ghostscript 7.04 - 9.99.
 2Installation
 ?Installation
 W
@@ -200,6 +200,33 @@ E
  supplied with Ghostscript for examples.  See the `Fonts` topic.
 
  If you have problems, try reading the help topic `Common Problems`.
+W
+3Portable Application
+?Portable Application
+ GSview can be installed as a Portable Application that can
+ run directly from a USB memory stick or CD-ROM.
+ To install as a portable application, obtain the GSview and Ghostscript
+ self extracting archives and unpack them as follows:
+  mkdir GSview
+  cd GSview
+  unzip gvNNNw32.exe
+  unzip gsvNNw32.exe
+  del set*.*
+  del FILE_ID.DIZ
+  del filelist.txt
+  del fontlist.txt
+  del un*.exe
+ You should then have a directory structure as follows
+  GSview/GSviewPortable.exe
+  GSview/fonts
+  GSview/gsN.NN
+  GSview/gsview
+  GSview/pstotext
+ Run GSviewPortable.  This will automatically find ghostscript, 
+ and will write the configuration file gsview32.ini into the 
+ GSview/gsview directory.
+ GSview as a portable application will not modify the registry.
+E
 WP
 3Network Installation
 ?Network Installation
@@ -236,12 +263,12 @@ WP
  Copy gsview32.ini or gvpm.ini from the system directory or your
  user profile directory to the GSview directory, then edit it to
  remove all entries except for:
-  [GSview-4.8]
-  Version=4.8
-  GSversion=853
+  [GSview-4.9]
+  Version=4.9
+  GSversion=860
   Configured=1
-  GhostscriptDLL=e:\gs\gs8.53\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs8.53\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs8.60\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs8.60\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  When a user starts GSview, their INI file will normally be used.
  The first time GSview is run, or when the GSview version doesn't
@@ -2200,6 +2227,8 @@ E
 W
  Windows supports a few additional command line options.
 
+ `-a` runs as a `Portable Application`.
+
  `-s` spools a file directly to the printer, without using Ghostscript.
  GSview will exit when the file has been spooled.
  Some examples are:
@@ -2564,14 +2593,16 @@ WP
  Obtain it from the same place you obtained GSview or from
   ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Place the zlib DLL in the same directory as the GSview EXE.
- zlib16.dll is for Win16.  zlib32.dll is for Win32.
- zlib2.dll is for OS/2. zlib64.dll is for Win64 (AMD64).
+ zlib32.dll is for Win32 (same as official zlib1.dll).
+ zlib64.dll is for Win64 (AMD64).
+P
+ zlib2.dll is for OS/2.
 X
  If you get an error message `Failed to load zlib DLL...` then
  you probably don't have libz.so available.
 E
 
- zlib is Copyright 1995-2004 by Jean-loup Gailly and Mark Adler.
+ zlib is Copyright 1995-2005 by Jean-loup Gailly and Mark Adler.
  The source code can be obtained from
   http://www.zlib.net/
 3Internals

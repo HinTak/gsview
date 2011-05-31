@@ -59,7 +59,7 @@ all: $(BD)gsview$(WINEXT).exe \
   $(BD)gsvw$(WINEXT)se.dll $(BD)gsviewse.hlp $(BD)setp$(WINEXT)se.dll \
   $(BD)gsvw$(WINEXT)sk.dll $(BD)gsviewsk.hlp $(BD)setp$(WINEXT)sk.dll \
   $(BD)gvwgs$(WINEXT).exe $(BD)setup.exe $(BD)uninstgs.exe \
-  $(BD)gsprint.exe 
+  $(BD)gsprint.exe  $(BD)GSviewPortable.exe
 
 $(OD)lib.rsp: makefile srcwin/win.mak srcwin/wincom.mak
 	echo "$(PLATLIBDIR)$(D)kernel32.lib" > $(OD)lib.rsp
@@ -152,6 +152,12 @@ $(BD)gvwgs$(WINEXT).exe: $(SRCWIN)gvwgs.c $(SRCWIN)gvwgs.h $(OD)gvwgs$(WINEXT).r
 	$(COMP) $(FOO)gvwgs$(WINEXT)$(OBJ) $(CO) $(SRCWIN)gvwgs.c
 	$(LINK) $(DEBUGLINK) $(LGUI) $(LDEF)$(SRCWIN)gvwgs$(WINEXT).def $(LOUT)$(BD)gvwgs$(WINEXT).exe $(OD)gvwgs$(WINEXT)$(OBJ) $(OD)cdll$(OBJ)  $(OD)gvwgs$(WINEXT).res $(LIBRSP)
 
+$(OD)GSviewPortable.res: $(SRCWIN)gvwport.rc $(SRC)gvcrc.h $(ICONS)
+	$(RCOMP) $(VIEWFLAGS) $(ROFILE)$(OD)GSviewPortable.res $(SRCWIN)gvwport.rc
+
+$(BD)GSviewPortable.exe: $(SRCWIN)gvwport.c $(OD)GSviewPortable.res $(OD)lib.rsp 
+	$(COMP) $(FOO)GSviewPortable$(OBJ) $(CO) $(SRCWIN)gvwport.c
+	$(LINK) $(DEBUGLINK) $(LGUI) $(LDEF)$(SRCWIN)gvwport.def $(LOUT)$(BD)GSviewPortable.exe $(OD)GSviewPortable$(OBJ)  $(OD)GSviewPortable.res $(LIBRSP)
 
 ##########
 # Catalan
@@ -605,16 +611,17 @@ viewonlydist:
 	$(CP) cdorder.txt dist$(D)gsview$(D)cdorder.txt
 	$(CP) regorder.txt dist$(D)gsview$(D)regorder.txt
 	$(CP) $(BD)gsview$(WINEXT).exe dist$(D)gsview$(D)gsview$(WINEXT).exe
-	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(D)gsview$(WINEXT).ico
+	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(WINEXT).ico
 	$(CP) $(BD)gsviewen.hlp dist$(D)gsview$(D)gsviewen.hlp
 	$(CP) $(SRC)printer.ini dist$(D)gsview$(D)printer.ini
+	$(CP) $(BD)GSviewPortable.exe dist$(D)GSviewPortable.exe
 	$(CP) NUL dist$(D)gsview$(D)gsview$(WINEXT).ini
 	$(CP) $(BD)uninstgs.exe dist$(D)gsview$(D)uninstgs.exe
 	$(CP) $(BD)setup.exe dist$(D)setup.exe
 	$(CP) gsview$(WINEXT)$(D)zlib$(WINEXT).dll dist$(D)gsview$(D)zlib$(WINEXT).dll
 	$(CP) gsview$(WINEXT)$(D)libbz2.dll dist$(D)gsview$(D)libbz2.dll
 	echo gsview$(D)gsview$(WINEXT).exe> $(OD)viewlist.txt
-	echo gsview$(D)gsview$(WINEXT).ico>> $(OD)viewlist.txt
+	echo gsview$(D)$(WINEXT).ico>> $(OD)viewlist.txt
 	echo gsview$(D)uninstgs.exe>> $(OD)viewlist.txt
 	echo gsview$(D)printer.ini>> $(OD)viewlist.txt
 	echo gsview$(D)gsview$(WINEXT).ini>> $(OD)viewlist.txt
@@ -633,6 +640,7 @@ viewonlydist:
 	echo FILE_ID.DIZ>> $(OD)files$(WINEXT).txt
 	echo filelist.txt>> $(OD)files$(WINEXT).txt
 	echo setup.exe>> $(OD)files$(WINEXT).txt
+	echo GSviewPortable.exe>> $(OD)files$(WINEXT).txt
 	cd dist
 	-$(RM) ..$(D)gsv$(GSVIEW_VERSION)w$(WINEXT).zip
 	-$(RM) ..$(D)gsv$(GSVIEW_VERSION)w$(WINEXT).exe
@@ -641,11 +649,11 @@ viewonlydist:
 	cd dist
 	echo -win32 -setup > setup.rsp
 	echo -st "GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT)" >> setup.rsp
-	echo -i gsview$(D)gsview$(WINEXT).ico >> setup.rsp
+	echo -i gsview$(WINEXT).ico >> setup.rsp
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .$(D)setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2006 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2007 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview$(D)LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT). > dialog.txt
 	echo GSview uses Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
@@ -655,6 +663,7 @@ viewonlydist:
 #	-$(RM) setup.rsp 
 #	-$(RM) about.txt
 #	-$(RM) dialog.txt
+#	-$(RM) gsview$(WINEXT).ico
 	cd ..
 
 distcopy:
@@ -671,7 +680,7 @@ distcopy:
 	$(CP) cdorder.txt dist$(D)gsview$(D)cdorder.txt
 	$(CP) regorder.txt dist$(D)gsview$(D)regorder.txt
 	$(CP) $(BD)gsview$(WINEXT).exe dist$(D)gsview$(D)gsview$(WINEXT).exe
-	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(D)gsview$(WINEXT).ico
+	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(WINEXT).ico
 	$(CP) $(BD)gsviewen.hlp dist$(D)gsview$(D)gsviewen.hlp
 	$(CP) $(BD)gsviewde.hlp dist$(D)gsview$(D)gsviewde.hlp
 	$(CP) $(BD)gsviewes.hlp dist$(D)gsview$(D)gsviewes.hlp
@@ -694,6 +703,7 @@ distcopy:
 	$(CP) $(BD)gsvw$(WINEXT)sk.dll dist$(D)gsview$(D)gsvw$(WINEXT)sk.dll
 	$(CP) $(BD)gsvw$(WINEXT)ct.dll dist$(D)gsview$(D)gsvw$(WINEXT)ct.dll
 	$(CP) $(BD)gvwgs$(WINEXT).exe dist$(D)gsview$(D)gvwgs$(WINEXT).exe
+	$(CP) $(BD)GSviewPortable.exe dist$(D)GSviewPortable.exe
 	$(CP) $(SRC)printer.ini dist$(D)gsview$(D)printer.ini
 	$(CP) NUL dist$(D)gsview$(D)gsview$(WINEXT).ini
 	$(CP) $(BD)uninstgs.exe dist$(D)gsview$(D)uninstgs.exe
@@ -723,11 +733,12 @@ distcopy:
 	$(CP) $(OD)filelist.tmp+$(SRCWIN)dist$(WINEXT).txt dist$(D)filelist.txt
 	$(RM) $(OD)filelist.tmp
 
-$(OD)files$(WINEXT).txt: $(SRCWIN)dist$(WINEXT).txt $(SRCWIN)win.mak makefile
+$(OD)files$(WINEXT).txt: $(SRCWIN)dist$(WINEXT).txt $(SRCWIN)win.mak $(SRCWIN)wincom.mak makefile
 	$(CP) $(SRCWIN)dist$(WINEXT).txt $(OD)files$(WINEXT).txt
 	echo Readme.htm >> $(OD)files$(WINEXT).txt
 	echo FILE_ID.DIZ >> $(OD)files$(WINEXT).txt
 	echo filelist.txt >> $(OD)files$(WINEXT).txt
+	echo GSviewPortable.exe >> $(OD)files$(WINEXT).txt
 	echo setup.exe >> $(OD)files$(WINEXT).txt
 	echo setp$(WINEXT)de.dll >> $(OD)files$(WINEXT).txt
 	echo setp$(WINEXT)es.dll >> $(OD)files$(WINEXT).txt
@@ -754,11 +765,11 @@ gsv$(GSVIEW_VERSION)w$(WINEXT).exe: distcopy gsv$(GSVIEW_VERSION)w$(WINEXT).zip
 	cd dist
 	echo -win32 -setup > setup.rsp
 	echo -st "GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT)" >> setup.rsp
-	echo -i gsview$(D)gsview$(WINEXT).ico >> setup.rsp
+	echo -i gsview$(WINEXT).ico >> setup.rsp
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .$(D)setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2006 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2007 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview$(D)LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT). > dialog.txt
 	echo GSview uses Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
@@ -768,6 +779,7 @@ gsv$(GSVIEW_VERSION)w$(WINEXT).exe: distcopy gsv$(GSVIEW_VERSION)w$(WINEXT).zip
 #	-$(RM) setup.rsp 
 #	-$(RM) about.txt
 #	-$(RM) dialog.txt
+#	-$(RM) gsview$(WINEXT).ico
 	cd ..
 
 zip: gsv$(GSVIEW_VERSION)w$(WINEXT).exe

@@ -174,6 +174,10 @@ CDSC *dsc = psfile.dsc;
 	    gserror(IDS_EPSONEPAGE, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    return;
 	}
+	if (psfile.ispdf) {
+	    gserror(IDS_EPSONEPAGE, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
+	    return;
+	}
 	if (dsc == (CDSC *)NULL) {
 	    TCHAR mess[MAXSTR];
 	    load_string(IDS_EPSQPAGES, mess, sizeof(mess));
@@ -295,19 +299,26 @@ CDSC *dsc = psfile.dsc;
 	}
 	else {
 	    /* document already has DSC comments */
+	    char eol[3];
+	    char *p;
 	    info_wait(IDS_WAITWRITE);
 	    gfile_seek(psfile.file, dsc->begincomments, gfile_begin);
 	    ps_fgets(text, sizeof(text), psfile.file);
+ 	    p = text;
+	    while (*p && (*p != '\r') && (*p != '\n'))
+		p++;	/* find EOL used in DSC file */
+	    memset(eol, 0, sizeof(eol));
+	    strncpy(eol, p, sizeof(eol)-1);
 	    if (dsc->epsf)
 	        fputs(text,f);
 	    else
-	        fputs("%!PS-Adobe-3.0 EPSF-3.0\r\n",f);
+	        fprintf(f, "%%!PS-Adobe-3.0 EPSF-3.0%s", eol);
 	    if (dsc->bbox != (CDSCBBOX *)NULL) {
 		ps_copy_find(f, psfile.file, dsc->endcomments,
 		    text, sizeof(text), "%%BoundingBox:");
 	    }
-	    fprintf(f, "%%%%BoundingBox: %d %d %d %d\r\n",
-		bbox.llx, bbox.lly, bbox.urx, bbox.ury);
+	    fprintf(f, "%%%%BoundingBox: %d %d %d %d%s",
+		bbox.llx, bbox.lly, bbox.urx, bbox.ury, eol);
 	    here = gfile_get_position(psfile.file);
 	    ps_copy(f, psfile.file, here, dsc->endcomments);
 	    ps_copy(f, psfile.file, dsc->begindefaults, dsc->enddefaults);
@@ -2018,25 +2029,36 @@ copy_bbox_header(FILE *f)
     BOOL bbox_written = FALSE;
     long position;
     CDSC *dsc = psfile.dsc;
+    char eol[3];
+    char *p;
+    memset(eol, 0, sizeof(eol));
 
     gfile_seek(psfile.file, dsc->begincomments, gfile_begin);
     if (dsc->bbox != (CDSCBBOX *)NULL) {
       while ( ps_copy_find(f, psfile.file, dsc->endcomments,
 		text, sizeof(text), "%%BoundingBox:") ) {
 	if (!bbox_written) {
-	    fprintf(f, "%%%%BoundingBox: %d %d %d %d\r\n",
-		bbox.llx, bbox.lly, bbox.urx, bbox.ury);
+	    p = text;
+	    while (*p && (*p != '\r') && (*p != '\n'))
+		p++;	/* find EOL used in DSC file */
+	    strncpy(eol, p, sizeof(eol)-1);
+	    fprintf(f, "%%%%BoundingBox: %d %d %d %d%s",
+		bbox.llx, bbox.lly, bbox.urx, bbox.ury, eol);
 	    bbox_written = TRUE;
 	}
       }
     }
     else {
-      ps_fgets(text, sizeof(text), psfile.file);
-      fputs(text,f);
-      fprintf(f, "%%%%BoundingBox: %d %d %d %d\r\n",
-	    bbox.llx, bbox.lly, bbox.urx, bbox.ury);
-      position = gfile_get_position(psfile.file);
-      ps_copy(f, psfile.file, position, dsc->endcomments);
+	ps_fgets(text, sizeof(text), psfile.file);
+        fputs(text,f);
+	p = text;
+	while (*p && (*p != '\r') && (*p != '\n'))
+	    p++;	/* find EOL used in DSC file */
+	strncpy(eol, p, sizeof(eol)-1);
+	fprintf(f, "%%%%BoundingBox: %d %d %d %d%s",
+	    bbox.llx, bbox.lly, bbox.urx, bbox.ury, eol);
+	position = gfile_get_position(psfile.file);
+	ps_copy(f, psfile.file, position, dsc->endcomments);
     }
 }
 

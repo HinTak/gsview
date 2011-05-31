@@ -47,6 +47,13 @@ int parse_argv(GSVIEW_ARGS *args, int argc, char *argv[])
 		    else
 			args->debug = !args->debug;
 		    break;
+		case 'a':
+		    if (*p) {
+			args->portable = atoi(p);
+		    }
+		    else
+			args->portable = !args->portable;
+		    break;
 		case 't':
 		    if (*p) {
 			args->multithread = atoi(p);
@@ -599,7 +606,7 @@ int language;
     }
 #endif
 
-    if (option.configured) {
+    if (option.configured && !portable_app) {
 	if (beta())
 	    return 1;	/* don't run if expired */
 	post_args();
@@ -609,27 +616,29 @@ int language;
     if (beta_warn())
 	return 1;	/* don't run */
 
-    /* check if the system administrator has pre-configured GSview */
+    if (!portable_app) {
+	/* check if the system administrator has pre-configured GSview */
 #ifdef UNIX
-    strncpy(sysini, szEtcPath, sizeof(sysini)-1);
+	strncpy(sysini, szEtcPath, sizeof(sysini)-1);
 #else
-    convert_widechar(sysini, szExePath, sizeof(sysini)-1);
+	convert_widechar(sysini, szExePath, sizeof(sysini)-1);
 #endif
-    strncat(sysini, INIFILE, sizeof(sysini)-1-strlen(sysini));
-    language = option.language;
-    read_profile(sysini);
-    if (option.configured) {
-	/* pre configured INI file was found */
-	gsview_printer_profiles();	/* trust sys admin to have it correct */
-	/* check if language changed */
-	if (option.language != language)
-	    change_language();
-	/* don't bother running the configure wizard */
-	post_args();
-	return 0;
+	strncat(sysini, INIFILE, sizeof(sysini)-1-strlen(sysini));
+	language = option.language;
+	read_profile(sysini);
+	if (option.configured) {
+	    /* pre configured INI file was found */
+	    gsview_printer_profiles();	/* trust sys admin to have it correct */
+	    /* check if language changed */
+	    if (option.language != language)
+		change_language();
+	    /* don't bother running the configure wizard */
+	    post_args();
+	    return 0;
+	}
+	/* revert back to our copy of INI file */
+	read_profile(szIniFile);
     }
-    /* revert back to our copy of INI file */
-    read_profile(szIniFile);
 
     check_language();	/* offer to change language if doesn't match WIN.INI */
 

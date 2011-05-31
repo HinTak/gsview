@@ -3,7 +3,6 @@ pstotext\pstotext.txt
 pstotext\pstotxt3.dll
 pstotext\pstotxt3.exe
 gsview\gsview32.exe
-gsview\gsview32.ico
 gsview\gsviewct.hlp
 gsview\gsviewde.hlp
 gsview\gsviewen.hlp

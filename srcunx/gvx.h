@@ -234,6 +234,7 @@ typedef struct tagPRINTER {
 extern int print_count;		/* number of current print jobs */
 
 extern BOOL getting_bbox;	/* PS to EPS get Bounding Box dialog is shown */
+extern int portable_app;	/* /A command line option used */
 
 extern int debug;			/* /D command line option used */
 extern FILE *debug_file;		/* for gs input logging */

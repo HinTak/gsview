@@ -173,7 +173,11 @@ BOOL start_gvwgs_with_pipe(HDC hdc)
 #ifdef DECALPHA
 	TEXT("gvwgsda.exe"),
 #else
+# ifdef _WIN64
+	TEXT("gvwgs64.exe"),
+# else
 	TEXT("gvwgs32.exe"),
+# endif
 #endif
 	debug ? TEXT("/d") : TEXT(""),
 	wgsdll, woptname, wpsname);

@@ -248,6 +248,7 @@ extern BOOL print_silent;	/* /P or /F command line option used */
 extern BOOL print_exit;		/* exit on completion of printing */
 extern int print_count;		/* number of current print jobs */
 				/* It is safe to exit GSview when this is 0 */
+extern int portable_app;	/* /A command line option used */
 
 extern int debug;			/* /D command line option used */
 extern FILE *debug_file;		/* for gs input logging */

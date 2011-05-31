@@ -1,4 +1,27 @@
 ---------------------------
+Version 4.9 2007-11-18
+---------------------------
+All:
+  Prevent crash when incorrectly trying to convert PDF to EPS.
+  Prevent mangling of non-ASCII paths when creating temporary files.
+  When adding a %%BoundingBox line, use the same line ending as
+  the preceeding line.
+
+Win:
+  Win64 will now print to "Windows GDI printer".
+  Add StartPagePrinter/EndPagePrinter to raw printing routine
+  as per updated Microsoft documentation.
+  Change zlib DLL to version 1.2.3 due to security vulnerabilities in
+  earlier versions.
+  Change bzip2 DLL to version 1.0.4.
+  Can run as a portable application for Win32.  See online help
+  on "Portable Application".
+
+OS/2:
+  Remove the old zlib DLL.  Ghostgum Software no longer has easy
+  access to OS/2, and this may be the last OS/2 build of GSview.
+
+---------------------------
 Version 4.8 2006-02-25
 ---------------------------
 

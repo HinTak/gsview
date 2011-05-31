@@ -1,4 +1,4 @@
-/* Copyright (C) 2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2005-2007, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -81,7 +81,7 @@ write_registration(unsigned int reg_receipt, unsigned int reg_number,
     TCHAR *value;
    
 #ifndef UNICODE
-    if (is_win32s) {
+    if (portable_app) {
 	char profile[MAXSTR];
 	char *section = INISECTION;
 	PROFILE *prf;
@@ -157,7 +157,7 @@ read_registration(unsigned int *preg_receipt, unsigned int *preg_number,
     lstrcpyn(reg_name, PREREG_NAME, reg_len-1);
 #else
 #ifndef UNICODE
-    if (is_win32s) {
+    if (portable_app) {
 	unsigned int i;
 	char profile[MAXSTR];
 	char *section = INISECTION;

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2007, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -179,9 +179,9 @@ extern int pstotextCount;
 /* for zlib gunzip decompression */
 extern HINSTANCE zlib_hinstance;
 typedef void *gzFile ;
-typedef gzFile (WINAPI *PFN_gzopen)(const char *path, const char *mode);
-typedef int (WINAPI *PFN_gzread)(gzFile file, void *buf, unsigned len);
-typedef int (WINAPI *PFN_gzclose)(gzFile file);
+typedef gzFile (*PFN_gzopen)(const char *path, const char *mode);
+typedef int (*PFN_gzread)(gzFile file, void *buf, unsigned len);
+typedef int (*PFN_gzclose)(gzFile file);
 extern PFN_gzopen gzopen;
 extern PFN_gzread gzread;
 extern PFN_gzclose gzclose;
@@ -205,6 +205,7 @@ extern BOOL print_silent;	/* /P or /F command line option used */
 extern BOOL print_exit;		/* exit on completion of printing */
 extern int print_count;		/* number of current print jobs */
 				/* It is safe to exit GSview when this is 0 */
+extern int portable_app;	/* /A command line option used */
 
 extern int debug;		/* /D command line option used */
 extern FILE *debug_file;	/* for gs input logging */

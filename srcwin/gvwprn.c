@@ -971,6 +971,14 @@ TCHAR wbuf[MAXSTR];
 	free(buffer);
 	return FALSE;
     }
+    if (!StartPagePrinter(printer)) {
+	char buf[256];
+	sprintf(buf, "StartPagePrinter() failed, error code = %d", GetLastError());
+	gserror(0, buf, MB_ICONHAND, SOUND_ERROR);
+	AbortPrinter(printer);
+	free(buffer);
+	return FALSE;
+    }
    
 
     while ((count = fread(buffer, 1, PRINT_BUF_SIZE, f)) != 0 ) {
@@ -984,6 +992,13 @@ TCHAR wbuf[MAXSTR];
     fclose(f);
     free(buffer);
 
+    if (!EndPagePrinter(printer)) {
+	char buf[256];
+	sprintf(buf, "EndPagePrinter() failed, error code = %d", GetLastError());
+	gserror(0, buf, MB_ICONHAND, SOUND_ERROR);
+	AbortPrinter(printer);
+	return FALSE;
+    }
     if (!EndDocPrinter(printer)) {
 	char buf[256];
 	sprintf(buf, "EndDocPrinter() failed, error code = %d", GetLastError());

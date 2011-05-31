@@ -422,7 +422,7 @@ gsv$(GSVIEW_VERSION)wda.zip:
 	copy regorder.txt ..\gsview\regorder.txt
 	copy gsviewda.exe ..\gsview\gsviewda.exe
 	copy NUL ..\gsview\gsview32.ini
-	copy binary\gvwin1.ico ..\gsview\gsview32.ico
+	copy binary\gvwin1.ico ..\gsview32.ico
 	copy gsviewen.hlp ..\gsview\gsviewen.hlp
 	copy gsviewde.hlp ..\gsview\gsviewde.hlp
 	copy gsviewes.hlp ..\gsview\gsviewes.hlp
@@ -475,7 +475,7 @@ distcopy:
 	copy cdorder.txt ..\gsview\cdorder.txt
 	copy regorder.txt ..\gsview\regorder.txt
 	copy gsview32.exe ..\gsview\gsview32.exe
-	copy binary\gvwin1.ico ..\gsview\gsview32.ico
+	copy binary\gvwin1.ico ..\gsview32.ico
 	copy gsviewen.hlp ..\gsview\gsviewen.hlp
 	copy gsviewde.hlp ..\gsview\gsviewde.hlp
 	copy gsviewes.hlp ..\gsview\gsviewes.hlp
@@ -543,20 +543,21 @@ gsv$(GSVIEW_VERSION)w32.exe: strip distcopy gsv$(GSVIEW_VERSION)w32.zip
 	cd ..
 	echo -win32 -setup > setup.rsp
 	echo -st "GSview $(GSVIEW_DOT_VERSION) for Win32" >> setup.rsp
-	echo -i gsview\gsview32.ico >> setup.rsp
+	echo -i gsview32.ico >> setup.rsp
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .\setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2002 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2007 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview\LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win32. > dialog.txt
-	echo GSview uses AFPL Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
+	echo GSview uses GPL Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
 	$(WINZIPSE_XE) gsv$(GSVIEW_VERSION)w32 @setup.rsp
 # Don't delete temporary files, because make continues
 # before these files are used.
 #	-del setup.rsp 
 #	-del about.txt
 #	-del dialog.txt
+#	-del gsview32.ico
 	cd src
 
 language:

@@ -785,9 +785,7 @@ FILE *CInstall::MakeTemp(char *fname)
 	else
 		strcpy(fname, temp);
 	
-	/* Prevent X's in path from being converted by mktemp. */
 	for ( temp = fname; *temp; temp++ ) {
-		*temp = (char)tolower(*temp);
 		if (*temp == '/')
 			*temp = '\\';
 	}

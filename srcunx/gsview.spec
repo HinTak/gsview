@@ -1,16 +1,16 @@
 #
-# Spec file for GSview 4.8
+# Spec file for GSview 4.9
 #
-# 4.8 release
-#  2006-02-25 Russell Lang <gsview@ghostgum.com.au>
+# 4.9 release
+#  2007-11-18 Russell Lang <gsview@ghostgum.com.au>
 #
 Summary: PostScript and PDF previewer
 Name: gsview
-Version: 4.8
+Version: 4.9
 Release: 1
 Copyright: Aladdin Free Public License, Ghostgum Software Pty Ltd
 Group: Applications/Graphics
-Source: ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/gsview-4.8.tar.gz
+Source: ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/gsview-4.9.tar.gz
 URL: http://www.cs.wisc.edu/~ghost/gsview/
 #Icon: gsview.gif
 #Distribution: Unknown
@@ -85,6 +85,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Nov 18 2007 Russell Lang <gsview@ghostgum.com.au>
+- GSview 4.9 release
+  Minor bug fixes.
 * Sat Feb 25 2006 Russell Lang <gsview@ghostgum.com.au>
 - GSview 4.8 release
   Minor bug fixes.

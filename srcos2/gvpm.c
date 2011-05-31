@@ -94,6 +94,7 @@ BOOL print_silent = FALSE;	/* /P or /F command line option used */
 BOOL print_exit = FALSE;	/* exit on completion of printing */
 int print_count = 0;		/* number of current print jobs */
 				/* It is safe to exit GSview when this is 0 */
+int portable_app = 0;		/* /A command line option used */
 int debug = 0;			/* /D command line option used */
 struct sound_s sound[NUMSOUND] = {
 	{"SoundOutputPage", IDS_SNDPAGE, ""},

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2007, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -118,6 +118,7 @@ BOOL print_silent = FALSE;	/* /P or /F command line option used */
 BOOL print_exit = FALSE;	/* exit on completion of printing */
 int print_count = 0;		/* number of current print jobs */
 				/* It is safe to exit GSview when this is 0 */
+int portable_app = 0;		/* /A command line option used */
 HINSTANCE hlib_mmsystem;	/* DLL containing sndPlaySound function */
 FPSPS lpfnSndPlaySound;		/* pointer to sndPlaySound function if loaded */
 BOOL quitnow = FALSE;		/* Used to cause exit from nested message loops */

@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2007, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -565,7 +565,7 @@ distcopy:
 	copy cdorder.txt dist\cdorder.txt
 	copy regorder.txt dist\gsview2\regorder.txt
 	copy regorder.txt dist\regorder.txt
-	copy gsview2\zlib2.dll dist\zlib2.dll
+#	copy gsview2\zlib2.dll dist\zlib2.dll
 	copy $(BD)gvpm.exe dist\gvpm.exe
 	copy binary\gvpm1.ico dist\gvpm.ico
 	copy $(BD)gvpmen.hlp dist\gvpmen.hlp

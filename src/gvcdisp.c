@@ -603,9 +603,7 @@ gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 	else
 		strncpy(fname, temp, MAXSTR-1);
 
-	/* Prevent X's in path from being converted by mktemp. */
 	for ( temp = fname; *temp; temp++ ) {
-		*temp = (char)tolower(*temp);
 #if defined(_Windows) || defined(OS2)
 		if (*temp == '/')
 		    *temp = '\\';
