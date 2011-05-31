@@ -84,16 +84,15 @@ src/gvpm.mak
 src/gvwin16.def
 src/gvwin32.def
 src/gsvw32de.def
-src/gsvw32en.def
 src/gsvw32fr.def
 src/gsvw16de.def
-src/gsvw16en.def
 src/gsvw16fr.def
 src/gvpmde.def
 src/gvpmen.def
 src/gvpmfr.def
 src/gvwin.h
 src/gvwin.mak
+src/gvwinvc.mak
 src/gvwlang.c
 src/gvplang.c
 src/gvcde.h
@@ -105,9 +104,9 @@ src/gvcfr.rc
 src/gvpde.rc
 src/gvpen.rc
 src/gvpfr.rc
-src/gvpm.rc
 src/gvpm1.rc
 src/gvpm2.rc
+src/gvpm3.rc
 src/gvwde.rc
 src/gvwen.rc
 src/gvwfr.rc
@@ -129,6 +128,7 @@ src/gvcbugs.txt
 src/gvclist1.txt
 src/gvclist2.txt
 src/gvclist3.txt
+src/gvclista.txt
 src/gvcliste.txt
 src/gvclistp.txt
 src/gvclists.txt
@@ -172,4 +172,3 @@ src/LICENCE
 src/PUBLIC
 src/FILE_ID.DIZ
 src/tasks
-

@@ -78,7 +78,11 @@ HINSTANCE hInstance;
     /* load language dependent resources */
     strcpy(langdll, szExePath);
 #ifdef __WIN32__
+#ifdef DECALPHA
+    strcat(langdll, "gsvwda");
+#else
     strcat(langdll, "gsvw32");
+#endif
 #else
     strcat(langdll, "gsvw16");
 #endif
@@ -91,7 +95,11 @@ HINSTANCE hInstance;
 	    break;
 	case IDM_LANGEN:
 	default:
-	    strcat(langdll, "en");
+	    if ((hlanguage != (HINSTANCE)NULL) && (hlanguage != phInstance))
+		FreeLibrary(hlanguage);
+	    /* Don't load a DLL */
+	    hlanguage = phInstance;
+	    return TRUE;
     }
     strcat(langdll, ".dll");
     hInstance = LoadLibrary(langdll);
@@ -129,7 +137,9 @@ char *p;
     InvalidateRect(hwndimg, (LPRECT)NULL, FALSE);
 }
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 /* language dialog box */
 BOOL CALLBACK _export
 LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -534,9 +544,11 @@ char filedir[MAXSTR];
 	}
 	else
 	    *(++p) = '\0';
+#ifndef _MSC_VER
 	if (isalpha(filedir[0]) && (filedir[1]==':'))
 	    (void) setdisk(toupper(filedir[0])-'A');
 	if (!((strlen(filedir)==2) && isalpha(filedir[0]) && (filedir[1]==':')))
+#endif
 	    gs_chdir(filedir);
     }
 
@@ -767,69 +779,81 @@ const char commandsubkey[] = "command";
     }
 
     /* Write new information */
-    fprintf(logfile, "OpenKey=%s\n", keyname);
+    if (logfile != (FILE *)NULL)
+	fprintf(logfile, "OpenKey=%s\n", keyname);
     rc = RegCreateKey(HKEY_CLASSES_ROOT, keyname, &hkey);
     if (rc != ERROR_SUCCESS)
 	return rc;
 
-    fprintf(logfile, "DeleteValue=\n");
+    if (logfile != (FILE *)NULL)
+	fprintf(logfile, "DeleteValue=\n");
     rc = RegSetValue(hkey, NULL, REG_SZ, description, strlen(description));
 
-    fprintf(logfile, "OpenSubKey=%s\n", opensubkey);
+    if (logfile != (FILE *)NULL)
+	fprintf(logfile, "OpenSubKey=%s\n", opensubkey);
     if (rc == ERROR_SUCCESS)
 	rc = RegCreateKey(hkey, opensubkey, &hsubkey);
     sprintf(buf, "%s%s %%1", szExePath, GSVIEW_EXENAME);
     if (rc == ERROR_SUCCESS)
 	rc = RegSetValue(hsubkey, commandsubkey, REG_SZ, buf, strlen(buf));
-    fprintf(logfile, "DeleteKey=%s\n", commandsubkey);
+    if (logfile != (FILE *)NULL)
+	fprintf(logfile, "DeleteKey=%s\n", commandsubkey);
     RegCloseKey(hsubkey);
-    fprintf(logfile, "CloseSubKey=\n");
+    if (logfile != (FILE *)NULL)
+	fprintf(logfile, "CloseSubKey=\n");
     /* fprintf(logfile, "DeleteSubKey=%s\n", opensubkey); */
     
 
-    fprintf(logfile, "OpenSubKey=%s\n", printsubkey);
+    if (logfile != (FILE *)NULL)
+	fprintf(logfile, "OpenSubKey=%s\n", printsubkey);
     if (rc == ERROR_SUCCESS)
 	rc = RegCreateKey(hkey, "shell\\print", &hsubkey);
     sprintf(buf, "%s%s /p %%1", szExePath, GSVIEW_EXENAME);
     if (rc == ERROR_SUCCESS)
 	rc = RegSetValue(hsubkey, commandsubkey, REG_SZ, buf, strlen(buf));
-    fprintf(logfile, "DeleteKey=%s\n", commandsubkey);
+    if (logfile != (FILE *)NULL)
+	fprintf(logfile, "DeleteKey=%s\n", commandsubkey);
     RegCloseKey(hsubkey);
-    fprintf(logfile, "CloseSubKey=\n");
+    if (logfile != (FILE *)NULL)
+	fprintf(logfile, "CloseSubKey=\n");
     /* fprintf(logfile, "DeleteSubKey=%s\n", printsubkey); */
 
     if (is_win4) {
 	/* icon offset 3 is ID_GSVIEW_DOC */
 	sprintf(buf, "%s%s,3", szExePath, GSVIEW_EXENAME);
-	fprintf(logfile, "DeleteKey=%s\n", "DefaultIcon");
+	if (logfile != (FILE *)NULL)
+	    fprintf(logfile, "DeleteKey=%s\n", "DefaultIcon");
 	if (rc == ERROR_SUCCESS)
 	    rc = RegSetValue(hkey, "DefaultIcon", REG_SZ, buf, strlen(buf));
     }
 
     RegCloseKey(hkey);
-    fprintf(logfile, "CloseKey=\n");
-    if (!oldkey)
-        fprintf(logfile, "DeleteKey=%s\n", keyname);
-
-    /* Restore previous values */
-    if (oldkey) {
-	fprintf(logfile, "CreateKey=%s\n", keyname);
-	if (oldvalue[0])
-	    fprintf(logfile, "SetValue=,%s\n", oldvalue);
-	if (oldopen[0]) {
-	    fprintf(logfile, "CreateSubKey=%s\\%s\n", opensubkey, commandsubkey);
-	    fprintf(logfile, "SetValue=,%s\n", oldopen);
-	    fprintf(logfile, "CloseSubKey=\n");
-	}
-	if (oldprint[0]) {
-	    fprintf(logfile, "CreateSubKey=%s\\%s\n", printsubkey, commandsubkey);
-	    fprintf(logfile, "SetValue=,%s\n", oldprint);
-	    fprintf(logfile, "CloseSubKey=\n");
-	}
-	if (is_win4 && oldicon[0]) {
-	    fprintf(logfile, "SetValue=DefaultIcon,%s\n", oldicon);
-	}
+    if (logfile != (FILE *)NULL) {
 	fprintf(logfile, "CloseKey=\n");
+	if (!oldkey)
+	    fprintf(logfile, "DeleteKey=%s\n", keyname);
+
+	/* Restore previous values */
+	if (oldkey) {
+	    if (logfile != (FILE *)NULL)
+		fprintf(logfile, "CreateKey=%s\n", keyname);
+	    if (oldvalue[0])
+		fprintf(logfile, "SetValue=,%s\n", oldvalue);
+	    if (oldopen[0]) {
+		fprintf(logfile, "CreateSubKey=%s\\%s\n", opensubkey, commandsubkey);
+		fprintf(logfile, "SetValue=,%s\n", oldopen);
+		fprintf(logfile, "CloseSubKey=\n");
+	    }
+	    if (oldprint[0]) {
+		fprintf(logfile, "CreateSubKey=%s\\%s\n", printsubkey, commandsubkey);
+		fprintf(logfile, "SetValue=,%s\n", oldprint);
+		fprintf(logfile, "CloseSubKey=\n");
+	    }
+	    if (is_win4 && oldicon[0]) {
+		fprintf(logfile, "SetValue=DefaultIcon,%s\n", oldicon);
+	    }
+	    fprintf(logfile, "CloseKey=\n");
+	}
     }
 
     return rc;
@@ -859,7 +883,8 @@ LONG lrc = !ERROR_SUCCESS;
     if (!ps && !pdf)
 	return 0;
 
-    fprintf(logfile, "\n[Registry]\n");
+    if (logfile != (FILE *)NULL)
+	fprintf(logfile, "\n[Registry]\n");
     if (ps) {
 
         if (rc == ERROR_SUCCESS) {
@@ -868,9 +893,12 @@ LONG lrc = !ERROR_SUCCESS;
 	}
         if (rc == ERROR_SUCCESS)
 	    rc = RegSetValue(HKEY_CLASSES_ROOT, psext, REG_SZ, pskey, strlen(pskey));
-	fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", psext);
-	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0'))
-	    fprintf(logfile, "SetValue=%s,%s\n", psext, old);
+	if (logfile != (FILE *)NULL)
+	    fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", psext);
+	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0')) {
+	    if (logfile != (FILE *)NULL)
+	        fprintf(logfile, "SetValue=%s,%s\n", psext, old);
+	}
 
         if (rc == ERROR_SUCCESS) {
 	    lold = sizeof(old);
@@ -878,9 +906,12 @@ LONG lrc = !ERROR_SUCCESS;
 	}
 	if (rc == ERROR_SUCCESS)
 	    rc = RegSetValue(HKEY_CLASSES_ROOT, epsext, REG_SZ, pskey, strlen(pskey));
-	fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", epsext);
-	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0'))
-	    fprintf(logfile, "SetValue=%s,%s\n", epsext, old);
+	if (logfile != (FILE *)NULL)
+	    fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", epsext);
+	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0')) {
+	    if (logfile != (FILE *)NULL)
+		fprintf(logfile, "SetValue=%s,%s\n", epsext, old);
+	}
 
 #ifdef __WIN32__
 	/* Don't bother with undelete information for these */
@@ -922,9 +953,12 @@ LONG lrc = !ERROR_SUCCESS;
 	}
 	if (rc == ERROR_SUCCESS)
 	    rc = RegSetValue(HKEY_CLASSES_ROOT, pdfext, REG_SZ, pdfkey, strlen(pdfkey));
-	fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", pdfext);
-	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0'))
-	    fprintf(logfile, "SetValue=%s,%s\n", pdfext, old);
+	if (logfile != (FILE *)NULL)
+	    fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", pdfext);
+	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0')) {
+	    if (logfile != (FILE *)NULL)
+		fprintf(logfile, "SetValue=%s,%s\n", pdfext, old);
+	}
 
 #ifdef __WIN32__
 	/* Don't bother with undelete information for these */
@@ -957,7 +991,9 @@ LONG lrc = !ERROR_SUCCESS;
 }
 
 
+#ifdef __BORLANDC__
 #pragma argsused	/* ignore warning for next function */
+#endif
 HDDEDATA CALLBACK 
 DdeCallback(UINT type, UINT fmt, HCONV hconv,
     HSZ hsz1, HSZ hsz2, HDDEDATA hData, DWORD dwData1, DWORD dwData2)
@@ -1179,7 +1215,9 @@ WIZPAGE pages[]={
 	{0, 0, 0, NULL, 0}
 };
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 int wiz_exit(HWND hwnd)
 {
     PostMessage(hWiz, WM_COMMAND, (WPARAM)IDOK, (LPARAM)0);
@@ -1376,13 +1414,11 @@ char logname[MAXSTR];
     logfile = fopen(logname, "a");	/* append */
     if (logfile == (FILE *)NULL) {
 	logfile = fopen(logname, "w");	/* don't append */
-        if (logfile == (FILE *)NULL) {
-/*
-	    load_string(IDS_CANTOPENWRITE, buf, sizeof(buf)); 
-	    sprintf(error_message, buf, logname);
-*/
-	    return 1;
-	}
+        /* if (logfile == (FILE *)NULL) { */
+	    /* We can't write the logfile, probably because the destination */
+	    /* is read only.  Don't worry about this, just remember not */
+	    /* to write to logfile! */
+	/* } */
     }
 
     assoc_ps = (BOOL)SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, 
@@ -1390,7 +1426,8 @@ char logname[MAXSTR];
     assoc_pdf = (BOOL)SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, 
 	    IDC_CFG42, BM_GETCHECK, (WPARAM)0, (LPARAM)0);
     if (update_registry(assoc_ps, assoc_pdf)) {
-	fclose(logfile);
+	if (logfile != (FILE *)NULL)
+	    fclose(logfile);
 	return 1;
     }
 
@@ -1399,7 +1436,8 @@ char logname[MAXSTR];
     if (SendDlgItemMessage(find_page_from_id(IDD_CFG5)->hwnd, 
 	    IDC_CFG51, BM_GETCHECK, (WPARAM)0, (LPARAM)0)
 	&& gsview_create_objects(buf)) {
-	fclose(logfile);
+	if (logfile != (FILE *)NULL)
+	    fclose(logfile);
 	return 1;
     }
     
@@ -1412,7 +1450,8 @@ char logname[MAXSTR];
 
     write_profile();
 
-    fclose(logfile);
+    if (logfile != (FILE *)NULL)
+	fclose(logfile);
 
     return 0;
 }
@@ -1471,7 +1510,9 @@ config_wizard(void)
 
 
 
+#ifdef __BORLANDC__
 #pragma argsused	/* ignore warning for next function */
+#endif
 /* Modeless Dialog Box */
 BOOL CALLBACK _export
 CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -1567,7 +1608,9 @@ CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 
+#ifdef __BORLANDC__
 #pragma argsused	/* ignore warning for next function */
+#endif
 /* Modeless Dialog Box */
 BOOL CALLBACK _export
 CfgChildDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -1635,4 +1678,3 @@ CfgChildDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 
-

@@ -268,7 +268,7 @@ char sysini[MAXSTR];
     if (beta_warn())
 	return 1;	/* don't run */
 
-    /* check if the system administrator has pre configured GSview */
+    /* check if the system administrator has pre-configured GSview */
     strcpy(sysini, szExePath);
     strcat(sysini, INIFILE);
     read_profile(sysini);

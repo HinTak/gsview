@@ -28,8 +28,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#ifdef _MSC_VER
+#include <direct.h>
+#define _export
+#else
 #include <dir.h>
 #include <dirent.h>
+#endif
+#include <sys/stat.h>
 #include <io.h>
 #include <time.h>
 #include <process.h>
@@ -127,7 +133,7 @@ typedef struct tagPSFILE {
 	BOOL	pjl;		/* TRUE if file starts with HP LaserJet PJL prologue */
 	BOOL	gzip;		/* TRUE if file compressed with gzip */
 	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
-#ifdef _Windows
+#if defined(_Windows) && defined(OLD)
 	struct	ftime datetime;	/* time/date of selected file */
 #else
 	time_t	datetime;	/* time/date of selected file */
@@ -343,13 +349,12 @@ extern int pstotextCount;
 /* for zlib gunzip decompression */
 extern HINSTANCE zlib_hinstance;
 typedef void GVFAR *gzFile ;
-typedef gzFile WINAPI (*PFN_gzopen)(const char GVFAR *path, const char GVFAR *mode);
-typedef int WINAPI    (*PFN_gzread)(gzFile file, void GVFAR *buf, unsigned len);
-typedef int WINAPI    (*PFN_gzclose)(gzFile file);
+typedef gzFile (WINAPI *PFN_gzopen)(const char GVFAR *path, const char GVFAR *mode);
+typedef int (WINAPI *PFN_gzread)(gzFile file, void GVFAR *buf, unsigned len);
+typedef int (WINAPI *PFN_gzclose)(gzFile file);
 extern PFN_gzopen gzopen;
 extern PFN_gzread gzread;
 extern PFN_gzclose gzclose;
-
 
 extern BOOL debug;			/* /D command line option used */
 extern FILE *debug_file;		/* for gs input logging */
@@ -490,3 +495,4 @@ extern char not_defined[];
 void start_gvwgs(void);
 
 #endif
+

@@ -33,11 +33,15 @@
 /* GSview */
 
 #define GSVIEW_PRODUCT "GSview"
-#define GSVIEW_VERSION "2.3"
-#define GSVIEW_DATE    "1997-09-16"
+#define GSVIEW_VERSION "2.4"
+#define GSVIEW_DATE    "1997-11-30"
 #ifdef _Windows
 #ifdef __WIN32__
+#ifdef DECALPHA
+#define GSVIEW_ZIP     "win32da.zip"
+#else
 #define GSVIEW_ZIP     "win32.zip"
+#endif
 #else
 #define GSVIEW_ZIP     "win16.zip"
 #endif
@@ -49,8 +53,8 @@
 /* undefine BETA for a final release */
 /* #define BETA */
 #define BETA_YEAR    1997
-#define BETA_MONTH   10
-#define BETA_DAY     31
+#define BETA_MONTH   11
+#define BETA_DAY     30
 
 
 /* Ghostscript */
@@ -58,7 +62,7 @@
 #if defined(_Windows) && !defined(__WIN32__)
 #define GS_REVISION	  403		/* this is the last 16-bit version */
 #else
-#define GS_REVISION	  503
+#define GS_REVISION	  510
 #endif
 #define GS_REVISION_MIN   403
 #define GS_REVISION_MAX   599
@@ -81,4 +85,3 @@
 #define EMX_NEEDED "0.9c"
 #define INSTALL_DIR "\\gstools"
 
-

@@ -1,3 +1,50 @@
+----------------------------------
+Version 2.4 (rerelease) 1997-11-30
+----------------------------------
+All:
+ doc2html will now write out <IMG SRC="file.gif"> if it finds
+ {bml* file.bmp}.
+Win:
+ Changed dialog font to "MS Sans Serif".  These were originally
+ all "Helv" to allow operation on Windows 3.0, but the Borland
+ Resource Workshop changed one of these to "MS Sans Serif".
+ The result was that on a system without "Helv", the configure
+ dialog windows were too large for their parent dialog.
+Win16:
+ Stopped gsview16.exe attempting to unload itself while still
+ running.
+ Increased the stack size of gsview16.exe to stop it crashing
+ Windows on exit.
+
+----------------------
+Version 2.4 1997-11-25
+----------------------
+All:
+ When writing TIFF 6 previews with packbits compression,
+ some input sequences caused excessive expansion of the
+ data which trashed the heap.  Fixed the relevant part
+ of the packbit code.
+ Moved English language resources to main EXE, so they
+ are always available.
+ Corrected EPS Warn message for /statusdict.
+ Drawing percentage went negative when file was longer 
+ than (2^31 / 100) = 22 Mbytes.
+ Added GS_OPTIONS/-dFIXEDMEDIA to Common Problems in help file.
+ Added note on converting PS to PDF using GSview in help file.
+Win:
+ Recent versions wrote a logfile when configuring GSview.
+ This caused GSview configuration to fail if the GSview
+ directory was read only.  Carry on normally if logfile
+ can't be created.
+ When reading printer resolutions, the wrong INI file was
+ read, resulting in the resolution listbox being disabled.
+Win32:
+ Added MS Visual C++ 5.0 makefile and changes to sources.
+ Changes for DEC Alpha Windows NT.  Associated DLLs (pstotext,
+ unzip, zlib) not yet compiled for the DEC Alpha.
+ Recompiled zlib32.dll to be MULTIPLE SHARED so it can be
+ used by multiple copies of GSview.
+ 
 ----------------------
 Version 2.3 1997-09-16
 ----------------------

@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "1.02  1997-02-15";
+char szVersion[] = "1.04  1997-11-21";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -486,7 +486,7 @@ void
 do_help(void)
 {
    fprintf(stderr,"Usage:  epstool [option] operation filename\n");
-   fprintf(stderr,"  Copyright (C) 1995, 1996 Russell Lang.  All rights reserved.\n");
+   fprintf(stderr,"  Copyright (C) 1995-1997, Russell Lang.  All rights reserved.\n");
    fprintf(stderr,"  Version: %s\n", szVersion);
    fprintf(stderr,"  Options:\n");
    fprintf(stderr,"     -b             Calculate BoundingBox from image\n");

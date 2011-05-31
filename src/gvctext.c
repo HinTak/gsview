@@ -541,7 +541,7 @@ wildmatch(char *w, char *s)
 {
 char *lastw = "";	/* location of last possible '*' */
 char *lasts = s;	/* location of character after the last matched by '*' */
-BOOL nomatch = FALSE;
+BOOL nomatch;
     while (*s && *w) {
 	nomatch = FALSE;
 	if (*w == '*') {

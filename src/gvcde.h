@@ -137,18 +137,18 @@
 
 #ifdef _Windows
 #define AAAPROPERTIES "&Einstellung"
-#define AAALLPAGES "&Alle Seiten"
+#define AAALLPAGES "Alle &Seiten"
 #define AAODDPAGES "&Ungerade"
 #define AAEVENPAGES "&Gerade"
-#define AAALL "&Alle"
+#define AAALL "Alle &Seiten"
 #define AAODD "&Ungerade"
 #define AAEVEN "&Gerade"
 #else
 #define AAAPROPERTIES "~Einstellung"
-#define AAALLPAGES "~Alle Seiten"
+#define AAALLPAGES "Alle ~Seiten"
 #define AAODDPAGES "~Ungerade"
 #define AAEVENPAGES "~Gerade"
-#define AAALL "~Alle"
+#define AAALL "Alle ~Seiten"
 #define AAODD "~Ungerade"
 #define AAEVEN "~Gerade"
 #endif
@@ -271,8 +271,8 @@
 #define AACFG32 "Aktualisiere GSview Druckerliste"
 #define AACFG33 "Aktualisierung der GSview Druckerliste überschreibt vorhandene Einträge"
 #define AACFG40 "GSview kann Dateiverknüfungen für PostScript und\
- Portable Document Format (PDF) Dateien anlegen.\
- Durch diese Verknüpfungen führt ein Doppelklick auf jene Dateien \
+ Portable Document Format (PDF) Dateien anlegen."
+#define AACFG43 "Durch diese Verknüpfungen führt ein Doppelklick auf jene Dateien \
  zum start von GSview.  Außerdem bewirken sie bei einigen WWW browsern,\
  daß GSview als ein Viewer für PostScript und PDF Dateien benutzt wird."
 #define AACFG41 "Verknüpfung von PostScript (.ps and .eps) Dateien mit GSview."

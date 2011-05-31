@@ -1078,7 +1078,7 @@ diff -c ./zlib32.def ../zlib_bcc/zlib32.def
 + 
 + CODE		PRELOAD DISCARDABLE 
 + 
-+ DATA		SINGLE SHARED
++ DATA		MULTIPLE SHARED
 + 
 + HEAPSIZE	1048576,4096
 + 

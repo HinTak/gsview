@@ -72,7 +72,7 @@ static char device[MAXSTR];	/* contains printer device name */
 		SetDlgItemText(hDlg, EDITPROP_NAME, editpropname+1);
 		strcpy(section, device);
 		strcat(section, " values");
-		GetPrivateProfileString(section, editpropname, "", buf, sizeof(buf)-2, INIFILE);
+		GetPrivateProfileString(section, editpropname, "", buf, sizeof(buf)-2, szIniFile);
 		SetDlgItemText(hDlg, EDITPROP_VALUE, buf);
 	    }
 	    else
@@ -95,8 +95,8 @@ static char device[MAXSTR];	/* contains printer device name */
 		if (strlen(name)>1) {
 		    strcpy(section, device);
 		    strcat(section, " values");
-		    WritePrivateProfileString(section, name, NULL, INIFILE);
-		    WritePrivateProfileString(device, name, NULL, INIFILE);
+		    WritePrivateProfileString(section, name, NULL, szIniFile);
+		    WritePrivateProfileString(device, name, NULL, szIniFile);
 		}
 		EndDialog(hDlg, TRUE);
 		}
@@ -122,9 +122,9 @@ static char device[MAXSTR];	/* contains printer device name */
 		if ((strlen(name)>1) && strlen(value)) {
 		    strcpy(section, device);
 		    strcat(section, " values");
-		    WritePrivateProfileString(section, name, value, INIFILE);
+		    WritePrivateProfileString(section, name, value, szIniFile);
 		    strtok(value, ",");
-		    WritePrivateProfileString(device, name, value, INIFILE);
+		    WritePrivateProfileString(device, name, value, szIniFile);
 		}
 		EndDialog(hDlg, TRUE);
 		}
@@ -173,9 +173,9 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 
 	    strcpy(section, device);
 	    strcat(section, " Options");
-	    GetPrivateProfileString(section, "Xoffset", "0", buf, sizeof(buf)-2, INIFILE);
+	    GetPrivateProfileString(section, "Xoffset", "0", buf, sizeof(buf)-2, szIniFile);
 	    SetDlgItemText(hDlg, PROP_XOFFSET, buf);
-	    GetPrivateProfileString(section, "Yoffset", "0", buf, sizeof(buf)-2, INIFILE);
+	    GetPrivateProfileString(section, "Yoffset", "0", buf, sizeof(buf)-2, szIniFile);
 	    SetDlgItemText(hDlg, PROP_YOFFSET, buf);
 
 	    SetFocus(GetDlgItem(hDlg, IDOK));
@@ -203,7 +203,7 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			(LPARAM)((LPSTR)notdef));
 		    strcpy(section, device);
 		    strcat(section, " values");
-		    GetPrivateProfileString(section, propitem[iprop].name, "", buf, sizeof(buf)-2, INIFILE);
+		    GetPrivateProfileString(section, propitem[iprop].name, "", buf, sizeof(buf)-2, szIniFile);
 		    buf[strlen(buf)+1] = '\0';	/* put double NULL at end */
 		    p = buf;
 		    if (*p != '\0') {
@@ -289,14 +289,14 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    return FALSE;
 		case IDOK:
 		    for (iprop=0; propitem[iprop].name[0]; iprop++) {
-			WritePrivateProfileString(device, propitem[iprop].name, propitem[iprop].value, INIFILE);
+			WritePrivateProfileString(device, propitem[iprop].name, propitem[iprop].value, szIniFile);
 		    }
 		    strcpy(section, device);
 		    strcat(section, " Options");
 		    GetDlgItemText(hDlg, PROP_XOFFSET, buf, sizeof(buf)-2);
-		    WritePrivateProfileString(section, "Xoffset", buf, INIFILE);
+		    WritePrivateProfileString(section, "Xoffset", buf, szIniFile);
 		    GetDlgItemText(hDlg, PROP_YOFFSET, buf, sizeof(buf)-2);
-		    WritePrivateProfileString(section, "Yoffset", buf, INIFILE);
+		    WritePrivateProfileString(section, "Yoffset", buf, szIniFile);
 		    free((char *)propitem);
 		    EndDialog(hDlg, TRUE);
 		    return TRUE;
@@ -481,7 +481,7 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			    EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), FALSE);
 			/* now look up entry in gsview.ini */
 			/* and update DEVICE_RES list box */
-			GetPrivateProfileString(DEVSECTION, entry, "", buf, sizeof(buf)-2, INIFILE);
+			GetPrivateProfileString(DEVSECTION, entry, "", buf, sizeof(buf)-2, szIniFile);
 			buf[strlen(buf)+1] = '\0';	/* double NULL at end */
 		    	SendDlgItemMessage(hDlg, DEVICE_RES, CB_RESETCONTENT, 0, 0L);
 			p = buf;
@@ -510,7 +510,7 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			{ char section[MAXSTR];
 			strcpy(section, entry);
 			strcat(section, " Options");
-			GetPrivateProfileString(section, "Options", "", buf, sizeof(buf)-2, INIFILE);
+			GetPrivateProfileString(section, "Options", "", buf, sizeof(buf)-2, szIniFile);
 			SetDlgItemText(hDlg, DEVICE_OPTIONS, buf);
 			}
 			return FALSE;
@@ -578,7 +578,7 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			strcpy(section, option.device_name);
 			strcat(section, " Options");
 		        GetDlgItemText(hDlg, DEVICE_OPTIONS, buf, sizeof(buf)-2);
-			WritePrivateProfileString(section, "Options", buf, INIFILE);
+			WritePrivateProfileString(section, "Options", buf, szIniFile);
 			}
 			EndDialog(hDlg, TRUE);
 			return TRUE;
@@ -624,7 +624,9 @@ DLGPROC lpProcDevice;
 
 
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 /* Modeless dialog box - Cancel printing */
 BOOL CALLBACK _export
 CancelDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -1249,7 +1251,11 @@ start_gvwgs(void)
     info_wait(IDS_WAIT);
     strcpy(progname, szExePath);
 #ifdef __WIN32__
+#ifdef DECALPHA
+    strcat(progname, "gvwgsda.exe");
+#else
     strcat(progname, "gvwgs32.exe");
+#endif
 #else
     strcat(progname, "gvwgs16.exe");
 #endif

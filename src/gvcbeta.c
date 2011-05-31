@@ -48,8 +48,12 @@ beta_expired(void)
   t = localtime(&today);
   if (t->tm_year+1900 < BETA_YEAR)
     return 0;
+  if (t->tm_year+1900 > BETA_YEAR)
+    return 1;    /* beta copy has expired */
   if (t->tm_mon+1 < BETA_MONTH)
     return 0;
+  if (t->tm_mon+1 > BETA_MONTH)
+    return 1;    /* beta copy has expired */
   if (t->tm_mday < BETA_DAY)
     return 0;
   return 1;    /* beta copy has expired */
@@ -78,4 +82,3 @@ int beta_warn(void)
 }
 
 #endif /* BETA */
-

@@ -34,7 +34,7 @@ DEBUG=0
 # Language is English (en) or Deutsch (de) or French (fr)
 LANGUAGE=en
 # GSview version
-GSVIEW_VERSION=23
+GSVIEW_VERSION=24
 
 !if $(USE_EMX)
 # EMX
@@ -95,7 +95,7 @@ OBJS=gvpm.$(OBJ) gvpdlg.$(OBJ) gvpdisp.$(OBJ) gvpeps.$(OBJ) gvpinit.$(OBJ)\
 HDRS=gvpm.h ps.h gvcfn.h gvcver.h
 
 all: gvpm.exe\
- gvpmen.hlp gvpmen.dll\
+ gvpmen.hlp\
  gvpmde.hlp gvpmde.dll\
  gvpmfr.hlp gvpmfr.dll\
  gvpgs.exe\
@@ -146,29 +146,11 @@ gvctext.$(OBJ): gvctext.c $(HDRS)
 ansi2oem.exe: ansi2oem.c
 	$(COMP) ansi2oem.c
 
-gvpmen.res: gvpmen.hlp gvcrc.h gvcen.h gvpm1.rc gvcen.rc gvpen.rc gvpm2.rc binary\gvpm1.ico ansi2oem.exe $(HDRS)
-	ansi2oem < gvcen.h > gvclang.h
-	ansi2oem < gvcen.rc > gvclang.rc
-	ansi2oem < gvpen.rc > gvplang.rc
-	copy gvpm1.rc+gvphlpen.rc+gvclang.rc+gvplang.rc+gvpm2.rc gvpmen.rc
-	rc -i $(COMPBASE)\include -r $*.rc
-	-del gvclang.rc
-	-del gvplang.rc
-	-del gvclang.h
-	ansi2oem < gvc$(LANGUAGE).h > gvclang.h
-
-gvpmen.dll: gvpmen.res gvpmen.def gvplang.c
-!if $(USE_EMX)
-	$(COMP) -Zdll -Zso -Zsys -Zomf -c gvplang.c
-	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj gvplang.obj, gvpmen.dll, ,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, gvpmen.def
-	rc gvpmen.res gvpmen.dll
-!endif
-
-gvpmde.res: gvpmde.hlp gvcrc.h gvcde.h gvpm1.rc gvcde.rc gvpde.rc gvpm2.rc binary\gvpm1.ico ansi2oem.exe $(HDRS)
+gvpmde.res: gvpmde.hlp gvcrc.h gvcde.h gvpm2.rc gvcde.rc gvpde.rc gvpm3.rc binary\gvpm1.ico ansi2oem.exe $(HDRS)
 	ansi2oem < gvcde.h > gvclang.h
 	ansi2oem < gvcde.rc > gvclang.rc
 	ansi2oem < gvpde.rc > gvplang.rc
-	copy gvpm1.rc+gvphlpde.rc+gvclang.rc+gvplang.rc+gvpm2.rc gvpmde.rc
+	copy gvpm2.rc+gvphlpde.rc+gvclang.rc+gvplang.rc+gvpm3.rc gvpmde.rc
 	rc -i $(COMPBASE)\include -r $*.rc
 	-del gvclang.rc
 	-del gvplang.rc
@@ -182,11 +164,11 @@ gvpmde.dll: gvpmde.res gvpmde.def gvplang.c
 	rc gvpmde.res gvpmde.dll
 !endif
 
-gvpmfr.res: gvpmfr.hlp gvcrc.h gvcfr.h gvpm1.rc gvcfr.rc gvpfr.rc gvpm2.rc binary\gvpm1.ico ansi2oem.exe $(HDRS)
+gvpmfr.res: gvpmfr.hlp gvcrc.h gvcfr.h gvpm2.rc gvcfr.rc gvpfr.rc gvpm3.rc binary\gvpm1.ico ansi2oem.exe $(HDRS)
 	ansi2oem < gvcfr.h > gvclang.h
 	ansi2oem < gvcfr.rc > gvclang.rc
 	ansi2oem < gvpfr.rc > gvplang.rc
-	copy gvpm1.rc+gvphlpfr.rc+gvclang.rc+gvplang.rc+gvpm2.rc gvpmfr.rc
+	copy gvpm2.rc+gvphlpfr.rc+gvclang.rc+gvplang.rc+gvpm3.rc gvpmfr.rc
 	rc -i $(COMPBASE)\include -r $*.rc
 	-del gvclang.rc
 	-del gvplang.rc
@@ -200,8 +182,16 @@ gvpmfr.dll: gvpmfr.res gvpmfr.def gvplang.c
 	rc gvpmfr.res gvpmfr.dll
 !endif
 
-gvpm.res: gvpm.rc gvpm.h binary\gvpm1.ico
+gvpm.res: gvpm1.rc gvpm.h binary\gvpm1.ico gvpmen.hlp gvcrc.h gvcen.h gvpm1.rc gvcen.rc gvpen.rc gvpm3.rc ansi2oem.exe $(HDRS)
+	ansi2oem < gvcen.h > gvclang.h
+	ansi2oem < gvcen.rc > gvclang.rc
+	ansi2oem < gvpen.rc > gvplang.rc
+	copy gvpm1.rc+gvphlpen.rc+gvclang.rc+gvplang.rc+gvpm3.rc gvpm.rc
 	rc -i $(COMPBASE)\include -r $*.rc
+	-del gvclang.rc
+	-del gvplang.rc
+	-del gvclang.h
+	ansi2oem < gvc$(LANGUAGE).h > gvclang.h
 
 gvpm.exe: $(OBJS) gvpm.res gvpm.def
 !if $(USE_EMX)
@@ -424,7 +414,6 @@ gsv$(GSVIEW_VERSION)os2.zip:
 	copy gvpmen.hlp ..
 	copy gvpmde.hlp ..
 	copy gvpmfr.hlp ..
-	copy gvpmen.dll ..
 	copy gvpmde.dll ..
 	copy gvpmfr.dll ..
 	copy gvpgs.exe ..
@@ -449,7 +438,6 @@ gsv$(GSVIEW_VERSION)os2.zip:
 	-del gvpmen.hlp
 	-del gvpmde.hlp
 	-del gvpmfr.hlp
-	-del gvpmen.dll
 	-del gvpmde.dll
 	-del gvpmfr.dll
 	-del gvpgs.exe
@@ -536,7 +524,6 @@ clean: language
 
 veryclean: clean
 	-del gvpm.exe
-	-del gvpmen.dll
 	-del gvpmde.dll
 	-del gvpmfr.dll
 	-del gvpmen.hlp

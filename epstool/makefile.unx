@@ -25,14 +25,14 @@ INCLUDES=-I/usr/openwin/include
 LIBS=
 DEFINES=-DUNIX -DEPSTOOL -DHAVE_UNISTD_H
 OBJ=o
-COMP=gcc
+CC=gcc
 
 OBJS=epstool.$(OBJ) gvceps.$(OBJ) ps.$(OBJ)
 
 all: epstool
 
 .c.$(OBJ):
-	$(COMP) $(INCLUDES) $(DEFINES) -c $*.c
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $*.c
 
 
 epstool.$(OBJ): epstool.c epstool.h ps.h gvceps.h
@@ -42,7 +42,7 @@ ps.$(OBJ): ps.c epstool.h ps.h gvceps.h
 gvceps.$(OBJ): gvceps.c epstool.h ps.h gvceps.h
 
 epstool: $(OBJS)
-	$(COMP) $(INCLUDES) -o epstool $(OBJS) $(LIBS) 
+	$(CC) $(CFLAGS) $(INCLUDES) -o epstool $(OBJS) $(LIBS) 
 
 clean:
 	-$(RM) epstool.$(OBJ)
@@ -55,4 +55,3 @@ veryclean: clean
 install: epstool
 	cp epstool $(BINDIR)
 	chmod 755 $(BINDIR)/epstool
-

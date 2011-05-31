@@ -271,8 +271,8 @@
 #define AACFG32 "Mettre à jour la liste des imprimantes"
 #define AACFG33 "La mise à jour de la liste des imprimantes va remplacer toutes les entrées déjà existantes."
 #define AACFG40 "GSview peut créer des associations de fichiers pour les types de fichiers PostScript et\
- Portable Document Format (PDF).\
- Grâce à ces associations, double-cliquer sur un fichier PostScript ou PDF lancera\
+ Portable Document Format (PDF)."
+#define AACFG43 "Grâce à ces associations, double-cliquer sur un fichier PostScript ou PDF lancera\
  GSview qui ouvrira ce fichier. Ces associations permettent également à certains navigateurs WWW\
  d'utiliser GSview comme visualisateur pour les fichiers PostScript et PDF."
 #define AACFG41 "Associer les fichiers PostScript (.ps et .eps) avec GSview."

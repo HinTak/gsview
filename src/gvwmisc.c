@@ -46,7 +46,9 @@ delayed_message_box(int id, int icon)
     PostMessage(hwndimg, WM_GSMESSBOX, (WPARAM)id, (LPARAM)icon);
 }
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 /* change menu item checkmark */
 void
 check_menu_item(int menuid, int itemid, BOOL checked)
@@ -54,7 +56,9 @@ check_menu_item(int menuid, int itemid, BOOL checked)
         CheckMenuItem(hmenu, itemid, MF_BYCOMMAND | (checked ? MF_CHECKED : MF_UNCHECKED));
 }
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 /* get text of menu item */
 int
 get_menu_string(int menuid, int itemid, char *str, int len)

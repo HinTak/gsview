@@ -25,7 +25,7 @@
  */
 
 #ifndef NeedFunctionPrototypes
-#if defined(FUNCPROTO) || defined(__STDC__) || defined(__cplusplus) || defined(c_plusplus) || defined(__TURBOC__) || defined(OS2)
+#if defined(FUNCPROTO) || defined(__STDC__) || defined(__cplusplus) || defined(c_plusplus) || defined(__TURBOC__) || defined(OS2) || defined(_MSC_VER)
 #define NeedFunctionPrototypes 1
 #else
 #define NeedFunctionPrototypes 0
@@ -163,3 +163,4 @@ PS_WORD reorder_word(PS_WORD val);
 PS_WORD reorder_word();
 #endif
 
+

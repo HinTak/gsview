@@ -8,6 +8,8 @@
  * Modified by Russell Lang 1996-10-15
  *   obtain title from first line of doc file.
  *   Conform to HTML 3.2. 
+ * Modified by Russell Lang 1997-11-28
+ *   Convert {bml* file.bmp} to <IMG SRC="file.gif">
  *
  * usage:  doc2html gnuplot.doc gnuplot.htm
  *
@@ -241,7 +243,7 @@ convert(a,b)
     fprintf(b,"<TITLE>%s</TITLE>\n", line+1);
     fprintf(b,"</HEAD>\n");
     fprintf(b,"<BODY>\n");
-    fprintf(b,"<H1>%s</H1><P>\n", line+1);
+    fprintf(b,"<H1>%s</H1>\n", line+1);
 
     /* process each line of the file */
         while (fgets(line,MAX_LINE_LEN,a)) {
@@ -414,7 +416,16 @@ process_line(line, b)
                 }
           else if (strncmp(line2+1, "{bml", 4)==0)
 	  {
-		/* do nothing, ignore line */
+		/* assume bitmap is available as GIF */
+		char *p;
+		fprintf(b, "\n<IMG SRC=\042");
+		for (p=line2+1; *p && *p!=' '; p++)
+		   ; /* skip over bml text */
+		for (; *p && *p==' '; p++)
+		   ; /* skip over spaces */
+		for (; *p && *p!='.' && *p!=' '; p++)
+		    fprintf(b, "%c", *p);
+		fprintf(b, ".gif\042>\n");
 	      }
 	  else 
           {
@@ -450,7 +461,7 @@ process_line(line, b)
 	    else
                 fprintf(b,"<HR>\n<H%c><A NAME=\042%d\042>", line[0]=='1'?line[0]:line[0]-1, line_count);
             fprintf(b,&(line2[1])); /* title */
-            fprintf(b,"</A></H%c>\n<P>", line[0]=='1'?line[0]:line[0]-1) ;
+            fprintf(b,"</A></H%c>\n", line[0]=='1'?line[0]:line[0]-1) ;
           } else
             fprintf(stderr, "unknown control code '%c' in column 1, line %d\n",
                 line[0], line_count);
@@ -459,4 +470,3 @@ process_line(line, b)
     }
 }
 
-

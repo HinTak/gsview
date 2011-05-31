@@ -1,5 +1,0 @@
-LIBRARY		GSVW32EN
-DESCRIPTION	'GSview English Language Resources'
-DATA		MULTIPLE SHARED
-EXPORTS		DllEntryPoint
-

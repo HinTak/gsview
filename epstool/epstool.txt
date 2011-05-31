@@ -17,7 +17,7 @@
 
 /* epstool.txt */
 
-1997-02-15
+1997-11-21
 
 EPSTOOL - Create or extract preview bitmaps in EPS files.
 
@@ -169,6 +169,12 @@ and the current directory will be used for other platforms.
 ================
 Revision History
 ================
+1.03 1997-09-22
+  TIFF4 preview didn't work from 24bit/pixel source bitmap.
+  TIFF 6 packbits didn't compress properly for some data (and
+  consquently caused heap corruption).
+  Fixed TIFF 6 output when using palette (4 or 8 bit/pixel).
+
 1.02 1997-02-15
   Removed requirement for EPS file to use showpage.
   Added -c to allow correction of %%BoundingBox
@@ -220,4 +226,3 @@ Revision History
 0.3 alpha 1995-09-14
   First release separate from GSview.
 
-

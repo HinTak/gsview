@@ -790,7 +790,9 @@ char *gs_argv[3];
 
 
 /* Thread which loads Ghostscript DLL and sends input file to DLL */
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 void 
 gs_thread(void *arg)
 {
@@ -835,3 +837,4 @@ int code;
 */
 }
 
+

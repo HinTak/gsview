@@ -2,7 +2,6 @@ pstotext.txt
 pstotxt2.dll
 pstotxt2.exe
 gvpm.exe
-gvpmen.dll
 gvpmde.dll
 gvpmfr.dll
 gvpmen.hlp

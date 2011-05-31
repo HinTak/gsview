@@ -59,7 +59,11 @@ APIRET rc;
 	    break;
 	case IDM_LANGEN:
 	default:
-	    strcat(langdll, "en");
+	    if (hlanguage)
+		DosFreeModule(hlanguage);
+	    /* Don't load a DLL - English is in main EXE resources */
+	    hlanguage = (HMODULE)NULL;
+	    return TRUE;
     }
     strcat(langdll, ".dll");
     rc = DosLoadModule(buf, sizeof(buf), langdll, &hmodule);

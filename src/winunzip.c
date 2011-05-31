@@ -16,6 +16,11 @@
 #  define near
 #  define _near
 #  define __near
+#define _fstrrchr strrchr
+#endif
+
+#ifdef _MSC_VER
+#define _export
 #endif
 
 /* ************ EXTERNALS *********** */
@@ -82,10 +87,10 @@ HGLOBAL  hUMB;
 LPDCL lpDCL;
 HGLOBAL hDCL;
 HINSTANCE hWinDll;
-int WINAPI (far *DllProcessZipFiles)(DCL far *);
-WINAPI (far *GetDllVersion)(DWORD far *);
+int (WINAPI far *DllProcessZipFiles)(DCL far *);
+(WINAPI far *GetDllVersion)(DWORD far *);
 
-typedef int _export (far *THUNKDLLPRNT) (FILE *, unsigned int, char *);
+typedef int (_export far *THUNKDLLPRNT) (FILE *, unsigned int, char *);
 THUNKDLLPRNT lpfnDoPrint;
 
 extern char szAppName[];
@@ -276,3 +281,4 @@ int i;
 	 return i;
 }
 #endif
+

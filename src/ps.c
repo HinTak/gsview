@@ -42,7 +42,7 @@
  */
 
 #include <stdio.h>
-#if defined(__TURBOC__) || defined(OS2)
+#if defined(__TURBOC__) || defined(OS2) || defined(_MSC_VER)
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -1687,3 +1687,4 @@ psfgets(s, n, stream)
     *p = '\0';
     return (ferror(stream)) ? NULL : s;
 }
+

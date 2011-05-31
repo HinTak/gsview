@@ -1716,7 +1716,9 @@ update_scroll_bars(void)
 }
 
 /* Thread which loads Ghostscript DLL for display */
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 void 
 gs_thread(void *arg)
 {
@@ -1770,8 +1772,6 @@ gsview_close()
     }
 #endif
     unload_zlib();
-    if (hlanguage)
-	FreeLibrary(hlanguage);
     return;
 }
 
@@ -1847,7 +1847,9 @@ HPALETTE hpalette;
 }
 
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 /* enable or disable a menu item */
 void
 enable_menu_item(int menuid, int itemid, BOOL enabled)
@@ -2056,4 +2058,3 @@ HDC hdc;
 	}
     }
 }
-

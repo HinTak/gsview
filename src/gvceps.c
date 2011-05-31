@@ -530,7 +530,9 @@ dib_pal_colors(LPBITMAP2 pbm)
 }
 
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 void
 scan_colors(PREBMAP *ppbmap, LPBITMAP2 pbm)
 {
@@ -835,54 +837,25 @@ int i, j;
 		    repeat = 0;
 		} else if (repeat == 2) {	/* 2 byte repeat */
 		    /* code 2 byte repeat as repeat */
-		    /* except when preceeded and followed by literal */
-		    if (prevlit) {
-			/* look ahead */
-			if (i+2<length) {
-			    if (raw[i+1] == raw[i+2]) {
-				/* next is not a literal, code this as repeat */
-				*cp++ = (BYTE)(-repeat+1);
-				*cp++ = previous;
-				start = i;
-				prevlit = 0;
-				repeat = 0;
-			    }
-			    else {
-				if (prevlit < 126) {
-				    /* room to combine */
-				    start -= prevlit;  /* continue previous literal */
-				    cp -= prevlit+1;
-				    literal = prevlit + 2;
-				    prevlit = 0;
-				    repeat = 0;
-			        }
-				else {
-				    /* can't combine, code as repeat */
-				    *cp++ = (BYTE)(-repeat+1);
-				    *cp++ = previous;
-				    start = i;
-				    repeat = 0;
-				    /* literal = 0; */	/* implicit */
-				    prevlit = 0;
-			        }
-			    }
-			}
-			else {
-			    /* next isn't a repeat because not enough bytes */
-			    /* code later as literal */
-			    literal = repeat;
-			    repeat = 0;
-			}
+		    /* except when preceeded by literal */
+		    if ( (prevlit) && (prevlit < 126) ) {
+			/* previous literal and room to combine */
+			start -= prevlit;  /* continue previous literal */
+			cp -= prevlit+1;
+			literal = prevlit + 2;
+			prevlit = 0;
+			repeat = 0;
 		    }
 		    else {
-			/* previous was repeat, code this as repeat */
+			/* code as repeat */
 			*cp++ = (BYTE)(-repeat+1);
 			*cp++ = previous;
 			start = i;
-			repeat = 0;
-			/* literal = 0; */	/* implicit */
 			prevlit = 0;
+			/* literal = 0; */	/* implicit */
+			repeat = 0;
 		    }
+		    /* literals will be coded later */
 		}
 		else {
 		    /* repeat of 3 or more bytes */
@@ -1027,6 +1000,8 @@ int lastrow;
 		rowsperstrip = 1;	/* strips are larger than 8k */
 	}
 	stripsperimage = (height + rowsperstrip - 1) / rowsperstrip;
+	if (stripsperimage == 1)
+	    rowsperstrip = height;
 
 	preview = (unsigned char *) malloc(prebmap.bytewidth);
 	if (preview == NULL)
@@ -1200,7 +1175,7 @@ int lastrow;
 	    if (!tiff4) {
 		len += ((strlen(szAppName)+2)&~1) + 20;	/* software and date */
 		if (prebmap.depth == 4 || prebmap.depth == 8)
-		    tiff_end += 2 * 3*(1<<prebmap.depth);	/* palette */
+		    len += 2 * 3*(1<<prebmap.depth);	/* palette */
 	    }
 	    tiff_long(tiff_end + len, f);
 	}
@@ -2501,3 +2476,4 @@ int code;
 	return code;
 }
 
+

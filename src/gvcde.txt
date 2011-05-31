@@ -11,7 +11,7 @@
  entwickelten PostScript Document Structuring Conventions
  (DSC-Konventionen) entsprechen, auf dem Bildschirm dargestellt und auf
  einen Drucker ausgegeben werden.
- Die Version GSview 2.3 erfordert Ghostscript in der Version 4.03 - 5.99.
+ Die Version GSview 2.4 erfordert Ghostscript in der Version 4.03 - 5.99.
  Grundlage für GSview ist das von Tim Theisen entwickelte Programm
  Ghostview für X11.
 2Installation
@@ -83,12 +83,12 @@ E
  Anschließend installieren Sie das Programm
 P
  PM GSview, indem Sie die Dateien gvpm.exe, gvpgs.exe,
- gvpmen.dll, gvpmde.dll, gvpmfr.dll,
+ gvpmde.dll, gvpmfr.dll,
  gvpmen.hlp, gvpmde.hlp, gvpmfr.hlp,
  und printer.ini
 W
  GSview für Windows, indem Sie gsview32.exe, gsv16spl.exe, gvwgs32.exe,
- gsvw32en.dll, gsvw32de.dll, gsvw32fr.dll,
+ gsvw32de.dll, gsvw32fr.dll,
  gsviewen.hlp, gsviewde.hlp, gsviewfr.hlp,
  und printer.ini
 E
@@ -181,12 +181,12 @@ E
  Die vorgeschlagene Methode ist zuerst Gsview zu installieren und dann zu konfigurieren.
  Kopieren Sie gsview32.ini oder gvpm.ini aus dem Systemverzeichnis oder dem Benutzerprofil-Verzeichnis in  
  das Gsview Verzeichnis und entfernen alle Einträge bis auf:
-[Options]
-  Version=2.3
-  GSversion=503
+  [Options]
+  Version=2.4
+  GSversion=510
   Configured=1
-  GhostscriptDLL=E:\GSTOOLS\gs5.03\gsdll32.dll
-  GhostscriptInclude=E:\GSTOOLS\gs5.03;E:\GSTOOLS\gs5.03\fonts
+  GhostscriptDLL=E:\GSTOOLS\gs5.10\gsdll32.dll
+  GhostscriptInclude=E:\GSTOOLS\gs5.10;E:\GSTOOLS\gs5.10\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Wenn ein Benutzer Gsview startet, dann wird normalerweise seine INI Datei benutzt.
  Startet Gsview das erste Mal oder die Version von Gsview stimmt nicht mit der in der INI Datei überein, dann 
@@ -465,9 +465,8 @@ E
  `GS_FONTPATH` mit den hier aufgeführten Verzeichnissen.
  Ghostscript erhält dann automatisch alle installierten Type 1-Fonts:
 
-    Betriebssystem          GS_FONTPATH
-    --------------          -----------
------------       -----------
+  Betriebssystem    GS_FONTPATH
+  --------------    -----------
   DEC OSF/1         /usr/lib/X11/fonts/Type1Adobe
   DEC Ultrix        /usr/lib/DPS/outline/decwin
   HP-UX 9           /usr/lib/X11/fonts/type1.st/typefaces
@@ -976,7 +975,7 @@ P
 E
  gespeichert.
  Die Standard-Liste der Ausgabegeräte und Einstellungen stammt
- aus der Ghostscript Version 5.03, ist aber unter Umständen nicht
+ aus der Ghostscript Version 5.10, ist aber unter Umständen nicht
  vollständig.
 
  Wenn ein Dokument sofort gedruckt werden soll, vorher jedoch auf dem
@@ -2322,4 +2321,3 @@ E
  ist die Verwendung gswin32.exe (Win32), gswin32c.exe (Win32 Konsole)
  oder gsos2.exe (OS/2) sicherer.
 
-

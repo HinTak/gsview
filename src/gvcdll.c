@@ -271,7 +271,7 @@ int depth;
 	gs_addmess(buf);
 	pending.unload = TRUE;
 	if ( (code == -13)	/* limitcheck */
-	     || (code = -8)	/* invalidexit */
+	     || (code == -8)	/* invalidexit */
 	   ) {
 	    gs_addmess("Page size may have been too large or resolution too high.\nResetting page size and resolution\n");
 	    if (option.xdpi > DEFAULT_RESOLUTION)
@@ -1473,7 +1473,7 @@ int real_orientation;
 		return code;
 	    }
 	    ldone += len;
-	    pcdone = (int)(ldone * 100 / lsize);
+	    pcdone = (int)(ldone * 100.0 / lsize);
 	    if ((pcdone != percent_done) && !percent_pending) {
 		percent_done = pcdone;
 		percent_pending = TRUE;

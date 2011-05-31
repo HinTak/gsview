@@ -113,7 +113,7 @@
 #define AASELECTPRINTER "Select Printer"
 #define AAPRINTING "Printing"
 #define AASELECTPAGE "Select Page"
-#define AASELECTPAGES "Select Page"
+#define AASELECTPAGES "Select Pages"
 
 /* Printer Setup dialog box */
 #define AAPRINTERSETUP "Printer Setup"
@@ -272,9 +272,10 @@
 #define AACFG32 "Update GSview printer list" 
 #define AACFG33 "Updating the GSview printer list will overwrite any existing entries." 
 #define AACFG40 "GSview can create file associations for PostScript and\
- Portable Document Format (PDF) files.\
- With these associations, double clicking on a PostScript or PDF file will\
- start GSview.  These associations also allow some WWW browsers\
+ Portable Document Format (PDF) files."
+#define AACFG43 "With these associations, double clicking on a PostScript\
+ or PDF file will start GSview.\
+  These associations also allow some WWW browsers\
  to use GSview as a viewer for PostScript and PDF files."
 #define AACFG41 "Associate PostScript (.ps and .eps) files with GSview."
 #define AACFG42 "Associate PDF (.pdf) files with GSview."
@@ -320,4 +321,3 @@
 #define AAENGLISH "English"
 #define AADEUTSCH "Deutsch"
 #define AAFRANCAIS "Français"
-

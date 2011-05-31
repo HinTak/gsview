@@ -7,7 +7,7 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 2.3 requires Ghostscript 4.03 - 5.99.
+ GSview 2.4 requires Ghostscript 4.03 - 5.99.
  GSview was inspired by Tim Theisen's X11 Ghostview program.
 2Installation
 ?Installation
@@ -73,12 +73,12 @@ E
  Next install
 P
  PM GSview by copying gvpm.exe, gvpgs.exe,
- gvpmen.dll, gvpmde.dll, gvpmfr.dll,
+ gvpmde.dll, gvpmfr.dll,
  gvpmen.hlp, gvpmde.hlp, gvpmfr.hlp
  and printer.ini
 W
  GSview for Windows by copying gsview32.exe, gsv16spl.exe, gvwgs32.exe,
- gsvw32en.dll, gsvw32de.dll, gsvw32fr.dll,
+ gsvw32de.dll, gsvw32fr.dll,
  gsviewen.hlp, gsviewde.hlp, gsviewfr.hlp,
  and printer.ini
 E
@@ -136,7 +136,7 @@ P
 W
  Create a Program Manager or Start Menu item for GSview.
 
- Add the .ps and .eps (and optionally the .pdf) file types to 
+ Add the .ps and .eps (and optionally the .pdf) file types to
  the `Registry`.
 E
 
@@ -175,11 +175,11 @@ E
  user profile directory to the GSview directory, then edit it to
  remove all entries except for:
   [Options]
-  Version=2.3
-  GSversion=503
+  Version=2.4
+  GSversion=510
   Configured=1
-  GhostscriptDLL=E:\GSTOOLS\gs5.03\gsdll32.dll
-  GhostscriptInclude=E:\GSTOOLS\gs5.03;E:\GSTOOLS\gs5.03\fonts
+  GhostscriptDLL=E:\GSTOOLS\gs5.10\gsdll32.dll
+  GhostscriptInclude=E:\GSTOOLS\gs5.10;E:\GSTOOLS\gs5.10\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  When a user starts GSview, their INI file will normally be used.
  The first time GSview is run, or when the GSview version doesn't
@@ -543,28 +543,6 @@ E
  Unix/X11 Ghostscript may have an ability to use Xresources to
  specify font aliases.  If this is the case, then the method should
  be described here.
-3Portable Document Format
-?Portable Document Format
-?PDF
- GSview can display and print PDF files, although there are a number
- of problems with the current method.
-
- Known problems with the current implementation are:
-
- - GSview ignores the page size on the Media menu, and instead uses
- the /MediaBox from the PDF file.
-
- - Doesn't sense if PDF file has been changed during display.
-
- - Extracting PDF pages extracts PostScript rather than PDF.
- See the Ghostscript documentation on pdf2ps.
-
- - GSview needs to `Open` a PDF file to count the pages.  If you
- `Select` the file, GSview will not be able to `Text Extract`,
- `Find`, `Goto Page` or any other operation that needs to know
- how many pages are in the document.
-
- - pdfmark link support is crude.
 2Document Structuring Conventions
 ?Document Structuring Conventions
 ?DSC
@@ -621,6 +599,47 @@ E
   %%BeginPreview: width height depth lines
  An EPS file with a preview can be created from an EPS file without a
  preview using `Add EPS Preview`.
+2Portable Document Format
+?Portable Document Format
+?PDF
+?pdf2ps
+?ps2pdf
+ GSview can display and print PDF files, although there are a number
+ of problems with the current method.
+
+ Known problems with the current implementation are:
+
+ - GSview ignores the page size on the Media menu, and instead uses
+ the /MediaBox from the PDF file.
+
+ - Doesn't sense if PDF file has been changed during display.
+
+ - Extracting PDF pages extracts PostScript rather than PDF.
+ See the Ghostscript documentation on pdf2ps.
+
+ - GSview needs to `Open` a PDF file to count the pages.  If you
+ `Select` the file, GSview will not be able to `Text Extract`,
+ `Find`, `Goto Page` or any other operation that needs to know
+ how many pages are in the document.
+
+ - pdfmark link support is crude.
+
+ To convert a PostScript file to a PDF file, use `File` | `Print`,
+ then select the `pdfwrite` device and `Print to File`.
+
+ To convert a PDF file to a PostScript file, use `File` |
+ `Extract`.
+
+ To batch convert multiple files, look at ps2pdf.bat and pdf2ps.bat
+ in the Ghostscript directory.
+ You will need to use
+P
+ gvpm.exe
+W
+ gswin32c.exe
+E
+ instead of gs.exe.  You will also need to set the Ghostscript
+ include path using `-I` or the environment variable `GS_LIB`.
 2Opening a Document
 ?File
 ?Open
@@ -899,7 +918,7 @@ P
  gvpm.ini.
 E
  The default list of devices and resolutions is taken from the
- standard distribution version of Ghostscript 5.03 and may not
+ standard distribution version of Ghostscript 5.10 and may not
  be complete.
 
  To print a document without displaying it, open the document
@@ -1323,7 +1342,7 @@ E
 3Language
 ?Language
 ?International
- GSview is available in English, French and German.  To change the 
+ GSview is available in English, French and German.  To change the
  language use `Options` | `Language`.
 3PStoText
 ?PStoText
@@ -2102,6 +2121,19 @@ E
  Change this to "Printers | PostScript tab | Advanced... |
  Data format group box | ASCII data"
 
+ `Problem:` Trying to open any file gives
+  `Unrecoverable error: configurationerror in setpagedevice`
+  Failed to open device or install ViewerPreProcess hook: returns -26
+  Page size may have been too large or resolution too high.
+  Resetting page size and resolution
+
+ Either the problem described in the error message has occurred,
+ in which case you should reduce the page size, resolution,
+ depth or a combination of all three.
+ Alternatively, you may have used `-dFIXEDMEDIA` in the Ghostscript
+ environment variable GS_OPTIONS.  When using GSview, it is safest
+ not to use GS_OPTIONS at all and to use `Options` |
+ `Configure Ghostscript` | `Ghostscript Options` instead.
 2Other Help Topics
 ?Other Help Topics
  These topics are usually accessed by pressing the `Help` button
@@ -2159,4 +2191,3 @@ E
  (Win32 console) or gsos2.exe (OS/2).
 
 
-

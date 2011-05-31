@@ -35,6 +35,7 @@ do_message(void)
 
 
 
+#ifdef OLD
 /* return TRUE if file length or modification time changed */
 BOOL
 psfile_changed(void)
@@ -65,6 +66,32 @@ psfile_savestat(PSFILE *psf)
 	}
 	psf->length = filelength(fileno(psf->file));
 }
+
+#else
+/* return TRUE if file length or modification time changed */
+BOOL
+psfile_changed(void)
+{
+time_t thisftime;
+long thisflength;
+struct stat fstatus;
+	fstat(fileno(psfile.file), &fstatus);
+	thisftime = fstatus.st_mtime;
+	thisflength = fstatus.st_size;
+	return ( (thisflength != psfile.length) ||
+		memcmp(&thisftime, &psfile.datetime, sizeof(thisftime)) );
+}
+
+void
+psfile_savestat(PSFILE *psf)
+{
+struct stat fstatus;
+	fstat(fileno(psf->file), &fstatus);
+	psf->datetime = fstatus.st_mtime;
+	psf->length = fstatus.st_size;
+}
+#endif
+
 
 BOOL 
 exec_pgm(char *name, char *arg, PROG* prog)
@@ -126,3 +153,4 @@ cleanup_pgm(PROG* prog)
 	prog->hinst = 0;
 }
 
+

@@ -1,7 +1,7 @@
 ===============================================================
-README.TXT         1997-09-16
+README.TXT         1997-11-29
 ===============================================================
-GSview 2.3 - PostScript previewer.  Needs Ghostscript 5.03.
+GSview 2.4 - PostScript previewer.  Needs Ghostscript 5.10.
 
 ========
 Overview
@@ -36,16 +36,16 @@ Features include:
  - On-line help.
  - OS/2, Win16 and Win32 executables.
  - Can be run directly off a CD-ROM.
- - German translation (Deutsch, siehe unten).
- - Installation program for GSview and Ghostscript.
+ - German and French translations.
+ - Per user initialisation files for Windows.
+ - Installation program for GSview and Ghostscript
+   in English, French and German.
  - Free (GSview Free Public Licence).
  - Works with Aladdin Ghostscript 4.03 - 5.99 (GSview checks the
    Ghostscript version number).
-New features in version 2.3:
- - French translation.
- - Install program in English, French and German.
- - Remembers most recently used 4 files.
- - Per user initialisation files for Windows.
+New features in version 2.4:
+ - Can be compiled with MSVC++ 5.0.  Can be compiled for the
+   DEC Alpha, except for the unzip, zlib and pstotext zlib DLLs.
  - See gvcnews.txt in the GSview sources for more detailed change
    notes.
 
@@ -58,7 +58,7 @@ Create three 1.44M floppies containing the following files, or
 put them all in the same directory on your hard disk.
 
 Disk 1:
-  For Win32, unzip gsv23w32.zip
+  For Win32, unzip gsv24w32.zip
       README.TXT    (this file)
       LICENCE
       FILE_ID.DIZ
@@ -69,7 +69,7 @@ Disk 1:
       setp32fr.dll  French language resources
       wizunz32.dll  Info-ZIP unzip utility
 
-  For Win16, unzip gsv23w16.zip
+  For Win16, unzip gsv24w16.zip
       README.TXT   (this file)
       LICENCE
       FILE_ID.DIZ
@@ -80,7 +80,7 @@ Disk 1:
       setp16fr.dll  French language resources
       wizunz16.dll  Info-ZIP unzip utility
 
-  For OS/2, unzip gsv23os2.zip
+  For OS/2, unzip gsv24os2.zip
       README.TXT    (this file)
       LICENCE
       FILE_ID.DIZ
@@ -92,19 +92,19 @@ Disk 1:
       unzip2.dll    Info-ZIP unzip utility
 
 Disk 2:
-  gs503ini.zip      Aladdin Ghostscript library files
+  gs510ini.zip      Aladdin Ghostscript library files
     PLUS
-  gs503w32.zip      MS-Windows Win32 Aladdin Ghostscript
+  gs510w32.zip      MS-Windows Win32 Aladdin Ghostscript
      OR 
-  gs503os2.zip      OS/2 Aladdin Ghostscript
+  gs510os2.zip      OS/2 Aladdin Ghostscript
 
   (for Windows 3.1/Win16 use gs403ini.zip plus gs403win.zip)
 
 Disk 3:
-  gs503fn1.zip      Aladdin Ghostscript fonts.
+  gs510fn1.zip      Aladdin Ghostscript fonts.
 
-Disk 1 is the contents of gsv23w32.zip or gsv23w16.zip or gsv23os2.zip
-(all of which are contained in gsview23.zip).
+Disk 1 is the contents of gsv24w32.zip or gsv24w16.zip or gsv24os2.zip
+(all of which are contained in gsview24.zip).
 Disks 2 and 3 are obtained from ftp://ftp.cs.wisc.edu/ghost/aladdin/
 
 If using the floppy install method, 10 Mbytes of hard disk space is 
@@ -137,7 +137,7 @@ updating to a later version of Win32s.  Some computers
 will work with Win32s v1.15, others will not.
 To install from MS-Windows, run 'setup.exe' from disk 1.
 If you wish to use the slower 16-bit version, install
-using 'setup16.exe' from gsv23w16.zip.
+using 'setup16.exe' from gsv24w16.zip.
 
 If you don't like automatic installation programs, it is 
 possible to install GSview and Ghostscript manually.  See
@@ -214,11 +214,11 @@ Create the directories gsview and gsN.NN (where N.NN is the
 Ghostscript version number).
 
 Copy 
-  gvpm.exe, gvpgs.exe, gvpmen.dll, gvpmde.dll, gvpmfr.dll,
+  gvpm.exe, gvpgs.exe, gvpmde.dll, gvpmfr.dll,
   gvpmen.hlp, gvpmde.hlp and gvpmfr.hlp (OS/2)
      and/or
-  gsview32.exe, gvwgs32.exe, gsv16spl.exe, 
-  gsvw32en.dll, gsvw32de.dll, gsvw32fr.dll
+  gsview32.exe, gvwgs32.exe, gsv16spl.exe,
+  gsvw32de.dll, gsvw32fr.dll,
   gsviewen.hlp, gsviewde.hlp and gsviewen.hlp (MS-Windows)
     and 
   printer.ini
@@ -277,8 +277,8 @@ The GSview Free Public Licence does not require any payment to the author;
 however the author would welcome any donations to cover costs and time
 involved in developing and maintaining GSview.  These may be sent to
     Russell Lang
-    12 Princetown Road
-    MOUNT WAVERLEY  VIC  3149
+    218 Gallaghers Rd
+    GLEN WAVERLEY  VIC  3150
     AUSTRALIA
 Donations are preferred in Australian dollars because it costs 
 AUD$5 to bank an overseas currency cheque.
@@ -294,8 +294,9 @@ Please accompany donations with the following information:
     CD-ROM (see below)?
 
 To obtain the latest version of GSview and Aladdin Ghostscript
-on CD-ROM, send a cheque for USD$50 or equivalent to the address
-above.  The CD-ROM (actually a CD-R) will contain ready to run 
+on CD-ROM, send a cheque for USD$50 drawn on a USA bank or 
+equivalent drawn on your local bank to the address above.  
+The CD-ROM (actually a CD-R) will contain ready to run 
 and ready to install copies of GSview and Aladdin Ghostscript for 
 Windows and OS/2.  The CD-ROM and a printed copy of the Ghostscript 
 User Manual by Thomas Merz will be dispatched by air-mail.  
@@ -350,4 +351,3 @@ German/Deutsch.
 Cyrille Chevallet for translating GSview into French/Français.
 
 ==============================================================
-

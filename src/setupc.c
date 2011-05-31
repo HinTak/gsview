@@ -34,7 +34,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _MSC_VER
+#include <direct.h>
+#else
 #include <dir.h>
+#endif
 #include <ctype.h>
 #endif
 

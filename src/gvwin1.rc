@@ -29,6 +29,8 @@
 #define DS_3DLOOK 0x0004L	/* for Windows 95 look */
 #endif
 
+#define GVWIN1
+
 /* Don't rearrange the order of the following icons or their values */
 /* Registry setup depends on their order */
 ID_GSVIEW ICON "binary/gvwin1.ico"
@@ -88,7 +90,7 @@ BEGIN
 	"/erasepage {/erasepage eps_warn} def\015\012"
 	"/exitserver {/exitserver eps_warn} def\015\012"  /* this won't work - exitserver is in serverdict */
 	"/serverdict {/serverdict eps_warn} def\015\012"  /* so use this to provide warnings instead */
-	"/statusdict {/serverdict eps_warn} def\015\012"
+	"/statusdict {/statusdict eps_warn} def\015\012"
 	"/framedevice {/framedevice eps_warn} def\015\012"
 	"/grestoreall {/grestoreall eps_warn} def\015\012"
 	"/initclip {/initclip eps_warn} def\015\012"
@@ -290,4 +292,8 @@ IDM_TEXTFIND BITMAP "binary/gvwfind.bmp"
 
 IDM_TEXTFINDNEXT BITMAP "binary/gvwfindn.bmp"
 
-
+/* Now include the English language resources */
+
+#include "gvwin2.rc"
+
+/* end of gvwin1.rc */

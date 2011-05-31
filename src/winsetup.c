@@ -26,7 +26,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _MSC_VER
+#include <direct.h>
+#else
 #include <dir.h>
+#endif
 #include <ctype.h>
 #include <io.h>
 
@@ -51,7 +55,11 @@ char groupfile[MAXSTR];
 HINSTANCE phInstance;
 HINSTANCE hlanguage;
 #ifdef __WIN32__
+#ifdef DECALPHA
+char szUnzipDll[]="wizunzda.dll";
+#else
 char szUnzipDll[]="wizunz32.dll";
+#endif
 char szIniName[]="gsview32.ini";
 #else
 char szUnzipDll[]="wizunz16.dll";
@@ -147,7 +155,9 @@ HWND hbutton;
     }
 }
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 /* exit from program */
 int
 done(HWND hwnd)
@@ -267,7 +277,9 @@ char buf[16];
     return 0;
 }
 
+#ifdef __BORLANDC__
 #pragma argsused	/* ignore warning for next function */
+#endif
 HDDEDATA CALLBACK 
 DdeCallback(UINT type, UINT fmt, HCONV hconv,
     HSZ hsz1, HSZ hsz2, HDDEDATA hData, DWORD dwData1, DWORD dwData2)
@@ -550,7 +562,9 @@ HINSTANCE hInstance;
     return FALSE;
 }
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 /* language dialog box */
 BOOL CALLBACK _export
 LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -606,7 +620,9 @@ int language;
     }
 }
 
+#ifdef __BORLANDC__
 #pragma argsused	/* ignore warning for next function */
+#endif
 int PASCAL 
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmdShow)
 {
@@ -655,7 +671,9 @@ MSG msg;
 }
 
 
+#ifdef __BORLANDC__
 #pragma argsused	/* ignore warning for next function */
+#endif
 /* input string dialog box */
 BOOL CALLBACK _export
 InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -680,7 +698,9 @@ InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return(FALSE);
 }
 
+#ifdef __BORLANDC__
 #pragma argsused	/* ignore warning for next function */
+#endif
 /* Modeless Dialog Box */
 BOOL CALLBACK _export
 MainDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -724,7 +744,9 @@ static BOOL initialised;
 }
 
 
+#ifdef __BORLANDC__
 #pragma argsused	/* ignore warning for next function */
+#endif
 /* Modeless Dialog Box */
 BOOL CALLBACK _export
 ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -853,4 +875,3 @@ ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 /* delete program group */
 /*    want this to fail if user has added to contents of group */
 
-

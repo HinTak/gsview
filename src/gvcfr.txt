@@ -8,7 +8,7 @@
  Pour les documents respectant les conventions de structure du langage Adobe
  PostScript, GSview permet de visualiser ou d'imprimer des pages
  sélectionnées.
- GSview 2.3 nécessite Ghostscript version 4.03 - 5.99.
+ GSview 2.4 nécessite Ghostscript version 4.03 - 5.99.
  GSview s'est inspiré du programme Ghostview pour X11 de Tim Theisen.
 2Installation
 ?Installation
@@ -72,11 +72,11 @@ E
  Ensuite, installez
 P
  PM GSview en copiant gvpm.exe, gvpgs.exe,
- gvpmen.dll, gvpmde.dll, gvpmfr.dll, gvpmen.hlp, gvpmde.hlp, gvpmfr.hlp
+ gvpmde.dll, gvpmfr.dll, gvpmen.hlp, gvpmde.hlp, gvpmfr.hlp
  et printer.ini
 W
  GSview pour Windows en copiant gsview32.exe, gsv16spl.exe, gvwgs32.exe,
- gsvw32en.dll, gsvw32de.dll, gsvw32fr.dll, gsviewen.hlp, gsviewde.hlp, gsviewfr.hlp
+ gsvw32de.dll, gsvw32fr.dll, gsviewen.hlp, gsviewde.hlp, gsviewfr.hlp
  et printer.ini
 E
  dans le répertoire `C:\gstools\gsview`.
@@ -167,11 +167,11 @@ E
  puis d'éditer ce fichier
  en supprimant toutes les entrées sauf :
   [Options]
-  Version=2.3
-  GSversion=503
+  Version=2.4
+  GSversion=510
   Configured=1
-  GhostscriptDLL=E:\GSTOOLS\gs5.03\gsdll32.dll
-  GhostscriptInclude=E:\GSTOOLS\gs5.03;E:\GSTOOLS\gs5.03\fonts
+  GhostscriptDLL=E:\GSTOOLS\gs5.10\gsdll32.dll
+  GhostscriptInclude=E:\GSTOOLS\gs5.10;E:\GSTOOLS\gs5.10\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="C:\psfonts"
  Lorsqu'un utilisateur lance GSview, son fichier INI sera utilisé normalement.
  La première fois que GSview est exécuté ou
@@ -891,7 +891,7 @@ P
  gvpm.ini.
 E
  La liste standard des types d'imprimantes et des résolutions est
- extraite de la distribution de Ghostscript version 5.03 et il
+ extraite de la distribution de Ghostscript version 5.10 et il
  est possible qu'elle soit incomplète.
 
  Pour imprimer un document sans l'afficher à l'écran, ouvrez le document
@@ -2150,4 +2150,3 @@ E
  qu'ils effacent les fichiers indiqués dans la ligne de commande,
  il est plus sûr d'utiliser gswin32.exe (Win32), gswin32c.exe
  (Win32 console) ou gsos2.exe (OS/2).
-

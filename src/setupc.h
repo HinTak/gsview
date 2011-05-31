@@ -19,6 +19,10 @@
 
 #define MAXSTR 256
 
+#ifdef _MSC_VER
+#define _export
+#endif
+
 extern char szAppName[];
 
 /* flags for items we need to do */

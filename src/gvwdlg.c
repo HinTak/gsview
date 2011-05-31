@@ -289,7 +289,9 @@ show_about()
 #endif
 }
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 /* information about document dialog box */
 BOOL CALLBACK _export
 InfoDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -436,7 +438,9 @@ change_sounds(void)
 #endif
 }
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 BOOL CALLBACK _export
 SoundDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
@@ -568,7 +572,9 @@ SoundDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 }
 
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 BOOL CALLBACK _export
 PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
@@ -681,7 +687,9 @@ int i;
 }
 
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 BOOL CALLBACK _export
 BoundingBoxDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -763,7 +771,9 @@ DLGPROC lpfnBoundingBoxProc;
 }
 
 /* dialog box for warning PSTOEPS warning and auto/manual bbox selection */
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 BOOL CALLBACK _export
 PSTOEPSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
@@ -815,7 +825,9 @@ DLGPROC lpProcPSTOEPS;
 
 
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 /* input string dialog box */
 BOOL CALLBACK _export
 InstallDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -910,7 +922,9 @@ enable_alpha(HWND hDlg)
 
 
 /* dialog box for display settings */
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 BOOL CALLBACK _export
 DisplaySettingsDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
@@ -1070,7 +1084,9 @@ display_settings()
 }
 
 /* dialog box for selecting PDF2PS options */
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 BOOL CALLBACK _export
 PDF2PSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
@@ -1144,7 +1160,9 @@ char twbuf[TWLENGTH];
 int twend;
 
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 BOOL CALLBACK _export
 TextDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {

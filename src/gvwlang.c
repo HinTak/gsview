@@ -2,6 +2,9 @@
 /* put some code in the DLL to keep the linker happy */
 
 #include <windows.h>
+#ifdef _MSC_VER
+#define _export
+#endif
 
 #ifdef __WIN32__
 BOOL WINAPI _export

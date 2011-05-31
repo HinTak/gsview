@@ -7,7 +7,7 @@ Print to printer device context using mswindll/os2dll device.
 
 Update interval
 
-Win32 accelerators (VK_F1, VK_BACK) while button has mouse capture.
+Win32 accelerators (VK_F1, VK_F3, VK_BACK) while button has mouse capture.
 
 You can use spaces in the Ghostscript path, but I can't figure out
 how to create a Win95 shortcut to "-Ic:\gs tools" using Progman DDE.
@@ -30,9 +30,8 @@ Give useful error message if printer unknown.
 
 Fix /Orientation landscape/seascape values to be more consistent. 
 
-Document that -dFIXEDMEDIA in GS_OPTIONS will screw up GSview.
-
 OS/2 "Look for additional fonts" accepts too few characters.
+Fixed - test it.
 
 Why is redisplay of an existing modified file so slow?
 Suspect memory leak.
@@ -42,5 +41,7 @@ Forward/backward button using history.
 Goto Page: Add edit field linked to listbox (or change to combobox)
   to allow page number to be typed in.
 
+Reverse print order.
 
-
+Remember extracted text between uses.
+

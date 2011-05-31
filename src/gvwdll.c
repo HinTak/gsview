@@ -58,7 +58,9 @@ gs_load_dll_cleanup(void)
 }
 
 /* display error message for LoadLibrary */
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 void
 load_error(HMODULE hmodule , const char *dllname)
 {
@@ -638,3 +640,4 @@ int code = -1;
 	return code;
 }
 
+
