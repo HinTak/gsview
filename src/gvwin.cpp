@@ -1416,7 +1416,7 @@ RECT rect;
 			      break;
 			  if (psfile.name[0] != '\0') {
 			      option.print_to_file = FALSE;
-			      gsview_print(FALSE);
+			      gsview_print(FALSE);	/* Print */
 			  }
 			  dfclose();
 			  break;
@@ -1427,7 +1427,7 @@ RECT rect;
 			      break;
 			  if (psfile.name[0] != '\0') {
 			      option.print_to_file = TRUE;
-			      gsview_print(FALSE);
+			      gsview_print(TRUE);	/* Convert */
 			  }
 			  dfclose();
 			  break;

@@ -1,4 +1,15 @@
 ----------------------
+Version 3.3 2000-07-01
+----------------------
+All:
+  "gsview /F filename" now uses "File | Convert".
+
+Win32:
+  Fixed yet another bug in Windows GDI printing, introduced
+  in 3.2.  This bug caused the output to be horizontally
+  shifted if black & white or colour rendering was used.
+
+----------------------
 Version 3.2 2000-06-30
 ----------------------
 All:

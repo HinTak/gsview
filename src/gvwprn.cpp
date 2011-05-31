@@ -2999,10 +2999,12 @@ gsview_print(BOOL convert)
 	option.print_method = PRINT_GS;
     
     if (convert) {
-	nHelpTopic = IDS_TOPICCONVERT;
-	if (DialogBoxParam(hlanguage, "ConvertDlgBox", hwndimg, 
-	    NewDeviceDlgProc, (LPARAM)TRUE) != IDOK)
-	    return;
+	if (!print_silent) {
+	    nHelpTopic = IDS_TOPICCONVERT;
+	    if (DialogBoxParam(hlanguage, "ConvertDlgBox", hwndimg, 
+		NewDeviceDlgProc, (LPARAM)TRUE) != IDOK)
+		return;
+	}
     }
     else {
 	nHelpTopic = IDS_TOPICPRINT;

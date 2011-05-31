@@ -1048,7 +1048,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 				  break;
 			      if (psfile.name[0] != '\0') {
 				  option.print_to_file = FALSE;
-				  gsview_print(FALSE);
+				  gsview_print(FALSE);	/* print */
 			      }
 			      dfclose();
 			      break;
@@ -1059,7 +1059,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 				  break;
 			      if (psfile.name[0] != '\0') {
 				  option.print_to_file = TRUE;
-				  gsview_print(FALSE);
+				  gsview_print(TRUE);	/* convert */
 			      }
 			      dfclose();
 			      break;

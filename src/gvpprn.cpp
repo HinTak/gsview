@@ -1379,16 +1379,18 @@ gsview_print(BOOL convert)
     char progname[MAXSTR];
     
     if (psfile.name[0] == '\0') {
-	    gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
-	    return;
+	gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
+	return;
     }
     
 
     if (convert) {
-	nHelpTopic = IDS_TOPICCONVERT;
-	if (WinDlgBox(HWND_DESKTOP, hwnd_frame, DeviceDlgProc, 
-		hlanguage, IDD_CONVERT, (MPARAM)TRUE) != DID_OK)
-	    return;
+	if (!print_silent) {
+	    nHelpTopic = IDS_TOPICCONVERT;
+	    if (WinDlgBox(HWND_DESKTOP, hwnd_frame, DeviceDlgProc, 
+		    hlanguage, IDD_CONVERT, (MPARAM)TRUE) != DID_OK)
+		return;
+	}
     }
     else {
 	if (print_silent) {
