@@ -9,10 +9,16 @@
 %   reconstruction of the document's words and an approximation of the words'
 %   bounding rectangles.
 
-% Last modified on Sat Feb  5 21:00:00 AEST 2000 by rjl
+% Last modified on Fri Jan  9 21:20:00 AEST 2004 by rjl
+%      modified on Sat Feb  5 21:00:00 AEST 2000 by rjl
 %      modified on Fri Oct  2 17:13:53 PDT 1998 by mcjones
 %      modified on Thu Jan 25 15:24:37 PST 1996 by deutsch
 %      modified on Wed May  3 15:41:30 PDT 1995 by birrell
+
+% Modified by rjl
+%   For Ghostscript 6 or later.
+%   Change ashow, widthshow and awidthshow to call show for each character.
+%   Add xshow, yshow, xyshow.
 
 % Restrictions:
 %
@@ -21,8 +27,9 @@
 %   jobs might be sensitive to this distinction.  In this case, you'd
 %   need to make "redef" create a new operator.  For example, "odef".
 %
-%   This library reports characters rendered by show, ashow, showwidth,
-%   ashowwidth and kshow.  The characters are reported even if they would
+%   This library reports characters rendered by show, ashow, widthshow,
+%   awidthshow, kshow, xshow, yshow and xyshow.  
+%   The characters are reported even if they would
 %   be invisible in final hardcopy.  This could happen, for example, if the
 %   characters get clipped, or if they get overprinted, or if they are the
 %   same color as their background, or if the font's glyph make no marks.
@@ -576,6 +583,74 @@ pstotextLocalDict begin		% following stuff is private
 
 /kshow.temp (X) def		% scratch space for kshow
 
+% Output from groff 1.08 sometimes uses ashow to show letters from 
+% two separate words, with the offset being used to add the space.
+% Implement 'awidthshow' and friends as calls to 'show' to catch this.
+
+/pstotext_awidthshow { % cx cy char ax ay string --
+  //kshow.temp
+  0 1 3 index length 1 sub
+  {
+    2 index exch get
+    1 index 0 2 index put
+    1 index show
+    4 index 4 index rmoveto
+    5 index eq
+    { 6 index 6 index rmoveto } if
+  } for
+  pop pop pop pop pop pop pop
+} def
+
+/pstotext_xshow { % string numarray --
+  //kshow.temp
+  0 1 4 index length 1 sub
+  {
+    currentpoint 2 index
+    6 index exch get
+    4 index 0 2 index put pop
+    3 index show 
+    moveto
+    % set char width from array
+    2 index exch get
+    0 rmoveto
+  } for
+  pop pop pop
+} def
+
+/pstotext_yshow { % string numarray --
+  //kshow.temp
+  0 1 4 index length 1 sub
+  {
+    currentpoint 2 index
+    6 index exch get
+    4 index 0 2 index put pop
+    3 index show
+    moveto
+    % set char height from array
+    2 index exch get
+    0 exch rmoveto
+  } for
+  pop pop pop
+} def
+
+/pstotext_xyshow { % string numarray --
+  //kshow.temp
+  0 1 4 index length 1 sub
+  {
+    currentpoint 2 index
+    6 index exch get
+    4 index 0 2 index put pop
+    3 index show
+    moveto
+    % set char width and height from array
+    dup add
+    2 index 1 index get exch
+    3 index exch 1 add get
+    rmoveto
+  } for
+  pop pop pop
+} def
+
 % Output inverse of initial currentmatrix, for possible use by postprocessor.
 (QI ) print
 matrix currentmatrix matrix invertmatrix
@@ -600,17 +675,37 @@ ifelse
   //systemdict /pstotextLocalDict get /report get
   exec } bind redef
 
-/ashow { {3 copy ashow pop}
-  //systemdict /pstotextLocalDict get /report get
-  exec pop pop } bind redef
+%/ashow { {3 copy ashow pop}
+%  //systemdict /pstotextLocalDict get /report get
+%  exec pop pop } bind redef
 
-/widthshow { {4 copy widthshow pop}
-  //systemdict /pstotextLocalDict get /report get
-  exec pop pop pop } bind redef
+% Implement as call to show to catch PostScript that uses
+% these to show letters from separate words.
+/ashow {
+   0 0 -1 6 3 roll
+  //systemdict /pstotextLocalDict get /pstotext_awidthshow get exec 
+} bind redef
 
-/awidthshow { {6 copy awidthshow pop}
-  //systemdict /pstotextLocalDict get /report get 
-  exec 5 {pop} repeat } bind redef
+/widthshow {
+   0 0 3 -1 roll
+  //systemdict /pstotextLocalDict get /pstotext_awidthshow get exec 
+} bind redef
+
+/awidthshow {
+  //systemdict /pstotextLocalDict get /pstotext_awidthshow get exec 
+} bind redef
+
+/xshow {
+  //systemdict /pstotextLocalDict get /pstotext_xshow get exec 
+} bind redef
+
+/yshow {
+  //systemdict /pstotextLocalDict get /pstotext_yshow get exec 
+} bind redef
+
+/xyshow {
+  //systemdict /pstotextLocalDict get /pstotext_xyshow get exec 
+} bind redef
 
 /kshow {			% stack: proc string
   exch //systemdict /pstotextLocalDict get exch /kshow.proc exch put

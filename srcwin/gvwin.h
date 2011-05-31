@@ -313,6 +313,20 @@ extern PSBBOX bbox;
 extern TCHAR registration_name[MAXSTR];
 extern unsigned int registration_receipt;
 
+/* Display dialog boxes on the first display, instead of centred.
+ * Display full screen on the last display.
+ * So we need to find out where the display are located...
+ */
+typedef struct tagDISPLAY_INFO {
+    int left;
+    int top;
+    int width;
+    int height;
+} DISPLAY_INFO;
+extern int number_of_displays; /* number of active displays */
+extern DISPLAY_INFO first_display;
+extern DISPLAY_INFO last_display;
+
 /* PRINT_GDI */
 extern int print_gdi_width;
 extern int print_gdi_height;

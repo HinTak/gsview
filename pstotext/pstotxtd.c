@@ -7,9 +7,14 @@
 /* Copyright (C) 1995, Digital Equipment Corporation.         */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Sat Mar 11 09:16:00 AEST 2000 by rjl      */
+/* Last modified on Fri Jan  9 21:11:00 AEST 2004 by rjl      */
+/*      modified on Sat Mar 11 09:16:00 AEST 2000 by rjl      */
 /*      modified on Fri Oct 16 16:30:54 PDT 1998 by mcjones   */
 /*      modified on Thu Nov 16 13:33:13 PST 1995 by deutsch   */
+
+/* Modifications by rjl
+ *  Fixed compiler warnings.
+ */
 
 #ifndef MSDOS
 #ifdef _Windows
@@ -82,7 +87,7 @@ static int bboxes = FALSE;
 static int explicitFiles = 0; /* count of explicit file arguments */
 
 void usage(void) {
-  fprintf(stderr, "pstotext 1.8h of 02 June 2001\n");
+  fprintf(stderr, "pstotext 1.8i of 2003-01-08\n");
   fprintf(stderr, "Copyright (C) 1995-1998, Digital Equipment Corporation.\n");
   fprintf(stderr, "Modified by Ghostgum Software Pty Ltd for Ghostscript 6.0.\n");
   fprintf(stderr, "Comments to {mcjones,birrell}@pa.dec.com.\n\n");
@@ -416,7 +421,8 @@ static int cleanup(void) {
 }
 
 static void handler(int code) {
-  int status = cleanup();
+  int status = code; /* suppress unreference 'code' warning */
+  status = cleanup();
   if (status!=0)
     exit(status);
   exit(2);
@@ -543,7 +549,7 @@ static void do_it(char *path) {
 
   if( gs==NULL ) {perror(cmd); cleanup(); exit(1);}
 
-  while (TRUE) {
+  while (gs != NULL) {   /* while TRUE */
     char line[LINELEN];
     char *pre, *word, *post;
     int llx, lly, urx, ury;
@@ -579,7 +585,7 @@ static void do_it(char *path) {
   if (status!=0) exit(status);
 }
 
-main(argc, argv) int argc; char *argv[]; {
+int main(int argc, char *argv[]) {
   int i;
   char *arg;
   cmd = argv[0];

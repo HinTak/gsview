@@ -7,22 +7,26 @@
 # makefile created by
 # Russell Lang, 1998-10-09
 # Updated for MSVC++ 7, 2003-03-09
+# Updated for MSVC++ 7.1 2004-01-09
 
 
 # Edit VCVER and DEVBASE as required
 !ifndef VCVER
-VCVER=7
+VCVER=71
 !endif
 
 !ifndef DEVBASE
 !if $(VCVER) <= 5
-DEVBASE=E:\Program Files\devstudio
+DEVBASE=C:\Program Files\devstudio
 !endif
 !if $(VCVER) == 6
-DEVBASE=E:\Program Files\Microsoft Visual Studio
+DEVBASE=C:\Program Files\Microsoft Visual Studio
 !endif
 !if $(VCVER) == 7
-DEVBASE=E:\Program Files\Microsoft Visual Studio .NET
+DEVBASE=C:\Program Files\Microsoft Visual Studio .NET
+!endif
+!if $(VCVER) == 71
+DEVBASE=C:\Program Files\Microsoft Visual Studio .NET 2003
 !endif
 !endif
 
@@ -37,24 +41,26 @@ CDEBUG=/Zi
 
 # For Intel x386 use pstotxt3
 DEST=pstotxt3
-CFLAGS=/D__WIN32__
+DEFS=/D__WIN32__
+CFLAGS=$(DEFS) /W4
 
 # For Alpha, uncomment the following two lines
 #DEST=pstotxta
-#CFLAGS=/D__WIN32__ /DDECALPHA
+#DEFS=/D__WIN32__ /DDECALPHA
+#CFLAGS=$(DEFS) /W4
 
 
 !if $(VCVER) <= 5
 COMPBASE = $(DEVBASE)\vc
-RCOMP="$(DEVBASE)\sharedide\bin\rc" -D_MSC_VER $(CFLAGS)
+RCOMP="$(DEVBASE)\sharedide\bin\rc" -D_MSC_VER $(DEFS)
 !endif
 !if $(VCVER) == 6
 COMPBASE = $(DEVBASE)\vc98
-RCOMP="$(DEVBASE)\common\msdev98\bin\rc" -D_MSC_VER $(CFLAGS)
+RCOMP="$(DEVBASE)\common\msdev98\bin\rc" -D_MSC_VER $(DEFS)
 !endif
-!if $(VCVER) == 7
+!if (($(VCVER) == 7) || ($(VCVER) == 71))
 COMPBASE = $(DEVBASE)\vc7
-RCOMP="$(DEVBASE)\Vc7\bin\rc" -D_MSC_VER $(CFLAGS)
+RCOMP="$(DEVBASE)\Vc7\bin\rc" -D_MSC_VER $(DEFS)
 !endif
 COMPDIR = $(COMPBASE)\bin
 INCDIR = $(COMPBASE)\include
@@ -117,4 +123,5 @@ clean:
 	-del mkrch.exe
 	-del mkrch.ilk
 	-del mkrch.pdb
+	-del vc*.pdb
 

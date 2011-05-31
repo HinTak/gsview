@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2004, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -793,6 +793,10 @@ copy_for_printer(FILE *pcfile, BOOL convert)
 	    for (; *p; p++)
 		if (*p == '\\')
 		   fputc('/', pcfile);
+		else if ((*p == '(') || (*p == ')')) {
+		   fputc('\\', pcfile);
+		   fputc(*p, pcfile);
+		}
 		else
 		   fputc(*p, pcfile);
 	    fputs(") run\n", pcfile);

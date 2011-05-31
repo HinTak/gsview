@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2004, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -48,9 +48,9 @@ char *p, *s;
 
     p = filename;
     for (s = psfile_name(&psfile); *s; s++) {
-	*p++ = *s;
-	if (*s == '\\')
+	if ((*s == '\\') || (*s == '(') || (*s == ')'))
 	    *p++ = '\\';
+	*p++ = *s;
     }
     *p = '\0';
 
@@ -788,9 +788,9 @@ CDSC *dsc = psfile.dsc;
 BOOL reverse = psfile.page_list.reverse;
     p = filename;
     for (s = psfile_name(&psfile); *s; s++) {
-	*p++ = *s;
-	if (*s == '\\')
+	if ((*s == '\\') || (*s == '(') || (*s == ')'))
 	    *p++ = '\\';
+	*p++ = *s;
     }
     *p = '\0';
 

@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* $Id: dscparse.h,v 1.14 2003/08/08 23:58:14 ghostgum Exp $ */
+/* $Id: dscparse.h,v 1.15 2004/01/08 09:15:41 ghostgum Exp $ */
 /* Interface for the DSC parser. */
 
 #ifndef dscparse_INCLUDED
@@ -237,7 +237,7 @@ typedef struct CDSCMEDIA_S {
     CDSCBBOX *mediabox;	/* Used by GSview for PDF MediaBox */
 } CDSCMEDIA;
 
-#define CDSC_KNOWN_MEDIA 11
+#define CDSC_KNOWN_MEDIA 25
 extern const CDSCMEDIA dsc_known_media[CDSC_KNOWN_MEDIA];
 
 typedef struct CDSCCTM_S { /* used for %%ViewingOrientation */

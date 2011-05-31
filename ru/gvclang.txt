@@ -248,12 +248,12 @@ WP
  каталог GSview, затем отредактируйте его так, чтобы удалить все записи
  кроме:
 
-  [GSview-4.5]
-  Version=4.5
-  GSversion=811
+  [GSview-4.6]
+  Version=4.6
+  GSversion=813
   Configured=1
-  GhostscriptDLL=e:\gs\gs8.11\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs8.11\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs8.13\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs8.13\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
 
  Когда пользователь запускает GSview, то обычно используется его

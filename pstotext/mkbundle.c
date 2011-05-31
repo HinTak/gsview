@@ -1,5 +1,6 @@
 /* mkbundle.c */
 /* Created by Russell Lang, 1996-10-11 */
+/* Updated by Russell Lang, 2004-01-09 to fix compiler warnings */
 
 #include <stdio.h>
 #include <string.h>
@@ -27,7 +28,7 @@ char *s, *d;
     }
     strcpy(inbuf, argv[1]);
     strtok(inbuf, ".");
-    fputs("char *", hdrfile);
+    fputs("const char *", hdrfile);
     fputs(inbuf, hdrfile);
     fputs("[] = {\n", hdrfile);
     while ( fgets(inbuf, sizeof(inbuf)-1, psfile) ) {

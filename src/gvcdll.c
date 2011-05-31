@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2004, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -27,6 +27,7 @@ IMAGE image;		/* display device */
 VIEW view;
 PENDING pending;	/* operations that must wait */
 int execute_code;	/* return code from gsapi_run_string_continue */
+BOOL in_pstotext = FALSE;
 
 
 /* forward declarations */
@@ -441,6 +442,8 @@ const char *p;
 		    filename[i++] = '\\';
 		    filename[i++] = '\\';
 		}
+		if ((*p == '(') || (*p == ')'))
+		    filename[i++] = '\\';
 		filename[i++] = *p;
 	    }
 	    filename[i] = '\0';
@@ -462,6 +465,8 @@ const char *p;
 		    filename[i++] = '\\';
 		    filename[i++] = '\\';
 		}
+		if ((*p == '(') || (*p == ')'))
+		    filename[i++] = '\\';
 		filename[i++] = *p;
 	    }
 	    filename[i] = '\0';
@@ -619,8 +624,12 @@ d_pdf_page(int pagenum)
 	if (!code) {
 	    /* local/global bug in GS, see note above */
 	    code = gs_printf("currentglobal true setglobal\n");
-	    if (!code)
-	        code = gs_printf("<< >> //systemdict /setpagedevice get exec\n");
+	    if (!code) {
+		if (in_pstotext)
+		    code = gs_printf("<< >> setpagedevice\n");
+		else
+		    code = gs_printf("<< >> //systemdict /setpagedevice get exec\n");
+	    }
 	    if (!code) 	/* local/global bug in GS, see note above */
 		code = gs_printf("setglobal\n");
 	    if (code)
@@ -1005,8 +1014,12 @@ gs_process_prepare_input(PENDING *ppend)
 	    view.img->ignore_sync = TRUE;		/* ignore next sync */
 	    if (!code) 	/* local/global bug in GS, see note above */
 		code = gs_printf("currentglobal true setglobal\n");
-	    if (!code)
-		code = gs_printf("<< >> //systemdict /setpagedevice get exec\n");
+	    if (!code) {
+		if (in_pstotext)
+		    code = gs_printf("<< >> setpagedevice\n");
+		else
+		    code = gs_printf("<< >> //systemdict /setpagedevice get exec\n");
+	    }
 	    if (!code) 	/* local/global bug in GS, see note above */
 		code = gs_printf("setglobal\n");
 	}
@@ -1874,6 +1887,7 @@ int real_orientation;
     if (load_pstotext())
 	return 1;
   
+    in_pstotext = TRUE;
     if (option.pstotext == IDM_PSTOTEXTCORK - IDM_PSTOTEXTMENU - 1)
         pstotextSetCork(pstotextInstance, TRUE);
 
@@ -1882,6 +1896,7 @@ int real_orientation;
     /* open output file */
     if ( (pstotextOutfile = gp_open_scratch_file(szScratch, psfile.text_name, "w")) == (FILE *)NULL) {
 	gs_addmess("Can't open temporary file for text extraction\n");
+        in_pstotext = FALSE;
 	unload_pstotext();
 	return 1;
     }
@@ -1930,12 +1945,14 @@ int real_orientation;
     if ((angle==270) && (code = send_pstotext_prolog(pstotextModule, 2)) != 0 ) {
 	gs_addmess("Error processing rot270 prolog\n");
 	gs_error_code(code);
+        in_pstotext = FALSE;
 	unload_pstotext();
 	return code;
     }
     if ((angle==90) && (code = send_pstotext_prolog(pstotextModule, 3)) != 0 ) {
 	gs_addmess("Error processing rot90 prolog\n");
 	gs_error_code(code);
+        in_pstotext = FALSE;
 	unload_pstotext();
 	return code;
     }
@@ -1943,6 +1960,7 @@ int real_orientation;
     if ( (code = send_pstotext_prolog(pstotextModule, 1)) != 0 ) {
 	gs_addmess("Error processing ocr prolog\n");
 	gs_error_code(code);
+        in_pstotext = FALSE;
 	unload_pstotext();
 	return code;
     }
@@ -1960,17 +1978,20 @@ int real_orientation;
 	if ( (code = pdf_head()) != 0 ) {
 	    gs_addmess("PDF prolog failed\n");
 	    gs_error_code(code);
+	    in_pstotext = FALSE;
 	    unload_pstotext();
 	    return code;
 	}
 	if ( psfile.dsc == (CDSC *)NULL ) {
 	    gs_addmess("Couldn't get PDF page count\n");
+	    in_pstotext = FALSE;
 	    unload_pstotext();
 	    return 1;
 	}
 	if ( (code = d_init1()) != 0) {
 	    gs_addmess("Error creating GSview dictionary\n");
 	    gs_error_code(code);
+	    in_pstotext = FALSE;
 	    unload_pstotext();
 	    return 1;
 	}
@@ -1980,6 +2001,7 @@ int real_orientation;
 	while (!pending.abort && !pending.unload && i <= (int)psfile.dsc->page_count) {
 	    if ( (code = d_pdf_page(i)) != 0 ) {
 		gs_error_code(code);
+		in_pstotext = FALSE;
 		unload_pstotext();
 		return code;
 	    }
@@ -2000,6 +2022,7 @@ int real_orientation;
 	if ((code = pdf_trailer()) != 0) {
 	    gs_addmess("Error in PDF trailer\n");
 	    gs_error_code(code);
+	    in_pstotext = FALSE;
 	    unload_pstotext();
 	    return code;
 	}
@@ -2007,6 +2030,7 @@ int real_orientation;
     else {
 	if (dfreopen() != 0) {
 	    gs_addmess("File changed or missing\n");
+	    in_pstotext = FALSE;
 	    unload_pstotext();
 	    return 1;
 	}
@@ -2025,6 +2049,7 @@ int real_orientation;
 	    if (code) {
 		dfclose();
 	        gs_error_code(code);
+		in_pstotext = FALSE;
 		unload_pstotext();
 		unlink(psfile.text_name);
 		psfile.text_name[0] = '\0';
@@ -2063,6 +2088,7 @@ int real_orientation;
     fclose(pstotextOutfile);
 
     /* unload pstotext DLL */
+    in_pstotext = FALSE;
     unload_pstotext();
 
     /* if successful, restart extract or find */

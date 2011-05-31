@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2004, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* $Id: dscparse.c,v 1.30 2003/10/17 11:34:13 ghostgum Exp $ */
+/* $Id: dscparse.c,v 1.32 2004/01/11 08:15:14 ghostgum Exp $ */
 
 /*
  * This is a DSC parser, based on the DSC 3.0 spec, 
@@ -102,6 +102,7 @@ dsc_private float dsc_get_real(const char *line, unsigned int len,
 dsc_private void dsc_unknown(CDSC *dsc); 
 dsc_private GSBOOL dsc_is_section(char *line);
 dsc_private int dsc_parse_pages(CDSC *dsc);
+dsc_private int dsc_parse_feature(CDSC *dsc);
 dsc_private int dsc_parse_bounding_box(CDSC *dsc, CDSCBBOX** pbbox, int offset);
 dsc_private int dsc_parse_float_bounding_box(CDSC *dsc, CDSCFBBOX** pfbbox, int offset);
 dsc_private int dsc_parse_orientation(CDSC *dsc, unsigned int *porientation, 
@@ -166,6 +167,22 @@ const CDSCMEDIA dsc_known_media[CDSC_KNOWN_MEDIA] = {
     {"Legal", 612, 1008, 0, NULL, NULL},
     {"Letter", 612, 792, 0, NULL, NULL},
     {"Note", 612, 792, 0, NULL, NULL},
+    /* Other standard sizes */
+    {"A0", 2384, 3370, 0, NULL, NULL},
+    {"A1", 1684, 2384, 0, NULL, NULL},
+    {"A2", 1190, 1684, 0, NULL, NULL},
+    /* Other non-standard sizes */
+    {"AnsiA", 612, 792, 0, NULL, NULL},  /* 8.5 x 11" */
+    {"AnsiB", 792, 1224, 0, NULL, NULL}, /* 11 x 17" */
+    {"AnsiC", 1224, 1584, 0, NULL, NULL}, /* 17 x 22" */
+    {"AnsiD", 1584, 2448, 0, NULL, NULL}, /* 22 x 34" */
+    {"AnsiE", 2448, 3168, 0, NULL, NULL}, /* 34 x 44" */
+    {"ArchA", 648, 864, 0, NULL, NULL},  /* 9 x 12" */
+    {"ArchB", 864, 1296, 0, NULL, NULL}, /* 12 x 18" */
+    {"ArchC", 1296, 1728, 0, NULL, NULL}, /* 18 x 24" */
+    {"ArchD", 1728, 2592, 0, NULL, NULL}, /* 24 x 36" */
+    {"ArchE", 2592, 3456, 0, NULL, NULL}, /* 36 x 48" */
+    {"ArchF", 2160, 3024, 0, NULL, NULL}, /* 30 x 42" */
     {NULL, 0, 0, 0, NULL, NULL}
 };
 
@@ -1325,9 +1342,13 @@ dsc_read_macbin(CDSC *dsc)
 	(dsc->macbin->data_begin + dsc->macbin->data_length + 127 ) & ~127;
     dsc->macbin->resource_length = dsc_get_bigendian_dword(line+87);
 
+    /* A MacBinary file has been seen that doesn't have the resource
+     * fork padded out to 128 bytes. Just make sure that the resource 
+     * doesn't extend beyond EOF.
+     */
     if (dsc->file_length && 
 	(((dsc->macbin->resource_begin + dsc->macbin->resource_length 
-	  + 127) & ~127) > dsc->file_length)) {
+	  /* + 127 */ ) /* & ~127 */ ) > dsc->file_length)) {
 	return CDSC_ERROR;
     }
 
@@ -2896,6 +2917,9 @@ dsc_scan_setup(CDSC *dsc)
 	/* ignore Begin/EndFeature, apart form making sure */
 	/* that they are matched. */
 	dsc->begin_feature_count++;
+	/* Look for "*PageSize name" where name is known */
+	if (dsc_parse_feature(dsc))
+	    return CDSC_ERROR;
     }
     else if (IS_DSC(line, "%%EndFeature")) {
 	dsc->id = CDSC_ENDFEATURE;
@@ -3774,6 +3798,67 @@ dsc_parse_page(CDSC *dsc)
     return CDSC_OK;
 }
 
+
+dsc_private int
+dsc_parse_feature(CDSC *dsc)
+{
+    char *p;
+    unsigned int i;
+    char feature_name[MAXSTR];
+    char feature_value[MAXSTR];
+    char *fn;
+    char *fv;
+
+    feature_name[0] = '\0';
+    feature_value[0] = '\0';
+    p = dsc->line + 15; /* %%BeginFeature: */
+    fn = dsc_copy_string(feature_name, sizeof(feature_name), 
+	p, dsc->line_length-15, &i);
+    if (fn == NULL)
+	return CDSC_ERROR;
+    p += i;
+    fv = dsc_copy_string(feature_value, sizeof(feature_value), 
+	p, dsc->line_length-15-i, &i);
+
+    if ((dsc_stricmp(feature_name, "*PageSize") == 0) &&
+	(fv != NULL) &&
+	(dsc->scan_section == scan_setup)) {
+	/* If this media was not specified in the header and the name
+	 * is known to us, add it to the media list
+	 */
+	int found = 0;
+	int media_index = -1;
+	for (i=0; i<dsc->media_count; i++) {
+	    if (dsc->media[i]->name && 
+		(dsc_stricmp(feature_value, dsc->media[i]->name) == 0))
+		found = 1;		/* don't add it again */
+	}
+        for (i=0; dsc_known_media[i].name; i++) {
+	    if (dsc_stricmp(feature_value, dsc_known_media[i].name)==0) {
+		media_index = i;	/* we know this paper size */
+		break;
+	    }
+	}
+
+	if (!found && (media_index >= 0)) {
+	    /* This media type was not included in the header where
+	     * it should have been.  Add it to the media list now.
+	     */
+	    CDSCMEDIA lmedia;
+	    lmedia.name = feature_value;
+	    lmedia.width = dsc_known_media[i].width;
+	    lmedia.height = dsc_known_media[i].height;
+	    lmedia.weight = 80.0;
+	    lmedia.colour = NULL;
+	    lmedia.type = NULL;
+	    lmedia.mediabox = NULL;
+	    if (dsc_add_media(dsc, &lmedia))
+		return CDSC_ERROR;	/* out of memory */
+	}
+    }
+	
+    return CDSC_OK;
+}
 
 
 /* DSC error reporting */

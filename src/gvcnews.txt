@@ -1,4 +1,31 @@
 ---------------------------
+Version 4.6 2004-01-11
+---------------------------
+All:
+  Fix "Text Extract" for PDF files.  Changes in 4.31 to avoid some 
+  local/global allocation problems in setpagedevice caused problems
+  with text extraction.
+
+  Allow '(' or ')' inside a filename, which was interfering with the
+  SAFER code.
+
+  Modified pstotext to recognise excessive space in ashow
+  as separate words.
+
+  Allow MacBinary files that don't have the resource fork
+  padded to 128 bytes.
+
+  If "%%BeginFeature: *PageSize name" is used and media was not specified 
+  in the header and we know it by name, add it to the media list.
+
+Win:
+  When printing and converting, Page Offset and device properties
+  are now saved again.  This was broken by the [] fix in 4.42 beta.
+
+  Recognise multiple monitor configuration.  Centre dialog boxes
+  on the first display.  Display full screen on the last display.
+
+---------------------------
 Version 4.5 2003-10-18
 ---------------------------
 All:

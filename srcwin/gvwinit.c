@@ -19,6 +19,8 @@
 /* Initialisation routines for Windows GSview */
 #include "gvwin.h"
 
+static void init_displays(void);
+
 /* Open/Save File Dialog Box */
 OPENFILENAME ofn;
 TCHAR szOFilename[MAXSTR];	/* filename for OFN */
@@ -548,6 +550,8 @@ int badarg;
 
 	if (is_win95 || is_winnt)
 	    args.multithread = TRUE;
+
+        init_displays();
 
 	badarg = parse_argv(&args, argc, argv);
 	parse_args(&args);
@@ -2199,4 +2203,72 @@ CfgChildDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     return FALSE;
 }
 
+
+/* In case we have multiple monitors, get the size of the first and 
+ * last displays.  This allows us to put dialog boxes on the the 
+ * first display (instead of centred and split across two displays),
+ * and to put the fullscreen window on the last display.
+ */ 
+typedef BOOL (WINAPI
+	*LUENUMDISPLAYDEVICES)(HDC,DWORD,PDISPLAY_DEVICE,DWORD);
+
+static void 
+init_displays(void)
+{
+    DISPLAY_DEVICE dd;
+    DEVMODE dm;
+    int dev = 0; /* device index */
+ 
+    /* Get the function's address. We could use the new platform SDK, but 
+     * this code also works with the old one and on older Windozes (NT/95)
+     */
+    HINSTANCE huser32=LoadLibrary("user32.dll");
+    LUENUMDISPLAYDEVICES pEnumDisplayDevices=0;
+    memset(&dd, 0, sizeof(dd));
+    dd.cb = sizeof(dd);
+
+    /* Defaults if we don't have or support multiple monitors */
+    number_of_displays = 1;
+    first_display.left   = last_display.left = 0;
+    first_display.top    = last_display.top = 0;
+    first_display.width  = last_display.width = GetSystemMetrics(SM_CXSCREEN);
+    first_display.height = last_display.height = GetSystemMetrics(SM_CYSCREEN);
+
+    if (huser32!=NULL)
+	pEnumDisplayDevices=(LUENUMDISPLAYDEVICES)
+		GetProcAddress(huser32,"EnumDisplayDevicesA");
+
+    /* If we support multiple monitors, get dimensions of first and last */
+    if (pEnumDisplayDevices!=NULL) {
+	number_of_displays = 0;
+	while ((*pEnumDisplayDevices)(0, dev, &dd, 0)) {
+	    if (!(dd.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER)) {
+		memset(&dm, 0, sizeof(dm));
+		dm.dmSize = sizeof(dm);
+		if ((dd.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) && 
+		    (EnumDisplaySettings(dd.DeviceName, 
+			ENUM_CURRENT_SETTINGS, &dm) == TRUE)) {
+		    EnumDisplaySettings(dd.DeviceName, 
+			ENUM_REGISTRY_SETTINGS, &dm);
+		    last_display.left = dm.dmPosition.x;
+		    last_display.top = dm.dmPosition.y;
+		    last_display.width =  dm.dmPelsWidth;
+		    last_display.height = dm.dmPelsHeight;
+		    if (number_of_displays == 0) {
+			first_display.left   = last_display.left;
+			first_display.top    = last_display.top;
+			first_display.width  = last_display.width;
+			first_display.height = last_display.height;
+		    }
+		    number_of_displays++;
+		}
+	    }
+	    dev++;
+	}
+    }
+    if (number_of_displays == 0)
+	number_of_displays = 1;
+    if (huser32 != NULL)
+	FreeLibrary(huser32);
+}
 

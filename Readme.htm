@@ -9,9 +9,9 @@
 GSview Readme
 </h1>
 <p>
-GSview 4.5 PostScript previewer.  Needs Ghostscript 7.04 or later.
+GSview 4.6 PostScript previewer.  Needs Ghostscript 7.04 or later.
 <br>
-Release date: 2003-10-18
+Release date: 2004-01-11
 </p>
 <h2>
 Table of contents
@@ -75,15 +75,19 @@ Features include:
    work with Ghostscript 4.03 - 6.99.
 </ul>
 <p>
-Changes in version 4.5:
+Changes in version 4.6:
 </p>
 <ul>
- <li> Fix Page Offset when printing.
- <li> Fix slow behaviour when displaying on remote X11 server.
- <li> Fix crash in X11 version when the LANG environment variable is not set.
- <li> Redisplay files correctly after they are changed.
- <li> Find pstoedit using registry information.
- <li> A few other minor bug fixes.
+ <li> Fix text extract for PDF files.
+ <li> Text extract (pstotext) now recognises excessive space within
+   text as being separate words.  Recognises a few more ways of
+   showing text.
+ <li> Fix problem with forgetting page offset and device settings.
+ <li> When displaying Full Screen on Windows with multiple monitors, 
+   display full screen on the last monitor.  When dialogs are centred
+   on the display, put them on the first monitor.
+ <li> Use pagesize from <tt>%%BeginFeature: *PageSize</tt> if no other
+   page size is given.
 </ul>
 <p>
 GSview was written by Russell Lang at Ghostgum Software Pty Ltd.
@@ -100,25 +104,25 @@ First uninstall any previous versions of GSview.
 Win32
 </h3>
 <p>
-  Obtain GSview (gsv45w32.exe) from 
+  Obtain GSview (gsv46w32.exe) from 
 </p>
   <blockquote>
-    <a href="http://www.cs.wisc.edu/~ghost/gsview/get45.htm">
-    http://www.cs.wisc.edu/~ghost/gsview/get45.htm
+    <a href="http://www.cs.wisc.edu/~ghost/gsview/get46.htm">
+    http://www.cs.wisc.edu/~ghost/gsview/get46.htm
     </a>
   </blockquote>
 <p>
-  Obtain AFPL Ghostscript 8.11 (gs811w32.exe) from
+  Obtain AFPL Ghostscript 8.13 (gs813w32.exe) from
 </p>
   <blockquote>
-    <a href="http://www.cs.wisc.edu/~ghost/doc/AFPL/get811.htm">
-    http://www.cs.wisc.edu/~ghost/doc/AFPL/get811.htm
+    <a href="http://www.cs.wisc.edu/~ghost/doc/AFPL/get813.htm">
+    http://www.cs.wisc.edu/~ghost/doc/AFPL/get813.htm
     </a>
   </blockquote>
 <p>
   First install the AFPL Ghostscript self extracting archive 
-  gs811w32.exe (or a later version if available)
-  Then install the GSview self extracting archive gsv45w32.exe.
+  gs813w32.exe (or a later version if available)
+  Then install the GSview self extracting archive gsv46w32.exe.
   Run GSview.
 </p>
 <h4>
@@ -153,26 +157,26 @@ Win32 location details
 OS/2
 </h3>
 <p>
-  Obtain GSview (gsv45os2.zip) from
+  Obtain GSview (gsv46os2.zip) from
 </p>
   <blockquote>
-    <a href="http://www.cs.wisc.edu/~ghost/gsview/get45.htm">
-    http://www.cs.wisc.edu/~ghost/gsview/get45.htm
+    <a href="http://www.cs.wisc.edu/~ghost/gsview/get46.htm">
+    http://www.cs.wisc.edu/~ghost/gsview/get46.htm
     </a>
   </blockquote>
 <p>
-  Obtain AFPL Ghostscript 8.11 (gs811os2.zip) from
+  Obtain AFPL Ghostscript 8.13 (gs813os2.zip) from
 </p>
   <blockquote>
-    <a href="http://www.cs.wisc.edu/~ghost/doc/AFPL/get811.htm">
-    http://www.cs.wisc.edu/~ghost/doc/AFPL/get811.htm
+    <a href="http://www.cs.wisc.edu/~ghost/doc/AFPL/get813.htm">
+    http://www.cs.wisc.edu/~ghost/doc/AFPL/get813.htm
     </a>
   </blockquote>
 
 <p>
   <a href="http://www.info-zip.org/pub/infozip/">Unzip</a>
   GSview to a temporary directory, change to the gsview2 subdirectory,
-  place gs811os2.zip (or a later version) in the same directory, 
+  place gs813os2.zip (or a later version) in the same directory, 
   and then run os2setup.exe.
 </p>
  
@@ -254,9 +258,9 @@ which should be included in recent GNU/Linux distributions.
 If you don't have the ghostscript shared object, 
 you must first install Ghostscript, then the additional shared
 object files.
-These are available from
- <a href="ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/AFPL/gs811/linux/">
- ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/AFPL/gs811/linux/</a>
+These may be available from
+ <a href="ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/AFPL/gs813/linux/">
+ ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/AFPL/gs813/linux/</a>
 </p>
 
 <p>
@@ -333,9 +337,9 @@ Type 'nmake'
 To compile GSview for X11/Unix you need gcc and the GTK+ 1.2 toolkit.
 Unzip the sources as follows to convert the line endings:
 <pre>
-  unzip -aa gsv45src.zip
-  unzip -o gsv45src.zip "gsview-4.5/src/binary/*"
-  cd gsview-4.5
+  unzip -aa gsv46src.zip
+  unzip -o gsv46src.zip "gsview-4.6/src/binary/*"
+  cd gsview-4.6
   cp srcunx/unx.mak Makefile
   make
 </pre>

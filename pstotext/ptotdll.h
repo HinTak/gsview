@@ -1,12 +1,17 @@
 /* Copyright (C) 1996, Digital Equipment Corporation.         */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Sun Oct 13 08:46:00 PDT 1996 by mcjones   */
+/* Last modified on Fri Jan 09 21:17:00 AEST 2004 by rjl   */
+/*      modified on Sun Oct 13 08:46:00 PDT 1996 by mcjones   */
 /*      modified on Mon Jul 29 14:29:00 UTC 1996 by rjl       */
 
 /* Interface to ptotdll.c, which is based on OCR_PS.m3, a module of
    the Virtual Paper project at the DEC Systems Research Center:
    http://www.research.digital.com/SRC/virtualpaper/  */
+
+/* Modifications by rjl
+ *   Fixed compiler warnings
+ */
 
 #ifndef _PTOTDLL_H
 #define _PTOTDLL_H
@@ -43,8 +48,9 @@ int DLLEXPORT pstotextFilter(
   /* input parameters: */
   void *instance,
   char *instr,
-  /* output parameters: */
-  char **pre, char **word, char **post,
+  /* output parameters:  */
+  /* rjl: "char **" made const in 1.9 */
+  const char **pre, const char **word, const char **post,
   int *llx, int *lly, int *urx, int *ury
 );
 /* Process *instr, a null-terminated line of GS ocr.ps output, and

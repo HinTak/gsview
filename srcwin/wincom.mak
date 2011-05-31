@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2004, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -643,7 +643,7 @@ viewonlydist:
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .$(D)setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2003 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2004 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview$(D)LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win32. > dialog.txt
 	echo GSview uses Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
@@ -756,7 +756,7 @@ gsv$(GSVIEW_VERSION)w32.exe: distcopy gsv$(GSVIEW_VERSION)w32.zip
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .$(D)setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2003 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2004 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview$(D)LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win32. > dialog.txt
 	echo GSview uses Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt

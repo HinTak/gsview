@@ -1,24 +1,23 @@
 /* Copyright (C) 1995-1998, Digital Equipment Corporation.    */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Wed Oct 28 08:42:15 PST 1998 by mcjones   */
+/* Last modified on Fri Jan 09 21:19:00 AEST 2004 by rjl   */
+/*      modified on Fri Jan 09 08:21:00 AEST 2004 by rjl       */
+/*      modified on Wed Oct 28 08:42:15 PST 1998 by mcjones   */
 /*      modified on Sun Jul 28 00:00:00 UTC 1996 by rjl       */
+
+/* Modifications by rjl
+ *   Fixed compiler warnings
+ */
 
 /* This module is based on OCR_PS.m3, a module of the Virtual Paper
    project at the DEC Systems Research Center:
    http://www.research.digital.com/SRC/virtualpaper/ */
 
-#ifdef VMS
-#include <stdlib.h>
-#endif
-
 #include <math.h>
-#include "ptotdll.h"
-
 #include <string.h>
-#ifdef NEED_PROTO
 #include <stdlib.h>
-#endif
+#include "ptotdll.h"
 
 #ifndef NULL
 #define NULL 0
@@ -49,7 +48,7 @@ typedef unsigned GlyphIndex;
 
 #define FIRSTSpecialGlyphs (LastISOLatin1+1)
 #define LASTSpecialGlyphs (LastISOLatin1+28)
-static char *SpecialGlyphs[] = {
+static const char *SpecialGlyphs[] = {
     "''",    /* quotedblright */
     "S\237", /* Scaron */
     "+",     /* dagger */
@@ -99,7 +98,7 @@ static char *SpecialGlyphs[] = {
 
 #define FIRSTTTSpecialGlyphs (FirstTT1+130)
 #define LASTTTSpecialGlyphs (FirstTT1+159)
-static char *TTSpecialGlyphs[] = {
+static const char *TTSpecialGlyphs[] = {
     "'",     /* quotesinglbase */
     "f",     /* florin */
     "''",    /* quotdblbase */
@@ -134,7 +133,7 @@ static char *TTSpecialGlyphs[] = {
 
 #define FIRSTDvipsGlyphs FirstDvips
 #define LASTDvipsGlyphs (FirstDvips+127)
-static char *DvipsGlyphs[] = {
+static const char *DvipsGlyphs[] = {
   /* 00x */
     "\\Gamma", "\\Delta", "\\Theta", "\\Lambda",
     "\\Xi", "\\Pi", "\\Sigma", "\\Upsilon",
@@ -195,7 +194,7 @@ static char *DvipsGlyphs[] = {
 
 #define FIRSTCorkSpecialGlyphs FirstDvips
 #define LASTCorkSpecialGlyphs (FirstDvips+0277)
-static char *CorkSpecialGlyphs[] = {
+static const char *CorkSpecialGlyphs[] = {
   /* 000 - accents for lowercase letters */
     "`",
     "'",
@@ -369,7 +368,6 @@ typedef struct {
   /* state_metrics: */ int metrics_m, metrics_i;
 } T;
 
-#ifdef NEED_PROTO
 static int ReadChar(char **instr);
 static void UnreadChar(char **instr);
 static int ReadInt(char **instr);
@@ -382,15 +380,14 @@ static int ParseFont(T *t, char *instr);
 static int ParseMetrics(T *t, char *instr);
 static int ParseMetricsMore(T *t, char *instr);
 static void Itransform(T *t, double *x1, double *y1, double x0, double y0);
-static void Output(
-  T *t, char **pre, char **word, int *llx, int *lly, int *urx, int *ury);
+static void Output(T *t, const char **pre, const char **word, 
+  int *llx, int *lly, int *urx, int *ury);
 static BOOLEAN SameDirection(double x0, double y0, double x1, double y1);
 static int ParseString(
-  T *t, char *instr, char **pre, char **word, char **post, 
+  T *t, char *instr, const char **pre, const char **word, const char **post, 
   int *llx, int *lly, int *urx, int *ury);
-#endif
 
-int DLLEXPORT pstotextInit(instance) void **instance; {
+int DLLEXPORT pstotextInit(void **instance) {
   T *t;
   int i;
 
@@ -441,13 +438,13 @@ int DLLEXPORT pstotextInit(instance) void **instance; {
   return 0;
 }
 
-int DLLEXPORT pstotextSetCork(instance, value) void *instance; int value; {
+int DLLEXPORT pstotextSetCork(void *instance, int value) {
   T *t = (T *)instance;
   t->dvipsIsCork = value;
   return 0;  
 }
 
-int DLLEXPORT pstotextExit(instance) void *instance; {
+int DLLEXPORT pstotextExit(void *instance) {
   T *t = (T *)instance;
   free(t->metrics);
   free(t->encoding);
@@ -456,17 +453,17 @@ int DLLEXPORT pstotextExit(instance) void *instance; {
   return 0;
 }
 
-static int ReadChar(instr) char **instr; {
+static int ReadChar(char **instr) {
   int c = **(unsigned char**)instr;
   (*instr)++;
   return c;
 }
 
-static void UnreadChar(instr) char **instr; {
+static void UnreadChar(char **instr) {
   (*instr)--;
 }
 
-static int ReadInt(instr) char **instr; {
+static int ReadInt(char **instr) {
   int i = 0;
   int sign = 1;
   int c;
@@ -477,7 +474,7 @@ static int ReadInt(instr) char **instr; {
   return i*sign;
 }
 
-static long ReadLong(instr) char **instr; {
+static long ReadLong(char **instr) {
   long i = 0;
   int sign = 1;
   int c;
@@ -488,13 +485,13 @@ static long ReadLong(instr) char **instr; {
   return i*sign;
 }
 
-static int ParseInverseTransform(t, instr) T *t; char *instr; {
+static int ParseInverseTransform(T *t, char *instr) {
   int i;
   for (i = 0; i<6; i++) t->itransform[i] = ReadLong(&instr) / 100.0;
   return 0;
 }
 
-static int ParseEncoding(t, instr) T *t; char *instr; {
+static int ParseEncoding(T *t, char *instr) {
   /* Parse first line of QE directive. */
   int e = ReadInt(&instr);
   int n = ReadInt(&instr);
@@ -523,7 +520,7 @@ static int ParseEncoding(t, instr) T *t; char *instr; {
   return 0;
 }
 
-static int ParseEncodingMore(t, instr) T *t; char *instr; {
+static int ParseEncodingMore(T *t, char *instr) {
   /* Parse subsequent line of QE directive. */
   Encoding enc = (*t->encoding)[t->encoding_e];
   int i, tooSparse;
@@ -540,6 +537,7 @@ static int ParseEncodingMore(t, instr) T *t; char *instr; {
     /* Some applications build the encoding vector incrementally.  If
        this one doesn't have at least the lower-case letters, we augment
        it with ISOLatin1. */
+    tooSparse = 0;
     for (i = 'a'; i<='z'; i++)
       tooSparse = (*enc)[i] == NonstandardGlyph;
     if (tooSparse)
@@ -554,12 +552,12 @@ static int ParseEncodingMore(t, instr) T *t; char *instr; {
 #define GuessAscend 0.9
 #define GuessDescend -0.3
 
-static void ReadPair(/*out*/ x, /*out*/ y, instr) double *x, *y; char **instr; {
+static void ReadPair(double /*out*/ *x, /*out*/ double *y, char **instr) {
   *x = ReadLong(instr) / 100.0;
   *y = ReadLong(instr) / 100.0;
 }
 
-static int ParseFont(t, instr) T *t; char *instr; {
+static int ParseFont(T *t, char *instr) {
   /* Parse QF directive. */
   int n = ReadInt(&instr), i;
   Metrics mt;
@@ -614,7 +612,7 @@ static int ParseFont(t, instr) T *t; char *instr; {
   return 0;
 }
 
-static int ParseMetrics(t, instr) T *t; char *instr; {
+static int ParseMetrics(T *t, char *instr) {
   /* Parse first line of QM directive. */
   int m = ReadInt(&instr), i;
   Metrics mt;
@@ -646,7 +644,7 @@ static int ParseMetrics(t, instr) T *t; char *instr; {
   return 0;
 }
 
-static int ParseMetricsMore(t, instr) T *t; char *instr; {
+static int ParseMetricsMore(T *t, char *instr) {
   /* Parse subsequent line of QM directive. */
   int i;
   Metrics mt = (*t->metrics)[t->metrics_m];
@@ -672,16 +670,14 @@ static int ParseMetricsMore(t, instr) T *t; char *instr; {
   return 0;
 }
 
-static void Itransform(t, x1, y1, x0, y0) T *t; double *x1, *y1, x0, y0; {
+static void Itransform(T *t, double *x1, double *y1, double x0, double y0) {
 /* Set (*x1, *y1) to (t->itransform) * (x0, y0). */
   *x1 = t->itransform[0]*x0 + t->itransform[2]*y0 + t->itransform[4];
   *y1 = t->itransform[1]*x0 + t->itransform[3]*y0 + t->itransform[5];
 }
 
-static void Output(t, pre, word, llx, lly, urx, ury)
-  T *t;
-  char **pre, **word;
-  int *llx, *lly, *urx, *ury; {
+static void Output(T *t, const char **pre, const char **word, 
+    int *llx, int *lly, int *urx, int *ury) {
   /* Output the next word. */
   double x0, y0, x1, y1, x2, y2, x3, y3;
   long blx, bly, toprx, topry, mid;
@@ -699,10 +695,10 @@ static void Output(t, pre, word, llx, lly, urx, ury)
   x2 = t->x0 + f->tx; y2 = t->y0 + f->ty;
   x3 = t->x1 + f->tx; y3 = t->y1 + f->ty;
 
-  blx = ceil(MIN(MIN(MIN(x0, x1), x2), x3));
-  bly = ceil(MAX(MAX(MAX(y0, y1), y2), y3)); /* *** should this be floor? PMcJ 981002 */
-  toprx = floor(MAX(MAX(MAX(x0, x1), x2), x3));
-  topry = floor(MIN(MIN(MIN(y0, y1), y2), y3)); /* *** should this be ceil? PMcJ 981002 */
+  blx = (long)ceil(MIN(MIN(MIN(x0, x1), x2), x3));
+  bly = (long)ceil(MAX(MAX(MAX(y0, y1), y2), y3)); /* *** should this be floor? PMcJ 981002 */
+  toprx = (long)floor(MAX(MAX(MAX(x0, x1), x2), x3));
+  topry = (long)floor(MIN(MIN(MIN(y0, y1), y2), y3)); /* *** should this be ceil? PMcJ 981002 */
 
   if (blx!=toprx && bly!=topry) {
 
@@ -727,9 +723,9 @@ static void Output(t, pre, word, llx, lly, urx, ury)
 
     /* transform device units to default PostScript units */
     Itransform( t, &x1, &y1, (double)blx, (double)bly);
-    blx = floor(x1); bly = floor(y1);
+    blx = (long)floor(x1); bly = (long)floor(y1);
     Itransform( t, &x1, &y1, (double)toprx, (double)topry);
-    toprx = ceil(x1); topry = ceil(y1);
+    toprx = (long)ceil(x1); topry = (long)ceil(y1);
 
     if (blx < toprx) {
 	*llx = blx; 
@@ -753,17 +749,15 @@ static void Output(t, pre, word, llx, lly, urx, ury)
   t->lbuf = 0;
 }
 
-static BOOLEAN SameDirection(x0, y0, x1, y1) double x0, y0, x1, y1; {
-  return y0 == 0.0 && y1 == 0.0 && x0*x1 > 0.0
-      || x0 == 0.0 && x1 == 0.0 && y0*y1 > 0.0
-      || x0 * y1 == x1 * y0;
+static BOOLEAN SameDirection(double x0, double y0, double x1, double y1) {
+  return (y0 == 0.0 && y1 == 0.0 && x0*x1 > 0.0)
+      || (x0 == 0.0 && x1 == 0.0 && y0*y1 > 0.0)
+      || (x0 * y1 == x1 * y0);
 }
 
-static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
-  T *t;
-  char *instr;
-  char **pre, **word, **post;
-  int *llx, *lly, *urx, *ury; {
+static int ParseString(T *t, char *instr, 
+  const char **pre, const char **word, const char **post,
+  int *llx, int *lly, int *urx, int *ury) {
   /* Parse QS directive. */
 #define spaceTol 0.3 /* fraction of average character width to signal word break */
   char buf[1000];
@@ -774,12 +768,12 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
   double x0, y0, x1, y1, xsp, ysp, dx, dy, maxx, maxy;
 
 #define SetBuf() \
-  do { \
+  { \
   strncpy(t->buf, buf, l); \
   t->lbuf = l; \
   t->f = n; \
   t->x0 = x0; t->y0 = y0; t->x1 = x1; t->y1 = y1; \
-  } while(0)
+  }
 
   n = ReadInt(&instr); /* index in "t->font" */
   f = (*t->font)[n];
@@ -824,13 +818,13 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
       l++;
     }
     else if (glyph <= LASTSpecialGlyphs) {
-      char *str = SpecialGlyphs[glyph-FIRSTSpecialGlyphs];
+      const char *str = SpecialGlyphs[glyph-FIRSTSpecialGlyphs];
       int lstr = strlen(str);
       strncpy(&buf[l], str, lstr);
       l += lstr;
     }
     else if (glyph <= LastDvips) {
-      char *str; int lstr; char tempstr[2];
+      const char *str; int lstr; char tempstr[2];
       if (t->dvipsIsCork) {
         if (glyph <= LASTCorkSpecialGlyphs)
           str = CorkSpecialGlyphs[glyph-FIRSTCorkSpecialGlyphs];
@@ -839,7 +833,7 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
         else if (glyph == FIRSTCorkSpecialGlyphs+0377)
           str = "\337";
         else {
-          tempstr[0] = glyph-FIRSTCorkSpecialGlyphs; tempstr[1] = '\0';
+          tempstr[0] = (char)(glyph-FIRSTCorkSpecialGlyphs); tempstr[1] = '\0';
           str = &tempstr[0];
         }
       }
@@ -864,14 +858,14 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
         buf[l] = (char)(glyph - FirstTT1); l++;
       }
       else {
-        char *str = TTSpecialGlyphs[glyph-FIRSTTTSpecialGlyphs];
+        const char *str = TTSpecialGlyphs[glyph-FIRSTTTSpecialGlyphs];
         int lstr = strlen(str);
         strncpy(&buf[l], str, lstr);
         l += lstr;
       }
     }
     else if (glyph <= LastOldDvips) {
-      char *str = DvipsGlyphs[glyph-FirstOldDvips];
+      const char *str = DvipsGlyphs[glyph-FirstOldDvips];
       int lstr = strlen(str);
       strncpy(&buf[l], str, lstr);
       l += lstr;
@@ -913,9 +907,9 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
       dy = y0 - t->y1;
       maxx = spaceTol * xsp;
       maxy = spaceTol * ysp;
-      if (dx*dx + dy*dy < maxx*maxx + maxy*maxy
-          || t->y1 == y0 && t->x0 <= t->x1 && t->x0 <= x0 && x0 <= t->x1
-         && SameDirection(t->x1-t->x0, t->y1-t->y0, x1-x0, y1-y0)) {
+      if ((dx*dx + dy*dy < maxx*maxx + maxy*maxy)
+          || ((t->y1 == y0 && t->x0 <= t->x1 && t->x0 <= x0 && x0 <= t->x1)
+         && SameDirection(t->x1-t->x0, t->y1-t->y0, x1-x0, y1-y0))) {
         if (t->lbuf+l >= sizeof(t->buf)) {
           Output(t, pre, word, llx, lly, urx, ury);
           *post = "";
@@ -939,11 +933,9 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
   return 0;
 }
 
-int DLLEXPORT pstotextFilter(instance, instr, pre, word, post, llx, lly, urx, ury)
-  void *instance;
-  char *instr;
-  char **pre, **word, **post;
-  int *llx, *lly, *urx, *ury; {
+int DLLEXPORT pstotextFilter(void *instance, char *instr, 
+  const char **pre, const char **word, const char **post, 
+  int *llx, int *lly, int *urx, int *ury) {
   T *t = (T *)instance;
   int c;
   *word = NULL;

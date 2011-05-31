@@ -125,6 +125,9 @@ BOOL quitnow = FALSE;		/* Used to cause exit from nested message loops */
 int percent_done;		/* percentage of document processed */
 int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
 
+int number_of_displays = 1; /* number of active displays */
+DISPLAY_INFO first_display;
+DISPLAY_INFO last_display;
 
 #if (WINVER < 0x0400)
 /* Windows 4.0 scroll bar extras */
@@ -2571,14 +2574,17 @@ static BOOL class_registered;
 		class_registered = TRUE;
 	    }
 
+/* OLD */
+/*
 	    width = GetSystemMetrics(SM_CXSCREEN);
 	    height = GetSystemMetrics(SM_CYSCREEN);
+*/
 
 	    fullscreen = TRUE;
 	    hwnd_fullscreen = CreateWindow(class_name, szAppName,
 		      WS_POPUP,
-		      0, 0, 
-		      width, height,
+		      last_display.left, last_display.top, 
+		      last_display.width, last_display.height,
 		      NULL /* parent = desktop */, 
 		      NULL, phInstance, (void FAR *)NULL);
 

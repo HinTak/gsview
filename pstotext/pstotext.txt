@@ -1,7 +1,7 @@
 =================================================================== 
-pstotext.txt    5 February 2000
+pstotext.txt    9 Jan 2004
 =================================================================== 
-pstotext 1.8h - PostScript text extractor.  Requires Ghostscript.
+pstotext 1.9 - PostScript text extractor.  Requires Ghostscript.
 
 The files pstotxt1.dll (Win16), pstotxt2.dll (OS/2) pstotxt3.dll (Win32), and
 pstotext.zip (sources) constitute the pstotext package, which was written by
@@ -9,8 +9,8 @@ Paul McJones and Andrew Birrell of Digital Equipment Corporation's Systems
 Research Center.  These files are copyright by Digital Equipment Corporation. 
 You may use them subject to the attached END USER LICENSE AGREEMENT.
 
-The source files are available as pstotext.zip in the GSview source
-distribution, or directly from the authors:
+The source files are available in the GSview source distribution, 
+or directly from the authors:
     http://www.research.digital.com/SRC/virtualpaper/pstotext.html
 
 You can build DLL and command-line versions of pstotext for various
@@ -19,7 +19,8 @@ platforms from the sources:
     Unix         Makefile
     Win16        pstotxt1.mak
     OS/2         pstotxt2.mak
-    Win32        pstotxt3.mak
+    Win32        pstotxt3.mak (Borland C++ 4.5)
+    Win32        pstotxtv.mak (Microsoft Visual Studio)
     VMS          descrip.mms
 
 pstotext was developed as a part of the Virtual Paper system, which is
@@ -37,6 +38,14 @@ You can contact the authors at <mcjones@pa.dec.com> and
 For Windows and OS, contact gsview@ghostgum.com.au;
 for VMS, contact <goathunter@PROCESS.COM>.
 
+Version 1.9 is a modification of 1.8h to recognise excessive space in 
+"ashow" as being a word separator, as found output from groff 1.08. 
+Also fixed widthshow, awidthshow and added xshow, yshow and xyshow.  
+Uses ANSI prototypes.  These are now required, not optional.
+Fixes a number of compiler warnings.
+Note that neither of the original authors still work at DEC/Compaq/HP.
+2004-01-09 by Russell Lang at Ghostgum Software Pty Ltd.
+
 Version 1.8h is a modification of the original 1.8 to allow 
 operation with Aladdin Ghostscript 6.0, to add -output to 
 Windows and OS/2 executables, and to insert line breaks
@@ -44,6 +53,7 @@ and form feeds is pstotext output.  Modifications made
 2000-07-15 by Russell Lang at Ghostgum Software Pty Ltd.
 main.c changed to use mkstemp not tempnam for Unix, 
 2000-06-02 by Russell Lang at Ghostgum Software Pty Ltd.
+
 
                       ==========================
                       END USER LICENSE AGREEMENT

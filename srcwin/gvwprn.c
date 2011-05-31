@@ -337,6 +337,7 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		      profile_write_string(prf, section, "Xoffset", buf);
 		      GetDlgItemTextA(hDlg, PROP_YOFFSET, buf, sizeof(buf)-2);
 		      profile_write_string(prf, section, "Yoffset", buf);
+		      profile_close(prf);
 		    }
 		    free((char *)propitem);
 		    EndDialog(hDlg, TRUE);
@@ -1514,8 +1515,8 @@ NewDeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    profile_read_string(prf, section, "Options", "", 
 			    buf, sizeof(buf)-2);
 		    SetDlgItemTextA(hDlg, DEVICE_OPTIONS, buf);
+	            profile_close(prf);
 		}
-	        profile_close(prf);
 		return FALSE;
 	    case DEVICE_RES:
 		/* don't have anything to do */

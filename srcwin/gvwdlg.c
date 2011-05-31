@@ -23,15 +23,22 @@
 void
 centre_dialog(HWND hwnd)
 {
-    // centre dialog on screen
+    /* centre dialog on screen */
+    int left = 0;
+    int top = 0;
     int width = GetSystemMetrics(SM_CXFULLSCREEN);
     int height = GetSystemMetrics(SM_CYFULLSCREEN);
     RECT rect;
+    if (number_of_displays > 1) {
+	/* Put it on the first display */
+	left = first_display.left;
+	top = first_display.top;
+	width = first_display.width;
+	height = first_display.height;
+    }
     GetWindowRect(hwnd, &rect);
-    if (width / height >= 2)
-	width = width / 2;	/* dual monitors */
-    MoveWindow(hwnd, (width - (rect.right - rect.left))/2,
-	    (height - (rect.bottom - rect.top))/2,
+    MoveWindow(hwnd, left+(width - (rect.right - rect.left))/2,
+	    top+(height - (rect.bottom - rect.top))/2,
 	    (rect.right - rect.left),
 	    (rect.bottom - rect.top), FALSE);
 }
