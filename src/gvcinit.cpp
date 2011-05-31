@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -109,7 +109,6 @@ init_options(void)
     option.drawmethod = IDM_DRAWDEF;
     option.unit = IDM_UNITPT;
     option.unitfine = 0;
-    option.quick_open = TRUE;
     option.pstotext = IDM_PSTOTEXTNORM - IDM_PSTOTEXTMENU - 1;
     option.settings = TRUE;
     option.button_show = TRUE;
@@ -134,8 +133,8 @@ init_options(void)
     option.zoom_xdpi = 300;
     option.zoom_ydpi = 300;
     option.depth = 0;
-    option.alpha_text = 1;
-    option.alpha_graphics = 1;
+    option.alpha_text = 4;
+    option.alpha_graphics = 4;
     option.save_dir = TRUE;
     strcpy(option.printer_device, "djet500");
     strcpy(option.printer_resolution, "300");
@@ -209,7 +208,6 @@ init_check_menu(void)
     check_menu_item(IDM_MEDIAMENU, IDM_MEDIAROTATE, option.media_rotate);
 #if defined(_Windows) || defined(OS2)
     check_menu_item(IDM_OPTIONMENU, IDM_FITPAGE, option.fit_page);
-    check_menu_item(IDM_OPTIONMENU, IDM_QUICK_OPEN, option.quick_open);
 #endif
     check_menu_item(IDM_OPTIONMENU, IDM_SAVESETTINGS, option.settings);
     check_menu_item(IDM_OPTIONMENU, IDM_BUTTONSHOW, option.button_show);
@@ -227,7 +225,7 @@ init_check_menu(void)
 void
 default_gsdll(char *buf)
 {
-    strcpy(buf, "gs");
+    strcpy(buf, "libgs.so");
 }
 
 void
@@ -249,11 +247,7 @@ char *p;
     p = strrchr(buf, '\\');	/* remove trailing gsview */
     if (p)
 	*(++p) = '\0';
-    if (option.gsversion % 100 == 0)
-	sprintf(buf+strlen(buf), "gs%d.%01d", 
-	    option.gsversion / 100, option.gsversion % 100);
-    else
-	sprintf(buf+strlen(buf), "gs%d.%02d", 
+    sprintf(buf+strlen(buf), "gs%d.%02d", 
 	    option.gsversion / 100, option.gsversion % 100);
 }
 

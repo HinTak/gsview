@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -26,14 +26,13 @@ LPBITMAP2
 get_bitmap()
 {
     LPBITMAPINFOHEADER lpBitmap;
-    get_bitmap_hglobal = GlobalAlloc(GHND, sizeof(BITMAPINFOHEADER) + 256*sizeof(RGBQUAD));
+    get_bitmap_hglobal = image_copy_dib(&image);
     if (get_bitmap_hglobal == (HGLOBAL)NULL) {
-	gserror(0, "not enough memory to copy bitmap", MB_ICONEXCLAMATION, SOUND_ERROR);
+	gserror(0, "not enough memory to copy bitmap", 
+		MB_ICONEXCLAMATION, SOUND_ERROR);
 	return NULL;
     }
     lpBitmap = (LPBITMAPINFOHEADER)GlobalLock(get_bitmap_hglobal);
-    (*gsdll.get_bitmap_row)(gsdll.device, lpBitmap, NULL, NULL, 0);
-    (*gsdll.get_bitmap_row)(gsdll.device, NULL, (LPRGBQUAD)(((LPBYTE)lpBitmap) + (int)lpBitmap->biSize), NULL, 0);
     return (LPBITMAP2)lpBitmap;
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -151,7 +151,7 @@ CDSC *dsc = psfile.dsc;
 	    return;
 	}
 
-	if ((gsdll.state != PAGE) && (gsdll.state != IDLE)) {
+	if ((gsdll.state != GS_PAGE) && (gsdll.state != GS_IDLE)) {
 	    gserror(IDS_EPSNOBBOX, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    return;
 	}
@@ -175,33 +175,21 @@ CDSC *dsc = psfile.dsc;
 		gserror(IDS_MUSTUSEPORTRAIT, 0, MB_ICONEXCLAMATION, 0); 
 		return;
 	    }
-#ifndef UNIX
-	    if (gsdll.lock_device && gsdll.device)
-		gsdll.lock_device(gsdll.device, 1);
-#endif
+	    image_lock(view.img);
 	    if ( (pbitmap = (unsigned char *)get_bitmap()) 
 		== (unsigned char *)NULL) {
-#ifndef UNIX
-		if (gsdll.lock_device && gsdll.device)
-		    gsdll.lock_device(gsdll.device, 0);
-#endif
+		    image_unlock(view.img);
 		play_sound(SOUND_ERROR);
 		return;
 	    }
 	    if (scan_dib(&prebmap, pbitmap))
 	 	return;
-#if defined(_Windows) && !defined(EPSTOOL)
-	    /* we have to ask for each row */
-	    prebmap.bits = NULL;
-#endif
 	    devbbox.valid = FALSE;
 	    bbox.valid = FALSE;
 	    scan_bbox(&prebmap, &devbbox);
 	    release_bitmap();
-#ifndef UNIX
-	    if (gsdll.lock_device && gsdll.device)
-		gsdll.lock_device(gsdll.device, 0);
-#endif
+	    image_unlock(view.img);
+
 	    if (devbbox.valid) {
 		bbox.llx = (int)(devbbox.llx / option.xdpi * 72 - 0.5);
 		bbox.lly = (int)(devbbox.lly / option.ydpi * 72 - 0.5);
@@ -1074,10 +1062,6 @@ int lastrow;
 	    code = scan_pbmplus(&prebmap, pbitmap);
 	else {
 	    code = scan_dib(&prebmap, pbitmap);
-#if defined(_Windows) && !defined(EPSTOOL)
-	    /* we have to ask for each row */
-	    prebmap.bits = NULL;
-#endif
 	}
 	if (code)
 	    return code;
@@ -1183,11 +1167,7 @@ int lastrow;
 		    line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (devbbox.ury-1));
 	    }
 	    else {
-#if defined(_Windows) && !defined(EPSTOOL)
-		line = NULL;
-#else
 		return 1;
-#endif
 	    }
 	    /* process each strip */
 	    for (strip = 0; strip < stripsperimage; strip++) {
@@ -1196,10 +1176,6 @@ int lastrow;
 		comp_length[strip] = 0;
 		/* process each line within strip */
 		for (i = 0; i< lastrow; i++) {
-#if defined(_Windows) && !defined(EPSTOOL)
-		    if (prebmap.bits == NULL)
-			gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, devbbox.ury-1-(i+is));
-#endif
 		    if (tiff4 || prebmap.depth==1)
 			get_dib_line(line, preview, prebmap.width, prebmap.depth);
 		    else
@@ -1359,7 +1335,7 @@ int lastrow;
 	    if (use_packbits)
 		tiff_long(comp_length[0], f);
 	    else
-		tiff_long(bwidth, f);
+		tiff_long(bwidth * rowsperstrip, f);
 	}
 	else {
 	    tiff_long(stripsperimage, f);
@@ -1441,8 +1417,11 @@ int lastrow;
 	    for (i=0; i<stripsperimage; i++) {
 		if (use_packbits)
 		    tiff_long(comp_length[i], f);
-		else
-		    tiff_long(bwidth * rowsperstrip, f);
+		else {
+	    	    is = i * rowsperstrip;
+	    	    lastrow = min( rowsperstrip, height - is);
+		    tiff_long(lastrow * bwidth, f);
+		}
 	    }
 	}
 
@@ -1502,11 +1481,7 @@ int lastrow;
 		line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (devbbox.ury-1));
 	}
 	else {
-#if defined(_Windows) && !defined(EPSTOOL)
-	    line = NULL;
-#else
 	    return 1;
-#endif
 	}
         /* process each strip of bitmap */
 	for (strip = 0; strip < stripsperimage; strip++) {
@@ -1515,10 +1490,6 @@ int lastrow;
 	    lastrow = min( rowsperstrip, height - is);
             /* process each row of strip */
 	    for (i = 0; i < lastrow; i++) {
-#if defined(_Windows) && !defined(EPSTOOL)
-		if (prebmap.bits == NULL)
-		    gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, devbbox.ury-1-(i+is));
-#endif
 		if (tiff4 || prebmap.depth==1)
 		    get_dib_line(line, preview, prebmap.width, prebmap.depth);
 		else
@@ -1639,10 +1610,10 @@ int code;
 	}
 
 	/* write DOS EPS binary header */
-	eps_header.id[0] = 0xc5;
-	eps_header.id[1] = 0xd0;
-	eps_header.id[2] = 0xd3;
-	eps_header.id[3] = 0xc6;
+	eps_header.id[0] = (char) 0xc5;
+	eps_header.id[1] = (char) 0xd0;
+	eps_header.id[2] = (char) 0xd3;
+	eps_header.id[3] = (char) 0xc6;
 	eps_header.ps_begin = EPS_HEADER_SIZE;
 	if (calc_bbox) {
 	    fseek(tpsfile, 0, SEEK_END);
@@ -1740,10 +1711,6 @@ write_interchange(FILE *f, unsigned char *pbitmap, BOOL calc_bbox)
 	    code = scan_pbmplus(&prebmap, pbitmap);
 	else {
 	    code = scan_dib(&prebmap, pbitmap);
-#if defined(_Windows) && !defined(EPSTOOL)
-	    /* we have to ask for each row */
-	    prebmap.bits = NULL;
-#endif
 	}
 	if (code)
 	    return code;
@@ -1806,18 +1773,10 @@ write_interchange(FILE *f, unsigned char *pbitmap, BOOL calc_bbox)
 		line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (devbbox.ury-1));
 	}
 	else {
-#if defined(_Windows) && !defined(EPSTOOL)
-	    line = NULL;
-#else
 	    return FALSE;
-#endif
 	}
 	/* process each line of bitmap */
 	for (i = 0; i < (devbbox.ury-devbbox.lly); i++) {
-#if defined(_Windows) && !defined(EPSTOOL)
-	    if (prebmap.bits == NULL)
-	        gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, devbbox.ury-1-i);
-#endif
 	    get_dib_line(line, preview, prebmap.width, prebmap.depth);
 	    if (devbbox.llx)
 		shift_preview(preview, preview_width, devbbox.llx);
@@ -1928,24 +1887,16 @@ scan_bbox(PREBMAP *pprebmap, PSBBOX *devbbox)
 		line = (BYTE *)pprebmap->bits;
 	}
 	else {
-#if defined(_Windows) && !defined(EPSTOOL)
-	    line = NULL;
-#else
 	    devbbox->llx = 0;
 	    devbbox->lly = 0;
 	    devbbox->urx = pprebmap->width;
 	    devbbox->ury = pprebmap->height;
 	    devbbox->valid = FALSE;
 	    return;
-#endif
 	}
         /* process each line of bitmap */
 	for (i = 0; i < pprebmap->height; i++) {
 	    /* get 1bit/pixel line, 0=black, 1=white */
-#if defined(_Windows) && !defined(EPSTOOL)
-	    if (pprebmap->bits == NULL)
-	        gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, i);
-#endif
 	    get_dib_line(line, preview, pprebmap->width, pprebmap->depth);
 	    chline = preview;
 	    ch = 0;
@@ -2155,10 +2106,10 @@ long end;
 	}
 
 	/* write DOS EPS binary header */
-	eps_header.id[0] = 0xc5;
-	eps_header.id[1] = 0xd0;
-	eps_header.id[2] = 0xd3;
-	eps_header.id[3] = 0xc6;
+	eps_header.id[0] = (char) 0xc5;
+	eps_header.id[1] = (char) 0xd0;
+	eps_header.id[2] = (char) 0xd3;
+	eps_header.id[3] = (char) 0xc6;
 	eps_header.ps_begin = EPS_HEADER_SIZE;
 	end = psfile.dsc->begincomments;
 	if (dsc->endcomments)
@@ -2249,10 +2200,6 @@ unsigned long size;
 	    code = scan_pbmplus(&prebmap, pbitmap);
 	else {
 	    code = scan_dib(&prebmap, pbitmap);
-#if defined(_Windows) && !defined(EPSTOOL)
-	    /* we have to ask for each row */
-	    prebmap.bits = NULL;
-#endif
 	}
 	if (code)
 	    return code;
@@ -2389,10 +2336,6 @@ unsigned long size;
 	    code = scan_pbmplus(&prebmap, pbitmap);
 	else {
 	    code = scan_dib(&prebmap, pbitmap);
-#if defined(_Windows) && !defined(EPSTOOL)
-	    /* we have to ask for each row */
-	    prebmap.bits = NULL;
-#endif
 	}
 	if (code)
 	    return code;
@@ -2436,13 +2379,9 @@ unsigned long size;
 		line = (BYTE *)prebmap.bits + ((long)prebmap.bytewidth * (pdevbbox->lly));
 	}
 	else {
-#if defined(_Windows) && !defined(EPSTOOL)
-	    line = NULL;
-#else
 	    free((char *)pbmi);
 	    free(line2);
 	    return 1;
-#endif
 	}
 
 
@@ -2491,10 +2430,6 @@ unsigned long size;
 
 	    /* write bitmap rows */
 	    for (i=0; i<ny; i++) {
-#if defined(_Windows) && !defined(EPSTOOL)
-		if (prebmap.bits == NULL)
-		    gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, i+sy);
-#endif
 	        memmove(line2,  line, prebmap.bytewidth);
 		shift_preview(line2, prebmap.bytewidth, bitoffset);
 		if (activewidth < bytewidth)
@@ -2533,11 +2468,6 @@ unsigned long size;
 
 	/* copy last chunk */
 	for (i=0; i<wy; i++) {
-#if defined(_Windows) && !defined(EPSTOOL)
-	    if (prebmap.bits == NULL)
-		gsdll.get_bitmap_row(gsdll.device, NULL, NULL, &(BYTE *)line, i+sy);
-#endif
-
 	    memmove(line2,  line, prebmap.bytewidth);
 	    shift_preview(line2, prebmap.bytewidth, bitoffset);
 	    if (activewidth < bytewidth)
@@ -2650,10 +2580,10 @@ CDSC *dsc = psfile.dsc;
 	}
 
 	/* write DOS EPS binary header */
-	eps_header.id[0] = 0xc5;	/* "EPSF" with bit 7 set */
-	eps_header.id[1] = 0xd0;
-	eps_header.id[2] = 0xd3;
-	eps_header.id[3] = 0xc6;
+	eps_header.id[0] = (char) 0xc5;	/* "EPSF" with bit 7 set */
+	eps_header.id[1] = (char) 0xd0;
+	eps_header.id[2] = (char) 0xd3;
+	eps_header.id[3] = (char) 0xc6;
 	eps_header.ps_begin = EPS_HEADER_SIZE;
 	fseek(tpsfile, 0, SEEK_END);
 	eps_header.ps_length = ftell(tpsfile);

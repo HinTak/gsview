@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -348,9 +348,17 @@ BOOL parse_correct;
 		}
 		if (multithread)
 		    InitializeCriticalSection(&crit_sec);
+
 		if (multithread)
 		    hmutex_ps = CreateMutex(NULL, FALSE, NULL);
 		if (hmutex_ps == NULL) {
+		    error_message("Failed to create mutex");
+		    multithread = FALSE;
+		}
+
+		if (multithread)
+		    image.hmutex = CreateMutex(NULL, FALSE, NULL);
+		if (image.hmutex == NULL) {
 		    error_message("Failed to create mutex");
 		    multithread = FALSE;
 		}
@@ -436,6 +444,8 @@ BOOL parse_correct;
 	}
 
 	system_colours();
+
+        view_init(&view);
 
 	/* register the child image window class */
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;
@@ -1378,15 +1388,20 @@ EasyConfigureDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	    {
 		int *gsver = (int *)lParam;
 		int i;
+		int n=0;
 		char buf[16];
 	        for (i=1; i<=gsver[0]; i++) {
-		    gsver_string(gsver[i], buf);
-		    /* put string in list box */
-		    SendDlgItemMessage(hDlg, IDC_GSVER, LB_ADDSTRING, 
-			0, (LPARAM)((LPSTR)buf));
+		    if ((gsver[i] >= GS_REVISION_MIN) &&
+		        (gsver[i] <= GS_REVISION_MAX)) {
+			n++;
+			gsver_string(gsver[i], buf);
+			/* put string in list box */
+			SendDlgItemMessage(hDlg, IDC_GSVER, LB_ADDSTRING, 
+			    0, (LPARAM)((LPSTR)buf));
+		    }
 		}
 		SendDlgItemMessage(hDlg, IDC_GSVER, LB_SETCURSEL, 
-		    gsver[0]-1, 0L);
+		    n-1, 0L);
 	    }
 	    return TRUE;
         case WM_COMMAND:
@@ -1467,6 +1482,8 @@ config_easy(BOOL bVerbose)
 	option.configured = TRUE;
 
 	write_profile();
+
+	post_command_line();
 
 	return 0; /* success */
 }
@@ -1820,10 +1837,7 @@ config_wizard(BOOL bVerbose)
 
     gsver = GS_REVISION;
     while (gsver <= GS_REVISION_MAX) {
-	if (gsver % 100 == 0)
-	    sprintf(p, "gs%d.%d", gsver / 100, gsver % 100);
-	else
-	    sprintf(p, "gs%d.%02d", gsver / 100, gsver % 100);
+	sprintf(p, "gs%d.%02d", gsver / 100, gsver % 100);
 
 	strcpy(gsdll, gsdir);
 	strcat(gsdll, "\\bin\\gsdll32.dll");
@@ -1896,11 +1910,7 @@ CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 
 		/* assume that GS is in the adjacent directory */
-		if (option.gsversion % 100 == 0)
-		    sprintf(buf, "%d.%01d", option.gsversion / 100, 
-			option.gsversion % 100);
-		else
-		    sprintf(buf, "%d.%02d", option.gsversion / 100, 
+		sprintf(buf, "%d.%02d", option.gsversion / 100, 
 			option.gsversion % 100);
 		strcpy(gsdir, szExePath);
 		p = strrchr(gsdir, '\\');	/* remove trailing \ */
@@ -1989,10 +1999,7 @@ CfgChildDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    { int ver;
 		      char buf[16];
 		      ver = add_gsver(hwnd, 0);
-		      if (ver % 100 == 0)
-			  sprintf(buf, "%d.%01d", ver / 100, ver % 100);
-		      else
-			  sprintf(buf, "%d.%02d", ver / 100, ver % 100);
+		      sprintf(buf, "%d.%02d", ver / 100, ver % 100);
 		      /* don't use touch IDC_CFG20 - this would be recursive */
 		      gsdir_fix(hwnd, buf);
 		    }

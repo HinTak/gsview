@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -24,6 +24,7 @@
  *   Readme.htm
  *   FILE_ID.DIZ
  *   gvcnews.txt
+ *   gvxspec.txt
  *   language/gvclang.txt
  *   language/gvclang.h    (for Copyright dates)
  *   gvpm.mak
@@ -55,19 +56,15 @@
 #define GSVIEW_ZIP     "win32.zip"
 #else
 #define GSVIEW_ZIP     "os2.zip"
-#define GSVIEW_BASEDIR "gsview"
+#define GSVIEW_BASEDIR "gsview2"
 #endif
 
 
 /* Ghostscript */
-#define GS_PRODUCT  "AFPL or Aladdin Ghostscript"
-#define GS_REVISION_MIN   403
-#ifdef UNIX
-#define GS_REVISION	  550
-#else
-#define GS_REVISION	  600
-#endif
-#define GS_REVISION_MAX   699
+#define GS_PRODUCT  "AFPL Ghostscript"
+#define GS_REVISION_MIN   700
+#define GS_REVISION	  700
+#define GS_REVISION_MAX   799
 
 #ifdef _Windows
 #ifdef DECALPHA

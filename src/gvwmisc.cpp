@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -132,7 +132,7 @@ POINT pt;
 	        SetCursor(NULL);
 		return;
 	    }
-	    if ( (gsdll.device)
+	    if ( (image.open)
 	      && ((hwnd == hwndimg) || (hwnd == hwndimgchild)) ) {
 		if (in_child_client_area()) {
 		    SetCursor(GetClassCursor(hwndimgchild));

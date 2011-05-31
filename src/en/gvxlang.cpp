@@ -82,7 +82,7 @@ MENU_ENTRY menu_en[] = {
   { "/Edit/sep1",     		NULL,   NULL, 		0, "<Separator>" },
   { "/Edit/Convert _Bitmap",    NULL,	GS_CMD,	IDM_CONVERT, NULL },
 */
-  { "/Edit/Save Pixmap as BMP",     	NULL,	GS_CMD,	IDM_PASTETO, NULL },
+  { "/Edit/Save Image as BMP",     	NULL,	GS_CMD,	IDM_PASTETO, NULL },
   { "/Edit/sep2",     		NULL,   NULL, 		0, "<Separator>" },
   { "/Edit/_Add EPS Preview",   NULL,   NULL, 		0, "<Branch>" },
   { "/Edit/Add EPS Preview/_Interchange", NULL,		GS_CMD, IDM_MAKEEPSI, NULL },

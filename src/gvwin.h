@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -43,10 +43,23 @@
 #include "gvcrc.h"
 #ifdef _MSC_VER
 #define DLLEXPORT __declspec(dllimport)
+#define GSDLLEXPORT __declspec(dllimport)
 #endif
-#include "gsdll.h"
 
 #ifndef RC_INVOKED
+
+
+#define P0() void
+#define P1(t1) t1
+#define P2(t1,t2) t1,t2
+#define P3(t1,t2,t3) t1,t2,t3
+#define P4(t1,t2,t3,t4) t1,t2,t3,t4
+#define P5(t1,t2,t3,t4,t5) t1,t2,t3,t4,t5
+#define P6(t1,t2,t3,t4,t5,t6) t1,t2,t3,t4,t5,t6
+
+#include "errors.h"
+#include "iapi.h"
+#include "gdevdsp.h"
 
 #include "dscparse.h"
 #include "gvcfile.h"
@@ -73,7 +86,7 @@ extern HWND hwndspl;	/* window handle of gsv16spl.exe */
 
 #define PROFILE_SIZE 2048
 #define MAXSTR 256	/* maximum file name length and general string length */
-#define DEVICENAME "mswindll"
+#define DEVICENAME "display"
 #define DEFAULT_GSCOMMAND "gswin32.exe"
 #define DEFAULT_RESOLUTION 96.0
 #define DEFAULT_ZOOMRES 300.0
@@ -101,8 +114,6 @@ typedef struct tagPRINTER {
 
 /* bitmap details */
 typedef struct tagBM {
-    int		width;
-    int		height;
     int		scrollx;
     int		scrolly;
     BOOL	changed;	/* if width or height changed by GS */
@@ -175,14 +186,6 @@ typedef struct tagPSFILE {
 	PSBBOX	text_bbox;	    /* bbox of found word */
 } PSFILE;
 
-/* State of GS DLL */
-/* state transitions are between adjacent states only */
-/* except IDLE can be skipped between UNLOADED and BUSY */
-#define UNLOADED 0	/* DLL has not been loaded or has been unloaded */
-#define IDLE     1	/* No input is being sent to DLL */
-#define BUSY     2	/* Input is being sent to DLL */
-#define PAGE     3      /* Waiting at showpage */
-
 /* In the single threaded version, there are three places that
  * process the message loop:
  *  1. Main get message loop in UNLOADED state
@@ -213,41 +216,23 @@ typedef struct tagPENDING {
 
 extern PENDING pending;
 
-
 typedef struct tagGSINPUT {
     unsigned long ptr;
     unsigned long end;
     BOOL seek;
 } GSINPUT;
 
+typedef struct tagGSDLL_INPUT {
+    int	count;
+    int	index;
+    GSINPUT section[5];	/* header, defaults, prolog, setup, page */
+} GSDLL_INPUT;
+
+
 /* main structure with info about the GS DLL */
-typedef struct tagGSDLL {
-	BOOL		valid;		/* true if loaded */
-	HINSTANCE	hmodule;	/* handle to module */
-	int		state;
-	long		revision_number;
-
-	/* pointers to DLL functions */
-	PFN_gsdll_revision	 revision;
-	PFN_gsdll_init		 init;
-	PFN_gsdll_exit		 exit;
-	PFN_gsdll_execute_begin	 execute_begin;
-	PFN_gsdll_execute_cont	 execute_cont;
-	PFN_gsdll_execute_end	 execute_end;
-	PFN_gsdll_lock_device	 lock_device;
-	PFN_gsdll_copy_dib	 copy_dib;
-	PFN_gsdll_copy_palette	 copy_palette;
-	PFN_gsdll_draw		 draw;
-	PFN_gsdll_get_bitmap_row get_bitmap_row;
-	GSDLL_CALLBACK		 callback;
-
-	/* pointer to os2dll or mswindll device */
-	unsigned char	*device;
-
-	int	input_count;
-	int	input_index;
-	GSINPUT input[5];	/* header, defaults, prolog, setup, page */
-} GSDLL;
+#include "cdll.h"
+#include "cimg.h"
+#include "cview.h"
 
 typedef struct tagMATRIX {
    float xx, xy, yx, yy, tx, ty;
@@ -259,8 +244,6 @@ typedef struct tagMEASURE {
    float sx, sy;	/* scaling */
    int unit;		/* IDM_UNITPT .. IDM_UNITCUSTOM */
 } MEASURE;
-
-
 
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
@@ -278,7 +261,6 @@ typedef struct tagOPTIONS {
 	int	unit;
 	BOOL	unitfine;
 	int	pstotext;
-	BOOL	quick_open;
 	BOOL	settings;
 	BOOL	button_show;
 	BOOL	fit_page;
@@ -504,9 +486,9 @@ extern long gsbytes_size;		/* number of bytes for this page */
 extern long gsbytes_done;		/* number of byte written */
 extern OPENFILENAME ofn;
 extern WNDPROC lpfnButtonWndProc;
+extern BOOL quitnow;	/* Used to cause exit from nested message loops */
 extern int percent_done;		/* percentage of document processed */
 extern int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
-extern BOOL ignore_sync;		/* ignore next GSDLL_SYNC */
 extern BOOL fit_page_enabled;		/* next WM_SIZE is allowed to resize window */
 
 extern PROG gsprog;
@@ -553,6 +535,7 @@ extern HANDLE print_gdi_write_handle;
 
 #include "gvcfn.h"    /* common function prototypes */
 #include "gvcbeta.h"  /* common function prototypes */
+#include "gvwgsver.h" /* common function prototypes */
 
 /* in gvwin.c */
 LRESULT CALLBACK _export MenuButtonProc(HWND, UINT, WPARAM, LPARAM);
@@ -580,5 +563,16 @@ BOOL get_portname(char *portname, char *port);
 int gp_printfile(char *filename, char *port);
 extern char not_defined[];
 void start_gvwgs(void);
+
+/* gvwimg.cpp */
+void image_color(unsigned int format, int index, 
+    unsigned char *r, unsigned char *g, unsigned char *b);
+int image_size(IMAGE *img, int new_width, int new_height, int new_raster, 
+    unsigned int new_format, void *pimage);
+HPALETTE image_create_palette(IMAGE *img);
+HGLOBAL image_copy_dib(IMAGE *img);
+void image_draw(IMAGE *img, HDC hdc, int dx, int dy, int wx, int wy,
+    int sx, int sy);
+
 
 #endif

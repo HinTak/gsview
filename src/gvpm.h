@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -43,13 +43,24 @@
 #define NeedFunctionPrototypes 1
 #include "gsvver.h"
 #include "gvcrc.h"
-#include "gsdll.h"
-
 
 #ifndef RC_INVOKED
 
 typedef unsigned short WORD;
 typedef unsigned long DWORD;
+
+
+#define P0() void
+#define P1(t1) t1
+#define P2(t1,t2) t1,t2
+#define P3(t1,t2,t3) t1,t2,t3
+#define P4(t1,t2,t3,t4) t1,t2,t3,t4
+#define P5(t1,t2,t3,t4,t5) t1,t2,t3,t4,t5
+#define P6(t1,t2,t3,t4,t5,t6) t1,t2,t3,t4,t5,t6
+
+#include "errors.h"
+#include "iapi.h"
+#include "gdevdsp.h"
 
 #include "dscparse.h"
 
@@ -71,7 +82,7 @@ extern FILE *malloc_file;
 
 #define MAXSTR 256	/* maximum file name length and general string length */
 #define PROFILE_SIZE 2048
-#define DEVICENAME "os2dll"
+#define DEVICENAME "display"
 #define DEFAULT_GSCOMMAND "gsos2.exe"
 #define DEFAULT_RESOLUTION 96.0
 #define DEFAULT_ZOOMRES 300.0
@@ -113,7 +124,6 @@ typedef struct tagPROG {
 
 /* bitmap details */
 typedef struct tagBM {
-    BOOL	valid;
     BOOL	old_bmp;	/* bitmap type */
     PBITMAPINFO2 pbmi;		/* pointer to bitmap info */
     PBYTE	bits;		/* pointer to bitmap bits */
@@ -234,31 +244,18 @@ typedef struct tagGSINPUT {
     BOOL seek;
 } GSINPUT;
 
+typedef struct tagGSDLL_INPUT {
+    int	count;
+    int	index;
+    GSINPUT section[5];	/* header, defaults, prolog, setup, page */
+} GSDLL_INPUT;
+
+
 /* main structure with info about the GS DLL */
-typedef struct tagGSDLL {
-	BOOL		valid;		/* true if loaded */
-	HMODULE		hmodule;	/* handle to module */
-	int		state;
-	long		revision_number;
+#include "cdll.h"
+#include "cimg.h"
+#include "cview.h"
 
-	/* pointers to DLL functions */
-	PFN_gsdll_revision	revision;
-	PFN_gsdll_init		init;
-	PFN_gsdll_exit		exit;
-	PFN_gsdll_execute_begin	execute_begin;
-	PFN_gsdll_execute_cont	execute_cont;
-	PFN_gsdll_execute_end	execute_end;
-	PFN_gsdll_get_bitmap	get_bitmap;
-	PFN_gsdll_lock_device	lock_device;
-	GSDLL_CALLBACK		callback;
-
-	/* pointer to os2dll or mswindll device */
-	unsigned char	*device;
-
-	int	input_count;
-	int	input_index;
-	GSINPUT input[5];	/* header, defaults, prolog, setup, page */
-} GSDLL;
 
 typedef struct tagMATRIX {
    float xx, xy, yx, yy, tx, ty;
@@ -288,7 +285,6 @@ typedef struct tagOPTIONS {
 	int	unit;
 	BOOL	unitfine;
 	int	pstotext;
-	BOOL	quick_open;
 	BOOL	settings;
 	BOOL	button_show;
 	BOOL	fit_page;
@@ -514,9 +510,9 @@ MRESULT EXPENTRY FrameWndProc(HWND, ULONG, MPARAM, MPARAM);
 MRESULT EXPENTRY StatusWndProc(HWND, ULONG, MPARAM, MPARAM);
 MRESULT EXPENTRY ButtonWndProc(HWND, ULONG, MPARAM, MPARAM);
 extern PFNWP OldFrameWndProc;
+extern BOOL quitnow;	/* Used to cause exit from nested message loops */
 extern int percent_done;		/* percentage of document processed */
 extern int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
-extern BOOL ignore_sync;		/* ignore next GSDLL_SYNC */
 extern BOOL fit_page_enabled;		/* next WM_SIZE is allowed to resize window */
 
 

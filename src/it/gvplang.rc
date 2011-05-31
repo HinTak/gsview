@@ -120,7 +120,6 @@ BEGIN
 		MENUITEM "Salva Ultima ~Cartella", IDM_SAVEDIR
 		MENUITEM "~Barra Pulsanti", IDM_BUTTONSHOW
 		MENUITEM "~Adatta la Finestra alla Pagina", IDM_FITPAGE
-		MENUITEM "Apertura ~Veloce", IDM_QUICK_OPEN
 		MENUITEM "~Rivisualizza Automaticamente", IDM_AUTOREDISPLAY
 		MENUITEM "Rita~glia EPS", IDM_EPSFCLIP
 		MENUITEM "~Avvisi EPS", IDM_EPSFWARN

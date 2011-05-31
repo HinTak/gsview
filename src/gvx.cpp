@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -19,40 +19,21 @@
 /* Main routines for X11 GSview */
 #include "gvx.h"
 
-Display *dpy;
-GtkWidget *window;
+Display *dpy;	/* X11 display, used for XFlush and obtaining colour depth */
+GtkWidget *window;		/* main window */
 GtkWidget *main_vbox;
 GtkWidget *menubar;
 GtkWidget *buttonbar;
-GtkWidget *scroll_window;
-GtkWidget *img;
+GtkWidget *scroll_window;	/* this scrolls the image window */
+GtkWidget *img;			/* drawing area, image window */
 GtkWidget *statusbar;
 GtkWidget *statusfile;
 GtkWidget *statuscoord;
 GtkWidget *statuspage;
-GdkPixmap *pixmap = NULL;
 char *pszLocale;
-int pixmap_width;
-int pixmap_height;
 BOOL have_selection;
 
-Atom ghostview_atom;
-Atom page_atom;
-Atom done_atom;
-Atom next_atom;
-Window gs_window;
-int gs_pipe_stdin[2] = {-1, -1};
-int gs_pipe_stdout[2] = {-1, -1};
-int gs_pipe_stderr[2] = {-1, -1};
-gint gs_pipe_stdin_tag = -1;
-gint gs_pipe_stdout_tag = -1;
-gint gs_pipe_stderr_tag = -1;
-void stop_stdin(void);
-void start_stdin(void);
-void stop_stdout(void);
-void start_stdout(void);
-void stop_stderr(void);
-void start_stderr(void);
+pthread_mutex_t hmutex_ps; 	/* for protecting psfile and pending */
 
 char szAppName[MAXSTR] = GSVIEW_PRODUCT;  /* application name - for title bar */
 int nHelpTopic;
@@ -64,17 +45,15 @@ char szFindText[MAXSTR];
 char szIniFile[MAXSTR];
 char previous_filename[MAXSTR];
 char selectname[MAXSTR];
-char szDisplay[MAXSTR];			/* environment variable DISPLAY= */
-char szGhostview[MAXSTR];		/* environment variable GHOSTVIEW= */
 const char szScratch[] = "gsvx";	/* temporary filename prefix */
 
-#ifdef NOTUSED
 const char *szSpoolPrefix = "%pipe%";	/* GS 6.0 and later should use %pipe% */
-#else
-const char *szSpoolPrefix = "|";	/* earlier versions don't understand %pipe % */
-#endif
 char coord_text[64];		/* last text displayed as coordinate */
 BOOL multithread;
+int geometry_width;
+int geometry_height;
+int geometry_xoffset;
+int geometry_yoffset;
 
 int on_link;			/* TRUE if we were or are over link */
 int on_link_page;		/* page number of link target */
@@ -84,6 +63,7 @@ BOOL quitnow = FALSE;		/* Used to cause exit from nested message loops */
 
 int percent_done;		/* percentage of document processed */
 int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
+BOOL fit_page_enabled = FALSE;	/* next WM_SIZE is allowed to resize window */
 
 PSFILE psfile;		/* Postscript file structure */
 OPTIONS option;		/* GSview options (saved in INI file) */
@@ -102,7 +82,7 @@ BOOL print_silent = FALSE;	/* /P or /F command line option used */
 BOOL print_exit = FALSE;	/* exit on completion of printing */
 int print_count = 0;		/* number of current print jobs */
 				/* It is safe to exit GSview when this is 0 */
-int disable_gsview_wcmd;
+int disable_gsview_wcmd;	/* to avoid recursive messages */
 BOOL getting_bbox;		/* PS to EPS get Bounding Box dialog is shown */
 int debug = 0;			/* /D command line option used */
 struct sound_s sound[NUMSOUND] = {
@@ -121,10 +101,6 @@ int gargc;	/* for delayed parsing of command line */
 char **gargv;
 char workdir[MAXSTR];
 
-int flush_stdout(int fd);
-int stop_gs(void);
-int start_gs(void);
-void check_zombie(void);
 void map_pt_to_pixel(float *x, float *y);
 BOOL get_cursorpos(float *x, float *y);
 void statuscoord_update(void);
@@ -137,24 +113,86 @@ void info_link(void);
 void parse_args(int argc, char *argv[]);
 void selection_add(void);
 void selection_release(void);
+void *gs_thread(void *arg);
 
+/**********************************************************/
+
+/* To communicate from the GS thread to the main GUI thread
+ * we use a pipe.  This passes 8 byte messages containing
+ * a message ID and an integer parameter.
+ * GS thread sends a message with post_img_message().
+ */
+
+int message_pipe[2];	/* file descriptors */
+gint message_pipe_tag;	/* for gtk_input_add */
+
+/* stop listening for messages form GS thread */
 void
-post_img_message(int message, int param)
+close_img_message(void)
 {
-    if (message == WM_QUIT)
+    if (debug & DEBUG_GENERAL)
+	gs_addmess("close_img_message:\n");
+    if (message_pipe_tag >= 0)
+        gdk_input_remove(message_pipe_tag);
+    message_pipe_tag = -1;
+    if (message_pipe[0] >= 0)
+	close(message_pipe[0]);
+    message_pipe[0] = -1;
+    if (message_pipe[1] >= 0)
+	close(message_pipe[1]);
+    message_pipe[1] = -1;
+}
+
+/* process a message from GS thread*/
+void
+do_img_message(int message, int param)
+{
+    if (message == WM_QUIT) {
 	quit_gsview(window, NULL);
-    else if (message == WM_CLOSE)
+        gtk_main_quit();
+    }
+    else if (message == WM_CLOSE) {
 	quit_gsview(window, NULL);
-    else if (message == WM_COMMAND)
+    }
+    else if (message == WM_COMMAND) {
 	gsview_wcmd(NULL, (gpointer)param);
-    else if (message == WM_GSSYNC)
+    }
+    else if (message == WM_GSDEVICE) {
+	/* hide window if closed */
+	if (!image.open) {
+	    if ((GTK_WIDGET_FLAGS(img) & GTK_VISIBLE))
+		gtk_widget_hide_all(img);
+	}
+    }
+    else if (message == WM_GSSYNC) {
+	if (!(GTK_WIDGET_FLAGS(img) & GTK_VISIBLE))
+	    gtk_widget_show_all(img);
 	gtk_widget_draw(img, NULL);
+    }
+    else if (message == WM_GSPAGE) {
+	gsdll.state = GS_PAGE;
+	if (display.show_find)
+	    scroll_to_find();
+	gtk_widget_draw(img, NULL);
+	info_wait(IDS_NOWAIT);
+	selection_release();
+    }
+    else if (message == WM_GSSIZE) {
+	if (image.open) {
+	    gtk_drawing_area_size(GTK_DRAWING_AREA (img), 
+		image.width, image.height);
+	    if (!(GTK_WIDGET_FLAGS(img) & GTK_VISIBLE))
+		gtk_widget_show(img);
+	}
+    }
     else if (message == WM_GSWAIT) {
-	gs_addmessf("WM_GSWAIT: %s\n", szWait);
 	info_wait(param);
     }
     else if (message == WM_GSMESSBOX) {
-	delayed_message_box(param, 0);
+	/* delayed message box, usually from other thread */
+	char buf[MAXSTR];
+	load_string(param, buf, sizeof(buf));
+	message_box(buf, 0);
     }
     else if (message == WM_GSSHOWMESS) {
 	gs_showmess();
@@ -197,779 +235,109 @@ post_img_message(int message, int param)
 	gs_addmessf("Unknown post_img_message %d\n", message);
 }
 
+/* read a message from the GS thread to us the GUI thread */
+int
+read_img_message(void)
+{
+    int bytes_read;
+    int message, param;
+    bytes_read = read(message_pipe[0], &message, sizeof(message));
+    if (bytes_read > 0)
+        bytes_read = read(message_pipe[0], &param, sizeof(param));
+    if (bytes_read == -1) {
+	if (errno == EAGAIN) {
+	    return 1;	/* come back later */
+	}
+	else {
+	    if (debug & DEBUG_GENERAL)
+		gs_addmessf("read_img_message: read failed, errno=%d\n", errno);
+	    return -1;
+	}
+    }
+    do_img_message(message, param);
+    return 0;
+}
+
+
+/* Asynchronous read of message_pipe.
+ * This is called from event loop when a read is possible on message_pipe.
+ */
+void read_message_pipe_fn(gpointer data, gint fd, GdkInputCondition condition)
+{
+    if (message_pipe[0] != fd) {
+	if (debug & DEBUG_GENERAL)
+	    gs_addmess("read_message_pipe_fn: called with wrong source\n");
+	return;
+    }
+
+    if (condition & GDK_INPUT_EXCEPTION) {
+	/* complain */
+	if (debug & DEBUG_GENERAL)
+	    gs_addmess("read_message_pipe_fn: exception\n");
+	close_img_message();
+    }
+    else if (condition & GDK_INPUT_READ) {
+	while (read_img_message()==0)
+	    /* keep reading */;
+    }
+    else {
+	if (debug & DEBUG_GENERAL)
+	    gs_addmessf("read_message_pipe_fn: unknown condition %d\n", condition);
+    }
+}
+
+/* start listening to messages from the GS thread */
+int
+init_img_message(void)
+{
+    int flags;
+    if (pipe(message_pipe)) {
+	gs_addmessf("Could not open pipe for messages, errno=%d\n", errno);
+	return 1;
+    }
+    flags = fcntl(message_pipe[0], F_GETFL, 0);
+    if (fcntl(message_pipe[0], F_SETFL, flags | O_NONBLOCK)) {
+	gs_addmessf("Could not set message pipe to non-blocking, errno=%d\n", errno);
+	close(message_pipe[0]);
+	close(message_pipe[1]);
+	return 1;
+    }
+    message_pipe_tag = gdk_input_add(message_pipe[0], 
+	(enum GdkInputCondition)(GDK_INPUT_READ | GDK_INPUT_EXCEPTION),
+	read_message_pipe_fn, 0);
+    return 0;
+}
+
+/* Send a message from GS thread to the GUI thread.
+ * Use a pipe to implement this.
+ * We need this because the GS thread is not allowed
+ * to use gtk, gdk or Xlib.
+ */
+void
+post_img_message(int message, int param)
+{
+    int mess[2];
+    if (!multithread) {
+	do_img_message(message, param);
+    }
+    mess[0] = message;
+    mess[1] = param;
+    write(message_pipe[1], &mess, sizeof(mess));
+    /* no flush needed, because low level I/O doesn't buffer */
+}
+
 
 /* On "File | Exit" or window destroy */ 
 void quit_gsview( GtkWidget *w,
                          gpointer   data )
 {
-    stop_gs();
-    gtk_main_quit();
-}
-
-void clear_img_window(void)
-{
-    /* unreference pixmap and redraw window */
-    if (pixmap) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("clear_img_window\n");
-	gdk_pixmap_unref(pixmap);
-	pixmap = NULL;
-	gtk_widget_draw(img, NULL);
-    }
-}
-
-/* Ghostscript sends us client events.
- * PAGE means showpage has been called.
- * DONE means the x11 device is being closed.
- */
-gboolean gs_client_event(GtkWidget *widget,
-	GdkEventClient *event, gpointer data)
-{
-    if (event->type != GDK_CLIENT_EVENT)
-	return FALSE;
-
-    if (event->message_type == page_atom) {
-	gsdll.state = PAGE;
-	gs_addmess("PAGE event\n");
-        gs_window = event->data.l[0];
-	flush_stdout(gs_pipe_stdout[0]);
-	flush_stdout(gs_pipe_stderr[0]);
-	if (display.show_find)
-	    scroll_to_find();
-	gtk_widget_draw(img, NULL);
-	if (gsdll.input_index < gsdll.input_count)
-	    gsdll.input[gsdll.input_index].seek = TRUE; 
-	info_wait(IDS_NOWAIT);
-	selection_release();
-    }
-    else if (event->message_type == done_atom) {
-	gs_addmess("DONE event\n");
-        gs_window = event->data.l[0];
-	stop_gs();
-    }
-    else if (event->message_type == next_atom) {
-	/* shouldn't happen - we send these events to Ghostscript */
-	gs_addmess("NEXT event\n");
-    }
-    else 
-	gs_addmessf("Unknown atom %d\n", (int)event->message_type);
-    return FALSE;
-}
-
-/* Asynchronous write to GS stdin.
- * This is called from event loop when a write is possible on gs_stdin_pipe.
- */
-/* Need to change this to read sections of a page */
-/* read from gsdll.buffer if available, otherwise read from file into buffer */
-void write_fn(gpointer data, gint fd, GdkInputCondition condition)
-{
-    if (fd != gs_pipe_stdin[1]) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("write_fn: called with wrong source\n");
-	return;
-    }
-    if (psfile.file == NULL) {
-	if (!psfile.ispdf) {
-	    if (debug & DEBUG_GENERAL)
-		gs_addmess("write_fn: psfile.file is closed\n");
-	    stop_stdin();
-	    return;
-	}
-    }
-    if (gs_pipe_stdin[1] == -1) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("write_fn: gs_pipe_stdin[1] is closed\n");
-	return;
-    }
-    if (condition & GDK_INPUT_EXCEPTION) {
-	/* complain */
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("write_fn: exception\n");
-	close(gs_pipe_stdin[1]);
-	gs_pipe_stdin[1] = -1;
-	return;
-    }
-    else if (condition & GDK_INPUT_WRITE) {
-        int pcdone;
-	int bytes_written = 0;
-/*
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("write_fn: write\n");
-*/
-	do {
-	    if (gsdll.buffer_count == 0) {
-		/* read some more */
-		gsdll.buffer_index = 0;
-		gsdll.buffer_count = get_gs_input((char *)gsdll.buffer, 
-			gsdll.buffer_length);
-		if ((gsdll.buffer_count == 0) && gsdll.send_eps_showpage) {
-	    	    gsdll.send_eps_showpage = FALSE;
-		    gs_printf("\nsystemdict /showpage get exec\n");
-		}
-	    }
-	    if (gsdll.buffer_count == 0) {
-		stop_stdin();
-		dfclose();
-		if (psfile.dsc == (CDSC *)NULL) {
-		    /* non-DSC, close stdin to close Ghostscript */
-		    if (debug & DEBUG_GENERAL)
-		        gs_addmess("write_fn: EOF for non-DSC, closing stdin\n");
-		    close_gs_stdin();
-		    gsdll.state = IDLE;
-		    psfile.pagenum = 1;
-		}
-		break;
-	    }
-	    
-	    bytes_written = write(gs_pipe_stdin[1], 
-		gsdll.buffer+gsdll.buffer_index, gsdll.buffer_count);
-	    if (psfile.dsc == (CDSC *)NULL)
-		info_wait(IDS_WAITDRAW);
-	    /* for debugging, log all output sent to Ghostscript */
-	    if (debug & DEBUG_GSINPUT)
-		gs_addmess_count((char *)(gsdll.buffer+gsdll.buffer_index), 
-			bytes_written);
-	    if (bytes_written == -1) {
-		if (errno == EAGAIN) {
-		    break;	/* come back later */
-		}
-		else {
-		    if (debug & DEBUG_GENERAL)
-			gs_addmessf("write_fn: write to GS failed, errno=%d\n", errno);
-		}
-	    }
-	    else if (bytes_written == 0) {
-		/* pipe probably closed */
-		check_zombie();
-	    }
-	    else {
-		gsdll.buffer_count -= bytes_written;
-		if (gsdll.buffer_count == 0)
-		   gsdll.buffer_index = 0;
-		else
-		   gsdll.buffer_index += bytes_written;
-
-		if (psfile.file) {
-		    gsbytes_done += bytes_written;
-		    pcdone = (int)(gsbytes_done * 100 / gsbytes_size);
-		    if ((pcdone != percent_done) && !percent_pending) {
-			percent_done = pcdone;
-			percent_pending = TRUE;
-			post_img_message(WM_GSPERCENT, 0);
-		    }
-		}
-	    }
-
-	} while (bytes_written > 0);
-    }
-    else {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmessf("write_fn: unknown condition %d\n", condition);
-    }
-}
-
-/* read from stdout or stderr if possible */
-/* returns 0 if pipe closed, -1 if nothing available */
-int flush_stdout(int fd)
-{
-    char buf[256];
-    int bytes_read = 0;
-    if (fd < 0)
-	return 0;
-    do {
-	bytes_read = read(fd, buf, sizeof(buf));
-	if (bytes_read == -1) {
-	    if (errno == EAGAIN) {
-		break;	/* come back later */
-	    }
-	    else {
-		if (debug & DEBUG_GENERAL)
-		    gs_addmessf("read_stdout_fn: read from GS failed, errno=%d\n", errno);
-	    }
-	}
-	else if (bytes_read == 0) {
-	    if (debug & DEBUG_GENERAL)
-		gs_addmessf("read_stdout_fn: read 0 bytes from GS %s\n",
-		    (fd == gs_pipe_stdout[0]) ? "stdout" : "stderr");
-	}
-	else {
-	    gs_addmess_count(buf, bytes_read);
-	    pdf_checktag(buf, bytes_read);
-	}
-
-    } while (bytes_read > 0);
-
-    return bytes_read;
-}
-
-/* Asynchronous read of GS stdout/stderr.
- * This is called from event loop when a read is possible on gs_stdout_pipe.
- */
-void read_stdout_fn(gpointer data, gint fd, GdkInputCondition condition)
-{
-    int is_stdout = (fd == gs_pipe_stdout[0]);
-    int is_stderr = (fd == gs_pipe_stderr[0]);
-
-    if (!is_stdout && !is_stderr) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("read_stdout_fn: called with wrong source\n");
-	return;
-    }
-
-    if (condition & GDK_INPUT_EXCEPTION) {
-	/* complain */
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("read_stdout_fn: exception\n");
-	if (is_stdout)
-	    stop_stdout();
-	else
-	    stop_stderr();
-	return;
-    }
-    else if (condition & GDK_INPUT_READ) {
-	if (flush_stdout(fd) == 0)
-	    check_zombie();
-    }
-    else {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmessf("read_stdout_fn: unknown condition %d\n", condition);
-    }
-}
-
-/* Close GS stdin, to encourage it to exit */
-void close_gs_stdin(void)
-{
-    if (gs_pipe_stdin[1] != -1) {
-	close(gs_pipe_stdin[1]);
-	gs_pipe_stdin[1] = -1;
-    }
-}
-
-void stop_stdin(void)
-{
-    if (gs_pipe_stdin_tag >=0) {
-        gdk_input_remove(gs_pipe_stdin_tag);
-	gs_pipe_stdin_tag = -1;
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("stop_stdin:\n");
-    }
-}
-
-void start_stdin(void)
-{
-    if (gs_pipe_stdin_tag >=0)
-	return;
-    gs_pipe_stdin_tag = gdk_input_add(gs_pipe_stdin[1], 
-	(enum GdkInputCondition)(GDK_INPUT_WRITE | GDK_INPUT_EXCEPTION),
-	write_fn, 0);
-    if (debug & DEBUG_GENERAL)
-	gs_addmess("start_stdin:\n");
-}
-
-void stop_stdout(void)
-{
-    if (gs_pipe_stdout_tag >=0) {
-	flush_stdout(gs_pipe_stdout[0]);
-        gdk_input_remove(gs_pipe_stdout_tag);
-	gs_pipe_stdout_tag = -1;
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("stop_stdout:\n");
-    }
-}
-
-void start_stdout(void)
-{
-    if (gs_pipe_stdout_tag >=0)
-	return;
-    gs_pipe_stdout_tag = gdk_input_add(gs_pipe_stdout[0], 
-	(enum GdkInputCondition)(GDK_INPUT_READ | GDK_INPUT_EXCEPTION),
-	read_stdout_fn, 0);
-    if (debug & DEBUG_GENERAL)
-	gs_addmess("start_stdout:\n");
-}
-
-void stop_stderr(void)
-{
-    if (gs_pipe_stderr_tag >=0) {
-	flush_stdout(gs_pipe_stdout[1]);
-        gdk_input_remove(gs_pipe_stderr_tag);
-	gs_pipe_stderr_tag = -1;
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("stop_stderr:\n");
-    }
-}
-
-void start_stderr(void)
-{
-    if (gs_pipe_stderr_tag >=0)
-	return;
-    gs_pipe_stderr_tag = gdk_input_add(gs_pipe_stderr[0], 
-	(enum GdkInputCondition)(GDK_INPUT_READ | GDK_INPUT_EXCEPTION),
-	read_stdout_fn, 0);
-    if (debug & DEBUG_GENERAL)
-	gs_addmess("start_stderr:\n");
-}
-
-/* display messages if GS terminated early */
-void stop_gs_messages(int rc, int status)
-{
-    if (WIFEXITED(status)) {
-	/* normal exit */
-	if (debug & DEBUG_GENERAL)
-	    gs_addmessf("stop_gs_messages: Ghostscript exit code %d\n", 
-		WEXITSTATUS(status));
-	if (WEXITSTATUS(status) != 0)
-	    gs_showmess();	/* show error message */
-    }
-    else {
-	/* someone killed it */
-	if (debug & DEBUG_GENERAL)
-	    gs_addmessf("stop_gs_messages: child ended, rc=%d, status=%d\n", 
-		rc, status); 
-    }
-}
-
-void close_gs_stdio()
-{
-    stop_stdin();
-    close_gs_stdin();
-    stop_stdout();
-    if (gs_pipe_stdout[0] != -1) {
-	close(gs_pipe_stdout[0]);
-	gs_pipe_stdout[0] = -1;
-    }
-    stop_stderr();
-    if (gs_pipe_stderr[0] != -1) {
-	close(gs_pipe_stderr[0]);
-	gs_pipe_stderr[0] = -1;
-    }
-}
-
-void check_zombie(void)
-{
-    if (gsdll.hmodule > 0) {
-	/* check if Ghostscript has exited prematurely */
-	int rc = 0;
-	int status = 0;
-	if ( (rc = waitpid(gsdll.hmodule, &status, WNOHANG)) > 0 ) {
-	    close_gs_stdio();
-	    stop_gs_messages(rc, status);
-	    /* Ghostscript has exited, release resources */
-	    gsdll.hmodule = 0;
-	    if (debug & DEBUG_GENERAL)
-		gs_addmess("check_zombie: calling stop_gs()\n");
-	    stop_gs();
-	    gsdll.buffer_count = gsdll.buffer_index = 0;
-	}
-    }
-}
-
-
-/* We have a problem with receiving a DONE after stopping Ghostscript.
- * If we restart Ghostscript, we receive this DONE after the new
- * Ghostscript has started, which triggers us to shut the new Ghostscript.
- * Need to get the DONE earlier, or be able to identify which
- * instance of Ghostscript it applied to.
- */
-
-int stop_gs(void)
-{
-    if (debug & DEBUG_GENERAL)
-	gs_addmess("stop_gs\n");
-    close_gs_stdio();
-
-    if (gsdll.hmodule > 0) {
-	int rc;
-	int status = 0;
-	/* get termination code */
-	usleep(100000);	/* allow a little time for child to finish */
-	errno = 0;
-	rc = waitpid(gsdll.hmodule, &status, WNOHANG);
-	if (debug & DEBUG_GENERAL)
-	    gs_addmessf("stop_gs: waitpid rc=%d status=%d errno=%d\n", 
-		rc, status, errno);
-	if (rc > 0) {
-	    if (!pending.unload && !pending.abort)
-	        stop_gs_messages(rc, status);
-	}
-	else if (rc == 0) {
-	    /* child has not yet ended */
-	    if (debug & DEBUG_GENERAL)
-		gs_addmess("stop_gs: killing Ghostscript\n");
-	    kill(gsdll.hmodule, SIGTERM);
-	    waitpid(gsdll.hmodule, &status, 0);
-	}
-	else {
-	    /* error - no such process */
-	    if (debug & DEBUG_GENERAL)
-		gs_addmessf("stop_gs: waitpid rc=%d errno=%d\n", rc, errno);
-	}
-	gsdll.hmodule = 0;
-
-    }
-
-    if (psfile.file != (FILE *)NULL)
-	dfclose();
-
-    clear_img_window();
-    selection_release();
-
-    gsdll.state = UNLOADED;
-    display.init = FALSE;
-    display.need_header = TRUE;
-    display.need_trailer = FALSE;
-
-    info_wait(IDS_NOWAIT);
-
-    /* Process gtk messages until queue empty, to make sure 
-     * DONE event from Ghostscript is flushed. */
-    while (gtk_events_pending())
-	gtk_main_iteration_do(FALSE);	/* don't block */
-
-    if (command_on_done) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("Executing deferred command\n");
-	gsview_wcmd(NULL, (gpointer)command_on_done);
-    }
-
-    return 0;
-}
-
-/* Start Ghostscript */
-int start_gs(void)
-{
-    char buf[256];
-    char *nargv[10];
-    XWindowAttributes attrib;
-    int rc;
-    int bpixmap = 0;
-#ifdef NOTUSED
-    int top_margin = 0;		/* see comments below about this */
-    int right_margin = 0;	/* see comments below about this */
-#endif
-    int orientation;
-    char safer_string[] = "-dSAFER";
-    char nodisplay_string[] = "-dNODISPLAY";
-    char nopause_string[] = "-dNOPAUSE";
-    char dash_string[] = "-";
-
-    if (pixmap) {
-	gdk_pixmap_unref(pixmap);
-	pixmap = NULL;
-    }
-    pixmap_width = display.width;  /* pixels */
-    pixmap_height = display.height; /* pixels */
-    if ((display.orientation == 1) || (display.orientation == 3)) {
-	int temp = pixmap_width;
-	pixmap_width = pixmap_height;
-	pixmap_height = temp;
-
-#ifdef NOTUSED
-	/* Dodge some unit bugs in Ghostscript/Ghostview interface */
-	if (pixmap_width > pixmap_height)
-	    top_margin = (int)((pixmap_width - pixmap_height) 
-				* 72 / display.xdpi);
-	else 
-	    right_margin = (int)((pixmap_height - pixmap_width) 
-			* 72 / display.xdpi);
-#endif
-    }
-
-    /* change window size */
-    gtk_widget_set_usize(img, pixmap_width, pixmap_height);
-
-    if (debug & DEBUG_GENERAL)
-	gs_addmessf("start_gs: width=%d height=%d orientation=%d\n", 
-		pixmap_width, pixmap_height, display.orientation);
-    if (option.drawmethod == IDM_DRAWPIXMAP) {
-	/* Ghostscript is to draw on a pixmap */
-	/* We are responsible for copying this to the window */
-	pixmap = gdk_pixmap_new(img->window, pixmap_width, pixmap_height, -1);
-	gdk_draw_rectangle(pixmap, img->style->white_gc,
-		TRUE, 0, 0, pixmap_width, pixmap_height);
-    }
-    else if (option.drawmethod == IDM_DRAWBACKING) {
-	/* Create a backing pixmap for Ghostscript */
-	pixmap = gdk_pixmap_new(img->window, pixmap_width, pixmap_height, -1);
-	gdk_draw_rectangle(pixmap, img->style->white_gc,
-		TRUE, 0, 0, pixmap_width, pixmap_height);
-	bpixmap = (int)GDK_WINDOW_XWINDOW(pixmap);
-    }
-    else if (option.drawmethod == IDM_DRAWSTORAGE) {
-	/* Ask the X server to provide backing storage.
-	 * If the X server ignores this, exposed areas will not be redrawn.
-	 * This is a problem with XFree4.
-	 */
-	XSetWindowAttributes xswa;
-	memset(&xswa, 0, sizeof(xswa));
-	xswa.backing_store = Always;
-	XChangeWindowAttributes(dpy, GDK_WINDOW_XWINDOW(img->window),
-		CWBackingStore, &xswa);
-	XFlush(dpy);
-    }
-    else {
-	message_box("start_gs: Invalid draw method", 0);
-	return 1;
-    }
-
-    /* tell Ghostscript which X Window to draw on */
-    if (option.drawmethod == IDM_DRAWPIXMAP) {
-	sprintf(szGhostview, "GHOSTVIEW=%d %d", 
-	    (int)GDK_WINDOW_XWINDOW(img->window), 
-	    (int)GDK_WINDOW_XWINDOW(pixmap));
-    }
-    else {
-	sprintf(szGhostview, "GHOSTVIEW=%d", 
-	    (int)GDK_WINDOW_XWINDOW(img->window));
-    }
-    putenv(szGhostview);
-    if (debug & DEBUG_GENERAL)
-	gs_addmessf("%s\n", szGhostview);
-
-    sprintf(szDisplay, "DISPLAY=%s", 
-	XDisplayString(GDK_WINDOW_XDISPLAY(img->window)));
-    putenv(szDisplay);
-    if (debug & DEBUG_GENERAL)
-	gs_addmessf("%s\n", szDisplay);
-
-    if (XGetWindowAttributes(dpy, (int)GDK_WINDOW_XWINDOW(img->window),
-	    &attrib)) {
-	    if (debug & DEBUG_GENERAL)
-		gs_addmessf("xwindow width=%d height=%d\n", attrib.width, attrib.height);
-    }
-    else {
-	    gs_addmessf("Can't open get attributes for window %d\n", 
-		    (int)GDK_WINDOW_XWINDOW(img->window));
-    }
-
-
-#ifdef NOTUSED
-    /* The values for urx, ury and the margins are very strange.
-     * They work for portrait, but when the page is rotated using
-     * /Orientation, the value of urx is the output device width
-     * in pts, not the PostScript page width.  Just to confuse
-     * things further, the ImagingBBox is set using urx and ury
-     * assuming they are in PostScript page coordinates, 
-     * not output device coordinates in pts.
-     * To dodge this inconsistency, we need to set the top margin
-     * or right margin when rotating the page.
-     */
-
-    sprintf(buf, "%d %d %d %d %d %d %g %g %d %d %d %d",
-	bpixmap /*bpixmap*/, 
-	0 /*orientation*/,
-	0 /*llx*/, 0 /*lly*/, 
-	(int)(pixmap_width * 72 / display.xdpi),  /* urx */
-	(int)(pixmap_height * 72 / display.ydpi), /* ury */
-	display.xdpi, display.ydpi,
-	0, 0, right_margin, top_margin);
-#else
-    /* rely on the Ghostview interface for setting page size and
-     * offsets, since the Ghostview code predates the setpagedevice
-     * implementation Ghostscript and screws up when Orientation
-     * is not portrait.
-     */
-    orientation = display.orientation * 90;
-    switch(display.orientation) {
-	/* convert from /Orientation as used by setpagedevice
-	 * to rotation angle used by Ghostview interface
-	 */
-	case 0: /* portrait */
-	    orientation = 0;
-	    break;
-	case 1: /* seascape */
-	    orientation = 270;
-	    break;
-	case 2: /* upside-down */
-	    orientation = 180;
-	    break;
-	case 3: /* landscape */
-	    orientation = 90;
-	    break;
-    }
-    sprintf(buf, "%d %d %d %d %d %d %g %g %d %d %d %d",
-	bpixmap /*bpixmap*/, 
-	orientation /*orientation*/,
-	(int)(display.xoffset * 72 / display.xdpi) /*llx*/, 
-	(int)(display.yoffset * 72 / display.ydpi) /*lly*/, 
-	(int)((display.width+display.xoffset) * 72 / display.xdpi),  /* urx */
-	(int)((display.height+display.yoffset) * 72 / display.ydpi), /* ury */
-	display.xdpi, display.ydpi,
-	0, 0, 0, 0);
-#endif
-
-    if (debug & DEBUG_GENERAL)
-	gs_addmessf("prop=%s\n", buf);
-    rc = XChangeProperty(dpy, (int)GDK_WINDOW_XWINDOW(img->window), 
-	ghostview_atom, XA_STRING, 8, PropModeReplace,
-	(unsigned char *)buf, strlen(buf));
-    if (debug & DEBUG_GENERAL)
-	gs_addmessf("XChangeProperty returns %d\n", rc);
-    XFlush(dpy);
-
-    /* redirect stdio of Ghostscript */
-    if (pipe(gs_pipe_stdin)) {
-	gs_addmessf("Could not open pipe for stdin, errno=%d\n", errno);
-	return 1;
-    }
-    if (pipe(gs_pipe_stdout)) {
-	gs_addmessf("Could not open pipe for stdout, errno=%d\n", errno);
-	return 1;
-    }
-    if (pipe(gs_pipe_stderr)) {
-	gs_addmessf("Could not open pipe for stderr, errno=%d\n", errno);
-	return 1;
-    }
-
-    gsdll.hmodule = fork();
-    if (gsdll.hmodule == 0) {
-	int j;
-	/* child */
-	close(gs_pipe_stdin[1]);	/* close write handle */
-	dup2(gs_pipe_stdin[0], 0);	/* duplicate and make it stdin */
-	close(gs_pipe_stdin[0]);	/* close original read handle */
-
-	close(gs_pipe_stdout[0]);
-	dup2(gs_pipe_stdout[1], 1);	/* duplicate and make it stdout */
-	close(gs_pipe_stdout[1]);
-
-	close(gs_pipe_stderr[0]);
-	dup2(gs_pipe_stderr[1], 2);	/* duplicate and make it stderr */
-	close(gs_pipe_stderr[1]);
-
-	/* replace with Ghostscript */
-	/* start Ghostscript */
-	j = 0;
-	nargv[j++] = option.gsdll;
-	if (option.safer)
-	    nargv[j++] = safer_string;
-	nargv[j++] = nodisplay_string;
-	nargv[j++] = nopause_string;
-	char talpha[MAXSTR];
-	char galpha[MAXSTR];
-	char include[MAXSTR];
-	if (strlen(option.gsinclude) && (strlen(option.gsinclude) < 200)) {
-	    sprintf(include, "-I%s", option.gsinclude);
-	    nargv[j++] = include;
-	}
-	if (strlen(option.gsother))
-	    nargv[j++] = option.gsother;
-	if (option.gsversion >= 600) {
-	    if (real_depth(option.depth) >= 8) {
-		sprintf(talpha, "-dTextAlphaBits=%d\n", option.alpha_text);
-		nargv[j++] = talpha;
-		sprintf(galpha, "-dGraphicsAlphaBits=%d\n", option.alpha_graphics);
-		nargv[j++] = galpha;
-	    }
-	}
-	nargv[j++] = dash_string;
-	nargv[j++] = NULL;
-	if (debug & DEBUG_GENERAL) {
-	    fprintf(stdout, "child: starting gs\n");
-	    for (j=0; nargv[j]; j++)
-		fprintf(stdout, "%s ", nargv[j]);
-	    fputc('\n', stdout);
-	    fflush(stdout);
-	}
-	if (execvp(nargv[0], nargv) == -1) {
-	    int err = errno;
-	    /* write to stdout, which will be captured by GSview */
-	    fprintf(stdout, "Failed to start Ghostscript process\n");
-	    for (j=0; nargv[j]; j++)
-		fprintf(stdout, " %s", nargv[j]);
-	    fputc('\n', stdout);
-	    fprintf(stdout, " errno=%d\n", err);
-	    fflush(stdout);
-	    /* If we used exit(), it would call the atexit function
-	     * registered by gtk, and kill all the parent's windows.
-	     * Instead we use _exit() which does not call atexit functions.
-	     */
-	    _exit(1);
-	}
-    }
-    else {
-	/* parent */
-	int flags;
-
-	close(gs_pipe_stdin[0]);	/* close read handle */
-	gs_pipe_stdin[0] = -1;
-	/* make pipe non blocking */
-	flags = fcntl(gs_pipe_stdin[1], F_GETFL, 0);
-	if (fcntl(gs_pipe_stdin[1], F_SETFL, flags | O_NONBLOCK)) {
-	    gs_addmessf("Could not set stdin pipe to non-blocking, errno=%d\n", errno);
-/* should close other handles */
-	    return 1;
-        }
-
-	close(gs_pipe_stdout[1]);	/* close write handle */
-	gs_pipe_stdout[1] = -1;
-	/* make pipe non blocking */
-	flags = fcntl(gs_pipe_stdout[0], F_GETFL, 0);
-	if (fcntl(gs_pipe_stdout[0], F_SETFL, flags | O_NONBLOCK)) {
-	    gs_addmessf("Could not set stdout pipe to non-blocking, errno=%d\n", errno);
-/* should close other handles */
-	    return 1;
-        }
-	start_stdout();
-
-	close(gs_pipe_stderr[1]);	/* close write handle */
-	gs_pipe_stdout[1] = -1;
-	/* make pipe non blocking */
-	flags = fcntl(gs_pipe_stderr[0], F_GETFL, 0);
-	if (fcntl(gs_pipe_stderr[0], F_SETFL, flags | O_NONBLOCK)) {
-	    gs_addmessf("Could not set stderr pipe to non-blocking, errno=%d\n", errno);
-/* should close other handles */
-	    return 1;
-        }
-	start_stderr();
-
-	/* Remember to trigger async write with start_stdin()*/
-
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("parent\n");
-	
-	gsdll.state = IDLE;
-	gsdll.valid = TRUE;
-	info_wait(IDS_WAIT);
-	
-    } 
-    return 0;
-}
-
-void
-send_next_event(void)
-{
-    if (gsdll.state == BUSY) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("send_next_event: gsdll.state == BUSY, ignoring\n");
-    }
-    else if (gsdll.state == UNLOADED) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("send_next_event: gsdll.state == UNLOADED, ignoring\n");
-    }
-    else if (gsdll.state == IDLE) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("send_next_event: gsdll.state == IDLE, shouldn't happen\n");
-    }
-    else if (gsdll.state == PAGE) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("send_next_event: sending NEXT event\n");
-	XEvent ev; 
-	ev.xclient.type = ClientMessage;
-	ev.xclient.serial = 0;
-	ev.xclient.send_event = TRUE;
-	ev.xclient.display = dpy;
-	ev.xclient.window = gs_window;
-	ev.xclient.message_type = next_atom;
-	ev.xclient.format = 32;
-	XSendEvent(dpy, gs_window, FALSE, 0, &ev);
-	XFlush(dpy);
-	gsdll.state = BUSY;
-	post_img_message(WM_GSWAIT, IDS_WAITDRAW);
-    }
-    else {
-	gs_addmess("send_next_event: gsdll.state is unknown\n");
-    }
+    /* Tell GS thread to exit. */
+    /* When it finishes, it will post the quit message */
+    quitnow = TRUE;
+    pending.unload = TRUE;
+    pending.abort = TRUE;
+    if (multithread)
+	sem_post(&display.event);	/* unblock display thread */
 }
 
 
@@ -1035,7 +403,6 @@ void gsview_wcmd(GtkWidget *w, gpointer data)
 	return;
     }
 
-    check_zombie();
     if (debug & DEBUG_GENERAL)
 	gs_addmessf("gsview_wcmd: gsdll.state=%d\n", gsdll.state);
 
@@ -1044,7 +411,7 @@ void gsview_wcmd(GtkWidget *w, gpointer data)
 	gs_addmessf("gsview_wcmd: now=%d next=%d unload=%d\n", 
 	    pending.now, pending.next, pending.unload);
 
-    while (pending.now || pending.next || pending.unload) {
+    if (pending.now || pending.next || pending.unload || quitnow) {
 	if (display.bitcount == 0) {
 	    XWindowAttributes attrib;
 	    if (XGetWindowAttributes(dpy, 
@@ -1060,17 +427,14 @@ void gsview_wcmd(GtkWidget *w, gpointer data)
 	    }
 	}
     
-	gs_process();
-
-	if (gsdll.state == PAGE) {
-	    if (psfile.dsc == (CDSC *)NULL)
-		psfile.pagenum++;
-	    send_next_event();
+	if (multithread) {
+	    /* release other thread if needed */
+	    sem_post(&display.event);
 	}
-
-	if ((gsdll.buffer_count != 0) || 
-	     (gsdll.input_index != gsdll.input_count)) {
-	    gsdll.state = BUSY;
+	else 
+	{
+	    /* single threaded operation not implemented */
+	    gs_addmess("Single threaded operation not implemented\n");
 	}
     }
 
@@ -1341,30 +705,85 @@ size_event(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
     return TRUE; 
 }
 
+static void
+window_draw(GtkWidget *widget, int x, int y, int width, int height)
+{
+    if (image.open && image.image) {
+        int color = image.format & DISPLAY_COLORS_MASK;
+	int depth = image.format & DISPLAY_DEPTH_MASK;
+	switch (color) {
+	    case DISPLAY_COLORS_NATIVE:
+		if (depth == DISPLAY_DEPTH_8) {
+		    gdk_draw_indexed_image(widget->window, 
+			widget->style->fg_gc[GTK_STATE_NORMAL],
+			x, y, width, height, GDK_RGB_DITHER_MAX, 
+			image.image + x + y*image.raster, 
+			image.raster, image.cmap);
+		}
+	  	else if ((depth == DISPLAY_DEPTH_16) && image.rgbbuf) {
+		    gdk_draw_rgb_image(widget->window, 
+			widget->style->fg_gc[GTK_STATE_NORMAL],
+			x, y, width, height, GDK_RGB_DITHER_MAX, 
+			image.rgbbuf + x*3 + image.width*3*y, 
+			image.width * 3);
+		}
+		break;
+	    case DISPLAY_COLORS_GRAY:
+		if (depth == DISPLAY_DEPTH_8)
+		    gdk_draw_gray_image(widget->window, 
+			widget->style->fg_gc[GTK_STATE_NORMAL],
+			x, y, width, height, GDK_RGB_DITHER_MAX, 
+			image.image + x + y*image.raster, 
+		        image.raster);
+		break;
+	    case DISPLAY_COLORS_RGB:
+		if (depth == DISPLAY_DEPTH_8) {
+		    if (image.rgbbuf) {
+			gdk_draw_rgb_image(widget->window, 
+			    widget->style->fg_gc[GTK_STATE_NORMAL],
+			    x, y, width, height, GDK_RGB_DITHER_MAX, 
+			    image.rgbbuf + x*3 + image.width*3*y, 
+			    image.width * 3);
+		    }
+		    else {
+			gdk_draw_rgb_image(widget->window, 
+			    widget->style->fg_gc[GTK_STATE_NORMAL],
+			    x, y, width, height, GDK_RGB_DITHER_MAX, 
+			    image.image + x*3 + y*image.raster, 
+			    image.raster);
+		    }
+		}
+		break;
+	    case DISPLAY_COLORS_CMYK:
+		if ((depth == DISPLAY_DEPTH_8) && image.rgbbuf)
+		    gdk_draw_rgb_image(widget->window, 
+			widget->style->fg_gc[GTK_STATE_NORMAL],
+			x, y, width, height, GDK_RGB_DITHER_MAX, 
+			image.rgbbuf + x*3 + image.width*3*y, 
+			image.width * 3);
+		break;
+	}
+    }
+}
+
 
 gint
 expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    if ((option.drawmethod == IDM_DRAWPIXMAP) ||
-        (option.drawmethod == IDM_DRAWBACKING)) {
-	if (pixmap) {
-	   gdk_draw_pixmap(widget->window,
-		widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-		pixmap,
-		event->area.x, event->area.y,
-		event->area.x, event->area.y,
-		event->area.width, event->area.height);
+    image_lock(view.img);
+    if (image.open && image.image) {
+	int x = event->area.x;
+	int y = event->area.y;
+	int width = event->area.width;
+	int height = event->area.height;
+	if ((x>=0) && (y>=0) && (x <= image.width) && (y <= image.height)) {
+	    /* drawing area intersects the bitmap, so draw it */
+	    if (x + width > image.width)
+		width = image.width - x;
+	    if (y + height > image.height)
+		height = image.height - y;
+	    window_draw(img, x, y, width, height);
 	}
-	else {
-	    /* draw background instead */
-	    gdk_draw_rectangle(widget->window, img->style->white_gc, TRUE, 
-		event->area.x, event->area.y,
-		event->area.width, event->area.height);
-	}
-    }
-    else {
-	/* IDM_DRAWSTORAGE */
-	/* We are not responsible for drawing */
     }
 
     if (option.show_bbox && (psfile.dsc != (CDSC *)NULL) &&
@@ -1412,7 +831,7 @@ expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 
 
     /* highlight found search word */
-    if (pixmap && display.show_find) {
+    if (image.open && display.show_find) {
 	float x, y;
 	int left, top, bottom, right;
 	/* map bounding box to device coordinates */
@@ -1437,14 +856,9 @@ expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 	    left = temp;
 	}
 
-	if (pixmap) {
+	if (image.open) {
 	    /* redraw rectangle we about to invert */
-	    gdk_draw_pixmap(img->window,
-		    img->style->fg_gc[GTK_WIDGET_STATE(img)],
-		    pixmap,
-		    left, top,
-		    left, top,
-		    right-left, bottom-top);
+            window_draw(img, left, top, right-left, bottom-top);
 	}
 	/* invert text */
 	GdkGC *gcinvert = gdk_gc_new(img->window);
@@ -1460,6 +874,8 @@ expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
     /* GS 6.50 highlights links itself for PDF files */
     if ((option.gsversion < 650) || !psfile.ispdf)
 	highlight_links();
+
+    image_unlock(view.img);
 
     return FALSE; 
 }
@@ -1479,7 +895,7 @@ map_pt_to_pixel(float *x, float *y)
 	*y = (*y * 72.0 / option.ydpi);
 	itransform_point(x, y);
 	*x = (*x * option.xdpi / 72.0) + display.offset.x;
-	*y = -(*y * option.ydpi / 72.0) + (pixmap_height - 1) 
+	*y = -(*y * option.ydpi / 72.0) + (image.height - 1) 
 		+ display.offset.y;
     }
     else {
@@ -1494,7 +910,7 @@ map_pt_to_pixel(float *x, float *y)
 	itransform_point(x, y);
 	*x = *x * option.xdpi/72.0 + display.offset.x;
 	*y = -(*y * option.ydpi/72.0)
-	      + (pixmap_height - 1) + display.offset.y;
+	      + (image.height - 1) + display.offset.y;
     }
 }
 
@@ -1507,7 +923,7 @@ get_cursorpos(float *x, float *y)
 	return FALSE;
     gdk_window_get_pointer(img->window, &ix, &iy, &state);
     *x = ix;
-    *y = pixmap_height - 1 - iy;
+    *y = image.height - 1 - iy;
     transform_cursorpos(x, y);
     return TRUE;
 }
@@ -1604,7 +1020,7 @@ statusbar_update(void)
 	    gtk_label_set_text(GTK_LABEL(statuspage), buf);
 	  }
 	  else {
-	    if ((gsdll.state == IDLE) || (gsdll.state == UNLOADED))
+	    if ((gsdll.state == GS_IDLE) || (gsdll.state == GS_UNINIT))
 		load_string(IDS_NOMORE, buf, sizeof(buf));
 	    else {
 		load_string(IDS_PAGE, buf, sizeof(buf));
@@ -1786,7 +1202,7 @@ highlight_words(int first, int last, BOOL marked)
     if ((first == -1) || (last == -1))
 	return;
 
-    if (pixmap == NULL)
+    if (!image.open)
 	return;
 
     if ((first > (int)text_index_count) || (last > (int)text_index_count)) {
@@ -1826,15 +1242,9 @@ highlight_words(int first, int last, BOOL marked)
 	    left = temp;
 	}
 
-	if (pixmap) {
-	    /* redraw rectangle we about to invert */
-	    gdk_draw_pixmap(img->window,
-		    img->style->fg_gc[GTK_WIDGET_STATE(img)],
-		    pixmap,
-		    left, top,
-		    left, top,
-		    right-left, bottom-top);
-	}
+	/* redraw rectangle we about to invert */
+	window_draw(img, left, top, right-left, bottom-top);
+
 	if (marked) {
 	    /* invert text */
 	    gdk_draw_rectangle(img->window, gcinvert,
@@ -1934,11 +1344,12 @@ void copy_clipboard(void)
     gs_addmess("copy_clipboard: not implemented\n");
 }
 
-/* Save Pixmap to file */
+/* Save image to file */
 /* doesn't work because of structure packing */
 void
 paste_to_file(void)
 {
+/* not implemented fully */
     LPBITMAP2 pbmih;
     BITMAPFILE bmfh;
     DWORD header_size;
@@ -1946,11 +1357,15 @@ paste_to_file(void)
     FILE *f;
     PREBMAP pbmap;
     static char output[MAXSTR];
+
+    image_lock(view.img);
     pbmih = get_bitmap();
+    image_unlock(view.img);
     if (pbmih == (LPBITMAP2)NULL)
 	 return;
+
     scan_dib(&pbmap, (BYTE *)pbmih);
-    header_size = pbmap.bits - (BYTE *)pbmih;
+    header_size = BITMAP2_LENGTH;
     bitmap_size = pbmap.height * pbmap.bytewidth;
     bmfh.bfType = ('M'<<8) | 'B';
     bmfh.bfReserved1 = 0;
@@ -2049,13 +1464,26 @@ int gsview_pstoedit(void)
     return FALSE;
 }
 
-void pre_parse_args(int argc, char *argv[])
+int
+bad_arg(const char *arg)
+{
+    fprintf(stdout, "Bad argument %s\n", arg);
+    return -1;
+}
+
+/* returns 0 if OK, 1 if we should exit normally (e.g. gsview -h),
+ * -1 if we should exit abnormally
+ */
+int pre_parse_args(int argc, char *argv[])
 {
     int i;
-    char *str;
+    const char *str;
+    int rc = 0;
     for (i=1; i < argc; i++) {
 	str = argv[i];
 	if ( (*str == '-') && (str[1] != '0') ) {
+	    if (str[1] == '-')
+		str++;
 	    /* a command line switch */
 	    if ((str[1] == 'D') || (str[1] == 'd')) {
 		str+=2;
@@ -2064,8 +1492,46 @@ void pre_parse_args(int argc, char *argv[])
 		else
 		    debug = 1;
 	    }
+	    else if ((str[1] == 'V') || (str[1] == 'v')) {
+		fprintf(stdout, "GSview %s %s\n", GSVIEW_DOT_VERSION,
+		    GSVIEW_DATE);
+		fprintf(stdout, "Documentation files in %s\n", GSVIEW_DOCPATH);
+		fprintf(stdout, "Configuration files in %s\n", GSVIEW_ETCPATH);
+		rc = 1;
+	    }
+	    else if ((str[1] == 'H') || (str[1] == 'h')) {
+		fprintf(stdout, "Usage: %s [options] [filename]\n", argv[0]);
+		fprintf(stdout, "Options are:\n");
+		fprintf(stdout, " -help\n");
+		fprintf(stdout, " -version\n");
+		fprintf(stdout, " -geometry WIDTHxHEIGHT\n");
+		rc = 1;
+	    }
+	    else if ((str[1] == 'G') || (str[1] == 'g')) {
+		int j;
+		i++;
+		if (i >= argc)
+		   return bad_arg(argv[i-1]); 
+		j = sscanf(argv[i], "%dx%d%d%d", 
+		    &geometry_width, &geometry_height,
+		    &geometry_xoffset, &geometry_yoffset);
+		if (j == 4) {
+		    /* OK */
+		    fprintf(stdout, "Warning: ignoring x and y offset\n");
+		}
+		else if (j == 2) {
+		    geometry_xoffset = geometry_yoffset = CW_USEDEFAULT;
+		}
+		else {
+		    return bad_arg(argv[i]); 
+		}
+	    }
+	    else {
+		return bad_arg(argv[i]); 
+	    }
 	}
     }
+    return rc;
 }
 
 gint do_args_tag;
@@ -2102,16 +1568,22 @@ do_args(gpointer data)
 void parse_args(int argc, char *argv[])
 {
     int i;
-    char *str;
+    const char *str;
     char filename[MAXSTR];
     char *p = filename;
     *p = '\0';
     for (i=1; i < argc; i++) {
 	str = argv[i];
 	if ( (*str == '-') && (str[1] != '0') ) {
+	    if (str[1] == '-')
+		str++;
 	    /* a command line switch */
 	    if ((str[1] == 'D') || (str[1] == 'd')) {
-		/* already processed by pre_parse_args() */
+	        /* already processed by pre_parse_args() */
+	    }
+	    else if ((str[1] == 'G') || (str[1] == 'g')) {
+	        /* already processed by pre_parse_args() */
+		i++;
 	    }
 	    else {
 	        gserror(IDS_BADCLI, str, MB_ICONEXCLAMATION, SOUND_ERROR);
@@ -2159,15 +1631,37 @@ void parse_args(int argc, char *argv[])
     }
 }
 
+void *
+gs_thread(void *arg)
+{
+    while (!quitnow) {
+	if (!pending.now)
+	    wait_event();
+	if (!quitnow)
+	    gs_process();
+    }
+
+    /* signal that we have finished */
+    post_img_message(WM_QUIT, 0);   /* shut down application */
+    return NULL;
+}
 
 int main( int argc, char *argv[] )
 {
+    int rc;
     pszLocale = gtk_set_locale();
     setlocale(LC_NUMERIC, "C");
     gtk_init (&argc, &argv);
+    gdk_rgb_init();
+    gtk_widget_set_default_colormap(gdk_rgb_get_cmap());
+    gtk_widget_set_default_visual(gdk_rgb_get_visual());
 
     gs_getcwd(workdir, sizeof(workdir));
-    pre_parse_args(argc, argv);
+    rc = pre_parse_args(argc, argv);
+    if (rc < 0)
+	return 1;
+    if (rc > 0)
+	return 0;
     if (argc > 1) {
 	/* delay the argument processing until we reach idle state */
 	gargc = argc;
@@ -2184,7 +1678,22 @@ int main( int argc, char *argv[] )
     set_menu_sensitive();
     set_last_used();
 
-    gtk_main ();
+    if (multithread) {
+	/* start thread for displaying */
+	if (pthread_create(&display.tid, NULL, gs_thread, NULL)) {
+	    fprintf(stdout, "pthread_create failed\n");
+	    return 1;
+	}
+    }
+
+    gtk_main();
+
+    if (multithread) {
+	close_img_message();
+	sem_destroy(&display.event);
+	pthread_mutex_destroy(&image.hmutex);
+	pthread_mutex_destroy(&hmutex_ps);
+    }
 
     measure_close();
     psfile_free(&psfile);

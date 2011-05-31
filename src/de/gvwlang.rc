@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -113,7 +113,6 @@ BEGIN
 		MENUITEM "Merke Letztes &Verzeichnis", IDM_SAVEDIR
 		MENUITEM "&Hilfsmittelpalette", IDM_BUTTONSHOW
 		MENUITEM "Fenster an Seite an&passen", IDM_FITPAGE
-		MENUITEM "Schne&lles Öffnen", IDM_QUICK_OPEN
 		MENUITEM "&Automatisches Neuzeichnen", IDM_AUTOREDISPLAY
 		MENUITEM "EPS Ausschni&tt", IDM_EPSFCLIP
 		MENUITEM "EPS &Warnung", IDM_EPSFWARN
@@ -125,8 +124,8 @@ BEGIN
 		MENUITEM "&Nächste Seite\t+", IDM_NEXT
 		MENUITEM "&Vorherige Seite\t-", IDM_PREV
 		MENUITEM "&Gehe zu Seite...\tG", IDM_GOTO
-		MENUITEM "Go &Back\tB", IDM_GOBACK	 /* ENGLISH */
-		MENUITEM "Go &Forward", IDM_GOFWD	/* ENGLISH */
+		MENUITEM "&Zurück\tB", IDM_GOBACK
+		MENUITEM "W&eiter", IDM_GOFWD
 		MENUITEM "&Wiederaufbau\tW", IDM_REDISPLAY
 		MENUITEM SEPARATOR
 		MENUITEM "Nächste Seite oben\tLeer", IDM_NEXTHOME

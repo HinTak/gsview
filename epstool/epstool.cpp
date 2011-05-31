@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "1.6  2000-12-28";
+char szVersion[] = "1.8  2001-06-02";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -38,6 +38,8 @@ BOOL ptsize = FALSE;
 int ptwidth = 612;	/* letter width */
 int ptheight = 842;	/* A4 height */
 BOOL got_dsc_error = FALSE;
+BOOL ignore_dsc_warning = FALSE;
+BOOL ignored_dsc_warning = FALSE;
 int op = 0;
 #define EXTRACTPS	1
 #define EXTRACTPRE	2
@@ -142,6 +144,17 @@ show_dsc_error(P5(void *caller_data, CDSC *dsc, unsigned int explanation,
     fprintf(stdout, "Assuming Cancel\n");
 
     got_dsc_error = TRUE;
+
+    if ((severity == CDSC_ERROR_WARN) && ignore_dsc_warning) {
+	ignored_dsc_warning = TRUE;
+	dsc_debug_print(dsc, "\n****************************************************************");
+	dsc_debug_print(dsc, "\nYou have recklessly told epstool to ignore DSC Warnings.");
+	dsc_debug_print(dsc, "\nA warning has been given and you have ignored it.");
+	dsc_debug_print(dsc, "\nIf you distribute this so called EPS file, you name will be mud.");
+	dsc_debug_print(dsc, "\n****************************************************************\n\n");
+	got_dsc_error = FALSE;
+    }
+
     return response;
 }
 
@@ -190,7 +203,7 @@ main(int argc, char *argv[])
 	    dsc_set_error_function(dsc, show_dsc_error);
 	    while ((count = fread(d, 1, COPY_BUF_SIZE, psfile.file))!=0) {
 		code = dsc_scan_data(dsc, d, count);
-		if ((code == CDSC_ERROR) || (code == CDSC_NOTDSC)) {
+		if ((code == CDSC_ERROR)  || (code == CDSC_NOTDSC)) {
 		    /* not DSC or an error */
 		    fclose(psfile.file);
 		    dsc_free(dsc);
@@ -569,6 +582,11 @@ int count;
 		case 'q':
 		  quiet = !quiet;
 		  break;
+		case 'e':
+		  ignore_dsc_warning = !ignore_dsc_warning;
+		  if (ignore_dsc_warning)
+		    fprintf(stderr, "You have recklessly told epstool to ignore DSC Warnings.\nBad things might happen...\n");
+		  break;
 		case 'g':
 		  if (argp[2])
 		    strcpy(gsname, argp+2);
@@ -728,6 +746,7 @@ gserror(UINT id, char *str, UINT icon, int sound)
 FILE *
 gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 {	char *temp;
+        int fd;
 	if ( (temp = getenv("TEMP")) == NULL )
 #if defined(UNIX) || defined(__UNIX) || defined(__unix)
 		strcpy(fname, "/tmp");
@@ -750,8 +769,13 @@ gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 
 	strcat(fname, prefix);
 	strcat(fname, "XXXXXX");
+#if defined(UNIX) || defined(OS2)
+	fd = mkstemp(fname);
+	return fdopen(fd, mode);
+#else
 	mktemp(fname);
 	return fopen(fname, mode);
+#endif
 }
 
 char * 
@@ -964,6 +988,10 @@ copy_eps_bbox_header(FILE *f)
 	    bbox.llx, bbox.lly, bbox.urx, bbox.ury);
       ps_copy(f, psfile.file, position, dsc->endcomments); 
     }
+    if (ignored_dsc_warning)
+	fputs("\
+% The user who created this EPS file recklessly ignored a warning about\n\
+% incorrect DSC comments.  Blame them when things go wrong...\n", f);
 }
 
 /* copy psfile, updating %%BoundingBox */

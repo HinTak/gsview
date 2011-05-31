@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -87,8 +87,10 @@ OBJS=gvpm.$(OBJ) gvpdlg.$(OBJ) gvpdisp.$(OBJ) gvpedit.$(OBJ) gvpeps.$(OBJ)\
    gvccmd.$(OBJ) gvcdisp.$(OBJ) gvceps.$(OBJ) gvcinit.$(OBJ) gvcbeta.$(OBJ)\
    gvcmeas.$(OBJ) gvcmeas2.$(OBJ) gvcmisc.$(OBJ) gvcprf.$(OBJ) gvcprn.$(OBJ)\
    gvctext.$(OBJ) gvpdll.$(OBJ) gvcdll.$(OBJ) gvcpdf.$(OBJ)\
-   dscparse.$(OBJ) dscutil.$(OBJ) gvcreg.$(OBJ) gvpreg.$(OBJ)
-HDRS=gsvver.h gvpm.h dscparse.h gvcfn.h gvcver.h
+   dscparse.$(OBJ) dscutil.$(OBJ) gvcreg.$(OBJ) gvpreg.$(OBJ)\
+   cdll.$(OBJ) cimg.$(OBJ) cview.$(OBJ)
+GSHDRS=iapi.h errors.h gdevdsp.h
+HDRS=gsvver.h gvcrc.h gvpm.h dscparse.h gvcfn.h gvcver.h $(GSHDRS)
 
 
 all: gvpm.exe\
@@ -116,7 +118,7 @@ gvpm.$(OBJ): gvpm.cpp $(HDRS)
 gvpdlg.$(OBJ): gvpdlg.cpp gvcrc.h $(HDRS)
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
-gvpdll.$(OBJ): gvpdll.cpp gvcrc.h gsdll.h $(HDRS)
+gvpdll.$(OBJ): gvpdll.cpp gvcrc.h $(HDRS)
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
 gvpdisp.$(OBJ): gvpdisp.cpp  $(HDRS)
@@ -152,7 +154,7 @@ gvccmd.$(OBJ): gvccmd.cpp gvcrc.h $(HDRS)
 gvcdisp.$(OBJ): gvcdisp.cpp $(HDRS)
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
-gvcdll.$(OBJ): gvcdll.cpp gvcrc.h gsdll.h $(HDRS)
+gvcdll.$(OBJ): gvcdll.cpp gvcrc.h $(HDRS)
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
 dscparse.$(OBJ): dscparse.cpp dscparse.h
@@ -192,6 +194,15 @@ gvcreg.$(OBJ): gvcreg.cpp $(HDRS)
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
 gvctext.$(OBJ): gvctext.cpp $(HDRS)
+	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
+
+cdll.$(OBJ): cdll.cpp $(HDRS)
+	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
+
+cimg.$(OBJ): cimg.cpp $(HDRS)
+	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
+
+cview.$(OBJ): cview.cpp $(HDRS)
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
 ansi2oem.exe: ansi2oem.cpp
@@ -307,14 +318,14 @@ os2setup.res: os2setup.rc setup.h $(LANGUAGE)\gvclang.h ansi2oem.exe
 
 os2beta.obj: gvcbeta.cpp gvcbeta.h gvcrc.h
 !if $(USE_EMX)
-	$(COMP) -Zomf -Zsys -c -o os2beta.obj gvcbeta.cpp
+	$(COMP) -Zomf -Zsys -DOS2 -c -o os2beta.obj gvcbeta.cpp
 !else
-	$(COMP) -c /Foos2beta.obj gvcbeta.cpp
+	$(COMP) -c -DOS2 /Foos2beta.obj gvcbeta.cpp
 !endif
 
 os2prf.obj: gvcprf.cpp
 !if $(USE_EMX)
-	$(COMP) -Zomf -Zsys -DNODEBUG_MALLOC -c -o os2prf.obj gvcprf.cpp
+	$(COMP) -Zomf -Zsys -DNODEBUG_MALLOC -DOS2 -c -o os2prf.obj gvcprf.cpp
 !else
 	$(COMP) -DNODEBUG_MALLOC -c /Foos2prf.obj gvcprf.cpp
 !endif
@@ -508,11 +519,11 @@ doc2tex.exe: doc2tex.cpp
 !endif
 
 
-gvpgs.res: gvpgs.rc gvpgs.h gvcrc.h $(LANGUAGE)\gvclang.h
+gvpgs.res: gvpgs.rc gvpgs.h gvcrc.h $(LANGUAGE)\gvclang.h ansi2oem.exe
 	ansi2oem < $(LANGUAGE)\gvclang.h > gvclang.h
 	rc -i $(COMPBASE)\include -r $*.rc
 
-gvpgs.$(OBJ): gvpgs.cpp gvpgs.h gvcrc.h
+gvpgs.$(OBJ): gvpgs.cpp gvpgs.h gvcrc.h gsvver.h
 	$(COMP) $(FLAGS) -DOS2 -c $*.cpp
 
 gvpgs.exe: gvpgs.$(OBJ) gvpgs.res gvpgs.def
@@ -639,6 +650,9 @@ clean: language
 	-del gvcprn.$(OBJ)
 	-del gvcreg.$(OBJ)
 	-del gvctext.$(OBJ)
+	-del cdll.$(OBJ)
+	-del cimg.$(OBJ)
+	-del cview.$(OBJ)
 	-del doc2ipf.$(OBJ)
 	-del doc2ipf.exe
 	-del doc2html.$(OBJ)

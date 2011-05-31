@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -95,7 +95,6 @@ int on_link;			/* TRUE if we were or are over link */
 int on_link_page;		/* page number of link target */
 long gsbytes_size;		/* number of bytes for this page */
 long gsbytes_done;		/* number of byte written */
-BOOL ignore_sync = FALSE;	/* ignore next GSDLL_SYNC */
 BOOL fit_page_enabled = FALSE;	/* next WM_SIZE is allowed to resize window */
 
 BOOL prev_in_child;		/* true if cursor previously in gswin child window */
@@ -347,6 +346,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 }
 
 
+
 /* child image window */
 LRESULT CALLBACK _export
 WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -369,7 +369,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	    case WM_DESTROY:
 		    hwnd_image = hwndimgchild;
 		    fullscreen = FALSE;
-		    if ((hwnd == hwnd_fullscreen) && gsdll.device) {
+		    if ((hwnd == hwnd_fullscreen) && image.open) {
 			ShowWindow(hwnd_image, SW_SHOWNA);
 			update_scroll_bars();
 			InvalidateRect(hwnd_image, (LPRECT)NULL, FALSE);
@@ -386,12 +386,12 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    cxClient = LOWORD(lParam);
 
 #ifdef OLD
-		    cyAdjust = min(bitmap.height, cyClient) - cyClient;
+		    cyAdjust = min(image.height, cyClient) - cyClient;
 		    cyClient += cyAdjust;
 #else
-		    if (bitmap.height < cyClient) {
+		    if (image.height < cyClient) {
 			/* shrink window */
-			cyAdjust = bitmap.height - cyClient;
+			cyAdjust = image.height - cyClient;
 		    }
 		    else {
 			if (!fullscreen && fit_page_enabled) {
@@ -401,7 +401,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			     * bottom of screen
 			     */
 			    GetWindowRect(GetParent(hwnd),&rect);
-			    cyAdjust = min(bitmap.height, 
+			    cyAdjust = min(image.height, 
 				cyClient + GetSystemMetrics(SM_CYFULLSCREEN) + 
 				GetSystemMetrics(SM_CYCAPTION) - rect.bottom)
 				- cyClient;
@@ -412,10 +412,10 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    cyClient += cyAdjust;
 #endif
 
-		    nVscrollMax = max(0, bitmap.height - cyClient);
+		    nVscrollMax = max(0, image.height - cyClient);
 		    nVscrollPos = min(nVscrollPos, nVscrollMax);
 
-		    if (!gsdll.device)
+		    if (!image.open)
 			nVscrollMax = nVscrollPos = 0;
 
 		    if (fullscreen) {
@@ -447,12 +447,12 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    }
 
 #ifdef OLD
-		    cxAdjust = min(bitmap.width,  cxClient) - cxClient;
+		    cxAdjust = min(image.width,  cxClient) - cxClient;
 		    cxClient += cxAdjust;
 #else
-		    if (bitmap.width < cxClient) {
+		    if (image.width < cxClient) {
 			/* shrink window */
-			cxAdjust = bitmap.width - cxClient;
+			cxAdjust = image.width - cxClient;
 		    }
 		    else {
 			if (fit_page_enabled) {
@@ -460,7 +460,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			    /* enlarge window to smaller of bitmap width */
 			    /* and width if client extended to right of screen */
 			    GetWindowRect(GetParent(hwnd),&rect);
-			    cxAdjust = min(bitmap.width, 
+			    cxAdjust = min(image.width, 
 				cxClient + GetSystemMetrics(SM_CXFULLSCREEN)-rect.right)
 				- cxClient;
 			}
@@ -470,10 +470,10 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    cxClient += cxAdjust;
 #endif
 
-		    nHscrollMax = max(0, bitmap.width - cxClient);
+		    nHscrollMax = max(0, image.width - cxClient);
 		    nHscrollPos = min(nHscrollPos, nHscrollMax);
 
-		    if (!gsdll.device)
+		    if (!image.open)
 			nHscrollMax = nHscrollPos = 0;
 
 		    if (fullscreen) {
@@ -507,7 +507,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		    if (!fullscreen && option.fit_page &&
 			(wParam==SIZE_RESTORED) && !IsZoomed(hwndimg) &&
-			gsdll.device && (cxAdjust!=0 || cyAdjust!=0) ) {
+			image.open && (cxAdjust!=0 || cyAdjust!=0) ) {
 			GetWindowRect(GetParent(hwnd),&rect);
 			MoveWindow(GetParent(hwnd),rect.left,rect.top,
 			    rect.right-rect.left+cxAdjust,
@@ -520,12 +520,12 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    GetClientRect(hwnd, &rect);
 		    cxClient = rect.right - rect.left;
 		    cyClient = rect.bottom - rect.top;
-		    if (bitmap.width < cxClient)
-			display.offset.x = (cxClient - bitmap.width) / 2;
+		    if (image.width < cxClient)
+			display.offset.x = (cxClient - image.width) / 2;
 		    else
 			display.offset.x = 0;
-		    if (bitmap.height < cyClient)
-			display.offset.y = (cyClient - bitmap.height) / 2;
+		    if (image.height < cyClient)
+			display.offset.y = (cyClient - image.height) / 2;
 		    else
 			display.offset.y = 0;
 
@@ -570,7 +570,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			    bitmap.scrolly = nVscrollPos;
 			    UpdateWindow(hwnd);
 		    }
-		    else if (gsdll.state != IDLE) {
+		    else if (gsdll.state != GS_IDLE) {
 			/* We are at the top or bottom of the 
 			 * scroll range.  Change page if 
 			 * PageUp or PageDown pressed. */
@@ -816,8 +816,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			EndPaint(hwnd, &ps);
 			return 0;
 		    }
-		    if (gsdll.lock_device && gsdll.device)
-			gsdll.lock_device(gsdll.device, 1);
+		    image_lock(view.img);
 		    request_mutex();
 		    {
 		    int wx,wy;
@@ -830,8 +829,8 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    SetBkMode(hdc,OPAQUE);
 		    if (hwnd == hwnd_fullscreen)
 			hbrush = (HBRUSH)GetStockObject(WHITE_BRUSH);
-		    if (gsdll.draw && gsdll.device && 
-			    (bitmap.width > 1) && (bitmap.height > 1)) {
+		    if (image.open && 
+			    (image.width > 1) && (image.height > 1)) {
 
 			wx = rect.right-rect.left; /* width */
 			wy = rect.bottom-rect.top;
@@ -843,15 +842,15 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				source.top = 0;
 			else
 				source.top = rect.top - display.offset.y + nVscrollPos;
-			if (source.left > bitmap.width)
-				source.left = bitmap.width;
-			if (source.left + wx > bitmap.width)
-				wx = bitmap.width - source.left;
+			if (source.left > image.width)
+				source.left = image.width;
+			if (source.left + wx > image.width)
+				wx = image.width - source.left;
 			source.right = source.left + wx;
-			if (source.top > bitmap.height)
-				source.top = bitmap.height;
-			if (source.top + wy > bitmap.height)
-				wy = bitmap.height - source.top;
+			if (source.top > image.height)
+				source.top = image.height;
+			if (source.top + wy > image.height)
+				wy = image.height - source.top;
 			source.bottom = source.top + wy;
 
 			if (rect.left < display.offset.x)
@@ -865,14 +864,16 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			dest.right = dest.left + wx;
 			dest.bottom = dest.top + wy;
 			    
-			if (wx && wy)
-			    gsdll.draw(gsdll.device, hdc, &dest, &source);
+			if (wx && wy) {
+			    image_draw(&image, hdc, dest.left, dest.top,
+				wx, wy, source.left, source.top);
+			}
 			/* Fill areas around page */
 			/* not sure if display.offset.y is from top or bottom */
 			/* code here assumes top (opposite to OS/2) */
-			if (rect.bottom > bitmap.height + display.offset.y) {	/* bottom centre */
+			if (rect.bottom > image.height + display.offset.y) {	/* bottom centre */
 			    fillrect.bottom = rect.bottom; 
-			    fillrect.top = bitmap.height + display.offset.y;
+			    fillrect.top = image.height + display.offset.y;
 			    fillrect.left = dest.left;
 			    fillrect.right = dest.right;
 			    FillRect(hdc, &fillrect, hbrush);
@@ -891,10 +892,10 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			    fillrect.right = display.offset.x;
 			    FillRect(hdc, &fillrect, hbrush);
 			}
-			if (rect.right > bitmap.width + display.offset.x) { /* right */
+			if (rect.right > image.width + display.offset.x) { /* right */
 			    fillrect.bottom = rect.bottom;
 			    fillrect.top = rect.top;
-			    fillrect.left = bitmap.width + display.offset.x;
+			    fillrect.left = image.width + display.offset.x;
 			    fillrect.right = rect.right;
 			    FillRect(hdc, &fillrect, hbrush);
 			}
@@ -903,7 +904,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			FillRect(hdc, &rect, hbrush);
 		    }
 		    /* draw bounding box */
-		    if (gsdll.device && (dsc != (CDSC *)NULL) &&
+		    if (image.open && (dsc != (CDSC *)NULL) &&
 			(dsc->bbox != (CDSCBBOX *)NULL) &&
 			option.show_bbox) {
 			float x, y;
@@ -934,7 +935,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DeletePen(hpen);
 		    }
 		    /* highlight found search word */
-		    if (gsdll.device && display.show_find) {
+		    if (image.open && display.show_find) {
 			float x, y;
 			/* map bounding box to device coordinates */
 			x = psfile.text_bbox.llx;
@@ -969,8 +970,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    release_mutex();
 		    if (hwnd == hwnd_fullscreen)
 			SetCursor(NULL);
-		    if (gsdll.lock_device && gsdll.device)
-			gsdll.lock_device(gsdll.device, 0);
+		    image_unlock(view.img);
 		    return 0;
 		    }
     }
@@ -1080,7 +1080,7 @@ RECT rect;
 	    return 0;
 	case WM_GSDEVICE:
 	    /* hide window if closed */
-	    if (!gsdll.device) {
+	    if (!image.open) {
 		ShowWindow(hwndimgchild, SW_HIDE);
 		if (fullscreen)
 		    ShowWindow(hwnd_fullscreen, SW_HIDE);
@@ -1088,10 +1088,12 @@ RECT rect;
 	    bitmap.changed = TRUE;
 	    return 0;
 	case WM_GSSYNC:
+	    if (debug & DEBUG_GENERAL)
+		gs_addmess("WM_GSSYNC\n");
 	    hwnd_image = fullscreen ? hwnd_fullscreen : hwndimgchild;
 	    if ( fullscreen &&
 		(!IsWindowVisible(hwnd_fullscreen) || bitmap.changed) &&
-		(bitmap.width > 1) && (bitmap.height > 1)) {
+		(image.width > 1) && (image.height > 1)) {
 		SetFocus(hwndimg);
 		ShowWindow(hwndimgchild, SW_HIDE);
 		ShowWindow(hwnd_fullscreen, SW_SHOWNA);
@@ -1099,13 +1101,13 @@ RECT rect;
 		bitmap.changed = FALSE;
 	    }
 	    else if ( (!IsWindowVisible(hwndimgchild) || bitmap.changed) &&
-		(bitmap.width > 1) && (bitmap.height > 1)) {
+		(image.width > 1) && (image.height > 1)) {
 		ShowWindow(hwndimgchild, SW_SHOWNA);
 		update_scroll_bars();
 		bitmap.changed = FALSE;
 	    }
 	    if ( !IsIconic(hwndimg) && !fullscreen) {  /* redraw child window */
-		if (gsdll.device) {
+		if (image.open) {
 		    /* don't erase background - the bitmap will cover it anyway */
 		    InvalidateRect(hwnd_image, (LPRECT)NULL, FALSE);
 		    UpdateWindow(hwnd_image);
@@ -1113,11 +1115,12 @@ RECT rect;
 	    }
 	    return 0;
 	case WM_GSPAGE:
-	    ignore_sync = FALSE;
+	    if (debug & DEBUG_GENERAL)
+		gs_addmess("WM_GSPAGE\n");
 	    hwnd_image = fullscreen ? hwnd_fullscreen : hwndimgchild;
 	    if ( fullscreen &&
 		(!IsWindowVisible(hwnd_fullscreen) || bitmap.changed) &&
-		(bitmap.width > 1) && (bitmap.height > 1)) {
+		(image.width > 1) && (image.height > 1)) {
 		SetFocus(hwndimg);
 		ShowWindow(hwndimgchild, SW_HIDE);
 		ShowWindow(hwnd_fullscreen, SW_SHOWNA);
@@ -1125,7 +1128,7 @@ RECT rect;
 		bitmap.changed = FALSE;
 	    }
 	    else if ( (!IsWindowVisible(hwndimgchild) || bitmap.changed) &&
-		(bitmap.width > 1) && (bitmap.height > 1)) {
+		(image.width > 1) && (image.height > 1)) {
 		ShowWindow(hwndimgchild, SW_SHOWNA);
 		update_scroll_bars();
 		bitmap.changed = FALSE;
@@ -1135,7 +1138,7 @@ RECT rect;
 	    if (IsIconic(hwndimg))    /* useless as an Icon so fix it */
 		ShowWindow(hwndimg, SW_SHOWNORMAL);
 	    if ( !IsIconic(hwndimg) ) {  /* redraw child window */
-		if (gsdll.device) {
+		if (image.open) {
 		    if (display.show_find) {
 			scroll_to_find();
 		    }
@@ -1154,6 +1157,7 @@ RECT rect;
 	    }
 	    return 0;
 	case WM_GSSHOWMESS:
+	    /* delayed message box, usually from other thread */
 	    /* delayed show message, usually from other thread */
 	    gs_showmess();
 	    return 0;
@@ -1230,7 +1234,7 @@ RECT rect;
 	    pending.abort = TRUE;
 	    if (multithread)
 		SetEvent(display.event);	/* unblock display thread */
-	    if (gsdll.state != UNLOADED)
+	    if (gsdll.state != GS_UNINIT)
 		return 0;			/* don't close yet */
 	    PostQuitMessage(0);
 	    break;
@@ -1275,8 +1279,8 @@ RECT rect;
 		HMENU hmenuedit = GetSubMenu(hmenu,1);
 		BOOL idle;
 		BOOL addeps;
-	        idle = (gsdll.state != BUSY);
-		enable_menu_item(IDM_EDITMENU, IDM_COPYCLIP, gsdll.device!=NULL);
+	        idle = (gsdll.state != GS_BUSY);
+		enable_menu_item(IDM_EDITMENU, IDM_COPYCLIP, image.open);
 		if (OpenClipboard(hwnd)) {
 		    enable_menu_item(IDM_EDITMENU, IDM_PASTETO, IsClipboardFormatAvailable(CF_DIB));
 		    enable_menu_item(IDM_EDITMENU, IDM_CONVERT, 
@@ -1299,7 +1303,7 @@ RECT rect;
 		else
 		    EnableMenuItem(hmenuedit, 6, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
 		enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPSU, addeps);
-		addeps =  addeps && gsdll.device;
+		addeps =  addeps && image.open;
 		enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPSI, addeps);
 		enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPST4, addeps);
 		enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPST6U, addeps);
@@ -1429,7 +1433,7 @@ RECT rect;
 			return 0;	/* obtaining Bounding Box so ignore commands */
 		    }
 #ifdef NOTUSED
-		    if (gsdll.state == BUSY) {
+		    if (gsdll.state == GS_BUSY) {
 			/* With DLL, more than the following will be safe */
 			switch(LOWORD(wParam)) {
 			    case IDM_INFO:
@@ -1501,7 +1505,7 @@ RECT rect;
 		}
 	    }
 	    /* track cursor and display coordinates if in child window */
-	    if (gsdll.device) {
+	    if (image.open) {
 		float x, y;
 		if (in_child_client_area() || prev_in_child) {
 		    /* update coordinate info */
@@ -1550,16 +1554,16 @@ RECT rect;
 		    display.zoom_yoffset = y;
 		    scrollx = bitmap.scrollx;
 		    scrolly = bitmap.scrolly;
-		    if (rect.right - rect.left > bitmap.width)
-		        zwidth = bitmap.width;
+		    if (rect.right - rect.left > image.width)
+		        zwidth = image.width;
 		    else
 		        zwidth = rect.right - rect.left;
-		    if (rect.bottom - rect.top > bitmap.height)
-		        zheight = bitmap.height;
+		    if (rect.bottom - rect.top > image.height)
+		        zheight = image.height;
 		    else
 		        zheight = rect.bottom - rect.top;
 		    x = (scrollx + zwidth/2)*72.0/option.xdpi;
-		    y = ((bitmap.height-1) - (scrolly + zheight/2))*72.0/option.ydpi;
+		    y = ((image.height-1) - (scrolly + zheight/2))*72.0/option.ydpi;
 		    transform_point(&x, &y);
 		    x *= option.xdpi/72.0;
 		    y *= option.ydpi/72.0;
@@ -1789,7 +1793,7 @@ map_pt_to_pixel(float *x, float *y)
 	*y = (*y * 72.0 / option.ydpi);
 	itransform_point(x, y);
 	*x = (*x * option.xdpi / 72.0) - bitmap.scrollx + display.offset.x;
-	*y = -(*y * option.ydpi / 72.0) + (bitmap.height-1 - bitmap.scrolly) 
+	*y = -(*y * option.ydpi / 72.0) + (image.height-1 - bitmap.scrolly) 
 		+ display.offset.y;
     }
     else {
@@ -1805,7 +1809,7 @@ map_pt_to_pixel(float *x, float *y)
 	*x = *x * option.xdpi/72.0
 	      - bitmap.scrollx + display.offset.x;
 	*y = -(*y * option.ydpi/72.0)
-	      + (bitmap.height-1 - bitmap.scrolly) + display.offset.y;
+	      + (image.height-1 - bitmap.scrolly) + display.offset.y;
     }
 }
 
@@ -1814,13 +1818,13 @@ get_cursorpos(float *x, float *y)
 {
 RECT rect;
 POINT pt;
-    if (gsdll.device) {
+    if (image.open) {
 	GetClientRect(hwnd_image, &rect);
 	GetCursorPos(&pt);
 	ScreenToClient(hwnd_image, &pt);
 	if (PtInRect(&rect, pt)) {
 	    *x = bitmap.scrollx+pt.x - display.offset.x;
-	    *y = bitmap.height-1 - (bitmap.scrolly+pt.y) + display.offset.y;
+	    *y = image.height-1 - (bitmap.scrolly+pt.y) + display.offset.y;
 	    transform_cursorpos(x, y);
 	    return TRUE;
 	}
@@ -1934,7 +1938,7 @@ COLORREF text_colour;
 	    TextOut(hdc, info_page.x, info_page.y, buf, strlen(buf));
 	  }
 	  else {
-	    if (gsdll.state == IDLE)
+	    if (gsdll.state == GS_IDLE)
 		load_string(IDS_NOMORE, buf, sizeof(buf));
 	    else {
 		 load_string(IDS_PAGE, buf, sizeof(buf));
@@ -2100,6 +2104,7 @@ gsview_close()
     if (multithread) {
 	CloseHandle(display.event);
 	CloseHandle(hmutex_ps);
+	CloseHandle(image.hmutex);
 	DeleteCriticalSection(&crit_sec);
     }
     unload_zlib();
@@ -2168,9 +2173,10 @@ HPALETTE hpalette;
 	return;
     }
 
-    if (gsdll.device) {
-	hglobal = (*gsdll.copy_dib)(gsdll.device);
-	hpalette = (*gsdll.copy_palette)(gsdll.device);
+    image_lock(view.img);
+    if (image.open) {
+	hglobal = image_copy_dib(&image);
+	hpalette = image_create_palette(&image);
 	if (hglobal == (HGLOBAL)NULL) {
 	    MessageBox(hwndimg, "Not enough memory to Copy to Clipboard", 
 		szAppName, MB_OK | MB_ICONEXCLAMATION);
@@ -2183,6 +2189,7 @@ HPALETTE hpalette;
 	    SetClipboardData(CF_PALETTE, hpalette);
 	CloseClipboard();
     }
+    image_unlock(view.img);
 }
 
 
@@ -2409,7 +2416,7 @@ int width, height;
 char class_name[MAXSTR];
 static BOOL class_registered;
 
-	if (!gsdll.device)
+	if (!image.open)
 	    return;
         if (!IsWindow(hwnd_fullscreen)) {
 	    strcpy(class_name, szAppName);
@@ -2476,109 +2483,114 @@ gsview_fitwin(void)
 RECT rect;
 int width, height;
 float dpi, xdpi, ydpi, xdpi2, ydpi2;
-	if (psfile.ispdf) {
-	    if (option.epsf_clip && (psfile.dsc->bbox == (CDSCBBOX *)NULL)) {
-		width = psfile.dsc->bbox->urx - psfile.dsc->bbox->llx;
-		height = psfile.dsc->bbox->ury - psfile.dsc->bbox->lly;
+    if (psfile.ispdf) {
+	CDSCBBOX *mediabox = NULL;
+	CDSCBBOX *cropbox = NULL;
+	if (psfile.pagenum < (int)psfile.dsc->page_count) {
+	    if (psfile.dsc->page[psfile.pagenum].media)
+		mediabox = psfile.dsc->page[psfile.pagenum].media->mediabox;
+	    cropbox = psfile.dsc->page[psfile.pagenum].bbox;
+	}
+	if (option.epsf_clip && (cropbox != (CDSCBBOX *)NULL)) {
+	    width = cropbox->urx - cropbox->llx;
+	    height = cropbox->ury - cropbox->lly;
+	}
+	else {
+	    if (mediabox) {
+		width = mediabox->urx - mediabox->llx;
+		height = mediabox->ury - mediabox->lly;
 	    }
 	    else {
-		if (psfile.dsc->page_bbox) {
-		    width = psfile.dsc->page_bbox->urx - 
-			psfile.dsc->page_bbox->llx;
-		    height = psfile.dsc->page_bbox->ury - 
-			psfile.dsc->page_bbox->lly;
-		}
-		else {
-		    width = get_paper_width();
-		    height = get_paper_height();
-		}
+		width = get_paper_width();
+		height = get_paper_height();
 	    }
 	}
-	else {
-	    width = get_paper_width();
-	    height = get_paper_height();
-	}
+    }
+    else {
+	width = get_paper_width();
+	height = get_paper_height();
+    }
 
-	if (display.orientation & 1) {
-	    /* page is rotated 90 degrees */
-	    int temp = width;
-	    width = height;
-	    height = temp;
-	}
+    if (display.orientation & 1) {
+	/* page is rotated 90 degrees */
+	int temp = width;
+	width = height;
+	height = temp;
+    }
 
 
-	if (fullscreen)
-	    GetClientRect(hwnd_image, &rect);
-	else {
-	    /* get size including scroll bars area */
-	    GetClientRect(hwndimg, &rect);
-	    rect.left += img_offset.x;
-	    rect.top += img_offset.y;
-	    /* substract height of status bar */
-	    rect.bottom -= (info_rect.bottom - info_rect.top);
-	}
-	xdpi = (rect.right - rect.left) * 72.0 / width;
-	ydpi = (rect.bottom - rect.top) * 72.0 / height;
-	if (fullscreen) {
-	    xdpi2 = xdpi;
-	    ydpi2 = ydpi;
-	}
-	else {
-	    /* These are the resolutions allowing for a scroll bar */
-	    xdpi2 = (rect.right - rect.left - GetSystemMetrics(SM_CXVSCROLL)) 
-		* 72.0 / width;
-	    ydpi2 = (rect.bottom - rect.top - GetSystemMetrics(SM_CYHSCROLL)) 
-		* 72.0 / height;
-	}
+    if (fullscreen)
+	GetClientRect(hwnd_image, &rect);
+    else {
+	/* get size including scroll bars area */
+	GetClientRect(hwndimg, &rect);
+	rect.left += img_offset.x;
+	rect.top += img_offset.y;
+	/* substract height of status bar */
+	rect.bottom -= (info_rect.bottom - info_rect.top);
+    }
+    xdpi = (rect.right - rect.left) * 72.0 / width;
+    ydpi = (rect.bottom - rect.top) * 72.0 / height;
+    if (fullscreen) {
+	xdpi2 = xdpi;
+	ydpi2 = ydpi;
+    }
+    else {
+	/* These are the resolutions allowing for a scroll bar */
+	xdpi2 = (rect.right - rect.left - GetSystemMetrics(SM_CXVSCROLL)) 
+	    * 72.0 / width;
+	ydpi2 = (rect.bottom - rect.top - GetSystemMetrics(SM_CYHSCROLL)) 
+	    * 72.0 / height;
+    }
 
-	if (display.orientation & 1) {
-	    /* page is rotated 90 degrees */
-	    float ftemp;
-	    ftemp = xdpi;
-	    xdpi = ydpi;
-	    ydpi = ftemp;
-	    ftemp = xdpi2;
-	    xdpi2 = ydpi2;
-	    ydpi2 = ftemp;
-	}
+    if (display.orientation & 1) {
+	/* page is rotated 90 degrees */
+	float ftemp;
+	ftemp = xdpi;
+	xdpi = ydpi;
+	ydpi = ftemp;
+	ftemp = xdpi2;
+	xdpi2 = ydpi2;
+	ydpi2 = ftemp;
+    }
 
-	if ( ((xdpi + 0.5) > option.xdpi) && (xdpi - 0.5) < option.xdpi) {
-	    /* Width matches. Set size based on height. */
-	    if (fullscreen || (ydpi <= xdpi))
-	        dpi = ydpi;
-	    else
-	        dpi = ydpi2;
-	}
-	else if ( ((ydpi + 0.5) > option.ydpi) && (ydpi - 0.5) < option.ydpi) {
-	    /* Height matches. Set size based on width. */
-	    if (fullscreen || (xdpi <= ydpi))
-	        dpi = xdpi;
-	    else
-	        dpi = xdpi2;
-	}
-	else  {
-	    /* Neither width nor height match.  Fit the whole page. */
-	    if (xdpi > ydpi)
-		    dpi = ydpi;
-	    else
-		    dpi = xdpi;
-	}
+    if ( ((xdpi + 0.5) > option.xdpi) && (xdpi - 0.5) < option.xdpi) {
+	/* Width matches. Set size based on height. */
+	if (fullscreen || (ydpi <= xdpi))
+	    dpi = ydpi;
+	else
+	    dpi = ydpi2;
+    }
+    else if ( ((ydpi + 0.5) > option.ydpi) && (ydpi - 0.5) < option.ydpi) {
+	/* Height matches. Set size based on width. */
+	if (fullscreen || (xdpi <= ydpi))
+	    dpi = xdpi;
+	else
+	    dpi = xdpi2;
+    }
+    else  {
+	/* Neither width nor height match.  Fit the whole page. */
+	if (xdpi > ydpi)
+		dpi = ydpi;
+	else
+		dpi = xdpi;
+    }
 #ifdef DEBUG
-	{
-	char buf[MAXSTR];
-	sprintf(buf, "\nrect=%d %d %d %d\n", 
-	rect.left, rect.top, rect.right, rect.bottom);
-	gs_addmess(buf);
-	sprintf(buf, "size=%d %d\n", width, height);
-	gs_addmess(buf);
-	sprintf(buf, "old dpi=%f %f\n", option.xdpi, option.ydpi);
-	gs_addmess(buf);
-	sprintf(buf, "dpi=%f %f %f %f\n", xdpi, ydpi, xdpi2, ydpi2);
-	gs_addmess(buf);
-	sprintf(buf, "final dpi=%f\n", dpi);
-	gs_addmess(buf);
-	}
+    {
+    char buf[MAXSTR];
+    sprintf(buf, "\nrect=%d %d %d %d\n", 
+    rect.left, rect.top, rect.right, rect.bottom);
+    gs_addmess(buf);
+    sprintf(buf, "size=%d %d\n", width, height);
+    gs_addmess(buf);
+    sprintf(buf, "old dpi=%f %f\n", option.xdpi, option.ydpi);
+    gs_addmess(buf);
+    sprintf(buf, "dpi=%f %f %f %f\n", xdpi, ydpi, xdpi2, ydpi2);
+    gs_addmess(buf);
+    sprintf(buf, "final dpi=%f\n", dpi);
+    gs_addmess(buf);
+    }
 #endif
-	option.xdpi = option.ydpi = dpi;
-	gs_resize();
+    option.xdpi = option.ydpi = dpi;
+    gs_resize();
 }

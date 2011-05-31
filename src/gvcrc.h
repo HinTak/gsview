@@ -92,7 +92,6 @@
 #define IDM_SAVEDIR	  181
 #define IDM_BUTTONSHOW	  182
 #define IDM_FITPAGE	  183
-#define IDM_QUICK_OPEN	  184
 #define IDM_AUTOREDISPLAY 185
 #define IDM_EPSFCLIP	  186
 #define IDM_EPSFWARN	  187
@@ -575,7 +574,7 @@
 /* PageSize policies */
 #define IDS_PAGESIZE_VARIABLE	911
 #define IDS_PAGESIZE_FIXED	912
-#define IDS_PAGESIZE_RESCALE	913
+#define IDS_PAGESIZE_SHRINK	913
 
 
 /* cursors */
@@ -594,22 +593,22 @@
 /* window messages */
 
 #define WM_GSV16SPL    WM_USER+1	/* 16 bit spooler interface */
-#define WM_GSWAIT      WM_USER+2	/* info_wait from dll thread */
-#define WM_GSMESSBOX   WM_USER+3	/* delayed message box */
-#define WM_GSSHOWMESS  WM_USER+4	/* delayed show messages */
-#define WM_GSREDISPLAY WM_USER+5	/* document changed during display */
-#define WM_GSTITLE     WM_USER+6	/* change window title */
-#define WM_GSPERCENT   WM_USER+7	/* percent processed for status line */
-#define WM_GSTEXTINDEX WM_USER+8	/* load text index */
+#define WM_GSWAIT      WM_USER+102	/* info_wait from dll thread */
+#define WM_GSMESSBOX   WM_USER+103	/* delayed message box */
+#define WM_GSSHOWMESS  WM_USER+104	/* delayed show messages */
+#define WM_GSREDISPLAY WM_USER+105	/* document changed during display */
+#define WM_GSTITLE     WM_USER+106	/* change window title */
+#define WM_GSPERCENT   WM_USER+107	/* percent processed for status line */
+#define WM_GSTEXTINDEX WM_USER+108	/* load text index */
 
-/* messages for Ghostscript events */	/* needs gsdll.h */
-#define WM_GSDEVICE    WM_USER+10+GSDLL_DEVICE
-#define WM_GSSYNC      WM_USER+10+GSDLL_SYNC
-#define WM_GSPAGE      WM_USER+10+GSDLL_PAGE
-#define WM_GSSIZE      WM_USER+10+GSDLL_SIZE
+/* messages for Ghostscript events */
+#define WM_GSDEVICE    WM_USER+111
+#define WM_GSSYNC      WM_USER+112
+#define WM_GSPAGE      WM_USER+113
+#define WM_GSSIZE      WM_USER+114
 
 /* non standard scroll bar code */
-#define SB_FIND WM_USER
+#define SB_FIND WM_USER+120
 
 #define IDD_PRINTGDI		1538	/* must be this number */
 #define IDC_DEVICE_GROUP	1601	/* Group box */

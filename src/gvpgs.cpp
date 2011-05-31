@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1996-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -40,13 +40,22 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "gvcrc.h"
-#include "gsdll.h"
+
+#define P0() void
+#define P1(t1) t1
+#define P2(t1,t2) t1,t2
+#define P3(t1,t2,t3) t1,t2,t3
+#define P4(t1,t2,t3,t4) t1,t2,t3,t4
+#define P5(t1,t2,t3,t4,t5) t1,t2,t3,t4,t5
+#define P6(t1,t2,t3,t4,t5,t6) t1,t2,t3,t4,t5,t6
+#include "errors.h"
+#include "iapi.h"
 #include "gvpgs.h"
 
 MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2);
 void text_update(void);
-void gs_addmess(char *str);
-void gs_addmess_count(char *str, int count);
+void gs_addmess(const char *str);
+void gs_addmess_count(const char *str, int count);
 int parse_arg(int argc, char *argv[]);
 void gs_thread(void *arg);
 void show_about(void);
@@ -312,7 +321,7 @@ ClientWndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
 /* Add string for Ghostscript message window */
 void
-gs_addmess_count(char *str, int count)
+gs_addmess_count(const char *str, int count)
 {
     if (DosRequestMutexSem(text_mutex, 10000) == ERROR_TIMEOUT)
 	DosBeep(100, 100);
@@ -332,7 +341,7 @@ gs_addmess_count(char *str, int count)
 }
 
 void
-gs_addmess(char *str)
+gs_addmess(const char *str)
 {
     gs_addmess_count(str, strlen(str));
 }
@@ -400,6 +409,60 @@ It is intended that gvpgs be called with temporary files\n";
     return TRUE;
 }
 
+/*********************************************************************/
+/* stdio functions */
+static int GSDLLCALL
+gsdll_stdin(void *instance, char *buf, int len)
+{
+    char mess[MAXSTR];
+    sprintf(mess,"stdin callback not supported: %p %d\n", buf, len);
+    gs_addmess(mess);
+    return 0; /* EOF */
+}
+
+static int GSDLLCALL
+gsdll_stdout(void *instance, const char *str, int len)
+{
+    gs_addmess_count(str, len);
+    return len;
+}
+
+static int GSDLLCALL
+gsdll_stderr(void *instance, const char *str, int len)
+{
+    gs_addmess_count(str, len);
+    return len;
+}
+
+/* Poll the caller for cooperative multitasking. */
+/* If this function is NULL, polling is not needed */
+int GSDLLCALL gsdll_poll(void *handle)
+{
+    return 0;
+}
+
+/*********************************************************************/
+
+void
+gs_clear_gsdll(void)
+{
+    gsdll.hmodule = (HMODULE)NULL;
+    gsdll.revision_number = 0;
+    gsdll.minst = NULL;
+
+    gsdll.revision = NULL;
+    gsdll.new_instance = NULL;
+    gsdll.delete_instance = NULL;
+    gsdll.set_stdio = NULL;
+    gsdll.set_display_callback = NULL;
+    gsdll.set_poll = NULL;
+    gsdll.run_string_begin = NULL;
+    gsdll.run_string_continue = NULL;
+    gsdll.run_string_end = NULL;
+    gsdll.exit = NULL;
+}
+
+
 /* free GS DLL */
 /* This should only be called when gsdll_execute_cont has returned */
 /* TRUE means no error */
@@ -409,16 +472,17 @@ gs_free_dll(void)
 char buf[MAXSTR];
 APIRET rc = 0;
 int code;
-
 	if (gsdll.hmodule == (HMODULE)NULL)
 	    return TRUE;
-	if (gsdll.exit != NULL) {
-	    code = (*gsdll.exit)();
+	if (gsdll.exit && gsdll.minst) {
+	    code = gsdll.exit(gsdll.minst);
 #ifdef DEBUG
-	    sprintf(buf,"gsdll_exit returns %d\n", code);
+	    sprintf(buf,"gsapi_exit returns %d\n", code);
 	    gs_addmess(buf);
 #endif
 	}
+	if (gsdll.minst && gsdll.delete_instance)
+	    gsdll.delete_instance(gsdll.minst);
 	if (gsdll.hmodule) {
 	    rc = DosFreeModule(gsdll.hmodule);
 #ifdef DEBUG
@@ -426,16 +490,10 @@ int code;
 	    gs_addmess(buf);
 #endif
 	}
-	gsdll.hmodule = (HMODULE)NULL;
-	/* be extra safe */
-	gsdll.revision = NULL;
-	gsdll.init = NULL;
-	gsdll.execute_begin = NULL;
-	gsdll.execute_cont = NULL;
-	gsdll.execute_end = NULL;
-	gsdll.exit = NULL;
+	gs_clear_gsdll();
 	return !rc;
 }
+
 
 /* Cleanup when DLL couldn't be loaded */
 void
@@ -443,40 +501,10 @@ gs_load_dll_cleanup(void)
 {
 char buf[MAXSTR];
     gs_free_dll();
+    gs_clear_gsdll();
     sprintf(buf, "Can't load DLL %s", gsdllname);
     message_box(buf, 0);
 }
-
-
-/* callback routine for GS DLL */
-int 
-gsdll_callback(int message, char *str, unsigned long count)
-{
-char buf[MAXSTR];
-    switch (message) {
-	case GSDLL_STDIN:
-	    sprintf(buf,"Callback: STDIN %p %ld   stdin not supported\n", str, count);
-	    gs_addmess(buf);
-	    message_box("GSDLL_CALLBACK: stdin not supported\n",0);
-	    return 0;
-	case GSDLL_STDOUT:
-	    if (str != (char *)NULL)
-		gs_addmess_count(str, count);
-	    return count;
-	case GSDLL_DEVICE:
-	case GSDLL_SYNC:
-	case GSDLL_PAGE:
-	case GSDLL_SIZE:
-	    message_box("GSDLL_CALLBACK: os2dll device not supported", 0);
-	    break;
-	default:
-	    sprintf(buf,"Callback: Unknown message=%d\n",message);
-	    gs_addmess(buf);
-	    break;
-    }
-    return 0;
-}
-
 
 /* load GS DLL if not already loaded */
 /* return TRUE if OK */
@@ -485,84 +513,146 @@ gs_load_dll(void)
 {
 APIRET rc;
 char buf[MAXSTR+40];
-long revision;
 const char *shortname;
 const char *dllname;
-	if (gsdll.hmodule)
-	    return TRUE;
-	dllname = gsdllname;
+gsapi_revision_t rv;
+
+    if (gsdll.hmodule)
+	return TRUE;
+    gs_clear_gsdll();
+    dllname = gsdllname;
+    sprintf(buf, "Trying to load %s\n", dllname);
+    if (debug)
+	gs_addmess(buf);
+    memset(buf, 0, sizeof(buf));
+    rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)dllname, &gsdll.hmodule);
+    if (rc) {
+	/* failed */
+	/* try once more - which bug are we dodging? */
+	rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)dllname, &gsdll.hmodule);
+    }
+    if (rc) {
+	/* failed */
+	/* try once more, this time on system search path */
+	if ((shortname = strrchr((char *)gsdllname, '\\')) == (const char *)NULL)
+	    shortname = gsdllname;
+	dllname = shortname;
 	sprintf(buf, "Trying to load %s\n", dllname);
 	if (debug)
 	    gs_addmess(buf);
-	memset(buf, 0, sizeof(buf));
 	rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)dllname, &gsdll.hmodule);
-	if (rc) {
-	    /* failed */
-	    /* try once more, this time on system search path */
-	    if ((shortname = strrchr((char *)gsdllname, '\\')) == (const char *)NULL)
-		shortname = gsdllname;
-	    dllname = shortname;
-	    sprintf(buf, "Trying to load %s\n", dllname);
-	    if (debug)
-		gs_addmess(buf);
-	    rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)dllname, &gsdll.hmodule);
-	}
+    }
 
-	if (rc == 0) {
-	    gs_addmess("Loaded Ghostscript DLL\n");
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_REVISION", (PFN *)(&gsdll.revision)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_REVISION, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    /* check DLL version */
-	    gsdll.revision(NULL, NULL, &revision, NULL);
-	    if ( (revision < GS_REVISION_MIN) || (revision > GS_REVISION_MAX) ) {
-		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld - %ld\n", 
-			revision, (long)GS_REVISION_MIN, (long)GS_REVISION_MAX);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_INIT", (PFN *)(&gsdll.init)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_INIT, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_EXECUTE_BEGIN", (PFN *)(&gsdll.execute_begin)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_BEGIN, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_EXECUTE_CONT", (PFN *)(&gsdll.execute_cont)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_CONT, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_EXECUTE_END", (PFN *)(&gsdll.execute_end)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_END, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_EXIT", (PFN *)(&gsdll.exit)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXIT, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	}
-	else {
-	    sprintf(buf, "Can't load Ghostscript DLL %s \nDosLoadModule rc = %ld\n", gsdllname, rc);
-	    gs_addmess(buf);
-	    gs_load_dll_cleanup();
-	    return FALSE;
-	}
-	return TRUE;
+    if (rc) {
+	sprintf(buf, "Can't load Ghostscript DLL %s \nDosLoadModule rc = %ld\n", gsdllname, rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+
+    if (debug)
+	gs_addmess("Loaded Ghostscript DLL\n");
+
+    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSAPI_REVISION", 
+	    (PFN *) (&gsdll.revision))) != 0) {
+	sprintf(buf, "Can't find GSAPI_REVISION, rc = %ld\n", rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+    /* check DLL version */
+    if (gsdll.revision(&rv, sizeof(rv)) != 0) {
+	sprintf(buf, "Unable to identify Ghostscript DLL revision - it must be newer than needed.\n");
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+    gsdll.revision_number = rv.revision;
+
+    if ( (gsdll.revision_number < GS_REVISION_MIN) || 
+	(gsdll.revision_number > GS_REVISION_MAX) ) {
+	sprintf(buf, "\nWrong version of DLL found.\n\
+  Found version %ld\n  Need version  %ld - %ld\n", 
+	    gsdll.revision_number, 
+	    (long)GS_REVISION_MIN, (long)GS_REVISION_MAX);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+
+    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSAPI_NEW_INSTANCE", 
+	    (PFN *) (&gsdll.new_instance))) != 0) {
+	sprintf(buf, "Can't find GSAPI_NEW_INSTANCE, rc = %ld\n", rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSAPI_DELETE_INSTANCE", 
+	    (PFN *) (&gsdll.delete_instance))) != 0) {
+	sprintf(buf, "Can't find GSAPI_DELETE_INSTANCE, rc = %ld\n", rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSAPI_SET_STDIO", 
+	    (PFN *) (&gsdll.set_stdio))) != 0) {
+	sprintf(buf, "Can't find GSAPI_SET_STDIO, rc = %ld\n", rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSAPI_SET_DISPLAY_CALLBACK", 
+	    (PFN *) (&gsdll.set_display_callback))) != 0) {
+	sprintf(buf, "Can't find GSAPI_SET_DISPLAY_CALLBACK, rc = %ld\n", rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSAPI_SET_POLL", 
+	    (PFN *) (&gsdll.set_poll))) != 0) {
+	sprintf(buf, "Can't find GSAPI_SET_POLL, rc = %ld\n", rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, 
+	    (PCSZ)"GSAPI_INIT_WITH_ARGS", 
+	    (PFN *) (&gsdll.init_with_args))) != 0) {
+	sprintf(buf, "Can't find GSAPI_INIT_WITH_ARGS, rc = %ld\n", rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSAPI_RUN_STRING_BEGIN", 
+	    (PFN *) (&gsdll.run_string_begin))) != 0) {
+	sprintf(buf, "Can't find GSAPI_RUN_STRING_BEGIN, rc = %ld\n", rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSAPI_RUN_STRING_CONTINUE", 
+	    (PFN *) (&gsdll.run_string_continue))) != 0) {
+	sprintf(buf, "Can't find GSAPI_RUN_STRING_CONTINUE, rc = %ld\n", rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSAPI_RUN_STRING_END", 
+	    (PFN *) (&gsdll.run_string_end))) != 0) {
+	sprintf(buf, "Can't find GSAPI_RUN_STRING_END, rc = %ld\n", rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSAPI_EXIT", 
+	    (PFN *) (&gsdll.exit))) != 0) {
+	sprintf(buf, "Can't find GSAPI_EXIT, rc = %ld\n", rc);
+	gs_addmess(buf);
+	gs_load_dll_cleanup();
+	return FALSE;
+    }
+
+    return TRUE;
 }
 
 
@@ -576,6 +666,7 @@ int code;
 HAB hab;
 int gs_argc;
 char *gs_argv[3];
+int exit_code;
 
     hab = WinInitialize(0);
 
@@ -587,22 +678,36 @@ char *gs_argv[3];
     gs_argv[2] = NULL;
     gs_argc = 2;
 
-    code = gsdll.init(gsdll_callback, hwnd_client, gs_argc, gs_argv);
-    if (debug) {
-	sprintf(buf,"gsdll_init returns %d\n", code);
+    code = gsdll.new_instance(&gsdll.minst, NULL);
+    if (code) {
+	sprintf(buf,"gsapi_new_instance returns %d\n", code);
 	gs_addmess(buf);
     }
+
     if (!code) {
-	code = gsdll.execute_begin();
+	gsdll.set_stdio(gsdll.minst, gsdll_stdin, gsdll_stdout, gsdll_stderr);
+	gsdll.set_poll(gsdll.minst, gsdll_poll);
+	code = gsdll.init_with_args(gsdll.minst, gs_argc, gs_argv);
+	if (debug) {
+	    sprintf(buf,"gsapi_init_with_args returns %d\n", code);
+	    gs_addmess(buf);
+	}
+    }
+
+    if (!code) {
+	code = gsdll.run_string_begin(gsdll.minst, 0, &exit_code);
 
 	if (!code) {
 	  while ((len = fread(buf, 1, sizeof(buf), infile)) != 0) {
-	    code = gsdll.execute_cont(buf, len);
+	    code = gsdll.run_string_continue(gsdll.minst, buf, len,
+		    0, &exit_code);
 	    ldone += len;
 	    if (pcdone != (int)(ldone / lsize)) {
 		pcdone = (int)(ldone / lsize);
 		WinPostMsg(hwnd_client, WM_PCUPDATE, (MPARAM)pcdone, 0);
 	    }
+	    if (code == e_NeedInput)
+		code = 0;
 	    if (code) {
 		sprintf(buf, "gsdll_execute_cont returns %d\n", code);
 		gs_addmess(buf);
@@ -610,11 +715,9 @@ char *gs_argv[3];
 	    }
 	  }
 	  if (!code)
-	      gsdll.execute_end();
+	      gsdll.run_string_end(gsdll.minst, 0, &exit_code);
 	}
 	fclose(infile);
-
-	gsdll.execute_end();
     }
     gs_free_dll();
 

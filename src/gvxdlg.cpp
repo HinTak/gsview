@@ -780,7 +780,7 @@ BOOL get_bbox(void)
     gb->bbox->valid = FALSE;
     gb->bbox->llx = gb->bbox->lly = gb->bbox->urx = gb->bbox->ury = 0;
     gb->bboxindex = 0;
-    if ((gsdll.state != PAGE) && (gsdll.state != IDLE)) {
+    if ((gsdll.state != GS_PAGE) && (gsdll.state != GS_IDLE)) {
 	gserror(IDS_EPSNOBBOX, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	return FALSE;
     }
@@ -952,7 +952,7 @@ void display_settings(void)
     GtkWidget *hbox;
     GtkWidget *table;
     GtkWidget *button_ok, *button_cancel, *button_help;
-    GtkWidget *wres, *wzres, *wdepth, *wtext, *wgraphics, *wdraw;
+    GtkWidget *wres, *wzres, *wdepth, *wtext, *wgraphics;
     char buf[MAXSTR];
     int i;
     int y = 0;
@@ -1081,29 +1081,6 @@ void display_settings(void)
     gtk_signal_connect(GTK_OBJECT(GTK_COMBO(wgraphics)->entry), "activate",
                               GTK_SIGNAL_FUNC(modal_ok), &rc);
 
-    wdraw = gtk_combo_new();
-    list = NULL;
-    for (i=0; i<(int)(sizeof(drawlist)/sizeof(char *)); i++) {
-	char *p;
-	strcpy(buf, drawlist[i]);
-	p = (char *)malloc(strlen(buf)+1);
-	strcpy(p, buf);
-	list = g_list_append(list, p);
-    }
-    gtk_combo_set_popdown_strings(GTK_COMBO(wdraw), list);
-    l = list;
-    while (l) {
-	free(l->data);
-	l = g_list_next(l);
-    }
-    g_list_free(list);
-    list = NULL;
-    gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(wdraw)->entry), FALSE);
-    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(wdraw)->entry), 
-	drawlist[draw_to_index(option.drawmethod)] );
-    setting_add(table, get_string(IDS_AADRAWMETHOD), wdraw, "", &y);
-    gtk_signal_connect(GTK_OBJECT(GTK_COMBO(wdraw)->entry), "activate",
-                              GTK_SIGNAL_FUNC(modal_ok), &rc);
 
     /* buttons across bottom */
     hbox = gtk_hbox_new(TRUE, 0);
@@ -1231,26 +1208,12 @@ void display_settings(void)
 	    unzoom = TRUE;
 	}
 
-	strncpy(buf, gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(wdraw)->entry)),
-	    sizeof(buf)-1);
-	for (i=0; i<(int)(sizeof(drawlist)/sizeof(char *)); i++) {
-	    if (strcmp(buf, drawlist[i]) == 0)
-		break;
-	}
-	i = index_to_draw[i];
-	if (i != option.drawmethod) {
-	    option.drawmethod = i;
-	    restart = TRUE;
-	    resize = TRUE; 
-	    unzoom = TRUE;
-	}
-
 	if (resize) {
 	    if (unzoom)
 		gsview_unzoom();
-	    if (gsdll.state != UNLOADED) {
+	    if (gsdll.state != GS_UNINIT) {
 /* gs_resize has this check 
-		if (option.redisplay && (gsdll.state == PAGE) && (psfile.dsc != (CDSC *)NULL))
+		if (option.redisplay && (gsdll.state == GS_PAGE) && (psfile.dsc != (CDSC *)NULL))
 */
 		    gs_resize();
 		/* for those that can't be changed with a */
@@ -1266,7 +1229,7 @@ void display_settings(void)
 
 BOOL get_pdf2ps_options(void)
 {
-    gs_addmess("get_filename: not implemented\n");
+    gs_addmess("get_pdf2ps_options: not implemented\n");
     return FALSE;
 }
 

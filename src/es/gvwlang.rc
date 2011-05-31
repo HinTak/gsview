@@ -113,7 +113,6 @@ BEGIN
         MENUITEM "Guardar el último &directorio", IDM_SAVEDIR
         MENUITEM "&Mostrar barra de botones", IDM_BUTTONSHOW
         MENUITEM "A&justar la ventana a la página", IDM_FITPAGE
-        MENUITEM "Apertura &rápida", IDM_QUICK_OPEN
         MENUITEM "Actualización automática", IDM_AUTOREDISPLAY
         MENUITEM "Re&cortar EPS", IDM_EPSFCLIP
         MENUITEM "A&visos EPS", IDM_EPSFWARN

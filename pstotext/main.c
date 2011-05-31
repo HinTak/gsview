@@ -1,7 +1,8 @@
 /* Copyright (C) 1995-1998, Digital Equipment Corporation.    */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Fri Oct 16 16:27:54 PDT 1998 by mcjones   */
+/* Last modified on Sat Jun 02 15:04:00 AEST 2001 by rjl      */
+/*      modified on Fri Oct 16 16:27:54 PDT 1998 by mcjones   */
 /*      modified on Thu Nov 16 13:33:13 PST 1995 by deutsch   */
 /*
  * Modified on 27-MAY-1998 13:08 by Hunter Goatley
@@ -54,7 +55,7 @@ static BOOLEAN bboxes = FALSE;
 static int explicitFiles = 0; /* count of explicit file arguments */
 
 usage() {
-  fprintf(stderr, "pstotext 1.8g of 15 July 2000\n");
+  fprintf(stderr, "pstotext 1.8h of 2 June 2001\n");
   fprintf(stderr, "Copyright (C) 1995-1998, Digital Equipment Corporation.\n");
   fprintf(stderr, "Modified by Ghostgum Software Pty Ltd for Ghostscript 6.0.\n");
   fprintf(stderr, "Comments to {mcjones,birrell}@pa.dec.com\n\n");
@@ -88,16 +89,25 @@ usage() {
 #define ROT90PATH "/tmp/,pstotext-rot90.ps"
 #endif
 
-static char *make_temp(b) BUNDLE b; {
-  /* Return pathname of temporary file containing bundle "b".  Caller
-     should unlink file (and, technically, free pathname). */
-  FILE *f;
+/* modified by rjl to use mkstemp on Unix */
+static char *make_temp(b, path) BUNDLE b; char *path;{
+  /* Return pathname of temporary file containing bundle "b".  
+     Caller should unlink file. */
+  FILE *f = NULL;
 #ifdef VMS
-  char *path = tempnam("SYS$SCRATCH:", ".ps2t");
+  char *tpath = tempnam("SYS$SCRATCH:", ".ps2t");
+  if (tpath != NULL) {
+    strcpy(path, tpath);
+    free(tpath);
+    f = fopen(path, "w");
+  }
 #else
-  char *path = tempnam("/tmp", ",ps2t");
+  int fd;
+  strcpy(path, "/tmp/,ps2tXXXXXX");
+  fd = mkstemp(path);
+  if (fd != -1)
+      f = fdopen(fd, "w");
 #endif
-  f = fopen(path, "w");
   if (f==NULL) {perror(cmd); exit(1);}
   putbundle(b, f);
   fclose(f);
@@ -148,6 +158,8 @@ static do_it(path) char *path; {
   /* If "path" is NULL, then "stdin" should be processed. */
   char gs_cmdline[2*MAXPATHLEN];
   char input[MAXPATHLEN];
+  char ocr_path_buf[MAXPATHLEN];
+  char rotate_path_buf[MAXPATHLEN];
   int status;
   FILE *fileout;
 #ifdef VMS
@@ -167,12 +179,12 @@ static do_it(path) char *path; {
   signal(SIGINT, handler);
   signal(SIGHUP, handler);
 
-  ocr_path = make_temp(ocr);
+  ocr_path = make_temp(ocr, ocr_path_buf);
 
   switch (orientation) {
   case portrait: rotate_path = ""; break;
-  case landscape: rotate_path = make_temp(rot270); break;
-  case landscapeOther: rotate_path = make_temp(rot90); break;
+  case landscape: rotate_path = make_temp(rot270, rotate_path_buf); break;
+  case landscapeOther: rotate_path = make_temp(rot90, rotate_path_buf); break;
   }
 
   if (path==NULL) strcpy(input, "-");

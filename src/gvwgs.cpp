@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1996-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,6 +18,7 @@
 /* gvwgs.c */
 /* Ghostscript DLL interface for GSview */
 #include "gvwgs.h"
+#include "cdll.h"
 
 #ifdef _MSC_VER
 #define _export
@@ -63,7 +64,7 @@ char title[64];
 /* forward declarations */
 void show_about(void);
 int init_window(void);
-void gs_addmess(LPSTR str);
+void gs_addmess(const char *str);
 int get_args(LPSTR lpszCmdLine, int *pargc, char **pargv[]);
 int parse_args(int argc, char *argv[]);
 void text_update(void);
@@ -287,17 +288,18 @@ text_update(void)
 
 /* Add string for Ghostscript message window */
 void
-gs_addmess_count(LPSTR str, int count)
+gs_addmess_count(const char *str, int count)
 {
+const char *s;
 char *p;
 int i, lfcount;
     /* we need to add \r after each \n, so count the \n's */
     lfcount = 0;
-    p = str;
+    s = str;
     for (i=0; i<count; i++) {
-	if (*p == '\n')
+	if (*s == '\n')
 	    lfcount++;
-	p++;
+	s++;
     }
     if (count + lfcount >= TWSCROLL)
 	return;		/* too large */
@@ -320,9 +322,21 @@ int i, lfcount;
 }
 
 void
-gs_addmess(LPSTR str)
+gs_addmess(const char *str)
 {
     gs_addmess_count(str, lstrlen(str));
+}
+
+void
+gs_addmessf(const char *fmt, ...)
+{
+va_list args;
+int count;
+char buf[1024];
+	va_start(args,fmt);
+	count = vsprintf(buf,fmt,args);
+        gs_addmess(buf);
+	va_end(args);
 }
 
 
@@ -535,87 +549,168 @@ char szOFilename[256];	/* filename for OFN */
 	return;
 }
 
-void
-gs_clear_gsdll(void)
+/*********************************************************************/
+/* stdio functions */
+static int GSDLLCALL
+gsdll_stdin(void *instance, char *buf, int len)
 {
-    gsdll.hmodule = (HMODULE)NULL;
-    gsdll.revision = NULL;
-    gsdll.init = NULL;
-    gsdll.execute_begin = NULL;
-    gsdll.execute_cont = NULL;
-    gsdll.execute_end = NULL;
-    gsdll.exit = NULL;
-    gsdll.callback = NULL;
+    char mess[MAXSTR];
+    sprintf(mess,"stdin callback not supported: %p %d\n", buf, len);
+    gs_addmess(mess);
+    return 0; /* EOF */
 }
 
-/* free GS DLL */
-/* This should only be called when gsdll_execute has returned */
-/* TRUE means no error */
-BOOL
-gs_free_dll(void)
+static int GSDLLCALL
+gsdll_stdout(void *instance, const char *str, int len)
 {
-char buf[MAXSTR];
-int code;
-	if (gsdll.hmodule == (HINSTANCE)NULL)
-	    return TRUE;
-	if (gsdll.exit != NULL) {
-	    code = (*gsdll.exit)();
-	    sprintf(buf,"gsdll_exit returns %d\n", code);
-	    gs_addmess(buf);
+    gs_addmess_count(str, len);
+    return len;
+}
+
+static int GSDLLCALL
+gsdll_stderr(void *instance, const char *str, int len)
+{
+    gs_addmess_count(str, len);
+    return len;
+}
+
+/* Poll the caller for cooperative multitasking. */
+/* If this function is NULL, polling is not needed */
+int GSDLLCALL gsdll_poll(void *handle)
+{
+    if (!multithread) {
+	MSG msg;
+	if ((PeekMessage(&msg, (HWND)NULL, 0, 0, PM_REMOVE)) != 0) {
+	    TranslateMessage(&msg);
+	    DispatchMessage(&msg);
 	}
-	FreeLibrary(gsdll.hmodule);
-	sprintf(buf,"Unloaded GSDLL\n");
-	gs_addmess(buf);
-	gs_clear_gsdll();
-	return TRUE;
-}
-
-void
-gs_load_dll_cleanup(void)
-{
-char buf[MAXSTR];
-    gs_free_dll();
-    sprintf(buf, "Can't load Ghostscript DLL %s", gsdllname);
-    message_box(buf, 0);
-}
-
-/* callback routine for GS DLL */
-int _export 
-gsdll_callback(int message, char *str, unsigned long count)
-{
-char buf[MAXSTR];
-    switch (message) {
-	case GSDLL_STDIN:
-	    sprintf(buf,"Callback: STDIN %p %d   stdin not supported\n", str, count);
-	    gs_addmess(buf);
-	    message_box("GSDLL_CALLBACK: stdin not supported\n",0);
-	    return 0;
-	case GSDLL_STDOUT:
-	    if (str != (char *)NULL)
-		gs_addmess_count(str, (int)count);
-	    return (int)count;
-	case GSDLL_DEVICE:
-	case GSDLL_SYNC:
-	case GSDLL_PAGE:
-	case GSDLL_SIZE:
-	    message_box("GSDLL_CALLBACK: display device not supported", 0);
-	    break;
-	case GSDLL_POLL:
-	    if (!multithread) {
-		MSG msg;
-	        if ((PeekMessage(&msg, (HWND)NULL, 0, 0, PM_REMOVE)) != 0) {
-		    TranslateMessage(&msg);
-		    DispatchMessage(&msg);
-	        }
-	    }
-	    return 0;
-	default:
-	    sprintf(buf,"Callback: Unknown message=%d\n",message);
-	    gs_addmess(buf);
-	    break;
     }
     return 0;
 }
+
+/******************************************************************/
+
+#ifndef ERROR_DLL_NOT_FOUND
+#define ERROR_DLL_NOT_FOUND 1157L
+#endif
+
+/* display error message for LoadLibrary */
+static void
+load_library_error(HMODULE hmodule, const char *dllname)
+{
+char *text_reason;
+char buf[MAXSTR+128];
+int reason;
+    reason = GetLastError() & 0xffff;
+    switch (reason) {
+	case ERROR_FILE_NOT_FOUND:	/* 2 */
+	    text_reason = "File not found";
+	    break;
+	case ERROR_PATH_NOT_FOUND:	/* 3 */
+	    text_reason = "Path not found";
+	    break;
+	case ERROR_NOT_ENOUGH_MEMORY:	/* 8 */
+	    text_reason = "Not enough memory";
+	    break;
+	case ERROR_BAD_FORMAT:		/* 11 */
+	    text_reason = "Bad EXE or DLL format";
+	    break;
+	case ERROR_OUTOFMEMORY:		/* 14 */
+	    text_reason = "Out of memory";
+	    break;
+	case ERROR_DLL_NOT_FOUND:	/* 1157 */
+	    text_reason = "DLL not found";
+	    break;
+	default:
+	    text_reason = (char *)NULL;
+    }
+    if (text_reason)
+        sprintf(buf, "Failed to load %s, error %d = %s\n", dllname, reason, text_reason);
+    else
+	sprintf(buf, "Failed to load %s, error %d\n", dllname, reason);
+    gs_addmess(buf);
+
+    LPVOID lpMessageBuffer;
+    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+	FORMAT_MESSAGE_FROM_SYSTEM,
+	NULL, reason,
+	MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* user default language */
+	(LPTSTR) &lpMessageBuffer, 0, NULL);
+    if (lpMessageBuffer) {
+	gs_addmess((LPTSTR)lpMessageBuffer);
+	gs_addmess("\r\n");
+	LocalFree(LocalHandle(lpMessageBuffer));
+    }
+}
+
+int
+gsdll_open(GSDLL *dll, const char *name)
+{
+const char *shortname;
+char fullname[MAX_PATH];
+char *p;
+    if (debug)
+	gs_addmessf("Trying to load %s\n", name);
+
+    /* Try to load DLL first with given path */
+    dll->hmodule = LoadLibrary(name);
+    if (dll->hmodule < (HINSTANCE)HINSTANCE_ERROR) {
+	/* failed */
+	load_library_error(dll->hmodule, name);
+	/* try again, with path of EXE */
+	if ((shortname = strrchr((char *)name, '\\')) == (const char *)NULL)
+	    shortname = name;
+	else
+	    shortname++;
+
+	GetModuleFileName(phInstance, fullname, sizeof(fullname));
+	if ((p = strrchr(fullname,'\\')) != (char *)NULL)
+	    p++;
+	else
+	    p = fullname;
+	*p = '\0';
+	strcat(fullname, shortname);
+
+	if (debug)
+	    gs_addmessf("Trying to load %s\n", fullname);
+
+	dll->hmodule = LoadLibrary(fullname);
+	if (gsdll.hmodule < (HINSTANCE)HINSTANCE_ERROR) {
+	    /* failed again */
+	    load_library_error(gsdll.hmodule, fullname);
+	    /* try once more, this time on system search path */
+	    if (debug)
+		gs_addmessf("Trying to load %s\n", shortname);
+	    dll->hmodule = LoadLibrary(shortname);
+	    if (dll->hmodule < (HINSTANCE)HINSTANCE_ERROR) {
+		/* failed again */
+		load_library_error(dll->hmodule, shortname);
+	    }
+	}
+    }
+
+    if (dll->hmodule < (HINSTANCE)HINSTANCE_ERROR)
+	return_error(-1);
+
+    return 0;
+}
+
+
+int
+gsdll_close(GSDLL *dll)
+{
+    FreeLibrary(dll->hmodule);
+    return 0;
+}
+
+
+void *
+gsdll_sym(GSDLL *dll, const char *name)
+{
+    return GetProcAddress(dll->hmodule, name);
+}
+
+/*********************************************************************/
 
 
 /* load GS DLL if not already loaded */
@@ -624,94 +719,42 @@ BOOL
 gs_load_dll(void)
 {
 char buf[MAXSTR];
-long revision;
+gsapi_revision_t rv;
 int code;
 int gs_argc;
 char *gs_argv[3];
-	if (gsdll.hmodule)
-	    return TRUE;
-/* change this to search szExePath first, then system directories */
-	gs_clear_gsdll();
-	sprintf(buf, "Loading %s\n", gsdllname);
+
+    if (gsdll_load(&gsdll, gsdllname)) {
+	gs_addmess("Can't load Ghostscript DLL\n");
+	return FALSE;
+    }
+
+
+    gs_argv[0] = gsdllname;
+    gs_argv[1] = gsarg;
+    gs_argv[2] = NULL;
+    gs_argc = 2;
+
+    code = gsdll.new_instance(&gsdll.minst, NULL);
+    if (code) {
+	gs_addmessf("gsapi_new_instance returns %d\n", code);
+	gsdll_free(&gsdll);
+	return FALSE;
+    }
+
+    gsdll.set_stdio(gsdll.minst, gsdll_stdin, gsdll_stdout, gsdll_stderr);
+    gsdll.set_poll(gsdll.minst, gsdll_poll);
+    code = gsdll.init_with_args(gsdll.minst, gs_argc, gs_argv);
+
+    if (debug) {
+	sprintf(buf,"gsapi_init_with_args returns %d\n", code);
 	gs_addmess(buf);
-	gsdll.hmodule = LoadLibrary(gsdllname);
- 	if (gsdll.hmodule >= (HINSTANCE)HINSTANCE_ERROR) {
-	    gs_addmess("Loaded Ghostscript DLL\n");
-	    gsdll.revision = (PFN_gsdll_revision) GetProcAddress(gsdll.hmodule, "gsdll_revision");
-	    if (gsdll.revision == NULL) {
-	        sprintf(buf, "Can't find gsdll_revision\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    /* check DLL version */
-	    gsdll.revision(NULL, NULL, &revision, NULL);
-	    if ( (revision < GS_REVISION_MIN) || (revision > GS_REVISION_MAX) ) {
-		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld - %ld\n", 
-			revision, (long)GS_REVISION_MIN, (long)GS_REVISION_MAX);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    /* continue loading other functions */
-	    gsdll.init = (PFN_gsdll_init) GetProcAddress(gsdll.hmodule, "gsdll_init");
-	    if (gsdll.init == NULL) {
-	        sprintf(buf, "Can't find gsdll_init\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.execute_begin = (PFN_gsdll_execute_begin) GetProcAddress(gsdll.hmodule, "gsdll_execute_begin");
-	    if (gsdll.execute_begin == NULL) {
-	        sprintf(buf, "Can't find gsdll_execute_begin\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.execute_cont = (PFN_gsdll_execute_cont) GetProcAddress(gsdll.hmodule, "gsdll_execute_cont");
-	    if (gsdll.execute_cont == NULL) {
-	        sprintf(buf, "Can't find gsdll_execute_cont\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.execute_end = (PFN_gsdll_execute_end) GetProcAddress(gsdll.hmodule, "gsdll_execute_end");
-	    if (gsdll.execute_end == NULL) {
-	        sprintf(buf, "Can't find gsdll_execute_end\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.exit = (PFN_gsdll_exit) GetProcAddress(gsdll.hmodule, "gsdll_exit");
-	    if (gsdll.exit == NULL) {
-	        sprintf(buf, "Can't find gsdll_exit\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	}
-	else {
-	    gs_addmess("Can't load Ghostscript DLL\n");
-	    gs_load_dll_cleanup();
-	    return FALSE;
-	}
-	gsdll.callback = gsdll_callback;
-
-	gs_argv[0] = gsdllname;
-	gs_argv[1] = gsarg;
-	gs_argv[2] = NULL;
-	gs_argc = 2;
-
-	code = gsdll.init(gsdll.callback, hwnd_client, gs_argc, gs_argv);
-	if (debug) {
-	    sprintf(buf,"gsdll_init returns %d\n", code);
-	    gs_addmess(buf);
-	}
-	if (code) {
-	    gs_load_dll_cleanup();
-	    return !code;
-	}
+    }
+    if (code) {
+	gsdll_free(&gsdll);
 	return !code;
+    }
+    return !code;
 }
 
 
@@ -725,20 +768,24 @@ gs_thread(void *arg)
 char buf[MAXSTR];
 int len;
 int code;
+int exit_code;
 
     if (!gs_load_dll())
 	return;
-    gsdll.execute_begin();
+    gsdll.run_string_begin(gsdll.minst, 0, &exit_code);
 
     while ((len = fread(buf, 1, sizeof(buf), infile)) != 0) {
-	code = gsdll.execute_cont(buf, len);
+	code = gsdll.run_string_continue(gsdll.minst, buf, len,
+		0, &exit_code);
+	if (code == e_NeedInput)
+	    code = 0;
 	ldone += len;
 	if (pcdone != (int)(ldone / lsize)) {
 	    pcdone = (int)(ldone / lsize);
 	    PostMessage(hwnd_client, WM_PCUPDATE, (WPARAM)pcdone, 0);
 	}
 	if (code) {
-	    sprintf(buf, "gsdll_execute_cont returns %d\n", code);
+	    sprintf(buf, "gsapi_execute_cont returns %d\n", code);
 	    gs_addmess(buf);
 	    break;
 	}
@@ -752,9 +799,10 @@ int code;
     }
     fclose(infile);
 
-    gsdll.execute_end();
-    gs_free_dll();
-
+    gsdll.run_string_end(gsdll.minst, 0, &exit_code);
+    code = gsdll.exit(gsdll.minst);
+    gs_addmessf("gsapi_exit returns %d\n", code);
+    gsdll_free(&gsdll);
 
     /* tell main thread to shut down */
     if ((code == 0) && (!debug))

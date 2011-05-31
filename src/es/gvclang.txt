@@ -7,8 +7,8 @@
  utilizado por las impresoras láser.
  Para los documentos construidos siguiendo las especificaciones de Adobe acerca
  de la estructura de los documentos PostScript (DSC), GSview permite
- seleccionar las páginas que serán visualizadas o impresas. GSview 3.6 requiere
- Ghostscript 4.03 - 6.99, siendo preferible la versión 6.0 o superior.
+ seleccionar las páginas que serán visualizadas o impresas. GSview 4.0 requiere
+ Ghostscript 7.00 - 7.99.
 2Instalación
 ?Instalación
  Para la instalación de GSview, es recomendable utilizar el programa de
@@ -215,11 +215,11 @@ E
  desde el directorio del perfil de usuario, al directorio de GSview, edítelo y
  elimine todas las entradas excepto:
   [Options]
-  Version=3.6
-  GSversion=650
+  Version=4.0
+  GSversion=700
   Configured=1
-  GhostscriptDLL=e:\gs\gs6.50\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs6.50\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs7.00\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs7.00\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Cuando un usuario inicia GSview, se utiliza normalmente su archivo INI. La
  primera vez que GSview se ejecuta, o cuando la versión de GSview no coincide
@@ -929,7 +929,7 @@ E
  Convertir a un bitmap.
  `Archivo `| `Convertir`, seleccione bmp16m, a 72ppp.
 
-W
+WP
  Convertir a un formato vectorial que se puede editar (PStoEdit).
  `Editar `| `Convertir a formato vectorial` o convertir a PDF
  usando el método anterior.
@@ -1169,7 +1169,7 @@ E
 
  Puede también añadir una vista preliminar sin parecido con
  el archivo PostScript, aunque eso no es lo más conveniente.
-W
+WP
 3Convertir a formato vectorial
 ?Convertir a formato vectorial
 ?PStoEdit
@@ -1433,7 +1433,6 @@ E
  (Traslación, Giro, Escala) haya sido pulsado.
 
  Ver también `Unidades`.
-E
 2Opciones
 ?Opciones
  El menú `Opciones` ofrece las siguientes posibilidades:
@@ -1734,24 +1733,6 @@ E
  por defecto.
 
  Vea también `Ver` | `Ajustar a la ventana`.
-3Apertura rápida
-?Apertura rápida
- Cuando la opción `Apertura rápida` está `activada`, GSview no reinicializará el programa
- Ghostscript si se cambia la orientación, la resolución o
- el tamaño de la página.
-
- GSview intentará mantener a Ghostscript en una situación estable, pero
- algunos documentos pueden hacer que su comportamiento no sea estable e
- incluso pueden hacer que Ghostscript produzca errores.
- Cuando esto ocurre, la ejecución del programa Ghostscript se verá interrumpida.
- Para ver la ventana con los mensajes de error de Ghostscript
- deberá seleccionar la opción `Archivo `| `Mostrar mensajes` desde el menú.
- Para volver a abrir el documento deberá seleccionar `Ver` | `Actualizar`.
-
- Si la opción `Apertura rápida` no está `activada`, GSview
- lanzará el programa Ghostscript antes de cambiar a un
- nuevo documento o cuando se cambie el tamaño, la
- orientación o la resolución de la página.
 3Actualización automática
 ?Actualización automática
  Cuando la opción `Actualización automática` está `activada`, GSview
@@ -2212,7 +2193,7 @@ W
 P
   GVPM.EXE - Un interfaz gráfico para Ghostscript.
 E
-  Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  Reservados todos los derechos
+  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  Reservados todos los derechos
 
  Este archivo es parte de GSview.
 
@@ -2467,7 +2448,7 @@ W
  (`Failed to load bzip2 DLL...`), entonces
  es probable que dicha librería no se encuentre en su sistema. Puede
  conseguirla en el mismo sitio en el que consiguió GSview o en
-  ftp://ftp.cs.wisc.edu/ghost/ghostgum/
+  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Guarde la librería DLL bzip2 en el mismo directorio en el que se encuentre
  GSview. En Win32, la librería se llama libbz2.dll. En estos momentos no
  existe una versión de esta librería ni para Win16 ni para OS/2.
@@ -2487,7 +2468,7 @@ E
  (`Failed to load zlib DLL...`), entonces
  es probable que dicha librería no se encuentre en su sistema. Puede
  conseguirla en el mismo sitio en el que consiguió GSview o en
-  ftp://ftp.cs.wisc.edu/ghost/ghostgum/
+  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Guarde la librería DLL zlib en el mismo directorio en el que se encuentre
  GSview. En Win16 se llama zlib16.dll, en Win32 se llama zlib32.dll y
  zlib2.dll en OS/2.

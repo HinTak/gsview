@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -59,7 +59,7 @@ MENU_ENTRY menu_de[] = {
   { "/Edit/sep1",     		NULL,   NULL, 		0, "<Separator>" },
   { "/Edit/Konvertiere _Bitmap",    NULL,	GS_CMD,	IDM_CONVERT, NULL },
 */
-  { "/Bearbeiten/Save Pixmap as BMP",     	NULL,	GS_CMD,	IDM_PASTETO, NULL }, /*ENGLISH */
+  { "/Bearbeiten/Speichere Pixmap als BMP",    	NULL,	GS_CMD,	IDM_PASTETO, NULL },
   { "/Bearbeiten/sep2",     		NULL,   NULL, 		0, "<Separator>" },
   { "/Bearbeiten/EPS Vorschau ein_fügen",   NULL,   NULL, 		0, "<Branch>" },
   { "/Bearbeiten/EPS Vorschau einfügen/_Interchange", NULL,		GS_CMD, IDM_MAKEEPSI, NULL },
@@ -121,8 +121,8 @@ MENU_ENTRY menu_de[] = {
   { "/Anzeige/_Nächste Seite", 	"+",	GS_CMD, 	IDM_NEXT, NULL },
   { "/Anzeige/_Vorherige Seite", 	"-",	GS_CMD, 	IDM_PREV, NULL },
   { "/Anzeige/_Gehe zu Seite", 	"G",	GS_CMD, 	IDM_GOTO, NULL },
-  { "/Anzeige/Go _Back", 		"B",	GS_CMD, 	IDM_GOBACK, NULL }, /* ENGLISH */
-  { "/Anzeige/Go _Forward",	NULL,	GS_CMD, 	IDM_GOFWD, NULL },
+  { "/Anzeige/_Zurück",		"B",	GS_CMD, 	IDM_GOBACK, NULL },
+  { "/Anzeige/W_eiter",		NULL,	GS_CMD, 	IDM_GOFWD, NULL },
   { "/Anzeige/_Wiederaufbau", 	"R",	GS_CMD, 	IDM_REDISPLAY, NULL },
   { "/Anzeige/sep1",     		NULL,   NULL, 		0, "<Separator>" },
   { "/Anzeige/Nächste Seite oben", " ",	GS_CMD, 	IDM_NEXTHOME, NULL },

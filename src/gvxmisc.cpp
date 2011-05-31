@@ -71,7 +71,7 @@ delayed_message_box(int id, int icon)
 {
     if (debug & DEBUG_GENERAL)
 	gs_addmessf("delayed_message_box: %s\n", get_string(id));
-    message_box(get_string(id), icon);
+    post_img_message(WM_GSMESSBOX, id);
 }
 
 int
@@ -182,7 +182,6 @@ const char * viewer_resource =
 "  dup /TextAlphaBits undef\015\012"
 "  dup /GraphicsAlphaBits undef\015\012"
 "  dup /PageSize undef\015\012"
-#ifdef NOTUSED
 "  GSview /ImagingBBox get null eq \015\012"
 "  { GSview dup /PageSize get\015\012"
 "    /Size exch put\015\012"
@@ -243,10 +242,8 @@ const char * viewer_resource =
 "    pop\015\012"
 "  }\015\012"
 "  ifelse\015\012"
-#endif
 "  dup /TextAlphaBits GSview /TextAlphaBits get put\015\012"
 "  dup /GraphicsAlphaBits GSview /GraphicsAlphaBits get put\015\012"
-#ifdef NOTUSED
 "  dup /PageSize GSview /Size get put\015\012"
 "  dup /HWResolution GSview /HWResolution get put\015\012"
 "  dup /PageOffset GSview /PageOffset get put\015\012"
@@ -281,7 +278,6 @@ const char * viewer_resource =
 "    ]\015\012"
 "    >>\015\012"
 "  >> put\015\012"
-#endif
 "  dup /Policies << /PageSize 1 >> put\015\012"
 "  end % pop systemdict \015\012"
 /*

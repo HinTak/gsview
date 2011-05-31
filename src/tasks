@@ -40,8 +40,6 @@ Adobe PS 5.0.1 driver for NT 4.0 produces incorrect DSC comments
 Some PDF 1.3 files give incorrect links.  Check GS 5.91.
   http://www.pragma-ade.nl/itdemos/internal/gw/gw-s.pdf
 
-Modify gsdll.h in GS so it doesn't depend on gconfigv.h.
-
 Display 2 pages side by side (useful on 21" monitors).
 
 Advanced Configure should allow you to specify the Ghostscript
@@ -61,6 +59,7 @@ X11 uniprint settings.
 
 Allow old select pages dialog when printing (which allows you to 
 select disjoint ranges of pages), when non Windows GDI print.
+Add "current page" option to new print dialog.
 
 Remember different printer names for different print methods.
 
@@ -76,4 +75,12 @@ X11 PDF links not implemented.
 
 "currentfile fileposition ==" gives an error in GSview.
 When an error occurs, display page rendered at time of error.
+
+gsprint with 8-bit colour.
+
+Make GSview Print display the contents of the response file.
+
+Disable the collate control if it becomes enabled.
+
+Allow silent uninstall from GSview installer.
 

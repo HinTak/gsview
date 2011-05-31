@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -18,12 +18,12 @@
 /* de\gvclang.h */
 /* Common German language defines */
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2000 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2001 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Alle Rechte vorbehalten."
 #define GSVIEW_COPYRIGHT3 "Siehe Datei LICENCE für mehr Details."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2000 Aladdin Enterprises,"
-#define GS_COPYRIGHT2 "Menlo Park, California, U.S.A.  Alle Rechte vorbehalten."
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2001 artofcode LLC,"
+#define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Alle Rechte vorbehalten."
 #define GS_COPYRIGHT3 "Siehe Datei PUBLIC für mehr Details."
 
 /* Buttons */
@@ -134,18 +134,18 @@
 #define AASELECTPAGES "Auswahl Seiten"
 
 /* Printer Setup dialog box */
-#define AAPRINTERSETUP "Drucker-Einstellung"
+#define AAPRINTERSETUP "Druckereinstellung"
 #define AADEVICEC "Gerät:"
 #define AARESOLUTIONC "Auflösung:"
 #define AAQUEUEC "Drucker:"
 #define AAPRINTTOFILE "Druck in Datei"
 #define AAPSPRINTER "PostScript-Drucker"
 #define AAOPTIONSC "Optionen:"
-#define AAFIXEDMEDIA "Fixed Medium"
-#define AACONVERT "Konvertierung"
-#define AAWINPRINTERSETTINGS "Windows Druckereinstellungen" 
+#define AAFIXEDMEDIA "Feste Seitengröße"
+#define AACONVERT "Umwandlung"
+#define AAWINPRINTERSETTINGS "Windows-Druckereinstellungen" 
 #define AACOLOURS "Farben"
-#define AABANDW "Schwarz Weiß"
+#define AABANDW "Schwarz/Weiß"
 #define AAGREY "Grau"
 #define AAFULLCOLOUR "Echtfarben"
 #define AASELECTGSDEVICE "Wähle Ghostscript-Gerät"
@@ -157,7 +157,7 @@
 #define AATOC "Bis:"
 
 #define AAADVANCED "Fortgeschritten"
-#define AAADVANCEDPSOPT "Fortgeschrittene PostScript Optionen"
+#define AAADVANCEDPSOPT "Fortgeschrittene PostScript-Optionen"
 #define AASENDCTRLDBEFORE "Sende STRG+D vor jedem Auftrag"
 #define AASENDCTRLDAFTER "Sende STRG+D nach jedem Auftrag"
 #define AAPROLOGFILE "Prolog-Datei"
@@ -222,7 +222,7 @@
 #define AACOPYPRINTERDEF "Kopiere Druckervoreinstellungen"
 #define AAASSOCIATEPS "Verknüpfe .ps-Dateien"
 #define AAASSOCIATEPDF "Verknüpfe .pdf-Dateien"
-#define AACREATESTARTMENU "Lege Startmenü-Einträge"
+#define AACREATESTARTMENU "Lege Startmenü-Einträge an"
 
 /* Easy Configure dialog box */
 #define AAEASYCONFIGURE "Einfache Konfigurierung"
@@ -231,7 +231,7 @@
 /* Download Ghostscript dialog box */
 #define AADOWNLOADGS "Lade Ghostscript"
 #define AADOWNLOADNOW "Lade jetzt"
-#define AAGSNOTFOUND "Ghostscript kann nicht auf Ihrem Computer gefunden werden.  Sie müssen einen Download starten und Aladdin Ghostscript installieren von"
+#define AAGSNOTFOUND "Ghostscript kann nicht auf Ihrem Computer gefunden werden.  Sie müssen einen Download starten und AFPL Ghostscript installieren von"
 
 #define AAGSMESSWIN "GSview für Windows - Ghostscript Meldungen"
 #define AAGSMESSPM "PM GSview - Ghostscript Meldungen"
@@ -239,13 +239,13 @@
 #define AACOPY "Kopiere"
 
 /* Display Settings dialog box */
-#define AADISPLAYSETTINGS "Anzeige Einstellungen"
+#define AADISPLAYSETTINGS "Anzeigeeinstellungen"
 #define AARESOLUTION "Auflösung"
-#define AAZOOMRESOLUTION "Zoom Auflösung"
+#define AAZOOMRESOLUTION "Zoom-Auflösung"
 #define AADEPTH "Farbtiefe"
-#define AATEXTALPHA "Text Alpha"
-#define AAGRAPHICSALPHA "Graphik Alpha"
-#define AADRAWMETHOD "Zeichen Methode"
+#define AATEXTALPHA "Text-Alpha"
+#define AAGRAPHICSALPHA "Graphik-Alpha"
+#define AADRAWMETHOD "Zeichenmethode"
 #define AADPI "dpi"
 #define AABPP "bits/pixel"
 #define AABITS "bits"
@@ -273,10 +273,10 @@
 #define AAPSTOEDIT "PS zu Edit"
 #define AAFORMATC "Format:"
 #define AADRAWTASP "Zeichne Text als Polygone"
-#define AAMAPTOLATIN1 "Konvertiere zu ISO-Latin1"
+#define AAMAPTOLATIN1 "Wandle in ISO-Latin1 um"
 #define AAFLATNESSC "Flachheit:"
-#define AADEFAULTFONTC "Standard-Zeichensatz:"
-#define AADRIVEROPTIONSC "Treiber Optionen:"
+#define AADEFAULTFONTC "Standardzeichensatz:"
+#define AADRIVEROPTIONSC "Treiberoptionen:"
 
 /* Registration */
 #define AAREGTOC "Registriert an:"
@@ -286,7 +286,7 @@
 #define AAONLINEREG "Online Registrierung"
 #define AAREG1 "Bitte geben Sie ihren Namen und ihre Registrierungsnummer ein"
 #define AAREG2 ""
-#define AANAG1 "GSview ist Copyright 2000 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview ist Copyright 2001 Ghostgum Software Pty Ltd."
 #define AANAG2 "Bitte unterstützen Sie die Entwicklung von GSview"
 #define AANAG3 "durch ihre Registrierung."
 #define AANAG4 "GSview kann online registriert werden bei"
@@ -297,9 +297,9 @@
 #define AAINSTALL1 "GSview Installation"
 #define AAINSTALLINTRO1 "Dies Programm soll Ihnen bei der Installation helfen "
 #define AAINSTALLINTRO2 "Bevor Sie mit der Installation fortfahren, stellen Sie bitte sicher, daß sich die Dateien aus Readme.htm im aktuellen Verzeichnis."
-#define AAINSTALLINTRO3 "Die Installation beansprucht ca. 10 MB Platz auf der Festplatte."
+#define AAINSTALLINTRO3 "Die Installation beansprucht ca. 20 - 30 MB Platz auf der Festplatte."
 #define AAINSTALLCOPYRIGHT1 "Copyright Anmerkungen"
-#define AAINSTALLCOPYRIGHT2 "GSview und Aladdin Ghostscript sind separate Programme."
+#define AAINSTALLCOPYRIGHT2 "GSview und AFPL Ghostscript sind separate Programme."
 #define AAINSTALLCOPYRIGHT3 "Sie gehören unterschiedlichen Personen."
 #define AAINSTALLGSVER1 "Welche Komponenten möchten Sie installieren?"
 #define AAINSTALLGSVER2 "Installiere GSview"
@@ -349,57 +349,57 @@
 #define AAUNZIPCANCELLED "Entpacken abgebrochen \n"
 #define AACANTALLOCBUF "Kann keinen Speicher für den Kopierpuffer bekommen "
 #define AAPROGRAMOBJECTFAILED  "Kann Desktop Objekt nicht anlegen"
-#define AAUNINSTALLTITLE "GSview und Aladdin Ghostscript "
-#define AAUNINSTALLITEM "GSview und Aladdin Ghostscript löschen"
+#define AAUNINSTALLTITLE "GSview und AFPL Ghostscript "
+#define AAUNINSTALLITEM "GSview und AFPL Ghostscript löschen"
 
 /* setup program */
 #define AAINSTALLSPACE "Diese Installation benötigt 3 M bytes Plattenplatz"
 #define AAGSVIEWREQUIRES "GSview benötigt ferner"
-#define AAVIEWREADMEDETAILS "Lesen Sie bitte das Readme wie Sie Ghostscript bekommen."
-#define AACOPYRIGHTNOTICE "Copyright Anmerkung"
+#define AAVIEWREADMEDETAILS "Lesen Sie bitte in Readme, wie Sie Ghostscript bekommen."
+#define AACOPYRIGHTNOTICE "Copyright-Anmerkung"
 #define AASELECTGSVIEWDIR "Wählen Sie ein Verzeichnis aus, in das Sie GSview installieren wollen"
 #define AABROWSEE "Durchsuchen..."
-#define AAGSVIEWADDSTARTMENU "GSview Setup wird Einträge in den folgenden Start Menü Ordner machen"
+#define AAGSVIEWADDSTARTMENU "GSview-Setup wird Einträge in den folgenden Startmenüordner machen"
 #define AACREATEFOLDER "Mappe anlegen"
 #define AAALLUSERS "Alle Benutzer"
-#define AASELECTFOLDER "Mappe auswählen"
-#define AAFOLDER "Mappe"
-#define AADESTFOLDER "Zielmappe"
+#define AASELECTFOLDER "Ordner auswählen"
+#define AAFOLDER "Ordner"
+#define AADESTFOLDER "Zielordner"
 #define AAVIEWREADME "Lies Readme"
 
 /* configure */
 #define AAGSVIEWC "GSview:"
-#define AAALADDINGSC "Aladdin Ghostscript:"
+#define AAALADDINGSC "AFPL Ghostscript:"
 #define AACFG1 "GSview Konfigurieren"
 #define AACFG10 "Dieser Wizard hilft Ihnen Gsview zu konfigurieren."
 #define AACFG11 "Wenn Sie einen Eintrag der folgenden Seiten nicht verstehen,\
  dann ändern Sie ihn nicht.  Die Defaults sollten sinnvoll sein."
 #define AACFG20 "GSview muß die Version von Ghostscript kennen\
- und wo es installiert ist."
+ und wissen, wo es installiert ist."
 #define AACFG21 "Welche Version von Ghostscript wollen Sie einsetzen?"
 #define AACFG22 "In welchem Verzeichnis ist Ghostscript installiert?"
 #define AACFG23 "Zusätzliche Typ 1 Zeichensätze sind in"
 #define AACFG30 "GSview hält eine Liste von Ghostscript Druckern und\
  Auflösungen in seiner INI Datei vor."
-#define AACFG31 "Die Default Liste der Geräte und Auflösungen wurde der Standarddistribution \
+#define AACFG31 "Die Standardliste der Geräte und Auflösungen wurde der Standarddistribution \
  von Ghostscript 5.01 entnommen und könnte unvollständig sein."
 #define AACFG32 "Aktualisiere GSview Druckerliste"
-#define AACFG33 "Aktualisierung der GSview Druckerliste überschreibt vorhandene Einträge"
+#define AACFG33 "Aktualisierung der GSview-Druckerliste überschreibt vorhandene Einträge"
 #define AACFG40 "GSview kann Dateiverknüfungen für PostScript und\
  Portable Document Format (PDF) Dateien anlegen."
 #define AACFG43 "Durch diese Verknüpfungen führt ein Doppelklick auf jene Dateien \
- zum start von GSview.  Außerdem bewirken sie bei einigen WWW browsern,\
- daß GSview als ein Viewer für PostScript und PDF Dateien benutzt wird."
+ zum Start von GSview.  Außerdem bewirken sie bei einigen WWW-Browsern,\
+ daß GSview als ein Viewer für PostScript- und PDF-Dateien benutzt wird."
 #define AACFG41 "Verknüpfung von PostScript (.ps and .eps) Dateien mit GSview."
 #define AACFG42 "Verknüpfung von PDF (.pdf) Dateien mit GSview."
-#define AACFG50 "GSview kann eine Programm Manager Gruppe oder\
- Start Menü Einträge für GSview und Aladdin Ghostscript anlegen."
+#define AACFG50 "GSview kann eine Programmmanagergruppe oder\
+ Startmenüeinträge für GSview und AFPL Ghostscript anlegen."
 #define AACFG51 "Lege Gruppe / Eintrag an"
 #define AACFG52 "Name"
 #define AACFG60 "GSview ist jetzt bereit die Konfiguration zu starten.\r\r\
 Drücken Sie Fertig um weiter zu machen."
-#define AACFG53 "GSview kann ein Desktop Programm Objekt für Gsview anlegen. \
- Dies verknüpft PostScript (.ps und .eps) und PDF (.pdf) Dateien mit GSview."
+#define AACFG53 "GSview kann ein Desktop-Programmobjekt für Gsview anlegen. \
+ Dieses verknüpft PostScript- (.ps und .eps) und PDF- (.pdf) Dateien mit GSview."
 #define AACFG54 "Lege Programm Objekt an"
 #define AACFG70 "Konfiguration erfolgreich."
 #define AACFG72 "Um die Konfiguration später zu verändern,\
@@ -410,7 +410,7 @@ Drücken Sie Fertig um weiter zu machen."
 
 /* Menu items for gvXgs.rc */
 #define AAGSVIEWPRINT "GSview Druck"
-#define AAGSVIEWPRINTUSAGE "Aufruf: %s [/d] dllpfad optionsdatei eingabedatei\noptionsdatei und eingabedatei werden am ende gelöscht\nEs ist beabsichtigt gvpgs mit temporären Dateien aufzurufen\n"
+#define AAGSVIEWPRINTUSAGE "Aufruf: %s [/d] dllpfad optionsdatei eingabedatei\nOptionsdatei und Eingabedatei werden am Ende gelöscht\nEs ist beabsichtigt gvpgs mit temporären Dateien aufzurufen\n"
 #ifdef _Windows
 #define AAMFILE "&Datei"
 #define AAMSAVEAS "Speichen &Unter..."

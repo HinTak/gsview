@@ -7,16 +7,15 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 3.6 requires Ghostscript 4.03 - 6.99,
- preferably 6.0 or later.
+ GSview 4.0 requires Ghostscript 7.00 - 7.99.
 2Installation
 ?Installation
-WP
- It is recommended that you use the installation program for
- installing GSview.
- This is called `setup.exe` for MS-Windows and `os2setup.exe` for OS/2.
- GSview for MS-Windows is distributed in a self extracting archive -
- running this will run the setup program.
+W
+ It is recommended that you use the installation program `setup.exe`
+ for installing GSview.
+P
+ It is recommended that you use the installation program `os2setup.exe`
+ for installing GSview.
 X
  The preferred installation method is to use the RPM package.
 E
@@ -35,7 +34,7 @@ E
  See also `Options` | `Language`.
 3Obtaining Ghostscript
 ?Obtaining Ghostscript
- GSview needs Aladdin or AFPL Ghostscript.  GSview and Ghostscript 
+ GSview needs AFPL Ghostscript.  GSview and Ghostscript
  are available separately from
   http://www.cs.wisc.edu/~ghost/
  To configure GSview, obtain and install both Ghostscript
@@ -49,7 +48,7 @@ P
  AFPL Ghostscript for OS/2 is available as a zip file which
  you must manually install.
 X
- AFPL Ghostscript is available as an RPM package, or as source code 
+ AFPL Ghostscript is available as an RPM package, or as source code
  which you have to compile.
 E
  For details of how to manually install Ghostscript, please read
@@ -59,6 +58,7 @@ E
 W
  To uninstall GSview from Windows 95 or NT 4.0,
  use `Add/Remove Programs` from the Windows `Control Panel`.
+E
 4Manual uninstallation
 ?Manual uninstallation
 P
@@ -100,15 +100,19 @@ W
 X
  If you installed GSview using the RPM package, use `rpm` to uninstall it.
 
- Otherwise, remove `gsview`, `pstotext` and all files in the
- directory `/usr/share/gsview`.
+ Otherwise, remove `gsview`, `gsview-help`, `pstotext` and `epstool`
+ from the /usr/bin directory,
+ the documentation in `/usr/share/doc/gsview-N.N`
+ and `/usr/etc/gsview/printer.ini`.
+ The exact paths may vary depending on how GSview was compiled.
 E
 3Manual Installation
 ?Manual Installation
 X
- Copy `gsview` and `pstotext` to a directory on your search path.
- Make the directory `/usr/share/gsview`.
- Copy `gvx*.htm` and `printer.ini` to the directory `/usr/share/gsview`
+ Copy `gsview`, `gsview-help`, `epstool` and `pstotext`
+ to a directory on your search path.
+ Copy `gvx*.htm` to the directory `/usr/share/doc/gsview-N.NN`.
+ Copy `printer.ini` to the directory `/usr/etc/gsview/printer.ini`.
 WP
  It is recommended that you use the installation program for installing
  GSview.  The following instructions describe how to install GSview
@@ -167,7 +171,7 @@ WP
 
 P
  Exit GSview, then append printer.ini to the GSview INI file
- (c:\windows\gsview32.ini or c:\os2\gvpm.ini)
+ (c:\os2\gvpm.ini).
 
  Create a desktop program object for GSview, associating it
  with the file extensions .ps, .eps and .pdf.
@@ -178,7 +182,7 @@ W
  `Create Start Menu items`, or perform the following three steps.
 
  1. Exit GSview, then append printer.ini to the GSview INI file
- (c:\windows\gsview32.ini or c:\os2\gvpm.ini)
+ (c:\windows\gsview32.ini)
 
  2. Add the .ps and .eps (and optionally the .pdf) file types to
  the `Registry`.
@@ -233,11 +237,11 @@ WP
  user profile directory to the GSview directory, then edit it to
  remove all entries except for:
   [Options]
-  Version=3.6
-  GSversion=650
+  Version=4.0
+  GSversion=700
   Configured=1
-  GhostscriptDLL=e:\gs\gs6.50\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs6.50\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs7.00\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs7.00\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  When a user starts GSview, their INI file will normally be used.
  The first time GSview is run, or when the GSview version doesn't
@@ -256,6 +260,10 @@ WP
  will NOT be changed.
  If you wish to change these you must use `Options` | `Advanced Configure`.
 W
+
+ If you are installing on Windows NT4/2000, and you select "All Users",
+ then the installer will write this gsview32.ini into your GSview
+ directory.
 
  If a user tries to use the GSview uninstall program, it will
  try to delete the GSview and Ghostscript files on the network.
@@ -433,7 +441,7 @@ E
  Extracting PDF pages extracts PostScript rather than PDF.
 
 
- To batch convert multiple files, look at 
+ To batch convert multiple files, look at
 X
  ps2pdf.
 WP
@@ -638,7 +646,7 @@ W
  the `Settings `button.
 
  To control how GSview handles requests by the PostScript or
- PDF documents to change the page size, see the 
+ PDF documents to change the page size, see the
  `Page Size Matching` topic.
 
  `Options `is usually empty, but may contain Ghostscript command
@@ -659,7 +667,7 @@ W
  You can use other devices or resolutions.
 
  To control how GSview handles requests by the PostScript or
- PDF documents to change the page size, see the 
+ PDF documents to change the page size, see the
  `Page Size Matching` topic.
 
  Some Ghostscript options may be added using either the` Options`
@@ -748,7 +756,7 @@ P
  With all other printer drivers, Ghostscript sends the output direct
  to the printer queue.
  If you have trouble printing you may have to `Print To File`
- and then `Print File` or use the DOS command `COPY /B FILENAME PRN`.
+ and then `Print File` or use the OS/2 command `COPY /B FILENAME PRN`.
 PX
 
  If `PostScript Printer` is checked, the selected pages will be
@@ -759,7 +767,7 @@ PX
  a PostScript printer.
 
  The list of available devices and resolutions is stored in the
- [Devices] section of 
+ [Devices] section of
 P
  gvpm.ini.
 X
@@ -776,13 +784,17 @@ PX
  If you want to produce a bitmap, some useful drivers are
  `bmpmono`, `bmp16`, `bmp16m` and `bmp256`.
 
- `File | Print File` sends a file to a local port, bypassing the
- Presentation Manager printer drivers.
+ `File | Print File` sends a file to a local port
+P
+ , bypassing the Presentation Manager printer drivers.
+X
+ .
+PX
  This is useful for sending a document to a PostScript printer,
  or for sending an output file produced by Ghostscript to a printer.
 
  To control how GSview handles requests by the PostScript or
- PDF documents to change the page size, see the 
+ PDF documents to change the page size, see the
  `Page Size Matching` topic.
 
  The `Options `field contains a Ghostscript command line option
@@ -933,18 +945,18 @@ E
 ?Fixed Media
 ?Fixed Page Size
 ?Variable Page Size
-?Rescale to fit Page Size
+?Shrinkg to fit Page Size
  If `Fixed Page Size` is selected (the default), GSview will use the
  page size on the Media menu and will ignore attempts by PostScript
  or PDF documents to change the page size.
  This is useful for PDF files that contain a mix of portrait and
  landscape pages.
 
- If `Rescale to fit Page Size` is selected, any page size selected
- by the document will be rescaled to fit the page size on the Media
- menu.  This is useful if you want to print an A4 sized page on 
+ If `Shrink to fit Page Size` is selected, any page size selected
+ by the document that is larger than the selected media will
+ be shrunk to fit the page size on the Media menu.
+ This is useful if you want to print an A4 sized page on
  letter paper (although a better idea is to buy A4 paper).
- This does not work with Ghostscript 6.30 or earlier.
 
  If `Variable Page Size` GSview will set the default page
  size from the Media menu, but allow the page size to be changed.
@@ -1034,7 +1046,7 @@ E
 WP
  1. Display with smooth edges and save the display bitmap.
  OR
- 2. 
+ 2.
 E
  `Convert` using a bitmap device and set the following
  in the properties.
@@ -1046,8 +1058,15 @@ E
 
  You need to select a Ghostscript output device and resolution.
  The default list of available devices and resolutions is stored
- in the [Convert] section of gsview32.ini and is taken from the
- standard distribution version of Ghostscript 6.01.
+ in the [Convert] section of
+W
+ gsview32.ini
+P
+ gvpm.ini
+X
+ .gsviewrc
+E
+ and is taken from the standard distribution version of Ghostscript 6.01.
  You can use other devices or resolutions.
 
  Some Ghostscript options may be added using either the
@@ -1061,7 +1080,7 @@ E
  descending order.
 
  To control how GSview handles requests by the PostScript or
- PDF documents to change the page size, see the 
+ PDF documents to change the page size, see the
  `Page Size Matching` topic.
 
  See also `Conversions`.
@@ -1233,9 +1252,9 @@ WP
  A command line version `pstoedit.exe` and the manual `pstoedit.htm`
  are included in the
 W
- pstoedit 
+ pstoedit
 P
- pstoedt2 
+ pstoedt2
 WP
  directory.
  The home page of pstoedit is
@@ -1429,17 +1448,16 @@ P
 X
  There are no clipboard operations implemented in the X11 GSview.
 
- `Save Pixmap as BMP` will save the currently displayed page
- as a Windows bitmap.  This will only work if one of the pixmap
- display methods is used and the display is 16 or 24 bits in depth.
+ `Save Image as BMP` will save the currently displayed page
+ as a Windows bitmap.
 E
 
  If `Text Extract` or `Find` are used on a document with `PStoText` enabled,
  GSview creates an index of the words in the document.  If any words are
- marked with the mouse, 
+ marked with the mouse,
 WP
  `Copy` will copy these words to the clipboard instead
- of copying a bitmap.  
+ of copying a bitmap.
 X
  these will become the current X selection.
 E
@@ -1484,13 +1502,12 @@ E
 2Options
 ?Options
  The `Options` menu has the following selections:
-WP
 3Easy Configure
 ?Easy Configure
 W
- Easy configure allows you to select a which version of
+ Easy configure allows you to select which version of
  Ghostscript to use.  It is assumed that you have already installed
- Aladdin or AFPL Ghostscript 5.50 or later.
+ AFPL Ghostscript 7.00 or later.
  If you do not have Ghostscript installed, see the topic
  `Obtaining Ghostscript`.
  For more control over configuration of GSview, see
@@ -1708,9 +1725,19 @@ E
 ?Button Bar
 ?Magnify
  When the `Button Bar` option is `checked`, GSview will display
- a Button Bar at the top of the window.  This is the default.
- The Button Bar contains the following items in order from left to right:
-
+ a Button Bar
+WX
+ at the top
+P
+ down the left side
+E
+ of the window.  This is the default.
+ The Button Bar contains the following items in order from
+WX
+ left to right:
+P
+ top to bottom:
+E
 W
  {bmlwd gvwopen.bmp}
 E
@@ -1811,21 +1838,6 @@ WP
  at pages at low resolution.  This is the default.
 
  See also `View` | `Fit Window`.
-3Quick Open
-?Quick Open
- When the `Quick Open` option is `checked`, GSview will not restart
- Ghostscript whenever the page orientation, resolution or size
- is changed.
-
- GSview tries to preserve the Ghostscript state, but a document may
- still leave the Ghostscript interpreter in an unusual state or cause
- an error.  If an error occurs, Ghostscript will abort.
- Ghostscript error messages are displayed using `File ` | `Show Messages`.
- Select `Redisplay` to reopen the document.
-
- If `Quick Open` is `unchecked`, GSview will restart Ghostscript
- before each new document or whenever the page orientation,
- resolution or size is changed.
 E
 3Auto Redisplay
 ?Auto Redisplay
@@ -1962,7 +1974,7 @@ W
  `IMPORTANT`: If you use `Text Alpha`, GSview will disable
  `Platform Fonts` by doing the equivalent of adding
    -dNOPLATFONTS
- to the `Options `| `Configure Ghostscript` Ghostscript Options field.
+ to the `Options `| `Advanced Configure` Ghostscript Options field.
 E
 
  The `Graphics Alpha` field sets anti-aliasing for graphics and
@@ -2127,8 +2139,13 @@ P
   gvpm [/D] [/Tn] /P filename
 X
   gsview [-d] filename
-  gsview32 [-d] -P filename
-  gsview32 [-d] -F filename
+  gsview32 [-d] -P filename (not yet implemented)
+  gsview32 [-d] -F filename (not yet implemented)
+
+ Other options are
+  -help
+  -version
+  -geometry WIDTHxHEIGHT
 E
 
  To start GSview and display filename.ps use:
@@ -2246,7 +2263,7 @@ W
  There are two command line options to cause GSview to send a DDE
  command to another copy of GSview.
  The /E command line option uses [Command("command line")][ShowWindow(1)].
- The /X command line option uses [FileExit()]
+ The /X command line option uses [FileExit()].
 E
 2World Wide Web
 ?World Wide Web
@@ -2278,7 +2295,7 @@ P
 X
   gsview - A Ghostscript graphical interface
 E
-  Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 
  This file is part of GSview.
 
@@ -2316,7 +2333,7 @@ WP
  This error message usually occurs if you don't have Ghostscript,
  or if GSview can't find Ghostscript.
 
- From the GSview menu select `Options` | `Configure Ghostscript`
+ From the GSview menu select `Options` | `Advanced Configure`
  and enter the correct `Ghostscript DLL` path. For example
 P
   c:\gs\gsN.NN\bin\gsdll2.dll
@@ -2482,7 +2499,7 @@ E
  Alternatively, you may have used `-dFIXEDMEDIA` in the Ghostscript
  environment variable GS_OPTIONS.  When using GSview, it is safest
  not to use GS_OPTIONS at all and to use `Options` |
- `Configure Ghostscript` | `Ghostscript Options` instead.
+ `Advanced Configure` | `Ghostscript Options` instead.
 W
 2Other Useful Programs
 ?Other Useful Programs
@@ -2534,7 +2551,7 @@ W
  If you get an error message `Failed to load bzip2 DLL...` then
  you probably don't have the bzip2 DLL available.
  Obtain it from the same place you obtained GSview or from
-  ftp://ftp.cs.wisc.edu/ghost/ghostgum/
+  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Place the bzip2 DLL in the same directory as the GSview EXE.
  libbz2.dll is for Win32.  At this stage there is no bzip2 DLL
  for Win16 or OS/2.
@@ -2558,7 +2575,7 @@ WP
  If you get an error message `Failed to load zlib DLL...` then
  you probably don't have the zlib DLL available.
  Obtain it from the same place you obtained GSview or from
-  ftp://ftp.cs.wisc.edu/ghost/ghostgum/
+  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Place the zlib DLL in the same directory as the GSview EXE.
  zlib16.dll is for Win16.  zlib32.dll is for Win32.
  zlib2.dll is for OS/2.

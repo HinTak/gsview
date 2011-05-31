@@ -1,22 +1,22 @@
 #
-# Spec file for GSview 3.6
+# Spec file for GSview 4.0
 #
-# 3.6 release
-#  2000-12-29 Russell Lang <gsview@ghostgum.com.au>
+# 4.0 release
+#  2001-06-02 Russell Lang <gsview@ghostgum.com.au>
 #
 Summary: PostScript and PDF previewer
 Name: gsview
-Version: 3.6
+Version: 4.0
 Release: 1
 Copyright: Aladdin Free Public License, Ghostgum Software Pty Ltd
 Group: Applications/Graphics
-Source: ftp://ftp.cs.wisc.edu/ghost/ghostgum/gsv36src.zip
+Source: ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/gsv40src.zip
 URL: http://www.cs.wisc.edu/~ghost/gsview/
 #Icon: gsview.gif
 #Distribution: Unknown
 Vendor: Ghostgum Software Pty Ltd
 Packager: Russell Lang <gsview@ghostgum.com.au>
-Requires: ghostscript
+Requires: ghostscript >= 7.00
 BuildRoot: /var/tmp/gsview-root
 
 %description
@@ -25,7 +25,7 @@ Ghostscript is an interpreter for the PostScript page
 description language used by laser printers.
 For documents following the Adobe PostScript Document Structuring 
 Conventions, GSview allows selected pages to be viewed or printed.
-GSview requires Ghostscript 4.03 - 6.99.
+GSview requires Ghostscript 7.00 - 7.99.
 
 Includes epstool for creating of extracting preview bitmaps
 in EPS files.
@@ -39,37 +39,48 @@ mkdir $RPM_BUILD_DIR/gsview-%{version}
 #
 # unpack main sources
 cd $RPM_BUILD_DIR/gsview-%{version}
-unzip -a $RPM_SOURCE_DIR/gsv36src.zip
+unzip -a $RPM_SOURCE_DIR/gsv40src.zip
 unzip -a epstool.zip
 unzip -a pstotext.zip
 unzip -a src.zip
 
 %build
 cd $RPM_BUILD_DIR/gsview-%{version}/src
-make -f gvx.mak GSVIEW_BASE=/usr/local RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
+make -f gvx.mak RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/usr/local/{bin,man}
-mkdir -p $RPM_BUILD_ROOT/usr/local/doc
-mkdir -p $RPM_BUILD_ROOT/usr/local/etc/gsview
+mkdir -p $RPM_BUILD_ROOT/usr/{bin,man}
+mkdir -p $RPM_BUILD_ROOT/usr/share/doc
+mkdir -p $RPM_BUILD_ROOT/etc/gsview
 cd $RPM_BUILD_DIR/gsview-%{version}/src
-make -f gvx.mak GSVIEW_BASE=$RPM_BUILD_ROOT/usr/local install
-strip $RPM_BUILD_ROOT/usr/local/bin/gsview
-strip $RPM_BUILD_ROOT/usr/local/bin/pstotext
-strip $RPM_BUILD_ROOT/usr/local/bin/epstool
+make -f gvx.mak prefix=$RPM_BUILD_ROOT install
+strip $RPM_BUILD_ROOT/usr/bin/gsview
+strip $RPM_BUILD_ROOT/usr/bin/pstotext
+strip $RPM_BUILD_ROOT/usr/bin/epstool
 
 
 %files
 %defattr(-, root, root)
-%dir /usr/local/doc/gsview-%{version}
-/usr/local/doc/gsview-%{version}/*
-/usr/local/bin/*
-%dir /usr/local/etc/gsview
-/usr/local/etc/gsview/*
-/usr/local/man/*/*
+%docdir /usr/share/doc/gsview-%{version}
+/usr/share/doc/gsview-%{version}
+%dir /etc/gsview
+%config /etc/gsview/printer.ini
+/usr/bin/epstool
+/usr/bin/gsview
+/usr/bin/gsview-help
+/usr/bin/pstotext
+%dir /usr/man
+%dir /usr/man/man1
+# Something is automatically compressing this file between the 
+# time we install it and the time it gets added to the RPM.
+/usr/man/man1/pstotext.1.gz
 
 %changelog
+* Sat Jun 02 2001 Russell Lang <gsview@ghostgum.com.au>
+- GSview 4.0 release
+  Mark printer.ini an config file and the documentation files
+  as such.  Make sure only gsview files are included in the rpm.
 * Fri Dec 29 2000 Russell Lang <gsview@ghostgum.com.au>
 - GSview 3.6 release
 * Sat Dec 16 2000 Russell Lang <gsview@ghostgum.com.au>

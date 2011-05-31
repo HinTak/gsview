@@ -659,7 +659,7 @@ get_bbox(void)
 QMSG q_mess;		/* queue message */
 	bbox.valid = FALSE;
 	bbox.llx = bbox.lly = bbox.urx = bbox.ury = 0;
-	if ((gsdll.state != PAGE) && (gsdll.state != IDLE)) {
+	if ((gsdll.state != GS_PAGE) && (gsdll.state != GS_IDLE)) {
 	    gserror(IDS_EPSNOBBOX, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    return FALSE;
 	}
@@ -1358,9 +1358,9 @@ DisplaySettingsDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 		    if (resize) {
 			if (unzoom)
 			    gsview_unzoom();
-			if (gsdll.state != UNLOADED) {
+			if (gsdll.state != GS_UNINIT) {
 /* gs_resize has this check
-			    if (option.redisplay && (gsdll.state == PAGE) && (psfile.doc != (CDSC *)NULL))
+			    if (option.redisplay && (gsdll.state == GS_PAGE) && (psfile.doc != (CDSC *)NULL))
 */
 				gs_resize();
 			    /* for those that can't be changed with a */

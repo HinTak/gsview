@@ -252,7 +252,7 @@ BEGIN
 	// PageSize policies
 	GSVS(IDS_PAGESIZE_VARIABLE, "Variable Page Size") /* ENGLISH */
 	GSVS(IDS_PAGESIZE_FIXED, "Fixed Page Size") /* ENGLISH */
-	GSVS(IDS_PAGESIZE_RESCALE, "Rescale to fit Page Size") /* ENGLISH */
+	GSVS(IDS_PAGESIZE_SHRINK, "Shrink to fit Page Size") /* ENGLISH */
 END
 
 STRINGTABLE

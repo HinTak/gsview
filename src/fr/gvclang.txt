@@ -9,7 +9,7 @@
  Pour les documents respectant les conventions de structure du langage Adobe
  PostScript, GSview permet de visualiser ou d'imprimer des pages
  sélectionnées.
- GSview 3.6 nécessite Ghostscript version 4.03 - 6.99, de préférence 6.0.
+ GSview 4.0 nécessite Ghostscript version 7.00 - 7.99.
 2Installation
 ?Installation
  Pour installer GSview il est recommandé d'utiliser le programme
@@ -206,11 +206,11 @@ E
  puis d'éditer ce fichier
  en supprimant toutes les entrées sauf :
   [Options]
-  Version=3.6
-  GSversion=650
+  Version=4.0
+  GSversion=700
   Configured=1
-  GhostscriptDLL=e:\gs\gs6.50\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs6.50\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs7.00\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs7.00\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Lorsqu'un utilisateur lance GSview, son fichier INI sera utilisé normalement.
  La première fois que GSview est exécuté ou
@@ -829,7 +829,7 @@ E
 
  Lorsque GSview imprime un fichier, il va envoyer à Ghostscript le contenu de la section
  [cdjcolor] du fichier
-W
+WP
  gsview32.ini
 P
  gvpm.ini
@@ -890,7 +890,7 @@ E
  2. Imprimez vers un périphérique bitmap et ajustez ceci dans
  les propriétés :
     -dTextAlphaBits=4 -dGraphicsAlphaBits=4
-W
+WP
 2Conversion vers un format vectoriel
 ?Conversion vers un format vectoriel
 ?PS vers Edit
@@ -1069,7 +1069,7 @@ E
  Il est également possible d'obtenir une image depuis Ghostscript en utilisant l'un
  des pilotes BMP. Voir la rubrique d'aide `Imprimer`.
 
-W
+WP
  La commande `Coller` copie une image au format DIB depuis le presse-papiers (s'il en contient une)
  vers un fichier BMP.
 
@@ -1162,7 +1162,7 @@ E
 
  Vous pouvez ajouter un aperçu n'ayant aucune ressemblance avec le fichier PostScript,
  bien que cela ne soit pas très désirable.
-W
+WP
 2Mesure
 ?Mesure
 ?Calcul des unités transformées
@@ -1487,21 +1487,6 @@ E
  à une résolution faible. Par défaut, cette option n'est `pas cochée`.
 
  Voir aussi `Affichage` | `S'adapter à la fenêtre`.
-3Ouverture rapide
-?Ouverture rapide
- Lorsque l'option `Ouverture rapide` est `cochée`, GSview ne redémarre pas
- Ghostscript lorsque l'orientation de la page, la résolution ou la taille
- est modifiée.
-
- GSview tente de conserver l'état de Ghostscript mais un document peut toujours
- laisser l'interpréteur Ghostscript dans un état instable ou provoquer
- une erreur. Si une erreur se produit, l'exécution de Ghostscript va être interrompue.
- Les messages d'erreur de Ghostscript sont affichés en utilisant `Fichier `| `Afficher les messages`.
- Sélectionnez `Réafficher` pour ouvrir de nouveau le document.
-
- Si l'option `Ouverture rapide` n'est `pas cochée`, GSview redémarre Ghostscript
- avant chaque nouveau document ou lorsque l'orientation de la page,
- la résolution ou la taille est modifiée.
 3Réaffichage automatique
 ?Réaffichage automatique
  Lorsque l'option `Réaffichage automatique` est `cochée`, GSview réaffiche
@@ -1980,7 +1965,7 @@ W
 P
   GVPM.EXE - Une interface graphique pour Ghostscript
 E
-  Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  Tous droits réservés.
+  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  Tous droits réservés.
   Copyright (C) 1997-2000, Cyrille Chevallet, pour la traduction française.
 
  Ce fichier fait partie de GSview.
@@ -2240,7 +2225,7 @@ W
  Si vous recevez le message d'erreur `Chargement de la DLL bzip2 impossible...`, ce sera
  sans doute parce que la DLL bzip2 n'est pas disponible sur votre système.
  Vous pouvez la trouver au même endroit que celui où vous avez trouvé GSview ou à l'adresse suivante :
-  ftp://ftp.cs.wisc.edu/ghost/ghostgum/
+  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Copiez la DLL bzip2 dans le répertoire contenant l'exécutable de GSview.
  Elle s'appelle libbz2.dll pour Win32.  Il n'existe pour le moment aucune DLL bzip2
  pour Win16 ou OS/2.
@@ -2259,7 +2244,7 @@ E
  Si vous recevez le message d'erreur `Chargement de la DLL zlib impossible ...`, ce sera
  sans doute parce que la DLL zlib n'est pas disponible sur votre système.
  Vous pouvez la trouver au même endroit que celui où vous avez trouvé GSview ou à l'adresse suivante :
-  ftp://ftp.cs.wisc.edu/ghost/rjl/
+  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/rjl/
  Copiez la DLL zlib dans le répertoire contenant l'exécutable de GSview.
  Elle s'appelle zlib16.dll pour Win16, zlib32.dll pour Win32 et
  zlib2.dll pour OS/2.

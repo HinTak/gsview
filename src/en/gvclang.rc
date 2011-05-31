@@ -228,7 +228,7 @@ BEGIN
 	GSVS(IDS_BETAWARN, AABETAWARN)
 	GSVS(IDS_NOPRINTERINI, "Can't open printer.ini")
 	GSVS(IDS_NOINI, "Can't open INI file")
-	GSVS(IDS_NEEDTEMP, "You must set the environment variable TEMP to a valid writeable directory.  Without this, GSview and Aladdin Ghostscript will not be able to print")
+	GSVS(IDS_NEEDTEMP, "You must set the environment variable TEMP to a valid writeable directory.  Without this, GSview will not be able to print")
 	GSVS(IDS_GSNOTINSTALLED, "You have not installed Ghostscript.  Please read the GSview Readme.htm file.")
 	GSVS(IDS_GSLIBNOTINSTALLED, "You have not installed the Ghostscript library files.  Please read the GSview Readme.htm file.")
 	GSVS(IDS_NOPROGMAN, AANODDEPROGMAN)
@@ -254,7 +254,7 @@ BEGIN
 	// PageSize policies
 	GSVS(IDS_PAGESIZE_VARIABLE, "Variable Page Size")
 	GSVS(IDS_PAGESIZE_FIXED, "Fixed Page Size")
-	GSVS(IDS_PAGESIZE_RESCALE, "Rescale to fit Page Size")
+	GSVS(IDS_PAGESIZE_SHRINK, "Shrink to fit Page Size")
 END
 
 STRINGTABLE

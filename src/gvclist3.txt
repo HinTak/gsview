@@ -28,6 +28,7 @@ gsview\gsv16spl.exe
 gsview\gvwgs32.exe
 gsview\uninstgs.exe
 gsview\printer.ini
+gsview\gsview32.ini
 gsview\zlib32.dll
 gsview\libbz2.dll
 gsview\gsprint.exe

@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1996-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
   
@@ -19,50 +19,31 @@
 /* GS DLL associated routines for MS-Windows */
 #include "gvwin.h"
 
-/* forward references */
-int get_gs_input(char FAR *buf, int blen);
-
-FARPROC lpfnCallback;
-
+/* process message queue until something is pending */
 void
-gs_clear_gsdll(void)
+view_wait_message(VIEW *view)
 {
-    gsdll.hmodule = (HMODULE)NULL;
-    gsdll.valid = FALSE;
-    gsdll.device = NULL;
-    gsdll.revision_number = 0;
-    gsdll.revision = NULL;
-    gsdll.init = NULL;
-    gsdll.execute_begin = NULL;
-    gsdll.execute_cont = NULL;
-    gsdll.execute_end = NULL;
-    gsdll.exit = NULL;
-    gsdll.lock_device = NULL;
-    gsdll.copy_dib = NULL;
-    gsdll.copy_palette = NULL;
-    gsdll.draw = NULL;
-    gsdll.get_bitmap_row = NULL;
-    gsdll.callback = NULL;
+    MSG msg;
+    while (!pending.next && !pending.now && !pending.unload && 
+	!quitnow && GetMessage(&msg, (HWND)NULL, 0, 0)) {
+	if ((hDlgModeless == 0) || !IsDialogMessage(hDlgModeless, &msg)) {
+	    if (!TranslateAccelerator(hwndimg, haccel, &msg)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	    }
+	}
+    }
 }
 
-void
-gs_load_dll_cleanup(void)
-{
-    gs_free_dll();
-    delayed_message_box(IDS_PROCESS_GSLOAD_FAIL, 0);
-    post_img_message(WM_GSSHOWMESS, 0);
-}
+/******************************************************************/
 
 #ifndef ERROR_DLL_NOT_FOUND
 #define ERROR_DLL_NOT_FOUND 1157L
 #endif
 
 /* display error message for LoadLibrary */
-#ifdef __BORLANDC__
-#pragma argsused
-#endif
-void
-load_error(HMODULE hmodule , const char *dllname)
+static void
+load_library_error(HMODULE hmodule, const char *dllname)
 {
 char *text_reason;
 char buf[MAXSTR+128];
@@ -109,338 +90,94 @@ int reason;
     }
 }
 
-/* load GS DLL if not already loaded */
-/* return TRUE if OK */
-BOOL
-gs_load_dll(void)
+int
+gsdll_open(GSDLL *dll, const char *name)
 {
-char buf[MAXSTR+40];
-char fullname[1024];
 const char *shortname;
+char fullname[MAX_PATH];
 char *p;
-const char *dllname;
+    if (debug)
+	gs_addmessf("Trying to load %s\n", name);
 
-	if (gsdll.hmodule)
-	    return TRUE;
-	post_img_message(WM_GSWAIT, IDS_WAITGSOPEN);
-	gs_clear_gsdll();
-	dllname = option.gsdll;
-	sprintf(buf, "Trying to load %s\n", dllname);
+    /* Try to load DLL first with given path */
+    dll->hmodule = LoadLibrary(name);
+    if (dll->hmodule < (HINSTANCE)HINSTANCE_ERROR) {
+	/* failed */
+	load_library_error(dll->hmodule, name);
+	/* try again, with path of EXE */
+	if ((shortname = strrchr((char *)name, '\\')) == (const char *)NULL)
+	    shortname = name;
+	else
+	    shortname++;
+
+	GetModuleFileName(phInstance, fullname, sizeof(fullname));
+	if ((p = strrchr(fullname,'\\')) != (char *)NULL)
+	    p++;
+	else
+	    p = fullname;
+	*p = '\0';
+	strcat(fullname, shortname);
+
 	if (debug)
-	    gs_addmess(buf);
-	/* Try to load DLL first with given path */
-	gsdll.hmodule = LoadLibrary(dllname);
+	    gs_addmessf("Trying to load %s\n", fullname);
+
+	dll->hmodule = LoadLibrary(fullname);
 	if (gsdll.hmodule < (HINSTANCE)HINSTANCE_ERROR) {
-	    /* failed */
-	    load_error(gsdll.hmodule, dllname);
-	    /* try again, with path of EXE */
-	    if ((shortname = strrchr((char *)option.gsdll, '\\')) == (const char *)NULL)
-		shortname = option.gsdll;
-	    else
-		shortname++;
-	    GetModuleFileName(phInstance, fullname, sizeof(fullname));
-	    if ((p = strrchr(fullname,'\\')) != (char *)NULL)
-		p++;
-	    else
-		p = fullname;
-	    *p = '\0';
-	    strcat(fullname, shortname);
-	    dllname = fullname;
-	    sprintf(buf, "Trying to load %s\n", dllname);
+	    /* failed again */
+	    load_library_error(gsdll.hmodule, fullname);
+	    /* try once more, this time on system search path */
 	    if (debug)
-		gs_addmess(buf);
-	    gsdll.hmodule = LoadLibrary(dllname);
-	    if (gsdll.hmodule < (HINSTANCE)HINSTANCE_ERROR) {
+		gs_addmessf("Trying to load %s\n", shortname);
+	    dll->hmodule = LoadLibrary(shortname);
+	    if (dll->hmodule < (HINSTANCE)HINSTANCE_ERROR) {
 		/* failed again */
-		load_error(gsdll.hmodule, dllname);
-		/* try once more, this time on system search path */
-		dllname = shortname;
-		sprintf(buf, "Trying to load %s\n", dllname);
-		if (debug)
-		    gs_addmess(buf);
-		gsdll.hmodule = LoadLibrary(dllname);
-		if (gsdll.hmodule < (HINSTANCE)HINSTANCE_ERROR) {
-		    /* failed again */
-		    load_error(gsdll.hmodule, dllname);
-		}
+		load_library_error(dll->hmodule, shortname);
 	    }
 	}
-
- 	if (gsdll.hmodule >= (HINSTANCE)HINSTANCE_ERROR) {
-	    sprintf(buf, "Loaded Ghostscript DLL %s\n", dllname);
-	    gs_addmess(buf);
-	    gsdll.revision = (PFN_gsdll_revision) GetProcAddress(gsdll.hmodule, "gsdll_revision");
-	    if (gsdll.revision == NULL) {
-		sprintf(buf, "Can't find gsdll_revision\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    /* check DLL version */
-	    gsdll.revision(NULL, NULL, &gsdll.revision_number, NULL);
-	    if ( (gsdll.revision_number < GS_REVISION_MIN) || (gsdll.revision_number > GS_REVISION_MAX) ) {
-		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld - %ld\n", 
-			gsdll.revision_number, (long)GS_REVISION_MIN, (long)GS_REVISION_MAX);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ( (gsdll.revision_number == 500) || (gsdll.revision_number == 501) ) {
-		gs_addmess("\
-**********************************************************************\n\
-GSview warning: Ghostscript 5.0 and 5.01 do not work well with GSview.\n\
-Please upgrade to a later version.\n\
-**********************************************************************\n\
-");
-	    }
-	    /* continue loading other functions */
-	    gsdll.init = (PFN_gsdll_init) GetProcAddress(gsdll.hmodule, "gsdll_init");
-	    if (gsdll.init == NULL) {
-	        sprintf(buf, "Can't find gsdll_init\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.execute_begin = (PFN_gsdll_execute_begin) GetProcAddress(gsdll.hmodule, "gsdll_execute_begin");
-	    if (gsdll.execute_begin == NULL) {
-	        sprintf(buf, "Can't find gsdll_execute_begin\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.execute_cont = (PFN_gsdll_execute_cont) GetProcAddress(gsdll.hmodule, "gsdll_execute_cont");
-	    if (gsdll.execute_cont == NULL) {
-	        sprintf(buf, "Can't find gsdll_execute_cont\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.execute_end = (PFN_gsdll_execute_end) GetProcAddress(gsdll.hmodule, "gsdll_execute_end");
-	    if (gsdll.execute_end == NULL) {
-	        sprintf(buf, "Can't find gsdll_execute_end\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.lock_device = (PFN_gsdll_lock_device) GetProcAddress(gsdll.hmodule, "gsdll_lock_device");
-	    if (gsdll.lock_device == NULL) {
-	        sprintf(buf, "Can't find gsdll_lock_device\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.copy_dib = (PFN_gsdll_copy_dib) GetProcAddress(gsdll.hmodule, "gsdll_copy_dib");
-	    if (gsdll.copy_dib == NULL) {
-	        sprintf(buf, "Can't find gsdll_copy_dib\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.copy_palette = (PFN_gsdll_copy_palette) GetProcAddress(gsdll.hmodule, "gsdll_copy_palette");
-	    if (gsdll.copy_palette == NULL) {
-	        sprintf(buf, "Can't find gsdll_copy_palette\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.draw = (PFN_gsdll_draw) GetProcAddress(gsdll.hmodule, "gsdll_draw");
-	    if (gsdll.draw == NULL) {
-	        sprintf(buf, "Can't find gsdll_draw\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.get_bitmap_row = (PFN_gsdll_get_bitmap_row) GetProcAddress(gsdll.hmodule, "gsdll_get_bitmap_row");
-	    if (gsdll.get_bitmap_row == NULL) {
-	        sprintf(buf, "Can't find gsdll_get_bitmap_row\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    gsdll.exit = (PFN_gsdll_exit) GetProcAddress(gsdll.hmodule, "gsdll_exit");
-	    if (gsdll.exit == NULL) {
-	        sprintf(buf, "Can't find gsdll_exit\n");
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	}
-	else {
-	    gs_addmess("Can't load Ghostscript DLL\n");
-	    gs_load_dll_cleanup();
-	    return FALSE;
-	}
-	gsdll.callback = gsdll_callback;
-
-    return TRUE;
-}
-
-
-/* free GS DLL */
-/* This should only be called when gsdll_execute has returned */
-/* TRUE means no error */
-BOOL
-gs_free_dll(void)
-{
-char buf[MAXSTR];
-	if (gsdll.hmodule == (HINSTANCE)NULL)
-	    return TRUE;
-	begin_crit_section();
-	display.epsf_clipped = FALSE;
-	FreeLibrary(gsdll.hmodule);
-	gs_clear_gsdll();
-	/* no bitmap exists */
-        bitmap.width = 0;
-        bitmap.height = 0;
-	bitmap.changed = 0;
-	end_crit_section();
-	sprintf(buf,"Unloaded GSDLL\n\n");
-	gs_addmess(buf);
-	return TRUE;
-}
-
-/* terminate DLL */
-BOOL
-gsdll_close()
-{
-	pending.unload = TRUE;
-	pending.abort = TRUE;
-	pending.now = TRUE;
-	pending.next = TRUE;
-	/* must now wait until gsdll.state = UNLOADED */
-	return TRUE;
-}
-
-/* callback routine for GS DLL */
-int _export 
-gsdll_callback(int message, char *str, unsigned long count)
-{
-char buf[MAXSTR];
-    switch (message) {
-	case GSDLL_STDIN:
-	    sprintf(buf,"Callback: STDIN %p %d - stdin not supported\n", str, count);
-	    gs_addmess(buf);
-	    return (int)0;
-	case GSDLL_STDOUT:
-	    if (callback_pstotext(str, count))
-		return (int)count;
-	    if (!pending.abort)
-		pdf_checktag(str, (int)count);
-	    if (str != (char *)NULL)
-		gs_addmess_count(str, (int)count);
-	    return (int)count;
-	case GSDLL_DEVICE:
-	    if (debug) {
-		sprintf(buf,"Callback: DEVICE %p %s\n", str,
-		    count ? "open" : "close");
-		gs_addmess(buf);
-	    }
-	    if (gsdll.device && count) {
-		gs_addmess("GSDLL_CALLBACK: multiple display devices not supported");
-		break;
-	    }
-	    if (gsdll.device && (gsdll.device != (unsigned char *)str)) {
-		gs_addmess("GSDLL_CALLBACK: not using that device");
-		break;
-	    }
-	    gsdll.device = count ? (unsigned char *)str : NULL;
-	    bitmap.width = bitmap.height = 0;
-	    bitmap.changed = TRUE;
-	    PostMessage(hwndimg, WM_GSDEVICE, (WPARAM)0, (LPARAM)0);
-	    break;
-	case GSDLL_SYNC:
-	    if (debug) {
-		sprintf(buf,"Callback: SYNC %p%s\n", str, ignore_sync ? " ignored" : "");
-		gs_addmess(buf);
-	    }
-	    if (gsdll.device != (unsigned char *)str)
-	        break;
-	    if (ignore_sync) {
-		/* ignore this sync, but not the next */
-		ignore_sync = FALSE;
-		break;
-	    }
-	    PostMessage(hwndimg, WM_GSSYNC, (WPARAM)0, (LPARAM)0);
-	    break;
-	case GSDLL_PAGE:
-	    {MSG msg;
-	    gsdll.state = PAGE;
-	    if (debug) {
-		sprintf(buf,"Callback: PAGE %p\n", str);
-		gs_addmess(buf);
-	    }
-	    if (gsdll.device != (unsigned char *)str)
-	        break;
-	    PostMessage(hwndimg, WM_GSPAGE, (WPARAM)0, (LPARAM)0);
-	    if (!psfile.ispdf) {
-		dfclose();
-		if (gsdll.input_index < gsdll.input_count)
-		    gsdll.input[gsdll.input_index].seek = TRUE;	/* must reseek on reopen */
-	    }
-	    post_img_message(WM_GSWAIT, IDS_NOWAIT);
-	    if (multithread) {
-		/* wait for semaphore */
-		if (!pending.next && !pending.now && !pending.unload)
-		    wait_event();
-	    }
-	    else {
-		/* process message queue until something is pending */
-		while (!pending.next && !pending.now && !pending.unload && GetMessage(&msg, (HWND)NULL, 0, 0)) {
-		    if ((hDlgModeless == 0) || !IsDialogMessage(hDlgModeless, &msg)) {
-			if (!TranslateAccelerator(hwndimg, haccel, &msg)) {
-			    TranslateMessage(&msg);
-			    DispatchMessage(&msg);
-			}
-		    }
-		}
-	    }
-	    if (!psfile.ispdf && !dfreopen()) {
-		gs_addmess("Callback: PAGE Can't reopen input file.  File has changed or is missing.\n");
-		/* document changed or missing, so force a rescan */
-		request_mutex();
-		pending.abort = TRUE;
-		pending.now = FALSE;
-		pending.redisplay = TRUE;
-		release_mutex();
-	    }
-	    pending.next = FALSE;
-	    if (psfile.dsc == (CDSC *)NULL) {
-		if (pending.abort)
-		    psfile.pagenum = 1;
-		else
-		    psfile.pagenum++;
-	    }
-	    gsdll.state = BUSY;
-	    post_img_message(WM_GSWAIT, IDS_WAITDRAW);
-	    }
-	    break;
-	case GSDLL_SIZE:
-	    bitmap.width = ((WORD)count & 0xffff);
-	    bitmap.height = ((WORD)((count)>>16) & 0xffff);
-	    bitmap.changed = TRUE;
-
-	    /* allow window to be resized without user control */
-	    fit_page_enabled = option.fit_page;
-
-	    if (debug) {
-		sprintf(buf,"Callback: SIZE %p width=%d height=%d\n", str,
-		    (count & 0xffff), ((count>>16) & 0xffff) );
-		gs_addmess(buf);
-	    }
-	    break;
-	case GSDLL_POLL:
-	    if (!multithread)
-		peek_message();
-	    if (pending.abort)
-		return -100;	/* signal an error if we want to abort */
-	    break;
-	default:
-	    sprintf(buf,"Callback: Unknown message=%d\n",message);
-	    gs_addmess(buf);
-	    break;
     }
+
+    if (dll->hmodule < (HINSTANCE)HINSTANCE_ERROR)
+	return_error(-1);
+
     return 0;
 }
+
+
+int
+gsdll_close(GSDLL *dll)
+{
+    FreeLibrary(dll->hmodule);
+    return 0;
+}
+
+
+void *
+gsdll_sym(GSDLL *dll, const char *name)
+{
+    return GetProcAddress(dll->hmodule, name);
+}
+
+/******************************************************************/
+
+
+static int poll(void)
+{
+    if (!multithread)
+	peek_message();
+    if (pending.abort)
+	return -100;	/* signal an error if we want to abort */
+    return 0;
+}
+
+
+/* Poll the caller for cooperative multitasking. */
+/* If this function is NULL, polling is not needed */
+int GSDLLCALL gsdll_poll(void *handle)
+{
+    return poll();
+}
+
+
 
 int
 get_message(void)
@@ -475,23 +212,6 @@ int status;
     return status;
 }
 
-
-static int crit_count = 0;
-void
-begin_crit_section(void)
-{
-    crit_count++;
-    if (multithread)
-	EnterCriticalSection(&crit_sec);
-}
-
-void
-end_crit_section(void)
-{
-    crit_count--;
-    if (multithread)
-	LeaveCriticalSection(&crit_sec);
-}
 
 void
 wait_event(void)

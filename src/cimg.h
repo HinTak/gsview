@@ -1,0 +1,96 @@
+/* display device image */
+
+/* cimg.h */
+
+#ifdef UNIX
+#define GGMUTEX pthread_mutex_t
+#endif
+
+#ifdef _Windows
+#define GGMUTEX HANDLE
+#endif
+
+#ifdef OS2
+#define GGMUTEX HMTX
+#endif
+
+/* return this to Ghostscript on error */
+#define DISPLAY_ERROR e_rangecheck;
+
+enum SEPARATIONS {
+    SEP_CYAN = 8,
+    SEP_MAGENTA = 4,
+    SEP_YELLOW = 2,
+    SEP_BLACK = 1
+};
+
+typedef struct IMAGE_S IMAGE;
+struct IMAGE_S {
+    BOOL opening;	/* between display_open() and first display_size() */
+    BOOL open;		/* image is valid */
+    void *handle;
+    void *device;
+    int width;
+    int height;
+    int raster;
+    unsigned int format;
+    unsigned char *image;
+
+    /* During presize, we check if we understand the format */
+    BOOL format_known;		/* true if we understand format */
+
+    /* Windows and OS/2 require a raster line which is a multiple 
+     * of 4 bytes.  If raster is not what we expect, then we need 
+     * to lie about about how many pixels are really on the line 
+     * when doing bitmap transfers.  
+     * align_width contains our calculation of how many pixels are 
+     * needed to match raster.
+     * If align_width != width, then we bitmap transfer uses:
+     *  source width      = img->align_width
+     *  destination width = img->width
+     */
+    int align_width;
+
+    /* When we open Ghostscript, we get one SYNC as the display
+     * device is opened, then later we get either SYNC or PAGE
+     * when we need to show something.
+     * If ignore_sync is TRUE, we are ignoring the first SYNC. */
+    BOOL ignore_sync;
+
+    int separation;	/* for displaying C or M or Y or K */
+
+    GGMUTEX hmutex;	/* thread synchronisation */
+    int lock_count;	/* used for debugging mutex locking */
+
+#ifdef UNIX
+    GdkRgbCmap *cmap;	/* colour map = palette */
+    guchar *rgbbuf;	/* used when we need to convert raster format */
+#endif
+
+#ifdef _Windows
+    BITMAPINFOHEADER bmih;
+    HPALETTE palette;
+#endif
+
+#ifdef OS2
+    unsigned char *bitmap;	/* allocated memory */
+#endif
+
+
+};
+
+void image_lock(IMAGE *img);
+void image_unlock(IMAGE *img);
+void image_to_24BGR(IMAGE *img, unsigned char *dest, unsigned char *source);
+void image_color(unsigned int format, int index, 
+    unsigned char *r, unsigned char *g, unsigned char *b);
+int image_sync(IMAGE *img);
+int image_size(IMAGE *img);
+int image_presize(IMAGE *img, int width, int height, int raster,
+    unsigned int format);
+int image_preclose(IMAGE *img);
+
+
+void *display_memalloc(void *handle, void *device, unsigned long size);
+int display_memfree(void *handle, void *device, void *mem);
+

@@ -8,8 +8,8 @@
  Per i documenti che si attengono all'Adobe Postscript Document Structiring
  Conventions, GSview permette alle pagine selezionate di essere viste o
  stampate.
- GSview 3.6 necessita di Ghostscript 4.03 - 6.99, con preferenza per la versione 6.0.
-2Installazione
+ GSview 4.0 necessita di Ghostscript 7.00 - 7.99.
+2knstallazione
 ?Installazione
  E' consigliabile usare lo specifico programma di installazione per
  installare GSview. Il programma di installazione si chiama `setup.exe`
@@ -216,11 +216,11 @@ E
  cartella del profilo utente alla cartella di GSview, quindi modificarlo
  togliendo tutte le registrazioni, ad eccezione di:
   [Options]
-  Version=3.6
-  GSversion=650
+  Version=4.0
+  GSversion=700
   Configured=1
-  GhostscriptDLL=e:\gs\gs6.50\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs6.50\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs7.00\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs7.00\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Quando un utente avvia GSview, il suo file INI sarà usato normalmente.
  La prima volta che GSview viene avviato, o quando la versione di GSview non
@@ -1706,21 +1706,6 @@ E
  pagine con una bassa risoluzione. Questa è l'impostazione predefinita.
 
  Vedere anche `Visualizza` | `Adatta Finestra`.
-3Apertura Veloce
-?Apertura Veloce
- Quando l'opzione `Apertura Veloce` è `attivata`, GSview non riavvierà
- Ghostscript ogni volta che l'orientamento, la risoluzione o le dimensioni della pagina
- verranno cambiate.
-
- GSview tenta di preservare lo stato di Ghostscript ma un documento può
- tuttavia lasciare l'interprete di Ghostscript in uno stato inusuale oppure causare
- un errore.  Se si manifesta un errore Ghostscript interrompe l'esecuzione e si chiude.
- I messaggi di errore di Ghostscript vengono visualizzati usando `File ` | `Mostra Messaggi`.
- Selezionare `Rivisualizza` per riaprire il documento.
-
- Se `Apertura Veloce` è `disattivato`, GSview riavvierà Ghostscript
- prima di ogni nuovo documento oppure ogni volta che l'orientamento, la risoluzione
- o le misure della pagina verranno cambiate.
 3Rivisualizza Automaticamente
 ?Rivisualizza Automaticamente
  Quando l'opzione `Rivisualizza Automaticamente` è `attivata`, GSview
@@ -2101,7 +2086,7 @@ W
 P
   GVPM.EXE - Una interfaccia grafica a Ghostscript
 E
-  Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  Tutti i diritti riservati.
+  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  Tutti i diritti riservati.
 
  Questo file è parte integrante di GSview.
 
@@ -2354,7 +2339,7 @@ W
  Se si riceve un messaggio di errore `Errore nel caricamento di bzip2 DLL...`
  probabilmente non c'è la DLL bzip2 disponibile.
  E' possibile ottenerla dallo stesso sito da cui si è ottenuto GSview oppure da
-  ftp://ftp.cs.wisc.edu/ghost/ghostgum/
+  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Mettere la DLL di bzip2 nella stessa cartella dell'EXE di GSview.
  libbz2.dll è per Win32.  Per questo aspetto non c'è la DLL bzip2
  per Win16 o OS/2.
@@ -2373,7 +2358,7 @@ E
  Se si riceve un messaggio `Errore nel caricamento della DLL zlib...`
  probabilmente non c'è la DLL zlib disponibile.
  E' possibile ottenerla dallo stesso sito dove è stato ottenuto GSview oppure da
-  ftp://ftp.cs.wisc.edu/ghost/ghostgum/
+  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Mettere la DLL zlib nella stessa cartella dell'EXE di GSview.
  zlib16.dll è per Win16.  zlib32.dll è per Win32.
  zlib2.dll è per OS/2.

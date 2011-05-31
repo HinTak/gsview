@@ -66,7 +66,6 @@ int on_link;			/* TRUE if we were or are over link */
 int on_link_page;		/* page number of link target */
 long gsbytes_size;		/* number of bytes for this page */
 long gsbytes_done;		/* number of byte written */
-BOOL ignore_sync = FALSE;	/* ignore next GSDLL_SYNC */
 BOOL fit_page_enabled = FALSE;	/* next WM_SIZE is allowed to resize window */
 BOOL quitnow = FALSE;		/* Used to cause exit from nested message loops */
 
@@ -146,11 +145,11 @@ BOOL
 query_close(void)
 {
     /* tell GS DLL to unload */
-    begin_crit_section();
+    request_mutex();
     pending.unload = TRUE;
     pending.abort = TRUE;
     quitnow = TRUE;
-    end_crit_section();
+    release_mutex();
     if (multithread)
         DosPostEventSem(display.event);	/* unblock display thread */
     return TRUE;
@@ -359,8 +358,6 @@ PBITMAPINFO2 pbmi;
 PBITMAPINFO old_pbmi;
 BOOL old_bmp;
 
-    if (!pbm->valid)
-	return TRUE;
     if (!pbm->pbmi)
 	return TRUE;
 
@@ -384,7 +381,6 @@ BOOL old_bmp;
   	    pbm->palsize = 2;
   	    break;
   	  default:
-	    pbm->valid = FALSE;
   	    error_message("scan_bitmap: wrong number of bits"); /* panic */
   	    return FALSE;
 	}
@@ -412,7 +408,6 @@ BOOL old_bmp;
   	    pbm->palsize = 2;
   	    break;
   	  default:
-	    pbm->valid = FALSE;
   	    error_message("scan_bitmap: wrong number of bits"); /* panic */
   	    return FALSE;
 	}
@@ -460,7 +455,7 @@ void
 copy_clipboard(void)
 {
 HBITMAP hbmp;
-    if (!gsdll.device || !bitmap.valid) {
+    if (!image.open) {
 	gserror(0, "Cannot copy to clipboard:\nNo Bitmap displayed", MB_ICONEXCLAMATION, SOUND_ERROR);
 	return;
     }
@@ -512,9 +507,8 @@ HBITMAP hbmp;
 
     if (WinOpenClipbrd(hab)) {
 	/* get bmp mutex to stop gs.exe changing bitmap while we copy it */
-	if (gsdll.lock_device && gsdll.device)
-	    (*gsdll.lock_device)(gsdll.device, 1);
-	if (scan_bitmap(&bitmap)) {
+	image_lock(&image);
+	if (image.open && scan_bitmap(&bitmap)) {
 	    /* bitmap has changed */
 	    update_scroll_bars();
 	}
@@ -523,9 +517,7 @@ HBITMAP hbmp;
 	    WinEmptyClipbrd(hab);
 	    WinSetClipbrdData(hab, (ULONG)hbmp, CF_BITMAP, CFI_HANDLE);
 	}
-	
-	if (gsdll.lock_device && gsdll.device)
-	    (*gsdll.lock_device)(gsdll.device, 0);
+	image_unlock(&image);
 	WinCloseClipbrd(hab);
     }
 }
@@ -779,7 +771,7 @@ paint_bitmap(HPS ps, PRECTL prect, int scrollx, int scrolly)
     }
 
     /* highlight found search word */
-    if (gsdll.device && display.show_find) {
+    if (image.open && display.show_find) {
 	float x, y;
 	/* map bounding box to device coordinates */
 	x = psfile.text_bbox.llx;
@@ -840,7 +832,7 @@ init_menu(int menuid)
 {
 BOOL idle;
 BOOL addeps;
-    idle = (gsdll.state != BUSY);
+    idle = (gsdll.state != GS_BUSY);
     switch (menuid) {
 	case IDM_FILEMENU:
 	    enable_menu_item(IDM_FILEMENU, IDM_PRINT, idle);
@@ -891,12 +883,12 @@ BOOL addeps;
 	    break;
 	case IDM_EDITMENU:
 	    request_mutex();
-	    enable_menu_item(IDM_EDITMENU, IDM_COPYCLIP, bitmap.valid);
-	    enable_menu_item(IDM_EDITMENU, IDM_PASTETO, bitmap.valid);
+	    enable_menu_item(IDM_EDITMENU, IDM_COPYCLIP, image.open);
+	    enable_menu_item(IDM_EDITMENU, IDM_PASTETO, image.open);
     	    addeps =  (psfile.dsc != (CDSC *)NULL) && psfile.dsc->epsf && idle;
 	    enable_menu_item(IDM_EDITMENU, IDM_ADDEPSMENU, addeps);
 	    enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPSU, addeps);
-    	    addeps =  addeps && bitmap.valid;
+    	    addeps =  addeps && image.open;
 	    enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPSI, addeps);
 	    enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPST4, addeps);
 	    enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPST6U, addeps);
@@ -935,7 +927,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	    /* by returning TRUE, the Presentation Manager automatically clears
 	     * the window each time the window is resized or moved.
 	     */
-	    if (!gsdll.device || !bitmap.valid) {
+	    if (!image.open) {
 		WinFillRect((HPS)mp1, (PRECTL)mp2, SYSCLR_DIALOGBACKGROUND);
 		return (MRESULT)FALSE;	/* say we have done it */
 	    }
@@ -949,7 +941,6 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	    }
 	    return 0;
 	case WM_GSPAGE:
-	    ignore_sync = FALSE;
 	    play_sound(SOUND_PAGE);
 	    if (display.show_find)
 		scroll_to_find();
@@ -959,21 +950,16 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		    error_message("error updating window");
 	    return 0;
 	case WM_GSDEVICE:
-	    if (mp1 && gsdll.device) {
-		memset(&bitmap, 0, sizeof(bitmap));
-		/* if we don't know the bitmap pointer, get it now */
-		(*gsdll.get_bitmap)(gsdll.device, (unsigned char **)&bitmap.pbmi);
-		bitmap.valid = TRUE;
-	    }
-	    else {
+	    if (!image.open) {
 		if (fullscreen)
 		    gsview_fullscreen_end();
-		bitmap.valid = FALSE;
-		update_scroll_bars();
+	        WinInvalidateRect(hwnd, NULL, FALSE);
+		if (!psfile.name[0])
+		    update_scroll_bars();
 	    }
 	    return 0;
 	case WM_GSSIZE:
-	    if (scan_bitmap(&bitmap)) {
+	    if (image.open && scan_bitmap(&bitmap)) {
 		/* bitmap has changed */
 		update_scroll_bars();
 	    }
@@ -1124,7 +1110,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	    }
 	    break;	/* use default processing */
 	case WM_PAINT:
-	    if (!gsdll.device || !bitmap.valid || quitnow) {
+	    if (!image.open || quitnow) {
 	        hps = WinBeginPaint(hwnd, (ULONG)0, &rect);
 		WinFillRect(hps, &rect, SYSCLR_DIALOGBACKGROUND);
 		WinEndPaint(hwnd);
@@ -1134,15 +1120,13 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	    /* Refresh the window each time the WM_PAINT message is received */
 
 	    /* get bmp mutex to stop gs.exe changing bitmap while we paint */
-	    if (gsdll.device && gsdll.lock_device)
-		(*gsdll.lock_device)(gsdll.device, 1);
-	    if (gsdll.device && scan_bitmap(&bitmap)) {
+	    image_lock(&image);
+	    if (image.open && scan_bitmap(&bitmap)) {
 		update_scroll_bars(); /* bitmap has changed */
 	    }
 
-	    if (!gsdll.device || !bitmap.valid) {
-		if (gsdll.lock_device && gsdll.device)
-		    (*gsdll.lock_device)(gsdll.device, 0);
+	    if (!image.open) {
+		image_unlock(&image);
 	        hps = WinBeginPaint(hwnd, (ULONG)0, &rect);
 		WinFillRect(hps, &rect, CLR_BACKGROUND);
 		WinEndPaint(hwnd);
@@ -1163,8 +1147,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	    release_mutex();
 	    if (hwnd == hwnd_fullscreen)
 		WinSetPointer(HWND_DESKTOP, 0);
-	    if (gsdll.lock_device && gsdll.device)
-	        (*gsdll.lock_device)(gsdll.device, 0);
+	    image_unlock(&image);
 	    return 0;
 	case WM_MOVE:
 	    /* don't interrogate the window location immediately since */
@@ -1216,7 +1199,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		nVscrollPos = min(nVscrollPos, nVscrollMax);
 		scroll_pos.y = nVscrollMax - nVscrollPos;
 
-		if (!gsdll.device || !bitmap.valid)
+		if (!image.open)
 			cyClient = cyAdjust = nVscrollMax = nVscrollPos = 0;
 
 		if (fullscreen) {
@@ -1227,7 +1210,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 			WinQueryWindow(hwnd, QW_PARENT), FID_VERTSCROLL);
 		    WinSendMsg(hwndScroll, SBM_SETSCROLLBAR, 
 			MPFROMLONG(nVscrollPos), MPFROM2SHORT(0, nVscrollMax));
-		    if (gsdll.device && bitmap.valid)
+		    if (image.open)
 			WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, 
 			    MPFROM2SHORT(cyClient, bitmap.height),
 			    MPFROMLONG(0));
@@ -1267,7 +1250,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		nHscrollPos = min(nHscrollPos, nHscrollMax);
 		scroll_pos.x = nHscrollPos;
 
-		if (!gsdll.device || !bitmap.valid)
+		if (!image.open)
 			cxClient = cxAdjust = nHscrollMax = nHscrollPos = 0;
 
 		if (fullscreen) {
@@ -1278,7 +1261,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 			WinQueryWindow(hwnd, QW_PARENT), FID_HORZSCROLL);
 		    WinSendMsg(hwndScroll, SBM_SETSCROLLBAR, 
 			MPFROMLONG(nHscrollPos), MPFROM2SHORT(0, nHscrollMax));
-		    if (gsdll.device && bitmap.valid)
+		    if (image.open)
 			WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, 
 			    MPFROM2SHORT(cxClient, bitmap.width), 
 			    MPFROMLONG(0));
@@ -1287,7 +1270,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 			    MPFROM2SHORT(1, 1), MPFROMLONG(0));
 		}
 
-		if (!fullscreen && option.fit_page && gsdll.device &&
+		if (!fullscreen && option.fit_page && image.open &&
 			(cxAdjust!=0 || cyAdjust!=0) ) {
 		        SWP swp;
 			/* don't interrogate the window location immediately since */
@@ -1316,7 +1299,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		fit_page_enabled = FALSE;
 		break;
 	case WM_VSCROLL:
-	    if (!gsdll.device && !bitmap.valid)
+	    if (!image.open)
 		break;
 	    switch(SHORT2FROMMP(mp2)) {
 		case SB_LINEUP:
@@ -1397,7 +1380,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	    }
 	    break;
 	case WM_HSCROLL:
-	    if (!gsdll.device || !bitmap.valid)
+	    if (!image.open)
 		break;
 	    switch(SHORT2FROMMP(mp2)) {
 		case SB_LINELEFT:
@@ -1702,7 +1685,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		    if (get_cursorpos(&x, &y) && is_link(x, y, &link)) {
 			WinSetPointer(HWND_DESKTOP, hptr_hand);
 		    }
-		    else if (!gsdll.device || !bitmap.valid)
+		    else if (!image.open)
     		        WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
 		    else
     		        WinSetPointer(HWND_DESKTOP, hptr_crosshair);
@@ -1720,7 +1703,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 	    case WM_DESTROY:
 		hwnd_image = hwnd_bmp;
 		fullscreen = FALSE;
-		if ((hwnd == hwnd_fullscreen) && gsdll.device) {
+		if ((hwnd == hwnd_fullscreen) && image.open) {
 		    WinShowWindow(hwnd_frame, TRUE);
 		    update_scroll_bars();
 		    WinInvalidateRect(hwnd_image, NULL, FALSE);
@@ -1782,7 +1765,7 @@ get_cursorpos(float *x, float *y)
 {
 RECTL rect;
 POINTL pt;
-	if (!gsdll.device || !bitmap.valid)
+	if (!image.open)
 	    return FALSE;
 	if (!WinQueryPointerPos(HWND_DESKTOP, &pt))
 	    return FALSE;
@@ -1891,7 +1874,7 @@ char fmt[MAXSTR];
 	        GpiCharStringAt(ps, &info_page, strlen(buf), (PBYTE)buf);
 	      }
 	      else {
-		if (gsdll.state == IDLE)
+		if (gsdll.state == GS_IDLE)
 		    i = load_string(IDS_NOMORE, buf, sizeof(buf));
 		else {
 		    i = load_string(IDS_PAGE, buf, sizeof(buf));
@@ -2546,7 +2529,7 @@ gsview_fullscreen(void)
     RECTL rect;
     static BOOL class_registered;
 
-    if (!gsdll.device)
+    if (!image.open)
 	return;
 
     if (fullscreen && (hwnd_fullscreen != (HWND)NULL))
@@ -2601,86 +2584,91 @@ gsview_fitwin(void)
 RECTL rect;
 int width, height;
 float dpi, xdpi, ydpi;
-	if (psfile.ispdf) {
-	    if (option.epsf_clip && (psfile.dsc->bbox == (CDSCBBOX *)NULL)) {
-		width = psfile.dsc->bbox->urx - psfile.dsc->bbox->llx;
-		height = psfile.dsc->bbox->ury - psfile.dsc->bbox->lly;
-	    }
-	    else {
-		if (psfile.dsc->page_bbox) {
-		    width = psfile.dsc->page_bbox->urx - 
-			psfile.dsc->page_bbox->llx;
-		    height = psfile.dsc->page_bbox->ury - 
-			psfile.dsc->page_bbox->lly;
-		}
-		else {
-		    width = get_paper_width();
-		    height = get_paper_height();
-		}
-	    }
+    if (psfile.ispdf) {
+	CDSCBBOX *mediabox = NULL;
+	CDSCBBOX *cropbox = NULL;
+	if (psfile.pagenum < (int)psfile.dsc->page_count) {
+	    if (psfile.dsc->page[psfile.pagenum].media)
+		mediabox = psfile.dsc->page[psfile.pagenum].media->mediabox;
+	    cropbox = psfile.dsc->page[psfile.pagenum].bbox;
+	}
+	if (option.epsf_clip && (cropbox != (CDSCBBOX *)NULL)) {
+	    width = cropbox->urx - cropbox->llx;
+	    height = cropbox->ury - cropbox->lly;
 	}
 	else {
-	    width = get_paper_width();
-	    height = get_paper_height();
+	    if (mediabox) {
+		width = mediabox->urx - mediabox->llx;
+		height = mediabox->ury - mediabox->lly;
+	    }
+	    else {
+		width = get_paper_width();
+		height = get_paper_height();
+	    }
 	}
+    }
+    else {
+	width = get_paper_width();
+	height = get_paper_height();
+    }
 
-	if (display.orientation & 1) {
-	    /* page is rotated 90 degrees */
-	    int temp = width;
-	    width = height;
-	    height = temp;
-	}
-	
-	/* get client window size */
-	WinQueryWindowRect(hwnd_image, &rect);
+    if (display.orientation & 1) {
+	/* page is rotated 90 degrees */
+	int temp = width;
+	width = height;
+	height = temp;
+    }
+    
+    /* get client window size */
+    WinQueryWindowRect(hwnd_image, &rect);
 
-	xdpi = (rect.xRight - rect.xLeft) * 72.0 / width;
-	ydpi = (rect.yTop - rect.yBottom) * 72.0 / height;
+    xdpi = (rect.xRight - rect.xLeft) * 72.0 / width;
+    ydpi = (rect.yTop - rect.yBottom) * 72.0 / height;
 
-	/* don't need to worry about scroll bars - these are always
-	 * present in a normal window but outside the client area,
- 	 * and in fullscreen mode (if ever implemented) are not present
-	 */
+    /* don't need to worry about scroll bars - these are always
+     * present in a normal window but outside the client area,
+     * and in fullscreen mode (if ever implemented) are not present
+     */
 
-	if (display.orientation & 1) {
-	    /* page is rotated 90 degrees */
-	    float ftemp;
-	    ftemp = xdpi;
-	    xdpi = ydpi;
-	    ydpi = ftemp;
-	}
+    if (display.orientation & 1) {
+	/* page is rotated 90 degrees */
+	float ftemp;
+	ftemp = xdpi;
+	xdpi = ydpi;
+	ydpi = ftemp;
+    }
 
-	if ( ((xdpi + 0.5) > option.xdpi) && (xdpi - 0.5) < option.xdpi) {
-	    /* Width matches. Set size based on height. */
-	    dpi = ydpi;
-	}
-	else if ( ((ydpi + 0.5) > option.ydpi) && (ydpi - 0.5) < option.ydpi) {
-	    /* Height matches. Set size based on width. */
-	    dpi = xdpi;
-	}
-	else  {
-	    /* Neither width nor height match.  Fit the whole page. */
-	    if (xdpi > ydpi)
-		    dpi = ydpi;
-	    else
-		    dpi = xdpi;
-	}
+    if ( ((xdpi + 0.5) > option.xdpi) && (xdpi - 0.5) < option.xdpi) {
+	/* Width matches. Set size based on height. */
+	dpi = ydpi;
+    }
+    else if ( ((ydpi + 0.5) > option.ydpi) && (ydpi - 0.5) < option.ydpi) {
+	/* Height matches. Set size based on width. */
+	dpi = xdpi;
+    }
+    else  {
+	/* Neither width nor height match.  Fit the whole page. */
+	if (xdpi > ydpi)
+		dpi = ydpi;
+	else
+		dpi = xdpi;
+    }
 #ifdef DEBUG
-	{
-	char buf[MAXSTR];
-	sprintf(buf, "\nrect=%d %d %d %d\n", 
-	rect.left, rect.top, rect.right, rect.bottom);
-	gs_addmess(buf);
-	sprintf(buf, "size=%d %d\n", width, height);
-	gs_addmess(buf);
-	sprintf(buf, "old dpi=%f %f\n", option.xdpi, option.ydpi);
-	gs_addmess(buf);
-	sprintf(buf, "dpi=%f %f\n", xdpi, ydpi);
-	gs_addmess(buf);
-	sprintf(buf, "final dpi=%f\n", dpi);
-	gs_addmess(buf);
-	}
+    {
+    char buf[MAXSTR];
+    sprintf(buf, "\nrect=%d %d %d %d\n", 
+    rect.left, rect.top, rect.right, rect.bottom);
+    gs_addmess(buf);
+    sprintf(buf, "size=%d %d\n", width, height);
+    gs_addmess(buf);
+    sprintf(buf, "old dpi=%f %f\n", option.xdpi, option.ydpi);
+    gs_addmess(buf);
+    sprintf(buf, "dpi=%f %f\n", xdpi, ydpi);
+    gs_addmess(buf);
+    sprintf(buf, "final dpi=%f\n", dpi);
+    gs_addmess(buf);
+    }
 #endif
-	option.xdpi = option.ydpi = dpi;
-	gs_resize();
+    option.xdpi = option.ydpi = dpi;
+    gs_resize();
 }

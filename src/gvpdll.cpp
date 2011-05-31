@@ -1,4 +1,4 @@
-/*  Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/*  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
   
@@ -20,6 +20,11 @@
 #include "gvpm.h"
 
 
+BOOL get_gs_string(int gs_revision, char *name, char *ptr, int len)
+{
+    /* do nothing - no registry */
+    return FALSE;
+}
 void 
 post_img_message(int message, int param)
 {
@@ -27,342 +32,330 @@ post_img_message(int message, int param)
 }
 
 void
-gs_clear_gsdll(void)
+view_wait_message(VIEW *view)
 {
-    gsdll.hmodule = (HMODULE)NULL;
-    gsdll.valid = FALSE;
-    gsdll.device = NULL;
-    gsdll.revision_number = 0;
-    gsdll.revision = NULL;
-    gsdll.init = NULL;
-    gsdll.execute_begin = NULL;
-    gsdll.execute_cont = NULL;
-    gsdll.execute_end = NULL;
-    gsdll.exit = NULL;
-    gsdll.get_bitmap = NULL;
-    gsdll.lock_device = NULL;
-    gsdll.callback = NULL;
+    /* process messsages until pending changes */
+    int rc;
+    QMSG q_mess;		/* queue message */
+    while (!pending.next && !pending.now && !pending.unload &&
+	!quitnow && ((rc = WinGetMsg(hab, &q_mess, 0L, 0, 0)) != 0))
+	    WinDispatchMsg(hab, &q_mess);
 }
 
-void
-gs_load_dll_cleanup(void)
-{
-    gs_free_dll();
-    delayed_message_box(IDS_PROCESS_GSLOAD_FAIL, 0);
-    post_img_message(WM_GSSHOWMESS, 0);
-}
+/******************************************************************/
 
-/* load GS DLL if not already loaded */
-/* return TRUE if OK */
-BOOL
-gs_load_dll(void)
+int
+gsdll_open(GSDLL *dll, const char *name)
 {
 APIRET rc;
 char buf[MAXSTR+40];
+
 char fullname[1024];
 const char *shortname;
 char *p;
-const char *dllname;
-	if (gsdll.hmodule)
-	    return TRUE;
-	post_img_message(WM_GSWAIT, IDS_WAITGSOPEN);
-	gs_clear_gsdll();
-	dllname = option.gsdll;
-	sprintf(buf, "Trying to load %s\n", dllname);
-	if (debug)
-	    gs_addmess(buf);
-	memset(buf, 0, sizeof(buf));
-	rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)dllname, &gsdll.hmodule);
-	if (rc) {
-	    /* failed */
-	    /* try once more - which bug are we dodging? */
-	    rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)dllname, &gsdll.hmodule);
+
+    if (debug)
+	gs_addmessf("Trying to load %s\n", name);
+
+    memset(buf, 0, sizeof(buf));
+    rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)name, &dll->hmodule);
+    if (rc) {
+	/* failed */
+	/* try once more - which bug are we dodging? */
+	rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)name, &dll->hmodule);
+    }
+
+    if (rc) {
+	/* failed */
+	/* try again, with path of EXE */
+
+	PTIB pptib;
+	PPIB pppib;
+	if ( (rc = DosGetInfoBlocks(&pptib, &pppib)) != 0 ) {
+	    gs_addmessf("gsdll_open: Couldn't get pid, rc = %ld\n", rc);
+	    return_error(-1);
 	}
-	if (rc) {
-	    /* failed */
-	    /* try again, with path of EXE */
-	    if ((shortname = strrchr((char *)option.gsdll, '\\')) == (const char *)NULL)
-		shortname = option.gsdll;
-	    strcpy(fullname, szExePath);
-	    if ((p = strrchr(fullname,'\\')) != (char *)NULL)
-		p++;
-	    else
-		p = fullname;
+	/* get path to EXE */
+	if ( (rc = DosQueryModuleName(pppib->pib_hmte, 
+	    sizeof(fullname), fullname)) != 0 ) {
+	    gs_addmessf("gsdll_open: Couldn't get module name, rc = %ld\n", rc);
+	    return_error(-1);
+	}
+	if ((p = strrchr(szExePath,'\\')) != (char *)NULL) {
+	    p++;
 	    *p = '\0';
-	    strcat(fullname, shortname);
-	    dllname = fullname;
-	    sprintf(buf, "Trying to load %s\n", dllname);
+	}
+
+	if ((shortname = strrchr((char *)name, '\\')) == (const char *)NULL)
+	    shortname = name;
+	else
+	    shortname++;
+
+	strcat(fullname, shortname);
+	if (debug)
+	    gs_addmessf("Trying to load %s\n", fullname);
+	rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)fullname, 
+	    &dll->hmodule);
+	if (rc) {
+	    /* failed again */
+	    /* try once more, this time on system search path */
 	    if (debug)
-		gs_addmess(buf);
-	    rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)dllname, &gsdll.hmodule);
-	    if (rc) {
-		/* failed again */
-		/* try once more, this time on system search path */
-		dllname = shortname;
-		sprintf(buf, "Trying to load %s\n", dllname);
-		if (debug)
-		    gs_addmess(buf);
-	        rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)dllname, &gsdll.hmodule);
-	    }
+		gs_addmessf("Trying to load %s\n", shortname);
+	    rc = DosLoadModule((PBYTE)buf, sizeof(buf), (PCSZ)shortname, 
+		&dll->hmodule);
 	}
+    }
+    if (rc)
+	return_error(-1);
 
-
-
-	if (rc == 0) {
-	    gs_addmess("Loaded Ghostscript DLL\n");
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_REVISION", (PFN *)(&gsdll.revision)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_REVISION, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    /* check DLL version */
-	    gsdll.revision(NULL, NULL, &gsdll.revision_number, NULL);
-	    if ( (gsdll.revision_number < GS_REVISION_MIN) || (gsdll.revision_number > GS_REVISION_MAX) ) {
-		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld - %ld\n", 
-			gsdll.revision_number, (long)GS_REVISION_MIN, (long)GS_REVISION_MAX);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ( (gsdll.revision_number == 500) || (gsdll.revision_number == 500) ) {
-		gs_addmess("\
-**********************************************************************\n\
-GSview warning: Ghostscript 5.0 and 5.01 do not work well with GSview.\n\
-Please upgrade to a later version.\n\
-**********************************************************************\n\
-");
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_INIT", (PFN *)(&gsdll.init)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_INIT, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_EXECUTE_BEGIN", (PFN *)(&gsdll.execute_begin)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_BEGIN, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_EXECUTE_CONT", (PFN *)(&gsdll.execute_cont)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_CONT, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_EXECUTE_END", (PFN *)(&gsdll.execute_end)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_END, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_EXIT", (PFN *)(&gsdll.exit)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXIT, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_GET_BITMAP", (PFN *)(&gsdll.get_bitmap)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_GET_BITMAP, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, (PCSZ)"GSDLL_LOCK_DEVICE", (PFN *)(&gsdll.lock_device)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_LOCK_DEVICE, rc = %ld\n", rc);
-		gs_addmess(buf);
-		gs_load_dll_cleanup();
-		return FALSE;
-	    }
-	}
-	else {
-	    sprintf(buf, "Can't load Ghostscript DLL %s \nDosLoadModule rc = %ld\n", option.gsdll, rc);
-	    gs_addmess(buf);
-	    gs_load_dll_cleanup();
-	    return FALSE;
-	}
-	gsdll.callback = gsdll_callback;
-	return TRUE;
+    return 0;
 }
 
-
-/* free GS DLL */
-/* This should only be called when gsdll_execute has returned */
-/* TRUE means no error */
-BOOL
-gs_free_dll(void)
+void *
+gsdll_sym(GSDLL *dll, const char *name)
 {
-char buf[MAXSTR];
-APIRET rc;
-	if (gsdll.hmodule == (HMODULE)NULL)
-	    return TRUE;
-	display.epsf_clipped = FALSE;
-	rc = DosFreeModule(gsdll.hmodule);
-	if (debug) {
-	    sprintf(buf,"DosFreeModule returns %ld\n", rc);
-	    gs_addmess(buf);
-	}
-	sprintf(buf,"Unloaded GSDLL\n\n");
-	gs_addmess(buf);
-	gs_clear_gsdll();
-	/* display bitmap is also invalid */
-	bitmap.valid = FALSE;
-        WinInvalidateRect(hwnd_bmp, (PRECTL)NULL, FALSE);
-	return !rc;
+    char uname[MAXSTR];
+    int i;
+    PFN fn;
+
+    for (i=0; name[i]; i++)
+	uname[i] = toupper(name[i]);
+    uname[i] = '\0';
+
+    if (DosQueryProcAddr(dll->hmodule, 0, (PCSZ)uname, &fn) != 0)
+	return NULL;
+
+    return (void *)fn;
 }
 
-/* terminate DLL */
-BOOL
-gsdll_close()
+int
+gsdll_close(GSDLL *dll)
 {
-	pending.unload = TRUE;
-	pending.abort = TRUE;
-	pending.now = TRUE;
-	pending.next = TRUE;
-	/* must now wait until gsdll.state = UNLOADED */
-	return TRUE;
+    DosFreeModule(dll->hmodule);
+    return 0;
+}
+
+/*********************************************************************/
+
+
+
+static int poll(void)
+{
+    if (!multithread)
+	peek_message();
+    if (pending.abort)
+	return -100;	/* signal an error if we want to abort */
+    return 0;
 }
 
 
-/* callback routine for GS DLL */
+/* Poll the caller for cooperative multitasking. */
+/* If this function is NULL, polling is not needed */
+int GSDLLCALL gsdll_poll(void *handle)
+{
+    return poll();
+}
+
+/*********************************************************************/
+
+static int image_palette_size(int format)
+{
+    int palsize = 0;
+    switch (format & DISPLAY_COLORS_MASK) {
+	case DISPLAY_COLORS_NATIVE:
+	    switch (format & DISPLAY_DEPTH_MASK) {
+		case DISPLAY_DEPTH_1:
+		    palsize = 2;
+		    break;
+		case DISPLAY_DEPTH_4:
+		    palsize = 16;
+		    break;
+		case DISPLAY_DEPTH_8:
+		    palsize = 96;
+		    break;
+	    }
+	    break;
+	case DISPLAY_COLORS_GRAY:
+	    switch (format & DISPLAY_DEPTH_MASK) {
+		case DISPLAY_DEPTH_1:
+		    palsize = 2;
+		    break;
+		case DISPLAY_DEPTH_4:
+		    palsize = 16;
+		    break;
+		case DISPLAY_DEPTH_8:
+		    palsize = 256;
+		    break;
+	    }
+	    break;
+    }
+    return palsize;
+}
+
+
 int 
-gsdll_callback(int message, char *str, unsigned long count)
+image_preclose(IMAGE *img)
 {
-char buf[MAXSTR];
-    switch (message) {
-	case GSDLL_STDIN:
-	    sprintf(buf,"Callback: STDIN %p %ld - stdin not supported\n", str, count);
-	    gs_addmess(buf);
-	    return (int)0;
-	case GSDLL_STDOUT:
-	    if (callback_pstotext(str, count))
-		return (int)count;
-	    if (!pending.abort)
-		pdf_checktag(str, count);
-	    if (str != (char *)NULL)
-		gs_addmess_count(str, count);
-	    return count;
-	case GSDLL_DEVICE:
-	    if (debug) {
-		sprintf(buf,"Callback: DEVICE %p %s\n", str,
-		    count ? "open" : "close");
-		gs_addmess(buf);
-	    }
-	    if (gsdll.device && count) {
-	        gs_addmess("GSDLL_CALLBACK: multiple display devices not supported");
-		break;
-	    }
-	    if (gsdll.device && (gsdll.device != (unsigned char *)str)) {
-		gs_addmess("GSDLL_CALLBACK: not using that device");
-		break;
-	    }
-	    gsdll.device = count ? (unsigned char *)str : NULL;
-/*
-	    if (gsdll.lock_device && gsdll.device) {
-		(*gsdll.lock_device)(gsdll.device, 1);
-		bitmap.width = bitmap.height = 0;
-		bitmap.changed = TRUE;
-		(*gsdll.lock_device)(gsdll.device, 0);
-	    }
-*/
-	    /* allow window resize when document first displayed */
-	    if (gsdll.device)
-		fit_page_enabled = option.fit_page;
+    return 0;
+}
 
-	    WinPostMsg(hwnd_frame, WM_GSDEVICE, (MPARAM)gsdll.device, (MPARAM)0);
-	    break;
-	case GSDLL_SYNC:
-	    if (debug) {
-		sprintf(buf,"Callback: SYNC %p%s\n", str, ignore_sync ? " ignored" : "");
-		gs_addmess(buf);
-	    }
-	    if (gsdll.device != (unsigned char *)str)
-	        break;
-	    if (ignore_sync) {
-		/* ignore this sync, but not the next */
-		ignore_sync = FALSE;
-		break;
-	    }
-	    WinPostMsg(hwnd_frame, WM_GSSYNC, (MPARAM)0, (MPARAM)0);
-	    break;
-	case GSDLL_PAGE:
-	    if (debug) {
-		sprintf(buf,"Callback: PAGE %p\n", str);
-		gs_addmess(buf);
-	    }
-	    if (gsdll.device != (unsigned char *)str)
-	        break;
-	    gsdll.state = PAGE;
-	    post_img_message(WM_GSWAIT, IDS_NOWAIT);
-	    WinPostMsg(hwnd_frame, WM_GSPAGE, (MPARAM)0, (MPARAM)0);
-	    if (!psfile.ispdf) {
-		dfclose();
-		if (gsdll.input_index < gsdll.input_count)
-		    gsdll.input[gsdll.input_index].seek = TRUE;	/* must reseek on reopen */
-	    }
-	    /* wait until freed */
-	    if (multithread) {
-		/* wait for semaphore */
-		if (!pending.next && !pending.now && !pending.unload)
-		    wait_event();
-	    }
-	    else {
-	      /* process messsages until pending changes */
-	      int rc;
-	      QMSG q_mess;		/* queue message */
-	      while (!pending.next && !pending.now && !pending.unload &&
-		  ((rc = WinGetMsg(hab, &q_mess, 0L, 0, 0)) != 0))
-		  WinDispatchMsg(hab, &q_mess);
-	    }
-	    if (!psfile.ispdf && !dfreopen()) {
-		gs_addmess("Callback: PAGE Can't reopen input file.  File has changed or is missing.\n");
-		/* document changed or missing, so force a rescan */
-		request_mutex();
-		pending.abort = TRUE;
-		pending.now = FALSE;
-		pending.redisplay = TRUE;
-		release_mutex();
-	    }
-	    pending.next = FALSE;
-	    if (psfile.dsc == (CDSC *)NULL) {
-		if (pending.abort)
-		    psfile.pagenum = 1;
-		else
-		    psfile.pagenum++;
-	    }
-	    gsdll.state = BUSY;
-	    post_img_message(WM_GSWAIT, IDS_WAITDRAW);
-	    break;
-	case GSDLL_SIZE:
-/*
-	    bitmap.width = (count & 0xffff);
-	    bitmap.height = ((count>>16) & 0xffff);
-	    bitmap.changed = TRUE;
-*/
+int
+image_presize(IMAGE *img, int width, int height, int raster,
+    unsigned int format)
+{
+    int color = format & DISPLAY_COLORS_MASK;
+    int depth = format & DISPLAY_DEPTH_MASK;
+    int alpha = format & DISPLAY_ALPHA_MASK;
+    img->format_known = FALSE;
+    if ( ((color == DISPLAY_COLORS_NATIVE) || 
+	  (color == DISPLAY_COLORS_GRAY))
+	     &&
+	 ((depth == DISPLAY_DEPTH_1) ||
+	  (depth == DISPLAY_DEPTH_4) ||
+	  (depth == DISPLAY_DEPTH_8)) )
+	img->format_known = TRUE;
+    if ((color == DISPLAY_COLORS_RGB) && (depth == DISPLAY_DEPTH_8) &&
+	(alpha == DISPLAY_ALPHA_NONE))
+	img->format_known = TRUE;
+    if (!img->format_known) {
+	gs_addmessf("display_presize: format %d = 0x%x is unsupported\n", format, format);
+	return_error(DISPLAY_ERROR);
+    }
 
-	    /* allow window to be resized without user control */
-	    fit_page_enabled = option.fit_page;
+    /* remember parameters so we can figure out where to allocate bitmap */
+    img->width = width;
+    img->height = height;
+    img->raster = raster;
+    img->format = format;
+    return 0;	/* OK */
+}
 
-	    if (debug) {
-		sprintf(buf,"Callback: SIZE %p width=%d height=%d\n", str,
-		    (int)(count & 0xffff), (int)((count>>16) & 0xffff) );
-		gs_addmess(buf);
-	    }
-	    break;
-	case GSDLL_POLL:
-	    if (!multithread)
-		peek_message();
-	    if (pending.abort)
-		return -100;	/* signal an error if we want to abort */
-	    break;
+/* Convert the raster format if needed */
+int
+image_sync(IMAGE *img)
+{
+    return 0;
+}
+
+/* resize image */
+int
+image_size(IMAGE *img)
+{
+    PBITMAPINFO2 bmi;
+    int i, nColors;
+    bmi = (PBITMAPINFO2) img->bitmap;
+
+    /* write BMP header including palette */
+    bmi = (PBITMAPINFO2) img->bitmap;
+    bmi->cbFix = BITMAP2_LENGTH;
+    bmi->cx = img->width;
+    bmi->cy = img->height;
+    bmi->cPlanes = 1;
+    bmi->cBitCount = 24;
+    bmi->ulCompression = BCA_UNCOMP;
+    bmi->cbImage = 0;
+    bmi->cxResolution = 0;
+    bmi->cyResolution = 0;
+    bmi->cclrUsed = bmi->cclrImportant = image_palette_size(img->format);
+
+    switch (img->format & DISPLAY_DEPTH_MASK) {
 	default:
-	    sprintf(buf,"Callback: Unknown message=%d\n",message);
-	    gs_addmess(buf);
+	case DISPLAY_DEPTH_1:
+	    bmi->cBitCount = 1;
 	    break;
+	case DISPLAY_DEPTH_4:
+	    bmi->cBitCount = 4;
+	    break;
+	case DISPLAY_DEPTH_8:
+	    if ((img->format & DISPLAY_COLORS_MASK) == DISPLAY_COLORS_NATIVE)
+		bmi->cBitCount = 8;
+	    else if ((img->format & DISPLAY_COLORS_MASK) == DISPLAY_COLORS_GRAY)
+		bmi->cBitCount = 8;
+	    else
+		bmi->cBitCount = 24;
+	    break;
+    }
+
+    /* add palette if needed */
+    nColors = bmi->cclrUsed;
+    if (nColors) {
+	unsigned char *p;
+	p = img->bitmap + BITMAP2_LENGTH;
+	for (i = 0; i < nColors; i++) {
+	    image_color(img->format, i, p+2, p+1, p);
+	    *(p+3) = 0;
+	    p += 4;
+	}
+    }
+
+#ifdef DISPLAY_DEBUG
+    if (debug) {
+    	fprintf(stdout, "\nBMP dump\n");
+    	fprintf(stdout, " bitmap=%lx\n", (long)img->bitmap);
+    	fprintf(stdout, " cx=%ld\n", bmi->cx);
+    	fprintf(stdout, " cy=%ld\n", bmi->cy);
+    	fprintf(stdout, " cPlanes=%d\n", bmi->cPlanes);
+    	fprintf(stdout, " cBitCount=%d\n", bmi->cBitCount);
+    	fprintf(stdout, " ulCompression=%ld\n", bmi->ulCompression);
+    	fprintf(stdout, " cbImage=%ld\n", bmi->cbImage);
+    	fprintf(stdout, " cxResolution=%ld\n", bmi->cxResolution);
+    	fprintf(stdout, " cyResolution=%ld\n", bmi->cyResolution);
+    	fprintf(stdout, " cclrUsed=%ld\n", bmi->cclrUsed);
+    	fprintf(stdout, " cclrImportant=%ld\n", bmi->cclrImportant);
+    }
+#endif
+
+    memset(&bitmap, 0, sizeof(bitmap));
+    bitmap.pbmi = (BITMAPINFO2 *)image.bitmap;
+
+    /* allow window to be resized without user control */
+    fit_page_enabled = option.fit_page;
+
+    return 0;
+}
+
+
+/* We allocate the memory ourselves, so we can place the
+ * BMP header before it
+ */
+void *display_memalloc(void *handle, void *device, unsigned long size)
+{
+    unsigned long header;
+    void *mem = NULL;
+
+#ifdef DISPLAY_DEBUG
+    gs_addmesssf("display_memalloc(0x%x 0x%x %ld)\n", 
+	(int)handle, (int)device, size);
+#endif
+
+    if (image.bitmap) {
+	char buf[256];
+	sprintf(buf, "display_memalloc: panic, bitmap still allocated\n");
+	gs_addmess(buf);
+    }
+
+    header = BITMAP2_LENGTH + image_palette_size(image.format) * 4;
+    image.bitmap = (unsigned char *)malloc(size+header);
+    if (image.bitmap)
+	mem = image.bitmap + header;
+    
+    return mem;
+}
+
+int display_memfree(void *handle, void *device, void *mem)
+{
+#ifdef DISPLAY_DEBUG
+    gs_addmessf("display_memfree(0x%x, 0x%x, 0x%x)\n", 
+	(int)handle, (int)device, (int)mem);
+#endif
+    if (image.bitmap) {
+	free(image.bitmap);
+	image.bitmap = NULL;
     }
     return 0;
 }
+
+
 
 /* DUMMY TESTING FUNCTIONS */
 int
@@ -387,20 +380,6 @@ int rc;
 }
 
 void
-begin_crit_section(void)
-{
-    if (multithread)
-	DosEnterCritSec();
-}
-
-void
-end_crit_section(void)
-{
-    if (multithread)
-	DosExitCritSec();
-}
-
-void
 wait_event(void)
 {
 ULONG count;
@@ -421,6 +400,35 @@ release_mutex(void)
     if (multithread)
 	DosReleaseMutexSem(hmutex_ps);
 }
+
+void
+image_lock(IMAGE *img)
+{
+    if (debug & img->lock_count)
+	gs_addmess("Image is locked\n");
+    if (multithread)
+	DosRequestMutexSem(img->hmutex, 120000);
+    if (debug) {
+	if (img->lock_count)
+	    gs_addmess("Attempted to lock image twice\n");
+	img->lock_count++;
+    }
+}
+
+void
+image_unlock(IMAGE *img)
+{
+    if (multithread)
+	DosReleaseMutexSem(img->hmutex);
+    if (debug) {
+	if (img->lock_count == 0)
+	    gs_addmess("Attempted to unlock unlocked image\n");
+	else 
+	    img->lock_count--;
+    }
+}
+
+
 
 /* for pstotext */
 

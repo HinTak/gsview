@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -14,7 +14,6 @@
   described in the Licence.  Among other things, the Licence requires that 
   the copyright notice and this notice be preserved on all copies.
 */
-
 
 /* winsetup.cpp */
 /* MS-Windows installation program for GSview */
@@ -52,6 +51,7 @@
 
 #include "gvcver.h"
 #include "gvcbeta.h"
+#include "gvwgsver.h"
 /* extern "C" { */
     int message_box(const char *str, int icon);
     int load_string(int id, char *str, int len);
@@ -159,7 +159,6 @@ typedef struct tagWIZPAGE {
 
 WIZPAGE * find_page_from_id(int id);
 void next_page(HWND hwnd);
-void prev_page(HWND hwnd);
 int init_temp(void);
 int check_dir(HWND hwnd);
 int make_dir(HWND hwnd);
@@ -1086,6 +1085,79 @@ install_prog()
 	if (!update_ini(buf))
 	    return FALSE;
 
+	if (g_bAllUsers) {
+	    /* Write a gsview32.ini file to allow use of GSview
+	     * by any user, not just the one who installed GSview.
+	     * This INI file will cause auto-configuration if
+	     * the user runs GSview for the first time, or was
+	     * previously using a different version of GSview.
+	     */
+	    FILE *f;
+	    char buf[256];
+	    int count;
+	    int *ver;
+	    int gsver;
+	    const char *p = cinst.GetUninstallName();
+	    strcpy(szProgram, g_szTargetDir);
+	    strcat(szProgram, "\\");
+	    strcat(szProgram, cinst.GetMainDir());
+	    strcat(szProgram, "\\");
+	    strcat(szProgram, szIniName);
+	    gs_addmess("Writing ");
+	    gs_addmess(szProgram);
+	    gs_addmess("\n");
+	    if ((f = fopen(szProgram, "w")) == (FILE *)NULL) {
+		gs_addmess("Failed\n");
+		return FALSE;
+	    }
+	    fprintf(f, "[Options]\n");
+	    /* Skip over "GSview 3.6" to get to version number */
+	    while (*p && *p != ' ')
+		p++;
+	    while (*p && *p == ' ')
+		p++;
+	    fprintf(f, "Version=%s\n", p);
+
+	    count = 1;
+	    get_gs_versions(&count);
+	    if (count < 1)
+		return FALSE;
+	    ver = (int *)malloc((count+1)*sizeof(int));
+	    if (ver == (int *)NULL)
+		return FALSE;
+	    ver[0] = count+1;
+	    if (!get_gs_versions(ver)) {
+		free(ver);
+		return FALSE;
+	    }
+	    gsver = 0;
+	    for (int i=1; i<=ver[0]; i++) {
+		if (ver[i] > gsver)
+		    gsver = ver[i];
+	    }
+	    free(ver);
+	    if (gsver == 0) {
+		gs_addmess("If installing for all users, you must install Ghostscript first.\n");
+		fclose(f);
+		return FALSE;
+	    }
+	    fprintf(f, "GSversion=%d\n", gsver);
+
+	    if (!get_gs_string(gsver, "GS_DLL", buf, sizeof(buf))) {
+		return FALSE;
+		fclose(f);
+	    }
+	    fprintf(f, "GhostscriptDll=%s\n", buf);
+	    if (!get_gs_string(gsver, "GS_LIB", buf, sizeof(buf))) {
+		return FALSE;
+		fclose(f);
+	    }
+	    fprintf(f, "GhostscriptInclude=%s\n", buf);
+	    fprintf(f, "GhostscriptOther=-dNOPLATFONTS -sFONTPATH=\042c:\\psfonts\042\n");
+	    fprintf(f, "Configured=1\n");
+	    fclose(f);
+	}
+
 	if (install_autoexec)
 	    if (!update_config()) {
 		gs_addmess(error_message);
@@ -1096,7 +1168,6 @@ install_prog()
 	gs_addmess("Program install successful\n");
 	return TRUE;
 }
-
 
 
 // install program and files

@@ -1,4 +1,4 @@
-#  Copyright (C) 2000, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 2000-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -18,16 +18,17 @@
 # X11 GSview 
 #
 
-GSVIEW_BASE=/usr/local
+prefix=
+GSVIEW_BASE=$(prefix)/usr
 
 # binaries placed here
 GSVIEW_BINDIR=$(GSVIEW_BASE)/bin
 # Man page for pstotext placed here
-GSVIEW_MANDIR=$(GSVIEW_BASE)/man/man1
+GSVIEW_MANDIR=$(GSVIEW_BASE)/man
 # GSview help files and epstool Readme placed here
-GSVIEW_DOCPATH=$(GSVIEW_BASE)/doc
+GSVIEW_DOCPATH=$(GSVIEW_BASE)/share/doc
 # GSview printer.ini and system wide gsview.ini
-GSVIEW_ETCPATH=$(GSVIEW_BASE)/etc
+GSVIEW_ETCPATH=$(prefix)/etc
 
 MAKE=make
 COMP=gcc
@@ -39,8 +40,8 @@ INSTALL_EXE=install -m 755
 CDEBUG=-g
 LDEBUG=
 
-CFLAGS=-O -Wall -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wtraditional -fno-builtin -fno-common -Wcast-qual -Wwrite-strings $(CDEBUG) -DX11 -DUNIX $(RPM_OPT_FLAGS) `gtk-config --cflags`
-LFLAGS=$(LDEBUG) `gtk-config --libs`
+CFLAGS=-O -Wall -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wtraditional -fno-builtin -fno-common -Wcast-qual -Wwrite-strings $(CDEBUG) -DX11 -DUNIX -DNONAG $(RPM_OPT_FLAGS) `gtk-config --cflags`
+LFLAGS=$(LDEBUG) `gtk-config --libs` -lpthread
 
 OBJS=gvx.$(OBJ) gvxdlg.$(OBJ) gvxdisp.$(OBJ) gvxedit.$(OBJ) gvxeps.$(OBJ)\
    gvxgsver.$(OBJ) gvxinit.$(OBJ) gvxmeas.$(OBJ) gvxmisc.$(OBJ) gvxprn.$(OBJ)\
@@ -49,7 +50,8 @@ OBJS=gvx.$(OBJ) gvxdlg.$(OBJ) gvxdisp.$(OBJ) gvxedit.$(OBJ) gvxeps.$(OBJ)\
    gvxdll.$(OBJ) gvcdll.$(OBJ) gvcpdf.$(OBJ)\
    dscparse.$(OBJ) dscutil.$(OBJ)\
    gvcreg.$(OBJ) gvxreg.$(OBJ) gvxres.$(OBJ)\
-   gvxl_de.$(OBJ) gvxl_en.$(OBJ) gvxl_es.$(OBJ) gvxl_fr.$(OBJ) gvxl_it.$(OBJ)
+   gvxl_de.$(OBJ) gvxl_en.$(OBJ) gvxl_es.$(OBJ) gvxl_fr.$(OBJ) gvxl_it.$(OBJ)\
+   cdll.$(OBJ) cimg.$(OBJ) cview.$(OBJ)
 HDRS=gsvver.h gvx.h dscparse.h gvcfn.h gvcver.h gvxres.h
 
 all: gsview html epstool pstotext
@@ -64,15 +66,28 @@ include gvcver.mak
 GSVIEW_DOCDIR=$(GSVIEW_DOCPATH)/gsview-$(GSVIEW_DOT_VERSION)
 
 install: all
+	-mkdir $(prefix)/usr
+	chmod 755 $(prefix)/usr
+	-mkdir $(GSVIEW_BASE)
+	chmod 755 $(GSVIEW_BASE)
+	-mkdir $(GSVIEW_BINDIR)
+	chmod 755 $(GSVIEW_BINDIR)
 	$(INSTALL_EXE) gsview $(GSVIEW_BINDIR)/gsview
 	$(INSTALL_EXE) gvxhelp.txt $(GSVIEW_BINDIR)/gsview-help
 	$(INSTALL_EXE) ../pstotext/pstotext $(GSVIEW_BINDIR)/pstotext
 	$(INSTALL_EXE) ../epstool/epstool $(GSVIEW_BINDIR)/epstool
 	-mkdir $(GSVIEW_MANDIR)
 	chmod 755  $(GSVIEW_MANDIR)
-	$(INSTALL) ../pstotext/pstotext.1 $(GSVIEW_MANDIR)/pstotext.1
+	-mkdir $(GSVIEW_MANDIR)/man1
+	chmod 755  $(GSVIEW_MANDIR)/man1
+	$(INSTALL) ../pstotext/pstotext.1 $(GSVIEW_MANDIR)/man1/pstotext.1
+	-mkdir $(GSVIEW_DOCPATH)
+	chmod 755 $(GSVIEW_DOCPATH)
 	-mkdir $(GSVIEW_DOCDIR)
 	chmod 755  $(GSVIEW_DOCDIR)
+	$(INSTALL) gsview.css $(GSVIEW_DOCDIR)/gsview.css
+	$(INSTALL) cdorder.txt $(GSVIEW_DOCDIR)/cdorder.txt
+	$(INSTALL) regorder.txt $(GSVIEW_DOCDIR)/regorder.txt
 	$(INSTALL) Readme.htm  $(GSVIEW_DOCDIR)/Readme.htm
 	$(INSTALL) LICENCE $(GSVIEW_DOCDIR)/LICENCE
 	$(INSTALL) gvxde.htm  $(GSVIEW_DOCDIR)/gvxde.htm
@@ -108,7 +123,7 @@ gvx.$(OBJ): gvx.cpp $(HDRS)
 gvxdlg.$(OBJ): gvxdlg.cpp gvcrc.h $(HDRS)
 	$(COMP) $(CFLAGS) -c gvxdlg.cpp
 
-gvxdll.$(OBJ): gvxdll.cpp gvcrc.h gsdll.h $(HDRS)
+gvxdll.$(OBJ): gvxdll.cpp gvcrc.h $(HDRS)
 	$(COMP) $(CFLAGS) -c gvxdll.cpp
 
 gvxdisp.$(OBJ): gvxdisp.cpp  $(HDRS)
@@ -162,7 +177,7 @@ gvccmd.$(OBJ): gvccmd.cpp gvcrc.h $(HDRS)
 gvcdisp.$(OBJ): gvcdisp.cpp $(HDRS)
 	$(COMP) $(CFLAGS) -c gvcdisp.cpp
 
-gvcdll.$(OBJ): gvcdll.cpp gvcrc.h gsdll.h $(HDRS)
+gvcdll.$(OBJ): gvcdll.cpp gvcrc.h $(HDRS)
 	$(COMP) $(CFLAGS) -c gvcdll.cpp
 
 dscparse.$(OBJ): dscparse.cpp dscparse.h
@@ -200,6 +215,15 @@ gvcreg.$(OBJ): gvcreg.cpp $(HDRS)
 
 gvctext.$(OBJ): gvctext.cpp $(HDRS)
 	$(COMP) $(CFLAGS) -c gvctext.cpp
+
+cdll.$(OBJ): cdll.cpp $(HDRS)
+	$(COMP) $(CFLAGS) -c cdll.cpp
+
+cimg.$(OBJ): cimg.cpp $(HDRS)
+	$(COMP) $(CFLAGS) -c cimg.cpp
+
+cview.$(OBJ): cview.cpp $(HDRS)
+	$(COMP) $(CFLAGS) -c cview.cpp
 
 gsview: $(OBJS)
 	$(COMP) $(CFLAGS) -o gsview $(OBJS) $(LFLAGS)
@@ -303,6 +327,9 @@ clean: language
 	-rm gvcprn.$(OBJ)
 	-rm gvcreg.$(OBJ)
 	-rm gvctext.$(OBJ)
+	-rm cdll.$(OBJ)
+	-rm cimg.$(OBJ)
+	-rm cview.$(OBJ)
 	-rm doc2ipf.$(OBJ)
 	-rm doc2ipf
 	-rm doc2html.$(OBJ)

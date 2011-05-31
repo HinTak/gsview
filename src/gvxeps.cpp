@@ -17,12 +17,9 @@
 
 /* gvxeps.cpp */
 
-/* not implemented fully - only 16 and 24 bit displays supported */
-
 #include "gvx.h"
 
-
-unsigned char *xbmp;
+static unsigned char *get_bitmap_ptr;
 
 void PutDWORD(unsigned char *buf, DWORD dw)
 {
@@ -41,142 +38,51 @@ void PutWORD(unsigned char *buf, WORD w)
 
 LPBITMAP2 get_bitmap(void)
 {
-    BITMAP2 bmp;
-    if (debug & DEBUG_GENERAL)
-	gs_addmess("get_bitmap: not implemented fully.  Only 16 & 24 bit displays supported\n");
+    unsigned char *pb;
+    int bytewidth = ((image.width * 24 + 31) & ~31) >> 3;
+    long size = BITMAP2_LENGTH + (3 * bytewidth * image.height);
+    int y;
+    unsigned char *s, *d;
+    int color = image.format & DISPLAY_COLORS_MASK;
 
-    XImage *image = NULL;
-    long plane_mask = (1L << display.bitcount) -1;
-    if (pixmap == NULL)
+    release_bitmap();
+    pb = (unsigned char *)malloc(size);
+    if (pb == NULL)
 	return NULL;
 
-    image = XGetImage(dpy, GDK_WINDOW_XWINDOW(pixmap), 
-	0, 0, display.width, display.height,
-	plane_mask, ZPixmap);
-    if (image == NULL)
-	return NULL;
+    /* Write BMP header */
+    PutDWORD(pb, BITMAP2_LENGTH);
+    PutDWORD(pb+4, image.width);
+    PutDWORD(pb+8, image.height);
+    PutWORD(pb+12, 1);
+    PutWORD(pb+14, 24);
+    PutDWORD(pb+16, 0);
+    PutDWORD(pb+20, 0);
+    PutDWORD(pb+24, (long)(1000 * option.xdpi / 25.4));
+    PutDWORD(pb+28, (long)(1000 * option.ydpi / 25.4));
+    PutDWORD(pb+32, 0);
+    PutDWORD(pb+36, 0);
 
-    if (debug & DEBUG_GENERAL) {
-	gs_addmess("get_bitmap:\n");
-	gs_addmessf("  width=%d\n", image->width);
-	gs_addmessf("  height=%d\n", image->height);
-	gs_addmessf("  xoffset=%d\n", image->xoffset);
-	gs_addmessf("  format=%d\n", image->format);
-	gs_addmessf("  data=0x%lx\n", (unsigned long)image->data);
-	gs_addmessf("  byte_order=%d\n", image->byte_order);
-	gs_addmessf("  bitmap_unit=%d\n", image->bitmap_unit);
-	gs_addmessf("  bitmap_bit_order=%d\n", image->bitmap_bit_order);
-	gs_addmessf("  bitmap_pad=%d\n", image->bitmap_pad);
-	gs_addmessf("  depth=%d\n", image->depth);
-	gs_addmessf("  bytes_per_line=%d\n", image->bytes_per_line);
-	gs_addmessf("  bits_per_pixel=%d\n", image->bits_per_pixel);
-	gs_addmessf("  red_mask=0x%lx\n", image->red_mask);
-	gs_addmessf("  green_mask=0x%lx\n", image->green_mask);
-	gs_addmessf("  blue_mask=0x%lx\n", image->blue_mask);
+    /* convert raster */
+    for (y = 0; y<image.height; y++) {
+	s = image.image + y * image.raster;
+	d = pb + BITMAP2_LENGTH + bytewidth * (image.height-1-y);
+	if ((color == DISPLAY_COLORS_NATIVE) ||
+	    (color == DISPLAY_COLORS_RGB) ||
+	    (color == DISPLAY_COLORS_CMYK))
+	   image_to_24BGR(&image, d, s);
+	else
+	    memset(d, 0xff, bytewidth);
     }
 
-    /* Convert image to 24 bpp Windows BMP format */
-    bmp.biSize = BITMAP2_LENGTH;
-    bmp.biWidth = image->width;
-    bmp.biHeight = image->height;
-    bmp.biPlanes = 1;
-    bmp.biBitCount = 24;
-    bmp.biCompression = 0;
-    bmp.biSizeImage = 0;
-    bmp.biXPelsPerMeter = (long)(1000 * option.xdpi / 25.4);
-    bmp.biYPelsPerMeter = (long)(1000 * option.ydpi / 25.4);
-    bmp.biClrUsed = 0;
-    bmp.biClrImportant = 0;
-    int bytewidth = ((bmp.biWidth * bmp.biBitCount + 31) & ~31) >> 3;
-    long size = BITMAP2_LENGTH + (3 * bytewidth * bmp.biHeight);
-    if (debug & DEBUG_GENERAL) {
-	gs_addmess("bmp:\n");
-	gs_addmessf(" biSize=%ld\n", bmp.biSize);
-	gs_addmessf(" biWidth=%ld\n", bmp.biWidth);
-	gs_addmessf(" biHeight=%ld\n", bmp.biHeight);
-	gs_addmessf(" bytewidth=%d\n", bytewidth);
-	gs_addmessf(" size=%ld\n", size);
-    }
-
-    if (xbmp != NULL)
-	release_bitmap();
-    if ((image->depth == 16) || (image->depth == 24)) {
-	if ((xbmp = (unsigned char *)malloc(size)) != NULL) {
-	    /* write BMP header */
-	    PutDWORD(xbmp, bmp.biSize);
-	    PutDWORD(xbmp+4, bmp.biWidth);
-	    PutDWORD(xbmp+8, bmp.biHeight);
-	    PutWORD(xbmp+12, bmp.biPlanes);
-	    PutWORD(xbmp+14, bmp.biBitCount);
-	    PutDWORD(xbmp+16, bmp.biCompression);
-	    PutDWORD(xbmp+20, bmp.biSizeImage);
-	    PutDWORD(xbmp+24, bmp.biXPelsPerMeter);
-	    PutDWORD(xbmp+28, bmp.biXPelsPerMeter);
-	    PutDWORD(xbmp+32, bmp.biClrUsed);
-	    PutDWORD(xbmp+36, bmp.biClrImportant);
-
-	    int x, y;
-	    unsigned char *s, *d;
-	    for (y=0; y<bmp.biHeight; y++) {
-		s = (unsigned char *)image->data + y * image->bytes_per_line;
-		d = xbmp + BITMAP2_LENGTH + 
-			(bytewidth * (bmp.biHeight - 1 - y));
-		if (image->depth == 24) {
-		    int step = image->bits_per_pixel >> 3;
-		    if (image->byte_order == MSBFirst) {
-			/* red first */
-			for (x=0; x<bmp.biWidth; x++) {
-			    d[0] = s[2]; 
-			    d[1] = s[1]; 
-			    d[2] = s[0]; 
-			    s += step;
-			    d += 3;
-			}
-		    }
-		    else {
-			/* blue first */
-			for (x=0; x<bmp.biWidth; x++) {
-			    d[0] = s[0]; 
-			    d[1] = s[1]; 
-			    d[2] = s[2]; 
-			    s += step;
-			    d += 3;
-			}
-		    }
-		}
-		else if (image->depth == 16) {
-		    int step = image->bits_per_pixel >> 3;
-		    int value;
-		    int r, g, b;
-		    for (x=0; x<bmp.biWidth; x++) {
-			if (image->byte_order == MSBFirst)
-			    value = (s[0] << 8) + s[1];
-			else
-			    value = (s[1] << 8) + s[0];
-			r = (value >> 11) & 0x1f;
-			g = (value >> 5) & 0x3f;
-			b = value & 0x1f;
-			d[0] = (b << 3) + (b >> 2);
-			d[1] = (g << 2) + (g >> 4);
-			d[2] = (r << 3) + (r >> 2);
-			s += step;
-			d += 3;
-		    }
-		}
-		else {
-		    /* panic */
-		}
-	    }
-	}
-    }
-    XDestroyImage(image);
-
-    return (LPBITMAP2)xbmp;
+    get_bitmap_ptr = pb;
+    return (LPBITMAP2)get_bitmap_ptr;
 }
 
 void release_bitmap(void)
 {
-    free(xbmp);
-    xbmp = NULL;
+    if (get_bitmap_ptr)
+	free(get_bitmap_ptr);
+    get_bitmap_ptr = NULL;
 }
 

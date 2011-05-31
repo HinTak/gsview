@@ -1,7 +1,7 @@
 =================================================================== 
 pstotext.txt    5 February 2000
 =================================================================== 
-pstotext 1.8g - PostScript text extractor.  Requires Ghostscript.
+pstotext 1.8h - PostScript text extractor.  Requires Ghostscript.
 
 The files pstotxt1.dll (Win16), pstotxt2.dll (OS/2) pstotxt3.dll (Win32), and
 pstotext.zip (sources) constitute the pstotext package, which was written by
@@ -37,11 +37,13 @@ You can contact the authors at <mcjones@pa.dec.com> and
 For Windows and OS, contact gsview@ghostgum.com.au;
 for VMS, contact <goathunter@PROCESS.COM>.
 
-Version 1.8g is a modification of the original 1.8 to allow 
+Version 1.8h is a modification of the original 1.8 to allow 
 operation with Aladdin Ghostscript 6.0, to add -output to 
 Windows and OS/2 executables, and to insert line breaks
 and form feeds is pstotext output.  Modifications made 
 2000-07-15 by Russell Lang at Ghostgum Software Pty Ltd.
+main.c changed to use mkstemp not tempnam for Unix, 
+2000-06-02 by Russell Lang at Ghostgum Software Pty Ltd.
 
                       ==========================
                       END USER LICENSE AGREEMENT

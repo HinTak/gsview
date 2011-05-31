@@ -260,6 +260,8 @@ gsview_init(int argc, char *argv[])
     init_options();
     read_profile(szIniFile);
 
+    view_init(&view);
+
     if (!load_language(option.language)) {
 	message_box("Couldn't load language specific resources.  Resetting to English.", 0);
 	option.language = IDM_LANGEN;
@@ -678,7 +680,6 @@ APIRET init1()
 	}
 */
     }
-    bitmap.valid = FALSE;
     return rc;
 }
 
@@ -1103,11 +1104,7 @@ MRESULT EXPENTRY CfgMainDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    p = strrchr(gsdir, '\\');	/* remove trailing gsview */
 	    if (p)
 		*(++p) = '\0';
-	    if (option.gsversion % 100 == 0)
-		sprintf(buf, "%d.%01d", option.gsversion / 100, 
-		    option.gsversion % 100);
-	    else
-		sprintf(buf, "%d.%02d", option.gsversion / 100, 
+	    sprintf(buf, "%d.%02d", option.gsversion / 100, 
 		    option.gsversion % 100);
 	    strcat(gsdir, "gs");
 	    strcat(gsdir, buf);
@@ -1192,10 +1189,7 @@ MRESULT EXPENTRY CfgChildDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		int ver;
 		char buf[16];
 		ver = add_gsver(hwnd, 0);
-		if (ver % 100 == 0)
-		    sprintf(buf, "%d.%01d", ver / 100, ver % 100);
-		else
-		    sprintf(buf, "%d.%02d", ver / 100, ver % 100);
+		sprintf(buf, "%d.%02d", ver / 100, ver % 100);
 		/* don't use or touch IDC_CFG20 - this would be recursive */
 		gsdir_fix(hwnd, buf);
 	        return (MRESULT)TRUE;

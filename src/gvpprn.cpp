@@ -960,8 +960,8 @@ void init_fixed_media(HWND hwnd, int id, int fixed_media)
     load_string(IDS_PAGESIZE_FIXED, buf, sizeof(buf));
     WinSendMsg( WinWindowFromID(hwnd, id),
 	LM_INSERTITEM, MPFROMLONG(LIT_END), MPFROMP(buf) );
-    strcpy(buf, "Rescale");
-    load_string(IDS_PAGESIZE_RESCALE, buf, sizeof(buf));
+    strcpy(buf, "Shrink");
+    load_string(IDS_PAGESIZE_SHRINK, buf, sizeof(buf));
     WinSendMsg( WinWindowFromID(hwnd, id),
 	LM_INSERTITEM, MPFROMLONG(LIT_END), MPFROMP(buf) );
     WinSendMsg( WinWindowFromID(hwnd, id),

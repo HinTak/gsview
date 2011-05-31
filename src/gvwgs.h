@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -25,11 +25,21 @@
 #include <string.h>
 #include <process.h>
 #include <dos.h>
-#include "gsdll.h"
+#ifdef _MSC_VER
+#define GSDLLEXPORT __declspec(dllimport)
+#endif
+#define P0() void
+#define P1(t1) t1
+#define P2(t1,t2) t1,t2
+#define P3(t1,t2,t3) t1,t2,t3
+#define P4(t1,t2,t3,t4) t1,t2,t3,t4
+#define P5(t1,t2,t3,t4,t5) t1,t2,t3,t4,t5
+#define P6(t1,t2,t3,t4,t5,t6) t1,t2,t3,t4,t5,t6
+#include "errors.h"
+#include "iapi.h"
 #include "gvcrc.h"
-#include "gsdll.h"
 
-#define GVWGS_VERSION	"0.2"
+#define GVWGS_VERSION	"0.3"
 
 #ifndef DS_3DLOOK
 #define DS_3DLOOK 0x0004L	/* for Windows 95 look */
@@ -41,22 +51,5 @@
 #define WM_PCUPDATE	WM_USER+2
 
 #define MAXSTR 256
-
-
-/* main structure with info about the GS DLL */
-typedef struct tagGSDLL {
-	HINSTANCE	hmodule;	/* handle to module */
-
-	/* pointers to DLL functions */
-	PFN_gsdll_revision	revision;
-	PFN_gsdll_init		init;
-	PFN_gsdll_exit		exit;
-	PFN_gsdll_execute_begin	execute_begin;
-	PFN_gsdll_execute_cont	execute_cont;
-	PFN_gsdll_execute_end	execute_end;
-	PFN_gsdll_lock_device	lock_device;
-	GSDLL_CALLBACK		callback;
-} GSDLL;
-
 
 #endif

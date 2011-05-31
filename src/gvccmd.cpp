@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -73,7 +73,7 @@ gsview_command(int command)
 	case IDM_CLOSE:
 		/* doesn't unload DLL */
 		/* close file */
-	  	if (gsdll.valid && gsdll.state) {
+	  	if (gsdll.open && (gsdll.state != GS_UNINIT)) {
 		    PSFILE *tpsfile;
 		    if (pending.psfile) {
 			play_sound(SOUND_BUSY);
@@ -139,7 +139,7 @@ gsview_command(int command)
 		    return 0;
 		if (psfile.dsc==(CDSC *)NULL) {
 		    /* don't know where we are so close and reopen */
-		    if (gsdll.state != IDLE) {
+		    if (gsdll.state != GS_IDLE) {
 			if (!pending.psfile) {
 			    pending.psfile = (PSFILE *)malloc(sizeof(PSFILE));
 			    if (pending.psfile)
@@ -230,7 +230,7 @@ gsview_command(int command)
 	case IDM_CONVERTFILE:
 		if (psfile.name[0] == '\0')
 		    gsview_select();
-		if (gsdll.state == BUSY) {
+		if (gsdll.state == GS_BUSY) {
 		    play_sound(SOUND_BUSY);
 		    return 0;
 		}
@@ -246,7 +246,7 @@ gsview_command(int command)
 		gsview_spool((char *)NULL, (char *)NULL);
 		return 0;
 	case IDM_SAVEAS:
-		if (gsdll.state == BUSY) {
+		if (gsdll.state == GS_BUSY) {
 		    play_sound(SOUND_BUSY);
 		    return 0;
 		}
@@ -256,7 +256,7 @@ gsview_command(int command)
 		    gsview_saveas();
 		return 0;
 	case IDM_EXTRACT:
-		if (gsdll.state == BUSY) {
+		if (gsdll.state == GS_BUSY) {
 		    play_sound(SOUND_BUSY);
 		    return 0;
 		}
@@ -268,7 +268,7 @@ gsview_command(int command)
 		    gsview_extract();
 		return 0;
 	case IDM_PSTOEDIT:
-		if (gsdll.state == BUSY) {
+		if (gsdll.state == GS_BUSY) {
 		    play_sound(SOUND_BUSY);
 		    return 0;
 		}
@@ -334,7 +334,7 @@ gsview_command(int command)
 		check_menu_item(IDM_UNITMENU, IDM_UNITFINE, option.unitfine);
 		return 0;
 	case IDM_MEASURE:
-		if (gsdll.state == BUSY) {
+		if (gsdll.state == GS_BUSY) {
 		    play_sound(SOUND_BUSY);
 		    return 0;
 		}
@@ -364,10 +364,6 @@ gsview_command(int command)
 		option.fit_page = !option.fit_page;
 		check_menu_item(IDM_OPTIONMENU, IDM_FITPAGE, option.fit_page);
 		/* should cause WM_SIZE message to be sent */
-		return 0;
-	case IDM_QUICK_OPEN:
-		option.quick_open = !option.quick_open;
-		check_menu_item(IDM_OPTIONMENU, IDM_QUICK_OPEN, option.quick_open);
 		return 0;
 	case IDM_PSTOTEXTDIS:
 	case IDM_PSTOTEXTNORM:
@@ -430,15 +426,9 @@ gsview_command(int command)
 		     (option.auto_orientation == TRUE) ) {
 		    if (!dfreopen())
 			return 0;
-#ifndef UNIX
-		    if (gsdll.lock_device && gsdll.device)
-			gsdll.lock_device(gsdll.device, 1);
-#endif
+		    image_lock(view.img);
 		    make_eps_interchange(FALSE);
-#ifndef UNIX
-		    if (gsdll.lock_device && gsdll.device)
-			gsdll.lock_device(gsdll.device, 0);
-#endif
+		    image_unlock(view.img);
 		    dfclose();
 	  	}
 		else
@@ -451,15 +441,9 @@ gsview_command(int command)
 		     (option.auto_orientation == TRUE) ) {
 		    if (!dfreopen())
 			return 0;
-#ifndef UNIX
-		    if (gsdll.lock_device && gsdll.device)
-			gsdll.lock_device(gsdll.device, 1);
-#endif
+		    image_lock(view.img);
 		    make_eps_tiff(command, FALSE);
-#ifndef UNIX
-		    if (gsdll.lock_device && gsdll.device)
-			gsdll.lock_device(gsdll.device, 0);
-#endif
+		    image_unlock(view.img);
 		    dfclose();
 		}
 		else
@@ -470,15 +454,9 @@ gsview_command(int command)
 		     (option.auto_orientation == TRUE) ) {
 		    if (!dfreopen())
 			return 0;
-#ifndef UNIX
-		    if (gsdll.lock_device && gsdll.device)
-			gsdll.lock_device(gsdll.device, 1);
-#endif
+		    image_lock(view.img);
 		    make_eps_metafile(FALSE);
-#ifndef UNIX
-		    if (gsdll.lock_device && gsdll.device)
-			gsdll.lock_device(gsdll.device, 0);
-#endif
+		    image_unlock(view.img);
 		    dfclose();
 		}
 		else
@@ -538,7 +516,7 @@ gsview_command(int command)
 		    zoom = FALSE;
 		    return 0;
 		}
-		if (! ((gsdll.state == PAGE) || (gsdll.state == IDLE)) ) {
+		if (! ((gsdll.state == GS_PAGE) || (gsdll.state == GS_IDLE)) ) {
 		    zoom = FALSE;
 	    	    gserror(IDS_NOZOOM, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    	    return 0;

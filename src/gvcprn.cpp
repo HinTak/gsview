@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -1097,7 +1097,7 @@ int method = option.print_method;
 	free((char *)proplist);
     }
     p = option.gsother;
-    while ((p = gs_argnext(p, buf)) != NULL)
+    while ((p = gs_argnext(p, buf, TRUE)) != NULL)
         fprintf(optfile, "%s\n", buf);
 
     if (   ((method==PRINT_GS) && option.print_fixed_media)

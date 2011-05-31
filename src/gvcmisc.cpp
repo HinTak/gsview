@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -172,7 +172,7 @@ info_init(HWND hwnd)
 	        load_string(IDS_NOTDSC, buf, sizeof(buf));
 	    SetDlgItemText(hwnd, INFO_TYPE, buf);
 	}
-	sprintf(buf, "%d x %d", bitmap.width, bitmap.height);
+	sprintf(buf, "%d x %d", view.img->width, view.img->height);
 	SetDlgItemText(hwnd, INFO_BITMAP, buf);
     }
     else {
@@ -328,9 +328,6 @@ PROFILE *prf;
     profile_read_string(prf, section, "PStoText", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
 	    option.pstotext = i;
-    profile_read_string(prf, section, "QuickOpen", "", profile, sizeof(profile));
-    if (sscanf(profile,"%d", &i) == 1)
-	    option.quick_open = i;
     profile_read_string(prf, section, "Safer", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
 	    option.safer = i;
@@ -525,8 +522,6 @@ PROFILE *prf;
 	profile_write_string(prf, section, "Unit", profile);
 	sprintf(profile, "%d", (int)option.unitfine);
 	profile_write_string(prf, section, "UnitFine", profile);
-	sprintf(profile, "%d", (int)option.quick_open);
-	profile_write_string(prf, section, "QuickOpen", profile);
 	sprintf(profile, "%d", (int)option.pstotext);
 	profile_write_string(prf, section, "PStoText", profile);
 	sprintf(profile, "%d", (int)option.safer);

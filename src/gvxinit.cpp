@@ -177,18 +177,16 @@ check_menu_item(int menuid, int itemid, BOOL checked)
 void edit_menu_show(GtkWidget *w, gpointer   data)
 {
     BOOL addeps;
-    BOOL bitmap_valid;
-    BOOL idle = (gsdll.state != BUSY);
-    bitmap_valid = (pixmap != 0);
+    BOOL idle = (gsdll.state != GS_BUSY);
 /*
-    enable_menu_item(IDM_EDITMENU, IDM_COPYCLIP, bitmap_valid);
+    enable_menu_item(IDM_EDITMENU, IDM_COPYCLIP, image.open);
     enable_menu_item(IDM_EDITMENU, IDM_CONVERT, FALSE);
 */
-    enable_menu_item(IDM_EDITMENU, IDM_PASTETO, bitmap_valid);
+    enable_menu_item(IDM_EDITMENU, IDM_PASTETO, image.open);
     addeps =  (psfile.dsc != (CDSC *)NULL) && psfile.dsc->epsf && idle;
     enable_menu_item(IDM_EDITMENU, IDM_ADDEPSMENU, addeps);
     enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPSU, addeps);
-    addeps =  addeps && bitmap_valid;
+    addeps =  addeps && image.open;
     enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPSI, addeps);
     enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPST4, addeps);
     enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPST6U, addeps);
@@ -428,6 +426,8 @@ gsview_init(void)
 {
     GtkWidget *con1, *con2, *con3;
 
+    multithread = TRUE;
+
     init_options();
     strcpy(option.printer_queue, "lpr");
 
@@ -444,11 +444,28 @@ gsview_init(void)
     }
     read_profile(szIniFile);
 
+    view_init(&view);
+
+    if (init_img_message())
+	return 1;
+
+    if (multithread) {
+	pthread_mutex_init(&image.hmutex, NULL);
+	pthread_mutex_init(&hmutex_ps, NULL);
+        sem_init(&display.event, 0, 0);
+    }
+
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_signal_connect(GTK_OBJECT (window), "destroy", 
 			GTK_SIGNAL_FUNC (quit_gsview), NULL);
 
     gtk_window_set_title(GTK_WINDOW(window), szAppName);
+    if (geometry_width && geometry_height) {
+	/* window size specified on the command line */
+	option.img_size.x = geometry_width;
+	option.img_size.y = geometry_height;
+	/* Don't know how to set geometry_xoffset, geometry_yoffset */
+    }
     if (option.img_size.x == CW_USEDEFAULT)
         option.img_size.x = 480;
     if (option.img_size.y == CW_USEDEFAULT)
@@ -541,14 +558,6 @@ gsview_init(void)
 	gs_addmessf("Can't open display %s\n", 
 	    XDisplayString(GDK_WINDOW_XDISPLAY(img->window)));
     }
-
-    ghostview_atom = XInternAtom(dpy, "GHOSTVIEW", False);
-    next_atom = XInternAtom(dpy, "NEXT", False);;
-    page_atom = XInternAtom(dpy, "PAGE", False);;
-    done_atom = XInternAtom(dpy, "DONE", False);;
-    /* ask to be notified about client events */
-    gtk_signal_connect(GTK_OBJECT(img), "client-event",
-	GTK_SIGNAL_FUNC(gs_client_event), GINT_TO_POINTER(0));
 
     info_wait(IDS_NOWAIT);
 
@@ -733,7 +742,9 @@ void check_language(void)
 
 void post_command_line(void)
 {
-    gs_addmess("post_command_line: not implemented\n");
+/* Don't need to do this, because we use delayed parsing of
+ * the command line instead.
+ */
 }
 
 void gsview_pdf2ps(char *output)

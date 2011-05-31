@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -34,24 +34,6 @@ void pdf_add_link(PDFLINK link);
 
 #define MAX_TAG_LEN 4096
 char pdf_tag_line[MAX_TAG_LEN];
-
-#ifdef UNIX
-int
-pdf_scan(void)
-{
-    if (debug & DEBUG_GENERAL)
-	gs_addmess("pdf_scan:\n");
-    pdf_head();
-
-    /* access every page to collect media, crop box and orientation */
-    gs_printf("/FirstPage where { pop FirstPage } { 1 } ifelse\n1\n");
-    gs_printf("/LastPage where { pop LastPage } { pdfpagecount } ifelse\n");
-    gs_printf("{GSview_PDFpage} for\n");
-    gs_printf("(%s) print (\\n) print flush\n", pdf_done_tag);
-    pdf_trailer();
-    return 0;
-}
-#endif
 
 int
 pdf_head(void)
@@ -215,9 +197,7 @@ pdf_page_init(int pagenum)
     /* Prepare to show a page */
     /* This obtains the page size and orientation */
     pdf_free_link();
-#if defined(_Windows) || defined(OS2)
-    ignore_sync = TRUE;		/* ignore next GSDLL_SYNC */
-#endif
+    view.img->ignore_sync = TRUE;	/* ignore next SYNC callback */
     return gs_printf("%d GSview_PDFpage\n", pagenum);
 }
 
@@ -359,17 +339,6 @@ static int pdf_page_first;
 	    return TRUE;
 	}
     }
-#ifdef UNIX
-    if (psfile.ispdf && (len >= sizeof(pdf_done_tag)-1) &&
-	(strncmp(line, pdf_done_tag, strlen(pdf_done_tag)) == 0) ) {
-	if (debug)
-	    gs_addmess("Found GSVIEW_PDF_DONE tag\n");
-extern int command_on_done;
-	command_on_done = IDM_REDISPLAY;
-	close_gs_stdin();	/* Tell GS to exit */
-	return TRUE;
-    }
-#endif
     if (psfile.ispdf && (len >= sizeof(pdf_page_tag)-1) &&
 	(strncmp(line, pdf_page_tag, strlen(pdf_page_tag)) == 0) ) {
         pdf_page_number = 0;
@@ -602,7 +571,7 @@ extern int command_on_done;
 
 /* Check stdout for tag giving page range */
 int
-pdf_checktag(LPSTR str, int len)
+pdf_checktag(const char *str, int len)
 {
 char *p;
 BOOL quote_next;
@@ -845,7 +814,7 @@ char *p;
     fputc('\n',optfile);
 
     p = option.gsother;
-    while ((p = gs_argnext(p, buf)) != NULL)
+    while ((p = gs_argnext(p, buf, TRUE)) != NULL)
         fprintf(optfile, "%s\n", buf);
 
     fclose(optfile);

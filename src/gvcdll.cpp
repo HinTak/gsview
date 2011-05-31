@@ -1,4 +1,4 @@
-/*  Copyright (C) 1996-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/*  Copyright (C) 1996-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
   
@@ -21,8 +21,10 @@
 #include <stdarg.h>
 
 GSDLL gsdll;		/* the main DLL structure */
+IMAGE image;		/* display device */
+VIEW view;
 PENDING pending;	/* operations that must wait */
-int execute_code;	/* return code from gsdll.execute_cont */
+int execute_code;	/* return code from gsapi_run_string_continue */
 
 /* forward declarations */
 int gs_process_pstotext(void);
@@ -30,36 +32,22 @@ int gs_process_pstotext(void);
 int
 gs_execute(const char *str, int len)
 {
-#ifdef UNIX
-    /* Instead of executing this immediately, we write it to 
-     * a buffer.  This allows us to write PostScript code before
-     * or after Ghostscript is started.
-     */
-    if (gsdll.buffer == NULL) {
-        gs_addmess("gs_execute: buffer not allocated\n");
-	return -1;
-    }
-    if (len + gsdll.buffer_count + gsdll.buffer_index >= gsdll.buffer_length) {
-        gs_addmess("gs_execute: buffer overflow\n");
-	return -1;
-    }
-    memcpy(gsdll.buffer + gsdll.buffer_index + gsdll.buffer_count, str, len); 
-    gsdll.buffer_count += len;
-    return 0;
-#else
-    if (gsdll.execute_cont == NULL)
+    int exit_code;
+    if (gsdll.run_string_continue == NULL)
 	return 255;
-    execute_code = gsdll.execute_cont(str, len);
+    execute_code = gsdll.run_string_continue(gsdll.minst, str, len, 
+	0, &exit_code);
+    if (execute_code == e_NeedInput)
+	execute_code = 0;	/* normal return */
 #ifdef UNUSED
     if (debug & DEBUG_GENERAL) {
 	char buf[MAXSTR];
 	/* gs_addmess_count(str, len); */
-	sprintf(buf, "gsdll.execute_cont returns %d\n", execute_code);
+	sprintf(buf, "gsdll.run_string_continue returns %d\n", execute_code);
 	gs_addmess(buf);
     }
 #endif
     return execute_code;
-#endif
 }
 
 /* returns error code from GS */
@@ -349,26 +337,65 @@ d_init1(void)
 /TextAlphaBits 1 def /GraphicsAlphaBits 1 def\nend\n");
 }
 
+#ifdef UNIX
+long dmode1 = 
+     DISPLAY_COLORS_GRAY | DISPLAY_ALPHA_NONE | DISPLAY_DEPTH_1 | 
+     DISPLAY_BIGENDIAN | DISPLAY_TOPFIRST;
+long dmode4 = 
+     DISPLAY_COLORS_GRAY | DISPLAY_ALPHA_NONE | DISPLAY_DEPTH_4 | 
+     DISPLAY_BIGENDIAN | DISPLAY_TOPFIRST;
+long dmode8 = 
+     DISPLAY_COLORS_NATIVE | DISPLAY_ALPHA_NONE | DISPLAY_DEPTH_8 | 
+     DISPLAY_BIGENDIAN | DISPLAY_TOPFIRST;
+long dmode24 = 
+     DISPLAY_COLORS_RGB | DISPLAY_ALPHA_NONE | DISPLAY_DEPTH_8 | 
+     DISPLAY_BIGENDIAN | DISPLAY_TOPFIRST;
+#else
+long dmode1 = 
+     DISPLAY_COLORS_NATIVE | DISPLAY_ALPHA_NONE | DISPLAY_DEPTH_1 | 
+     DISPLAY_LITTLEENDIAN | DISPLAY_BOTTOMFIRST;
+long dmode4 = 
+     DISPLAY_COLORS_NATIVE | DISPLAY_ALPHA_NONE | DISPLAY_DEPTH_8 | 
+     DISPLAY_LITTLEENDIAN | DISPLAY_BOTTOMFIRST;
+long dmode8 = 
+     DISPLAY_COLORS_NATIVE | DISPLAY_ALPHA_NONE | DISPLAY_DEPTH_8 | 
+     DISPLAY_LITTLEENDIAN | DISPLAY_BOTTOMFIRST;
+long dmode24 = 
+     DISPLAY_COLORS_RGB | DISPLAY_ALPHA_NONE | DISPLAY_DEPTH_8 | 
+     DISPLAY_LITTLEENDIAN | DISPLAY_BOTTOMFIRST;
+#endif
+
 /* open device and install viewer hooks */
 int
 d_init2(void)
 {
 int code;
 int depth;
+long dmode;
 
     /* calculate depth */
     depth = real_depth(option.depth);
 
     /* set the device depth and size */
     /* open device */
-#ifdef UNIX
-    code = gs_printf("<< /OutputDevice /%s \n", 
-	(option.depth) == 1 ? "x11mono" : "x11");
-#else
-    ignore_sync = TRUE;	 /* ignore GSDLL_SYNC from this setpagedevice */
-    code = gs_printf("<< /OutputDevice /%s /BitsPerPixel %d \n",
-	    DEVICENAME, depth);
-#endif
+    view.img->ignore_sync = TRUE;	 /* ignore GSDLL_SYNC from this setpagedevice */
+    switch (depth) {
+	case 1:
+	    dmode = dmode1;
+	    break;
+	case 4:
+	    dmode = dmode4;
+	    break;
+	case 8:
+	    dmode = dmode8;
+	    break;
+	default:
+	case 24:
+	    dmode = dmode24;
+	    break;
+    }
+    code = gs_printf("<< /OutputDevice /%s /DisplayFormat %ld /DisplayHandle %ld\n",
+	    DEVICENAME, dmode, &view);
     if (!code)
         code = send_prolog(IDR_VIEWER);
     if (!code)
@@ -402,10 +429,6 @@ d_pdf_page(int pagenum)
     code = pdf_page_init(pagenum);
     if (code)
 	gs_addmess("pdf_page_init failed\n");
-#ifdef UNIX
-     /* X11 Ghostscript can't change the page size after opening. */
-     /* We have to restart to resize.  */
-#else
     if (!zoom) {
 	if (!code) {
 	    code = d_resize(pagenum);
@@ -418,7 +441,6 @@ d_pdf_page(int pagenum)
 		gs_addmess("setpagedevice failed\n");
 	}
     }
-#endif
     if (!code) {
 	code = pdf_page();
 	if (code)
@@ -436,13 +458,14 @@ get_gs_input(char *buf, int blen)
 {
 unsigned long len;
 GSINPUT *entry;
+GSDLL_INPUT *input = &view.input;
 
 
-    if (gsdll.input_index >= gsdll.input_count) {
+    if (input->index >= input->count) {
 	return 0; /* no more */
     }
 
-    entry = &gsdll.input[gsdll.input_index];
+    entry = &input->section[input->index];
     len = entry->end - entry->ptr;
     len = min(len, (unsigned long)blen);
 
@@ -456,11 +479,11 @@ GSINPUT *entry;
 
     /* check if we need to move to next item */
     if (entry->ptr >= entry->end) {
-        gsdll.input_index++;
+        input->index++;
 	/* do initial seek */
-        if (gsdll.input_index < gsdll.input_count) {
-	    fseek(psfile.file, gsdll.input[gsdll.input_index].ptr, SEEK_SET);
-	    gsdll.input[gsdll.input_index].seek = FALSE;
+        if (input->index < input->count) {
+	    fseek(psfile.file, input->section[input->index].ptr, SEEK_SET);
+	    input->section[input->index].seek = FALSE;
 	}
     }
     return (int)len;
@@ -477,6 +500,8 @@ unsigned long ptr;
 int code = 0;
 int prevlen = 0;
 CDSC *dsc = psfile.dsc;
+    if (psfile.file == (FILE *)NULL)
+	return 0;	/* file has been deleted */
     ptr = dsc->begintrailer;
     fseek(psfile.file, ptr, SEEK_SET);
     len = dsc->endtrailer - ptr;
@@ -505,6 +530,7 @@ char filename[MAXSTR];
 char buf[MAXSTR];
 char *p;
 CDSC *dsc = psfile.dsc;
+GSDLL_INPUT *input = &view.input;
     if (debug & DEBUG_GENERAL)
 	gs_addmess("send_document:\n");
     if (psfile.file == (FILE *)NULL)
@@ -529,9 +555,9 @@ CDSC *dsc = psfile.dsc;
 			    (long)(dsc->begincomments), (long)(dsc->endcomments));
 		 	gs_addmess(buf);
 		    }
-		    gsdll.input[i].ptr = dsc->begincomments;
-		    gsdll.input[i].end = dsc->endcomments;
-		    gsdll.input[i].seek = TRUE;
+		    input->section[i].ptr = dsc->begincomments;
+		    input->section[i].end = dsc->endcomments;
+		    input->section[i].seek = TRUE;
 		    i++;
 		}
 		/* add defaults */
@@ -541,9 +567,9 @@ CDSC *dsc = psfile.dsc;
 			    (long)(dsc->begindefaults), (long)(dsc->enddefaults));
 		 	gs_addmess(buf);
 		    }
-		    gsdll.input[i].ptr = dsc->begindefaults;
-		    gsdll.input[i].end = dsc->enddefaults;
-		    gsdll.input[i].seek = TRUE;
+		    input->section[i].ptr = dsc->begindefaults;
+		    input->section[i].end = dsc->enddefaults;
+		    input->section[i].seek = TRUE;
 		    i++;
 		}
 		/* add prolog */
@@ -553,9 +579,9 @@ CDSC *dsc = psfile.dsc;
 			    (long)(dsc->beginprolog), (long)(dsc->endprolog));
 		 	gs_addmess(buf);
 		    }
-		    gsdll.input[i].ptr = dsc->beginprolog;
-		    gsdll.input[i].end = dsc->endprolog;
-		    gsdll.input[i].seek = TRUE;
+		    input->section[i].ptr = dsc->beginprolog;
+		    input->section[i].end = dsc->endprolog;
+		    input->section[i].seek = TRUE;
 		    i++;
 		}
 		/* add setup */
@@ -565,9 +591,9 @@ CDSC *dsc = psfile.dsc;
 			    (long)(dsc->beginsetup), (long)(dsc->endsetup));
 		 	gs_addmess(buf);
 		    }
-		    gsdll.input[i].ptr = dsc->beginsetup;
-		    gsdll.input[i].end = dsc->endsetup;
-		    gsdll.input[i].seek = TRUE;
+		    input->section[i].ptr = dsc->beginsetup;
+		    input->section[i].end = dsc->endsetup;
+		    input->section[i].seek = TRUE;
 		    i++;
 		}
 		display.need_header = FALSE;
@@ -583,24 +609,24 @@ CDSC *dsc = psfile.dsc;
 		    (long)(dsc->page[page].begin), (long)(dsc->page[page].end));
 		gs_addmess(buf);
 	    }
-	    gsdll.input[i].ptr = dsc->page[page].begin;
-	    gsdll.input[i].end = dsc->page[page].end;
+	    input->section[i].ptr = dsc->page[page].begin;
+	    input->section[i].end = dsc->page[page].end;
 	    if (dsc->epsf) {
 		/* add everything including trailer */
-		gsdll.input[i].ptr = dsc->page[0].begin;
+		input->section[i].ptr = dsc->page[0].begin;
 		for (int j=0; j<(int)dsc->page_count; j++)
 		    if (dsc->page[j].end)
-			gsdll.input[i].end = dsc->page[j].end;
+			input->section[i].end = dsc->page[j].end;
 		
 		if (dsc->endtrailer)
-		    gsdll.input[i].end = dsc->endtrailer;
+		    input->section[i].end = dsc->endtrailer;
 		display.need_trailer = FALSE;
 		display.need_trailer = TRUE;
 	    }
-	    gsdll.input[i].seek = TRUE;
+	    input->section[i].seek = TRUE;
 	    i++;
-	    gsdll.input_count = i;
-	    gsdll.input_index = 0;
+	    input->count = i;
+	    input->index = 0;
 	}
 	else {
 	    /* add complete file */
@@ -614,9 +640,9 @@ CDSC *dsc = psfile.dsc;
 			(long)(dsc->begincomments), (long)(dsc->endcomments));
 		    gs_addmess(buf);
 		}
-		gsdll.input[i].ptr = dsc->begincomments;
-		gsdll.input[i].end = dsc->endcomments;
-		gsdll.input[i].seek = TRUE;
+		input->section[i].ptr = dsc->begincomments;
+		input->section[i].end = dsc->endcomments;
+		input->section[i].seek = TRUE;
 		i++;
 	    }
 	    /* add defaults */
@@ -626,9 +652,9 @@ CDSC *dsc = psfile.dsc;
 			(long)(dsc->begindefaults), (long)(dsc->enddefaults));
 		    gs_addmess(buf);
 		}
-		gsdll.input[i].ptr = dsc->begindefaults;
-		gsdll.input[i].end = dsc->enddefaults;
-		gsdll.input[i].seek = TRUE;
+		input->section[i].ptr = dsc->begindefaults;
+		input->section[i].end = dsc->enddefaults;
+		input->section[i].seek = TRUE;
 		i++;
 	    }
 	    /* add prolog */
@@ -638,9 +664,9 @@ CDSC *dsc = psfile.dsc;
 			(long)(dsc->beginprolog), (long)(dsc->endprolog));
 		    gs_addmess(buf);
 		}
-		gsdll.input[i].ptr = dsc->beginprolog;
-		gsdll.input[i].end = dsc->endprolog;
-		gsdll.input[i].seek = TRUE;
+		input->section[i].ptr = dsc->beginprolog;
+		input->section[i].end = dsc->endprolog;
+		input->section[i].seek = TRUE;
 		i++;
 	    }
 	    /* add setup */
@@ -650,9 +676,9 @@ CDSC *dsc = psfile.dsc;
 			(long)(dsc->beginsetup), (long)(dsc->endsetup));
 		    gs_addmess(buf);
 		}
-		gsdll.input[i].ptr = dsc->beginsetup;
-		gsdll.input[i].end = dsc->endsetup;
-		gsdll.input[i].seek = TRUE;
+		input->section[i].ptr = dsc->beginsetup;
+		input->section[i].end = dsc->endsetup;
+		input->section[i].seek = TRUE;
 		i++;
 	    }
 	    /* add trailer */
@@ -662,36 +688,36 @@ CDSC *dsc = psfile.dsc;
 			(long)(dsc->begintrailer), (long)(dsc->endtrailer));
 		    gs_addmess(buf);
 		}
-		gsdll.input[i].ptr = dsc->begintrailer;
-		gsdll.input[i].end = dsc->endtrailer;
-		gsdll.input[i].seek = TRUE;
+		input->section[i].ptr = dsc->begintrailer;
+		input->section[i].end = dsc->endtrailer;
+		input->section[i].seek = TRUE;
 		i++;
 	    }
 	    display.need_header = FALSE;
 	    display.need_trailer = FALSE;
-	    gsdll.input_count = i;
-	    gsdll.input_index = 0;
+	    input->count = i;
+	    input->index = 0;
 	}
     }
     else {
 	/* add complete file */
         sprintf(buf, "Displaying non DSC file %s\n", filename);
 	gs_addmess(buf);
-	gsdll.input[0].ptr = 0;
+	input->section[0].ptr = 0;
 	fseek(psfile.file, 0, SEEK_END);
-	gsdll.input[0].end = ftell(psfile.file);
-	gsdll.input[0].seek = TRUE;
+	input->section[0].end = ftell(psfile.file);
+	input->section[0].seek = TRUE;
 	if (debug & DEBUG_GENERAL) {
 	    sprintf(buf, "adding complete file %ld %ld\n", 
-		(long)0, (long)(gsdll.input[0].end));
+		(long)0, (long)(input->section[0].end));
 	    gs_addmess(buf);
 	}
-	gsdll.input_count = 1;
-	gsdll.input_index = 0;
+	input->count = 1;
+	input->index = 0;
         display.need_trailer = FALSE;
     }
 /* this is done by get_gs_input
-    fseek(psfile.file, gsdll.input[0].ptr, SEEK_SET);
+    fseek(psfile.file, input->section[0].ptr, SEEK_SET);
 */
     return 0;
 }
@@ -740,6 +766,7 @@ gs_process_prepare_input(PENDING *ppend)
     int code;
     int i;
     char buf[MAXSTR];
+    GSDLL_INPUT *input = &view.input;
     code = dfreopen();
     if (code < 0) {
 	/* file could not be opened */
@@ -748,28 +775,6 @@ gs_process_prepare_input(PENDING *ppend)
     }
     else if (code == 0) {
 	/* document changed, so force a rescan */
-#ifdef UNIX
-	/* we can rescan immediately since we are single threaded */
-	PSFILE *tpsfile;
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("gs_process_prepare_input: document changed\n");
-	if (pending.psfile)
-	    tpsfile = pending.psfile;	/* new file, old file deleted */
-	else
-	    tpsfile = gsview_openfile(psfile.name);
-	if (tpsfile) {
-	    tpsfile->pagenum = psfile.pagenum;
-	    request_mutex();
-	    pending.psfile = tpsfile;
-	    pending.now = TRUE;
-	    if (debug & DEBUG_GENERAL)
-		gs_addmess("gs_process_prepare_input: redisplaying...\n");
-	    release_mutex();
-	    return 0;
-	}
-	/* beep only */
-	return -1;
-#else
 	/* Cause the rescan to occur on main thread */
 	request_mutex();
 	pending.now = FALSE;
@@ -777,7 +782,6 @@ gs_process_prepare_input(PENDING *ppend)
 	pending.abort = TRUE;
 	release_mutex();
 	return 1;
-#endif
     }
 
     code = 0;	/* GS return code */
@@ -808,17 +812,12 @@ gs_process_prepare_input(PENDING *ppend)
 	if (ppend->resize) {
 	    if (!code)
 		code = d_resize(psfile.pagenum);
-#ifndef UNIX
-	    ignore_sync = TRUE;		/* ignore next sync */
-#endif
+	    view.img->ignore_sync = TRUE;		/* ignore next sync */
 	    if (!code)
 		code = gs_printf("<< >> //systemdict /setpagedevice get exec\n");
 	}
     }
 
-    if (!code)
-        if (!display.saved && display.need_header && option.quick_open)
-	    code = d_save();
     if (!code && option.epsf_warn)
 	code = send_prolog(IDR_EPSFWARN);
 
@@ -839,28 +838,9 @@ gs_process_prepare_input(PENDING *ppend)
 
     if (psfile.ispdf) {
 	post_img_message(WM_GSTEXTINDEX, 0);
-#ifdef UNIX
-	if (psfile.dsc == NULL) {
-	    /* Unix needs two passes to display a PDF file.
-	     * First pass collects page count, page size and 
-	     * orientation information.  On completion of the
-	     * the first pass, a redisplay will be triggered.
-	     * Second pass actually displays the pages and is
-	     * almost the same as the DLL version.
-	     */
-	    gs_addmess("Scanning PDF file\n");
-	    if ( (code = pdf_scan()) != 0 )
-		return code;
-	}
-	else
-#endif
 	{
 	    if (display.need_header) {
-#ifdef UNIX
-		gs_addmess("Opening PDF file\n");
-#else
 		gs_addmess("Scanning PDF file\n");
-#endif
 		if ( (code = pdf_head()) != 0 )
 		    return code;
 	    }
@@ -889,13 +869,9 @@ gs_process_prepare_input(PENDING *ppend)
 	}
 
 	gsbytes_done = 0;
-#ifdef UNIX
-	gsbytes_size = gsdll.buffer_count;
-#else
 	gsbytes_size = 0;
-#endif
-	for (i=0; i<gsdll.input_count; i++)
-	    gsbytes_size += (gsdll.input[i].end - gsdll.input[i].ptr);
+	for (i=0; i<input->count; i++)
+	    gsbytes_size += (input->section[i].end - input->section[i].ptr);
 	percent_pending = FALSE;
 	percent_done = 0;
     }
@@ -903,7 +879,6 @@ gs_process_prepare_input(PENDING *ppend)
     return code;
 }
 
-#ifndef UNIX
 /* process current page or non-DSC file */
 /* returns 0 if OK, else GS error code */
 int
@@ -924,6 +899,7 @@ int pcdone;
 
     if (!psfile.ispdf) {
 	/* send postscript */
+	post_img_message(WM_GSWAIT, IDS_WAITDRAW_PC);
 	while (!pending.abort && !pending.unload
 	    && ((len = get_gs_input(buf, sizeof(buf)))!=0)) {
 	    code = gs_execute(buf, len);
@@ -939,9 +915,9 @@ int pcdone;
 		    gs_addmess("\n--- End offending input ---\n");
 		    /* a file offset of 0 really means that it reached the end of the data */
 		    /* need to fix this eventually */
-		    sprintf(buf, "file offset = %ld\n", gsdll.input[gsdll.input_index].ptr);
+		    sprintf(buf, "file offset = %ld\n", view.input.section[view.input.index].ptr);
 		    gs_addmess(buf);
-		    sprintf(buf, "gsdll_execute_cont returns %d\n", code);
+		    sprintf(buf, "gsapi_run_string_continue returns %d\n", code);
 		    gs_addmess(buf);
 		}
 		return code;
@@ -975,7 +951,6 @@ int pcdone;
 
     return 0;
 }
-#endif
 
 
 /* Find out exactly what is pending.
@@ -1017,52 +992,16 @@ gs_process_pending(PENDING *lpending)
     if (lpending->psfile && display.init)
 	lpending->restart = TRUE;
 
-    if (lpending->resize && display.init && !option.quick_open)
+    if (lpending->resize && display.init)
 	lpending->restart = TRUE;
 
     if (lpending->text && display.init)
 	lpending->restart = TRUE;
 
-#ifdef UNIX
-    if (display.init && (psfile.dsc != (CDSC*) NULL) && lpending->pagenum) {
-	/* Unix can't resize the page */
-	/* Find out if the page size, offset or orientation changes */
-	int width, height;	/* in points */
-	int xoffset, yoffset;	/* in points */
-	width = (int)(display.width * 72 / display.xdpi);
-	height = (int)(display.height * 72 / display.ydpi);
-	xoffset = (int)(display.xoffset * 72 / display.xdpi);
-	yoffset = (int)(display.yoffset * 72 / display.ydpi);
-	float newwidth, newheight;
-	int newxoffset, newyoffset;
-	d_calc_resize(lpending->pagenum, &newwidth, &newheight, 
-	    &newxoffset, &newyoffset);
-
-	if (display.orientation != d_orientation(lpending->pagenum))
-	    lpending->resize = TRUE;
- 	if ((newwidth > width+2) || (newwidth < width-2))
-	    lpending->resize = TRUE;
- 	if ((newheight > height+2) || (newheight < height-2))
-	    lpending->resize = TRUE;
- 	if ((newxoffset > xoffset+2) || (newxoffset < xoffset-2))
-	    lpending->resize = TRUE;
- 	if ((newyoffset > yoffset+2) || (newyoffset < yoffset-2))
-	    lpending->resize = TRUE;
-
-	/* Restart if page size changes */
-        if (lpending->resize)
-	    lpending->restart = TRUE;
-    }
-
-    /* We can't resize the pixmap, so we must restart */
-    if (lpending->resize)
-	lpending->restart = TRUE;
-#endif
 
     if (lpending->restart || (lpending->resize && !psfile.ispdf) 
 	  || lpending->psfile) {
 	/* if size or document changed, need to restart document */
-#ifndef UNIX
 	if (display.need_trailer)
 	    gs_process_trailer();	/* send trailer to clean up */
 	display.need_header = TRUE;
@@ -1070,7 +1009,6 @@ gs_process_pending(PENDING *lpending)
 	    code = d_restore();
 	if (code)
 	    lpending->restart = TRUE;
-#endif
     }
 
     if (lpending->psfile) {
@@ -1085,7 +1023,6 @@ gs_process_pending(PENDING *lpending)
     return code;
 }
 
-#ifndef UNIX
 /* loop while Ghostscript loaded, document unchanged and no errors */
 /* return 0 if OK, or GS error code */
 int
@@ -1104,7 +1041,7 @@ int code;
 	}
 
 	if (pending.now && !pending.unload && !pending.abort) {
-	    gsdll.state = BUSY;
+	    gsdll.state = GS_BUSY;
 	    post_img_message(WM_GSWAIT, IDS_WAIT);
 
 	    code = gs_process_pending(&lpending);
@@ -1113,7 +1050,7 @@ int code;
 
 	    if (psfile.name[0] == '\0') {
 		/* no new file */
-		gsdll.state = IDLE;
+		gsdll.state = GS_IDLE;
 		post_img_message(WM_GSWAIT, IDS_NOWAIT);
 		/* notify in case CLOSE was caused by IDM_SELECT */
 		post_img_message(WM_COMMAND, IDM_CLOSE_DONE);
@@ -1133,12 +1070,12 @@ int code;
 
 	    if (lpending.text) {
 		code = gs_process_pstotext();
-		gsdll.state = IDLE;
+		gsdll.state = GS_IDLE;
 		return code;
 	    }
 
 	    if ( (code = gs_process_loop2(&lpending)) != 0 ) {
-		gsdll.state = IDLE;
+		gsdll.state = GS_IDLE;
 		if (psfile.dsc == (CDSC *)NULL)
 		    psfile.pagenum = 1;
 		post_img_message(WM_GSWAIT, IDS_NOWAIT);
@@ -1152,7 +1089,7 @@ int code;
 		post_img_message(WM_GSWAIT, IDS_WAITGSCLOSE);
 	    }
 	    else {
-		gsdll.state = IDLE;
+		gsdll.state = GS_IDLE;
 		if (psfile.dsc == (CDSC *)NULL)
 		    psfile.pagenum = 1;
 		post_img_message(WM_GSWAIT, IDS_NOWAIT);
@@ -1163,52 +1100,6 @@ int code;
     return 0;
 }
 
-/* patch around a bug in Ghostscript 5.0 and 5.01 */
-/* KLUDGE part 2 */
-int
-gs_501_kludge_part2(void)
-{
-int code;
-    if ((gsdll.revision_number != 500) && (gsdll.revision_number != 501))
-	return 0;	/* no kludge needed */
-
-    if (gsdll.execute_begin == NULL)
-	return 0;
-
-    if ( (code = gsdll.execute_begin()) != 0 ) {
-	char buf[256];
-	sprintf(buf,"gsdll.execute_begin returns %d\n", code);
-	gs_addmess(buf);
-	pending.unload = TRUE;
-	post_img_message(WM_GSSHOWMESS, 0);
-	return 0;
-    }
-
-    /* patch around a bug in Ghostscript */
-    /* GS 5.0 and 5.01 use  "{ .runexec } execute" which runs .runexec
-     * inside "stopped".  This prevents error codes from being passed
-     * back to gsdll_execute_cont().  We redefine .runstringbegin to
-     * fix this.
-     */
-    if (!code)
-	code = gs_printf("systemdict begin\n");
-    if (!code)
-	code = gs_printf("/.runstringbegin {\n.currentglobal true .setglobal\n\
-{ .needinput } bind 0 () .subfiledecode\nexch .setglobal cvx .runexec\n} bind def\n");
-    /* close up systemdict  */
-    if (!code)
-	code = gs_printf("end\n");
-    if (!code && !pending.text)
-	code = gs_printf("systemdict readonly pop\n");
-
-    gsdll.execute_end();
-
-    if (code)
-	gs_addmess("Error trying to install GS 5.0 / 5.01 kludge\n");
-
-    return code;
-}
-#endif
 
 /********************************************************/
 /* public functions */
@@ -1218,17 +1109,20 @@ int code;
 
 /* This is the second message loop, or second thread */
 /* It loads the GS DLL and returns when GS DLL is unloaded */
-/* The third message loop is in the GS DLL callback gsdll.state = PAGE */
+/* The third message loop is in the GS DLL callback gsdll.state = GS_PAGE */
 
-#ifndef UNIX
 void
 gs_process(void)
 {
 int code;
+int exit_code;
 
     if (pending.pstoedit) {
 	post_img_message(WM_GSWAIT, IDS_WAIT);
+#ifndef UNIX
+	gsdll_free(&gsdll);	/* pstoedit is going to load it */
 	process_pstoedit(NULL);
+#endif
 	post_img_message(WM_GSWAIT, IDS_NOWAIT);
 	pending.pstoedit = FALSE;
 	pending.now = FALSE;
@@ -1236,10 +1130,12 @@ int code;
     }
 
     /* gsdll.state = UNLOADED; */
-    gsdll.state = BUSY;		/* skip IDLE state */
+    gsdll.state = GS_BUSY;		/* skip IDLE state */
 
-    if (!gs_load_dll()) {
-        gsdll.state = UNLOADED;
+    post_img_message(WM_GSWAIT, IDS_WAITGSOPEN);
+
+    if (gsdll_load(&gsdll, option.gsdll)) {
+        gsdll.state = GS_UNINIT;
 	request_mutex();
 	pending.now = FALSE;
 	pending.next = FALSE;
@@ -1256,6 +1152,7 @@ int code;
 	}
 	release_mutex();
 	post_img_message(WM_GSWAIT, IDS_NOWAIT);
+        post_img_message(WM_GSSHOWMESS, 0);
 	return;
     }
 /*
@@ -1279,19 +1176,22 @@ int code;
 		get_message();	/* process one message */
 	}
 
-	if ( (code = gs_dll_init(gsdll.callback, NULL)) != 0 ) {
+	if ( (code = gs_dll_init(NULL)) != 0 ) {
+/*
 	    delayed_message_box(IDS_PROCESS_INIT_FAIL, 0);
+*/
 	    post_img_message(WM_GSSHOWMESS, 0);
 	    pending.unload = TRUE;
 	    break;
 	}
 
 	if (!code) {
-	    if (gsdll.execute_begin == NULL)
+	    if (gsdll.run_string_begin == NULL)
 		break;
-	    if ( (code = gsdll.execute_begin()) != 0 ) {
+	    if ( (code = gsdll.run_string_begin(
+		    gsdll.minst, 0, &exit_code)) != 0 ) {
 		char buf[256];
-		sprintf(buf,"gsdll.execute_begin returns %d\n", code);
+		sprintf(buf,"gsdll.run_string_begin returns %d\n", code);
 		gs_addmess(buf);
 		pending.unload = TRUE;
 		post_img_message(WM_GSSHOWMESS, 0);
@@ -1311,12 +1211,12 @@ int code;
 	    }
 	}
 	if (execute_code >= 0)
-	    gsdll.execute_end();
+	    gsdll.run_string_end(gsdll.minst, 0, &exit_code);
 	if (gsdll.exit != NULL) {
 	    char buf[256];
-	    code = gsdll.exit();
+	    code = gsdll.exit(gsdll.minst);
 	    if ((debug  & DEBUG_GENERAL)|| code) {
-	        sprintf(buf,"gsdll_exit returns %d\n", code);
+	        sprintf(buf,"gsapi_exit returns %d\n", code);
 	        gs_addmess(buf);
 	    }
 	    gs_addmess("\n\n");
@@ -1329,8 +1229,8 @@ int code;
     }
 
     post_img_message(WM_GSWAIT, IDS_WAITGSCLOSE);
-    gs_free_dll();
-    gsdll.state = UNLOADED;
+    gsdll_free(&gsdll);
+    gsdll.state = GS_UNINIT;
     display.need_header = TRUE;
     display.need_trailer = FALSE;
     display.saved = FALSE;
@@ -1355,7 +1255,6 @@ int code;
     post_img_message(WM_GSWAIT, IDS_NOWAIT);
     post_img_message(WM_GSTITLE, 0);
 }
-#endif
 
 
 /* next page */
@@ -1369,7 +1268,7 @@ CDSC *dsc = psfile.dsc;
 	    play_sound(SOUND_NOPAGE);
 	    return FALSE;
 	}
-	if (gsdll.state == IDLE) {
+	if (gsdll.state == GS_IDLE) {
 	    /* at end of file */
 	    play_sound(SOUND_NOPAGE);
 	    return FALSE;	/* nothing to do */
@@ -1408,12 +1307,15 @@ CDSC *dsc = psfile.dsc;
     return TRUE;
 }
      
-/* parse argline looking for argument */
-/* If argument found, copy to arg and return pointer to next argument */
-/* If no argument found, return NULL */
-/* To get next argument, call again with return value as argline */
+/* Parse argline looking for argument
+ * If argument found, copy to arg and return pointer to next argument.
+ * If no argument found, return NULL.
+ * To get next argument, call again with return value as argline.
+ * If copyquotes is TRUE, quotes will copied to the output, otherwise
+ * they will be omitted.
+ */
 char *
-gs_argnext(char *argline, char *arg)
+gs_argnext(char *argline, char *arg, BOOL copyquotes)
 {
     /* quotes may be put around embedded spaces and are copied */
     while ((*argline) && (*argline==' '))
@@ -1432,14 +1334,17 @@ gs_argnext(char *argline, char *arg)
 	else if (*argline == '"') {
 	    /* quoted argument */
 	    /* copy until closing quote or end of string */
-	    *arg++ = *argline++; /* copy opening quote */
+	    if (copyquotes)
+	        *arg++ = *argline; /* copy opening quote */
+	    argline++;
 	    while ((*argline) && (*argline != '"')) {
 		*arg++ = *argline;
 		argline++;
 	    }
 	    if ((*argline) && (*argline == '"')) {
 		/* copy closing quote */
-		*arg++ = *argline;
+		if (copyquotes)
+		    *arg++ = *argline;
 		argline++;
 	    }
 	}
@@ -1452,10 +1357,42 @@ gs_argnext(char *argline, char *arg)
     return argline;
 }
 
+
+/*********************************************************************/
+/* stdio functions */
+static int GSDLLCALL
+gsdll_stdin(void *instance, char *buf, int len)
+{
+    char mess[MAXSTR];
+    sprintf(mess,"stdin callback not supported: %p %d\n", buf, len);
+    gs_addmess(mess);
+    return 0; /* EOF */
+}
+
+static int GSDLLCALL
+gsdll_stdout(void *instance, const char *str, int len)
+{
 #ifndef UNIX
-/* called from gs_load_dll */
+    if (callback_pstotext(str, len))
+	return len;
+#endif
+    if (!pending.abort)
+	pdf_checktag(str, len);
+    gs_addmess_count(str, len);
+    return len;
+}
+
+static int GSDLLCALL
+gsdll_stderr(void *instance, const char *str, int len)
+{
+    gs_addmess_count(str, len);
+    return len;
+}
+/*********************************************************************/
+
+/* called from gs_process */
 int
-gs_dll_init(GSDLL_CALLBACK callback, char *devname)
+gs_dll_init(char *devname)
 {
 char buf[1024];
 char *p, *q;
@@ -1519,14 +1456,6 @@ char **argv;
 	    *p = '\0';
 	  }
 
-	if ((gsdll.revision_number == 500) || (gsdll.revision_number == 501)) {
-	    /* KLUDGE part 1 */
-	    /* patch around a bug in Ghostscript */
-	    strcpy(p, "-dWRITESYSTEMDICT");
-	    p += strlen(p)+1;
-	    *p = '\0';
-	    /* we will close this up later */
-	}
 
 	if (option.alpha_text > 1) {
 	    strcpy(p, "-dNOPLATFONTS");
@@ -1534,17 +1463,14 @@ char **argv;
 	    *p = '\0';
 	}
 
-	if ((option.gsversion >= 650) || (gsdll.revision_number >=650)) {
-	    /* Ghostscript 6.50 won't execute pdfmark for links unless
-	     * the device has /pdfmark as a parameter.  This doesn't 
-	     * work for GSview so we need a patched version of pdf_main.ps
-	     * which has "systemdict /WRITEPDFMARKS or" added at the
-	     * the end of .writepdfmarks
-	     */
-	    strcpy(p, "-dWRITEPDFMARKS");
-	    p += strlen(p)+1;
-	    *p = '\0';
-	}
+	/* Ghostscript 7.0 won't execute pdfmark for links unless
+	 * the device has /pdfmark as a parameter.  This isn't the
+	 * case for any device other than pdfwrite, so we need
+	 * to force it to procedd pdfmarks.
+	 */
+	strcpy(p, "-dDOPDFMARKS");
+	p += strlen(p)+1;
+	*p = '\0';
 
 	if (pending.text) {
 	    /* pstotext needs to make some changes to the systemdict */
@@ -1568,7 +1494,7 @@ char **argv;
 	/* option.gsother must have options separated by one or more spaces */
 	/* quotes may be put around embedded spaces, but are not copied */
 	q = option.gsother;
-	while ((q = gs_argnext(q, p)) != NULL) {
+	while ((q = gs_argnext(q, p, FALSE)) != NULL) {
 	    p += strlen(p)+1;
 	    *p = '\0';
 	}
@@ -1593,27 +1519,42 @@ argv[i] = NULL;
 	    }
 	}
 
-	code = gsdll.init((GSDLL_CALLBACK)callback, hwndimg, argc, argv);
+	if (gsdll.minst == NULL) {
+	    code = gsdll.new_instance(&gsdll.minst, NULL);
+	    if (code) {
+		sprintf(buf,"gsapi_new_instance returns %d\n", code);
+		gs_addmess(buf);
+		return code;
+	    }
+	    if (image.open) {
+		if (debug & DEBUG_GENERAL)
+		    gs_addmess("Ghostscript didn't close display when it exited.\n");
+	    }
+	    gsdll.set_stdio(gsdll.minst, gsdll_stdin, gsdll_stdout, gsdll_stderr);
+	    gsdll.set_poll(gsdll.minst, gsdll_poll);
+	    gsdll.set_display_callback(gsdll.minst, &gsdisplay);
+	}
+	code = gsdll.init_with_args(gsdll.minst, argc, argv);
 free((void *)argv);
 	if (code) {
-	    sprintf(buf,"gsdll_init returns %d\n", code);
+	    sprintf(buf,"gsapi_init_with_args returns %d\n", code);
 	    gs_addmess(buf);
 	}
 	if (code) {
-	    gs_load_dll_cleanup();
+	    gsdll_free(&gsdll);
+            post_img_message(WM_GSSHOWMESS, 0);
 	    return code;
 	}
 
-	code = gs_501_kludge_part2();	/* KLUDGE part 2 */
 /*
 	zoom = FALSE;
 */
 	display.epsf_clipped = FALSE;
-	gsdll.valid = TRUE;
+	gsdll.open = TRUE;
 	return code;
 }
 
-
+#ifndef UNIX
 /******************************************************************/
 /* for pstotext */
 HMODULE pstotextModule;
@@ -1628,8 +1569,20 @@ PFN_pstotextSetCork pstotextSetCork;
 char pstotextLine[2048];
 int pstotextCount;
 
+/* We use this instead of strchr because the line may contain a null. */
+char *
+memchr(char *str, int ch, int len) 
+{
+    int i;
+    for (i=0; i<len; i++) {
+	if (str[i] == ch)
+	    return &str[i];
+    }
+    return NULL;
+}
+
 int
-callback_pstotext(char *str, unsigned long count)
+callback_pstotext(const char *str, unsigned long count)
 {
     if (pstotextInstance) {
 	if (debug & DEBUG_GENERAL)
@@ -1641,18 +1594,16 @@ callback_pstotext(char *str, unsigned long count)
 	    int status;
 	    char ch;
 	    if (sizeof(pstotextLine) > count + pstotextCount) { 
-#if defined(_Windows) && !defined(__WIN32)
-		_fmemcpy(pstotextLine+pstotextCount, str, (int)count);
-#else
 		memcpy(pstotextLine+pstotextCount, str, (int)count);
-#endif
 		pstotextCount += (int)count;
 		pstotextLine[pstotextCount] = '\0';
-		e = strchr(pstotextLine, '\n');
+		/* can't use strchr, because line may include null char */
+		e = memchr(pstotextLine, '\n', pstotextCount);
 		while ( e != NULL ) {
 		    ch = *(++e);	/* save character after \n */
 		    *e = '\0';
 		    d = pre = post = (char *)NULL;
+		    llx = lly = urx = ury = 0;
 		    status = pstotextFilter(pstotextInstance, pstotextLine, 
 			&pre, &d, &post,
 			&llx, &lly, &urx, &ury);
@@ -1660,7 +1611,8 @@ callback_pstotext(char *str, unsigned long count)
 		    memmove(pstotextLine, e, (int)(pstotextCount - (e-pstotextLine)));
 		    pstotextCount -= (int)(e-pstotextLine);
 		    pstotextLine[pstotextCount] = '\0';
-		    e = strchr(pstotextLine, '\n');
+		    /* can't use strchr, because line may include null char */
+		    e = memchr(pstotextLine, '\n', pstotextCount);
 		    if (status) {
 			char buf[MAXSTR];
 			sprintf(buf, "\npstotextFilter error %d\n", status);
@@ -1721,6 +1673,8 @@ int real_orientation;
 	unload_pstotext();
 	return 1;
     }
+    if (debug & DEBUG_GENERAL)
+        gs_addmessf("Writing text index to \042%s\042\n", psfile.text_name);
 
     percent_pending = FALSE;
     percent_done = 0;
@@ -1867,7 +1821,7 @@ int real_orientation;
 		    gs_addmess("\n--- Begin offending input ---\n");
 		    gs_addmess_count(buf, len);
 		    gs_addmess("\n--- End offending input ---\n");
-		    sprintf(buf, "gsdll_execute_cont returns %d\n", code);
+		    sprintf(buf, "gsapi_run_string_continue returns %d\n", code);
 		    gs_addmess(buf);
 		}
 		return code;
@@ -1888,6 +1842,7 @@ int real_orientation;
 	}
 	dfclose();
     }
+
 
     /* close output file */
     fclose(pstotextOutfile);
@@ -1914,170 +1869,3 @@ int real_orientation;
 #endif
 
 
-#ifdef UNIX
-
-
-void
-clear_pending(void) {
-    pending.now = FALSE;
-    pending.next = FALSE;
-    pending.abort = FALSE;
-    pending.psfile = NULL;
-    pending.pagenum = 0;
-    pending.resize = FALSE;
-    pending.text = FALSE;
-    pending.restart = FALSE;
-}
-
-void
-gs_process(void)
-{
-    int code = 0;
-    PENDING lpending;
-
-    if (pending.text) {
-	if (gs_process_pstotext())
-	    gs_showmess();
-	clear_pending();
-	return;
-    }
-
-    if (pending.unload) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("gs_process: pending.unload\n");
-	stop_gs();
-	clear_pending();
-	return;
-    }
-
-    if (pending.abort) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("gs_process: pending.abort\n");
-	stop_gs();
-	pending.abort = FALSE;
-    }
-
-    if (pending.now) {
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("gs_process: pending.now is TRUE\n");
-	/* Find out what we need to do based on pending */
-	code = gs_process_pending(&lpending);
-	if (debug & DEBUG_GENERAL)
-	    gs_addmessf("gs_process: gs_process_pending returns %d\n", code);
-	if (psfile.name[0] == '\0') {
-	    /* we are closing the file */
-	    if (debug & DEBUG_GENERAL)
-		gs_addmess("gs_process: no file\n");
-	    stop_gs();
-	    return;
-	}
-
-	if (lpending.restart && display.init) {
-	    if (debug & DEBUG_GENERAL)
-		gs_addmess("gs_process: stopping GS\n");
-	    stop_gs();
-	}
-
-	/* initialise buffers for writing to GS */
-	if (gsdll.buffer == NULL) {
-	    gsdll.buffer_length = 16384;
-	    gsdll.buffer = (unsigned char *)malloc(gsdll.buffer_length);
-	}
-	if (gsdll.buffer == NULL) {
-	    gsdll.buffer_length = 0;
-	    gs_addmess("gs_process: buffer allocation failed\n");
-	    return;
-	}
-	gsdll.buffer_index = 0;
-	gsdll.buffer_count = 0;
-
-	gsdll.input_count = 0;
-	gsdll.input_index = 0;
-
-	if (!gsdll.hmodule) {
-	    /* if Ghostscript not running */
-	    display.saved = FALSE;
-	    display.init = FALSE;
-	    display.need_header = TRUE;
-	    display.need_trailer = FALSE;
-	    display.epsf_clipped = FALSE;
-	    pending.restart = FALSE;
-	}
-
-	gsdll.send_eps_showpage = FALSE;
-	if ((psfile.dsc != (CDSC *)NULL) && (psfile.dsc->epsf)) {
-	    /* If an EPS file does not contain showpage, we would sit
-	     * waiting forever for some response from Ghostscript.
-	     * This code disables showpage, then causes showpage
-	     * to be called once after the end of the EPS file.
-	     */ 
-	    gs_printf("/showpage {} def\n");
-	    gsdll.send_eps_showpage = TRUE;
-	}
-
-	/* calculate initial size and queue input in 
-	 * gsdll.buffer and gsdll.input
-	 */
-	if (gs_process_prepare_input(&lpending) < 0) {
-	    gs_addmess("gs_process: gs_process_prepare_input FAILED\n");
-	    return;
-        }
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("gs_process: gs_process_prepare_input succeeded\n");
-
-        /* start Ghostscript if needed */
-	if (!gsdll.hmodule) { /* gsdl.hmodule = PID */
-	    if (debug & DEBUG_GENERAL)
-		gs_addmess("gs_process: starting GS\n");
-	    if (start_gs()) {
-		gs_addmess("gs_process: starting GS failed\n");
-		gsdll.state = UNLOADED;
-		request_mutex();
-		pending.now = FALSE;
-		pending.next = FALSE;
-		pending.unload = FALSE;
-		pending.abort = FALSE;
-		pending.redisplay = FALSE;
-		pending.pstoedit = FALSE;
-		pending.text = FALSE;
-		if (pending.psfile) {
-		    psfile_free(&psfile);
-		    psfile = *pending.psfile;
-		    free(pending.psfile);
-		    pending.psfile = NULL;
-		}
-		release_mutex();
-		post_img_message(WM_GSWAIT, IDS_NOWAIT);
-// dfclose();
-		return;
-	    }
-	}
-
-	/* trigger async write */
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("gs_process: trigger async write to GS\n");
-	start_stdin();
-	post_img_message(WM_GSWAIT, IDS_WAITDRAW);
-
-	if (debug & DEBUG_GENERAL) {
-	    int i;
-	    gs_addmessf("gsdll.input_index=%d gsdll.input_count=%d\n",
-		gsdll.input_index, gsdll.input_count);
-	    for (i=0; i<gsdll.input_count; i++) {
-	    if (debug & DEBUG_GENERAL)
-		gs_addmessf(" ptr=%ld end=%ld seek=%d\n",
-		    gsdll.input[i].ptr,
-		    gsdll.input[i].end,
-		    gsdll.input[i].seek);
-	    }
-	}
-   }
-   else if (pending.next) {
-	/* advance to next non DSC page */
-	if (debug & DEBUG_GENERAL)
-	    gs_addmess("gs_process: pending.next\n");
-	clear_pending();
-	/* caller will send NEXT event */
-   }
-}
-#endif

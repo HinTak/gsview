@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -15,8 +15,9 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* not yet implemented */
+/* partially implemented */
 #include "gvx.h"
+#include <dlfcn.h>
 
 
 BOOL get_gs_string(int gs_revision, char *name, char *ptr, int len)
@@ -28,22 +29,353 @@ BOOL get_gs_string(int gs_revision, char *name, char *ptr, int len)
 
 void request_mutex(void)
 {
-    /* do nothing since we are not multithreaded */
+    if (multithread)
+	pthread_mutex_lock(&hmutex_ps);
 }
 
 void release_mutex(void)
 {
-    /* do nothing since we are not multithreaded */
+    if (multithread)
+	pthread_mutex_unlock(&hmutex_ps);
 }
 
-void begin_crit_section(void)
+void
+wait_event(void)
 {
-    /* do nothing since we are not multithreaded */
+    if (multithread) {
+	int val = 0;
+	/* reset semaphore */
+	sem_getvalue(&display.event, &val);
+	while (val) {
+	    sem_wait(&display.event);
+	    sem_getvalue(&display.event, &val);
+	}
+	/* then wait for it to be set */
+	sem_wait(&display.event);
+    }
 }
-void end_crit_section(void)
+
+void
+view_wait_message(VIEW *view)
 {
-    /* do nothing since we are not multithreaded */
+    while (!pending.next && !pending.now && !pending.unload && !quitnow)
+	gtk_main_iteration();
 }
+
+/* process one message */
+int
+get_message(void)
+{
+    if (multithread)
+	g_print("get_message shouldn't be called when multithreading\n");
+    gtk_main_iteration();
+    return 0;
+}
+
+int
+peek_message(void)
+{
+    if (multithread)
+	g_print("peek_message shouldn't be called when multithreading\n");
+    gtk_main_iteration_do(FALSE);
+    return 0;
+}
+
+
+void
+image_lock(IMAGE *img)
+{
+    if (debug && img->lock_count)
+	gs_addmess("Image is locked\n");
+    if (multithread) {
+	pthread_mutex_lock(&img->hmutex);
+    }
+    if (debug) {
+	if (img->lock_count)
+	    gs_addmess("Attempted to lock image twice\n");
+	img->lock_count++;
+    }
+}
+
+void
+image_unlock(IMAGE *img)
+{
+    if (multithread)
+	pthread_mutex_unlock(&img->hmutex);
+    if (debug) {
+	if (img->lock_count == 0)
+	    gs_addmess("Attempted to unlock unlocked image\n");
+	else 
+	    img->lock_count--;
+    }
+}
+
+/* Poll the caller for cooperative multitasking. */
+/* If this function is NULL, polling is not needed */
+int GSDLLCALL gsdll_poll(void *handle)
+{
+    if (!multithread)
+	peek_message();
+    if (pending.abort)
+	return -100;	/* signal an error if we want to abort */
+    return 0;
+}
+
+
+/*********************************************************************/
+
+int 
+image_preclose(IMAGE *img)
+{
+    if (img->cmap)
+	gdk_rgb_cmap_free(img->cmap);
+    img->cmap = NULL;
+    if (img->rgbbuf)
+	free(img->rgbbuf);
+    img->rgbbuf = NULL;
+    return 0;
+}
+
+
+/* Device is about to be resized. */
+/* Resize will only occur if this function returns 0. */
+int
+image_presize(IMAGE *img, int width, int height, 
+	int raster, unsigned int format)
+{
+    int color = format & DISPLAY_COLORS_MASK;
+    int depth = format & DISPLAY_DEPTH_MASK;
+    int alpha = format & DISPLAY_ALPHA_MASK;
+    img->format_known = FALSE;
+    if ( ((color == DISPLAY_COLORS_NATIVE) || 
+	  (color == DISPLAY_COLORS_GRAY))
+	     &&
+	 ((depth == DISPLAY_DEPTH_1) ||
+	  (depth == DISPLAY_DEPTH_4) ||
+	  (depth == DISPLAY_DEPTH_8)) )
+	img->format_known = TRUE;
+    if ((color == DISPLAY_COLORS_RGB) && (depth == DISPLAY_DEPTH_8) &&
+	(alpha == DISPLAY_ALPHA_NONE))
+	img->format_known = TRUE;
+    if (!img->format_known) {
+	fprintf(stdout, "display_presize: format %d = 0x%x is unsupported\n", format, format);
+	return_error(DISPLAY_ERROR);
+    }
+    return 0;
+}
+
+
+int
+image_size(IMAGE *img)
+{
+    int color, depth;
+
+    if (img->cmap)
+	gdk_rgb_cmap_free(img->cmap);
+    img->cmap = NULL;
+    if (img->rgbbuf)
+	free(img->rgbbuf);
+    img->rgbbuf = NULL;
+
+    /* create palette and rgb buffer if needed */
+    color = img->format & DISPLAY_COLORS_MASK;
+    depth = img->format & DISPLAY_DEPTH_MASK;
+    switch (color) {
+	case DISPLAY_COLORS_NATIVE:
+	    if (depth == DISPLAY_DEPTH_8) {
+		/* palette of 96 colors */
+		guint32 color[96];
+		int i;
+		int one = 255 / 3;
+		for (i=0; i<96; i++) {
+		    /* 0->63 = 00RRGGBB, 64->95 = 010YYYYY */
+		    if (i < 64) {
+			color[i] = 
+			    (((i & 0x30) >> 4) * one << 16) + 	/* r */
+			    (((i & 0x0c) >> 2) * one << 8) + 	/* g */
+			    (i & 0x03) * one;		        /* b */
+		    }
+		    else {
+			int val = i & 0x1f;
+			val = (val << 3) + (val >> 2);
+			color[i] = (val << 16) + (val << 8) + val;
+		    }
+		}
+		img->cmap = gdk_rgb_cmap_new(color, 96);
+		break;
+	    }
+	    else if (depth == DISPLAY_DEPTH_16) {
+		/* need to convert to 24RGB */
+		img->rgbbuf = (guchar *)malloc(img->width * img->height * 3);
+		if (img->rgbbuf == NULL)
+		    return -1;
+	    }
+	    else
+		return_error(DISPLAY_ERROR);	/* not supported */
+	case DISPLAY_COLORS_GRAY:
+	    if (depth == DISPLAY_DEPTH_8)
+		break;
+	    else
+		return_error(DISPLAY_ERROR);	/* not supported */
+	case DISPLAY_COLORS_RGB:
+	    if (depth == DISPLAY_DEPTH_8) {
+		if (((img->format & DISPLAY_ALPHA_MASK) == DISPLAY_ALPHA_NONE)
+		    && ((img->format & DISPLAY_ENDIAN_MASK) 
+			== DISPLAY_BIGENDIAN))
+		    break;
+		else {
+		    /* need to convert to 24RGB */
+		    img->rgbbuf = (guchar *)malloc(img->width * img->height * 3);
+		    if (img->rgbbuf == NULL)
+			return_error(DISPLAY_ERROR);
+		}
+	    }
+	    else
+		return_error(DISPLAY_ERROR);	/* not supported */
+	    break;
+	case DISPLAY_COLORS_CMYK:
+	    if (depth == DISPLAY_DEPTH_8) {
+		/* need to convert to 24RGB */
+		img->rgbbuf = (guchar *)malloc(img->width * img->height * 3);
+		if (img->rgbbuf == NULL)
+		    return_error(DISPLAY_ERROR);
+	    }
+	    else
+		return_error(DISPLAY_ERROR);	/* not supported */
+	    break;
+    }
+
+    img->separation = 0xf;	/* all layers */
+
+    /* allow window to be resized without user control */
+    fit_page_enabled = option.fit_page;
+ 
+    return 0;
+}
+   
+int 
+image_sync(IMAGE *img)
+{
+    int color;
+    int depth;
+    int endian;
+    int alpha;
+
+    color = img->format & DISPLAY_COLORS_MASK;
+    depth = img->format & DISPLAY_DEPTH_MASK;
+    endian = img->format & DISPLAY_ENDIAN_MASK;
+    alpha = img->format & DISPLAY_ALPHA_MASK;
+		
+    /* some formats need to be converted for use by GdkRgb */
+    switch (color) {
+	case DISPLAY_COLORS_NATIVE:
+	    break;
+	case DISPLAY_COLORS_RGB:
+	    if ( (depth == DISPLAY_DEPTH_8) &&
+		      (endian == DISPLAY_LITTLEENDIAN) ) {
+		/* Windows BGR24 */
+		int x, y;
+		unsigned char *s, *d;
+		for (y = 0; y<img->height; y++) {
+		    s = img->image + y * img->raster;
+		    d = img->rgbbuf + y * img->width * 3;
+		    for (x=0; x<img->width; x++) {
+			*d++ = s[2];	/* r */
+			*d++ = s[1];	/* g */
+			*d++ = s[0];	/* b */
+			s += 3;
+		    }
+		}
+	    }
+	    break;
+	case DISPLAY_COLORS_CMYK:
+	    if (depth == DISPLAY_DEPTH_8) {
+	    	/* Separations */
+		int x, y;
+		int cyan, magenta, yellow, black;
+		unsigned char *s, *d;
+		for (y = 0; y<img->height; y++) {
+		    s = img->image + y * img->raster;
+		    d = img->rgbbuf + y * img->width * 3;
+		    for (x=0; x<img->width; x++) {
+			cyan = *s++;
+			magenta = *s++;
+			yellow = *s++;
+			black = *s++;
+			if (!(img->separation & SEP_CYAN))
+			    cyan = 0;
+			if (!(img->separation & SEP_MAGENTA))
+			    magenta = 0;
+			if (!(img->separation & SEP_YELLOW))
+			    yellow = 0;
+			if (!(img->separation & SEP_BLACK))
+			    black = 0;
+			*d++ = (255-cyan)    * (255-black) / 255; /* r */
+			*d++ = (255-magenta) * (255-black) / 255; /* g */
+			*d++ = (255-yellow)  * (255-black) / 255; /* b */
+		    }
+		}
+	    }
+	    break;
+    }
+    return 0;
+}
+   
+
+/******************************************************************/
+
+/* platform dependent */
+/* Load Ghostscript DLL */
+int
+gsdll_open(GSDLL *dll, const char *name)
+{
+const char *shortname;
+
+    if (debug)
+	gs_addmessf( "Trying to load %s\n", name);
+
+    /* Try to load DLL first with given path */
+    dll->hmodule = dlopen(name, RTLD_NOW);
+    if (dll->hmodule == NULL) {
+	/* failed */
+	if (debug)
+	    gs_addmessf( "Failed, errno=%d\n", errno);
+	/* try once more, this time on system search path */
+	if ((shortname = strrchr(name, '/')) 
+		== (const char *)NULL)
+	    shortname = name;
+	else
+	    shortname++;
+	if (debug)
+	    gs_addmessf( "Trying to load %s\n", name);
+	dll->hmodule = dlopen(name, RTLD_NOW);
+	if (dll->hmodule == NULL) {
+	    /* failed again */
+	    if (debug)
+		gs_addmessf( "Failed, errno=%d\n", errno);
+	}
+    }
+   if (dll->hmodule == NULL)
+	return_error(-1);
+   return 0;
+}
+
+/* Unload Ghostscript DLL */
+int
+gsdll_close(GSDLL *dll)
+{
+    dlclose(dll->hmodule);
+    return 0;
+}
+
+void *
+gsdll_sym(GSDLL *dll, const char *name)
+{
+    return (void *)dlsym(dll->hmodule, name);
+}
+
+
+/******************************************************************/
 
 int pstotext_pid = 0;
 
@@ -106,6 +438,7 @@ int gs_process_pstotext(void)
     char portrait_string[] = "-portrait";
     char output_string[] = "-output";
     char gs_string[] = "-gs";
+    char gs_prog[] = "gs";
     int k = 0;
 
     if (pstotext_pid != 0) {
@@ -163,10 +496,8 @@ int gs_process_pstotext(void)
     nargv[k++] = output_string;
     nargv[k++] = psfile.text_name;
 
-    if (strlen(option.gsdll)) {
-        nargv[k++] = gs_string;
-        nargv[k++] = option.gsdll;
-    }
+    nargv[k++] = gs_string;
+    nargv[k++] = gs_prog;
 
     nargv[k++] = psfile_name(&psfile);
     nargv[k++] = NULL;
@@ -202,4 +533,4 @@ int gs_process_pstotext(void)
     return 0;	/* all is well */
 }
 
-
+/******************************************************************/

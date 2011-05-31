@@ -171,10 +171,7 @@ load_pstoedit(void)
   p = dllname + strlen(dllname) - 1;	/* remove trailing slash */
   if (*p == '\\')
     *p = '\0';
-  p = strrchr(dllname, '\\');		/* remove trailing gsview */
-  if (p)
-    *(++p) = '\0';
-  strcat(dllname, "pstoedt2\\pstoedit.dll");
+  strcat(dllname, "\\pstoedit.dll");
 
   /* load pstoedit DLL */
   memset(buf, 0, sizeof(buf));

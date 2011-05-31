@@ -117,6 +117,12 @@ src/binary/gvxprev.xpm
 src/binary/gvxprevs.xpm
 src/binary/gvxprint.xpm
 src/ansi2oem.cpp
+src/cdll.h
+src/cdll.cpp
+src/cimg.h
+src/cimg.cpp
+src/cview.h
+src/cview.cpp
 src/gsprint.htm
 src/gsprint.cpp
 src/gvcbeta.cpp
@@ -145,8 +151,6 @@ src/gvpmeas.cpp
 src/gvpmisc.cpp
 src/gvpprn.cpp
 src/gvpreg.cpp
-src/gvwin.cpp
-src/gvwinit.cpp
 src/gvwclip.cpp
 src/gvwdde.cpp
 src/gvwdde2.cpp
@@ -158,6 +162,9 @@ src/gvwedit.cpp
 src/gvweps.cpp
 src/gvwfile.cpp
 src/gvwgsver.cpp
+src/gvwimg.cpp
+src/gvwin.cpp
+src/gvwinit.cpp
 src/gvwmeas.cpp
 src/gvwmisc.cpp
 src/gvwpdib.cpp
@@ -176,10 +183,13 @@ src/gvcfn.h
 src/gvcprf.h
 src/gvcrc.h
 src/gvcver.h
-src/gsdll.h
+src/gdevdsp.h
+src/iapi.h
+src/errors.h
 src/gvpm.def
 src/gvpm.h
 src/gvwdib.h
+src/gvwgsver.h
 src/gvwin.h
 src/gvwpdib.h
 src/pstoedll.h

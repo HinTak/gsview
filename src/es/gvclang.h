@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -18,12 +18,12 @@
 /* en\gvclang.h */
 /* Common English language defines */
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2000 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2001 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Reservados todos los derechos."
 #define GSVIEW_COPYRIGHT3 "Léase el archivo LICENCE para más detalles."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2000 Aladdin Enterprises,"
-#define GS_COPYRIGHT2 "Menlo Park, California, U.S.A.  Reservados todos los derechos."
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2001 artofcode LLC,"
+#define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Reservados todos los derechos."
 #define GS_COPYRIGHT3 "Léase el archivo PUBLIC para más detalles."
 
 /* Buttons */
@@ -242,7 +242,7 @@
 /* Download Ghostscript dialog box */
 #define AADOWNLOADGS "Descargar Ghostscript"
 #define AADOWNLOADNOW "Descargar ahora"
-#define AAGSNOTFOUND "Ghostscript no se encuentra en su ordenador.  Necesita descargar e instalar Aladdin Ghostscript desde"
+#define AAGSNOTFOUND "Ghostscript no se encuentra en su ordenador.  Necesita descargar e instalar AFPL Ghostscript desde"
 
 #define AAGSMESSWIN "GSview para Windows - Mensajes de Ghostscript"
 #define AAGSMESSPM "PM GSview - Mensajes de Ghostscript"
@@ -297,7 +297,7 @@
 #define AAONLINEREG "Registro -en línea-"
 #define AAREG1 "Por favor, escriba su nombre y el número de registro"
 #define AAREG2 ""
-#define AANAG1 "GSview is Copyright 2000 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview is Copyright 2001 Ghostgum Software Pty Ltd."
 #define AANAG2 "Por favor, colabore con el desarrollo de GSview"
 #define AANAG3 "registrándose."
 #define AANAG4 "El registro -en línea- de GSview puede hacerse en"
@@ -308,9 +308,9 @@
 #define AAINSTALL1 "Instalación de GSview"
 #define AAINSTALLINTRO1 "Este asistente le ayudara durante la instalación"
 #define AAINSTALLINTRO2 "Si no está realizando la instalación con el archivo auto-extraible EXE, asegúrese de tener todos los archivos listados en el archivo Readme.htm dentro del directorio en uso."
-#define AAINSTALLINTRO3 "La instalación usará 10 Mb de espacio en el disco duro."
+#define AAINSTALLINTRO3 "La instalación usará 20 - 30 Mb de espacio en el disco duro."
 #define AAINSTALLCOPYRIGHT1 "Información del Copyright"
-#define AAINSTALLCOPYRIGHT2 "GSview y Aladdin Ghostscript son dos programas distintos."
+#define AAINSTALLCOPYRIGHT2 "GSview y AFPL Ghostscript son dos programas distintos."
 #define AAINSTALLCOPYRIGHT3 "Tienen distintos propietarios."
 #define AAINSTALLGSVER1 "¿Qué componentes desearía instalar?"
 #define AAINSTALLGSVER2 "Instalar GSview"
@@ -360,8 +360,8 @@
 #define AAUNZIPCANCELLED "Cancelada la descompresión.\n"
 #define AACANTALLOCBUF "No hay memoria suficiente."
 #define AAPROGRAMOBJECTFAILED "No pudo crearse el acceso directo al programa en el escritorio."
-#define AAUNINSTALLTITLE "GSview y Aladdin Ghostscript"
-#define AAUNINSTALLITEM "Desinstalación de GSview y Aladdin Ghostscript"
+#define AAUNINSTALLTITLE "GSview y AFPL Ghostscript"
+#define AAUNINSTALLITEM "Desinstalación de GSview y AFPL Ghostscript"
 
 /* setup program */
 #define AAINSTALLSPACE "La instalación usará 3 Mb de espacio en su disco duro"
@@ -380,7 +380,7 @@
 
 /* configure */
 #define AAGSVIEWC "GSview:"
-#define AAALADDINGSC "Aladdin Ghostscript:"
+#define AAALADDINGSC "AFPL Ghostscript:"
 #define AACFG1 "Configuración de GSview"
 #define AACFG10 "Este asistente le ayudará a configurar GSview."
 #define AACFG11 "Si no entiende algún elemento de la página siguiente,\
@@ -405,7 +405,7 @@
 #define AACFG41 "Asociar los archivos PostScript (.ps y .eps) con GSview."
 #define AACFG42 "Asociar los archivos PDF (.pdf) con GSview."
 #define AACFG50 "GSview puede crear una nueva carpeta en el Administrador de Programas o\
- accesos directos a GSview y Aladdin Ghostscript en el menú de Inicio."
+ accesos directos a GSview y AFPL Ghostscript en el menú de Inicio."
 #define AACFG51 "Crear nueva carpeta / acceso directo"
 #define AACFG52 "Nombre:"
 #define AACFG53 "GSview puede crear un acceso directo a GSview en el escritorio.\

@@ -56,7 +56,7 @@ int string_es_len = sizeof(string_es)/sizeof(STRING_ENTRY);
 /* Not all of these are relevant */
 MENU_ENTRY menu_es[] = {
   { "/_Archivo", 			NULL, 	NULL, 	IDM_FILEMENU, "<Branch>" },
-  { "/Archivo/_Arbrir...",     	"O", 	GS_CMD,	IDM_OPEN, NULL },
+  { "/Archivo/_Abrir...",     	"O", 	GS_CMD,	IDM_OPEN, NULL },
   { "/Archivo/Se_leccionar archivo...",    "S", 	GS_CMD,	IDM_SELECT, NULL },
   { "/Archivo/_Guardar como...",     	"A", 	GS_CMD,	IDM_SAVEAS, NULL },
   { "/Archivo/_Cerrar",     	"C", 	GS_CMD,	IDM_CLOSE, NULL },

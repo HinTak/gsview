@@ -508,10 +508,7 @@ install_init(void)
 {
 int i;
 char *s, *d;
-    if (gsver % 100 == 0)
-	sprintf(gs_basedir, "gs%d.%01d", gsver / 100, gsver % 100);
-    else
-	sprintf(gs_basedir, "gs%d.%02d", gsver / 100, gsver % 100);
+    sprintf(gs_basedir, "gs%d.%02d", gsver / 100, gsver % 100);
     sprintf(gs_zipprefix, "gs%3d", gsver);
 
     /* derive group filename from group name */

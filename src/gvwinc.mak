@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -25,12 +25,14 @@ WINZIPSE_XE="C:\Program Files\WinZip Self-Extractor\WZIPSE32.EXE"
 OBJ1=gvwin.obj gvwdde.obj gvwdde2.obj gvwdll.obj gvwdisp.obj gvwdlg.obj
 OBJ2=gvwclip.obj gvwedit.obj gvweps.obj gvwmeas.obj gvwmisc.obj gvwprf.obj 
 OBJ3=gvwprn.obj gvcmeas.obj gvcmeas2.obj gvcmisc.obj gvcdisp.obj gvccmd.obj 
-OBJ4=gvcprn.obj gvceps.obj gvcinit.obj gvctext.obj dscparse.obj
-OBJ5=dscutil.obj gvcdll.obj gvcpdf.obj gvwinit.obj gvcbeta.obj gvwgsver.obj
+OBJ4=gvcprn.obj gvceps.obj gvcinit.obj gvctext.obj dscparse.obj dscutil.obj 
+OBJ5=gvwimg.obj gvcdll.obj gvcpdf.obj gvwinit.obj gvcbeta.obj gvwgsver.obj
 OBJ6=gvcreg.obj gvwreg.obj gvwfile.obj gvwdib.obj gvwpdib.obj gvwpgdi.obj
-OBJS=$(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ6)
+OBJ7=cdll.obj cimg.obj cview.obj
+OBJS=$(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ6) $(OBJ7)
 
-HDRS=gsvver.h gvwin.h dscparse.h gvcfn.h gvcver.h gvcfile.h gvwdib.h gvwpdib.h
+GSHDRS=iapi.h errors.h gdevdsp.h
+HDRS=gsvver.h gvcrc.h gvwin.h dscparse.h gvcfn.h gvcver.h gvcfile.h gvwdib.h gvwpdib.h gvwgsver.h $(GSHDRS)
 
 echogsv.exe: echogsv.c
 	$(CC) $(CFLAGS) echogsv.c
@@ -88,15 +90,17 @@ gvwclip.obj: gvwclip.cpp $(HDRS)
 
 gvwdisp.obj: gvwdisp.cpp $(HDRS)
 
-gvwdlg.obj: gvwdlg.cpp gvcrc.h $(HDRS)
+gvwdlg.obj: gvwdlg.cpp $(HDRS)
 
-gvwdll.obj: gvwdll.cpp gvcrc.h gsdll.h $(HDRS)
+gvwdll.obj: gvwdll.cpp $(HDRS)
 
 gvwedit.obj: gvwedit.cpp $(HDRS)
 
 gvweps.obj: gvweps.cpp gvceps.h $(HDRS)
 
 gvwgsver.obj: gvwgsver.cpp $(HDRS)
+
+gvwimg.obj: gvwimg.cpp $(HDRS)
 
 gvwinit.obj: gvwinit.cpp $(HDRS)
 
@@ -106,11 +110,17 @@ gvwmisc.obj: gvwmisc.cpp $(HDRS)
 
 gvwprn.obj: gvwprn.cpp $(HDRS)
 
-gvccmd.obj: gvccmd.cpp gvcrc.h $(HDRS)
+gvccmd.obj: gvccmd.cpp $(HDRS)
 
 gvcdisp.obj: gvcdisp.cpp $(HDRS)
 
-gvcdll.obj: gvcdll.cpp gvcrc.h gsdll.h $(HDRS)
+gvcdll.obj: gvcdll.cpp $(HDRS)
+
+cdll.obj: cdll.cpp $(HDRS)
+
+cimg.obj: cimg.cpp $(HDRS)
+
+cview.obj: cview.cpp $(HDRS)
 
 dscparse.obj: dscparse.cpp dscparse.h
 
@@ -120,15 +130,15 @@ gvcbeta.obj: gvcbeta.cpp gvcbeta.h $(HDRS)
 
 gvceps.obj: gvceps.cpp gvceps.h $(HDRS)
 
-gvcinit.obj: gvcinit.cpp gvcrc.h $(HDRS)
+gvcinit.obj: gvcinit.cpp $(HDRS)
 
-gvcmeas.obj: gvcmeas.cpp gvcrc.h $(HDRS)
+gvcmeas.obj: gvcmeas.cpp $(HDRS)
 
-gvcmeas2.obj: gvcmeas2.cpp gvcrc.h $(HDRS)
+gvcmeas2.obj: gvcmeas2.cpp $(HDRS)
 
-gvcmisc.obj: gvcmisc.cpp gvcrc.h $(HDRS)
+gvcmisc.obj: gvcmisc.cpp $(HDRS)
 
-gvcpdf.obj: gvcpdf.cpp gvcrc.h $(HDRS)
+gvcpdf.obj: gvcpdf.cpp $(HDRS)
 
 gvcprn.obj: gvcprn.cpp $(HDRS)
 
@@ -369,6 +379,7 @@ gsv$(GSVIEW_VERSION)wda.zip:
 	copy cdorder.txt ..\gsview\cdorder.txt
 	copy regorder.txt ..\gsview\regorder.txt
 	copy gsviewda.exe ..\gsview\gsviewda.exe
+	copy NUL > ..\gsview\gsview32.ini
 	copy binary\gvwin1.ico ..\gsview\gsview32.ico
 	copy gsviewen.hlp ..\gsview\gsviewen.hlp
 	copy gsviewde.hlp ..\gsview\gsviewde.hlp
@@ -425,6 +436,7 @@ distcopy:
 	copy gsvw32it.dll ..\gsview\gsvw32it.dll
 	copy gvwgs32.exe ..\gsview\gvwgs32.exe
 	copy printer.ini ..\gsview\printer.ini
+	copy NUL > ..\gsview\gsview32.ini
 	copy uninstgs.exe ..\gsview\uninstgs.exe
 	copy winsetup.exe ..\setup.exe
 	copy setp32de.dll ..\setp32de.dll
@@ -433,7 +445,7 @@ distcopy:
 	copy setp32it.dll ..\setp32it.dll
 # assume zlib32.dll is in ..\gsview\zlib32.dll
 # assume libbz2.dll is in ..\gsview\libbz2.dll
-	copy pstoedit.htm ..\gsview\pstoedit.htm
+	copy ..\pstoedit\pstoedit.htm ..\gsview\pstoedit.htm
 	copy gsprint.htm ..\gsview\gsprint.htm
 	copy gsprint.exe ..\gsview\gsprint.exe
 	copy ..\epstool\epstool.htm ..\gsview\epstool.htm
@@ -473,7 +485,7 @@ gsv$(GSVIEW_VERSION)w32.exe: strip distcopy gsv$(GSVIEW_VERSION)w32.zip
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .\setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2000 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2001 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview\LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win32. > dialog.txt
 	echo GSview uses Aladdin Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
@@ -492,6 +504,9 @@ language:
 	-del gvwlang.rc
 
 clean: language
+ 	-del cdll.obj
+ 	-del cimg.obj
+ 	-del cview.obj
 	-del gsvver.h
 	-del gvwin.obj
 	-del gvwclip.obj
@@ -502,6 +517,7 @@ clean: language
 	-del gvwedit.obj
 	-del gvweps.obj
 	-del gvwfile.obj
+	-del gvwimg.obj
 	-del gvwinit.obj
 	-del gvwdde.obj
 	-del gvwdde2.obj

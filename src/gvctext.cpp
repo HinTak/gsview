@@ -522,7 +522,7 @@ text_extract_slow(FILE *outfile, FILE *infile, BOOL all)
     thispage = (all || psfile.page_list.select[page]);
     while (fgets(line, sizeof(line)-1, infile)) {
 	if (thispage) {
-	    if ( (*line == '\n') || (*line == '\f') )
+	    if ( (*line == '\r') || (*line == '\n') || (*line == '\f') )
 		fputs(line, outfile);
 	    else {
 		p = text_grab_word(line);
@@ -548,13 +548,14 @@ gsview_text_extract_slow()
     if (!get_filename(output, TRUE, FILTER_TXT, 0, IDS_TOPICTEXT))
 	return;
 
-    if ((f = fopen(output, "w")) == (FILE *)NULL)
+    if ((f = fopen(output, "wb")) == (FILE *)NULL)
 	return;
 
     if (psfile.text_name[0] == '\0')
 	return;
 
-    if ((infile = fopen(psfile.text_name, "r")) == (FILE *)NULL) {
+    /* Must read in binary mode, since TeX can use ^Z as a character code. */
+    if ((infile = fopen(psfile.text_name, "rb")) == (FILE *)NULL) {
 	message_box("pstotext text extraction file is missing", 0);
 	return;
     }
@@ -729,7 +730,7 @@ char find_text[MAXSTR];
 	    return;
 	}
 
-	if ((infile = fopen(psfile.text_name, "r")) == (FILE *)NULL) {
+	if ((infile = fopen(psfile.text_name, "rb")) == (FILE *)NULL) {
 	    message_box("pstotext text extraction file is missing", 0);
 	    return;
 	}
@@ -753,7 +754,7 @@ char find_text[MAXSTR];
 	    info_wait(IDS_NOWAIT);
 	    /* signal that BBOX is valid and should be highlighted */
 	    if ((psfile.pagenum == psfile.text_page+1) 
-		&& (gsdll.state == PAGE)) {
+		&& (gsdll.state == GS_PAGE)) {
 		/* on correct page */
 		display.show_find = TRUE;
 		scroll_to_find();
@@ -837,7 +838,7 @@ int page = psfile.pagenum;
     text_index_count = 0;
 
     /* find page */
-    f = fopen(psfile.text_name, "r");
+    f = fopen(psfile.text_name, "rb");
     if (f == (FILE *)NULL) {
 	free_text_index();
 	return FALSE;

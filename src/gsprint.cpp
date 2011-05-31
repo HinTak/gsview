@@ -49,8 +49,8 @@ PROCESS_INFORMATION piProcInfo;
 #endif
 BOOL global_debug;
 
-#define COPYRIGHT TEXT("Copyright (C) 2000, Ghostgum Software Pty Ltd.  All Rights Reserved.\n")
-#define VERSION TEXT("2000-12-28 gsprint 1.4\n")
+#define COPYRIGHT TEXT("Copyright (C) 2001, Ghostgum Software Pty Ltd.  All Rights Reserved.\n")
+#define VERSION TEXT("2000-06-02 gsprint 1.5\n")
 
 #define MAXSTR 256
 

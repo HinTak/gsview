@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,12 +18,12 @@
 /* it\gvclang.h */
 /* Common Italian language defines */
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2000 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2001 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Tutti i diritti riservati."
 #define GSVIEW_COPYRIGHT3 "Vedere il file LICENCE per maggiori dettagli."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2000 Aladdin Enterprises,"
-#define GS_COPYRIGHT2 "Menlo Park, California, U.S.A.  Tutti i diritti riservati."
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2001 artofcode LLC,"
+#define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Tutti i diritti riservati."
 #define GS_COPYRIGHT3 "Vedere il file PUBLIC per maggiori dettagli."
 
 /* Buttons */
@@ -232,7 +232,7 @@
 /* Download Ghostscript dialog box */
 #define AADOWNLOADGS "Download Ghostscript"
 #define AADOWNLOADNOW "Download"
-#define AAGSNOTFOUND "Ghostscript non può essere trovato sul computer.  E' necessario effettuare il download ed installare Aladdin Ghostscript da"
+#define AAGSNOTFOUND "Ghostscript non può essere trovato sul computer.  E' necessario effettuare il download ed installare AFPL Ghostscript da"
 
 #define AAGSMESSWIN "GSview per Windows - Messaggi di Ghostscript"
 #define AAGSMESSPM "PM GSview - Messaggi di Ghostscript"
@@ -288,7 +288,7 @@
 #define AAONLINEREG "Registrazione Online"
 #define AAREG1 "Inserire il nome e il numero di registrazione"
 #define AAREG2 ""
-#define AANAG1 "GSview è Copyright 2000 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview è Copyright 2001 Ghostgum Software Pty Ltd."
 #define AANAG2 "Si prega di supportare lo sviluppo di GSview"
 #define AANAG3 "tramite la registrazione."
 #define AANAG4 "GSview può essere registrato online presso"
@@ -299,9 +299,9 @@
 #define AAINSTALL1 "Installazione di GSview"
 #define AAINSTALLINTRO1 "Questo wizard vi aiuterà nell'installazione"
 #define AAINSTALLINTRO2 "Prima di continuare l'installazione, assicuratevi di avere i files elencati in Readme.htm nella cartella corrente."
-#define AAINSTALLINTRO3 "L'installazione richiede 10 MB di spazio libero sul disco."
+#define AAINSTALLINTRO3 "L'installazione richiede 20 - 30 MB di spazio libero sul disco."
 #define AAINSTALLCOPYRIGHT1 "Informazioni sui Diritti d'Autore"
-#define AAINSTALLCOPYRIGHT2 "GSview e Aladdin Ghostscript sono dei programmi separati."
+#define AAINSTALLCOPYRIGHT2 "GSview e AFPL Ghostscript sono dei programmi separati."
 #define AAINSTALLCOPYRIGHT3 "Essi sono di proprità di diverse entità."
 #define AAINSTALLGSVER1 "Quali componenti vuoi installare?"
 #define AAINSTALLGSVER2 "Installa GSview"
@@ -331,7 +331,7 @@
 #define AABETAWARN "Questa è una versione BETA Test di GSview.  Il programma sarà disabilitato il %04d-%02d-%02d."
 #define AAINSTALLOK "Installazione terminata con successo."
 #define AAINSTALLFAILED "Installazione fallita"
-#define AAPROGMANGROUP1 "GSview può creare un Gruppo in Program Manager oppure una cartella nello Start Menu per GSview e Aladdin Ghostscript."
+#define AAPROGMANGROUP1 "GSview può creare un Gruppo in Program Manager oppure una cartella nello Start Menu per GSview e AFPL Ghostscript."
 #define AAPROGMANGROUP2 "Creare Gruppo / Cartella"
 #define AAPROGMANGROUP3 "Nome"
 #define AAPROGMANGROUP4 "GS Tools"
@@ -351,8 +351,8 @@
 #define AAUNZIPCANCELLED "Unzip cancellato\n"
 #define AACANTALLOCBUF "Non è possibile allocare memoria per il buffer di copia"
 #define AAPROGRAMOBJECTFAILED "Non è possibile creare il Collegamento sul Desktop"
-#define AAUNINSTALLTITLE "GSview e Aladdin Ghostscript"
-#define AAUNINSTALLITEM "Disinstalla GSview d Aladdin Ghostscript"
+#define AAUNINSTALLTITLE "GSview e AFPL Ghostscript"
+#define AAUNINSTALLITEM "Disinstalla GSview d AFPL Ghostscript"
 
 /* setup program */
 #define AAINSTALLSPACE "Questa installazione richiederà circa 3 Mb di spazio nell'hard disk"
@@ -371,7 +371,7 @@
 
 /* configure */
 #define AAGSVIEWC "GSview:"
-#define AAALADDINGSC "Aladdin Ghostscript:"
+#define AAALADDINGSC "AFPL Ghostscript:"
 #define AACFG1 "Configura GSview"
 #define AACFG10 "Il wizard ti aiuterà nel configurare GSview."
 #define AACFG11 "Se non capisci un argomento delle pagine seguenti,\
@@ -396,7 +396,7 @@
 #define AACFG41 "Associare i files PostScript (.ps and .eps) con GSview."
 #define AACFG42 "Associare i files PDF (.pdf) con GSview."
 #define AACFG50 "GSview può creare un Gruppo in Program Manager oppure\
- una cartella nello Start Menu per GSview e Aladdin Ghostscript."
+ una cartella nello Start Menu per GSview e AFPL Ghostscript."
 #define AACFG51 "Create Gruppo / Cartella"
 #define AACFG52 "Nome"
 #define AACFG53 "GSview può creare un collegamento a GSview sul Desktop. \

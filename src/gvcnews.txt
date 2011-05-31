@@ -1,3 +1,99 @@
+----------------------
+Version 4.0 2001-06-02
+----------------------
+Win:
+  Unload Ghostscript DLL before calling pstoedit.
+
+  EPS previews fixed.  They were broken when we changed to 
+  using the display device instead of mswindll.
+
+OS/2:
+  Text extraction with pstotext crashed when the extracted
+  character was a null, because GSview did not pass the complete
+  to pstotext.  Scan for EOL in the entire buffer, not just until
+  a null character.
+
+  Don't reset scroll bars when image closed, needed for zoom
+  to work correctly.  Reset scroll bars when image closed 
+  and no file selected.
+
+X11:
+  Help script prints usage info and can be called without tag.
+  Added -help, -version and -geometry.
+
+  Changed default install path to /usr/bin/gsview.
+
+All:
+  Ghostscript plus GSview takes 20 - 30Mbytes of disk space, not 10M.
+
+  Text extracted using pstotext could use ^Z as a valid character
+  (math formula from TeX).  Open files in binary not text mode.
+
+  Fixed crash when PDF file without crop box, EPS Clip enabled and Fit Page
+  used together.
+
+  Fixed TIFF StripByteCount when image data < 8kbytes, and for multiple
+  strip images fixed StripByteCount of last strip.
+
+---------------------------
+Version 3.62beta 2001-04-12
+---------------------------
+All:
+  Use common code for loading DLL and display device.
+
+  Fix printing/convert using GS 7.00.
+
+  "Rescale to fit page" is now called "Shrink to fit page" since
+  this is how it behaves.
+
+X11:
+  Use new Ghostscript shared object libgs.so.
+
+---------------------------
+Version 3.61beta 2001-04-07
+---------------------------
+All:
+  Avoid trying to send trailer after document is deleted.
+
+  Changed ftp locations to ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/
+
+  Removed "Options | Quick Open".  This isn't needed on modern
+  fast computers, was not the default, and caused problems with
+  many PostScript files.
+
+  Fixed progress message "Drawing 50%".
+
+  Remove quotes from Ghostscript Options when initialising DLL.
+
+  Allow epstool to ignore DSC warnings with command line option -e.
+  A comment will be added to the EPS file about the reckless user
+  who ignored the DSC warning.
+
+  Enabled anti-aliasing as the default. TextAlphaBits=4, 
+  GraphicsAlphaBits=4.
+ 
+Win32:
+  If installing for "All User", write gsview32.ini file to
+  gsview directory so GSview is auto-configured for any user.
+
+  When first use after install contains filename on the command line,
+  don't ignore it.
+
+  Fixed page selection for File | Convert.
+
+  Use new Ghostcript API.
+
+  Change user messages to start at WM_USER+100, not WM_USER
+  which caused problems on Japanese Windows.  
+  Didn't change WM_GSV16SPL which is only used on Win32s
+  and is used for interprocess communication.
+
+OS/2:
+  Use new Ghostscript API.
+
+X11:
+  Probably won't compile.  Need to use new Ghostscript API.
+
 ---------------------------
 Version 3.6 2000-12-29
 ---------------------------

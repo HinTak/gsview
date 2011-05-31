@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -127,6 +127,7 @@ gsview$(WINEXT).exe: $(OBJS) gvwin$(WINEXT).res gvwin$(WINEXT).def lib.rsp
 	echo $(OBJ4) >> link.rsp
 	echo $(OBJ5) >> link.rsp
 	echo $(OBJ6) >> link.rsp
+	echo $(OBJ7) >> link.rsp
 	$(LINK) $(DEBUGLINK) /DEF:gvwin$(WINEXT).def /OUT:gsview$(WINEXT).exe @link.rsp @lib.rsp gvwin$(WINEXT).res
 
 
@@ -146,8 +147,8 @@ gsvw$(WINEXT)it.dll: gsvw$(WINEXT)it.res it\gvwin32.def
 uninstgs.exe: dwuninst.obj dwuninst.h dwuninst.res dwuninst.def
 	$(LINK) $(DEBUGLINK) /DEF:dwuninst.def /OUT:uninstgs.exe dwuninst.obj @lib.rsp dwuninst.res
 
-winsetup.exe: winsetup.obj winsetup.res winsetup.def dwinst.obj gvcbeta.obj lib.rsp
-	$(LINK) $(DEBUGLINK) /DEF:winsetup.def /OUT:winsetup.exe winsetup.obj dwinst.obj gvcbeta.obj @lib.rsp winsetup.res
+winsetup.exe: winsetup.obj winsetup.res winsetup.def dwinst.obj gvcbeta.obj gvwgsver.obj lib.rsp
+	$(LINK) $(DEBUGLINK) /DEF:winsetup.def /OUT:winsetup.exe winsetup.obj dwinst.obj gvcbeta.obj gvwgsver.obj @lib.rsp winsetup.res
 
 setp$(WINEXT)de.dll: setp$(WINEXT)de.res de\setup32.def
 	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:de\setup32.def /OUT:setp$(WINEXT)de.dll setp$(WINEXT)de.res
@@ -168,12 +169,12 @@ ungsview.exe: ungsview.obj ungsview.res ungsview.def
 # Intel
 gvwgs32.exe: gvwgs.cpp gvwgs.h gvwgs32.res lib.rsp
 	$(CC) -c $(CFLAGS) -I"$(INCDIR)" gvwgs.cpp
-	$(LINK) $(DEBUGLINK) /DEF:gvwgs32.def /OUT:gvwgs32.exe gvwgs.obj @lib.rsp gvwgs32.res
+	$(LINK) $(DEBUGLINK) /DEF:gvwgs32.def /OUT:gvwgs32.exe gvwgs.obj cdll.obj @lib.rsp gvwgs32.res
 
 # DEC Alpha
 gvwgsda.exe: gvwgs.cpp gvwgs.h gvwgsda.res lib.rsp
 	$(CC) -c $(CFLAGS) -I"$(INCDIR)" gvwgs.cpp
-	$(LINK) $(DEBUGLINK) /DEF:gvwgs32.def /OUT:gvwgsda.exe gvwgs.obj @lib.rsp gvwgs32.res
+	$(LINK) $(DEBUGLINK) /DEF:gvwgs32.def /OUT:gvwgsda.exe gvwgs.obj cdll.obj @lib.rsp gvwgs32.res
 
 gsv16spl.exe: gsv16spl.c gsv16spl.rc gsv16spl.def  $(LANGUAGE)\gvclang.h
 	echo Can't build gsv16spl.exe with MSVC++

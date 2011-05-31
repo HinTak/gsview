@@ -113,7 +113,6 @@ BEGIN
 		MENUITEM "Enregistrer le &dernier répertoire", IDM_SAVEDIR
 		MENUITEM "Afficher la &barre d'outils", IDM_BUTTONSHOW
 		MENUITEM "Ajuster la fe&nêtre à la page", IDM_FITPAGE
-		MENUITEM "Ouverture &rapide", IDM_QUICK_OPEN
 		MENUITEM "Réaffichage &automatique", IDM_AUTOREDISPLAY
 		MENUITEM "Ajuster l'affichage des &fichiers EPS", IDM_EPSFCLIP
 		MENUITEM "A&vertissements EPS", IDM_EPSFWARN

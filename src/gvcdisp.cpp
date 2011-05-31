@@ -265,11 +265,12 @@ gs_resize(void)
 {
 	pending.resize = TRUE;
 
-	if ( gsdll.hmodule &&  (psfile.dsc==(CDSC *)NULL) && (gsdll.state != IDLE) )
+	if ( gsdll.hmodule &&  (psfile.dsc==(CDSC *)NULL) && 
+	    (gsdll.state != GS_IDLE) )
 	    /* don't know where we are so close and reopen */
 	    pending.abort = TRUE;
 
-	if (option.redisplay && (gsdll.state == PAGE)) {
+	if (option.redisplay && (gsdll.state == GS_PAGE)) {
 	    if (psfile.dsc != (CDSC *)NULL)
 	        pending.now = TRUE;
 	    else {
@@ -277,7 +278,7 @@ gs_resize(void)
 		pending.now = TRUE;
 	    }
 	}
-	if (option.redisplay && (gsdll.state == IDLE)
+	if (option.redisplay && (gsdll.state == GS_IDLE)
 	   && (psfile.dsc != (CDSC *)NULL)) {
 	     /* zero page EPS file */
 	    pending.now = TRUE;
@@ -471,7 +472,7 @@ gsview_selectfile(char *filename)
 
 	update_last_files(filename);
 
-	if (gsdll.valid && (gsdll.state!=UNLOADED)) {
+	if (gsdll.open && (gsdll.state!=GS_UNINIT)) {
 	    /* remember name for later */
 	    strncpy(selectname, filename, sizeof(selectname));
 	    /* close file and wait for notification */
@@ -517,7 +518,8 @@ PSFILE *tpsfile;
 	    return;
 	}
 	pending.psfile = tpsfile;
-	if ( gsdll.hmodule &&  (psfile.dsc==(CDSC *)NULL) && (gsdll.state != IDLE) )
+	if ( gsdll.hmodule &&  (psfile.dsc==(CDSC *)NULL) && 
+	    (gsdll.state != GS_IDLE) )
 	    /* don't know where we are so close and reopen */
 	    pending.abort = TRUE;
 	pending.now = TRUE;
@@ -530,6 +532,7 @@ PSFILE *tpsfile;
 FILE *
 gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 {	char *temp;
+        int fd;
 	if ( (temp = getenv("TEMP")) == NULL )
 #ifdef UNIX
 		strcpy(fname, "/tmp");
@@ -558,10 +561,16 @@ gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 	strncpy(fname, p, MAXSTR-1);
 	free(p);
 	}
+	return fopen(fname, mode);
+#else
+#if defined(UNIX) || defined(OS2)
+	fd = mkstemp(fname);
+	return fdopen(fd, mode);
 #else
 	mktemp(fname);
-#endif
 	return fopen(fname, mode);
+#endif
+#endif
 }
 
 /* This is triggered by WM_ACTIVATE.
@@ -576,13 +585,13 @@ char *filename;
 FILE *f;
 BOOL changed = FALSE;
 PSFILE temp_psfile;
-	begin_crit_section();
+	request_mutex();
 	if (psfile.locked) {
-	    end_crit_section();	/* someone else has it */
+	    release_mutex();	/* someone else has it */
 	    return;
 	}
 	psfile.locked = TRUE;	/* stop others using it */
-	end_crit_section();
+	release_mutex();
 
 	filename = psfile_name(&psfile);
 
@@ -613,14 +622,14 @@ dfreopen(void)
 char *filename;
 	if (debug & DEBUG_GENERAL)
 	    gs_addmess("dfreopen:\n");
-	begin_crit_section();
+	request_mutex();
 	if (psfile.locked) {
-	    end_crit_section();	/* someone else has it */
+	    release_mutex();	/* someone else has it */
 	    delayed_message_box(IDS_DEBUG_DFISLOCKED, 0);
 	    return -1;
 	}
 	psfile.locked = TRUE;	/* stop others using it */
-	end_crit_section();
+	release_mutex();
 
 	filename = psfile_name(&psfile);
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -1136,7 +1136,7 @@ gsview_pdf2ps(char *output)
 	{
 	    /* Win16 and Win32s can't load GS DLL twice */
 	    /* We must unload the current GS DLL */
-	    if (gsdll.valid)
+	    if (gsdll.open)
 		pending.unload = TRUE;
 	    /* printer_pending will cause start_gvwgs() to be run */
 	    /* from main message loop, after displaying GS DLL */
@@ -1311,8 +1311,8 @@ void init_fixed_media(HWND hDlg, int id, int fixed_media)
     load_string(IDS_PAGESIZE_FIXED, buf, sizeof(buf));
     SendDlgItemMessage(hDlg, id, CB_ADDSTRING, 0, 
 	    (LPARAM)((LPSTR)buf));
-    strcpy(buf, "Rescale");
-    load_string(IDS_PAGESIZE_RESCALE, buf, sizeof(buf));
+    strcpy(buf, "Shrink");
+    load_string(IDS_PAGESIZE_SHRINK, buf, sizeof(buf));
     SendDlgItemMessage(hDlg, id, CB_ADDSTRING, 0, 
 	    (LPARAM)((LPSTR)buf));
     SendDlgItemMessage(hDlg, id, CB_SETCURSEL, fixed_media, 0L);
@@ -1519,6 +1519,10 @@ NewDeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    option.print_fixed_media = (int)SendDlgItemMessage(
 			hDlg, DEVICE_FIXEDMEDIA, CB_GETCURSEL, 0, 0);
 		}
+	  	if ( (psfile.dsc != (CDSC *)NULL) && 
+		     (psfile.dsc->page_count != 0))
+		    PageMultiDlgProc(hDlg, wmsg, wParam, lParam);
+
 		option.print_reverse = psfile.page_list.reverse = 
 		    (int)SendDlgItemMessage(hDlg, PAGE_REVERSE, 
 			BM_GETCHECK, 0, 0);
@@ -2903,7 +2907,7 @@ gsview_print(BOOL convert)
     {
 	/* Win16 and Win32s can't load GS DLL twice */
 	/* We must unload the current GS DLL */
-	if (gsdll.valid)
+	if (gsdll.open)
 	    pending.unload = TRUE;
 	/* printer_pending will cause start_gvwgs() to be run */
 	/* from main message loop, after displaying GS DLL */

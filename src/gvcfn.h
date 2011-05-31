@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -213,36 +213,42 @@ int gs_execute(const char *str, int len);
 int gs_printf(const char *fmt, ...);
 void gs_process(void);
 int gs_page_skip(int skip);
-char * gs_argnext(char *argline, char *arg);
+char * gs_argnext(char *argline, char *arg, BOOL copyquotes);
 #if defined(_Windows) || defined(OS2)
-int gs_dll_init(GSDLL_CALLBACK callback, char *devname);
-int callback_pstotext(char *str, unsigned long count);
+int callback_pstotext(const char *str, unsigned long count);
 #endif
+
+int gs_dll_init(char *devname);
+
+/* gvwgsver.cpp or gvxdll.cpp or gvpdll.cpp */
+BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len);
 
 /* in gvpdll.c or gvwdll.c */
 extern GSDLL gsdll;
+extern GSDLL_INPUT gsdll_input;
+extern IMAGE image;
+extern VIEW view;
+extern display_callback gsdisplay;
 
-#ifdef _Windows
-int _export gsdll_callback(int message, char *str, unsigned long count);
-#else
-int gsdll_callback(int message, char *str, unsigned long count);
-#endif
+int GSDLLCALL gsdll_poll(void *handle);
 
-#if defined(_Windows) || defined(OS2)
+#ifdef NOTUSED
 void gs_load_dll_cleanup(void);
 BOOL gs_load_dll(void);
 BOOL gs_free_dll(void);
 BOOL gsdll_close(void);
+#endif
 int get_message(void);
 int peek_message(void);
 void wait_event(void);
+
+#if defined(_Windows) || defined(OS2)
 int load_pstotext(void);
 int unload_pstotext(void);
 int send_pstotext_prolog(HINSTANCE hmodule, int resource);
 #endif
 
-void begin_crit_section(void);
-void end_crit_section(void);
+/* mutex for psfile */
 void request_mutex(void);
 void release_mutex(void);
 
@@ -253,7 +259,7 @@ int pdf_makedoc(int first, int last);
 int pdf_trailer(void);
 int pdf_page_init(int pagenum);
 int pdf_page(void);
-int pdf_checktag(LPSTR str, int len);
+int pdf_checktag(const char *str, int len);
 int pdf_extract(FILE *f, int copies);
 BOOL gsview_pdf2ps_common(char *psname, char *optname, char *output);
 int pdf_orientation(int page);
@@ -297,11 +303,6 @@ BOOL calc_command(HWND hwnd, int message, MATRIX *ctm, int *unit);
 void measure_dialog_unit(void);
 void measure_update_last(void);
 
-
-/* gvwgsver.c */
-BOOL get_gs_versions(int *pver);
-BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len);
-BOOL find_gs(char *gspath, int len, int minver, BOOL bDLL);
 
 /* gvwreg.cpp or gvpreg.cpp */
 BOOL write_registration(unsigned int reg_receipt, unsigned int reg_number, 

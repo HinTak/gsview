@@ -1,21 +1,31 @@
-/* Copyright (C) 2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000, 2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
-  This file is part of GSview.
-  
-  This program is distributed with NO WARRANTY OF ANY KIND.  No author
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this file ("Software"), to deal in the Software without 
+  restriction, including without limitation the rights to use, copy, 
+  modify, merge, publish, distribute, sublicense, and/or sell copies of 
+  this Software, and to permit persons to whom this file is furnished to 
+  do so, subject to the following conditions: 
+
+  This Software is distributed with NO WARRANTY OF ANY KIND.  No author
   or distributor accepts any responsibility for the consequences of using it,
   or for whether it serves any particular purpose or works at all, unless he
-  or she says so in writing.  Refer to the GSview Free Public Licence 
-  (the "Licence") for full details.
-  
-  Every copy of GSview must include a copy of the Licence, normally in a 
-  plain ASCII text file named LICENCE.  The Licence grants you the right 
-  to copy, modify and redistribute GSview, but only under certain conditions 
-  described in the Licence.  Among other things, the Licence requires that 
-  the copyright notice and this notice be preserved on all copies.
+  or she says so in writing.  
+
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 */
 
+/* This file is part of GSview.  The above notice applies only 
+ * to this file.  It does NOT apply to any other file in GSview
+ * unless that file includes the above copyright notice.
+ */
+
 /* gvwgsver.c */
+/* Obtain details of copies of Ghostscript installed under Windows */
+
+/* To compile as a demo program, define DUMP_GSVER */
+/* #define DUMP_GSVER */
 
 #ifdef DUMP_GSVER
 #include <windows.h>
@@ -24,18 +34,22 @@
 #include <windows.h>
 #endif
 #include <stdlib.h>
+#include "gvwgsver.h"
 
+/* Ghostscript may be known in the Windows Registry by
+ * the following names.
+ */
 #define GS_PRODUCT_AFPL "AFPL Ghostscript"
 #define GS_PRODUCT_ALADDIN "Aladdin Ghostscript"
 #define GS_PRODUCT_GNU "GNU Ghostscript"
 
-// Get Ghostscript versions for given product.
-// Store results starting at pver + 1 + offset.
-// Returns total number of versions in pver.
+/* Get Ghostscript versions for given product.
+ * Store results starting at pver + 1 + offset.
+ * Returns total number of versions in pver.
+ */
 static int get_gs_versions_product(int *pver, int offset, 
     const char *gs_productfamily)
 {
-    // First find out how many versions of Ghostscript are available.
     HKEY hkey;
     DWORD cbData;
     HKEY hkeyroot;
@@ -47,7 +61,7 @@ static int get_gs_versions_product(int *pver, int offset,
     wsprintf(key, TEXT("Software\\%s"), gs_productfamily);
     hkeyroot = HKEY_LOCAL_MACHINE;
     if (RegOpenKeyEx(hkeyroot, key, 0, KEY_READ, &hkey) == ERROR_SUCCESS) {
-	// Now enumerate the keys
+	/* Now enumerate the keys */
 	cbData = sizeof(key) / sizeof(TCHAR);
 	while (RegEnumKey(hkey, n, key, cbData) == ERROR_SUCCESS) {
 	    n++;
@@ -72,24 +86,24 @@ static int get_gs_versions_product(int *pver, int offset,
     return n+offset;
 }
 
-// Query registry to find which versions of Ghostscript are installed.
-// Return version numbers in an integer array.   
-// On entry, the first element in the array must be the array size 
-// in elements.
-// If all is well, TRUE is returned.
-// On exit, the first element is set to the number of Ghostscript
-// versions installed, and subsequent elements to the version
-// numbers of Ghostscript.
-// e.g. on entry {5, 0, 0, 0, 0}, on exit {3, 550, 600, 596, 0}
-// Returned version numbers may not be sorted.
-//
-// If Ghostscript is not installed at all, return FALSE
-// and set pver[0] to 0.
-// If the array is not large enough, return FALSE 
-// and set pver[0] to the number of Ghostscript versions installed.
+/* Query registry to find which versions of Ghostscript are installed.
+ * Return version numbers in an integer array.   
+ * On entry, the first element in the array must be the array size 
+ * in elements.
+ * If all is well, TRUE is returned.
+ * On exit, the first element is set to the number of Ghostscript
+ * versions installed, and subsequent elements to the version
+ * numbers of Ghostscript.
+ * e.g. on entry {5, 0, 0, 0, 0}, on exit {3, 550, 600, 596, 0}
+ * Returned version numbers may not be sorted.
+ *
+ * If Ghostscript is not installed at all, return FALSE
+ * and set pver[0] to 0.
+ * If the array is not large enough, return FALSE 
+ * and set pver[0] to the number of Ghostscript versions installed.
+ */
 BOOL get_gs_versions(int *pver)
 {
-    // First find out how many versions of Ghostscript are available.
     int n;
     if (pver == (int *)NULL)
 	    return FALSE;
@@ -100,12 +114,12 @@ BOOL get_gs_versions(int *pver)
 
     if (n >= pver[0]) {
 	pver[0] = n;
-	return FALSE;	// too small
+	return FALSE;	/* too small */
     }
 
     if (n == 0) {
 	pver[0] = 0;
-	return FALSE;	// not installed
+	return FALSE;	/* not installed */
     }
     pver[0] = n;
     return TRUE;
@@ -175,10 +189,7 @@ static BOOL get_gs_string_product(int gs_revision, const char *name,
     }
 
 
-    if (gs_revision % 100 == 0)
-	wsprintf(dotversion, "%d.0", (int)(gs_revision/100));
-    else
-	wsprintf(dotversion, "%d.%02d", 
+    wsprintf(dotversion, "%d.%02d", 
 	    (int)(gs_revision / 100), (int)(gs_revision % 100));
     wsprintf(key, "Software\\%s\\%s", gs_productfamily, dotversion);
 
@@ -209,7 +220,7 @@ BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len)
 
 
 
-// Set the latest Ghostscript EXE or DLL from the registry
+/* Set the latest Ghostscript EXE or DLL from the registry */
 BOOL
 find_gs(char *gspath, int len, int minver, BOOL bDLL)
 {
@@ -266,6 +277,7 @@ find_gs(char *gspath, int len, int minver, BOOL bDLL)
 
 
 #ifdef DUMP_GSVER
+/* This is an example of how you can use the above functions */
 int main(int argc, char *argv[])
 {
     BOOL flag;

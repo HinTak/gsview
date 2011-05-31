@@ -79,47 +79,47 @@
 #define CDSC_NEEDMORE 11
 
 /* local prototypes */
-private void * dsc_memalloc(P2(CDSC *dsc, size_t size));
-private void dsc_memfree(P2(CDSC*dsc, void *ptr));
-private CDSC * dsc_init2(P1(CDSC *dsc));
-private void dsc_reset(P1(CDSC *dsc));
-private void dsc_section_join(P3(unsigned long begin, unsigned long *pend, unsigned long **pplast));
-private int dsc_read_line(P1(CDSC *dsc));
-private int dsc_read_doseps(P1(CDSC *dsc));
-private char * dsc_alloc_string(P3(CDSC *dsc, const char *str, int len));
-private char * dsc_add_line(P3(CDSC *dsc, const char *line, unsigned int len));
-private char * dsc_copy_string(P5(char *str, unsigned int slen, 
+dsc_private void * dsc_memalloc(P2(CDSC *dsc, size_t size));
+dsc_private void dsc_memfree(P2(CDSC*dsc, void *ptr));
+dsc_private CDSC * dsc_init2(P1(CDSC *dsc));
+dsc_private void dsc_reset(P1(CDSC *dsc));
+dsc_private void dsc_section_join(P3(unsigned long begin, unsigned long *pend, unsigned long **pplast));
+dsc_private int dsc_read_line(P1(CDSC *dsc));
+dsc_private int dsc_read_doseps(P1(CDSC *dsc));
+dsc_private char * dsc_alloc_string(P3(CDSC *dsc, const char *str, int len));
+dsc_private char * dsc_add_line(P3(CDSC *dsc, const char *line, unsigned int len));
+dsc_private char * dsc_copy_string(P5(char *str, unsigned int slen, 
     char *line, unsigned int len, unsigned int *offset));
-private GSDWORD dsc_get_dword(P1(const unsigned char *buf));
-private GSWORD dsc_get_word(P1(const unsigned char *buf));
-private int dsc_get_int(P3(const char *line, unsigned int len, unsigned int *offset));
-private float dsc_get_real(P3(const char *line, unsigned int len, 
+dsc_private GSDWORD dsc_get_dword(P1(const unsigned char *buf));
+dsc_private GSWORD dsc_get_word(P1(const unsigned char *buf));
+dsc_private int dsc_get_int(P3(const char *line, unsigned int len, unsigned int *offset));
+dsc_private float dsc_get_real(P3(const char *line, unsigned int len, 
     unsigned int *offset));
-private int dsc_stricmp(P2(const char *s, const char *t));
-private void dsc_unknown(P1(CDSC *dsc)); 
-private int dsc_parse_pages(P1(CDSC *dsc));
-private int dsc_parse_bounding_box(P3(CDSC *dsc, CDSCBBOX** pbbox, int offset));
-private int dsc_parse_orientation(P3(CDSC *dsc, unsigned int *porientation, 
+dsc_private int dsc_stricmp(P2(const char *s, const char *t));
+dsc_private void dsc_unknown(P1(CDSC *dsc)); 
+dsc_private int dsc_parse_pages(P1(CDSC *dsc));
+dsc_private int dsc_parse_bounding_box(P3(CDSC *dsc, CDSCBBOX** pbbox, int offset));
+dsc_private int dsc_parse_orientation(P3(CDSC *dsc, unsigned int *porientation, 
     int offset));
-private int dsc_parse_order(P1(CDSC *dsc));
-private int dsc_parse_media(P2(CDSC *dsc, const CDSCMEDIA **page_media));
-private int dsc_parse_document_media(P1(CDSC *dsc));
-private int dsc_parse_viewing_orientation(P2(CDSC *dsc, CDSCCTM **pctm));
-private int dsc_parse_page(P1(CDSC *dsc));
-private void dsc_save_line(P1(CDSC *dsc));
-private int dsc_scan_type(P1(CDSC *dsc));
-private int dsc_scan_comments(P1(CDSC *dsc));
-private int dsc_scan_preview(P1(CDSC *dsc));
-private int dsc_scan_defaults(P1(CDSC *dsc));
-private int dsc_scan_prolog(P1(CDSC *dsc));
-private int dsc_scan_setup(P1(CDSC *dsc));
-private int dsc_scan_page(P1(CDSC *dsc));
-private int dsc_scan_trailer(P1(CDSC *dsc));
-private int dsc_error(P4(CDSC *dsc, unsigned int explanation, 
+dsc_private int dsc_parse_order(P1(CDSC *dsc));
+dsc_private int dsc_parse_media(P2(CDSC *dsc, const CDSCMEDIA **page_media));
+dsc_private int dsc_parse_document_media(P1(CDSC *dsc));
+dsc_private int dsc_parse_viewing_orientation(P2(CDSC *dsc, CDSCCTM **pctm));
+dsc_private int dsc_parse_page(P1(CDSC *dsc));
+dsc_private void dsc_save_line(P1(CDSC *dsc));
+dsc_private int dsc_scan_type(P1(CDSC *dsc));
+dsc_private int dsc_scan_comments(P1(CDSC *dsc));
+dsc_private int dsc_scan_preview(P1(CDSC *dsc));
+dsc_private int dsc_scan_defaults(P1(CDSC *dsc));
+dsc_private int dsc_scan_prolog(P1(CDSC *dsc));
+dsc_private int dsc_scan_setup(P1(CDSC *dsc));
+dsc_private int dsc_scan_page(P1(CDSC *dsc));
+dsc_private int dsc_scan_trailer(P1(CDSC *dsc));
+dsc_private int dsc_error(P4(CDSC *dsc, unsigned int explanation, 
     char *line, unsigned int line_len));
 
 /* DSC error reporting */
-private const int dsc_severity[] = {
+dsc_private const int dsc_severity[] = {
     CDSC_ERROR_WARN, 	/* CDSC_MESSAGE_BBOX */
     CDSC_ERROR_WARN, 	/* CDSC_MESSAGE_EARLY_TRAILER */
     CDSC_ERROR_WARN, 	/* CDSC_MESSAGE_EARLY_EOF */
@@ -662,7 +662,7 @@ dsc_set_page_bbox(CDSC *dsc, unsigned int page_number,
 /* Private functions below here.                                  */
 /******************************************************************/
 
-private void *
+dsc_private void *
 dsc_memalloc(CDSC *dsc, size_t size)
 {
     if (dsc->memalloc)
@@ -670,7 +670,7 @@ dsc_memalloc(CDSC *dsc, size_t size)
     return malloc(size);
 }
 
-private void
+dsc_private void
 dsc_memfree(CDSC*dsc, void *ptr)
 {
     if (dsc->memfree) 
@@ -680,7 +680,7 @@ dsc_memfree(CDSC*dsc, void *ptr)
 }
 
 /* private constructor */
-private CDSC *
+dsc_private CDSC *
 dsc_init2(CDSC *dsc)
 {
     dsc_reset(dsc);
@@ -716,7 +716,7 @@ dsc_init2(CDSC *dsc)
 }
 
 
-private void 
+dsc_private void 
 dsc_reset(CDSC *dsc)
 {
     unsigned int i;
@@ -848,7 +848,7 @@ dsc_reset(CDSC *dsc)
 * pend is a pointer to the end of this section
 * pplast is a pointer to a pointer of the end of the previous section
 */
-private void 
+dsc_private void 
 dsc_section_join(unsigned long begin, unsigned long *pend, unsigned long **pplast)
 {
     if (begin)
@@ -859,7 +859,7 @@ dsc_section_join(unsigned long begin, unsigned long *pend, unsigned long **pplas
 
 
 /* return value is 0 if no line available, or length of line */
-private int
+dsc_private int
 dsc_read_line(CDSC *dsc)
 {
     char *p, *last;
@@ -1027,7 +1027,7 @@ dsc_read_line(CDSC *dsc)
 
 
 /* Save last DSC line, for use with %%+ */
-private void 
+dsc_private void 
 dsc_save_line(CDSC *dsc)
 {
     int len = min(sizeof(dsc->last_line), dsc->line_length);
@@ -1035,7 +1035,7 @@ dsc_save_line(CDSC *dsc)
 }
 
 /* display unknown DSC line */
-private void 
+dsc_private void 
 dsc_unknown(CDSC *dsc)
 {
     if (dsc->debug_print_fn) {
@@ -1074,7 +1074,7 @@ dsc_is_section(char *line)
 }
 
 
-private GSDWORD
+dsc_private GSDWORD
 dsc_get_dword(const unsigned char *buf)
 {
     GSDWORD dw;
@@ -1085,7 +1085,7 @@ dsc_get_dword(const unsigned char *buf)
     return dw;
 }
 
-private GSWORD
+dsc_private GSWORD
 dsc_get_word(const unsigned char *buf)
 {
     GSWORD w;
@@ -1094,7 +1094,7 @@ dsc_get_word(const unsigned char *buf)
     return w;
 }
 
-private int
+dsc_private int
 dsc_read_doseps(CDSC *dsc)
 {
     unsigned char *line = (unsigned char *)dsc->line;
@@ -1118,12 +1118,17 @@ dsc_read_doseps(CDSC *dsc)
     /* skip from current position to start of PostScript section */
     dsc->skip_bytes = dsc->doseps->ps_begin - 30;
 
+    if (dsc->doseps->tiff_begin)
+	dsc->preview = CDSC_TIFF;
+    if (dsc->doseps->wmf_begin)
+	dsc->preview = CDSC_WMF;
+
     return CDSC_OK;
 }
 
 
 
-private int 
+dsc_private int 
 dsc_parse_pages(CDSC *dsc)
 {
     int ip, io; 
@@ -1214,7 +1219,7 @@ dsc_parse_pages(CDSC *dsc)
     return CDSC_OK;
 }
 
-private int 
+dsc_private int 
 dsc_parse_bounding_box(CDSC *dsc, CDSCBBOX** pbbox, int offset)
 {
     unsigned int i, n;
@@ -1345,7 +1350,7 @@ dsc_parse_bounding_box(CDSC *dsc, CDSCBBOX** pbbox, int offset)
     return CDSC_OK;
 }
 
-private int 
+dsc_private int 
 dsc_parse_orientation(CDSC *dsc, unsigned int *porientation, int offset)
 {
     char *p;
@@ -1406,7 +1411,7 @@ dsc_parse_orientation(CDSC *dsc, unsigned int *porientation, int offset)
     return CDSC_OK;
 }
 
-private int 
+dsc_private int 
 dsc_parse_order(CDSC *dsc)
 {
     char *p;
@@ -1473,7 +1478,7 @@ dsc_parse_order(CDSC *dsc)
 }
 
 
-private int 
+dsc_private int 
 dsc_parse_media(CDSC *dsc, const CDSCMEDIA **page_media)
 {
     char media_name[MAXSTR];
@@ -1496,7 +1501,7 @@ dsc_parse_media(CDSC *dsc, const CDSCMEDIA **page_media)
 }
 
 
-private int 
+dsc_private int 
 dsc_parse_document_media(CDSC *dsc)
 {
     unsigned int i, n;
@@ -1559,7 +1564,7 @@ dsc_parse_document_media(CDSC *dsc)
 /* viewing orientation is believed to be the first four elements of
  * a CTM matrix
  */
-private int 
+dsc_private int 
 dsc_parse_viewing_orientation(CDSC *dsc, CDSCCTM **pctm)
 {
     CDSCCTM ctm;
@@ -1602,7 +1607,7 @@ dsc_parse_viewing_orientation(CDSC *dsc, CDSCCTM **pctm)
  * need to skip a binary header which contains a new line
  * character
  */
-private int 
+dsc_private int 
 dsc_scan_type(CDSC *dsc)
 {
     unsigned char *p;
@@ -1739,7 +1744,7 @@ dsc_scan_type(CDSC *dsc)
 
 
 
-private int 
+dsc_private int 
 dsc_scan_comments(CDSC *dsc)
 {
     /* Comments section ends at */
@@ -2006,6 +2011,8 @@ dsc_scan_comments(CDSC *dsc)
     else if (IS_DSC(line, "%%DocumentData:")) {
 	unsigned int n = continued ? 3 : 15;
 	char *p = dsc->line + n;
+        while (IS_WHITE(*p))
+	    p++;
 	dsc->id = CDSC_DOCUMENTDATA;
 	if (COMPARE(p, "Clean7Bit"))
 	    dsc->document_data = CDSC_CLEAN7BIT;
@@ -2042,7 +2049,7 @@ dsc_scan_comments(CDSC *dsc)
 }
 
 
-private int 
+dsc_private int 
 dsc_scan_preview(CDSC *dsc)
 {
     /* Preview section ends at */
@@ -2060,6 +2067,8 @@ dsc_scan_preview(CDSC *dsc)
 	    dsc->beginpreview = DSC_START(dsc);
 	    dsc->endpreview = DSC_END(dsc);
 	    dsc->scan_section = scan_preview;
+	    if (dsc->preview == CDSC_NOPREVIEW)
+		dsc->preview = CDSC_EPSI;
 	    return CDSC_OK;
 	}
 	else {
@@ -2095,7 +2104,7 @@ dsc_scan_preview(CDSC *dsc)
     return CDSC_OK;
 }
 
-private int
+dsc_private int
 dsc_scan_defaults(CDSC *dsc)
 {
     /* Defaults section ends at */
@@ -2172,7 +2181,7 @@ dsc_scan_defaults(CDSC *dsc)
 
 /* CDSC_RESPONSE_OK and CDSC_RESPONSE_CANCEL mean ignore the 
  * mismatch (default) */
-private int
+dsc_private int
 dsc_check_match_prompt(CDSC *dsc, const char *str, int count)
 {
     if (count != 0) {
@@ -2187,7 +2196,7 @@ dsc_check_match_prompt(CDSC *dsc, const char *str, int count)
     return CDSC_RESPONSE_CANCEL;
 }
 
-private int
+dsc_private int
 dsc_check_match_type(CDSC *dsc, const char *str, int count)
 {
     if (dsc_check_match_prompt(dsc, str, count) == CDSC_RESPONSE_IGNORE_ALL)
@@ -2197,7 +2206,7 @@ dsc_check_match_type(CDSC *dsc, const char *str, int count)
 
 /* complain if Begin/End blocks didn't match */
 /* return non-zero if we should ignore all DSC */
-private int
+dsc_private int
 dsc_check_match(CDSC *dsc)
 {
     int rc = 0;
@@ -2223,7 +2232,7 @@ dsc_check_match(CDSC *dsc)
 }
 
 
-private int 
+dsc_private int 
 dsc_scan_prolog(CDSC *dsc)
 {
     /* Prolog section ends at */
@@ -2323,7 +2332,7 @@ dsc_scan_prolog(CDSC *dsc)
     return CDSC_OK;
 }
 
-private int
+dsc_private int
 dsc_scan_setup(CDSC *dsc)
 {
     /* Setup section ends at */
@@ -2459,7 +2468,7 @@ dsc_scan_setup(CDSC *dsc)
     return CDSC_OK;
 }
 
-private int 
+dsc_private int 
 dsc_scan_page(CDSC *dsc)
 {
     /* Page section ends at */
@@ -2773,7 +2782,7 @@ dsc_scan_page(CDSC *dsc)
  * %%PageResources: 
  */
 
-private int
+dsc_private int
 dsc_scan_trailer(CDSC *dsc)
 {
     /* Trailer section start at */
@@ -2910,7 +2919,7 @@ dsc_scan_trailer(CDSC *dsc)
 }
 
 
-private char *
+dsc_private char *
 dsc_alloc_string(CDSC *dsc, const char *str, int len)
 {
     char *p;
@@ -2958,7 +2967,7 @@ dsc_alloc_string(CDSC *dsc, const char *str, int len)
 }
 
 /* store line, ignoring leading spaces */
-private char *
+dsc_private char *
 dsc_add_line(CDSC *dsc, const char *line, unsigned int len)
 {
     char *newline;
@@ -2991,7 +3000,7 @@ dsc_add_line(CDSC *dsc, const char *line, unsigned int len)
 /* Return pointer to string  */
 /* Store number of used characters from line */
 /* Don't copy enclosing () */
-private char *
+dsc_private char *
 dsc_copy_string(char *str, unsigned int slen, char *line, 
 	unsigned int len, unsigned int *offset)
 {
@@ -3081,7 +3090,7 @@ dsc_copy_string(char *str, unsigned int slen, char *line,
     return str;
 }
 
-private int 
+dsc_private int 
 dsc_get_int(const char *line, unsigned int len, unsigned int *offset)
 {
     char newline[MAXSTR];
@@ -3107,7 +3116,7 @@ dsc_get_int(const char *line, unsigned int len, unsigned int *offset)
     return atoi(newline);
 }
 
-private float 
+dsc_private float 
 dsc_get_real(const char *line, unsigned int len, unsigned int *offset)
 {
     char newline[MAXSTR];
@@ -3136,7 +3145,7 @@ dsc_get_real(const char *line, unsigned int len, unsigned int *offset)
     return (float)atof(newline);
 }
 
-private int
+dsc_private int
 dsc_stricmp(const char *s, const char *t)
 {
     while (toupper(*s) == toupper(*t)) {
@@ -3149,7 +3158,7 @@ dsc_stricmp(const char *s, const char *t)
 }
 
 
-private int
+dsc_private int
 dsc_parse_page(CDSC *dsc)
 {
     char *p;
@@ -3218,7 +3227,7 @@ dsc_debug_print(CDSC *dsc, const char *str)
  *   CDSC_RESPONSE_IGNORE_ALL  Ignore all DSC.
  */
 /* Silent operation.  Don't display errors. */
-private int 
+dsc_private int 
 dsc_error(CDSC *dsc, unsigned int explanation, 
 	char *line, unsigned int line_len)
 {

@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000, 2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -33,7 +33,12 @@
 #include <time.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
+/*
 #include <X11/Xatom.h>
+*/
+#include <semaphore.h>
+#define __USE_GNU	/* we need recursive mutex */
+#include <pthread.h>
 
 #define NeedFunctionPrototypes 1
 #define GSDLL_SYNC 4    /* sync_output for device str */ 
@@ -64,8 +69,10 @@ extern GtkWidget *statusbar;
 extern GtkWidget *statusfile;
 extern GtkWidget *statuscoord;
 extern GtkWidget *statuspage;
-extern GdkPixmap *pixmap;
 extern char *pszLocale;
+
+#ifdef NOTUSED
+extern GdkPixmap *pixmap;
 
 extern int gs_pid;
 extern Atom ghostview_atom;
@@ -78,6 +85,20 @@ extern int gs_pipe_stdin[2];
 extern int gs_pipe_stdout[2];
 extern int gs_pipe_stderr[2];
 extern int infile;
+#endif
+
+
+#define P0() void
+#define P1(t1) t1
+#define P2(t1,t2) t1,t2
+#define P3(t1,t2,t3) t1,t2,t3
+#define P4(t1,t2,t3,t4) t1,t2,t3,t4
+#define P5(t1,t2,t3,t4,t5) t1,t2,t3,t4,t5
+#define P6(t1,t2,t3,t4,t5,t6) t1,t2,t3,t4,t5,t6
+
+#include "errors.h"
+#include "iapi.h"
+#include "gdevdsp.h"
 
 #include "dscparse.h"
 
@@ -99,7 +120,7 @@ extern FILE *malloc_file;
 
 #define MAXSTR 256	/* maximum file name length and general string length */
 #define PROFILE_SIZE 2048
-#define DEVICENAME "x11"
+#define DEVICENAME "display"
 #define DEFAULT_GSCOMMAND "gs"
 #define DEFAULT_RESOLUTION 96.0
 #define DEFAULT_ZOOMRES 300.0
@@ -245,34 +266,26 @@ typedef struct tagPENDING {
 
 extern PENDING pending;
 
+extern pthread_mutex_t hmutex_ps; 	/* for protecting psfile and pending */
+
 typedef struct tagGSINPUT {
     unsigned long ptr;
     unsigned long end;
     BOOL seek;
 } GSINPUT;
 
-#define HMODULE int
+typedef struct tagGSDLL_INPUT {
+    int	count;
+    int	index;
+    GSINPUT section[5];	/* header, defaults, prolog, setup, page */
+} GSDLL_INPUT;
+
+
 /* main structure with info about the GS DLL */
-typedef struct tagGSDLL {
-	BOOL		valid;		/* true if loaded */
-					/* true if GS child process running */
-	HMODULE		hmodule;	/* handle to module */
-					/* On Unix this contains the pid */
-	int		state;
-	long		revision_number;
+#include "cdll.h"
+#include "cimg.h"
+#include "cview.h"
 
-	BYTE *buffer;
-	int buffer_index;	/* offset to next byte to send */
-	int buffer_count;	/* remaining bytes to send */
-	int buffer_length;	/* length of buffer */
-
-	/* TRUE if gsview_showpage should be sent after end of input */
-	BOOL	send_eps_showpage;	
-
-	int	input_count;
-	int	input_index;
-	GSINPUT input[5];	/* header, defaults, prolog, setup, page */
-} GSDLL;
 
 typedef struct tagMATRIX {
    float xx, xy, yx, yy, tx, ty;
@@ -307,7 +320,6 @@ typedef struct tagOPTIONS {
 	int	unit;
 	BOOL	unitfine;
 	int	pstotext;
-	BOOL	quick_open;
 	BOOL	settings;
 	BOOL	button_show;
 	BOOL	fit_page;
@@ -381,10 +393,8 @@ typedef struct tagDISPLAY {
 	BOOL	saved;		/* interpreter state saved */
 	BOOL	need_header;
 	BOOL	need_trailer;
-#ifndef UNIX
-	HEV	event;
-	TID	tid;
-#endif
+	sem_t	event;
+	pthread_t tid;
 } DISPLAY;
 
 extern GtkWidget *last_file_widget[4];
@@ -452,6 +462,10 @@ extern const char szScratch[];	/* temporary filename prefix */
 extern const char *szSpoolPrefix;	/* usually \\spool\ */
 extern ULONG os_version;
 extern BOOL multithread;		/* TRUE if running multithreaded */
+extern int geometry_width;
+extern int geometry_height;
+extern int geometry_xoffset;
+extern int geometry_yoffset;
 
 /*
 extern POINT buttonbar;
@@ -468,6 +482,8 @@ extern long gsbytes_done;		/* number of byte written */
 extern int percent_done;		/* percentage of document processed */
 extern int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
 extern BOOL fit_page_enabled;		/* next WM_SIZE is allowed to resize window */
+extern BOOL fit_page_enabled;		/* next WM_SIZE is allowed to resize window */
+extern BOOL quitnow;	/* Used to cause exit from nested message loops */
 
 
 extern PROG pdfconv;
@@ -489,6 +505,7 @@ extern unsigned int registration_receipt;
 #include "gvcbeta.h"    /* common function prototypes */
 
 /* for pstotext DLL */
+#define HMODULE int	/* pid */
 extern HMODULE pstotextModule;
 extern FILE *pstotextOutfile;
 extern void *pstotextInstance;
@@ -551,9 +568,10 @@ extern char not_defined[];
 
 
 /* in gvx.cpp */
+int init_img_message(void);
+void close_img_message(void);
 void quit_gsview( GtkWidget *w, gpointer   data);
 gboolean gs_client_event(GtkWidget *widget, GdkEventClient *event, gpointer data);
-void write_fn(gpointer data, gint fd, GdkInputCondition condition);
 void gsview_wcmd( GtkWidget *w, gpointer data);
 gint button_press_event(GtkWidget *widget, GdkEventButton *event);
 gint button_release_event(GtkWidget *widget, GdkEventButton *event);
@@ -563,12 +581,6 @@ gint expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
 gint size_event(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
 void statusbar_update(void);
 void set_last_used(void);
-void close_gs_stdin(void);
-int stop_gs(void);
-int start_gs(void);
-int get_gs_input(char *buf, int blen);
-void stop_stdin(void);
-void start_stdin(void);
 void set_scroll(int hscroll, int vscroll);
 
 /* in gvxinit.cpp */
