@@ -8,7 +8,7 @@
  Per i documenti che si attengono all'Adobe Postscript Document Structiring
  Conventions, GSview permette alle pagine selezionate di essere viste o
  stampate.
- GSview 3.0 necessita di Ghostscript 4.03 - 6.99, con preferenza per la versione 6.0.
+ GSview 3.1 necessita di Ghostscript 4.03 - 6.99, con preferenza per la versione 6.0.
 2Installazione
 ?Installazione
  E' consigliabile usare lo specifico programma di installazione per
@@ -216,7 +216,7 @@ E
  cartella del profilo utente alla cartella di GSview, quindi modificarlo
  togliendo tutte le registrazioni, ad eccezione di:
   [Options]
-  Version=3.0
+  Version=3.1
   GSversion=601
   Configured=1
   GhostscriptDLL=e:\Aladdin\gs6.01\bin\gsdll32.dll

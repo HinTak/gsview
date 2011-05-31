@@ -36,7 +36,7 @@
 /*
 #define BETA
 #define BETA_YEAR    2000
-#define BETA_MONTH   6
+#define BETA_MONTH   7
 #define BETA_DAY     30
 */
 

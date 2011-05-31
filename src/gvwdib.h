@@ -54,6 +54,7 @@ typedef struct tagRGB4
     BYTE    rgbReserved;
 } RGB4;
 typedef RGB4 GVFAR* LPRGB4;
+#define SIZEOF_RGB4 4
 
 typedef struct tagBITMAP1
 {
@@ -88,6 +89,7 @@ typedef struct tagBITMAP2INFO
 	RGB4 rgb4[256];
 } BITMAP2INFO;
 typedef BITMAP2INFO GVFAR LPBITMAP2INFO;
+#define SIZEOF_BITMAP2INFO (SIZEOF_BITMAP2 + SIZEOF_RGB4 * 256)
 
 typedef struct tagBITMAPFILE
 {
@@ -127,9 +129,12 @@ public:
 	BOOL Write(CFile *cf);
 	HGLOBAL MakeGlobalDIB(void);
 
+#ifdef NOTUSED
 #ifdef _DEBUG
-//	void Dump(CDumpContext& dc) const;
+	void Dump(CDumpContext& dc);
 #endif
+#endif
+
 //	void DrawDump(CDC *pDC);	// draw BMP details
 //	void Draw(CDC *pDC);
 //	void Draw(CDC *pDC, int xOffset, int yOffset);

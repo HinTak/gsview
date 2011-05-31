@@ -503,6 +503,7 @@ extern HINSTANCE hlanguage;		/* instance of language resources */
 extern BOOL is_win31;			/* To allow selective use of win 3.1 features */
 extern BOOL is_winnt;			/* To allow selective use of Windows NT features */
 extern BOOL is_win95;			/* To allow selective use of Windows 95 features */
+extern BOOL is_win98;			/* To allow selective use of Windows 98 features */
 extern BOOL is_win32s;			/* To allow selective use of Win32s misfeatures */
 extern BOOL is_win4;			/* To allow selective use of Windows 4.0 features */
 extern BOOL multithread;		/* TRUE if running multithreaded */

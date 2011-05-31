@@ -35,13 +35,13 @@
 #include "afxmt.h"
 //#include "GSview.h"
 #include "DIB.h"
-#endif
-
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+#endif
+
 
 // This code assumes that structures elements are PACKED 
 // on byte boundaries.
@@ -178,6 +178,7 @@ void CDIB::Draw(HDC hdc, int xOffset, int yOffset)
     Unlock();
 }
 
+#ifdef NOTUSED
 #ifdef _DEBUG
 void CDIB::Dump(CDumpContext& dc) const
 {
@@ -193,6 +194,7 @@ void CDIB::Dump(CDumpContext& dc) const
 	dc << " ClrUsed " << m_bmp.bmp2.biClrUsed << "\n";
 	dc << " ClrImportant " << m_bmp.bmp2.biClrImportant << "\n";
 }
+#endif
 #endif
 
 void
@@ -610,6 +612,12 @@ CDIB::ReadHeader(CFile *pFile)
 	ASSERT(bmf.bfOffBits != 0);
 	length = bmf.bfOffBits - SIZEOF_BITMAPFILE;
 	ASSERT(length >= 40);
+
+	// make sure we have enough space to add a palette,
+	// in case we want to change the bits per pixel of
+	// the bitmap.
+	if (length < SIZEOF_BITMAP2INFO)
+	    length = SIZEOF_BITMAP2INFO;
 
 	// We are now responsible for freeing this memory
 	hglobal = GlobalAlloc(GHND, length);

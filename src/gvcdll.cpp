@@ -676,7 +676,7 @@ int i;
 	}
 
 	pdf_free_link();
-        gs_printf("userdict /pdfmark {(%%GSVIEW_PDF_MARK: ) print ==only ( ) print ] == flush} bind put\n");
+	pdf_add_pdfmark();
 
         /* calculate document length */
 	ldone = 0;
@@ -1260,7 +1260,7 @@ char **argv;
 
 	/* add other options */
 	/* option.gsother must have options separated by one or more spaces */
-	/* quotes may be put around embedded spaces, but are not copied */
+	/* quotes may be put around embedded spaces and are copied */
 	q = option.gsother;
 	while ((q = gs_argnext(q, p)) != NULL) {
 	    p += strlen(p)+1;

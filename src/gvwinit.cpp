@@ -276,6 +276,10 @@ LOGBRUSH lb;
     if (hbrush_menu)
 	DeleteBrush(hbrush_menu);
     hbrush_menu =  CreateBrushIndirect(&lb);
+
+    /* change class background brush of main and image windows */
+    SetClassLong(hwndimg, GCL_HBRBACKGROUND, (LONG)hbrush_window);
+    SetClassLong(hwndimgchild, GCL_HBRBACKGROUND, (LONG)hbrush_window);
 }
 
 /* main initialisation */
@@ -289,7 +293,6 @@ DWORD version = GetVersion();
 char *p;
 int length = 64;
 BOOL parse_correct;
-
 	getcwd(workdir, sizeof(workdir));
 
 	while (length && !SetMessageQueue(length))
@@ -315,6 +318,8 @@ BOOL parse_correct;
 	/* Windows 4.0 */
 	if (LOBYTE(LOWORD(version)) >= 4)
 	    is_win4 = TRUE;
+	if (is_win95 && is_win4 && HIBYTE(LOWORD(version)) >= 10)
+	    is_win98 = TRUE;
 #endif
 
 	multithread = FALSE;

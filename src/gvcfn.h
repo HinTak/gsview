@@ -248,6 +248,7 @@ int unload_pstotext(void);
 int send_pstotext_prolog(HINSTANCE hmodule, int resource);
 
 /* gvcpdf.c */
+int pdf_add_pdfmark(void);
 int pdf_head(void);
 int pdf_makedoc(int first, int last);
 int pdf_trailer(void);

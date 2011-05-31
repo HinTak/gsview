@@ -19,6 +19,15 @@
 /* Printer routines for Windows GSview */
 #include "gvwin.h"
 
+#ifndef DS_FIXEDSYS
+/* as defined in Windows 2000 April SDK */
+#define DS_FIXEDSYS 0x0008L
+#endif
+#ifndef DS_SHELLFONT
+/* as defined in Windows 2000 April SDK */
+#define DS_SHELLFONT (DS_SETFONT | DS_FIXEDSYS)
+#endif
+
 
 /* documented in Device Driver Adaptation Guide */
 /* Prototypes taken from print.h */
@@ -427,6 +436,25 @@ UniDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    }
 		    return FALSE;
 		case IDOK:
+		    /* select uniprint device in parent dialog */
+		    {char buf[MAXSTR];
+		      GetDlgItemText(GetParent(hDlg), DEVICE_NAME, 
+			buf, sizeof(buf));
+		      if (strcmp(buf, "uniprint") != 0) {
+		        /* select uniprint device */
+		        if (SendDlgItemMessage(GetParent(hDlg), DEVICE_NAME, 
+			    CB_SELECTSTRING, 0, 
+			    (LPARAM)(LPSTR)"uniprint")
+			      == CB_ERR) {
+			  play_sound(SOUND_ERROR);
+			  return FALSE;	/* can't select uniprint */
+		        }
+		        SendDlgNotification(GetParent(hDlg), DEVICE_NAME, 
+		  	  CBN_SELCHANGE);
+		      }
+		      SetDlgItemText(GetParent(hDlg), DEVICE_RES, "");
+		    }
+		    /* select uniprint option in parent dialog */
 		    if (GetDlgItemText(hDlg, UPP_NAME, uppname+2, 
 		      sizeof(uppname)-3) != 0) {
 		      uppname[0] = '"';
@@ -563,370 +591,6 @@ AdvPSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 
 char *device_queue_list;
 int device_queue_index;
-
-#ifdef NOTUSED
-/* dialog box for selecting printer device and resolution */
-BOOL CALLBACK _export
-DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
-{
-	char buf[128];
-	int i, idevice;
-	WORD notify_message;
-	char *p;
-	char *res;
-	char entry[MAXSTR];
-	struct prop_item_s *proplist;
-#ifndef __WIN32__
-	static DLGPROC lpProcPage;
-#endif
-
-	switch (wmsg) {
-	    case WM_INITDIALOG:
-#ifndef __WIN32__
-		lpProcPage = (DLGPROC)MakeProcInstance((FARPROC)PageMultiDlgProc, phInstance);
-#endif
-		p = get_devices(TRUE);	// printer devices
-		res = p;	/* save for free() */
-		while ( p!=(char *)NULL && strlen(p)!=0) {
-		    SendDlgItemMessage(hDlg, DEVICE_NAME, CB_ADDSTRING, 0, 
-			(LPARAM)((LPSTR)p));
-		    p += strlen(p) + 1;
-		}
-		free(res);
-		if (SendDlgItemMessage(hDlg, DEVICE_NAME, CB_SELECTSTRING, 
-			0, (LPARAM)(LPSTR)option.printer_device)
-		    == CB_ERR)
-		    SendDlgItemMessage(hDlg, DEVICE_NAME, CB_SETCURSEL, 0, 0L);
-		/* force update of DEVICE_RES */
-		SendDlgNotification(hDlg, DEVICE_NAME, CBN_SELCHANGE);
-		if (SendDlgItemMessage(hDlg, DEVICE_RES, CB_SELECTSTRING, 
-			0, (LPARAM)(LPSTR)option.printer_resolution)
-		    == CB_ERR)
-		    SendDlgItemMessage(hDlg, DEVICE_RES, CB_SETCURSEL, 0, 0L);
-		/* insert queue list */
-		p = device_queue_list;
-		device_queue_index = 0;
-	        idevice = 0;
-		if (strlen(p)==0) {
-		    /* no printers, so force Print to File */
-		    option.print_to_file = TRUE;
-		    option.print_method = PRINT_GS;
-		    SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_SETCHECK, 1, 0);
-		    EnableWindow(GetDlgItem(hDlg, SPOOL_TOFILE), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, SPOOL_PORT), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, SPOOL_PORTTEXT), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_PSPRINT), FALSE);
-		}
-		while (p && *p) {
-		    if ( strcmp(p, option.printer_queue) == 0 )
-		        device_queue_index = idevice;
-		    SendDlgItemMessage(hDlg, SPOOL_PORT, LB_ADDSTRING, 0, (LPARAM)p);
-		    p += lstrlen(p)+1;
-		    idevice++;
-		}
-	        SendDlgItemMessage(hDlg, SPOOL_PORT, LB_SETCURSEL, device_queue_index, (LPARAM)0);
-		/* fill in page list box */
-		if ( (psfile.dsc != (CDSC *)NULL) && (psfile.dsc->page_count != 0)) {
-		    psfile.page_list.current = psfile.pagenum-1;
-		    psfile.page_list.multiple = TRUE;
-		    for (i=0; i< psfile.dsc->page_count; i++)
-			psfile.page_list.select[i] = TRUE;
-		    psfile.page_list.select[psfile.page_list.current] = TRUE;
-		    psfile.page_list.reverse = option.print_reverse;
-#ifdef __WIN32__
-		    PageMultiDlgProc(hDlg, wmsg, wParam, lParam);
-#else
-		    CallWindowProc((WNDPROC)lpProcPage, hDlg, wmsg, wParam, lParam);
-#endif
-		}
-		else {
-		    psfile.page_list.multiple = FALSE;
-		    EnableWindow(GetDlgItem(hDlg, PAGE_ALL), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, PAGE_ODD), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, PAGE_EVEN), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, PAGE_REVERSE), FALSE);
-		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_ADDSTRING, 0, 
-			(LPARAM)((LPSTR)"All"));
-		    EnableWindow(GetDlgItem(hDlg, PAGE_LISTTEXT), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, PAGE_LIST), FALSE);
-		}
-		/* set PostScript Printer check box */
-		if (option.print_method == PRINT_PS) {
-		    SendDlgItemMessage(hDlg, DEVICE_PSPRINT, BM_SETCHECK, 1, 0);
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_NAMETEXT), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_NAME), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_RES), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_OPTIONS), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_UNIPRINT), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, SPOOL_TOFILE), FALSE);
-		}
-		else {
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_ADVPS), FALSE);
-		    /* set Print to File check box */
-		    if (option.print_to_file) {
-			SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_SETCHECK, 1, 0);
-			EnableWindow(GetDlgItem(hDlg, SPOOL_PORT), FALSE);
-			EnableWindow(GetDlgItem(hDlg, SPOOL_PORTTEXT), FALSE);
-		    }
-		}
-	        SendDlgItemMessage(hDlg, DEVICE_FIXEDMEDIA, BM_SETCHECK, 
-		    option.print_fixed_media, 0);
-		return TRUE;
-	    case WM_COMMAND:
-		notify_message = GetNotification(wParam,lParam);
-		switch (LOWORD(wParam)) {
-		    case PAGE_LIST:
-		    case SPOOL_PORT:
-			if (notify_message == LBN_DBLCLK)
-			    PostMessage(hDlg, WM_COMMAND, IDOK, 0L);
-			return FALSE;
-		    case SPOOL_TOFILE:
-			if (notify_message == BN_CLICKED) {
-		    	    i = (int)SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_GETCHECK, 0, 0);
-			    /* toggle state */
-			    i = (i == 0) ? 1 : 0;
-			    SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_SETCHECK, i, 0);
-			    if (i) {  /* save selection */
-				device_queue_index = (int)SendDlgItemMessage(hDlg, SPOOL_PORT, LB_GETCURSEL, 0, 0L);
-			    }
-			    /* can't clear selection */
-			    EnableWindow(GetDlgItem(hDlg, SPOOL_PORT), (i ? FALSE : TRUE));
-			    EnableWindow(GetDlgItem(hDlg, SPOOL_PORTTEXT), (i ? FALSE : TRUE));
-			}
-			return FALSE;
-		    case DEVICE_PSPRINT:
-			if (notify_message == BN_CLICKED) {
-			    int enable;
-		    	    i = (int)SendDlgItemMessage(hDlg, DEVICE_PSPRINT, BM_GETCHECK, 0, 0);
-			    /* toggle state */
-			    i = (i == 0) ? 1 : 0;
-			    SendDlgItemMessage(hDlg, DEVICE_PSPRINT, BM_SETCHECK, i, 0);
-			    enable = !i;
-			    EnableWindow(GetDlgItem(hDlg, DEVICE_NAMETEXT), enable);
-			    EnableWindow(GetDlgItem(hDlg, DEVICE_NAME), enable);
-			    EnableWindow(GetDlgItem(hDlg, DEVICE_OPTIONSTEXT), enable);
-			    EnableWindow(GetDlgItem(hDlg, DEVICE_OPTIONS), enable);
-			    if (i) {
-				EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), FALSE);
-				EnableWindow(GetDlgItem(hDlg, DEVICE_RES), FALSE);
-			    }
-			    else
-				SendDlgNotification(hDlg, DEVICE_NAME, CBN_SELCHANGE);
-			    EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), enable);
-			    if (i && (int)SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_GETCHECK, 0, 0))
-				SendDlgNotification(hDlg, SPOOL_TOFILE, BN_CLICKED);
-			    EnableWindow(GetDlgItem(hDlg, SPOOL_TOFILE), enable);
-			    EnableWindow(GetDlgItem(hDlg, DEVICE_UNIPRINT), enable);
-			    EnableWindow(GetDlgItem(hDlg, DEVICE_ADVPS), !enable);
-			}
-			return FALSE;
-		    case DEVICE_ADVPS:
-			{
-#ifndef __WIN32__
-	    		DLGPROC lpProcAdv;
-#endif
-			nHelpTopic = IDS_TOPICPRINT;
-#ifdef __WIN32__
-			DialogBoxParam(hlanguage, "AdvancedDlgBox", hDlg, 
-				AdvPSDlgProc, (LPARAM)NULL);
-#else
-			lpProcAdv = (DLGPROC)MakeProcInstance(
-				(FARPROC)AdvPSDlgProc, phInstance);
-			DialogBoxParam(hlanguage, "AdvancedDlgBox", hDlg, 
-				lpProcAdv, (LPARAM)NULL);
-			FreeProcInstance((FARPROC)lpProcAdv);
-#endif
-			}
-			return FALSE;
-		    case ID_HELP:
-		        get_help();
-		        return FALSE;
-		    case DEVICE_NAME:
-			if (notify_message != CBN_SELCHANGE) {
-			    return FALSE;
-			}
-			idevice = (int)SendDlgItemMessage(hDlg, DEVICE_NAME, CB_GETCURSEL, 0, 0L);
-			if (idevice == CB_ERR) {
-			    return FALSE;
-			}
-			SendDlgItemMessage(hDlg, DEVICE_NAME, CB_GETLBTEXT, idevice, (LPARAM)(LPSTR)entry);
-			if ( (proplist = get_properties(entry)) != (struct prop_item_s *)NULL ) {
-	    		    free((char *)proplist);
-			    EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), TRUE);
-			}
-			else
-			    EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), FALSE);
-			/* now look up entry in gsview.ini */
-			/* and update DEVICE_RES list box */
-			GetPrivateProfileString(DEVSECTION, entry, "", buf, sizeof(buf)-2, szIniFile);
-			buf[strlen(buf)+1] = '\0';	/* double NULL at end */
-		    	SendDlgItemMessage(hDlg, DEVICE_RES, CB_RESETCONTENT, 0, 0L);
-			p = buf;
-			if (*p == '\0') {
-			    /* no resolutions can be set */
-			    EnableWindow(GetDlgItem(hDlg, DEVICE_RES), FALSE);
-			    EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), FALSE);
-			}
-			else {
-			  EnableWindow(GetDlgItem(hDlg, DEVICE_RES), TRUE);
-			  EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), TRUE);
-			  while (*p!='\0') {
-			    res = p;
-			    while ((*p!='\0') && (*p!=','))
-				p++;
-			    *p++ = '\0';
-		    	    SendDlgItemMessage(hDlg, DEVICE_RES, CB_ADDSTRING, 0, 
-			        (LPARAM)((LPSTR)res));
-			  }
-			}
-			SendDlgItemMessage(hDlg, DEVICE_RES, CB_SETCURSEL, 0, 0L);
-			if (SendDlgItemMessage(hDlg, DEVICE_RES, CB_GETLBTEXT, 0, (LPARAM)(LPSTR)buf)
-			    != CB_ERR)
-		            SetDlgItemText(hDlg, DEVICE_RES, buf);
-			/* update printer options */
-			{ char section[MAXSTR];
-			strcpy(section, entry);
-			strcat(section, " Options");
-			GetPrivateProfileString(section, "Options", "", buf, sizeof(buf)-2, szIniFile);
-			if (buf[0] == '@') {
-			    /* STUPID Windows *sometimes* removes the quotes.
-			     * If the profile string contains quotes at the
-			     * the start *and* end, Windows will remove them.
-			     * Otherwise, quotes will be copied intact.
-			     * The quotes are important, so we have to put
-			     * them back in.
-			     */
-			    memmove(buf+1, buf, strlen(buf)+1);
-			    buf[0] = '\042';
-			    strcat(buf, "\042");
-			}
-			SetDlgItemText(hDlg, DEVICE_OPTIONS, buf);
-			}
-			return FALSE;
-		    case DEVICE_RES:
-			/* don't have anything to do */
-			return FALSE;
-		    case DEVICE_PROP:
-			idevice = (int)SendDlgItemMessage(hDlg, DEVICE_NAME, CB_GETCURSEL, 0, 0L);
-			if (idevice == CB_ERR) {
-			    return FALSE;
-			}
-			SendDlgItemMessage(hDlg, DEVICE_NAME, CB_GETLBTEXT, idevice, (LPARAM)(LPSTR)entry);
-			if ( (proplist = get_properties(entry)) != (struct prop_item_s *)NULL ) {
-#ifndef __WIN32__
-	    		    DLGPROC lpProcProp;
-#endif
-	    		    free((char *)proplist);
-			    nHelpTopic = IDS_TOPICPRINT;
-#ifdef __WIN32__
-			    DialogBoxParam(hlanguage, "PropDlgBox", hDlg, PropDlgProc, (LPARAM)entry);
-#else
-			    lpProcProp = (DLGPROC)MakeProcInstance((FARPROC)PropDlgProc, phInstance);
-			    DialogBoxParam(hlanguage, "PropDlgBox", hDlg, lpProcProp, (LPARAM)entry);
-			    FreeProcInstance((FARPROC)lpProcProp);
-#endif
-			}
-			else
-			    play_sound(SOUND_ERROR);
-			return FALSE;
-		    case DEVICE_UNIPRINT:
-			{
-#ifndef __WIN32__
-	    		DLGPROC lpProcUni;
-#endif
-			GetDlgItemText(hDlg, DEVICE_NAME, buf, sizeof(buf));
-			if (strcmp(buf, "uniprint") != 0) {
-			  /* select uniprint device */
-			  if (SendDlgItemMessage(hDlg, DEVICE_NAME, 
-			      CB_SELECTSTRING, 0, 
-			      (LPARAM)(LPSTR)"uniprint")
-				== CB_ERR) {
-			    play_sound(SOUND_ERROR);
-			    return FALSE;	/* can't select uniprint */
-			  }
-			  SendDlgNotification(hDlg, DEVICE_NAME, CBN_SELCHANGE);
-			}
-			nHelpTopic = IDS_TOPICPRINT;
-#ifdef __WIN32__
-			DialogBoxParam(hlanguage, "UniDlgBox", hDlg, 
-				UniDlgProc, (LPARAM)NULL);
-#else
-			lpProcUni = (DLGPROC)MakeProcInstance((FARPROC)UniDlgProc, phInstance);
-			DialogBoxParam(hlanguage, "UniDlgBox", hDlg, lpProcUni, (LPARAM)entry);
-			FreeProcInstance((FARPROC)lpProcUni);
-#endif
-			}
-			return FALSE;
-		    case PAGE_ALL:
-		    case PAGE_EVEN:
-		    case PAGE_ODD:
-#ifdef __WIN32__
-		    	PageMultiDlgProc(hDlg, wmsg, wParam, lParam);
-#else
-			CallWindowProc((WNDPROC)lpProcPage, hDlg, wmsg, wParam, lParam);
-#endif
-			return FALSE;
-		    case IDOK:
-			/* save device name and resolution */
-		        GetDlgItemText(hDlg, DEVICE_NAME, 
-				option.printer_device, 
-				sizeof(option.printer_device)-1);
-		        GetDlgItemText(hDlg, DEVICE_RES, 
-				option.printer_resolution, 
-				sizeof(option.printer_resolution)-1);
-			if ((int)SendDlgItemMessage(hDlg, 
-				DEVICE_PSPRINT, BM_GETCHECK, 0, 0))
-			    option.print_method = PRINT_PS;
-			else
-			    option.print_method = PRINT_GS;
-		 	option.print_fixed_media = (int)SendDlgItemMessage(
-				hDlg, DEVICE_FIXEDMEDIA, BM_GETCHECK, 0, 0);
-			/* get Print to File status */
-		 	option.print_to_file = (int)SendDlgItemMessage(hDlg, 
-			    SPOOL_TOFILE, BM_GETCHECK, 0, 0);
-			if (!option.print_to_file) {
-			    /* save queue name */
-			    SendDlgItemMessage(hDlg, SPOOL_PORT, LB_GETTEXT, 
-				(int)SendDlgItemMessage(hDlg, SPOOL_PORT, LB_GETCURSEL, 0, 0L),
-				(LPARAM)(LPSTR)option.printer_queue);
-			}
-			/* get pages */
-			if ((psfile.dsc != (CDSC *)NULL) 
-				&& (psfile.dsc->page_count != 0)) {
-#ifdef __WIN32__
-			    PageMultiDlgProc(hDlg, wmsg, wParam, lParam);
-#else
-			    CallWindowProc((WNDPROC)lpProcPage, hDlg, 
-				wmsg, wParam, lParam);
-#endif
-		            option.print_reverse = psfile.page_list.reverse;
-			}
-#ifndef __WIN32__
-			FreeProcInstance((FARPROC)lpProcPage);
-#endif
-			/* get options */
-			{ char section[MAXSTR];
-			strcpy(section, option.printer_device);
-			strcat(section, " Options");
-		        GetDlgItemText(hDlg, DEVICE_OPTIONS, buf, sizeof(buf)-2);
-			WritePrivateProfileString(section, "Options", buf, szIniFile);
-			}
-			EndDialog(hDlg, TRUE);
-			return TRUE;
-		    case IDCANCEL:
-			EndDialog(hDlg, FALSE);
-#ifndef __WIN32__
-			FreeProcInstance((FARPROC)lpProcPage);
-#endif
-			return TRUE;
-		}
-		break;
-	}
-	return FALSE;
-}
-#endif
 
 
 BOOL
@@ -1992,21 +1656,8 @@ NewDeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	        nHelpTopic = bConvert ? IDS_TOPICCONVERT : IDS_TOPICPRINT;
 		return FALSE;
 	    case DEVICE_UNIPRINT:
-		if (DialogBoxParam(hlanguage, "UniDlgBox", hDlg, 
-			UniDlgProc, (LPARAM)NULL)) {
-		    GetDlgItemText(hDlg, DEVICE_NAME, buf, sizeof(buf));
-		    if (strcmp(buf, "uniprint") != 0) {
-		      /* select uniprint device */
-		      if (SendDlgItemMessage(hDlg, DEVICE_NAME, 
-			  CB_SELECTSTRING, 0, 
-			  (LPARAM)(LPSTR)"uniprint")
-			    == CB_ERR) {
-			play_sound(SOUND_ERROR);
-			return FALSE;	/* can't select uniprint */
-		      }
-		      SendDlgNotification(hDlg, DEVICE_NAME, CBN_SELCHANGE);
-		    }
-		}
+		DialogBoxParam(hlanguage, "UniDlgBox", hDlg, 
+			UniDlgProc, (LPARAM)NULL);
 		return FALSE;
 	    case PAGE_ALL:
 	    case PAGE_EVEN:
@@ -2527,6 +2178,46 @@ printer_cleanup(void)
     pd.hDevNames = NULL;
 }
 
+typedef struct {
+    WORD      dlgVer;
+    WORD      signature;
+    DWORD     helpID;
+    DWORD     exStyle;
+    DWORD     style;
+    WORD      cDlgItems;
+    short     x;
+    short     y;
+    short     cx;
+    short     cy;
+    WORD /* sz_Or_Ord */ menu;
+    WORD /* sz_Or_Ord */ windowClass; 
+    WCHAR     title[1 /* titleLen */]; 
+/* The following members exist only if the style member is  */
+/* set to DS_SETFONT or DS_SHELLFONT. */
+    WORD     pointsize;
+    WORD     weight; 
+    BYTE     italic;
+    BYTE     charset;
+    WCHAR    typeface[1 /* stringLen */];  
+} DLGTEMPLATEEX; 
+typedef DLGTEMPLATEEX *LPDLGTEMPLATEEX;
+
+typedef struct { 
+  DWORD  helpID; 
+  DWORD  exStyle; 
+  DWORD  style; 
+  short  x; 
+  short  y; 
+  short  cx; 
+  short  cy; 
+  WORD   id; 
+  WORD /* sz_Or_Ord */ windowClass; 
+  WORD /* sz_Or_Ord */ title; 
+  WORD   extraCount; 
+} DLGITEMTEMPLATEEX; 
+typedef DLGITEMTEMPLATEEX *LPDLGITEMTEMPLATEEX;
+
+
 WORD *skip_unicode_string(WORD *pw)
 {
     char buf[MAXSTR];
@@ -2545,6 +2236,207 @@ WORD *skip_unicode_string(WORD *pw)
     return pw;
 }
 
+// returns length of dlgtemplateex
+int
+parse_dlgtemplateex(LPDLGTEMPLATEEX pt, LPDLGITEMTEMPLATEEX *pitem, int item_id)
+{
+    LPWORD pw;
+    LPDLGITEMTEMPLATEEX pit;
+    int i;
+    int fixup;
+    char buf[MAXSTR];
+    BOOL debug_gdi = debug & DEBUG_GDI;
+
+    // for debugging, dump to gs messages
+    if (debug_gdi) {
+	gs_addmess("=== Dump of dialog template ex ===\n");
+	wsprintf(buf, "dlgVer=%d signature=0x%x helpID=%d exStyle=0x%x style=0x%x cDlgItems=%d x=%d y=%d cx=%d cy=%d\n",
+	    (int)pt->dlgVer, (int)pt->signature,
+	    (int)pt->helpID,
+	     (int)pt->style, (int)pt->exStyle,
+	    (int)pt->cDlgItems, (int)pt->x, (int)pt->y,
+	    (int)pt->cx, (int)pt->cy);
+	gs_addmess(buf);
+    }
+    pw = (LPWORD)((LPBYTE)pt + 26 /* sizeof(DLGTEMPLATEEX) up to cy */);
+    if (*pw == 0x0000) {
+	pw++;
+	if (debug_gdi)
+	    gs_addmess("No menu\n");
+    }
+    else if (*pw == 0xffff) {
+	pw++;
+	if (debug_gdi) {
+	    wsprintf(buf, "Menu id %d\n", (int)*pw);
+	    gs_addmess(buf);
+	}
+	pw++;
+    }
+    else {
+	if (debug_gdi)
+	    gs_addmess("Menu name \042");
+	// unicode string
+	pw = skip_unicode_string(pw);
+	if (debug_gdi)
+	    gs_addmess("\042\n");
+    }
+    // might have class array
+    if (*pw == 0x0000) {
+	pw++;
+	if (debug_gdi)
+	    gs_addmess("No class\n");
+    }
+    else if (*pw == 0xffff) {
+	pw++;
+	if (debug_gdi) {
+	    wsprintf(buf, "Class id %d\n", (int)*pw);
+	    gs_addmess(buf);
+	}
+	pw++;
+    }
+    else {
+	if (debug_gdi)
+	    gs_addmess("Class name \042");
+	pw = skip_unicode_string(pw);
+	if (debug_gdi)
+	    gs_addmess("\042\n");
+    }
+    // might have title array
+    if (*pw == 0x0000) {
+	pw++;
+	if (debug_gdi)
+	    gs_addmess("No title\n");
+    }
+    else {
+	if (debug_gdi)
+	    gs_addmess("Title name \042");
+	pw = skip_unicode_string(pw);
+	if (debug_gdi)
+	    gs_addmess("\042\n");
+    }
+    // might have font size/name
+    if ( ((pt->style & DS_SETFONT) == DS_SETFONT) ||
+	 ((pt->style & DS_SHELLFONT) == DS_SHELLFONT) ) {
+	if (debug_gdi) {
+	    wsprintf(buf, "Font size = %d\n", (int)*pw);
+	    gs_addmess(buf);
+	}
+	pw++;
+	if (debug_gdi) {
+	    wsprintf(buf, "Font weight = %d\n", (int)*pw);
+	    gs_addmess(buf);
+	}
+	pw++;
+	if (debug_gdi) {
+	    wsprintf(buf, "Font italic = %d\n", ((unsigned char *)pw)[0]);
+	    gs_addmess(buf);
+	    wsprintf(buf, "Font charset = %d\n", ((unsigned char *)pw)[1]);
+	    gs_addmess(buf);
+	}
+	pw++;
+	if (debug_gdi)
+	    gs_addmess("Font name ");
+	pw = skip_unicode_string(pw);
+	if (debug_gdi)
+	    gs_addmess("\n");
+    }
+    else if (debug_gdi)
+	gs_addmess("No font\n");
+ 
+    for (i=0; i<pt->cDlgItems; i++) {
+        pit = (LPDLGITEMTEMPLATEEX)pw;
+	// realign to DWORD boundary
+	fixup = ((LPBYTE)pit - (LPBYTE)pt) % 4;
+	if (fixup != 0)
+	    pit = (LPDLGITEMTEMPLATEEX)((LPBYTE)pit + (4-fixup));
+	if (debug_gdi) {
+	    wsprintf(buf, "Dialog item ex %d\n", i);
+	    gs_addmess(buf);
+	    wsprintf(buf, "  helpID=%d exStyle=0x%x style=0x%x x=%d y=%d cx=%d cy=%d id=%d\n",
+		(int)pit->helpID,
+		(int)pit->exStyle, (int)pit->style, 
+		(int)pit->x, (int)pit->y,
+		(int)pit->cx, (int)pit->cy, (int)pit->id);
+	    gs_addmess(buf);
+	}
+
+	if ((pit->id == item_id) && (pitem != NULL))
+	    *pitem = pit;
+
+	pw = (LPWORD)((LPBYTE)pit + 22);
+/* for some reason, there is an extra null byte always present */
+pw++;
+	/* sizeof(DLGITEMTEMPLATEEX) less windowClass, title, extraCount */
+	// might have class array
+	if (*pw == 0xffff) {
+	    pw++;
+	    char *pc;
+	    switch ((int)*pw) {
+		case 0x0080:
+		    pc = "Button\n";
+		    break;
+		case 0x0081:
+		    pc = "Edit\n";
+		    break;
+		case 0x0082:
+		    pc = "Static\n";
+		    break;
+		case 0x0083:
+		    pc = "List box\n";
+		    break;
+		case 0x0084:
+		    pc = "Scroll bar\n";
+		    break;
+		case 0x0085:
+		    pc = "Combo box\n";
+		    break;
+		default:
+		    wsprintf(buf, " Control class id %d\n", (int)*pw);
+		    pc = buf;
+	    }
+	    pw++;
+	    if (debug_gdi) {
+		gs_addmess("  ");
+		gs_addmess(pc);
+	    }
+	}
+	else {
+	    if (debug_gdi)
+		gs_addmess("  Control class name \042");
+	    pw = skip_unicode_string(pw);
+	    if (debug_gdi)
+		gs_addmess("\042\n");
+	}
+	// might have title array
+	if (*pw == 0xffff) {
+	    pw++;
+	    if (debug_gdi)
+		wsprintf(buf, "  Title resource id %d\n", (int)*pw);
+	    pw++;
+	}
+	else {
+	    if (debug_gdi)
+		gs_addmess("  Title name \042");
+	    pw = skip_unicode_string(pw);
+	    if (debug_gdi)
+		gs_addmess("\042\n");
+	}
+	// might have creation data
+	if (*pw) {
+	    // skip *pw bytes of data, realigning to word boundary
+	    pw += ((*pw + 1) / sizeof(WORD)) ;	// skip creation data
+	}
+	pw++;	// skip creation data count
+    }
+
+    fixup = (LPBYTE)pw - (LPBYTE)pt;	// length of template
+    if (debug_gdi) {
+	wsprintf(buf, "Processed %d bytes of DLGTEMPLATEEX\n", fixup);
+	gs_addmess(buf);
+	gs_addmess("=== End of dialog template ===\n");
+    }
+    return fixup;
+}
 
 // returns length of dlgtemplate
 int
@@ -2727,6 +2619,50 @@ parse_dlgtemplate(LPDLGTEMPLATE pt, LPDLGITEMTEMPLATE *pitem, int item_id)
     return fixup;
 }
 
+/* returns number of WORDs added to structure */
+int dlg_add_control(LPDLGTEMPLATE pt, LPWORD pw, 
+    LPDLGITEMTEMPLATE dit, WORD control, BOOL bDlgEx)
+{
+    int fixup;
+    LPWORD newpw;
+    if (bDlgEx) {
+	LPDLGTEMPLATEEX ptex = (LPDLGTEMPLATEEX)pt;
+	LPDLGITEMTEMPLATEEX pitex = (LPDLGITEMTEMPLATEEX)pw;
+	ptex->cDlgItems += 1;
+	pitex->helpID = 0;
+	pitex->exStyle = dit->dwExtendedStyle;
+	pitex->style = dit->style;
+	pitex->x = dit->x;
+	pitex->y = dit->y;
+	pitex->cx = dit->cx;
+	pitex->cy = dit->cy;
+	pitex->id = dit->id;
+	/* newpw = (LPWORD)((LPBYTE)pw + 22); */
+	/* documentation says structure should be 22 bytes, but 24 is needed */
+	newpw = (LPWORD)((LPBYTE)pw + 24);
+    }
+    else {
+	LPDLGITEMTEMPLATE pit = (LPDLGITEMTEMPLATE)pw;
+	pt->cdit += 1;
+	pit->style = dit->style;
+	pit->dwExtendedStyle = dit->dwExtendedStyle;
+	pit->x = dit->x;
+	pit->y = dit->y;
+	pit->cx = dit->cx;
+	pit->cy = dit->cy;
+	pit->id = dit->id;
+	newpw = (LPWORD)((LPBYTE)pw + sizeof(DLGITEMTEMPLATE));
+    }
+    *newpw++ = 0xffff;	// windowClass
+    *newpw++ = control;	//   button
+    *newpw++ = 0x0000;	// title
+    *newpw++ = 0;	// creation data length
+    fixup = ((LPBYTE)newpw - (LPBYTE)pt) & 3;
+    if (fixup == 2)
+	*newpw++ = 0;
+    return ((LPBYTE)newpw - (LPBYTE)pw) / sizeof(WORD);
+}
+
 
 // Return a modified printer common dialog template
 // This template should be released with GlobalFree();
@@ -2734,20 +2670,22 @@ HGLOBAL fix_prn_dlg(void)
 {
     LPDLGTEMPLATE pt;
     LPDLGITEMTEMPLATE pit;
-    LPDLGITEMTEMPLATE pit_pagerange = NULL;
-    LPDLGITEMTEMPLATE pit_selection = NULL;
     LPWORD pw;
     int length;
     int fixup;
     char buf[MAXSTR];
-    HMODULE hCommDlg = phInstance;
     HGLOBAL hglobal;
     LPDLGTEMPLATE ptemplate;
+    BOOL bDlgEx = FALSE;
+    DLGITEMTEMPLATE dit;
 
+    HMODULE hCommDlg = phInstance;
     if (!is_win32s)  {
 	hCommDlg = LoadLibrary("COMDLG32.DLL");
-	if (hCommDlg < (HINSTANCE)HINSTANCE_ERROR)
+	if (hCommDlg < (HINSTANCE)HINSTANCE_ERROR) {
+	    gs_addmess("comdlg32.dll load failed\n");
 	    return NULL;
+	}
     }
 
     HRSRC hrsrc = FindResource(hCommDlg, MAKEINTRESOURCE(1538), RT_DIALOG);
@@ -2756,9 +2694,11 @@ HGLOBAL fix_prn_dlg(void)
 
     if ( (ptemplate = (LPDLGTEMPLATE)LockResource(hglobal)) 
 	    == (LPDLGTEMPLATE)NULL) {
+	gs_addmess("Failed to find print dialog resource 1538\n");
 	FreeLibrary(hCommDlg);
 	return NULL;
     }
+
     if (debug & DEBUG_GDI) {
 	wsprintf(buf, "size of dialog template from resources=%ld\n", dwSize);
 	gs_addmess(buf);
@@ -2769,12 +2709,25 @@ HGLOBAL fix_prn_dlg(void)
     // 3 auto radio buttons,  3 settings pushbuttons,
     // 1 select page pushbutton, 
     // 1 help pushbutton
-    int extra_size = sizeof(WORD)	// in case original needs padding
+    int extra_size;
+    if (*(DWORD *)ptemplate == 0xffff0001) {
+	extra_size = sizeof(WORD)	// in case original needs padding
+		+ 9 * (24	// sizeof(DLGITEMTEMPLATEEX)
+				//   less windowClass, title, extraCount
+				//   plus 2 (unknown why this is needed)
+		+ 2 * sizeof(WORD) 	// class id
+		+ sizeof(WORD)		// empty string
+		+ sizeof(WORD)		// creation data length
+		+ sizeof(WORD));	// padding
+    }
+    else {
+	extra_size = sizeof(WORD)	// in case original needs padding
 		+ 9 * (sizeof(DLGITEMTEMPLATE)  // 18 bytes
 		+ 2 * sizeof(WORD) 	// class id
 		+ sizeof(WORD)		// empty string
 		+ sizeof(WORD)		// creation data length
 		+ sizeof(WORD));	// padding
+    }
     // We set the titles of each control in WM_INITDIALOG
     // from resource strings.
 
@@ -2782,6 +2735,7 @@ HGLOBAL fix_prn_dlg(void)
     HGLOBAL hglobal_new = GlobalAlloc(GPTR, dwSize + extra_size);
     pt = (LPDLGTEMPLATE)GlobalLock(hglobal_new);
     if (pt == NULL) {
+	gs_addmess("Failed to allocate space for print dialog template\n");
 	FreeLibrary(hCommDlg);
 	return NULL;
     }
@@ -2794,10 +2748,41 @@ HGLOBAL fix_prn_dlg(void)
 	gs_addmess(buf);
     }
 
+    int cx, cy;
+    int selpagex = 0;
+    int selpagey = 0;
     // parse DLGTEMPLATE and find Page Range groupbox 
     // and Selection radio button
-    length = parse_dlgtemplate(pt, &pit_pagerange, 1072);
-    parse_dlgtemplate(pt, &pit_selection, 1057);
+    if (*(DWORD *)pt == 0xffff0001) {
+	/* DLGTEMPLATEEX */
+	LPDLGITEMTEMPLATEEX pit_pagerange = NULL;
+	LPDLGITEMTEMPLATEEX pit_selection = NULL;
+	bDlgEx = TRUE;
+	length = parse_dlgtemplateex((LPDLGTEMPLATEEX)pt, &pit_pagerange, 1072);
+	parse_dlgtemplateex((LPDLGTEMPLATEEX)pt, &pit_selection, 1057);
+	cx = ((LPDLGTEMPLATEEX)pt)->cx;
+	cy = ((LPDLGTEMPLATEEX)pt)->cy;
+	if ((pit_pagerange != 0) && (pit_selection != NULL)) {
+	    // location of Select Pages button
+	    selpagex = pit_pagerange->x + pit_pagerange->cx;
+	    selpagey = pit_selection->y + pit_selection->cy/2;
+	}
+    }
+    else {
+	/* older DLGTEMPLATE */
+	LPDLGITEMTEMPLATE pit_pagerange = NULL;
+	LPDLGITEMTEMPLATE pit_selection = NULL;
+	length = parse_dlgtemplate(pt, &pit_pagerange, 1072);
+	parse_dlgtemplate(pt, &pit_selection, 1057);
+	cx = pt->cx;
+	cy = pt->cy;
+	if ((pit_pagerange != 0) && (pit_selection != NULL)) {
+	    // location of Select Pages button
+	    selpagex = pit_pagerange->x + pit_pagerange->cx;
+	    selpagey = pit_selection->y + pit_selection->cy/2;
+	}
+    }
+
     pw = (LPWORD)((LPBYTE)pt + length);
     fixup = ((LPBYTE)pw - (LPBYTE)pt) & 3;
     if (fixup == 2)
@@ -2805,191 +2790,126 @@ HGLOBAL fix_prn_dlg(void)
 
     // START OF ADDITIONS
     // some extra space at bottom of dialog
-    pt->cy += 72;
+    cy += 72;
     if (is_win32s)
-	pt->cy += 8;
+	cy += 8;
+    if (bDlgEx)
+	((LPDLGTEMPLATEEX)pt)->cy = cy;
+    else
+	pt->cy = cy;
 
+#define ORD_BUTTON 0x0080
     // "Print Method" groupbox
-    pt->cdit += 1;
-    pit = (LPDLGITEMTEMPLATE)pw;
-    pit->style = BS_GROUPBOX | WS_GROUP | WS_CHILD | WS_VISIBLE;
-    pit->dwExtendedStyle = 0;
-    pit->x = 8;
-    pit->y = pt->cy - 80;
-    pit->cx = 164;
-    pit->cy = 72;
-    pit->id = IDC_DEVICE_GROUP;
-    pw = (LPWORD)((LPBYTE)pit + sizeof(DLGITEMTEMPLATE));
-    *pw++ = 0xffff;
-    *pw++ = 0x0080;	// button
-    *pw++ = 0x0000;	// title
-    *pw++ = 0;	// creation data length
-    fixup = ((LPBYTE)pw - (LPBYTE)pt) & 3;
-    if (fixup == 2)
-	*pw++ = 0;
+    dit.style = BS_GROUPBOX | WS_GROUP | WS_CHILD | WS_VISIBLE;
+    dit.dwExtendedStyle = 0;
+    dit.x = 8;
+    dit.y = cy - 80;
+    dit.cx = 164;
+    dit.cy = 72;
+    dit.id = IDC_DEVICE_GROUP;
+    pw += dlg_add_control(pt, pw, &dit, ORD_BUTTON, bDlgEx);
 
     // "Windows GDI Printer" auto radio button
-    pt->cdit += 1;
-    pit = (LPDLGITEMTEMPLATE)pw;
-    pit->style = BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE;
-    pit->dwExtendedStyle = 0;
-    pit->x = 16;
-    pit->y = pt->cy - 70;
-    pit->cx = 80;
-    pit->cy = 12;
-    pit->id = IDC_DEVICE_GDI;
-    pw = (LPWORD)((LPBYTE)pit + sizeof(DLGITEMTEMPLATE));
-    *pw++ = 0xffff;
-    *pw++ = 0x0080;	// button
-    *pw++ = 0x0000;	// title
-    *pw++ = 0;	// creation data length
-    fixup = ((LPBYTE)pw - (LPBYTE)pt) & 3;
-    if (fixup == 2)
-	*pw++ = 0;
+    dit.style = BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE;
+    dit.dwExtendedStyle = 0;
+    dit.x = 16;
+    dit.y = cy - 70;
+    dit.cx = 80;
+    dit.cy = 12;
+    dit.id = IDC_DEVICE_GDI;
+    pw += dlg_add_control(pt, pw, &dit, ORD_BUTTON, bDlgEx);
 
     // "Ghostscript device" auto radio button
-    pt->cdit += 1;
-    pit = (LPDLGITEMTEMPLATE)pw;
-    pit->style = BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE;
-    pit->dwExtendedStyle = 0;
-    pit->x = 16;
-    pit->y = pt->y;
-    pit->y = pt->cy - 50;
-    pit->cx = 80;
-    pit->cy = 12;
-    pit->id = IDC_DEVICE_GS;
-    pw = (LPWORD)((LPBYTE)pit + sizeof(DLGITEMTEMPLATE));
-    *pw++ = 0xffff;
-    *pw++ = 0x0080;	// button
-    *pw++ = 0x0000;	// title
-    *pw++ = 0;	// creation data length
-    fixup = ((LPBYTE)pw - (LPBYTE)pt) & 3;
-    if (fixup == 2)
-	*pw++ = 0;
+    dit.style = BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE;
+    dit.dwExtendedStyle = 0;
+    dit.x = 16;
+    dit.y = cy - 50;
+    dit.cx = 80;
+    dit.cy = 12;
+    dit.id = IDC_DEVICE_GS;
+    pw += dlg_add_control(pt, pw, &dit, ORD_BUTTON, bDlgEx);
 
     // "PostScript printer" auto radio button
-    pt->cdit += 1;
-    pit = (LPDLGITEMTEMPLATE)pw;
-    pit->style = BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE;
-    pit->dwExtendedStyle = 0;
-    pit->x = 16;
-    pit->y = pt->cy - 30;
-    pit->cx = 80;
-    pit->cy = 12;
-    pit->id = IDC_DEVICE_PS;
-    pw = (LPWORD)((LPBYTE)pit + sizeof(DLGITEMTEMPLATE));
-    *pw++ = 0xffff;
-    *pw++ = 0x0080;	// button
-    *pw++ = 0x0000;	// title
-    *pw++ = 0;	// creation data length
-    fixup = ((LPBYTE)pw - (LPBYTE)pt) & 3;
-    if (fixup == 2)
-	*pw++ = 0;
+    dit.style = BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE;
+    dit.dwExtendedStyle = 0;
+    dit.x = 16;
+    dit.y = cy - 30;
+    dit.cx = 80;
+    dit.cy = 12;
+    dit.id = IDC_DEVICE_PS;
+    pw += dlg_add_control(pt, pw, &dit, ORD_BUTTON, bDlgEx);
 
     // "Settings" for PRINT_GDI pushbutton
-    pt->cdit += 1;
-    pit = (LPDLGITEMTEMPLATE)pw;
-    pit->style = BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP | WS_CHILD | WS_VISIBLE;
-    pit->dwExtendedStyle = 0;
-    pit->x = 114;
-    pit->y = pt->cy - 70;
-    pit->cx = 50;
-    pit->cy = 14;
-    pit->id = IDC_GS_WINDOWS;
-    pw = (LPWORD)((LPBYTE)pit + sizeof(DLGITEMTEMPLATE));
-    *pw++ = 0xffff;
-    *pw++ = 0x0080;	// button
-    *pw++ = 0x0000;	// title
-    *pw++ = 0;	// creation data length
-    fixup = ((LPBYTE)pw - (LPBYTE)pt) & 3;
-    if (fixup == 2)
-	*pw++ = 0;
+    dit.style = BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP | WS_CHILD | WS_VISIBLE;
+    dit.dwExtendedStyle = 0;
+    dit.x = 114;
+    dit.y = cy - 70;
+    dit.cx = 50;
+    dit.cy = 14;
+    dit.id = IDC_GS_WINDOWS;
+    pw += dlg_add_control(pt, pw, &dit, ORD_BUTTON, bDlgEx);
 
     // "Settings" for PRINT_GS pushbutton
-    pt->cdit += 1;
-    pit = (LPDLGITEMTEMPLATE)pw;
-    pit->style = BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP | WS_CHILD | WS_VISIBLE;
-    pit->dwExtendedStyle = 0;
-    pit->x = 114;
-    pit->y = pt->cy - 50;
-    pit->cx = 50;
-    pit->cy = 14;
-    pit->id = IDC_GS_DEVNAME;
-    pw = (LPWORD)((LPBYTE)pit + sizeof(DLGITEMTEMPLATE));
-    *pw++ = 0xffff;
-    *pw++ = 0x0080;	// button
-    *pw++ = 0x0000;	// title
-    *pw++ = 0;	// creation data length
-    fixup = ((LPBYTE)pw - (LPBYTE)pt) & 3;
-    if (fixup == 2)
-	*pw++ = 0;
+    dit.style = BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP | WS_CHILD | WS_VISIBLE;
+    dit.dwExtendedStyle = 0;
+    dit.x = 114;
+    dit.y = cy - 50;
+    dit.cx = 50;
+    dit.cy = 14;
+    dit.id = IDC_GS_DEVNAME;
+    pw += dlg_add_control(pt, pw, &dit, ORD_BUTTON, bDlgEx);
 
     // "Settings" for PRINT_PS pushbutton
-    pit = (LPDLGITEMTEMPLATE)pw;
-    pt->cdit += 1;
-    pit->style = BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP | WS_CHILD | WS_VISIBLE;
-    pit->dwExtendedStyle = 0;
-    pit->x = 114;
-    pit->y = pt->cy - 30;
-    pit->cx = 50;
-    pit->cy = 14;
-    pit->id = IDC_GS_ADVPS;
-    pw = (LPWORD)((LPBYTE)pit + sizeof(DLGITEMTEMPLATE));
-    *pw++ = 0xffff;
-    *pw++ = 0x0080;	// button
-    *pw++ = 0x0000;	// title
-    *pw++ = 0;	// creation data length
-    fixup = ((LPBYTE)pw - (LPBYTE)pt) & 3;
-    if (fixup == 2)
-	*pw++ = 0;
+    dit.style = BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP | WS_CHILD | WS_VISIBLE;
+    dit.dwExtendedStyle = 0;
+    dit.x = 114;
+    dit.y = cy - 30;
+    dit.cx = 50;
+    dit.cy = 14;
+    dit.id = IDC_GS_ADVPS;
+    pw += dlg_add_control(pt, pw, &dit, ORD_BUTTON, bDlgEx);
 
     // "Help" pushbutton
-    pit = (LPDLGITEMTEMPLATE)pw;
-    pt->cdit += 1;
-    pit->style = BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP | WS_CHILD | WS_VISIBLE;
-    pit->dwExtendedStyle = 0;
-    pit->x = 180;
-    pit->y = pt->cy - 70;
-    pit->cx = 48;
+    dit.style = BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP | WS_CHILD | WS_VISIBLE;
+    dit.dwExtendedStyle = 0;
+    dit.x = 180;
+    dit.y = cy - 70;
+    dit.cx = 48;
     if (is_win32s)
-	pit->cx = 40;
-    pit->cy = 14;
-    pit->id = ID_HELP;
-    pw = (LPWORD)((LPBYTE)pit + sizeof(DLGITEMTEMPLATE));
-    *pw++ = 0xffff;
-    *pw++ = 0x0080;	// button
-    *pw++ = 0x0000;	// title
-    *pw++ = 0;	// creation data length
-    fixup = ((LPBYTE)pw - (LPBYTE)pt) & 3;
-    if (fixup == 2)
-	*pw++ = 0;
+	dit.cx = 40;
+    dit.cy = 14;
+    dit.id = ID_HELP;
+    pw += dlg_add_control(pt, pw, &dit, ORD_BUTTON, bDlgEx);
 
     // "Select Pages" pushbutton
-    pit = (LPDLGITEMTEMPLATE)pw;
-    pt->cdit += 1;
-    pit->style = BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP | WS_CHILD | WS_VISIBLE;
-    pit->dwExtendedStyle = 0;
-    pit->cx = 60;
-    pit->cy = 14;
+    dit.style = BS_PUSHBUTTON | WS_TABSTOP | WS_GROUP | WS_CHILD | WS_VISIBLE;
+    dit.dwExtendedStyle = 0;
+    dit.cx = 60;
+    dit.cy = 14;
     // Place this near "Selection" radio button
     // Do this by placing it vertically aligned with selection radio button
     // and right aligned with the page range groupbox
-    pit->x = pit_pagerange->x + pit_pagerange->cx - pit->cx - 6;
-    pit->y = pit_selection->y + (pit_selection->cy - pit->cy) / 2;
-    pit->id = IDC_SELECT_PAGES;
-    pw = (LPWORD)((LPBYTE)pit + sizeof(DLGITEMTEMPLATE));
-    *pw++ = 0xffff;
-    *pw++ = 0x0080;	// button
-    *pw++ = 0x0000;	// title
-    *pw++ = 0;	// creation data length
-    fixup = ((LPBYTE)pw - (LPBYTE)pt) & 3;
-    if (fixup == 2)
-	*pw++ = 0;
+    if ((selpagex==0) || (selpagey==0)) {
+	gs_addmess(
+	    "Error: can't find Print Range groupbox or Selection button\n");
+	/* place it below the help button instead */
+	dit.x = 180;
+	dit.y = cy - 50;
+    }
+    else {
+	dit.x = selpagex - dit.cx - 6;
+	dit.y = selpagey  - dit.cy / 2;
+    }
+    dit.id = IDC_SELECT_PAGES;
+    pw += dlg_add_control(pt, pw, &dit, ORD_BUTTON, bDlgEx);
 // END OF ADDITIONS
 
-    // 
-    if (debug & DEBUG_GDI)	// dump it again with our additions
-        parse_dlgtemplate(pt, NULL, 0);
+    if (debug & DEBUG_GDI) {	// dump it again with our additions
+	if (bDlgEx)
+	    parse_dlgtemplateex((LPDLGTEMPLATEEX)pt, NULL, 0);
+	else
+	    parse_dlgtemplate(pt, NULL, 0);
+    }
 
     GlobalUnlock(hglobal_new);
     return hglobal_new;

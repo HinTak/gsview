@@ -1060,8 +1060,20 @@ int method = option.print_method;
 
 	/* Options */
 	profile_read_string(prf, section, "Options", "", buf, sizeof(buf)-2);
-	if (strlen(buf) > 0)
-	   fprintf(optfile, "%s\n", buf);
+	if (strlen(buf) > 0) {
+	    if (buf[0] == '@') {
+		/* STUPID Windows *sometimes* removes the quotes.
+		 * If the profile string contains quotes at the
+		 * the start *and* end, Windows will remove them.
+		 * Otherwise, quotes will be copied intact.
+		 * The quotes are important, so we have to put
+		 * them back in.
+		 */
+		fprintf(optfile, "\042%s\042\n", buf);
+	    }
+	    else
+		fprintf(optfile, "%s\n", buf);
+ 	}
 	profile_close(prf);
     }
 
@@ -1075,8 +1087,9 @@ int method = option.print_method;
 	free((char *)proplist);
     }
     p = option.gsother;
-    while ((p = gs_argnext(p, buf)) != NULL)
-        fprintf(optfile, "%s\n", buf);
+    while ((p = gs_argnext(p, buf)) != NULL) {
+	fprintf(optfile, "%s\n", buf);
+    }
 
     if ( ((method==PRINT_GS || method==PRINT_GDI) && option.print_fixed_media)
 	|| ((method==PRINT_CONVERT) && option.convert_fixed_media) ) {

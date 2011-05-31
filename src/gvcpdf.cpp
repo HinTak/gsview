@@ -35,6 +35,58 @@ char pdf_mark_tag[] = "%GSVIEW_PDF_MARK: ";
 int pdf_rotate = IDM_PORTRAIT;
 void pdf_add_link(PDFLINK link);
 
+
+/* we will need to update this pdfmark code to handle */
+/* embedded dictionaries */
+int 
+pdf_add_pdfmark(void)
+{
+#ifdef NOTUSED
+/* This code only works if using default user space */ 
+        return gs_printf("userdict /pdfmark {(%s) print ==only counttomark 2 idiv { ( ) print exch ==only ( ) print ==only} repeat pop (\\n) print flush} bind put\n", pdf_mark_tag);
+#else
+/* pdfmark operates in user space, not in default user space */
+/* Within a PDF file however, annotations use default user space */
+/* Based on code provided by Valeriy Ushakov */
+        return gs_printf("\
+userdict /pdfmark { \
+(%s) print ==only \
+ counttomark 2 idiv \
+ { exch dup /Rect eq \
+  { ( ) print ==only ( ) print dup length 4 eq not \
+   {==only} \
+   {aload \
+    5 -2 roll transform matrix defaultmatrix itransform \
+    5 -2 roll transform matrix defaultmatrix itransform \
+    5 -1 roll astore ==only \
+   } \
+   ifelse \
+  } \
+  { dup /Border eq \
+   { ( ) print ==only ( ) print dup length 4 eq \
+    {aload \
+     5 -2 roll dtransform matrix defaultmatrix idtransform \
+     5 -2 roll dtransform matrix defaultmatrix idtransform \
+     5 -1 roll astore ==only \
+    } \
+    {aload \
+     4 -2 roll dtransform matrix defaultmatrix idtransform \
+     4 -1 roll dup dtransform matrix defaultmatrix idtransform pop \
+     4 -1 roll astore ==only \
+    } \
+    ifelse \
+   } \
+   { ( ) print ==only ( ) print ==only \
+   } \
+   ifelse \
+  } \
+  ifelse \
+ } repeat pop (\n) print flush \
+} bind put \
+\n", pdf_mark_tag);
+#endif
+}
+
 int
 pdf_head(void)
 {
@@ -68,10 +120,8 @@ Page /Rotate pget not { 0 } if\n\
 } def\n", pdf_media_tag, pdf_crop_tag, pdf_rotate_tag);
 
 
-    /* we will need to update this pdfmark code to handle */
-    /* embedded dictionaries */
     if (!code)
-        code = gs_printf("userdict /pdfmark {(%s) print ==only counttomark 2 idiv { ( ) print exch ==only ( ) print ==only} repeat pop (\\n) print flush} bind put\n", pdf_mark_tag);
+	code = pdf_add_pdfmark();
 
     /* put these in userdict so we can write to them later */
     if (!code)

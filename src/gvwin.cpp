@@ -70,6 +70,7 @@ struct sound_s sound[NUMSOUND] = {
 /* initialised in init.c */
 BOOL is_winnt = FALSE;		/* To allow selective use of Windows NT features */
 BOOL is_win95 = FALSE;		/* To allow selective use of Windows 95 features */
+BOOL is_win98 = FALSE;		/* To allow selective use of Windows 98 features */
 BOOL is_win32s = FALSE;		/* To allow selective use of Win32s misfeatures */
 BOOL is_win4;			/* To allow selective use of Windows 4.0 features */
 BOOL multithread = FALSE;
@@ -728,8 +729,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			      SendMessage(hwnd,WM_HSCROLL,SB_LINEDOWN,0L);
 			    break;
 			case VK_ESCAPE:
-			    if (fullscreen)
-				DestroyWindow(hwnd_fullscreen);
+			    gsview_fullscreen_end();
 			    break;
 		    }
 		    return(0);
@@ -1133,14 +1133,16 @@ RECT rect;
 	    if (!gsdll.device) {
 		ShowWindow(hwndimgchild, SW_HIDE);
 		if (fullscreen)
-		    DestroyWindow(hwnd_fullscreen);
+		    ShowWindow(hwnd_fullscreen, SW_HIDE);
 	    }
 	    bitmap.changed = TRUE;
 	    return 0;
 	case WM_GSSYNC:
+	    hwnd_image = fullscreen ? hwnd_fullscreen : hwndimgchild;
 	    if ( fullscreen &&
 		(!IsWindowVisible(hwnd_fullscreen) || bitmap.changed) &&
 		(bitmap.width > 1) && (bitmap.height > 1)) {
+		SetFocus(hwndimg);
 		ShowWindow(hwndimgchild, SW_HIDE);
 		ShowWindow(hwnd_fullscreen, SW_SHOWNA);
 		update_scroll_bars();
@@ -1162,9 +1164,11 @@ RECT rect;
 	    return 0;
 	case WM_GSPAGE:
 	    ignore_sync = FALSE;
+	    hwnd_image = fullscreen ? hwnd_fullscreen : hwndimgchild;
 	    if ( fullscreen &&
 		(!IsWindowVisible(hwnd_fullscreen) || bitmap.changed) &&
 		(bitmap.width > 1) && (bitmap.height > 1)) {
+		SetFocus(hwndimg);
 		ShowWindow(hwndimgchild, SW_HIDE);
 		ShowWindow(hwnd_fullscreen, SW_SHOWNA);
 		update_scroll_bars();
@@ -1683,34 +1687,22 @@ char buf[20];
 		    FillRect(hdc, &rect, hbrush);
 		    DeleteBrush(hbrush);
 		}
-#ifdef OLD
+		/* When painting from monochrome bitmap to a colour DC,
+		 * the text foreground and background colours are used
+		 */
 		HDC hdcsrc = CreateCompatibleDC(hdc);
+		COLORREF fgColour;
+		COLORREF bgColour;
+		fgColour = SetTextColor(hdc, GetSysColor(COLOR_BTNTEXT));
+		bgColour = SetBkColor(hdc, GetSysColor(COLOR_BTNFACE));
 		hbitmap_old = (HBITMAP)SelectObject(hdcsrc,hbitmap);
 		BitBlt(hdc, (rect.left+rect.right-bm.bmWidth)/2,
 		   (rect.top+rect.bottom-bm.bmHeight)/2,
 		   bm.bmWidth,bm.bmHeight,hdcsrc,0,0,SRCCOPY);
+		SetTextColor(hdc, fgColour);
+		SetBkColor(hdc, bgColour);
 		SelectObject(hdcsrc,hbitmap_old);
 		DeleteDC(hdcsrc);
-#else
-		HBRUSH hpatbrush = CreatePatternBrush(hbitmap);
-		if (hpatbrush) {
-		    HBRUSH holdbrush;
-		    COLORREF fgColour;
-		    COLORREF bgColour;
-		    RECT bmrect;
-		    bmrect.left = (rect.left+rect.right-bm.bmWidth)/2;
-		    bmrect.top = (rect.top+rect.bottom-bm.bmHeight)/2;
-		    bmrect.right = bmrect.left + bm.bmWidth;
-		    bmrect.bottom = bmrect.top + bm.bmHeight;
-		    fgColour = SetTextColor(hdc, GetSysColor(COLOR_BTNTEXT));
-		    bgColour = SetBkColor(hdc, GetSysColor(COLOR_BTNFACE));
-		    SetBkMode(hdc, OPAQUE);
-		    FillRect(hdc, &bmrect, hpatbrush);
-		    SetTextColor(hdc, fgColour);
-		    SetBkColor(hdc, bgColour);
-		    DeleteBrush(hpatbrush);
-		}
-#endif
 		DeleteObject(hbitmap);
 	    }
 	    else {
@@ -2469,6 +2461,8 @@ gsview_fullscreen_end(void)
     if (fullscreen) {
 	gs_addmess("Full Screen ending\r\n");
         DestroyWindow(hwnd_fullscreen);
+	hwnd_fullscreen = (HWND)NULL;
+	hwnd_image = hwndimgchild;
     }
 }
 
@@ -2523,7 +2517,12 @@ static BOOL class_registered;
 		fullscreen = FALSE;
 	    }
         }
-
+	else {
+	    hwnd_image = hwnd_fullscreen;
+	    ShowWindow(hwnd_fullscreen, SW_SHOWNORMAL);
+	    SetFocus(hwndimg);
+	    gs_addmess("Full Screen restarted\r\n");
+	}
 
 	return;
 }

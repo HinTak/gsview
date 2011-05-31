@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "1.2  2000-06-15";
+char szVersion[] = "1.3  2000-06-27";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -376,7 +376,7 @@ char line[DSC_LINE_LENGTH+1];
 	fprintf(tempfile, "\nquit\n");
 	fclose(tempfile);
 #ifdef UNIX
-	sprintf(gscommand, "%s -dNOPAUSE -dQUIET -sDEVICE=%s -sOutputFile=\042%s\042 -r%d -g%dx%d %s",
+	sprintf(gscommand, "\042%s\042 -dNOPAUSE -dQUIET -sDEVICE=%s -sOutputFile=\042%s\042 -r%d -g%dx%d %s",
 	   gsname, devname, bmpname, resolution, width, height, tempname);
 #else
 	sprintf(gscommand, "-dNOPAUSE\n-dQUIET\n-sDEVICE=%s\n-sOutputFile=\042%s\042\n-r%d\n-g%dx%d\n\042%s\042",
@@ -387,7 +387,11 @@ char line[DSC_LINE_LENGTH+1];
 	}
 	fputs(gscommand, rspfile);
 	fclose(rspfile);
+#if defined(__WIN32__) || defined(__EMX__)
+	sprintf(gscommand, "\042%s\042 @%s", gsname, rspname);
+#else
 	sprintf(gscommand, "%s @%s", gsname, rspname);
+#endif
 #endif
 	if (!quiet)
 	    fprintf(stderr,"%s\n", gscommand);

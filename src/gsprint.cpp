@@ -50,7 +50,7 @@ PROCESS_INFORMATION piProcInfo;
 BOOL global_debug;
 
 #define COPYRIGHT TEXT("Copyright (C) 2000, Ghostgum Software Pty Ltd.  All Rights Reserved.\n")
-#define VERSION TEXT("2000-06-15 gsprint 1.0\n")
+#define VERSION TEXT("2000-06-27 gsprint 1.1\n")
 
 #define MAXSTR 256
 
@@ -903,6 +903,7 @@ int main(int argc, char *argv[])
     int length;
     DWORD dwRead;
     DOCINFO di;
+    memset(&di, 0, sizeof(DOCINFO));
     di.cbSize = sizeof(DOCINFO);
     di.lpszDocName = strlen(opt.document_name) ? opt.document_name : "gsprint";
     di.lpszOutput = NULL;

@@ -266,6 +266,11 @@ char *q;
 		|| (nCmdShow == SW_SHOWNORMAL))
 	        SetForegroundWindow(hwndimg);
 	}
+	else if (strncmp(p, "FullScreen(", 11) == 0) {
+	    p+= 11;
+	    q = skiparg(p);
+	    gsview_fullscreen();
+	}
 	
 	p = q;
 	while (*p && *p!= ']')

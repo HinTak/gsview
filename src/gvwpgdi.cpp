@@ -53,32 +53,6 @@ typedef struct tagPGDI_THREAD {
 } PGDI_THREAD;
 
 
-#ifdef NOTUSED
-void CheckProcess( void *dummy )
-{
-    PGDI_CHECK *pchk = (PGDI_CHECK *)dummy;
-    DWORD exit_status;
-
-    while (GetExitCodeProcess(pchk->piProcInfo.hProcess, &exit_status)
-	&& (exit_status == STILL_ACTIVE)) {
-	Sleep(1000);
-        if (debug)
-	    gs_addmess(".");
-    }
-    if (debug)
-	gs_addmess("\nCheckProcess exiting\n");
-    CloseHandle(pchk->piProcInfo.hProcess);
-    CloseHandle(pchk->piProcInfo.hThread);
-
-    // We still have a handle to the write end of the pipe
-    // Reading the read end of the pipe won't return EOF 
-    // until both the child copy of the write handle and
-    // our copy of the write handle are closed.
-    CloseHandle(pchk->hPipeWr);
-    free(pchk);
-}
-#endif
-
 
 // Background part as separate thread
 // Don't do any GUI things on this thread.
@@ -143,13 +117,14 @@ void print_gdi_thread(void *pdummy)
 
     delete pFile;
     free(pth);
-    gs_addmess("\nPrint GDI finished\n");
 
     print_count--;
 
     /* if printing from command line, close GSview */
     if (print_exit && (print_count==0) && !(debug & DEBUG_GDI))
 	gsview_command(IDM_EXIT);
+
+    gs_addmess("\nPrint GDI finished\n");
 }
 
 
@@ -182,15 +157,6 @@ BOOL start_gvwgs_with_pipe(HDC hdc)
     }
     pth->hdc = hdc;
     pth->hPipeRd = print_gdi_read_handle;
-
-#ifdef NOTUSED
-    PGDI_CHECK *pchk= (PGDI_CHECK *)malloc(sizeof(PGDI_CHECK));
-    if (pchk == NULL) {
-	gs_addmess("Failed to allocate PGDI_CHECK\n");
-	return FALSE;
-    }
-    pchk->hPipeWr = print_gdi_write_handle;
-#endif
 
     sprintf(command, "\042%s%s\042 %s \042%s\042 \042%s\042 \042%s\042",
 	szExePath,
@@ -242,11 +208,7 @@ BOOL start_gvwgs_with_pipe(HDC hdc)
         env,           /* environment                        */
         NULL,          /* use parent's current directory     */
         &siStartInfo,  /* STARTUPINFO pointer                */
-#ifdef NOTUSED
-        &pchk->piProcInfo) /* receives PROCESS_INFORMATION  */
-#else
-	&piProcInfo)
-#endif
+	&piProcInfo)	/* receives PROCESS_INFORMATION  */
 	) {
 	// cleanup items created by gsviev_cprint()
 	if (!debug)
@@ -262,19 +224,12 @@ BOOL start_gvwgs_with_pipe(HDC hdc)
 	print_gdi_write_handle = NULL;
 	EndDoc(pth->hdc);
 	free(pth);
-#ifdef NOTUSED
-	free(pchk);
-#endif
 	info_wait(IDS_NOWAIT);
 	gserror(IDS_CANNOTRUN, command, MB_ICONHAND, SOUND_ERROR);
 	return FALSE;
     }
 
-#ifdef NOTUSED
-    WaitForInputIdle(pchk->piProcInfo.hProcess, 5000);
-#else
     WaitForInputIdle(piProcInfo.hProcess, 30000);
-#endif
     info_wait(IDS_NOWAIT);
 
     /* we shouldn't exit GSview until print_gdi_thread finishes
@@ -283,13 +238,9 @@ BOOL start_gvwgs_with_pipe(HDC hdc)
     print_count++;	
 
     _beginthread(print_gdi_thread, 65536, (void *)pth);
-#ifdef NOTUSED
-    _beginthread(CheckProcess, 65536, (void *)pchk);
-#else
-     // we don't need to know anything more */
-     CloseHandle(piProcInfo.hProcess);
-     CloseHandle(piProcInfo.hThread);
-#endif
+    // we don't need to know anything more */
+    CloseHandle(piProcInfo.hProcess);
+    CloseHandle(piProcInfo.hThread);
 
     // Now that Ghostscript has started, close our copy of the write
     // handle so that pipe will break when Ghostscript closes its 
@@ -325,13 +276,27 @@ init_print_gdi(HDC hdc)
     CloseHandle(hPipeTemp);
 
     // open printer, get size and resolution
-    CPrintDIB printdib;
     DOCINFO di;
+    memset(&di, 0, sizeof(DOCINFO));
     di.cbSize = sizeof(DOCINFO);
     di.lpszDocName = psfile_name(&psfile);
     di.lpszOutput = NULL;
     if (StartDoc(hdc, &di) == SP_ERROR) {
-	gs_addmess("StartDoc failed\n");
+	DWORD err = GetLastError();
+	LPVOID lpMessageBuffer;
+	char buf[MAXSTR];
+	sprintf(buf, "StartDoc failed, error %d\n", err);
+	gs_addmess(buf);
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+	    FORMAT_MESSAGE_FROM_SYSTEM,
+	    NULL, err,
+	    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* user default language */
+	    (LPTSTR) &lpMessageBuffer, 0, NULL);
+	if (lpMessageBuffer) {
+	    gs_addmess((LPTSTR)lpMessageBuffer);
+	    gs_addmess("\r\n");
+	    LocalFree(LocalHandle(lpMessageBuffer));
+	}
 	return FALSE;
     }
 
@@ -341,6 +306,12 @@ init_print_gdi(HDC hdc)
     print_gdi_height = GetDeviceCaps(hdc, PHYSICALHEIGHT);
     print_gdi_xdpi = GetDeviceCaps(hdc, LOGPIXELSX);
     print_gdi_ydpi = GetDeviceCaps(hdc, LOGPIXELSY);
+    if (debug & DEBUG_GDI) {
+	char buf[MAXSTR];
+	sprintf(buf, "GDI width=%d height=%d xdpi=%d ydpy=%d\n",
+	    print_gdi_width, print_gdi_height, print_gdi_xdpi, print_gdi_ydpi);
+	gs_addmess(buf);
+    }
 
     if ( (print_gdi_width == 0) || (print_gdi_height == 0) ) {
 	gs_addmess("Printer width or height is zero\n");

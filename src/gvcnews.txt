@@ -1,4 +1,36 @@
 ----------------------
+Version 3.1 2000-06-27
+----------------------
+All:
+  pdfmark uses user space coordinates, not default user space.
+
+  Fixed gvcdll.cpp to keep quotes around Ghostscript options.
+
+  Windows incorrectly removes the quotes around profile values,
+  which meant that uniprint filenames containing spaces were
+  not enclosed in quotes and gvwgs didn't work.  
+  If first character of printer option is @, put quotes around 
+  the whole option.
+
+Win32:
+  Added DDE command [FullScreen()].
+
+  Fixed drawing of bitmaps on Windows 95, which followed the Win16
+  CreatePatternBrush documentation, not the Win32 documentation.
+
+  Fixed Print dialog for Windows NT4 & 2000 with non-English support
+  which sometimes uses a different dialog structure.
+
+  Select uniprint options correctly after uniprint dialog used
+  for first time.
+
+  Fixed trashed memory heap when printing using GDI and converting 
+  palette from 24-bit colour to monochrome to save space.
+
+  Windows GDI printing didn't work on some computers because some
+  new DOCINFO structure fields were not being initialised.
+
+----------------------
 Version 3.0 2000-06-15
 ----------------------
 All:
