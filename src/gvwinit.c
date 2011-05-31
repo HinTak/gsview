@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -30,15 +30,39 @@ struct buttonlist {
 };
 struct buttonlist *buttonhead, *buttontail;
 int real_button_width;
+HGLOBAL hglobal_command_line;
+BOOL use_existing = FALSE;	/* /E command line option */
+BOOL exit_existing = FALSE;	/* /X command line option */
+BOOL dde_exit = FALSE;		/* exit after sending DDE command */
 
 BOOL parse_args(LPSTR str);
 
+void
+drop_filename(HWND hwnd, char *str)
+{
+    /* Send the message to the main window */
+    if (lstrlen(str) != 0) {
+	/* open file specified on command line */
+	HGLOBAL hglobal;
+	LPSTR szFile;
+	hglobal = GlobalAlloc(GHND | GMEM_SHARE, lstrlen(str)+1);
+	if (hglobal) {
+	    szFile = GlobalLock(hglobal);
+	    lstrcpy(szFile, str);
+	    GlobalUnlock(hglobal);
+	    PostMessage(hwnd, WM_COMMAND, IDM_DROP, (LPARAM)hglobal);
+	}
+    }
+}
+
 /* Don't start another instance - use previous instance */
+/* This is never used in Win95/NT */
 void
 gsview_init0(LPSTR lpszCmdLine)
 {
 	HWND hwnd = FindWindow(szClassName, NULL);
 	BringWindowToTop(hwnd);
+#ifdef UNUSED
 #if __BORLANDC__ == 0x452
 	/* avoid bug in BC++ 4.0 */
 #ifdef __WIN32__
@@ -49,18 +73,8 @@ gsview_init0(LPSTR lpszCmdLine)
 		lpszCmdLine++;
 #endif
 #endif
-	if (lstrlen(lpszCmdLine) != 0) {
-	    /* open file specified on command line */
-	    HGLOBAL hglobal;
-	    LPSTR szFile;
-	    hglobal = GlobalAlloc(GHND | GMEM_SHARE, lstrlen(lpszCmdLine)+1);
-	    if (hglobal) {
-	        szFile = GlobalLock(hglobal);
-		lstrcpy(szFile, lpszCmdLine);
-	        GlobalUnlock(hglobal);
-		PostMessage(hwnd, WM_COMMAND, IDM_DROP, (LPARAM)hglobal);
-	    }
-	}
+#endif
+	drop_filename(hwnd, lpszCmdLine);
 }
 
 
@@ -135,6 +149,8 @@ char *p;
     load_string(IDS_TOPICROOT, szHelpTopic, sizeof(szHelpTopic));
     init_check_menu();
     InvalidateRect(hwndimg, (LPRECT)NULL, FALSE);
+    if (hwnd_measure)
+	PostMessage(hwnd_measure, WM_COMMAND, IDCANCEL, 0L);
 }
 
 #ifdef __BORLANDC__
@@ -197,6 +213,14 @@ int language;
     }
 }
 
+void
+post_command_line(void)
+{
+    if (hglobal_command_line)
+	PostMessage(hwndimg, WM_COMMAND, IDM_DROP, 
+		(LPARAM)hglobal_command_line);
+}
+
 /* main initialisation */
 BOOL
 gsview_init1(LPSTR lpszCmdLine)
@@ -207,6 +231,9 @@ DWORD version = GetVersion();
 #endif
 char *p;
 int length = 64;
+BOOL parse_correct;
+
+	getcwd(workdir, sizeof(workdir));
 
 	while (length && !SetMessageQueue(length))
 	    length--;	/* reduce size and try again */
@@ -234,6 +261,26 @@ int length = 64;
 #endif
 
 	multithread = FALSE;
+
+	parse_correct = parse_args(lpszCmdLine);
+
+	if (exit_existing) {
+	    dde_execute("[FileExit()]");
+	    dde_exit = TRUE;
+	}
+	if (use_existing) {
+	    LPSTR line = GlobalLock(hglobal_command_line);
+	    if (line && dde_execute_line(line))
+		dde_exit = TRUE;
+	    use_existing = FALSE;
+	}
+
+	if (dde_exit) {
+		GlobalUnlock(hglobal_command_line);
+		GlobalFree(hglobal_command_line);
+		return FALSE;
+	}
+
 #ifdef __WIN32__
 	if (is_win32s) {
 	    /* don't allow multiple copies under Win32s */
@@ -351,11 +398,16 @@ int length = 64;
 #endif
 	strcat(szIniFile, INIFILE);
 
-	getcwd(workdir, sizeof(workdir));
 	/* defaults if entry not in gsview.ini */
  	init_options();
 	/* read entries from gsview.ini */
 	read_profile(szIniFile);
+
+	if (debug) {
+	    gs_addmess("INI file is \042");
+	    gs_addmess(szIniFile);
+	    gs_addmess("\042\n");
+	}
 
 	if (!load_language(option.language)) {
 	    message_box("Couldn't load language specific resources.  Resetting to English.", 0);
@@ -426,6 +478,7 @@ int length = 64;
 	}
 
 
+#ifdef UNUSED
 #if __BORLANDC__ == 0x452
 	/* avoid bug in BC++ 4.0 */
 #ifdef __WIN32__
@@ -436,6 +489,7 @@ int length = 64;
 		lpszCmdLine++;
 #endif
 #endif
+#endif
 
 #ifdef __WIN32__
 	if (is_win32s)
@@ -444,7 +498,7 @@ int length = 64;
 
 	gsview_initc(lpszCmdLine);
 
-	if (!parse_args(lpszCmdLine))
+	if (!parse_correct)
 	    gserror(IDS_PARSEERROR, NULL, 0, SOUND_ERROR);
 	return TRUE;
 }
@@ -456,11 +510,11 @@ HGLOBAL hglobal;
 LPSTR szFile;
 LPSTR p;
 BOOL found_command = FALSE;
-LPSTR filename = NULL;
 BOOL error = FALSE;
 char filedir[MAXSTR];
 
-    hglobal = GlobalAlloc(GHND | GMEM_SHARE, lstrlen(str)+1);
+    hglobal_command_line = NULL;
+    hglobal = GlobalAlloc(GHND | GMEM_SHARE, lstrlen(str)+lstrlen(workdir)+32);
     if (hglobal)
 	szFile = GlobalLock(hglobal);
     else
@@ -485,6 +539,27 @@ char filedir[MAXSTR];
 		else 
 		    multithread = TRUE;
 		/* skip over trailing garbage */
+		while (*str && (*str != ' '))
+		    str++;
+	    }
+	    else if ((str[1] == 'E') || (str[1] == 'e')) {
+		/* skip over trailing garbage */
+		use_existing = TRUE;
+		while (*str && (*str != ' '))
+		    str++;
+	    }
+	    else if ((str[1] == 'G') || (str[1] == 'g')) {
+		/* test DDE - /G5 goes to page 5 */
+		char buf[MAXSTR];
+		sprintf(buf, "[GotoPage(%d)]", atoi(str+2));
+		dde_execute(buf);
+		while (*str && (*str != ' '))
+		    str++;
+		dde_exit = TRUE;
+	    }
+	    else if ((str[1] == 'X') || (str[1] == 'x')) {
+		exit_existing = TRUE;
+	
 		while (*str && (*str != ' '))
 		    str++;
 	    }
@@ -534,10 +609,46 @@ char filedir[MAXSTR];
 		str++;
 	}
 	else {
-	    /* a filename */
+	    /* a filename - we only allow one */
 	    if (*str == '\042')
 		str++; 		/* don't copy quotes */
-	    filename = p;	/* save for extracting directory */
+	    /* we need the filename to include the path */
+	    if (str[0] && (str[0]=='\\' || str[0]=='/')) {
+		if (str[1] && (str[1]=='\\' ||  str[1]=='/')) {
+		    /* UNC name */
+		    /* do nothing */
+		}
+		else {
+		    /* referenced from root directory, so add drive */
+		    *p++ = workdir[0];
+		    *p++ = workdir[1];
+		}
+	    }
+	    else if (*str && ! (isalpha(*str) && str[1]==':')) {
+		/* Doesn't include drive code, so add work dir */
+		char *t = workdir;
+		while (*t)
+		   *p++ = *t++;
+		t--;
+		if (*t != '\\')
+		   *p++ = '\\';
+	    }
+	    else {
+		/* contains full path */
+		/* make this the work dir */
+		char *t;
+		lstrcpy(filedir, str);
+	        if ( (t = strrchr(filedir, '\\')) != (char *)NULL ) {
+		    *(++t) = '\0';
+#ifndef _MSC_VER
+		    if (isalpha(filedir[0]) && (filedir[1]==':'))
+			(void) setdisk(toupper(filedir[0])-'A');
+		    if (!((strlen(filedir)==2) && isalpha(filedir[0]) && 
+			(filedir[1]==':')))
+#endif
+			gs_chdir(filedir);
+		}
+	    }
 	    while (*str) {
 		if (*str == '\042')
 		    str++; 	/* don't copy quotes */
@@ -548,40 +659,28 @@ char filedir[MAXSTR];
     }
     *p = '\0';
 
-    /* use path to filename as current directory if specified */
-    if (filename) {
-	lstrcpy(filedir, filename);
-	if ( (p = strrchr(filedir, '\\')) == (char *)NULL ) {
-	    if ( (p = strrchr(filedir, ':')) == (char *)NULL )
-		strcpy(filedir, workdir);  /* no path so use work directory */
-	    else
-		*(++p) = '\0';
-	}
-	else
-	    *(++p) = '\0';
-#ifndef _MSC_VER
-	if (isalpha(filedir[0]) && (filedir[1]==':'))
-	    (void) setdisk(toupper(filedir[0])-'A');
-	if (!((strlen(filedir)==2) && isalpha(filedir[0]) && (filedir[1]==':')))
-#endif
-	    gs_chdir(filedir);
+    getcwd(filedir, sizeof(filedir));
+    if (debug) {
+	gs_addmess("Working directory: ");
+	gs_addmess(filedir);
+	gs_addmess("\n");
     }
 
     /* if a print option or filename was specified, pass it on */
     if (!error && lstrlen(szFile)) {
+	if (debug) {
+	    gs_addmess("Command line to be posted: ");
+	    gs_addmess(szFile);
+	    gs_addmess("\n");
+	}
 	GlobalUnlock(hglobal);
-	PostMessage(hwndimg, WM_COMMAND, IDM_DROP, (LPARAM)hglobal);
+	hglobal_command_line = hglobal;
     }
     else {
 	GlobalUnlock(hglobal);
 	GlobalFree(hglobal);
     }
 
-    if (debug) {
-	gs_addmess("INI file is \042");
-	gs_addmess(szIniFile);
-	gs_addmess("\042\n");
-    }
     return !error;
 }
 
@@ -646,7 +745,7 @@ RECT rect;
 
 	/* set size of info area, buttons and offset to child window */
 	info_rect.left = 0;
-	info_rect.right = info_rect.left + 64 * char_size.x;
+	info_rect.right = info_rect.left + 86 * char_size.x;
 	info_rect.top = 0;
 	info_rect.bottom = char_size.y+4;
 	button_size.x = 24;
@@ -664,11 +763,11 @@ RECT rect;
 	img_offset.y = info_rect.bottom + 1;
 	info_file.x = info_rect.left + 2;
 	info_file.y = 2;
-	info_coord.left = info_rect.left + 20 * char_size.x;
-	info_coord.right = info_rect.left + 34 * char_size.x;
+	info_coord.left = info_rect.left + 32 * char_size.x;
+	info_coord.right = info_rect.left + 52 * char_size.x;
 	info_coord.top = 2;
 	info_coord.bottom = char_size.y+4;
-	info_page.x = info_rect.left + 36 * char_size.x + 2;
+	info_page.x = info_rect.left + 54 * char_size.x + 2;
 	info_page.y = 2;
 
 	hcWait = LoadCursor((HINSTANCE)NULL, IDC_WAIT);
@@ -707,7 +806,8 @@ RECT rect;
 
 	/* create child window */
 	GetClientRect(hwndimg, &rect);
-	hwndimgchild = CreateWindow(szImgClassName, (LPSTR)szAppName,
+	hwnd_image = hwndimgchild = 
+		  CreateWindow(szImgClassName, (LPSTR)szAppName,
 		  WS_CHILD /* | WS_VISIBLE */,
 		  rect.left, rect.top,
 		  rect.right-rect.left, rect.bottom-rect.top,
@@ -895,7 +995,12 @@ BOOL flag = TRUE;
     strcat(kbuf, commandsubkey);
     if (flag)
 	flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
-    sprintf(buf, "%s%s %%1", szExePath, GSVIEW_EXENAME);
+#ifdef __WIN32__
+    if (!is_win32s)
+        sprintf(buf, "\042%s%s\042 \042%%1\042", szExePath, GSVIEW_EXENAME);
+    else
+#endif
+        sprintf(buf, "%s%s %%1", szExePath, GSVIEW_EXENAME);
     if (flag) {
 	flag = reg_set_value(newfile, oldfile, hkey, NULL, buf);
 	reg_close_key(&hkey);
@@ -911,7 +1016,12 @@ BOOL flag = TRUE;
     strcat(kbuf, commandsubkey);
     if (flag)
 	flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
-    sprintf(buf, "%s%s /p %%1", szExePath, GSVIEW_EXENAME);
+#ifdef __WIN32__
+    if (!is_win32s)
+        sprintf(buf, "\042%s%s\042 /p \042%%1\042", szExePath, GSVIEW_EXENAME);
+    else
+#endif
+        sprintf(buf, "%s%s /p %%1", szExePath, GSVIEW_EXENAME);
     if (flag) {
 	flag = reg_set_value(newfile, oldfile, hkey, NULL, buf);
 	reg_close_key(&hkey);
@@ -1547,6 +1657,7 @@ CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    EnableWindow(hwndimg, TRUE);
 		    DestroyWindow(hwnd);
 		    hDlgModeless = NULL;
+		    post_command_line();
 		    /* should post message to main window to delete thunks */
                     return(TRUE);
                 default:
@@ -1556,6 +1667,7 @@ CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	    EnableWindow(hwndimg, TRUE);
 	    DestroyWindow(hwnd);
 	    hDlgModeless = NULL;
+	    post_command_line();
 	    return TRUE;
     }
     return FALSE;

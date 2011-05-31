@@ -7,7 +7,7 @@
 /* Copyright (C) 1995, Digital Equipment Corporation.         */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Thu Aug 21 16:32:51 PDT 1997 by mcjones   */
+/* Last modified on Fri Oct 16 16:30:54 PDT 1998 by mcjones   */
 /*      modified on Thu Nov 16 13:33:13 PST 1995 by deutsch   */
 
 #ifndef MSDOS
@@ -80,8 +80,8 @@ static int bboxes = FALSE;
 static int explicitFiles = 0; /* count of explicit file arguments */
 
 void usage(void) {
-  fprintf(stderr, "pstotext 1.6 of 21 August 1997\n");
-  fprintf(stderr, "Copyright (C) 1995-1996, Digital Equipment Corporation.\n");
+  fprintf(stderr, "pstotext 1.8 of 16 October 1998\n");
+  fprintf(stderr, "Copyright (C) 1995-1998, Digital Equipment Corporation.\n");
   fprintf(stderr, "Comments to {mcjones,birrell}@pa.dec.com.\n\n");
   fprintf(stderr, "Usage: %s [option|file]...\n", cmd);
   fprintf(stderr, "Options:\n");
@@ -472,7 +472,7 @@ static void do_it(char *path) {
 	cleanup();
 	exit(1);
   }
-  fprintf(gsargfile, "-r72 -dNODISPLAY -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE\n",
+  fprintf(gsargfile, "-r72 -dNODISPLAY -dFIXEDMEDIA -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE\n",
     (debug ? "" : "-q"));
   fputs(rotate_path, gsargfile);
   fputs("\n", gsargfile);
@@ -491,7 +491,7 @@ static void do_it(char *path) {
     );
 
 #else   /* !MSDOS */
-  sprintf(gs_cmd, "%s -r72 -dNODISPLAY -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE %s %s %s %s %s",
+  sprintf(gs_cmd, "%s -r72 -dNODISPLAY -dFIXEDMEDIA -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE %s %s %s %s %s",
     gscommand,
     (debug ? "" : "-q"),
     ocr_path,

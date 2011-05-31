@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -155,7 +155,7 @@ int i;
 
 #define MAXFILTER 10
 char *file_filter[MAXFILTER+1];
-char file_filter_buffer[MAXSTR];
+char file_filter_buffer[1024];
 
 BOOL 
 get_filename(char *filename, BOOL save, int filter, int title, int help)

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -146,26 +146,30 @@ POINTL pt;
 int 
 gs_chdir(char *dirname)
 {
+int rc = 0;
+	DosError(FERR_DISABLEHARDERR);
 #ifdef __BORLANDC__
 	if (isalpha(dirname[0]) && (dirname[1]==':'))
 		(void) setdisk(toupper(dirname[0])-'A');
 	if (!((strlen(dirname)==2) && isalpha(dirname[0]) && (dirname[1]==':')))
 		chdir(dirname);
-	return TRUE;
+	rc = 1;
 #else
 #ifdef __IBMC__
 	if (isalpha(dirname[0]) && (dirname[1]==':'))
 	    if (_chdrive(toupper(dirname[0])-'A'+1))
-		return -1;
-	if (!((strlen(dirname)==2) && isalpha(dirname[0]) && (dirname[1]==':')))
-	    return _chdir(dirname);
+		rc = -1;
+	if (!rc && !((strlen(dirname)==2) && isalpha(dirname[0]) && (dirname[1]==':')))
+	    rc = _chdir(dirname);
 #else
 	if (isalpha(dirname[0]) && (dirname[1]==':'))
 	    if (_chdrive(dirname[0]))
-		return -1;
-	return _chdir2(dirname);
+		rc = -1;
+	rc = _chdir2(dirname);
 #endif
 #endif
+	DosError(FERR_ENABLEHARDERR);
+	return rc;
 }
 
 #ifndef __IBMC__

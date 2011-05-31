@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -666,6 +666,28 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     return WinDefDlgProc(hwnd, msg, mp1, mp2);
 }
 
+char *
+GetUPPname(HWND hwnd, char *uppname, int upplen)
+{
+    char *p, *q;
+    uppname[0] = '\0';
+    WinQueryWindowText(WinWindowFromID(WinQueryWindow(hwnd, QW_OWNER),
+	DEVICE_OPTIONS), upplen, uppname);
+    p = uppname;
+    if (p[0] == '"') {
+	/* remove quotes around configuration file */
+	p++;
+	q = strchr(p, '"');
+	if (q != (char *)NULL)
+	    *q = '\0';
+    }
+    if (p[0] == '@')
+	p++;
+    if (strlen(p))
+        memmove(uppname, p, strlen(p)+1);
+    return uppname;
+}
+
 
 MRESULT EXPENTRY
 UniDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
@@ -688,9 +710,8 @@ UniDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		MPFROMLONG(LIT_END), MPFROMP(uppname) );
 	    WinEnableWindow(WinWindowFromID(hwnd, UPP_LIST), FALSE);
 	    uppname[0] = uppname[1] = '\0';
-	    WinQueryWindowText(WinWindowFromID(WinQueryWindow(hwnd, QW_OWNER),
-		DEVICE_OPTIONS), sizeof(uppname), uppname);
-	    WinSetWindowText(WinWindowFromID(hwnd, UPP_NAME), uppname+1);
+	    GetUPPname(hwnd, uppname, sizeof(uppname));
+	    WinSetWindowText(WinWindowFromID(hwnd, UPP_NAME), uppname);
 	    WinPostMsg(hwnd, WM_COMMAND, (MPARAM)WM_USER, 
 		MPFROM2SHORT(CMDSRC_OTHER, TRUE));
 	    return (MRESULT)TRUE;
@@ -746,13 +767,12 @@ UniDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		    enum_upp_path(option.gsinclude, ubuf, needed);
 		}
 
-		WinQueryWindowText(WinWindowFromID(WinQueryWindow(hwnd, 
-		    QW_OWNER), DEVICE_OPTIONS), sizeof(uppname), uppname);
+		GetUPPname(hwnd, uppname, sizeof(uppname));
 		WinSendMsg(WinWindowFromID(hwnd, UPP_LIST), LM_DELETEALL, 
 		    (MPARAM)0, (MPARAM)0);
 		for (p = ubuf; *p!='\0'; p += strlen(p) + 1) {
 		    q = p + strlen(p) + 1;
-		    if (strcmp(p, uppname+1) == 0)
+		    if (strcmp(p, uppname) == 0)
 			desc = q;
 		    WinSendMsg( WinWindowFromID(hwnd, UPP_LIST), LM_INSERTITEM, 
 			MPFROMLONG(LIT_SORTASCENDING), MPFROMP(q) );
@@ -770,7 +790,7 @@ UniDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			    LM_SETTOPINDEX, MPFROMLONG(i), (MPARAM)0);
 		    }
 		}
-		WinSetWindowText(WinWindowFromID(hwnd, UPP_NAME), uppname+1);
+		WinSetWindowText(WinWindowFromID(hwnd, UPP_NAME), uppname);
 		WinEnableWindow(WinWindowFromID(hwnd, UPP_LIST), TRUE);
 		}
 		return (MRESULT)TRUE;
@@ -779,8 +799,10 @@ UniDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		return (MRESULT)TRUE;
 	    case DID_OK:
 		if (WinQueryWindowText(WinWindowFromID(hwnd, UPP_NAME), 
-			sizeof(uppname)-2, uppname+1)) {
-		  uppname[0] = '@';
+			sizeof(uppname)-3, uppname+2)) {
+		  uppname[0] = '"';
+		  uppname[1] = '@';
+		  strcat(uppname, "\042");
 		  WinSetWindowText(WinWindowFromID(WinQueryWindow(hwnd, 
 		      QW_OWNER), DEVICE_OPTIONS), uppname);
 		}
@@ -791,6 +813,125 @@ UniDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    case DID_CANCEL:
 		if (ubuf)
 		    free(ubuf);
+		WinDismissDlg(hwnd, DID_CANCEL);
+		return (MRESULT)TRUE;
+	}
+	break;
+    }
+    return WinDefDlgProc(hwnd, msg, mp1, mp2);
+}
+
+/* dialog box for selecting PostScript prolog/epilog and Ctrl+D */
+MRESULT EXPENTRY
+AdvPSDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+
+  switch (msg) {
+    case WM_INITDLG:
+	{
+	/* for PostScript printers, provide options for sending
+	 * Ctrl+D before and after job, and sending a prolog
+	 * and epilog file.
+	 * These are set using the Advanced button on the Printer
+	 * Setup dialog, only enabled for PostScript printer.
+	 */
+	PROFILE *prf;
+	char buf[MAXSTR];
+	char section[MAXSTR];
+	int prectrld=0;
+	int postctrld=0;
+	int i = (int)WinSendMsg(
+	  WinWindowFromID(WinQueryWindow(hwnd, QW_OWNER), SPOOL_PORT), 
+	    LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
+	  WinSendMsg(WinWindowFromID(WinQueryWindow(hwnd, QW_OWNER), SPOOL_PORT), 
+	    LM_QUERYITEMTEXT, MPFROM2SHORT(i, sizeof(section)), 
+	    MPFROMP(section));
+	  WinSendMsg( WinWindowFromID(hwnd, ADVPS_PROLOG),
+	    	EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
+	  WinSendMsg( WinWindowFromID(hwnd, ADVPS_EPILOG),
+	    	EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
+	  if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+	    profile_read_string(prf, section, "PreCtrlD", "0", buf, 
+		sizeof(buf)-2);
+	    if (sscanf(buf, "%d", &prectrld) != 1)
+		prectrld = 0;
+	    WinSendMsg( WinWindowFromID(hwnd, ADVPS_PRECTRLD),
+		BM_SETCHECK, MPFROMLONG(prectrld ? 1 : 0), MPFROMLONG(0));
+	    profile_read_string(prf, section, "PostCtrlD", "0", buf, 
+		sizeof(buf)-2);
+	    if (sscanf(buf, "%d", &postctrld) != 1)
+		postctrld = 0;
+	    WinSendMsg( WinWindowFromID(hwnd, ADVPS_POSTCTRLD),
+		BM_SETCHECK, MPFROMLONG(postctrld ? 1 : 0), MPFROMLONG(0));
+	    profile_read_string(prf, section, "Prolog", "", buf, 
+	       sizeof(buf)-2);
+	    WinSetWindowText(WinWindowFromID(hwnd, ADVPS_PROLOG), buf);
+	    profile_read_string(prf, section, "Epilog", "", buf, 
+	       sizeof(buf)-2);
+	    WinSetWindowText(WinWindowFromID(hwnd, ADVPS_EPILOG), buf);
+	    profile_close(prf);
+	  }
+	}
+	break;
+    case WM_COMMAND:
+	  switch(LOUSHORT(mp1)) {
+	    case ADVPS_PROLOGBROWSE:
+		{   char buf[MAXSTR];
+		    WinQueryWindowText(WinWindowFromID(hwnd, ADVPS_PROLOG), 
+			sizeof(buf)-1, buf);
+		    if (get_filename(buf, FALSE, FILTER_ALL, 
+			   0, IDS_TOPICPRINT)) {
+			WinSetWindowText(WinWindowFromID(hwnd, 
+			    ADVPS_PROLOG), buf);
+		    }
+		}
+		return (MRESULT)TRUE;
+	    case ADVPS_EPILOGBROWSE:
+		{   char buf[MAXSTR];
+		    WinQueryWindowText(WinWindowFromID(hwnd, ADVPS_EPILOG), 
+			sizeof(buf)-1, buf);
+		    if (get_filename(buf, FALSE, FILTER_ALL, 
+			   0, IDS_TOPICPRINT)) {
+			WinSetWindowText(WinWindowFromID(hwnd, 
+			    ADVPS_EPILOG), buf);
+		    }
+		}
+		return (MRESULT)TRUE;
+	    case ID_HELP:
+		get_help();
+		return (MRESULT)TRUE;
+	    case DID_OK:
+		{ PROFILE *prf;
+		  int i;
+		  char buf[MAXSTR];
+		  char section[MAXSTR];
+		  i = (int)WinSendMsg(
+		    WinWindowFromID(WinQueryWindow(hwnd, QW_OWNER), SPOOL_PORT), 
+		    LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
+		  WinSendMsg(WinWindowFromID(WinQueryWindow(hwnd, QW_OWNER), SPOOL_PORT), 
+		    LM_QUERYITEMTEXT, MPFROM2SHORT(i, sizeof(section)), 
+		    MPFROMP(section));
+		  if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+		    i = (int)WinSendMsg( WinWindowFromID(hwnd, ADVPS_PRECTRLD),
+	    	        BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+		    profile_write_string(prf, section, "PreCtrlD", 
+			i ? "1" : "0");
+		    i = (int)WinSendMsg( WinWindowFromID(hwnd, ADVPS_POSTCTRLD),
+	    	        BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+		    profile_write_string(prf, section, "PostCtrlD", 
+			i ? "1" : "0");
+		    WinQueryWindowText(WinWindowFromID(hwnd, ADVPS_PROLOG), 
+			sizeof(buf)-1, buf);
+		    profile_write_string(prf, section, "Prolog", buf);
+		    WinQueryWindowText(WinWindowFromID(hwnd, ADVPS_EPILOG), 
+			sizeof(buf)-1, buf);
+		    profile_write_string(prf, section, "Epilog", buf);
+		    profile_close(prf);
+		  }
+		}
+		WinDismissDlg(hwnd, DID_OK);
+            	return (MRESULT)TRUE;
+	    case DID_CANCEL:
 		WinDismissDlg(hwnd, DID_CANCEL);
 		return (MRESULT)TRUE;
 	}
@@ -905,6 +1046,8 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_OPTIONS), FALSE);
 	    }
 	    else {
+		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_ADVPS), FALSE);
+		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_UNIPRINT), TRUE);
 		/* set Print to File check box */
 		if (option.print_to_file) {
 		    WinSendMsg( WinWindowFromID(hwnd, SPOOL_TOFILE),
@@ -1018,6 +1161,8 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_NAME), i);
 			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_OPTIONSTEXT), i);
 			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_OPTIONS), i);
+			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_UNIPRINT), i);
+			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_ADVPS), !i);
 			if (i)
 			    WinSendMsg(hwnd, WM_CONTROL, MPFROM2SHORT(DEVICE_NAME, CBN_LBSELECT),
 				MPFROMLONG(WinWindowFromID(hwnd, DEVICE_NAME)));
@@ -1106,6 +1251,12 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			    sizeof(szHelpTopic));
 		    WinDlgBox(HWND_DESKTOP, hwnd, UniDlgProc, hlanguage, 
 			IDD_UNIPRINT, NULL);
+		    return (MRESULT)TRUE;
+		case DEVICE_ADVPS:
+		    load_string(IDS_TOPICPRINT, szHelpTopic, 
+			    sizeof(szHelpTopic));
+		    WinDlgBox(HWND_DESKTOP, hwnd, AdvPSDlgProc, hlanguage, 
+			IDD_ADVPS, NULL);
 		    return (MRESULT)TRUE;
 		case PAGE_ALL:
 		case PAGE_EVEN:

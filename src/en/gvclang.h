@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,7 +18,7 @@
 /* en\gvclang.h */
 /* Common English language defines */
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1998 Russell Lang."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1998 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "All rights reserved."
 #define GSVIEW_COPYRIGHT3 "See the file LICENCE for more details."
 
@@ -76,11 +76,11 @@
 #define AACOPY12 "certain conditions described in the Licence.  Among other things,"
 #define AACOPY13 "the Licence requires that the copyright notice and this notice be"
 #define AACOPY14 "preserved on all copies."
-#define AACOPY15 "pstotxt3.dll is Copyright (C) 1995-1996 Digital Equipment Corporation"
-#define AACOPY16 "pstotxt2.dll is Copyright (C) 1995-1996 Digital Equipment Corporation"
-#define AACOPY17 "pstotxt1.dll is Copyright (C) 1995-1996 Digital Equipment Corporation"
+#define AACOPY15 "pstotxt3.dll is Copyright (C) 1995-1998 Digital Equipment Corporation"
+#define AACOPY16 "pstotxt2.dll is Copyright (C) 1995-1998 Digital Equipment Corporation"
+#define AACOPY17 "pstotxt1.dll is Copyright (C) 1995-1998 Digital Equipment Corporation"
 #define AACOPY18 "and has a different licence.  See pstotext.txt for details."
-#define AACOPY19 "Author: Russell Lang  (rjl@aladdin.com)"
+#define AACOPY19 "Author: Russell Lang, Ghostgum Software Pty Ltd"
 #define AACOPY20 "A Ghostscript DLL interface."
 #define AACOPY21 "This program is part of GSview."
 #define AACOPY22 "GSview Win32s/Win16 spooler"
@@ -121,6 +121,14 @@
 #define AAPRINTTOFILE "Print to File"
 #define AAPSPRINTER "PostScript Printer"
 #define AAOPTIONSC "Options:"
+
+#define AAADVANCED "Advanced"
+#define AAADVANCEDPSOPT "Advanced PostScript Options"
+#define AASENDCTRLDBEFORE "Send CTRL+D before job"
+#define AASENDCTRLDAFTER "Send CTRL+D after job"
+#define AAPROLOGFILE "Prolog File"
+#define AAEPILOGFILE "Epilog File"
+#define AABROWSE "Browse"
 
 /* PDF2PS dialog box */
 #define AAPDFTOPS	"PDF to PostScript"
@@ -194,6 +202,25 @@
 #define AADPI "dpi"
 #define AABPP "bits/pixel"
 #define AABITS "bits"
+
+/* Measure and custom units dialog box */
+#define AAPT "pt"
+#define AAMM "mm"
+#define AAINCH "inch"
+#define AACUSTOM "Custom"
+#define AAMEASURE "Measure"
+#define AAUNITC	"Unit:"
+#define AASTARTC "Start:"
+#define AAFINISHC "Finish:"
+#define AADELTAC "Delta:"
+#define AALENGTHC "Length:"
+#define AACHANGE "Change"
+#define AACALCXFORM "Calculate Transformation"
+#define AATRANSLATE "Translate"
+#define AAROTATE "Rotate"
+#define AASCALE "Scale"
+#define AAINITMATRIX "initmatrix"
+#define AAINVERTMATRIX "invertmatrix"
 
 /* Installation program */
 #define AAINSTALL1 "GSview Install"

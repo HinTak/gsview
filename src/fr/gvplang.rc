@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -70,6 +70,9 @@ BEGIN
 			MENUITEM "la partie ~aperçu", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
+/*
+		MENUITEM "Measure", IDM_MEASURE /* ENGLISH */
+*/
 		MENUITEM "Extraire le ~texte...", IDM_TEXTEXTRACT
 		MENUITEM "~Rechercher...\tCtrl+R", IDM_TEXTFIND
 		MENUITEM "Rechercher ~suivant\tF3", IDM_TEXTFINDNEXT
@@ -85,11 +88,13 @@ BEGIN
 			MENUITEM "~pt", IDM_UNITPT
 			MENUITEM "~mm", IDM_UNITMM
 			MENUITEM "p~ouce", IDM_UNITINCH
+			MENUITEM SEPARATOR
+			MENUITEM "~Fine Resolution", IDM_UNITFINE /* ENGLISH */
 		END
 		SUBMENU "~Langue", IDM_LANGMENU
 		BEGIN
 			MENUITEM "~Anglais", IDM_LANGEN
-			MENUITEM "~Fran_ais", IDM_LANGFR
+			MENUITEM "~Français", IDM_LANGFR
 			MENUITEM "Alleman~d", IDM_LANGDE
 /*
 			MENUITEM "~Italien", IDM_LANGIT
@@ -121,6 +126,8 @@ BEGIN
 		MENUITEM "Page ~suivante\t+", IDM_NEXT
 		MENUITEM "Page ~précédente\t-", IDM_PREV
 		MENUITEM "~Atteindre la page...\tA", IDM_GOTO
+		MENUITEM "Go ~Back\tB", IDM_GOBACK
+		MENUITEM "Go ~Forward", IDM_GOFWD
 		MENUITEM "~Réafficher\tR", IDM_REDISPLAY
 		MENUITEM SEPARATOR
 		MENUITEM "Haut de la page suivante\tEspace", IDM_NEXTHOME
@@ -201,6 +208,10 @@ BEGIN
 	"A", IDM_GOTO, SHIFT
 	"a", IDM_GOTO
 	"a", IDM_GOTO, SHIFT
+	"B", IDM_GOBACK
+	"B", IDM_GOBACK, SHIFT
+	"b", IDM_GOBACK
+	"b", IDM_GOBACK, SHIFT
 	"I", IDM_INFO
 	"I", IDM_INFO, SHIFT
 	"i", IDM_INFO
@@ -261,7 +272,7 @@ END
 STRINGTABLE
 BEGIN
 	/* default is first */
-	IDS_FILTER_PSALL "*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz"
+	IDS_FILTER_PSALL "*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|*.eps|*.epi|*.pdf|*.prn|*.ps|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz"
 	IDS_FILTER_PS	"*.ps|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf"
 	IDS_FILTER_EPS	"*.eps|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf"
 	IDS_FILTER_EPI	"*.epi|*.eps|*.epi|*.pdf|*.ps|*.ps;*.eps;*.epi;*.pdf"

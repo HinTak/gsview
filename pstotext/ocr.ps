@@ -9,7 +9,7 @@
 %   reconstruction of the document's words and an approximation of the words'
 %   bounding rectangles.
 
-% Last modified on Thu Aug 21 16:41:40 PDT 1997 by mcjones
+% Last modified on Fri Oct  2 17:13:53 PDT 1998 by mcjones
 %      modified on Thu Jan 25 15:24:37 PST 1996 by deutsch
 %      modified on Wed May  3 15:41:30 PDT 1995 by birrell
 
@@ -128,13 +128,17 @@
 %ifelse
 revision 353 ge {
 NOBIND /DELAYBIND where { pop DELAYBIND or } if
- { systemdict begin /bind /.bind load def end }
+ { systemdict begin
+                /bind /.bind load
+                  /.forcedef where { pop .forcedef } { def } ifelse
+              end
+ }
 if
 } if
 
 30 dict begin			% following stuff is private
-
-/redef { systemdict begin odef end } bind def
+/.forcedef where { pop } { /.forcedef /def load def } ifelse
+/redef { systemdict begin 1 index exch .makeoperator //.forcedef end } bind def
 /privateDict currentdict def	% for lastFontNum and lastEncoding
 /fonts 200 dict def		% maps font to integer "n"
 /fontsUnit 200 dict def 	% (1000,0) and (0,1000) transformed, per font
@@ -452,7 +456,7 @@ if
       } {
       % It's not character number 32: search from 0
       0 exch {
-        dup /space eq exch /G20 eq or { exit } if
+        dup /space eq exch dup /G20 eq exch /suppress eq or or { exit } if
         1 add
         } forall
       } ifelse

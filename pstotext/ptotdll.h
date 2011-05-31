@@ -15,10 +15,14 @@
 #ifdef __DLL__
 #ifdef _Windows
 #include <windows.h>
-#define DLLEXPORT  CALLBACK _export	/* Win32 */
+#ifdef __BORLANDC__
+#define DLLEXPORT CALLBACK _export	/* Win32 Borland C++ */
+#else
+#define DLLEXPORT __declspec(dllexport) CALLBACK /* Win32 MS VC++ */
+#endif
 #else
 #include <os2.h>
-#define DLLEXPORT			/* OS/2 */
+#define DLLEXPORT			 /* OS/2 */
 #endif
 #else
 #define DLLEXPORT			/* all others */

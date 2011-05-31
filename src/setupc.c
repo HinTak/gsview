@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1996-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -402,6 +402,20 @@ char buf[MAXSTR];
 char gsviewdir[MAXSTR];
 char gstoolsdir[MAXSTR];
     install_init();
+
+    gs_addmess("Destination ");
+    gs_addmess(destdir);
+    gs_addmess("\n");
+    gs_addmess("Installing GSview: ");
+    if (install_gsview)
+        gs_addmess("true\n");
+    else
+        gs_addmess("false\n");
+    gs_addmess("Installing Ghostscript: ");
+    if (install_gs)
+        gs_addmess("true\n");
+    else
+        gs_addmess("false\n");
 
     if (!rc) {
 	char logname[MAXSTR];

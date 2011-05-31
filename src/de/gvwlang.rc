@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -64,6 +64,8 @@ BEGIN
 		    MENUITEM "&Vorschau", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
+		MENUITEM "Measure", IDM_MEASURE /* ENGLISH */
+		MENUITEM "Convert to vector format...", IDM_PSTOEDIT /* ENGLISH */
 		MENUITEM "&Text extrahieren...", IDM_TEXTEXTRACT
 		MENUITEM "&Suche...\tCtrl+S", IDM_TEXTFIND
 		MENUITEM "Suche &Nächsten\tF3", IDM_TEXTFINDNEXT
@@ -78,6 +80,8 @@ BEGIN
 			MENUITEM "&pt", IDM_UNITPT
 			MENUITEM "&mm", IDM_UNITMM
 			MENUITEM "&zoll", IDM_UNITINCH
+			MENUITEM SEPARATOR
+			MENUITEM "&Fine Resolution", IDM_UNITFINE
 		END
 		POPUP "&Sprache"
 		BEGIN
@@ -113,6 +117,8 @@ BEGIN
 		MENUITEM "&Nächste Seite\t+", IDM_NEXT
 		MENUITEM "&Vorherige Seite\t-", IDM_PREV
 		MENUITEM "&Gehe zu Seite...\tG", IDM_GOTO
+		MENUITEM "Go &Back\tB", IDM_GOBACK
+		MENUITEM "Go &Forward", IDM_GOFWD
 		MENUITEM "&Wiederaufbau\tW", IDM_REDISPLAY
 		MENUITEM SEPARATOR
 		MENUITEM "Nächste Seite oben\tLeer", IDM_NEXTHOME
@@ -177,6 +183,8 @@ BEGIN
 	VK_BACK, IDM_PREVHOME, VIRTKEY, SHIFT
 	"G", IDM_GOTO
 	"g", IDM_GOTO
+	"B", IDM_GOBACK
+	"b", IDM_GOBACK
 	"I", IDM_INFO
 	"i", IDM_INFO
 	"W", IDM_REDISPLAY
@@ -221,9 +229,9 @@ STRINGTABLE
 BEGIN
 	/* filter strings */
 #ifdef __WIN32__
-	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|PS Dateien (*.ps)|*.ps;*.ps.gz|EPS Dateien (*.eps)|*.eps;*.eps.gz|EPI Dateien (*.epi)|*.epi;*.epi.gz|PDF Dateien (*.pdf)|*.pdf;*.pdf.gz|Alle Dateien (*.*)|*.*|"
+	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|PS Dateien (*.ps)|*.ps;*.ps.gz|EPS Dateien (*.eps)|*.eps;*.eps.gz|EPI Dateien (*.epi)|*.epi;*.epi.gz|PDF Dateien (*.pdf)|*.pdf;*.pdf.gz|PRN Dateien (*.prn)|*.prn|Alle Dateien (*.*)|*.*|"
 #else
-	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf|PS Dateien (*.ps)|*.ps|EPS Dateien (*.eps)|*.eps|EPI Dateien (*.epi)|*.epi|PDF Dateien (*.pdf)|*.pdf|Alle Dateien (*.*)|*.*|"
+	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf;*.prn)|*.ps;*.eps;*.epi;*.pdf;*.prn|PS Dateien (*.ps)|*.ps|EPS Dateien (*.eps)|*.eps|EPI Dateien (*.epi)|*.epi|PDF Dateien (*.pdf)|*.pdf|PRN Dateien (*.prn)|*.prn|Alle Dateien (*.*)|*.*|"
 #endif
 	IDS_FILTER_PS, "Default (*.ps)|*.ps|EPS Dateien (*.eps)|*.eps|EPI Dateien (*.epi)|*.epi|Alle Dateien (*.*)|*.*|"
 	IDS_FILTER_EPS, "EPS Dateien (*.eps)|*.eps|EPI Dateien (*.epi)|*.epi|PS Dateien (*.ps)|*.ps|Alle Dateien (*.*)|*.*|"

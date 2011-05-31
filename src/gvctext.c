@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -457,11 +457,47 @@ char *p;
 /* This code assumes that pstotext has produced an output file
  * named psfile.text_name.
  * This file contains one line per word in the following format
- *   word llx lly urx ury
+ *   llx lly urx ury word 
  * A new line is identified by a blank line 
  * A new page is identified by a formfeed/newline
  *
  */
+
+char *
+text_grab_word(char *line)
+{
+char *p, *q;
+    p = line;
+    /* skip llx */
+    while (*p && *p!=' ')
+      p++;
+    if (*p)
+      p++;
+    /* skip lly */
+    while (*p && *p!=' ')
+      p++;
+    if (*p)
+      p++;
+    /* skip urx */
+    while (*p && *p!=' ')
+      p++;
+    if (*p)
+      p++;
+    /* skip ury */
+    while (*p && *p!=' ')
+      p++;
+    if (*p)
+      p++;
+    /* remove trailing newline */
+    q = p;
+    while (*q) {
+	if ( (*q == '\r') || (*q == '\n') )
+	    *q = '\0';
+	else
+	    q++;
+    }
+    return p;
+}
 
 void
 text_extract_slow(FILE *outfile, FILE *infile, BOOL all)
@@ -469,6 +505,7 @@ text_extract_slow(FILE *outfile, FILE *infile, BOOL all)
     char line[2048];
     int page = 0;
     BOOL thispage;
+    char *p;
 
     /* pages are in correct order - no reversal needed */
     thispage = (all || psfile.page_list.select[page]);
@@ -477,8 +514,8 @@ text_extract_slow(FILE *outfile, FILE *infile, BOOL all)
 	    if ( (*line == '\n') || (*line == '\f') )
 		fputs(line, outfile);
 	    else {
-		strtok(line, " ");
-		fputs(line, outfile);
+		p = text_grab_word(line);
+		fputs(p, outfile);
 		fputc(' ', outfile);
 	    }
 	}
@@ -573,6 +610,9 @@ BOOL nomatch;
 	    w = lastw;
 	    s = lasts + 1;
 	}
+	else if (nomatch) {
+	    break;
+	}
 	else {
 	    w++;
 	    s++;
@@ -600,6 +640,7 @@ BOOL
 text_find_slow(FILE *infile, char *str, BOOL all)
 {
 char line[MAXSTR];
+char *lineword;
 char sbuf[MAXSTR];
 char *strword;
 BOOL thispage;
@@ -619,12 +660,13 @@ int i;
     thispage = (all || psfile.page_list.select[psfile.text_page]);
     while (fgets(line, sizeof(line)-1, infile)) {
 	if (thispage && (*line != '\n') && (*line != '\f')) {
-	    strtok(line, " ");
-	    if (wildmatch(strword, line)) {
+	    /* get start of word */
+	    lineword = text_grab_word(line);
+	    if (wildmatch(strword, lineword)) {
 		/* matched first word */
 		psfile.text_offset = ftell(infile); /* remember location */
 		/* remember bounding box of word */
-		sscanf(line+strlen(line)+1, "%d %d %d %d",
+		sscanf(line, "%d %d %d %d",
 		   &psfile.text_bbox.llx, &psfile.text_bbox.lly, 
 		   &psfile.text_bbox.urx, &psfile.text_bbox.ury);
 		/* now check remaining words */
@@ -633,8 +675,8 @@ int i;
 		    if (!fgets(line, sizeof(line)-1, infile))
 			return FALSE;	/* match failed at EOF */
 		    if ((*line != '\n') && (*line != '\f')) {
-			strtok(line, " ");
-			if (!wildmatch(strword, line)) {
+			lineword = text_grab_word(line);
+			if (!wildmatch(strword, lineword)) {
 			    /* partial match failed */
 			    /* restart search from next word */
 			    fseek(infile, psfile.text_offset, SEEK_SET);
@@ -826,10 +868,10 @@ int page = psfile.pagenum;
 		}
 	    }
 	    text->word = text_words_count;
-	    sscanf(buf, "%s %d %d %d %d",
-		       text_words + text->word,
+	    sscanf(buf, "%d %d %d %d %s",
 		       &text->bbox.llx, &text->bbox.lly,
-		       &text->bbox.urx, &text->bbox.ury);
+		       &text->bbox.urx, &text->bbox.ury,
+		       text_words + text->word);
 	    text->line = thisline;
 	    text_words_count += strlen(text_words + text_words_count) + 1;
 	    text_index_count++;

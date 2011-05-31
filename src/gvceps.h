@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -137,4 +137,3 @@ int scan_pbmplus(PREBMAP *ppbmap, LPBITMAP2 pbm);
 int scan_dib(PREBMAP *ppbmap, LPBITMAP2 pbm);
 void scan_bbox(PREBMAP *pprebmap, PSBBOX *devbbox);
 
-

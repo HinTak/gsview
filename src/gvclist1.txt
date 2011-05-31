@@ -1,5 +1,6 @@
 pstotext.txt
 pstotxt1.dll
+pstotxtm.exe
 gsview16.exe
 gsview32.ico
 gsviewde.hlp

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -100,9 +100,6 @@ int width, height;
 		break;
 	}
 
-	if (psfile.ispdf)
-	    real_orientation = pdf_orientation();
-
 	switch (real_orientation) {
 	    case IDM_PORTRAIT:
 		break;
@@ -152,9 +149,6 @@ int width, height;
 		real_orientation = IDM_LANDSCAPE;
 		break;
 	}
-
-	if (psfile.ispdf)
-	    real_orientation = pdf_orientation();
 
 	switch (real_orientation) {
 	    case IDM_PORTRAIT:
@@ -327,6 +321,7 @@ gsview_openfile(char *filename)
 {
 int i;
 PSFILE *tpsfile;
+    history_reset();
     tpsfile = (PSFILE *)malloc(sizeof(PSFILE));
     if (tpsfile == NULL)
 	return NULL;
@@ -469,6 +464,7 @@ PSFILE *tpsfile;
 	    /* don't know where we are so close and reopen */
 	    pending.abort = TRUE;
 	pending.now = TRUE;
+	history_add(1);
 }
 
 
@@ -894,4 +890,99 @@ psfile_name(PSFILE *psf)
 	return psf->tname;
     /* otherwise return original file name */
     return psf->name;
+}
+
+#ifdef UNUSED
+void history_debug(void)
+{
+char buf[256];
+int i;
+    gs_addmess("history_debug: ");
+    for (i=0; i<history.count; i++) {
+	if (i == history.index)
+	    gs_addmess("[");
+        sprintf(buf, "%d", history.pages[i]);
+	gs_addmess(buf);
+	if (i == history.index)
+	    gs_addmess("]");
+	gs_addmess(" ");
+    }
+    gs_addmess("\n");
+}
+#endif
+
+void
+history_add(int pagenum)
+{
+    /* scroll if history full */
+    if (history.index >= HISTORY_MAX) {
+	memmove(&history.pages[0], &history.pages[1], 
+ 	    (HISTORY_MAX-1)*sizeof(history.pages[0]));
+	history.index--;
+	history.count = history.index;
+    }
+
+    if ((history.index > 1) && (history.pages[history.index -1] == pagenum)) {
+	/* Don't insert duplicate page */
+	return;
+    }
+    if (history.pages[history.index] != pagenum) {
+	/* If we are following a different path to last time,
+	 * truncate history
+	 */ 
+	history.count = history.index;
+    }
+
+    history.pages[history.index] = pagenum;
+
+    history.index++;
+    if (history.index > history.count)
+	history.count = history.index;
+}
+
+
+void
+history_reset(void)
+{
+    history.index = history.count = 0;
+}
+
+void
+history_back(void)
+{
+    if (history.index < 2)
+	return;	/* can't do anything */
+
+    history.index--;	/* point to current page */
+
+    request_mutex();
+    pending.pagenum = history.pages[history.index - 1];
+    if (pending.pagenum > (int)psfile.doc->numpages)
+	 pending.pagenum = psfile.doc->numpages;
+    if (pending.pagenum < 1)
+	pending.pagenum = 1;
+    gsview_unzoom();
+    pending.now = TRUE;
+    release_mutex();
+}
+
+void
+history_forward(void)
+{
+    if (history.index >= history.count) {
+	gs_page_skip(1);
+	return;
+    }
+
+    request_mutex();
+    pending.pagenum = history.pages[history.index];
+    if (pending.pagenum > (int)psfile.doc->numpages)
+	 pending.pagenum = psfile.doc->numpages;
+    if (pending.pagenum < 1)
+	pending.pagenum = 1;
+    gsview_unzoom();
+    pending.now = TRUE;
+    release_mutex();
+
+    history.index++;
 }

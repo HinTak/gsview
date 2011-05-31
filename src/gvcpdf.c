@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -29,6 +29,7 @@
 
 char pdf_page_tag[] = "%GSVIEW_PDF_PAGE: ";
 char pdf_media_tag[] = "%GSVIEW_PDF_MEDIA: ";
+char pdf_crop_tag[] = "%GSVIEW_PDF_CROP: ";
 char pdf_rotate_tag[] = "%GSVIEW_PDF_ROTATE: ";
 char pdf_mark_tag[] = "%GSVIEW_PDF_MARK: ";
 int pdf_rotate = IDM_PORTRAIT;
@@ -46,38 +47,28 @@ char *p;
 	if (*p == '\\')
 	    *p = '/';
 
-/* This can replace the "\pop\n\" line below.  It will be needed 
-   along if pdfshowpage is ever modified to use setpagedevice.
-GSview exch /ImagingBBox exch put\n\
-*/
-    /* define our routine for showing a page */
+    /* Define our routine for preparing to show a page. */
+    /* This writes out some tags which we capture in the */
+    /* callback to obtain the page size and orientation. */
     code = gs_printf("/GSview_PDFpage {\n\
 pdfgetpage /Page exch store\n\
 Page /MediaBox pget\n\
- { (%s) print dup == flush\n\
-   boxrect\n\
-   [ 2 index 5 index sub 2 index 5 index sub ]\n\
-   GSview exch /PageSize exch put\n\
-   pop pop neg exch neg exch\n\
-   [ 3 1 roll ]\n\
-   GSview exch /PageOffset exch put\n\
+ { (%s) print == flush\n\
+ }\n\
+if\n\
+Page /CropBox pget\n\
+ { (%s) print == flush\n\
  }\n\
 if\n\
 Page /Rotate pget not { 0 } if\n\
-   (%s) print dup == flush\n\
-   dup 0 lt { 360 add } if\n\
-   dup 0 lt 1 index 270 gt or { pop 0 } if\n\
-   90 idiv dup 3 eq\n\
-    { pop 1 }\n\
-    { dup 1 eq { pop 3 } if }\n\
-   ifelse\n\
-   GSview exch /Orientation exch put\n\
-<< >> setpagedevice\n\
-Page pdfshowpage_init pdfshowpage_finish\n\
-} def\n", pdf_media_tag, pdf_rotate_tag);
+   (%s) print == flush\n\
+} def\n", pdf_media_tag, pdf_crop_tag, pdf_rotate_tag);
 
+
+    /* we will need to update this pdfmark code to handle */
+    /* embedded dictionaries */
     if (!code)
-        code = gs_printf("userdict /pdfmark {(%%GSVIEW_PDF_MARK: ) print ==only counttomark 2 idiv { ( ) print exch ==only ( ) print ==only} repeat pop (\\n) print flush} bind put\n");
+        code = gs_printf("userdict /pdfmark {(%s) print ==only counttomark 2 idiv { ( ) print exch ==only ( ) print ==only} repeat pop (\\n) print flush} bind put\n", pdf_mark_tag);
 
     /* put these in userdict so we can write to them later */
     if (!code)
@@ -141,6 +132,20 @@ char tname[MAXSTR];
 	doc->numpages = numpages;
 	psfile.page_list.select = (BOOL *)malloc( doc->numpages * sizeof(BOOL) );
     }
+    /* put in some dummy values for the page size and bounding box */
+    i = get_paper_size_index();
+    if (i < 0) {
+	doc->default_page_boundingbox[URX] = option.user_width;
+	doc->default_page_boundingbox[URY] = option.user_height;
+    }
+    else {
+	doc->default_page_boundingbox[URX] = papersizes[i].width;
+	doc->default_page_boundingbox[URY] = papersizes[i].height;
+    }
+    doc->default_page_boundingbox[LLX] = doc->default_page_boundingbox[LLX] = 0;
+    doc->boundingbox[LLX] = doc->boundingbox[LLX] = 0;
+    doc->boundingbox[URX] = doc->default_page_boundingbox[URX];
+    doc->boundingbox[URY] = doc->default_page_boundingbox[URY];
     psfile.ispdf = TRUE;
     return TRUE;
 }
@@ -153,12 +158,23 @@ pdf_trailer(void)
 }
 
 int
-pdf_page(int pagenum)
+pdf_page_init(int pagenum)
 {
+    /* Prepare to show a page */
+    /* This obtains the page size and orientation */
     pdf_rotate = IDM_PORTRAIT;
     pdf_free_link();
     ignore_sync = TRUE;		/* ignore next GSDLL_SYNC */
     return gs_printf("%d GSview_PDFpage\n", pagenum);
+}
+
+int
+pdf_page(void)
+{
+    /* Display a page, assuming page size and orientation already correct */
+    /* We avoid using pdfshowpage becuase this would call */
+    /* pdf_showpage_setpage and undo our display pagesize setup */
+    return gs_printf("Page pdfshowpage_init pdfshowpage_finish\n");
 }
 
 /* Get next key/value pair */ 
@@ -254,25 +270,20 @@ int level;
     return p;
 }
 
-/* Check stdout for tag giving page range */
+
+/* Check stdout for tag giving page range, pdfmarks etc. */
 int
-pdf_checktag(LPSTR str, int len)
+pdf_process_tag(char *line, int len)
 {
 int i, first, last;
 char buf[MAXSTR];
 float x0, x1, y0, y1;
 int rotate;
-#if defined(__WIN32__) || defined(OS2)
-char *line = str;
-#else
-    char line[MAXSTR];
-    if (len > MAXSTR)
-        lstrcpyn(line, str, MAXSTR-1);
-    else
-        lstrcpy(line, str);
-#endif
+int temp;
+
     if ( (len < 1) || (*line != '%') )
 	return FALSE;
+
     if (psfile.ispdf && (len > sizeof(pdf_page_tag)) &&
 	(strncmp(line, pdf_page_tag, strlen(pdf_page_tag)) == 0) ) {
 	strncpy(buf, line, len);
@@ -293,8 +304,48 @@ char *line = str;
 	if (i==4) {
 	    if (debug)
 		gs_addmess("Found GSVIEW_PDF_MEDIA tag\n");
-	    display.width  = (unsigned int)(x1  * display.xdpi / 72.0 + 0.5);
-	    display.height = (unsigned int)(y1  * display.ydpi / 72.0 + 0.5);
+	    /* PDF page size is stored in default_page_boundingbox */
+	    if (x0 > x1) {
+		temp = x0;
+		x0 = x1;
+		x1 = temp;
+	    }
+	    if (y0 > y1) {
+		temp = y0;
+		y0 = y1;
+		y1 = temp;
+	    }
+	    psfile.doc->default_page_boundingbox[LLX] = x0;
+	    psfile.doc->default_page_boundingbox[LLY] = y0;
+	    psfile.doc->default_page_boundingbox[URX] = x1;
+	    psfile.doc->default_page_boundingbox[URY] = y1;
+	    return TRUE;
+	}
+    }
+    if (psfile.ispdf && (len > sizeof(pdf_crop_tag)) &&
+	(strncmp(line, pdf_crop_tag, strlen(pdf_crop_tag)) == 0) ) {
+	strncpy(buf, line, len);
+	buf[len] = '\0';
+	i = sscanf(buf+strlen(pdf_crop_tag), "[%f %f %f %f]", &x0, &y0, &x1, &y1);
+	if (i==4) {
+	    if (debug)
+		gs_addmess("Found GSVIEW_PDF_CROP tag\n");
+	    /* perform clipping by using epsf clipping code */
+	    /* PDF crop box is stored in boundingbox */
+	    if (x0 > x1) {
+		temp = x0;
+		x0 = x1;
+		x1 = temp;
+	    }
+	    if (y0 > y1) {
+		temp = y0;
+		y0 = y1;
+		y1 = temp;
+	    }
+	    psfile.doc->boundingbox[LLX] = x0;
+	    psfile.doc->boundingbox[LLY] = y0;
+	    psfile.doc->boundingbox[URX] = x1;
+	    psfile.doc->boundingbox[URY] = y1;
 	    return TRUE;
 	}
     }
@@ -324,16 +375,7 @@ char *line = str;
 		    pdf_rotate = IDM_PORTRAIT;
 		    break;
 	    }
-#ifdef OLD
-	    check_menu_item(IDM_ORIENTMENU, option.orientation, FALSE);
-	    option.orientation = pdf_rotate;
-	    check_menu_item(IDM_ORIENTMENU, option.orientation, TRUE);
-#else
-	    /* should put check mark next to actual orientation on */
-	    /* disabled menu, or check mark next to auto, since  */
-	    /* PDF always uses auto orientation */
-	    /* This should be done in WM_INITMENU */
-#endif
+	    /* pdf_rotate is used if orientation is auto */
 	    return TRUE;
 	}
     }
@@ -363,10 +405,7 @@ char *line = str;
 	    while (p) {
 		if (strcmp(key, "/Rect") == 0) {
 		    float fllx, flly, furx, fury;
-		    if (sscanf(value+1, "%d %d %d %d", 
-			&link.bbox.llx, &link.bbox.lly, &link.bbox.urx, &link.bbox.ury) == 4)
-			code = TRUE;
-		    else if (sscanf(value+1, "%f %f %f %f", 
+		    if (sscanf(value+1, "%f %f %f %f", 
 			&fllx, &flly, &furx, &fury) == 4) {
 			link.bbox.llx = (int)fllx;
 			link.bbox.lly = (int)flly;
@@ -374,12 +413,23 @@ char *line = str;
 			link.bbox.ury = (int)(fury + 0.5);
 			code = TRUE;
 		    }
+		    else if (debug)
+			gs_addmess("Invalid /Rect\n");
 		}
 		if (strcmp(key, "/Page") == 0) {
 		    if (strcmp(value, "/Next") == 0) {
 			link.page = psfile.pagenum+1;
 		    }
 		    else if (strcmp(value, "/Prev") == 0) {
+			link.page = psfile.pagenum-1;
+		    }
+		    else if (strcmp(value, "/GoBack") == 0) {
+			/* This is wrong - we should go to the
+			 * previously displayed page.
+			 * This has no effect in gs 5.50 because
+			 * it attempts to translate to a page number,
+			 * fails, and never gives us the /GoBack.
+			 */
 			link.page = psfile.pagenum-1;
 		    }
 		    else if (sscanf(value, "%d", &link.page) == 1) {
@@ -389,12 +439,16 @@ char *line = str;
 		if (strcmp(key, "/Border") == 0) {
 		    if (sscanf(value+1, "%f %f %f", &link.border_xr, &link.border_yr, &link.border_width) == 3)
 			code = TRUE;
+		    else if (debug)
+			gs_addmess("Invalid /Border\n");
 		}
 		if (strcmp(key, "/Color") == 0) {
 		    if (sscanf(value+1, "%f %f %f", &link.colour_red, &link.colour_green, &link.colour_blue) == 3) {
 			code = TRUE;
 			link.colour_valid = TRUE;
 		    }
+		    else if (debug)
+			gs_addmess("Invalid /Color\n");
 		}
 		if (strcmp(key, "/Subtype") == 0) {
 		    if (strcmp(value, "/Link") == 0) {
@@ -417,6 +471,67 @@ char *line = str;
     }
     return FALSE;
 }
+
+char pdf_tag_line[1024];
+
+/* Check stdout for tag giving page range */
+int
+pdf_checktag(LPSTR str, int len)
+{
+char *p;
+BOOL quote_next = FALSE;
+BOOL inparen = FALSE;
+BOOL found_eol = FALSE;
+int code = FALSE;
+int tag_len;
+
+    /* append to local copy */
+    tag_len = strlen(pdf_tag_line);
+
+    if ( tag_len + len < sizeof(pdf_tag_line) ) {
+#if defined(__WIN32__) || defined(OS2)
+        memcpy(pdf_tag_line+tag_len, str, len);
+#else
+        _fmemcpy(pdf_tag_line+tag_len, str, len);
+#endif
+	pdf_tag_line[tag_len + len] = '\0';
+    }
+    else
+	pdf_tag_line[0] = '\0';
+
+    /* only lines starting with % are tags */
+    if (pdf_tag_line[0] != '%') {
+	pdf_tag_line[0] = '\0';
+	return FALSE;
+    }
+
+    /* check if line is complete */
+    for (p = pdf_tag_line; *p; p++) {
+	if (quote_next) {
+	    quote_next = FALSE;
+	    continue;
+	}
+
+	if (*p == '\\')
+	   quote_next = TRUE;
+	else if (*p == '(') 
+	   inparen = TRUE;
+	else if (*p == ')') 
+	   inparen = FALSE;
+	else if ((*p == '\n') && !inparen)
+	    found_eol = TRUE;
+    }
+
+
+    if (!found_eol)
+	return FALSE; /* not yet complete */
+
+    if ( (len >= 1) && (*pdf_tag_line == '%') )
+	code = pdf_process_tag(pdf_tag_line, strlen(pdf_tag_line));
+    pdf_tag_line[0] = '\0';
+    return code;
+}
+	
 
 int
 pdf_orientation(void)
@@ -499,6 +614,7 @@ pdfdict begin\r\n\
 }
 
 
+/* This doesn't work in GS 5.50 because pdf_2ps.ps has been removed */
 /* Alternative convert PDF to PS */
 BOOL
 gsview_pdf2ps_common(char *psname, char *optname, char *output)
@@ -600,6 +716,34 @@ void
 pdf_add_link(PDFLINK newlink)
 {
 PDFLINK *thislink;
+int temp;
+    if (newlink.bbox.llx > newlink.bbox.urx) {
+	temp = newlink.bbox.llx;
+	newlink.bbox.llx = newlink.bbox.urx;
+	newlink.bbox.urx = temp;
+    }
+    if (newlink.bbox.lly > newlink.bbox.ury) {
+	temp = newlink.bbox.lly;
+	newlink.bbox.lly = newlink.bbox.ury;
+	newlink.bbox.ury = temp;
+    }
+	
+    if (debug) {
+	char buf[MAXSTR];
+	sprintf(buf, "Adding link /Page %d /Rect [%d %d %d %d] /Border [%g %g %g]",
+	    newlink.page,
+	    newlink.bbox.llx, newlink.bbox.lly,
+	    newlink.bbox.urx, newlink.bbox.ury,
+	    newlink.border_xr, newlink.border_yr, newlink.border_width);
+	gs_addmess(buf);
+	if (newlink.colour_valid) {
+	    sprintf(buf, " /Color [%g %g %g]",
+	      newlink.colour_red, newlink.colour_green, newlink.colour_blue);
+	    gs_addmess(buf);
+	}
+        gs_addmess("\n");
+    }
+
     request_mutex();
     thislink = (PDFLINK *)malloc(sizeof(PDFLINK));
     if (thislink) {

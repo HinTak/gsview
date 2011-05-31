@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "1.06  1998-09-13";
+char szVersion[] = "1.07  1998-12-23";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -234,7 +234,10 @@ int code = 0;
 	   height = (int)((doc->boundingbox[URY] - doc->boundingbox[LLY])*(long)resolution/72L);
 	}
 	/* cope with EPS files with and without showpage */
-	fprintf(tempfile, "/EPSTOOL_save save def\n/showpage {} def\n");
+	fprintf(tempfile, " /EPSTOOL_save save def\r\n /showpage {} def\r\n");
+	fprintf(tempfile, " count /EPSTOOL_count exch def\r\n");
+	fprintf(tempfile, " /EPSTOOL_countdictstack countdictstack def\r\n");
+
 	/* copy page to temporary file */
 	if (doc->numpages != 0) {
 	    psfile_extract_header(tempfile);
@@ -247,7 +250,9 @@ int code = 0;
 	    pscopyuntil(psfile.file, tempfile, doc->endpreview, doc->endtrailer, NULL);
 	}
 	/* cope with EPS files with and without showpage */
-	fprintf(tempfile, "\nEPSTOOL_save restore\nshowpage\n");
+	fprintf(tempfile, "\n count EPSTOOL_count sub {pop} repeat\r\n");
+	fprintf(tempfile, " countdictstack EPSTOOL_countdictstack sub {end} repeat\r\n");
+	fprintf(tempfile, " EPSTOOL_save restore\r\n showpage\r\n");
 	fprintf(tempfile, "\nquit\n");
 	fclose(tempfile);
 #ifdef UNIX
@@ -487,7 +492,7 @@ void
 do_help(void)
 {
    fprintf(stderr,"Usage:  epstool [option] operation filename\n");
-   fprintf(stderr,"  Copyright (C) 1995-1997, Russell Lang.  All rights reserved.\n");
+   fprintf(stderr,"  Copyright (C) 1995-1998, Ghostgum Software Pty Ltd.  All rights reserved.\n");
    fprintf(stderr,"  Version: %s\n", szVersion);
    fprintf(stderr,"  Options:\n");
    fprintf(stderr,"     -b             Calculate BoundingBox from image\n");

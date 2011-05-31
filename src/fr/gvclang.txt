@@ -8,7 +8,7 @@
  Pour les documents respectant les conventions de structure du langage Adobe
  PostScript, GSview permet de visualiser ou d'imprimer des pages
  sélectionnées.
- GSview 2.6 nécessite Ghostscript version 4.03 - 5.99.
+ GSview 2.7 nécessite Ghostscript version 4.03 - 5.99.
  GSview s'est inspiré du programme Ghostview pour X11 de Tim Theisen.
 2Installation
 ?Installation
@@ -188,7 +188,7 @@ E
  puis d'éditer ce fichier
  en supprimant toutes les entrées sauf :
   [Options]
-  Version=2.6
+  Version=2.7
   GSversion=550
   Configured=1
   GhostscriptDLL=E:\GSTOOLS\gs5.50\gsdll32.dll
@@ -1990,7 +1990,7 @@ W
 P
   GVPM.EXE - Une interface graphique pour Ghostscript
 E
-  Copyright (C) 1993-1997, Russell Lang.  Tous droits réservés.
+  Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  Tous droits réservés.
   Portions Copyright (C) 1994, Timothy O. Theisen.  Tous droits réservés.
 
  Ce fichier fait partie de GSview.
@@ -2007,10 +2007,8 @@ E
  sous certaines conditions décrites dans la Licence. Entre autres, la Licence
  exige que les informations de copyright et cette note soient présentes sur toutes les copies.
 
-     Auteur : Russell Lang
-   Internet : rjl@aladdin.com
- (Cette adresse est un alias fourni par Aladdin Enterprises. Russell Lang n'est ni un employé
- ni un agent d'Aladdin Enterprises).
+     Auteur : Russell Lang, Ghostgum Software Pty Ltd
+   Internet : gsview@ghostgum.com.au
  Veuillez lire la rubrique d'aide `Problèmes courants`, le fichier README.TXT fourni avec GSview et
  les pages du `WWW` avant d'envoyer un mail à l'auteur.
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1996-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -54,7 +54,7 @@ void saveas(void);
 int init_window(HAB hab);
 int message_box(char *str, int icon);
 
-#define TWLENGTH 8192
+#define TWLENGTH 16384
 #define TWSCROLL 1024
 char twbuf[TWLENGTH];
 int twend;
@@ -107,7 +107,7 @@ QMSG qmsg;
     if (!init_window(hab)) {
 
 	if (parse_arg(argc, argv)) {
-	    gstid = _beginthread(gs_thread, NULL, 16384, NULL);
+	    gstid = _beginthread(gs_thread, NULL, 65536, NULL);
 	}
 
 	text_update();

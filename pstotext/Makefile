@@ -1,7 +1,7 @@
 # Copyright (C) 1995, Digital Equipment Corporation.
 # All rights reserved.
 # See the file pstotext.txt for a full description.
-# Last modified on Fri Oct 11 15:28:59 PDT 1996 by mcjones
+# Last modified on Wed Oct 28 08:45:54 PST 1998 by mcjones
 
 # pstotext now requires an ANSI-compatible C compiler, such as gcc.
 # If you absolutely must use a pre-ANSI compiler, you can try
@@ -9,6 +9,7 @@
 # PMcJ 6 Sep 96
 
 CC=gcc
+#CC=cc -std
 
 BUNDLE = ocr.h rot270.h rot90.h
 

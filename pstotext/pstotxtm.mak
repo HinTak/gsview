@@ -47,7 +47,7 @@ pstotxtm.exe: pstotxtm.obj ptotdll.obj bundle.obj
 	rename pstotxtm.exe pstotxtm.exe
 
 prezip: pstotxtm.exe
-	copy pstotxtm.ext ..\pstotxtm.exe
+	copy pstotxtm.exe ..\pstotxtm.exe
 	copy pstotext.txt ..\pstotext.txt
 
 clean:
@@ -58,4 +58,3 @@ clean:
 	-del rot90.h
 	-del mkbundle.exe
 
-

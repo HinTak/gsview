@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -191,12 +191,13 @@ typedef struct tagPENDING {
 	BOOL	redisplay;	/* redisplay after interpreter restarted */
 	BOOL	next;		/* move to next page */
 	BOOL	now;		/* We want to do something now */
-	/* if now set, at least one of the following four will be set */
+	/* if now set, at least one of the following six will be set */
 	int	pagenum;	/* page number to display */
 	PSFILE *psfile;		/* new document to display */
 	BOOL	resize;		/* size, resolution or orientation change */
 	BOOL	text;		/* extract text, don't display */
 	BOOL	pdf2ps;		/* extract PS from PDF, don't display */
+	BOOL	pstoedit;	/* extract using pstoedit, don't display */
 } PENDING;
 
 extern PENDING pending;
@@ -233,6 +234,17 @@ typedef struct tagGSDLL {
 	GSINPUT input[5];	/* header, defaults, prolog, setup, page */
 } GSDLL;
 
+typedef struct tagMATRIX {
+   float xx, xy, yx, yy, tx, ty;
+} MATRIX;
+
+typedef struct tagMEASURE {
+   float tx, ty;	/* translation */
+   float rotate;	/* rotation */
+   float sx, sy;	/* scaling */
+   int unit;		/* IDM_UNITPT .. IDM_UNITCUSTOM */
+} MEASURE;
+
 
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
@@ -247,6 +259,7 @@ typedef struct tagOPTIONS {
 	POINTL	img_size;
 	BOOL	img_max;
 	int	unit;
+	BOOL	unitfine;
 	int	pstotext;
 	BOOL	quick_open;
 	BOOL	settings;
@@ -282,6 +295,8 @@ typedef struct tagOPTIONS {
 	BOOL	print_reverse;
 	int	pdf2ps;
 	BOOL	auto_bbox;
+	MATRIX	ctm;
+	MEASURE measure;
 } OPTIONS;
 
 typedef struct tagDISPLAY {
@@ -313,6 +328,14 @@ typedef struct tagDISPLAY {
 
 extern char last_files[4][MAXSTR];	/* last 4 files used */
 extern int last_files_count;		/* number of files known */
+
+#define HISTORY_MAX 32
+typedef struct tagHISTORY {
+    int index;  /* index of next page to store */
+    int count;	/* number of valid pages in history */
+    int pages[HISTORY_MAX];
+} HISTORY;
+extern HISTORY history;		/* history of pages displayed */
 
 typedef struct tagTEXTINDEX {
     int word;	/* offset to word */
@@ -418,6 +441,7 @@ extern HWND hwnd_status;
 extern HWND hwnd_button;
 extern HWND hwnd_help;
 extern HWND hwnd_modeless;		/* any modeless dialog box */
+extern HWND hwnd_measure;		/* measure modeless dialog box */
 extern HWND hptr_crosshair;
 extern HWND hptr_hand;
 extern HWND hwnd_menu;

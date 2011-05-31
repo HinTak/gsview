@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.;
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.;
   
   This file is part of GSview.
   
@@ -308,7 +308,7 @@ char gsviewpath[MAXSTR];
 	if (lrc == ERROR_SUCCESS) {
 	    lrc = RegSetValueEx(hkey, "GS_LIB", 0, REG_SZ, 
 		(CONST BYTE *)gsargs, strlen(gsargs)+1);
-	    sprintf(buf, "%s\\%s", gspath, GS_DLLNAME);
+	    sprintf(buf, "%s%s", gspath, GS_DLLNAME);
 	    if (lrc == ERROR_SUCCESS)
 		lrc = RegSetValueEx(hkey, "GS_DLL", 0, REG_SZ, 
 		    (CONST BYTE *)buf, strlen(buf)+1);
@@ -448,15 +448,26 @@ LPSTR d, s;
 
     /* get path to EXE */
     GetModuleFileName(phInstance, sourcedir, sizeof(sourcedir));
+    gs_addmess("Setup program is ");
+    gs_addmess(sourcedir);
+    gs_addmess("\n");
+
     if ((p = strrchr(sourcedir,'\\')) != (char *)NULL)
 	p++;
     else
 	p = sourcedir;
     *p = '\0';
+    gs_addmess("Source directory ");
+    gs_addmess(sourcedir);
+    gs_addmess("\n");
 
     /* Inspect system, get boot drive */
     getcwd(workdir, sizeof(workdir));	/* remember the working directory */
     strcpy(bootdrive, "c:");
+
+    gs_addmess("Current directory ");
+    gs_addmess(workdir);
+    gs_addmess("\n");
 
     gsver = GS_REVISION;
 

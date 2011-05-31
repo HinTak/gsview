@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -265,6 +265,11 @@ PROFILE *prf;
 	profile_read_string(prf, section, "Unit", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
 		option.unit = i+IDM_UNITPT;
+	if ((option.unit < IDM_UNITPT) || (option.unit > IDM_UNITINCH))
+		option.unit = IDM_UNITPT;
+	profile_read_string(prf, section, "UnitFine", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+		option.unitfine = i;
 	profile_read_string(prf, section, "PStoText", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
 		option.pstotext = i;
@@ -342,6 +347,9 @@ PROFILE *prf;
 	for (last_files_count=0; last_files_count<4; last_files_count++)
 	    if (strlen(last_files[last_files_count])==0)
 		break;
+
+	read_measure_profile(prf);
+
 	profile_close(prf);
 }
 
@@ -422,6 +430,8 @@ PROFILE *prf;
 	profile_write_string(prf, section, "SwapLandscape", profile);
 	sprintf(profile, "%d", option.unit - IDM_UNITPT);
 	profile_write_string(prf, section, "Unit", profile);
+	sprintf(profile, "%d", (int)option.unitfine);
+	profile_write_string(prf, section, "UnitFine", profile);
 	sprintf(profile, "%d", (int)option.quick_open);
 	profile_write_string(prf, section, "QuickOpen", profile);
 	sprintf(profile, "%d", (int)option.pstotext);
@@ -460,6 +470,9 @@ PROFILE *prf;
 	profile_write_string(prf, section, "LastFile2", last_files[1]);
 	profile_write_string(prf, section, "LastFile3", last_files[2]);
 	profile_write_string(prf, section, "LastFile4", last_files[3]);
+
+	write_measure_profile(prf);
+
 	profile_close(prf);
 }
 

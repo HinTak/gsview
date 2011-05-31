@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -71,6 +71,9 @@ char buffer[MAXSTR];
 #pragma argsused	/* ignore warning for next function */
 #endif
 HDDEDATA CALLBACK 
+#ifndef __WIN32__
+_export
+#endif
 DdeCallback(UINT type, UINT fmt, HCONV hconv,
     HSZ hsz1, HSZ hsz2, HDDEDATA hData, DWORD dwData1, DWORD dwData2)
 {
@@ -162,9 +165,22 @@ char groupfile[MAXSTR];
 int i;
 char *s, *d;
 FILE *ddefile;
+char gspathbuf[MAXSTR];
+char gsviewpathbuf[MAXSTR];
+
+    strncpy(gspathbuf, gspath, sizeof(gspathbuf));
+    strncpy(gsviewpathbuf, gsviewpath, sizeof(gsviewpathbuf));
+#ifdef __WIN32__
+    if (!is_win32s) {
+	/* The DDE interface isn't reliable with long names */
+	/* Convert everything to short names */
+	GetShortPathName(gspath, gspathbuf, sizeof(gspathbuf));
+	GetShortPathName(gsviewpath, gsviewpathbuf, sizeof(gsviewpathbuf));
+    }
+#endif
 
     /* Open ProgMan DDE undo file if it doesn't exist */
-    strcpy(setup, gsviewpath);
+    strcpy(setup, gsviewpathbuf);
     strcat(setup, GSVIEW_ZIP);
     d = strrchr(setup, '.');
     strcpy(d, "dde.log");
@@ -220,7 +236,7 @@ FILE *ddefile;
 
 #define DDEEXECUTE(str)\
     DdeClientTransaction((LPBYTE)str, strlen(str)+1, hConv,\
-	NULL, CF_TEXT, XTYP_EXECUTE, 2000, &dwResult)
+	NULL, CF_TEXT, XTYP_EXECUTE, 5000, &dwResult)
 
     sprintf(setup, "[CreateGroup(\042%s\042,%s.grp)][ShowGroup(\042%s\042,1)]",
 	groupname, groupfile, groupname);  /* display, active */
@@ -231,10 +247,10 @@ FILE *ddefile;
     DDEEXECUTE(setup);
     if (!is_win4)
        sprintf(setup, "[AddItem(\042%s%s\042,\042%s\042, \042%sgsview32.ico\042)]", 
-	  gsviewpath, GSVIEW_EXENAME, GSVIEW_NAME, gsviewpath);
+	  gsviewpathbuf, GSVIEW_EXENAME, GSVIEW_NAME, gsviewpathbuf);
     else
        sprintf(setup, "[AddItem(\042%s%s\042,\042%s\042)]", 
-	  gsviewpath, GSVIEW_EXENAME, GSVIEW_NAME);
+	  gsviewpathbuf, GSVIEW_EXENAME, GSVIEW_NAME);
     DDEEXECUTE(setup);
     if (ddefile)
         fprintf(ddefile, "[DeleteItem(\042%s\042)]\n", GSVIEW_NAME);
@@ -248,10 +264,10 @@ FILE *ddefile;
     DDEEXECUTE(setup);
     if (!is_win4)
 	sprintf(setup, "[AddItem(\042notepad.exe %sREADME.TXT\042,\042GSview README\042)]", 
-	    gsviewpath);
+	    gsviewpathbuf);
     else
 	sprintf(setup, "[AddItem(\042notepad.exe\042 \042%sREADME.TXT\042,\042GSview README\042,\042notepad.exe\042,1)]", 
-	    gsviewpath);
+	    gsviewpathbuf);
     DDEEXECUTE(setup);
     if (ddefile)
         fprintf(ddefile, "[DeleteItem(\042%s\042)]\n", "GSview README");
@@ -260,10 +276,10 @@ FILE *ddefile;
     DDEEXECUTE(setup);
     if (!is_win4)
         sprintf(setup, "[AddItem(\042%s%s -I%s\042,\042Ghostscript\042, \042%sgstext.ico\042)]", 
-	    gspath, GS_EXENAME, gsargs, gspath);
+	    gspathbuf, GS_EXENAME, gsargs, gspathbuf);
     else
         sprintf(setup, "[AddItem(\042%s%s\042 \042-I%s\042,\042Ghostscript\042)]", 
-	    gspath, GS_EXENAME, gsargs);
+	    gspathbuf, GS_EXENAME, gsargs);
     DDEEXECUTE(setup);
     if (ddefile)
         fprintf(ddefile, "[DeleteItem(\042%s\042)]\n", "Ghostscript");
@@ -273,18 +289,18 @@ FILE *ddefile;
     if (gsver >= 540) {
 	if (!is_win4)
 	    sprintf(setup, "[AddItem(\042%sReadme.htm\042,\042Ghostscript README\042)]", 
-		 gspath);
+		 gspathbuf);
 	else
 	    sprintf(setup, "[AddItem(\042%sReadme.htm\042,\042Ghostscript README\042)]", 
-		 gspath);
+		 gspathbuf);
     }
     else {
 	if (!is_win4)
 	    sprintf(setup, "[AddItem(\042notepad.exe %sREADME.\042,\042Ghostscript README\042)]", 
-		 gspath);
+		 gspathbuf);
 	else
 	    sprintf(setup, "[AddItem(\042notepad.exe\042 \042%sREADME.\042,\042Ghostscript README\042, \042notepad.exe\042,1)]", 
-		 gspath);
+		 gspathbuf);
     }
     DDEEXECUTE(setup);
     if (ddefile)
@@ -294,7 +310,7 @@ FILE *ddefile;
 #ifdef __WIN32__
     if (is_win4) {
 	load_string(IDS_UNINSTALLTITLE, buffer, sizeof(buffer));
-	win4_uninstall(gsviewpath, buffer);
+	win4_uninstall(gsviewpathbuf, buffer);
     }
     else
 #endif
@@ -304,7 +320,7 @@ FILE *ddefile;
 	sprintf(setup, "[ReplaceItem(\042%s\042)]", buffer);
 	DDEEXECUTE(setup);
 	sprintf(setup, "[AddItem(\042%s%s\042,\042%s\042)]", 
-	    gsviewpath, UNINSTALLPROG, buffer);
+	    gsviewpathbuf, UNINSTALLPROG, buffer);
 	DDEEXECUTE(setup);
 	if (ddefile)
 	    fprintf(ddefile, "[DeleteItem(\042%s\042)]\n", buffer);

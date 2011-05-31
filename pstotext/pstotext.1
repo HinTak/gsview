@@ -21,6 +21,8 @@ where option includes:
 .TP 6
 \-
 .TP 6
+\-output file
+.TP 6
 \-gs command
 .TP 6
 \-debug
@@ -52,7 +54,9 @@ process.  The option \- means to read and process a PostScript job from
 standard input.  If no \- or pathname arguments are encountered,
 \fBpstotext\fR reads a PostScript job from standard input. (PDF
 documents require random access, hence cannot be read from standard
-input.)
+input.) You can use the \-output option to specify an output file
+(remember to invoke it \fIbefore\fR the input file); otherwise
+\fBpstotext\fR writes to standard output.
 .PP
 The option \-cork is only relevant for PostScript files produced by
 dvips from TeX or LaTeX documents; it tells \fBpstotext\fR to use the
@@ -109,7 +113,8 @@ heuristics allowing it to handle a wide variety of misbehaving fonts.
 (\fBpstotext\fR no longer translates hyphen (\\255) to minus (\\055).)
 .SH "AUTHOR"
 Andrew Birrell (PostScript libraries), Paul McJones (application),
-and Russell Lang (Windows and OS/2 adaptation).
+Russell Lang (Windows and OS/2 adaptation), and Hunter Goatley (VMS
+adaptation).
 .SH "SEE ALSO"
 \fBpstotext\fR incorporates technology originally developed for the
 Virtual Paper project at SRC; see
@@ -119,7 +124,7 @@ As mentioned above, \fBpstotext\fR invokes Ghostscript.  See gs(1) or
 http://www.cs.wisc.edu/~ghost/.
 .SH "COPYRIGHT"
 .PP
-Copyright 1995 Digital Equipment Corporation.
+Copyright 1995\-8 Digital Equipment Corporation.
 .br
 Distributed only by permission.
 .br
@@ -128,6 +133,9 @@ See file pstotext.txt for details.
 .BR
 .PP
 .EX
-Last modified on Tue Oct 29 09:55:14 PST 1996 by mcjones  
+Last modified on Fri Jun  5 14:02:37 PDT 1998 by mcjones  
      modified on Wed Jun  7 17:47:56 PDT 1995 by birrell  
 .EE
+.PP
+This file was generated automatically by mtex software; see the
+mtex home page at http://www.research.digital.com/SRC/mtex/.

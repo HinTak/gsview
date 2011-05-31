@@ -1,12 +1,16 @@
-/* Copyright (C) 1995-1996, Digital Equipment Corporation.    */
+/* Copyright (C) 1995-1998, Digital Equipment Corporation.    */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Mon Oct 28 12:12:42 PST 1996 by mcjones   */
+/* Last modified on Wed Oct 28 08:42:15 PST 1998 by mcjones   */
 /*      modified on Sun Jul 28 00:00:00 UTC 1996 by rjl       */
 
 /* This module is based on OCR_PS.m3, a module of the Virtual Paper
    project at the DEC Systems Research Center:
    http://www.research.digital.com/SRC/virtualpaper/ */
+
+#ifdef VMS
+#include <stdlib.h>
+#endif
 
 #include <math.h>
 #include "ptotdll.h"
@@ -496,7 +500,7 @@ static int ParseEncoding(t, instr) T *t; char *instr; {
   int n = ReadInt(&instr);
   int i;
   if (e<0) return PSTOTEXT_FILTER_BADENCODINGNUMBER;
-  if (n>256) return PSTOTEXT_FILTER_TOOMANYGLYPHINDEXES;
+  if (n>/*256*/1024) return PSTOTEXT_FILTER_TOOMANYGLYPHINDEXES;
 
   /* Grow "t->encoding" if necessary. */
   if (t->encodingSize<=e) {
@@ -696,53 +700,57 @@ static void Output(t, pre, word, llx, lly, urx, ury)
   x3 = t->x1 + f->tx; y3 = t->y1 + f->ty;
 
   blx = ceil(MIN(MIN(MIN(x0, x1), x2), x3));
-  bly = ceil(MAX(MAX(MAX(y0, y1), y2), y3));
+  bly = ceil(MAX(MAX(MAX(y0, y1), y2), y3)); /* *** should this be floor? PMcJ 981002 */
   toprx = floor(MAX(MAX(MAX(x0, x1), x2), x3));
-  topry = floor(MIN(MIN(MIN(y0, y1), y2), y3));
+  topry = floor(MIN(MIN(MIN(y0, y1), y2), y3)); /* *** should this be ceil? PMcJ 981002 */
 
-  /* Output word separator if this isn't first word on page. */
-  if (t->nonEmptyPage) {
-    mid = (topry+bly) / 2;
-    if (t->blx<t->toprx && t->topry>=t->bly
-        || blx<toprx && topry<bly
-        && t->blx <= blx
-        && t->topry <= mid
-        && mid <= t->bly) *pre = " "; /* same line */
-    else *pre = "\n"; /* different line */
-  }
-  else *pre = "";
+  if (blx!=toprx && bly!=topry) {
 
-  /* Output elements "0" through "t->lbuf-1" of "t->buf". */
-  t->buf[t->lbuf] = '\0';
-  strncpy(t->word, t->buf, t->lbuf+1);
-  *word = t->word;
- 
+    /* Output word separator if this isn't first word on page. */
+    if (t->nonEmptyPage) {
+      mid = (topry+bly) / 2;
+      if (blx<toprx && topry<bly
+	  && t->blx <= blx
+	  && t->topry <= mid
+	  && mid <= t->bly) *pre = " "; /* same line */
+      else *pre = "\n"; /* different line */
+    }
+    else *pre = "";
+
+    /* Output elements "0" through "t->lbuf-1" of "t->buf". */
+    t->buf[t->lbuf] = '\0';
+    strncpy(t->word, t->buf, t->lbuf+1);
+    *word = t->word;
+
+    t->nonEmptyPage = TRUE;
+    t->blx = blx; t->bly = bly; t->toprx = toprx; t->topry = topry;
+
+    /* transform device units to default PostScript units */
+    Itransform( t, &x1, &y1, (double)blx, (double)bly);
+    blx = floor(x1); bly = floor(y1);
+    Itransform( t, &x1, &y1, (double)toprx, (double)topry);
+    toprx = ceil(x1); topry = ceil(y1);
+
+    if (blx < toprx) {
+	*llx = blx; 
+	*urx = toprx; 
+    }
+    else {
+	*llx = toprx; 
+	*urx = blx; 
+    }
+    if (bly < topry) {
+	*lly = bly; 
+	*ury = topry; 
+    }
+    else {
+	*lly = topry; 
+	*ury = bly; 
+    }
+
+  } /*if (blx!=toprx && bly!=topry) { */
+
   t->lbuf = 0;
-  t->nonEmptyPage = TRUE;
-  t->blx = blx; t->bly = bly; t->toprx = toprx; t->topry = topry;
-
-  /* transform device units to default PostScript units */
-  Itransform( t, &x1, &y1, (double)blx, (double)bly);
-  blx = floor(x1); bly = floor(y1);
-  Itransform( t, &x1, &y1, (double)toprx, (double)topry);
-  toprx = ceil(x1); topry = ceil(y1);
-
-  if (blx < toprx) {
-      *llx = blx; 
-      *urx = toprx; 
-  }
-  else {
-      *llx = toprx; 
-      *urx = blx; 
-  }
-  if (bly < topry) {
-      *lly = bly; 
-      *ury = topry; 
-  }
-  else {
-      *lly = topry; 
-      *ury = bly; 
-  }
 }
 
 static BOOLEAN SameDirection(x0, y0, x1, y1) double x0, y0, x1, y1; {

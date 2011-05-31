@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -331,4 +331,3 @@ HMETAFILE hmf;
 	return;
 }
 #endif
-

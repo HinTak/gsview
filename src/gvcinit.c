@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -96,6 +96,7 @@ init_options(void)
     option.img_max = FALSE;
     option.drawmethod = IDM_DRAWDEF;
     option.unit = IDM_UNITPT;
+    option.unitfine = 0;
     option.quick_open = TRUE;
     option.pstotext = IDM_PSTOTEXTNORM - IDM_PSTOTEXTMENU - 1;
     option.settings = TRUE;
@@ -172,6 +173,7 @@ init_check_menu(void)
 
     /* update menus */
     check_menu_item(IDM_UNITMENU, option.unit, TRUE);
+    check_menu_item(IDM_UNITMENU, IDM_UNITFINE, option.unitfine);
     check_menu_item(IDM_LANGMENU, option.language, TRUE);
     check_menu_item(IDM_PSTOTEXTMENU, option.pstotext + IDM_PSTOTEXTMENU + 1, TRUE);
     if (option.auto_orientation)
@@ -199,6 +201,9 @@ default_gsdir(char *buf)
 char *p;
     /* assume that GS is in the adjacent directory */
     strcpy(buf, szExePath);
+    p = buf + strlen(buf) - 1;	/* remove trailing slash */
+    if (*p == '\\')
+	*p = '\0';
     p = strrchr(buf, '\\');	/* remove trailing gsview */
     if (p)
 	*(++p) = '\0';
@@ -263,8 +268,10 @@ char sysini[MAXSTR];
 	putenv("TEMP=c:\\");   /* just in case the user ignores us */
     }
 
-    if (option.configured)
+    if (option.configured) {
+	post_command_line();
 	return beta();	/* don't run if expired */
+    }
 
     if (beta_warn())
 	return 1;	/* don't run */
@@ -277,10 +284,11 @@ char sysini[MAXSTR];
 	/* pre configured INI file was found */
 	gsview_printer_profiles();	/* trust sys admin to have it correct */
 	/* don't bother running the configure wizard */
+	post_command_line();
 	return 0;
     }
     /* revert back to our copy of INI file */
-    read_profile(INIFILE);
+    read_profile(szIniFile);
 
     check_language();	/* offer to change language if doesn't match WIN.INI */
 

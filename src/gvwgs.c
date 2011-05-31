@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1996-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -94,7 +94,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
     if (parse_args(argc, argv)) {
 #ifdef __WIN32__
 	if (multithread)
-	    gstid = _beginthread(gs_thread, 16384, NULL);
+	    gstid = _beginthread(gs_thread, 65536, NULL);
 	else 
 #endif
         {

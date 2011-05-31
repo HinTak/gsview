@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,4 +18,3 @@
 /* gvcbeta.h */
 int beta(void);		/* returns non-zero if expired */
 int beta_warn(void);	/* installation warning */
-

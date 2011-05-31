@@ -60,4 +60,3 @@ char *s, *d;
     fclose(hdrfile);
     return 0;
 }
-

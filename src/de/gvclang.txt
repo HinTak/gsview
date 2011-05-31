@@ -11,7 +11,7 @@
  entwickelten PostScript Document Structuring Conventions
  (DSC-Konventionen) entsprechen, auf dem Bildschirm dargestellt und auf
  einen Drucker ausgegeben werden.
- Die Version GSview 2.6 erfordert Ghostscript in der Version 4.03 - 5.99.
+ Die Version GSview 2.7 erfordert Ghostscript in der Version 4.03 - 5.99.
  Grundlage für GSview ist das von Tim Theisen entwickelte Programm
  Ghostview für X11.
 2Installation
@@ -193,7 +193,7 @@ E
  Kopieren Sie gsview32.ini oder gvpm.ini aus dem Systemverzeichnis oder dem Benutzerprofil-Verzeichnis in
  das Gsview Verzeichnis und entfernen alle Einträge bis auf:
   [Options]
-  Version=2.6
+  Version=2.7
   GSversion=550
   Configured=1
   GhostscriptDLL=E:\GSTOOLS\gs5.50\gsdll32.dll
@@ -2119,7 +2119,7 @@ W
 P
   GVPM.EXE - Bedienung von Ghostscript über graphische Oberfläche
 E
-  Copyright (C) 1993-1997, Russell Lang.  Alle Rechte vorbehalten.
+  Copyright (C) 1993-1997, Ghostgum Software Pty Ltd.  Alle Rechte vorbehalten.
   Partielles Copyright (C) 1994, Timothy O. Theisen.  Alle Rechte
   vorbehalten.
 
@@ -2138,10 +2138,8 @@ E
  Unter anderem fordert die  Lizenz, daß das Copyright und dieser Hinweis
  in allen Kopien enthalten ist.
 
-      Autor: Russell Lang
-   Internet: rjl@aladdin.com
- (Der Alias wird von der Fa. Aladdin Enterprises zur Verfügung gestellt.
- Russell Lang ist kein Mitarbeiter der Fa. Aladdin Enterprises).
+      Autor: Russell Lang, Ghostgum Software Pty Ltd
+   Internet: gsview@ghostgum.com.au
  Lesen Sie zunächst das Thema `Häufig auftretende Probleme`,
  die GSview-Datei README.TXT und die entsprechende `WWW`-Seite,
  bevor Sie sich per E-Mail an den Autor wenden.

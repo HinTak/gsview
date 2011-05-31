@@ -9,16 +9,16 @@ Update interval
 
 Win32 accelerators (VK_F1, VK_F3, VK_BACK) don't work 
 while button has mouse capture.
-
-You can use spaces in the Ghostscript path, but I can't figure out
-how to create a Win95 shortcut to "-Ic:\gs tools" using Progman DDE.
+Backspace and space don't work when cursor is over button bar.
 
 View bitmap files with viewjpg/viewbmp/viewpcx
 
 GSgrab needs a start_timer() added just before the main message loop.
 (Don't bother - RedMon is better).
 
-Check periodically if file is modified OR redisplay button.
+Write GS_LIB and GS_DLL registry names on configure if needed.
+Currently they are only written when winsetup is run.
+Implement for OS/2 also.
 
 Test setup from floppies with foreign language.
 
@@ -27,26 +27,11 @@ Create DLLs without code or data, or change to only a small amount of code.
 Fix /Orientation landscape/seascape values to be more consistent. 
 
 Why is redisplay of an existing modified file so slow?
-Suspect memory leak.
-
-Forward/backward button using history.
 
 Remember extracted text between uses.
 
-Compile pstotxt3.dll with MSVC++ 5.0.  Currently it compiles,
-but crashes caller.
-
 Check if user profiles work under NT 4.0.  If so, update
 the help file.
-
-Write GS_LIB and GS_DLL registry names on configure if needed.
-Currently they are only written when winsetup is run.
-Implement for OS/2 also.
-
-Option to specify decimal places for cursor position.
-Measure distances by dragging.
-
-Backspace and space don't work when cursor is over button bar.
 
 Write to network printing without connection.
 
@@ -57,6 +42,60 @@ but the desired printer is unidirectional, the wrong driver
 complains.  (Mike Uren, 6 April 1998).
 (Too hard - gsv16spl only gets the printer port, not the printer name).
 
+Printing of Portrait PDF files with Rotate 90 is
+now broken.  They print on landscape paper.
+In the previous version of Ghostscript, they were not
+rotated and so printed correctly.  This was due to some
+code which detected displays and rotated only for displays.
+This is a Ghostscript bug.
+
+Add "Fit Page to Window" which causes the resolution to be changed.
+
+User profile directory might be read only.
+
+Test pstoedit.
+
+Copy to clipboard from 16-bit GSview dies in GSDLL16.DLL under NT.
+
+Done:
+=====
+You can use spaces in the Ghostscript path, but I can't figure out
+how to create a Win95 shortcut to "-Ic:\gs tools" using Progman DDE.
+
+Check periodically if file is modified OR redisplay button.
+
+Compile pstotxt3.dll with MSVC++ 5.0.  Currently it compiles,
+but crashes caller.
+
+Forward/backward button using history.
+
+Print EPS by adding showpage wrapper.
+Resize if needed.
+
+pstotext 1.7 is returning wrong coordinates with GS 5.50.
+Add -dFIXEDMEDIA.
+
+Update documentation about PDF.
+
+pdf2ps now uses pswrite.  Old method has been removed
+so File | Extract doesn't work.
+Change GSview to use pdfwrite or pswrite.
+
+(Option to specify decimal places for cursor position.)
+Added "Fine resolution".
+
+Add more space in status line for filename and page number.
+
+Option to append ^D for PostScript printers.
+
+Command line option to open in existing GSview, instead of starting 
+a new version.
+
+Measure distances by dragging.
+
 Display full screen (no menu, buttons, sliders etc).
 This requires creating a new client window WS_POPUP.
+
+Put wrapper around EPS files in epstool to cope with 
+extra dictionaries on the stack.
 

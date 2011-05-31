@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -209,13 +209,23 @@ gsview_extract()
 		return;
     }
 
+    if (psfile.ispdf) {
+	if (option.gsversion > 510) {
+	    char buf[MAXSTR];
+	    load_string(IDS_USEPDFWRITE, buf, sizeof(buf));
+	    message_box(buf, MB_ICONASTERISK | MB_OK);
+	    return;
+	}
+    }
+
     load_string(IDS_TOPICOPEN, szHelpTopic, sizeof(szHelpTopic));
     if (doc->numpages != 0)
 	if (!get_page(&thispage, TRUE, FALSE))
 	    return;
 
     if (psfile.ispdf) {
-	if (!get_pdf2ps_options())
+	/* this doesn't work for GS >= 5.50 */
+        if (!get_pdf2ps_options())
 	    return;
     }
 
@@ -614,6 +624,130 @@ char *p, *desc;
     return NULL;
 }
 
+void
+psfile_epsf_print(FILE *f)
+{
+int llx, lly, urx, ury;
+float scale = 1.0;
+int rescale = FALSE;
+int i = get_paper_size_index();
+int width, height;
+
+    if (i < 0) {
+	width = option.user_width;
+	height = option.user_height;
+    }
+    else {
+	width = papersizes[i].width;
+	height = papersizes[i].height;
+    }
+
+    llx = psfile.doc->boundingbox[LLX];
+    lly = psfile.doc->boundingbox[LLY];
+    urx = psfile.doc->boundingbox[URX];
+    ury = psfile.doc->boundingbox[URY];
+
+    /* If EPS file isn't going to fit on the page, rescale it */
+    if ( (llx < 0) || (llx > width)  ||
+	 (lly < 0) || (lly > height) ||
+	 (urx < 0) || (urx > width)  ||
+	 (ury < 0) || (lly > height) )
+	rescale = TRUE;
+
+
+#define MARGIN 36	/* 12.5mm gap */
+    if (rescale) {
+	/* leave minimum 12.5mm gap on each side */
+	scale = min( ((float)(width  - 2 * MARGIN)/(urx - llx)), 
+		     ((float)(height - 2 * MARGIN)/(ury - lly)) );
+	urx = MARGIN + (int)((urx - llx)*scale + 0.999999);
+	ury = MARGIN + (int)((ury - lly)*scale + 0.999999);
+	llx = MARGIN;
+	lly = MARGIN;
+    }
+
+
+    fprintf(f, "%%!PS-Adobe-3.0 EPSF-3.0\r\n");
+    fprintf(f, "%%%%BoundingBox: %d %d %d %d\r\n", llx, lly, urx, ury);
+    fprintf(f, "%%%%Pages: 1\r\n%%%%EndComments\r\n%%%%BeginProlog\r\n");
+    fprintf(f, "%%%%EndProlog\r\n%%%%Page: 1 1\r\n");
+    fprintf(f, " /EPSTOOL_save save def\r\n /showpage {} def\r\n");
+    fprintf(f, " count /EPSTOOL_count exch def\r\n");
+    fprintf(f, " /EPSTOOL_countdictstack countdictstack def\r\n");
+    if (rescale)
+        fprintf(f, " %d %d translate\r\n %g %g scale\r\n %d %d translate\r\n", 
+	    MARGIN, MARGIN,		/* add new offset */
+	    scale, scale, 
+	    -psfile.doc->boundingbox[LLX], /* remove old offset */
+	    -psfile.doc->boundingbox[LLY]);
+    fprintf(f, "%%%%BeginDocument: %s\r\n", psfile.name);
+    pscopyuntil(psfile.file, f, psfile.doc->beginheader, 
+	    psfile.doc->endtrailer, NULL);
+    fprintf(f, "\r\n%%%%EndDocument\r\n");
+    fprintf(f, " count EPSTOOL_count sub {pop} repeat\r\n");
+    fprintf(f, " countdictstack EPSTOOL_countdictstack sub {end} repeat\r\n");
+    fprintf(f," EPSTOOL_save restore\r\n showpage\r\n%%%%Trailer\r\n%%%%EOF\r\n");
+#undef MARGIN
+}
+
+BOOL
+gsview_copyfile(FILE *outfile, FILE *infile)
+{
+    char *buffer;
+    int count;
+    /* create buffer for PS file copy */
+    buffer = malloc(COPY_BUF_SIZE);
+    if (buffer == (char *)NULL)
+	return FALSE;
+    while ( (count = fread(buffer, 1, COPY_BUF_SIZE, infile)) != 0 ) {
+	fwrite(buffer, 1, count, outfile);
+    }
+    free(buffer);
+    return TRUE;
+}
+
+BOOL
+copy_for_printer(FILE *pcfile)
+{
+    if (psfile.doc == (PSDOC *)NULL) {
+	/* copy non-DSC file */
+	if (!gsview_copyfile(pcfile, psfile.file)) {
+	    play_sound(SOUND_ERROR);
+	    fclose(pcfile);
+	    return FALSE;
+	}
+    }
+    else {
+	if (psfile.ispdf) {
+	    if (option.psprinter) {
+	        gserror(IDS_PRINTPDFPS, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
+		return FALSE;
+	    }
+	    if (!pdf_extract(pcfile)) {
+		fclose(pcfile);
+		return FALSE;
+	    }
+	}
+	else  {
+	    if (psfile.doc->epsf) {
+		/* Copy EPSF file, making sure it fits on the page
+		 * and includes one and only one showpage
+		 */
+		 psfile_epsf_print(pcfile);
+	    }
+	    else {
+		/* copy DSC file */
+		if (psfile.doc->numpages != 0)
+		    psfile_extract(pcfile);
+		else
+		    pscopyuntil(psfile.file, pcfile, psfile.doc->beginheader, 
+			psfile.doc->endtrailer, NULL);
+	    }
+	}
+    }
+    return TRUE;
+}
+
 
 /* common printer code */
 BOOL
@@ -635,11 +769,15 @@ float xoffset = 0;
 float yoffset = 0;
 char section[MAXSTR];
 PROFILE *prf;
+int prectrld=0;
+int postctrld=0;
+char psprolog[MAXSTR];
+char psepilog[MAXSTR];
 
     /*  ASSUMES psfile.file is valid */
 
     /* create temporary file containing pages to print */
-/*
+/*  File is now deleted by gvXgs.exe.
     if ((psname[0] != '\0') && !debug)
 	unlink(psname);
 */
@@ -650,41 +788,65 @@ PROFILE *prf;
 	return FALSE;
     }
 
-    if (psfile.doc == (PSDOC *)NULL) {
-	/* copy non-DSC file */
-	char *buffer;
-	int count;
-	/* create buffer for PS file copy */
-	buffer = malloc(COPY_BUF_SIZE);
-	if (buffer == (char *)NULL) {
-	    play_sound(SOUND_ERROR);
-	    fclose(pcfile);
-	    unlink(psname);
-	    return FALSE;
+    if (option.psprinter) {
+	/* for PostScript printers, provide options for sending
+         * Ctrl+D before and after job, and sending a prolog
+	 * and epilog file.
+	 * These are set using the Advanced button on the Printer
+	 * Setup dialog, only enabled for PostScript printer.
+	 */
+	strcpy(section, option.printer_queue);
+	if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+	    profile_read_string(prf, section, "PreCtrlD", "0", buf, 
+		sizeof(buf)-2);
+	    if (sscanf(buf, "%d", &prectrld) != 1)
+		prectrld = 0;
+	    profile_read_string(prf, section, "PostCtrlD", "0", buf, 
+		sizeof(buf)-2);
+	    if (sscanf(buf, "%d", &postctrld) != 1)
+		postctrld = 0;
+	    profile_read_string(prf, section, "Prolog", "", psprolog, 
+	       sizeof(psprolog)-2);
+	    profile_read_string(prf, section, "Epilog", "", psepilog, 
+	       sizeof(psepilog)-2);
+	    profile_close(prf);
 	}
-	while ( (count = fread(buffer, 1, COPY_BUF_SIZE, psfile.file)) != 0 ) {
-	    fwrite(buffer, 1, count, pcfile);
-	}
-	free(buffer);
-    }
-    else {
-	if (psfile.ispdf) {
-	    if (option.psprinter) {
-	        gserror(IDS_PRINTPDFPS, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
-		return FALSE;
+	if (prectrld)
+	   fputc('\004', pcfile);
+	if (strlen(psprolog)!=0) {
+	    FILE *infile = fopen(psprolog, "rb");
+	    if (infile != (FILE *)NULL) {
+	        if (!gsview_copyfile(pcfile, infile)) {
+		    play_sound(SOUND_ERROR);
+		    return FALSE;
+		}
+		fclose(infile);
 	    }
-	    if (!pdf_extract(pcfile)) {
-		fclose(pcfile);
-		return FALSE;
-	    }
-	}
-	else  {
-	    /* copy DSC file */
-	    if (psfile.doc->numpages != 0)
-		psfile_extract(pcfile);
 	    else
-		pscopyuntil(psfile.file, pcfile, psfile.doc->beginheader, psfile.doc->endtrailer, NULL);
+		play_sound(SOUND_ERROR);
 	}
+    }
+
+    if (!copy_for_printer(pcfile)) {
+	unlink(psname);
+	return FALSE;
+    }
+
+    if (option.psprinter) {
+	if (strlen(psepilog)!=0) {
+	    FILE *infile = fopen(psepilog, "rb");
+	    if (infile != (FILE *)NULL) {
+	        if (!gsview_copyfile(pcfile, infile)) {
+		    play_sound(SOUND_ERROR);
+		    return FALSE;
+		}
+		fclose(infile);
+	    }
+	    else
+		play_sound(SOUND_ERROR);
+	}
+	if (postctrld)
+	   fputc('\004', pcfile);
     }
 
     fclose(pcfile);

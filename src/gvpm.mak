@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+#  Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -34,7 +34,7 @@ DEBUG=0
 # Language is English (en) or Deutsch (de) or French (fr) or Italian (it)
 LANGUAGE=en
 # GSview version
-GSVIEW_VERSION=26
+GSVIEW_VERSION=27
 
 !if $(USE_EMX)
 # EMX
@@ -87,10 +87,10 @@ INCDIR=$(EMXPATH)/include
 LIBDIR=$(EMXPATH)/lib
 
 
-OBJS=gvpm.$(OBJ) gvpdlg.$(OBJ) gvpdisp.$(OBJ) gvpeps.$(OBJ) gvpinit.$(OBJ)\
-   gvpmisc.$(OBJ) gvpprn.$(OBJ)\
+OBJS=gvpm.$(OBJ) gvpdlg.$(OBJ) gvpdisp.$(OBJ) gvpedit.$(OBJ) gvpeps.$(OBJ)\
+   gvpinit.$(OBJ) gvpmeas.$(OBJ) gvpmisc.$(OBJ) gvpprn.$(OBJ)\
    gvccmd.$(OBJ) gvcdisp.$(OBJ) gvceps.$(OBJ) gvcinit.$(OBJ) gvcbeta.$(OBJ)\
-   gvcmisc.$(OBJ) gvcprf.$(OBJ) gvcprn.$(OBJ) gvctext.$(OBJ)\
+   gvcmeas.$(OBJ) gvcmisc.$(OBJ) gvcprf.$(OBJ) gvcprn.$(OBJ) gvctext.$(OBJ)\
    gvpdll.$(OBJ) gvcdll.$(OBJ)  gvcpdf.$(OBJ) ps.$(OBJ) 
 HDRS=gvpm.h ps.h gvcfn.h gvcver.h
 
@@ -114,9 +114,13 @@ gvpdll.$(OBJ): gvpdll.c gvcrc.h gsdll.h $(HDRS)
 
 gvpdisp.$(OBJ): gvpdisp.c  $(HDRS)
 
+gvpedit.$(OBJ): gvpedit.c $(HDRS)
+
 gvpeps.$(OBJ): gvpeps.c gvceps.h $(HDRS)
 
 gvpinit.$(OBJ): gvpinit.c $(HDRS) gvcrc.h
+
+gvpmeas.$(OBJ): gvpmeas.c $(HDRS)
 
 gvpmisc.$(OBJ): gvpmisc.c $(HDRS)
 
@@ -133,6 +137,8 @@ ps.$(OBJ): ps.c
 gvcbeta.obj: gvcbeta.c gvcbeta.h $(HDRS)
 
 gvceps.$(OBJ): gvceps.c gvceps.h $(HDRS)
+
+gvcmeas.$(OBJ): gvcmeas.c gvcrc.h $(HDRS)
 
 gvcmisc.$(OBJ): gvcmisc.c gvcrc.h $(HDRS)
 
@@ -513,8 +519,10 @@ clean: language
 	-del gvpdisp.$(OBJ)
 	-del gvpdlg.$(OBJ)
 	-del gvpdll.$(OBJ)
+	-del gvpedit.$(OBJ)
 	-del gvpeps.$(OBJ)
 	-del gvpinit.$(OBJ)
+	-del gvpmeas.$(OBJ)
 	-del gvpmisc.$(OBJ)
 	-del gvpprn.$(OBJ)
 	-del ps.$(OBJ)
@@ -524,6 +532,7 @@ clean: language
 	-del gvcdisp.$(OBJ)
 	-del gvceps.$(OBJ)
 	-del gvcinit.$(OBJ)
+	-del gvcmeas.$(OBJ)
 	-del gvcmisc.$(OBJ)
 	-del gvcpdf.$(OBJ)
 	-del gvcprf.$(OBJ)

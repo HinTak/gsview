@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+#  Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -30,7 +30,7 @@ WIN32=1
 # This only applies to the utilties, not GSview itself.
 LANGUAGE=en
 # GSview version
-GSVIEW_VERSION=26
+GSVIEW_VERSION=27
 
 # Shouldn't need editing below here
 COMPDIR = $(COMPBASE)\bin

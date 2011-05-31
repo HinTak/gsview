@@ -1,7 +1,7 @@
 =================================================================== 
-pstotext.txt    21 August 1997
+pstotext.txt    29 September 1998
 =================================================================== 
-pstotext 1.6 - PostScript text extractor.  Requires Ghostscript.
+pstotext 1.8 - PostScript text extractor.  Requires Ghostscript.
 
 The files pstotxt1.dll (Win16), pstotxt2.dll (OS/2) pstotxt3.dll (Win32), and
 pstotext.zip (sources) constitute the pstotext package, which was written by
@@ -9,24 +9,35 @@ Paul McJones and Andrew Birrell of Digital Equipment Corporation's Systems
 Research Center.  These files are copyright by Digital Equipment Corporation. 
 You may use them subject to the attached END USER LICENSE AGREEMENT.
 
-You can build a Unix command-line version of pstotext using the source
-files in pstotext.zip (use makefile).  Alternatively, you can fetch 
-this version from:
+The source files are available as pstotext.zip in the GSview source
+distribution, or directly from the authors:
     http://www.research.digital.com/SRC/virtualpaper/pstotext.html
 
-pstotext was developed as a part of the Virtual Paper system, which 
-is a high-quality viewer for computer-generated or scanned documents. 
+You can build DLL and command-line versions of pstotext for various
+platforms from the sources:
+    PLATFORM     BUILD FILE
+    Unix         Makefile
+    Win16        pstotxt1.mak
+    OS/2         pstotxt2.mak
+    Win32        pstotxt3.mak
+    VMS          descrip.mms
+
+pstotext was developed as a part of the Virtual Paper system, which is
+a high-quality viewer for computer-generated or scanned documents.
 See:
     http://www.research.digital.com/SRC/virtualpaper/
 
 We appreciate Russell Lang's willingness to incorporate pstotext in
-GSview, and his help in redesigning the API to the DLL module and
-in debugging the final version.
+GSview, and his help in redesigning the API to the DLL module and in
+debugging the final version.  We thank Hunter Goatley for the VMS
+port.
 
-You can contact the authors at <mcjones@pa.dec.com> and <birrell@pa.dec.com>. 
+You can contact the authors at <mcjones@pa.dec.com> and
+<birrell@pa.dec.com>.  For Windows and OS, contact rjl@aladdin.com;
+for VMS, contact <goathunter@PROCESS.COM>.
 
                       ==========================
-                      END USER LICENSE AGREEMENT 
+                      END USER LICENSE AGREEMENT
                       ==========================
 
 GRANT.  Subject to the provisions contained herein, Digital Equipment
@@ -128,4 +139,3 @@ FAR 52 227-19 when applicable, or in subparagraph (c) (1) (ii) of the
 Rights in Technical Data and Computer Software clause at DFARS
 252.227-7013, and in similar clauses in the NASA FAR Supplement.
 Contractor/manufacturer is Digital Equipment Corporation.
-

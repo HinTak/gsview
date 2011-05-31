@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -54,6 +54,7 @@
 #define IDM_LASTFILE4	117
 #define IDM_EXIT	118
 #define IDM_DROP	119
+#define IDM_PSTOEDIT	120
 
 #define IDM_EDITMENU	150
 #define IDM_COPYCLIP	151
@@ -95,11 +96,13 @@
 #define IDM_UNITPT	191
 #define IDM_UNITMM	192
 #define IDM_UNITINCH	193
+#define IDM_UNITCUSTOM	194
+#define IDM_UNITFINE	195
 
-#define IDM_DRAWMENU	195	/* OS/2 only */
-#define IDM_DRAWDEF	196
-#define IDM_DRAWGPI	197
-#define IDM_DRAWWIN	198
+#define IDM_DRAWMENU	196	/* OS/2 only */
+#define IDM_DRAWDEF	197
+#define IDM_DRAWGPI	198
+#define IDM_DRAWWIN	199
 
 #define IDM_VIEWMENU    200
 #define IDM_NEXT	201
@@ -109,8 +112,10 @@
 #define IDM_PREVHOME	205
 #define IDM_PREVSKIP	206
 #define IDM_GOTO	207
-#define IDM_REDISPLAY   208
-#define IDM_SKIP	209
+#define IDM_GOBACK	208
+#define IDM_GOFWD	209
+#define IDM_REDISPLAY   210
+#define IDM_SKIP	211
 
 #define IDM_ORIENTMENU	220
 #define IDM_PORTRAIT	221
@@ -219,6 +224,21 @@
 #define IDD_PSTOEPS	 470
 #define PSTOEPS_AUTOBBOX  471
 
+#define IDD_ADVPS		481
+#define ADVPS_PRECTRLD		482
+#define ADVPS_POSTCTRLD 	483
+#define ADVPS_PROLOG		484
+#define ADVPS_PROLOGBROWSE	485
+#define ADVPS_EPILOG		486
+#define ADVPS_EPILOGBROWSE	487
+
+#define EDIT_FORMAT	491
+#define EDIT_DT		492
+#define EDIT_LATIN1	493
+#define EDIT_FLAT	494
+#define EDIT_FONT	495
+#define EDIT_OPTION	496
+
 #define IDD_SOUND	500
 #define SOUND_EVENT	501
 #define SOUND_FILE	502
@@ -229,7 +249,6 @@
 #define SPOOL_PORT	515
 #define SPOOL_PORTTEXT	516
 #define SPOOL_TOFILE	517
-#define IDC_CHECKBOX1	55
 
 #define CANCEL_PCDONE	521
 
@@ -253,6 +272,7 @@
 #define DEVICE_OPTIONS  547
 #define DEVICE_OPTIONSTEXT  548
 #define DEVICE_UNIPRINT  549
+#define DEVICE_ADVPS   480
 
 #define IDD_UNIPRINT	550
 #define UPP_LIST	551
@@ -403,6 +423,8 @@
 #define IDS_TOPICMESS    717
 #define IDS_TOPICSPOOL   718
 #define IDS_TOPICZLIB	 719
+#define IDS_TOPICPSTOEDIT 720
+#define IDS_TOPICMEASURE 721
 
 /* ps_to_eps */
 #define IDS_BBPROMPT	750
@@ -448,6 +470,7 @@
 /* PDF messages */
 #define IDS_PDFNOPAGE		790
 #define IDS_PDFEXTRACTALL	791
+#define IDS_USEPDFWRITE		792
 
 /* filter strings */
 #define IDS_FILTER_BASE	800
@@ -536,3 +559,60 @@
 
 /* non standard scroll bar code */
 #define SB_FIND WM_USER
+
+/*  Custom units dialog box  */
+#define IDD_CALC              2000
+#define IDC_CALCCTMA          2001
+#define IDC_CALCCTMB          2002
+#define IDC_CALCCTMC          2003
+#define IDC_CALCCTMD          2004
+#define IDC_CALCCTMTX         2005
+#define IDC_CALCCTMTY         2006
+#define IDC_CALCPTS           2007
+#define IDC_CALCMM            2008
+#define IDC_CALCIN            2009
+#define IDC_CALCCUST          2010
+/* #define IDC_CALCNAME          2011 */
+#define IDC_CALCTX            2012
+#define IDC_CALCTY            2013
+#define IDC_CALCTR            2014
+#define IDC_CALCROTTH         2015
+#define IDC_CALCRO            2016
+#define IDC_CALCSCX           2017
+#define IDC_CALCSCY           2018
+#define IDC_CALCSC            2019
+#define IDC_CALCINI           2020
+#define IDC_CALCINV           2021
+
+#define IDS_INVALIDNUMBER       2022
+#define IDS_CANTINVERT          2023
+
+#define IDS_UNITNAME		2030
+#define IDS_UNITPT		2030
+#define IDS_UNITMM		2031
+#define IDS_UNITINCH		2032
+#define IDS_UNITCUSTOM		2033
+/*
+#define IDS_UNITPT		IDS_UNITNAME + IDM_UNITPT - IDM_UNITPT
+#define IDS_UNITMM		IDS_UNITNAME + IDM_UNITMM - IDM_UNITPT
+#define IDS_UNITINCH		IDS_UNITNAME + IDM_UNITINCH - IDM_UNITPT
+#define IDS_UNITCUSTOM		IDS_UNITNAME + IDM_UNITCUSTOM - IDM_UNITPT
+*/
+
+/* Measure dialog box */
+#define IDD_MEASURE         2100
+#define IDM_MEASURE         2100
+#define IDM_MEASURE_CALC    2101
+
+#define IDC_MEASURE_UNIT    2102
+#define IDC_MEASURE_LASTX   2103
+#define IDC_MEASURE_LASTY   2104
+#define IDC_MEASURE_X       2105
+#define IDC_MEASURE_Y       2106
+#define IDC_MEASURE_DELTAX  2107
+#define IDC_MEASURE_DELTAY  2108
+#define IDC_MEASURE_RADIUS  2109
+#define IDC_MEASURE_ANGLE   2110
+#define IDC_MEASURE_SETPOINT   2111
+
+#define IDM_FULLSCREEN 2200

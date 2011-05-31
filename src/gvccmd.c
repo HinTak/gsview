@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -33,6 +33,28 @@ int
 gsview_command(int command)
 {
     switch (command) {
+	case IDM_NEXTHOME:
+	case IDM_NEXT:
+	case IDM_NEXTSKIP:
+	case IDM_REDISPLAY:
+	case IDM_PREVHOME:
+	case IDM_PREVSKIP:
+	case IDM_PREV:
+	case IDM_GOBACK:
+	case IDM_GOFWD:
+	case IDM_MAGPLUS:
+	case IDM_MAGMINUS:
+	case IDM_ZOOM:
+	case IDM_FULLSCREEN:
+	    /* These don't close the full screen window */
+	    break;
+	default:
+	    gsview_fullscreen_end();
+    }
+    switch (command) {
+	case IDM_FULLSCREEN:
+		gsview_fullscreen();
+		return 0;
 	case IDM_OPEN:
 		if (pending.psfile) {
 		    play_sound(SOUND_BUSY);
@@ -93,7 +115,7 @@ gsview_command(int command)
 		return 0;
 	case IDM_NEXTHOME:
 #ifdef _Windows
-		PostMessage(hwndimgchild ,WM_VSCROLL,SB_TOP,0L);
+		PostMessage(hwnd_image ,WM_VSCROLL,SB_TOP,0L);
 #else
 		WinPostMsg(hwnd_frame, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_TOP));
 #endif
@@ -136,7 +158,7 @@ gsview_command(int command)
 		return 0;
 	case IDM_PREVHOME:
 #ifdef _Windows
-		PostMessage(hwndimgchild ,WM_VSCROLL,SB_TOP,0L);
+		PostMessage(hwnd_image ,WM_VSCROLL,SB_TOP,0L);
 #else
 		WinPostMsg(hwnd_frame, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_TOP));
 #endif
@@ -168,21 +190,24 @@ gsview_command(int command)
 		{ int pagenum;
 		    pagenum = psfile.pagenum;
 		    if (get_page(&pagenum, FALSE, FALSE)) {
-			if (pagenum > psfile.doc->numpages) {
-			    pagenum = psfile.doc->numpages;
-			    play_sound(SOUND_NOPAGE);
-			}
-			else if (pagenum < 1) {
-			    pagenum = 1;
-			    play_sound(SOUND_NOPAGE);
-			}
-			else {
-			    gsview_unzoom();
-			    pending.pagenum = pagenum;
-			    pending.now = TRUE;
-			}
+			gsview_goto_page(pagenum);
 		    }
 		}
+		return 0;
+	case IDM_GOBACK:
+		if (not_dsc())
+		    return 0;
+		if (order_is_special())
+		    return 0;
+		history_back();
+		return 0;
+	case IDM_GOFWD:
+		if (not_open())
+		    return 0;
+	        if (psfile.doc == (PSDOC *)NULL)
+		    gsview_command(IDM_NEXT);
+		else
+		    history_forward();
 		return 0;
 	case IDM_INFO:
 		show_info();
@@ -235,6 +260,20 @@ gsview_command(int command)
 		if (psfile.name[0] != '\0')
 		    gsview_extract();
 		return 0;
+	case IDM_PSTOEDIT:
+		if (gsdll.state == BUSY) {
+		    play_sound(SOUND_BUSY);
+		    return 0;
+		}
+		if (psfile.name[0] == '\0')
+		    gsview_select();
+		(void)order_is_special();    /* warn, but allow it anyway */
+		if (!dfreopen())
+		    return 0;
+		if (psfile.name[0] != '\0')
+		    gsview_pstoedit();
+		dfclose();
+		return 0;
 	case IDM_TEXTEXTRACT:
 		if (psfile.name[0] == '\0')
 		    gsview_select();
@@ -275,6 +314,13 @@ gsview_command(int command)
 	case IDM_UNITMM:
 	case IDM_UNITINCH:
 		gsview_unit(command);
+		return 0;
+	case IDM_UNITFINE:
+		option.unitfine = !option.unitfine;
+		check_menu_item(IDM_UNITMENU, IDM_UNITFINE, option.unitfine);
+		return 0;
+	case IDM_MEASURE:
+	        measure_show();
 		return 0;
 	case IDM_LANGEN:
 	case IDM_LANGDE:
@@ -518,10 +564,10 @@ gsview_command(int command)
 BOOL
 not_open()
 {
-	if (psfile.name[0] != '\0')
-	    return FALSE;
-	gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
-	return TRUE;
+    if (psfile.name[0] != '\0')
+	return FALSE;
+    gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
+    return TRUE;
 }
 
 /* if order is SPECIAL, display error message and return TRUE */
@@ -529,21 +575,22 @@ BOOL
 order_is_special()
 {
 char buf[MAXSTR];
-	if (psfile.doc==(PSDOC *)NULL)
-	    return TRUE;
-	if (psfile.doc->pageorder != SPECIAL)
-	    return FALSE;
-	if (psfile.doc->numpages == 1)
-	    return FALSE;	/* can't reorder anyway */
-	if (psfile.ignore_special)
-	    return FALSE;
-        load_string(IDS_PAGESPECIAL, buf, sizeof(buf)-1);
-        if (message_box(buf, MB_OKCANCEL) == IDOK) {
-	    /* don't show this warning again for this file */
-	    psfile.ignore_special = TRUE;
-	    return FALSE;	/* User override */
-	}
-	return TRUE;		/* order is special */
+    if (psfile.doc==(PSDOC *)NULL)
+	return TRUE;
+    if (psfile.doc->pageorder != SPECIAL)
+	return FALSE;
+    if (psfile.doc->numpages == 1)
+	return FALSE;	/* can't reorder anyway */
+    if (psfile.ignore_special)
+	return FALSE;
+    gsview_fullscreen_end();
+    load_string(IDS_PAGESPECIAL, buf, sizeof(buf)-1);
+    if (message_box(buf, MB_OKCANCEL) == IDOK) {
+	/* don't show this warning again for this file */
+	psfile.ignore_special = TRUE;
+	return FALSE;	/* User override */
+    }
+    return TRUE;		/* order is special */
 }
 
 
@@ -551,12 +598,12 @@ char buf[MAXSTR];
 BOOL
 not_dsc()
 {
-	if (not_open())
-	    return TRUE;
-	if (psfile.doc!=(PSDOC *)NULL)
-	    return FALSE;
-	gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
+    if (not_open())
 	return TRUE;
+    if (psfile.doc!=(PSDOC *)NULL)
+	return FALSE;
+    gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
+    return TRUE;
 }
 
 void
@@ -564,34 +611,34 @@ gserror(UINT id, LPSTR str, UINT icon, int sound)
 {
 int i;
 char mess[MAXSTR+MAXSTR];
-	if (sound >= 0)
-	    play_sound(sound);
-	i = 0;
-	if (id)
-	    i = load_string(id, mess, sizeof(mess)-1);
-	mess[i] = '\0';
-	if (str)
+    if (sound >= 0)
+	play_sound(sound);
+    i = 0;
+    if (id)
+	i = load_string(id, mess, sizeof(mess)-1);
+    mess[i] = '\0';
+    if (str)
 #if defined(_Windows) && !defined(__WIN32__)
-	    lstrcpyn(mess+i, str, sizeof(mess)-i-1);
+	lstrcpyn(mess+i, str, sizeof(mess)-i-1);
 #else
-	    strncpy(mess+i, str, sizeof(mess)-i-1);
+	strncpy(mess+i, str, sizeof(mess)-i-1);
 #endif
-	message_box(mess, icon);
+    message_box(mess, icon);
 }
 
 /* for ps.c errors instead of fprintf(stderr,...)! */
 void
 pserror(char *str)
 {
-	message_box(str, MB_ICONHAND);
+    message_box(str, MB_ICONHAND);
 }
 
 
 int
 not_implemented()
 {
-        gserror(IDS_NOTIMPLEMENTED, NULL, 0, 0);
-	return 0;
+    gserror(IDS_NOTIMPLEMENTED, NULL, 0, 0);
+    return 0;
 }
 
 /* get user defined size */
@@ -600,52 +647,72 @@ gsview_usersize()
 {
 char prompt[MAXSTR];
 char answer[MAXSTR];
-	load_string(IDS_TOPICMEDIA, szHelpTopic, sizeof(szHelpTopic));
-	load_string(IDS_USERWIDTH, prompt, sizeof(prompt));
-	sprintf(answer,"%d", option.user_width);
-	if (!get_string(prompt,answer) || atoi(answer)==0)
-		return FALSE;
-	option.user_width = atoi(answer);
-        gsview_check_usersize();
-	load_string(IDS_USERHEIGHT, prompt, sizeof(prompt));
-	sprintf(answer,"%d", option.user_height);
-	if (!get_string(prompt,answer) || atoi(answer)==0)
-		return FALSE;
-	option.user_height = atoi(answer);
-	if ((option.user_width==0) || (option.user_height == 0)) {
-	    option.user_width = 640;
-	    option.user_width = 480;
-	}
-        gsview_check_usersize();
-	return TRUE;
+    load_string(IDS_TOPICMEDIA, szHelpTopic, sizeof(szHelpTopic));
+    load_string(IDS_USERWIDTH, prompt, sizeof(prompt));
+    sprintf(answer,"%d", option.user_width);
+    if (!get_string(prompt,answer) || atoi(answer)==0)
+	    return FALSE;
+    option.user_width = atoi(answer);
+    gsview_check_usersize();
+    load_string(IDS_USERHEIGHT, prompt, sizeof(prompt));
+    sprintf(answer,"%d", option.user_height);
+    if (!get_string(prompt,answer) || atoi(answer)==0)
+	    return FALSE;
+    option.user_height = atoi(answer);
+    if ((option.user_width==0) || (option.user_height == 0)) {
+	option.user_width = 640;
+	option.user_width = 480;
+    }
+    gsview_check_usersize();
+    return TRUE;
 }
 
 void
 gsview_check_usersize()
 {
-	if ( (option.user_width > 5669) || (option.user_height > 5669) ) {
-	    gserror(IDS_LARGEMEDIA, NULL, 0, SOUND_ERROR);
-	}
+    if ( (option.user_width > 5669) || (option.user_height > 5669) ) {
+	gserror(IDS_LARGEMEDIA, NULL, 0, SOUND_ERROR);
+    }
 }
 
 /* unzoom when redisplaying or changing page */ 
 void
 gsview_unzoom(void)
 {
-	if (zoom) {
-		zoom = FALSE;
-		gs_resize();
-	}
+    if (zoom) {
+	    zoom = FALSE;
+	    gs_resize();
+    }
 }
 
 void
 gsview_language(int new_language)
 {
-	if (load_language(new_language)) {
-	    check_menu_item(IDM_LANGMENU, option.language, FALSE);
-	    option.language = new_language;
-	    check_menu_item(IDM_LANGMENU, option.language, TRUE);
-	    change_language();
-	}
+    if (load_language(new_language)) {
+	check_menu_item(IDM_LANGMENU, option.language, FALSE);
+	option.language = new_language;
+	check_menu_item(IDM_LANGMENU, option.language, TRUE);
+	change_language();
+    }
 }
 
+void
+gsview_goto_page(int pagenum)
+{
+    if (not_dsc())
+	return;
+    if (psfile.doc->numpages == 0)
+	return;
+    if (pagenum > psfile.doc->numpages) {
+	pagenum = psfile.doc->numpages;
+	play_sound(SOUND_NOPAGE);
+    }
+    else if (pagenum < 1) {
+	pagenum = 1;
+	play_sound(SOUND_NOPAGE);
+    }
+    gsview_unzoom();
+    pending.pagenum = pagenum;
+    pending.now = TRUE;
+    history_add(pagenum);
+}

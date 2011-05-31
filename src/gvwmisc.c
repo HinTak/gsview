@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -111,11 +111,15 @@ POINT pt;
 	else {
 	    /* set cursor to that of active window */
 	    hwnd = GetActiveWindow();
+	    if (hwnd == hwnd_fullscreen) {
+	        SetCursor(NULL);
+		return;
+	    }
 	    if ( (gsdll.device)
 	      && ((hwnd == hwndimg) || (hwnd == hwndimgchild)) ) {
 		if (in_child_client_area()) {
-			SetCursor(GetClassCursor(hwndimgchild));
-			return;
+		    SetCursor(GetClassCursor(hwndimgchild));
+		    return;
 		}
 	    }
 	    SetCursor(GetClassCursor(hwnd));
@@ -189,4 +193,3 @@ char val[256];
 	}
 	FreeResource(hglobal);
 }
-

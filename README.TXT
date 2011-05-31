@@ -1,7 +1,7 @@
 ===============================================================
-README.TXT         1998-09-17
+README.TXT         1998-12-23
 ===============================================================
-GSview 2.6 - PostScript previewer.  Needs Ghostscript 5.50.
+GSview 2.7 - PostScript previewer.  Needs Ghostscript 5.50.
 
 ========
 Overview
@@ -43,25 +43,37 @@ Features include:
  - Free (GSview Free Public Licence).
  - Works with Aladdin Ghostscript 4.03 - 5.99 (GSview checks the
    Ghostscript version number).
-Changes in version 2.6:
+Changes in version 2.7:
+ - PDF files honour the orientation menu.
+ - When printing to PostScript printer, can add ^D and prolog/epilog.
+ - Updated to pstotext 1.8.
+ - Win32 interface to pstoedit DLL (this DLL is NOT included
+   in GSview, see http://www.cs.wisc.edu/~ghost/gsview/)
  - Redisplay changed document when GSview activated.
+ - To open a file in an existing GSview window use "gsview32 /e filename".
+ - Puts wrapper around EPS files and rescales if needed so they can
+   be printed.
+ - Cursor position can be displayed with finer resolution.
+ - Lengths can be measured in custom coordinates (Edit | Measure) 
+   (Windows only).
+ - Full screen display mode (View | Full Screen) (Windows only).
  - A handful of bug fixes.
  - See gvcnews.txt in the GSview sources for more detailed change
    notes.
 
-GSview was written by Russell Lang.
+GSview was written by Russell Lang at Ghostgum Software Pty Ltd.
 
 ============
 Installation
 ============
-If you have the self extracting archive gsv26550.exe, run it.
-This contains GSview 2.6 and Aladdin Ghostscript 5.50 for Win32.
+If you have the self extracting archive gsv27550.exe, run it.
+This contains GSview 2.7 and Aladdin Ghostscript 5.50 for Win32.
 
-Otherwise, create three 1.44M floppies containing the following files, or
+Otherwise, create four 1.44M floppies containing the following files, or
 put them all in the same directory on your hard disk.
 
 Disk 1:
-  For Win32, unzip gsv25w32.zip
+  For Win32, unzip gsv27w32.zip
       README.TXT    (this file)
       LICENCE
       FILE_ID.DIZ
@@ -72,7 +84,7 @@ Disk 1:
       setp32fr.dll  French language resources
       wizunz32.dll  Info-ZIP unzip utility
 
-  For Win16, unzip gsv25w16.zip
+  For Win16, unzip gsv27w16.zip
       README.TXT   (this file)
       LICENCE
       FILE_ID.DIZ
@@ -83,7 +95,7 @@ Disk 1:
       setp16fr.dll  French language resources
       wizunz16.dll  Info-ZIP unzip utility
 
-  For OS/2, unzip gsv25os2.zip
+  For OS/2, unzip gsv27os2.zip
       README.TXT    (this file)
       LICENCE
       FILE_ID.DIZ
@@ -96,7 +108,8 @@ Disk 1:
 
 Disk 2:
   gs550ini.zip      Aladdin Ghostscript library files
-    PLUS
+
+Disk 3:
   gs550w32.zip      MS-Windows Win32 Aladdin Ghostscript
      OR 
   gs550os2.zip      OS/2 Aladdin Ghostscript
@@ -104,12 +117,12 @@ Disk 2:
   (for Windows 3.1/Win16 use gs403ini.zip plus gs403win.zip)
   (The last 16-bit version of Aladdin Ghostscript was 4.03)
 
-Disk 3:
-  gs510fn1.zip      Aladdin Ghostscript fonts.
+Disk 4:
+  gs550fn1.zip      Aladdin Ghostscript fonts.
 
-Disk 1 is the contents of gsv25w32.zip or gsv25w16.zip or gsv25os2.zip
-(all of which are contained in gsview25.zip).
-Disks 2 and 3 are obtained from ftp://ftp.cs.wisc.edu/ghost/aladdin/
+Disk 1 is the contents of gsv27w32.zip or gsv27w16.zip or gsv27os2.zip
+(all of which are contained in gsview27.zip).
+Disks 2-4 are obtained from ftp://ftp.cs.wisc.edu/ghost/aladdin/
 
 If using the floppy install method, 10 Mbytes of hard disk space is 
 required.
@@ -144,7 +157,7 @@ updating to a later version of Win32s.  Some computers
 will work with Win32s v1.15, others will not.
 To install from MS-Windows, run 'setup.exe' from disk 1.
 If you wish to use the slower 16-bit version, install
-using 'setup16.exe' from gsv25w16.zip.
+using 'setup16.exe' from gsv27w16.zip.
 
 If you don't like automatic installation programs, it is 
 possible to install GSview and Ghostscript manually.  See
@@ -253,9 +266,8 @@ The 'Common Problems' topic is worth reading if GSview won't work.
 ====
 Bugs
 ====
-Send bug reports to Russell Lang <rjl@aladdin.com>.
-(This is an alias provided by Aladdin Enterprises.  Russell Lang is not 
-an employee or agent of Aladdin Enterprises).
+Send bug reports to Russell Lang at Ghostgum Software Pty Ltd
+<gsview@ghostgum.com.au>. 
 When reporting bugs, please include the version number and date of 
 GSview (from the Help | About box), the version number of Ghostscript, 
 and the exact wording of any error messages.
@@ -279,13 +291,14 @@ A World Wide Web home page for Ghostscript, Ghostview and GSview is at
 ==================================
 Copyright, Licensing and Donations
 ==================================
-GSview is copyright by Russell Lang.
+GSview is copyright by Ghostgum Software Pty Ltd.
 GSview is distributed with the GSview Free Public Licence.
 This licence is contained in the file LICENCE.
 The GSview Free Public Licence does not require any payment to the author;
 however the author would welcome any donations to cover costs and time
 involved in developing and maintaining GSview.  These may be sent to
     Russell Lang
+    Ghostgum Software Pty Ltd
     218 Gallaghers Rd
     GLEN WAVERLEY  VIC  3150
     AUSTRALIA
@@ -307,9 +320,9 @@ The CD-ROM (actually a CD-R) will contain ready to run
 and ready to install copies of GSview and Aladdin Ghostscript for 
 Windows and OS/2.  The CD-ROM and a printed copy of the Ghostscript 
 User Manual by Thomas Merz will be dispatched by air-mail.  
-For surface delivery within Australia, send a cheque for AUD$50 
+For surface delivery within Australia, send a cheque for AUD$60 
 drawn on an Australian bank.
-This offer is valid until 31 December 1998.  If this date has
+This offer is valid until 31 December 1999.  If this date has
 passed, send mail to rjl@aladdin.com to find out if the offer
 is still valid.
 For more details see the page
@@ -321,7 +334,8 @@ licence in the file PUBLIC.
 
 GSview uses Ghostscript to display the contents of the PostScript
 files.  Ghostscript is a separate program from GSview; it is
-written and owned by Aladdin Enterprises, not by Russell Lang.
+written and owned by Aladdin Enterprises, not by Ghostgum
+Software Pty Ltd.
 
 Aladdin Ghostscript comes with a licence that is more restrictive than 
 the GNU Licence; in particular, it restricts the distribution of

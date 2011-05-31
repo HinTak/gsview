@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -27,7 +27,7 @@ LPCSTR old_lpstrTitle;
 char szTitle[MAXSTR];
 BOOL flag;
 LPCSTR old_lpstrFilter;
-char szFilter[256];		/* filter for OFN */
+char szFilter[1024];		/* filter for OFN */
 int i;
 char cReplace;
 

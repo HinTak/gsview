@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+#  Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -17,10 +17,10 @@
 # Common makefile for BC++ and MSVC++
 # See gvwin.mak or gvwinvc.mak
 
-OBJ1=gvwin.obj gvwdde.obj gvwdll.obj gvwdisp.obj gvwdlg.obj
-OBJ2=gvwclip.obj gvweps.obj gvwmisc.obj gvwprf.obj gvwprn.obj
-OBJ3=gvcmisc.obj gvcdisp.obj ps.obj gvccmd.obj gvcprn.obj
-OBJ4=gvceps.obj gvcinit.obj gvctext.obj
+OBJ1=gvwin.obj gvwdde.obj gvwdde2.obj gvwdll.obj gvwdisp.obj gvwdlg.obj
+OBJ2=gvwclip.obj gvwedit.obj gvweps.obj gvwmeas.obj gvwmisc.obj gvwprf.obj 
+OBJ3=gvwprn.obj gvcmeas.obj gvcmisc.obj gvcdisp.obj ps.obj gvccmd.obj 
+OBJ4=gvcprn.obj gvceps.obj gvcinit.obj gvctext.obj
 OBJ5=gvcdll.obj gvcpdf.obj gvwinit.obj gvcbeta.obj
 OBJS=$(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5)
 
@@ -73,9 +73,13 @@ gvwdlg.obj: gvwdlg.c gvcrc.h $(HDRS)
 
 gvwdll.obj: gvwdll.c gvcrc.h gsdll.h $(HDRS)
 
+gvwedit.obj: gvwedit.c $(HDRS)
+
 gvweps.obj: gvweps.c gvceps.h $(HDRS)
 
 gvwinit.obj: gvwinit.c $(HDRS)
+
+gvwmeas.obj: gvwmeas.c $(HDRS)
 
 gvwmisc.obj: gvwmisc.c $(HDRS)
 
@@ -94,6 +98,8 @@ gvcbeta.obj: gvcbeta.c gvcbeta.h $(HDRS)
 gvceps.obj: gvceps.c gvceps.h $(HDRS)
 
 gvcinit.obj: gvcinit.c gvcrc.h $(HDRS)
+
+gvcmeas.obj: gvcmeas.c gvcrc.h $(HDRS)
 
 gvcmisc.obj: gvcmisc.c gvcrc.h $(HDRS)
 
@@ -326,9 +332,12 @@ clean: language
 	del gvwdisp.obj
 	del gvwdlg.obj
 	del gvwdll.obj
+	del gvwedit.obj
 	del gvweps.obj
 	del gvwinit.obj
 	del gvwdde.obj
+	del gvwdde2.obj
+	del gvwmeas.obj
 	del gvwmisc.obj
 	del gvwprf.obj
 	del gvwprn.obj
@@ -337,6 +346,7 @@ clean: language
 	del gvcdisp.obj
 	del gvceps.obj
 	del gvcinit.obj
+	del gvcmeas.obj
 	del gvcmisc.obj
 	del gvcdll.obj
 	del gvcpdf.obj

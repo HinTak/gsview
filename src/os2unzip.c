@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1996-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -46,17 +46,12 @@ int dot_position;	/* KLUDGE */
 int
 MessagePrnt(zvoid *pG, uch *buffer, ulg size, int flag)
 {
-#ifndef UNUSED
+#ifdef OLD
     /* The OS/2 unzip 5.3 DLL has a bug in the msgfn hook. */
     /* It should have been called with _System, but wasn't */
     /* so the arguments are in registers which is wrong for */
     /* a publicly accessible callback function. */
-    QMSG q_mess;		/* queue message */
-    zip_message(buffer, size);
-    while (WinPeekMsg(hab, &q_mess, 0L, 0, 0, PM_REMOVE))
-	WinDispatchMsg(hab, &q_mess);
-    return size;
-#else
+
     /* Until the unzip 5.3 bug is fixed, just print a . */
     QMSG q_mess;		/* queue message */
     gs_addmess(". ");			/* KLUDGE */
@@ -66,6 +61,12 @@ MessagePrnt(zvoid *pG, uch *buffer, ulg size, int flag)
 	gs_addmess("\n");		/* KLUDGE */
     }
     gs_addmess_update();		/* KLUDGE */
+    while (WinPeekMsg(hab, &q_mess, 0L, 0, 0, PM_REMOVE))
+	WinDispatchMsg(hab, &q_mess);
+    return size;
+#else
+    QMSG q_mess;		/* queue message */
+    zip_message(buffer, size);
     while (WinPeekMsg(hab, &q_mess, 0L, 0, 0, PM_REMOVE))
 	WinDispatchMsg(hab, &q_mess);
     return size;

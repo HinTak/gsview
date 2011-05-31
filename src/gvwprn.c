@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -311,6 +311,28 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 }
 
 
+LPSTR
+GetUPPname(HWND hwnd, LPSTR uppname, int upplen)
+{
+    LPSTR p, q;
+    uppname[0] = '\0';
+    GetDlgItemText(GetParent(hwnd), 
+	    DEVICE_OPTIONS, (LPSTR)uppname, upplen);
+    p = uppname;
+    if (p[0] == '"') {
+	/* remove quotes around configuration file */
+	p++;
+	q = strchr(p, '"');
+	if (q != (LPSTR)NULL)
+	    *q = '\0';
+    }
+    if (p[0] == '@')
+	p++;
+    if (strlen(p))
+        memmove(uppname, p, strlen(p)+1);
+    return uppname;
+}
+
 /* dialog box for selecting uniprint configuration file */
 #ifdef __BORLANDC__
 #pragma argsused
@@ -338,9 +360,8 @@ UniDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		0, (LPARAM)uppname);
 	    EnableWindow(GetDlgItem(hDlg, UPP_LIST), FALSE);
 	    uppname[0] = uppname[1] = '\0';
-	    GetDlgItemText(GetParent(hDlg), 
-		    DEVICE_OPTIONS, (LPSTR)uppname, sizeof(uppname));
-	    SetDlgItemText(hDlg, UPP_NAME, uppname+1);
+	    GetUPPname(hDlg, uppname, sizeof(uppname));
+	    SetDlgItemText(hDlg, UPP_NAME, uppname);
 	    PostMessage(hDlg, WM_COMMAND, WM_USER, 0L);
 	    return TRUE;
 	case WM_COMMAND:
@@ -360,13 +381,12 @@ UniDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			return TRUE;	/* no memory */
 		    }
 		    enum_upp_path(option.gsinclude, ubuf, i);
-		    GetDlgItemText(GetParent(hDlg), 
-			DEVICE_OPTIONS, (LPSTR)uppname, sizeof(uppname));
+		    GetUPPname(hDlg, uppname, sizeof(uppname));
 		    SendDlgItemMessage(hDlg, UPP_LIST, LB_RESETCONTENT, 
 			0, (LPARAM)0);
 		    for (p = ubuf; *p; p += lstrlen(p) + 1) {
 			q = p + lstrlen(p) + 1;
-			if (lstrcmp(p, uppname+1) == 0)
+			if (lstrcmp(p, uppname) == 0)
 			    desc = q;
 			SendDlgItemMessage(hDlg, UPP_LIST, LB_ADDSTRING, 
 				0, (LPARAM)q);
@@ -375,7 +395,7 @@ UniDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    if (desc != (LPSTR)NULL)
 			SendDlgItemMessage(hDlg, UPP_LIST, LB_SELECTSTRING, 
 			    0, (LPARAM)desc);
-		    SetDlgItemText(hDlg, UPP_NAME, uppname+1);
+		    SetDlgItemText(hDlg, UPP_NAME, uppname);
 		    EnableWindow(GetDlgItem(hDlg, UPP_LIST), TRUE);
 		    return TRUE;	/* we processed the message */
 		case ID_HELP:
@@ -403,9 +423,11 @@ UniDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    }
 		    return FALSE;
 		case IDOK:
-		    if (GetDlgItemText(hDlg, UPP_NAME, uppname+1, 
-		      sizeof(uppname)-2) != 0) {
-		      uppname[0] = '@';
+		    if (GetDlgItemText(hDlg, UPP_NAME, uppname+2, 
+		      sizeof(uppname)-3) != 0) {
+		      uppname[0] = '"';
+		      uppname[1] = '@';
+		      strcat(uppname, "\042");
 		      SetDlgItemText(GetParent(hDlg), 
 			    DEVICE_OPTIONS, uppname);
 		    }
@@ -423,6 +445,117 @@ UniDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
     }
     return FALSE;
 }
+
+/* dialog box for selecting PostScript prolog/epilog and Ctrl+D */
+#ifdef __BORLANDC__
+#pragma argsused
+#endif
+BOOL CALLBACK _export
+AdvPSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
+{
+
+    switch (wmsg) {
+	case WM_INITDIALOG:
+	    {
+	    /* for PostScript printers, provide options for sending
+	     * Ctrl+D before and after job, and sending a prolog
+	     * and epilog file.
+	     * These are set using the Advanced button on the Printer
+	     * Setup dialog, only enabled for PostScript printer.
+	     */
+	    PROFILE *prf;
+	    char buf[MAXSTR];
+	    char section[MAXSTR];
+	    int prectrld=0;
+	    int postctrld=0;
+	    SendDlgItemMessage(GetParent(hDlg), SPOOL_PORT, LB_GETTEXT, 
+		(int)SendDlgItemMessage(GetParent(hDlg), SPOOL_PORT, 
+			LB_GETCURSEL, 0, 0L),
+		(LPARAM)(LPSTR)section);
+	    if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+		profile_read_string(prf, section, "PreCtrlD", "0", buf, 
+		    sizeof(buf)-2);
+		if (sscanf(buf, "%d", &prectrld) != 1)
+		    prectrld = 0;
+		SendDlgItemMessage(hDlg, ADVPS_PRECTRLD, BM_SETCHECK, 
+		    prectrld ? 1 : 0, 0);
+		profile_read_string(prf, section, "PostCtrlD", "0", buf, 
+		    sizeof(buf)-2);
+		if (sscanf(buf, "%d", &postctrld) != 1)
+		    postctrld = 0;
+		SendDlgItemMessage(hDlg, ADVPS_POSTCTRLD, BM_SETCHECK, 
+		    postctrld ? 1 : 0, 0);
+		profile_read_string(prf, section, "Prolog", "", buf, 
+		   sizeof(buf)-2);
+		SetDlgItemText(hDlg, ADVPS_PROLOG, buf);
+		profile_read_string(prf, section, "Epilog", "", buf, 
+		   sizeof(buf)-2);
+		SetDlgItemText(hDlg, ADVPS_EPILOG, buf);
+		profile_close(prf);
+	    }
+	    }
+	    return TRUE;
+	case WM_COMMAND:
+	    switch (LOWORD(wParam)) {
+		case ADVPS_PROLOGBROWSE:
+		    {   char buf[MAXSTR];
+			GetDlgItemText(hDlg, ADVPS_PROLOG, buf, sizeof(buf)-1);
+			if (get_filename(buf, FALSE, FILTER_ALL, 
+			       0, IDS_TOPICPRINT)) {
+			    SetDlgItemText(hDlg, ADVPS_PROLOG, buf);
+			}
+		    }
+		    return FALSE;
+		case ADVPS_EPILOGBROWSE:
+		    {   char buf[MAXSTR];
+			GetDlgItemText(hDlg, ADVPS_EPILOG, buf, sizeof(buf)-1);
+			if (get_filename(buf, FALSE, FILTER_ALL, 
+			       0, IDS_TOPICPRINT)) {
+			    SetDlgItemText(hDlg, ADVPS_EPILOG, buf);
+			}
+		    }
+		    return FALSE;
+		case ID_HELP:
+		    get_help();
+		    return FALSE;
+		case IDOK:
+		    {
+		    char buf[MAXSTR];
+		    char section[MAXSTR];
+		    int prectrld;
+		    int postctrld;
+		    /* save settings */
+		    SendDlgItemMessage(GetParent(hDlg), SPOOL_PORT, LB_GETTEXT, 
+			(int)SendDlgItemMessage(GetParent(hDlg), SPOOL_PORT, 
+				LB_GETCURSEL, 0, 0L),
+			(LPARAM)(LPSTR)section);
+		    prectrld = (int)SendDlgItemMessage(hDlg, ADVPS_PRECTRLD, 
+			BM_GETCHECK, 0, 0);
+		    WritePrivateProfileString(section, "PreCtrlD", 
+			prectrld ? "1" : "0", szIniFile);
+		    postctrld = (int)SendDlgItemMessage(hDlg, ADVPS_POSTCTRLD, 
+			BM_GETCHECK, 0, 0);
+		    WritePrivateProfileString(section, "PostCtrlD", 
+			postctrld ? "1" : "0", szIniFile);
+		    GetDlgItemText(hDlg, ADVPS_PROLOG, buf, sizeof(buf)-1);
+		    WritePrivateProfileString(section, "Prolog", 
+			buf, szIniFile);
+		    GetDlgItemText(hDlg, ADVPS_EPILOG, buf, sizeof(buf)-1);
+		    WritePrivateProfileString(section, "Epilog", 
+			buf, szIniFile);
+		    EndDialog(hDlg, TRUE);
+		    }
+		    return TRUE;
+		case IDCANCEL:
+		    EndDialog(hDlg, FALSE);
+		    return TRUE;
+	    }
+	    break;
+    }
+    return FALSE;
+		
+}
+
 
 char *device_queue_list;
 int device_queue_index;
@@ -519,9 +652,11 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    EnableWindow(GetDlgItem(hDlg, DEVICE_RES), FALSE);
 		    EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), FALSE);
 		    EnableWindow(GetDlgItem(hDlg, DEVICE_OPTIONS), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, DEVICE_UNIPRINT), FALSE);
 		    EnableWindow(GetDlgItem(hDlg, SPOOL_TOFILE), FALSE);
 		}
 		else {
+		    EnableWindow(GetDlgItem(hDlg, DEVICE_ADVPS), FALSE);
 		    /* set Print to File check box */
 		    if (option.print_to_file) {
 			SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_SETCHECK, 1, 0);
@@ -574,6 +709,27 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			    if (i && (int)SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_GETCHECK, 0, 0))
 				SendDlgNotification(hDlg, SPOOL_TOFILE, BN_CLICKED);
 			    EnableWindow(GetDlgItem(hDlg, SPOOL_TOFILE), enable);
+			    EnableWindow(GetDlgItem(hDlg, DEVICE_UNIPRINT), enable);
+			    EnableWindow(GetDlgItem(hDlg, DEVICE_ADVPS), !enable);
+			}
+			return FALSE;
+		    case DEVICE_ADVPS:
+			{
+#ifndef __WIN32__
+	    		DLGPROC lpProcAdv;
+#endif
+			load_string(IDS_TOPICPRINT, szHelpTopic, 
+				sizeof(szHelpTopic));
+#ifdef __WIN32__
+			DialogBoxParam(hlanguage, "AdvancedDlgBox", hDlg, 
+				AdvPSDlgProc, (LPARAM)NULL);
+#else
+			lpProcAdv = (DLGPROC)MakeProcInstance(
+				(FARPROC)AdvPSDlgProc, phInstance);
+			DialogBoxParam(hlanguage, "AdvancedDlgBox", hDlg, 
+				lpProcAdv, (LPARAM)NULL);
+			FreeProcInstance((FARPROC)lpProcAdv);
+#endif
 			}
 			return FALSE;
 		    case ID_HELP:
@@ -626,6 +782,18 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			strcpy(section, entry);
 			strcat(section, " Options");
 			GetPrivateProfileString(section, "Options", "", buf, sizeof(buf)-2, szIniFile);
+			if (buf[0] == '@') {
+			    /* STUPID Windows *sometimes* removes the quotes.
+			     * If the profile string contains quotes at the
+			     * the start *and* end, Windows will remove them.
+			     * Otherwise, quotes will be copied intact.
+			     * The quotes are important, so we have to put
+			     * them back in.
+			     */
+			    memmove(buf+1, buf, strlen(buf)+1);
+			    buf[0] = '\042';
+			    strcat(buf, "\042");
+			}
 			SetDlgItemText(hDlg, DEVICE_OPTIONS, buf);
 			}
 			return FALSE;

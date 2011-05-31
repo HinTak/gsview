@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -142,11 +142,7 @@ typedef struct tagPSFILE {
 	BOOL	pjl;		/* TRUE if file starts with HP LaserJet PJL prologue */
 	BOOL	gzip;		/* TRUE if file compressed with gzip */
 	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
-#if defined(_Windows) && defined(OLD)
-	struct	ftime datetime;	/* time/date of selected file */
-#else
 	time_t	datetime;	/* time/date of selected file */
-#endif
 	long	length;		/* length of selected file */
 	BOOL	ispdf;		/* true if PDF document */
 	char 	text_name[MAXSTR];  /* name of file containing extracted text */
@@ -183,12 +179,13 @@ typedef struct tagPENDING {
 	BOOL	redisplay;	/* redisplay after interpreter restarted */
 	BOOL	next;		/* move to next page */
 	BOOL	now;		/* We want to do something now */
-	/* if now set, at least one of the following five will be set */
+	/* if now set, at least one of the following six will be set */
 	int	pagenum;	/* page number to display */
 	PSFILE *psfile;		/* new document to display */
 	BOOL	resize;		/* size, resolution or orientation change */
 	BOOL	text;		/* extract text, don't display */
 	BOOL	pdf2ps;		/* extract PS from PDF, don't display */
+	BOOL	pstoedit;	/* extract using pstoedit, don't display */
 } PENDING;
 
 extern PENDING pending;
@@ -229,6 +226,18 @@ typedef struct tagGSDLL {
 	GSINPUT input[5];	/* header, defaults, prolog, setup, page */
 } GSDLL;
 
+typedef struct tagMATRIX {
+   float xx, xy, yx, yy, tx, ty;
+} MATRIX;
+
+typedef struct tagMEASURE {
+   float tx, ty;	/* translation */
+   float rotate;	/* rotation */
+   float sx, sy;	/* scaling */
+   int unit;		/* IDM_UNITPT .. IDM_UNITCUSTOM */
+} MEASURE;
+
+
 
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
@@ -243,6 +252,7 @@ typedef struct tagOPTIONS {
 	POINT	img_size;
 	BOOL	img_max;
 	int	unit;
+	BOOL	unitfine;
 	int	pstotext;
 	BOOL	quick_open;
 	BOOL	settings;
@@ -278,6 +288,8 @@ typedef struct tagOPTIONS {
 	BOOL	print_reverse;
 	int	pdf2ps;
 	BOOL	auto_bbox;
+	MATRIX	ctm;
+	MEASURE measure;
 } OPTIONS;
 
 typedef struct tagDISPLAY {
@@ -305,6 +317,16 @@ typedef struct tagDISPLAY {
 
 extern char last_files[4][MAXSTR];	/* last 4 files used */
 extern int last_files_count;		/* number of files known */
+
+
+#define HISTORY_MAX 32
+typedef struct tagHISTORY {
+    int index;  /* index of next page to store */
+    int count;	/* number of valid pages in history */
+    int pages[HISTORY_MAX];
+} HISTORY;
+extern HISTORY history;		/* history of pages displayed */
+
 
 struct prfentry {
 	char *name;
@@ -405,8 +427,10 @@ extern char selectname[MAXSTR];		/* for IDM_SELECT */
 extern UINT help_message;		/* message sent by OFN_SHOWHELP */
 extern HWND hwndimg;			/* gsview main window */
 extern HWND hDlgModeless;		/* any modeless dialog box */
-extern HWND hwndtext;			/* gswin text window */
+extern HWND hwnd_measure;		/* measure modeless dialog box */
 extern HWND hwndimgchild;		/* gswin image child window */
+extern HWND hwnd_fullscreen;		/* full screen popup of child window */
+extern HWND hwnd_image;			/* full screen or image child window */	
 extern HINSTANCE phInstance;		/* instance of gsview */
 extern HINSTANCE hlanguage;		/* instance of language resources */
 extern BOOL is_win31;			/* To allow selective use of win 3.1 features */

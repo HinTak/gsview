@@ -62,4 +62,3 @@ clean:
 	-del rot90.h
 	-del mkrch.exe
 
-

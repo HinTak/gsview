@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -155,6 +155,17 @@ END
 
 STRINGTABLE
 BEGIN
+	IDS_UNITPT, AAPT
+	IDS_UNITMM, AAMM
+	IDS_UNITINCH, AAINCH
+	IDS_UNITCUSTOM, AACUSTOM
+ 	IDS_INVALIDNUMBER, "Invalid number" /* ENGLISH */
+ 	IDS_CANTINVERT, "Cannot invert matrix"
+END
+
+
+STRINGTABLE
+BEGIN
 	/* wait messages */
 	IDS_WAIT, "Wait"
 	IDS_WAITREAD,  "Reading..."
@@ -191,6 +202,7 @@ BEGIN
 	/* PDF messages */
 	IDS_PDFNOPAGE, "Unknown number of pages in PDF file\nYou must display the file first" 
 	IDS_PDFEXTRACTALL, "Unknown number of pages in PDF file\nExtracting or printing all pages"
+	IDS_USEPDFWRITE, "To extract pages from a PDF file, Print to File using the pdfwrite or pswrite device." /* ENGLISH */
 END
 
 STRINGTABLE

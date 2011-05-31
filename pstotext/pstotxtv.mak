@@ -1,24 +1,25 @@
 # pstotxtv.mak
-# Makefile for pstotxt[3a].dll, for use GSview, Microsoft Visual C++
-# and Win23 Intel x86 or DEC Alpha. 
+# Makefile for pstotxt[3a].dll, for use with GSview, 
+# Microsoft Visual C++ and Win32 Intel x86 or DEC Alpha. 
 
-# THIS DOES NOT WORK
-# MSVC++ 5.0 will compile pstotxt3.dll and pstotxt3.exe,
-# but the created pstotxt3.dll is bad and causes a GPF.
-# DO NOT USE THIS MAKEFILE
+# Has not been tested with DEC Alpha
 
 # makefile created by
-# Russell Lang, 1998-01-06
+# Russell Lang, 1998-10-09
 
 # For Intel x386 use pstotxt3
 DEST=pstotxt3
+# For debugging use
+#CFLAGS=/D__WIN32__ /Zi
 CFLAGS=/D__WIN32__
+
 # For Alpha, uncomment the following two lines
 #DEST=pstotxta
 #CFLAGS=/D__WIN32__ /DDECALPHA
 
-# For debugging, use link /DEBUG
-DEBUGLINK=/DEBUG
+# For debugging, use link /DEBUG 
+#DEBUGLINK=/DEBUG
+DEBUGLINK=
 
 DEVBASE = e:\devstudio
 
@@ -50,7 +51,7 @@ mkrch.exe: mkrch.c
 	$(CCAUX) $*.c
 
 $(DEST).obj: ptotdll.c ptotdll.h
-	$(CC) /c /D_Windows /Fo$(DEST).obj ptotdll.c
+	$(CC) /c /D_Windows /D__DLL__ /Fo$(DEST).obj ptotdll.c
 
 $(DEST).rc:  ocr.h rot270.h rot90.h
 	copy ocr.h+rot270.h+rot90.h $(DEST).rc
@@ -75,9 +76,15 @@ clean:
 	-del $(DEST).dll
 	-del $(DEST).res
 	-del $(DEST).rc
+	-del $(DEST).exp
+	-del $(DEST).ilk
+	-del $(DEST).lib
+	-del $(DEST).pdb
 	-del *.obj
 	-del ocr.h
 	-del rot270.h
 	-del rot90.h
 	-del mkrch.exe
+	-del mkrch.ilk
+	-del mkrch.pdb
 

@@ -79,4 +79,3 @@ Known display driver bugs are:
   bitmap,  or any version of OS/2 and 4bit/pixel display.
 
 
-

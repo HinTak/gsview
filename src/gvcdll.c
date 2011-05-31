@@ -1,4 +1,4 @@
-/*  Copyright (C) 1996, Russell Lang.  All rights reserved.
+/*  Copyright (C) 1996-1998, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
   
@@ -75,6 +75,9 @@ gsview_page_orientation(int page)
     PSDOC *doc = psfile.doc;
     int orientation = IDM_PORTRAIT;
 
+    if (psfile.ispdf)
+	return pdf_orientation();
+
     if (doc == (PSDOC *)NULL)
 	return IDM_PORTRAIT;
 
@@ -145,8 +148,8 @@ int	yoffset;	  /* page origin offset in 1/72" */
 	xoffset = display.zoom_xoffset;
 	yoffset = display.zoom_yoffset;
     }
-    else if ((doc != (PSDOC *)NULL) && doc->epsf
-	&& option.epsf_clip) {
+    else if ( (doc != (PSDOC *)NULL) && 
+	       ((doc->epsf || psfile.ispdf) && option.epsf_clip) ) {
 	display.epsf_clipped = TRUE;
 	width = doc->boundingbox[URX] - doc->boundingbox[LLX];
 	height = doc->boundingbox[URY] - doc->boundingbox[LLY];
@@ -157,8 +160,15 @@ int	yoffset;	  /* page origin offset in 1/72" */
 	if (height <= 0)
 	    display.epsf_clipped = FALSE;
     }
+    else if ((doc != (PSDOC *)NULL) && psfile.ispdf) {
+	/* pdf media size is stored in default_page_boundingbox */
+	width = doc->default_page_boundingbox[URX];
+	height = doc->default_page_boundingbox[URY];
+	xoffset = 0;
+	yoffset = 0;
+    }
     else {
-	/* !zooming && !display.epsf_clipped */
+	/* !zooming && !display.epsf_clipped && !ispdf */
 	if (i < 0) {
 	    width = option.user_width;
 	    height = option.user_height;
@@ -287,6 +297,21 @@ int depth;
     return code;
 }
 
+int
+d_pdf_page(int pagenum)
+{
+    int code;
+    code = pdf_page_init(pagenum);
+    if (!zoom) {
+	if (!code)
+	    code = d_resize();
+	if (!code)
+	    code = gs_printf("<< >> //systemdict /setpagedevice get exec\n");
+    }
+    if (!code)
+	code = pdf_page();
+    return code;
+}
 
 /* input for Ghostscript DLL */
 /* get_gs_input() copies/reads from gs_input[] to the supplied buffer */
@@ -608,7 +633,7 @@ int i;
 	ppend->pagenum = 0;
 	sprintf(buf, "Displaying PDF page %d\n", psfile.pagenum);
 	gs_addmess(buf);
-	if ( (code = pdf_page(psfile.pagenum)) != 0 )
+	if ( (code = d_pdf_page(psfile.pagenum)) != 0)
 	    return code;
     }
     else {
@@ -880,8 +905,19 @@ void
 gs_process(void)
 {
 int code;
+
+    if (pending.pstoedit) {
+	post_img_message(WM_GSWAIT, IDS_WAIT);
+	process_pstoedit(NULL);
+	post_img_message(WM_GSWAIT, IDS_NOWAIT);
+	pending.pstoedit = FALSE;
+	pending.now = FALSE;
+	return;
+    }
+
     /* gsdll.state = UNLOADED; */
     gsdll.state = BUSY;		/* skip IDLE state */
+
     if (!gs_load_dll()) {
         gsdll.state = UNLOADED;
 	request_mutex();
@@ -890,6 +926,8 @@ int code;
 	pending.unload = FALSE;
 	pending.abort = FALSE;
 	pending.redisplay = FALSE;
+	pending.pstoedit = FALSE;
+	pending.text = FALSE;
 	if (pending.psfile) {
 	    psfile_free(&psfile);
 	    psfile = *pending.psfile;
@@ -991,6 +1029,9 @@ int code;
     /* close document also */
     gsview_unzoom();
 
+    if (pending.pstoedit)
+	pending.now = TRUE;
+
     post_img_message(WM_GSWAIT, IDS_NOWAIT);
     post_img_message(WM_GSTITLE, 0);
 }
@@ -1039,6 +1080,9 @@ PSDOC *doc = psfile.doc;
     gsview_unzoom();
     pending.now = TRUE;
     release_mutex();
+
+    /* add to history */
+    history_add(pending.pagenum);
 
     return TRUE;
 }
@@ -1143,7 +1187,7 @@ char **argv;
 	*p = '\0';
 
 	if (! (pending.text && (gsdll.revision_number < 500)) )
-	  /* disable -dSAFER when gsversion < 500 and using pstotext */
+	  /* don't use -dSAFER when gsversion < 500 and using pstotext */
 	  if (option.safer) {
 	    strcpy(p, "-dSAFER");
 	    p += strlen(p)+1;
@@ -1166,6 +1210,7 @@ char **argv;
 	}
 
 	if (pending.text) {
+	    /* pstotext needs to make some changes to the systemdict */
 	    strcpy(p, "-dDELAYBIND");
 	    p += strlen(p)+1;
 	    *p = '\0';
@@ -1173,6 +1218,11 @@ char **argv;
 	    p += strlen(p)+1;
 	    *p = '\0';
 	    strcpy(p, "-q");
+	    p += strlen(p)+1;
+	    *p = '\0';
+	    /* GS 5.50 incorrectly allows the page size of nullpage */
+	    /* device to be changed.  We must disable this. */
+	    strcpy(p, "-dFIXEDMEDIA");
 	    p += strlen(p)+1;
 	    *p = '\0';
 	}
@@ -1284,8 +1334,8 @@ callback_pstotext(char GVFAR *str, unsigned long count)
 				pre++;
 			    fputs(pre, pstotextOutfile);
 			}
-		        fprintf(pstotextOutfile, "%s %d %d %d %d\n",
-			    d, llx, lly, urx, ury);
+		        fprintf(pstotextOutfile, "%d %d %d %d %s\n",
+			    llx, lly, urx, ury, d);
 			if (post)
 			    fputs(post, pstotextOutfile);
 		    }
@@ -1314,7 +1364,7 @@ int real_orientation;
 	return 1;
   
     if (option.pstotext == IDM_PSTOTEXTCORK - IDM_PSTOTEXTMENU - 1)
-        pstotextSetCork(pstotextInit, TRUE);
+        pstotextSetCork(pstotextInstance, TRUE);
 
     gs_addmess("Extracting text using pstotext...\n");
 
@@ -1411,7 +1461,7 @@ int real_orientation;
 	lsize = psfile.doc->numpages;
 	i = 1;
 	while (!pending.abort && !pending.unload && i <= psfile.doc->numpages) {
-	    if ( (code = pdf_page(i)) != 0 ) {
+	    if ( (code = d_pdf_page(i)) != 0 ) {
 		unload_pstotext();
 		fclose(pstotextOutfile);
 		return code;

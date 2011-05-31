@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -48,6 +48,7 @@ HWND hwnd_status;
 HWND hwnd_button;
 HWND hwnd_help;
 HWND hwnd_modeless;	/* any modeless dialog box */
+HWND hwnd_measure;		/* measure modeless dialog box */
 HWND hptr_crosshair;
 HWND hptr_hand;
 HWND hwnd_menu;
@@ -75,6 +76,7 @@ DISPLAY display;	/* Display parameters */
 PRINTER printer;	/* Printer GS parameters */
 char last_files[4][MAXSTR];	/* last 4 files used */
 int last_files_count;		/* number of files known */
+HISTORY history;		/* history of pages displayed */
 
 int page_skip = 5;		/* number of pages to skip in IDM_NEXTSKIP or IDM_PREVSKIP */
 BOOL zoom = FALSE;		/* true if display zoomed */
@@ -230,7 +232,7 @@ main(int argc, char *argv[])
 
   if (multithread) {
       /* start thread for displaying */
-      display.tid = _beginthread(gs_thread, NULL, 32768, NULL);
+      display.tid = _beginthread(gs_thread, NULL, 65536, NULL);
   }
 
   play_sound(SOUND_START);
@@ -859,14 +861,6 @@ BOOL addeps;
 	    enable_menu_item(IDM_EDITMENU, IDM_TEXTFIND, idle);
 	    enable_menu_item(IDM_EDITMENU, IDM_TEXTFINDNEXT, idle);
 	    release_mutex();
-	    break;
-	case IDM_ORIENTMENU:
-	    enable_menu_item(IDM_ORIENTMENU, IDM_AUTOORIENT, !psfile.ispdf);
-	    enable_menu_item(IDM_ORIENTMENU, IDM_PORTRAIT, !psfile.ispdf);
-	    enable_menu_item(IDM_ORIENTMENU, IDM_LANDSCAPE, !psfile.ispdf);
-	    enable_menu_item(IDM_ORIENTMENU, IDM_UPSIDEDOWN, !psfile.ispdf);
-	    enable_menu_item(IDM_ORIENTMENU, IDM_SEASCAPE, !psfile.ispdf);
-	    enable_menu_item(IDM_ORIENTMENU, IDM_SWAPLANDSCAPE, !psfile.ispdf);
 	    break;
     }
 }
@@ -1499,6 +1493,9 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 			    pending.now = TRUE;
 			}
 		    }
+/*  measure doesn't work yet
+		    measure_setpoint(x, y);
+*/
 		}
 		break;
 	case WM_BUTTON2DOWN:
@@ -1685,25 +1682,34 @@ cursorpos_paint(HPS hps)
 float x, y;
 POINTL pt;
 char buf[64];
-	request_mutex();
-	if (get_cursorpos(&x, &y)) {
-	    switch(option.unit) {
-	       case IDM_UNITPT:   
-	          sprintf(buf,"%.0f, %.0fpt", x, y);
-		  break;
-	       case IDM_UNITMM:   
-	          sprintf(buf,"%.0f, %.0fmm", x/72*25.4, y/72*25.4);
-		  break;
-	       case IDM_UNITINCH:   
-	          sprintf(buf,"%.1f, %.1fin", x/72, y/72);
-		  break;
-	    }
-	    GpiSetTextAlignment(hps, TA_RIGHT, TA_NORMAL_VERT);
-	    pt.x = info_coord.xRight - 1;
-	    pt.y = info_page.y;
-            GpiCharStringAt(hps, &pt, strlen(buf), buf);
+char fmt[64];
+int digits = option.unitfine ? 2 : 0;
+    request_mutex();
+    if (get_cursorpos(&x, &y)) {
+	switch(option.unit) {
+	   case IDM_UNITPT:   
+	      sprintf(fmt, "%%.%df, %%.%dfpt", digits, digits);
+	      sprintf(buf, fmt, x, y);
+	      break;
+	   case IDM_UNITMM:   
+	      sprintf(fmt, "%%.%df, %%.%dfmm", digits, digits);
+	      sprintf(buf, fmt, x/72*25.4, y/72*25.4);
+	      break;
+	   case IDM_UNITINCH:   
+	      digits += 1;
+	      sprintf(fmt, "%%.%df, %%.%dfin", digits, digits);
+	      sprintf(buf, fmt, x/72, y/72);
+	      break;
 	}
-	release_mutex();
+	GpiSetTextAlignment(hps, TA_RIGHT, TA_NORMAL_VERT);
+	pt.x = info_coord.xRight - 1;
+	pt.y = info_page.y;
+	GpiCharStringAt(hps, &pt, strlen(buf), buf);
+    }
+/*  measure doesn't work yet
+    measure_paint(x, y);
+*/
+    release_mutex();
 }
 
 void
@@ -1808,11 +1814,11 @@ MRESULT EXPENTRY StatusWndProc(HWND hwnd, ULONG mess,
 	statusbar.y = char_size.y + 2;
 	info_file.x = 2;
 	info_file.y = fm.lMaxDescender + 3;
-	info_coord.xLeft = 25 * char_size.x;
-	info_coord.xRight = 38 * char_size.x;
+	info_coord.xLeft = 32 * char_size.x;
+	info_coord.xRight = 52 * char_size.x;
 	info_coord.yTop = char_size.y + 1;
 	info_coord.yBottom = 1;
-	info_page.x = 42 * char_size.x + 2;
+	info_page.x = 54 * char_size.x + 2;
 	info_page.y = fm.lMaxDescender + 3;
 /*
 	WinFillRect(ps, SYSCLR_BUTTONMIDDLE);
@@ -2389,4 +2395,14 @@ PDFLINK link;
 	    WinUpdateWindow(hwnd_status);
 	}
     }
+}
+
+void
+gsview_fullscreen_end(void)
+{
+}
+
+void
+gsview_fullscreen(void)
+{
 }

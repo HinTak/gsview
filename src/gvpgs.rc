@@ -1,4 +1,4 @@
-/* Copyright (C) 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1995-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   

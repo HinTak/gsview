@@ -6,4 +6,3 @@ EXPORTS
 		pstotextFilter	@2
 		pstotextExit	@3
 		pstotextSetCork	@4
-

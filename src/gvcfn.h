@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -23,6 +23,8 @@
 void copy_clipboard(void);
 BOOL get_cursorpos(float *x, float *y);
 void scroll_to_find(void);
+void gsview_fullscreen_end(void);
+void gsview_fullscreen(void);
 
 /* in gvpinit.c  or gvwinit.c */
 void show_buttons(void);
@@ -31,13 +33,22 @@ int gsview_create_objects(char *name);
 BOOL load_language(int language);
 void change_language(void);
 void check_language(void);
+void post_command_line(void);
 void unload_zlib(void);
 BOOL load_zlib(void);
 int config_wizard(void);
+void drop_filename(HWND hwnd, char *str);
 
 /* in gvwdde.c */
 int gsview_progman(char *name, char *gsviewpath, 
 	int gsver, char *gspath, char *gsargs);
+
+/* in gvwdde2.c */
+BOOL dde_initialise(void);
+void dde_uninitialise(void);
+void dde_enable_server(BOOL enable);
+BOOL dde_execute(char *str);
+BOOL dde_execute_line(char *str);
 
 /* in gvcinit.c */
 int gsview_printer_profiles(void);
@@ -105,6 +116,10 @@ void dsc_skip(int skip);
 int map_page(int page);
 void psfile_free(PSFILE *);
 char * psfile_name(PSFILE *psf);
+void history_add(int pagenum);
+void history_reset(void);
+void history_back(void);
+void history_forward(void);
 
 /* in gvpdisp.c or gvwdisp.c */
 BOOL psfile_changed(PSFILE *psf);
@@ -121,6 +136,7 @@ int not_implemented(void);
 void gsview_check_usersize(void);
 void gsview_unzoom(void);
 void gsview_language(int new_language);
+void gsview_goto_page(int pagenum);
 
 /* in gvpdlg.c or gvwdlg.c */
 BOOL get_filename(char *filename, BOOL save, int filter, int title, int help);
@@ -149,6 +165,10 @@ BOOL profile_close(PROFILE *prf);
 void ps_to_eps(void);
 /* see gvceps.h */
 
+/* in gvwedit.c */
+int gsview_pstoedit(void);
+void process_pstoedit(void *arg);
+
 /* in gvpeps.c or gvwclip.c */
 void clip_convert(void);
 void paste_to_file(void);
@@ -164,6 +184,7 @@ void gsview_extract(void);
 int enum_upp_path(char *path, char *buffer, int len);
 char *uppname_to_model(char *buffer, char *name);
 char *uppmodel_to_name(char *buffer, char *model);
+BOOL copy_for_printer(FILE *pcfile);
 BOOL gsview_cprint(char *cfname, char *optfname);
 
 /* in gvctext.c */
@@ -216,7 +237,8 @@ int send_pstotext_prolog(HINSTANCE hmodule, int resource);
 int pdf_head(void);
 int pdf_makedoc(int first, int last);
 int pdf_trailer(void);
-int pdf_page(int pagenum);
+int pdf_page_init(int pagenum);
+int pdf_page(void);
 int pdf_checktag(LPSTR str, int len);
 int pdf_extract(FILE *f);
 BOOL gsview_pdf2ps_common(char *psname, char *optname, char *output);
@@ -229,3 +251,20 @@ BOOL is_link(float x, float y, PDFLINK *link);
 /* gvwprn.c or gvpprn.c */
 void gsview_print(void);
 void gsview_pdf2ps(char *output);
+
+/* gvwmeas.c or gvpmeas.c */
+void measure_show(void);
+BOOL dialog_get_float_error(HWND hwnd, int field, float *fres, BOOL error);
+void calc_enable_custom(HWND hwnd, BOOL enab);
+
+/* gvcmeas.c */
+void measure_setpoint(float x, float y);
+void measure_paint(float x, float y);
+void read_measure_profile(PROFILE *prf);
+void write_measure_profile(PROFILE *prf);
+void update_dialog_ctm(HWND hwnd, MATRIX *ctm);
+void dialog_put_float(HWND hwnd, int field, float fx);
+BOOL dialog_get_ctm(HWND hwnd, MATRIX *ctm, BOOL error);
+BOOL calc_command(HWND hwnd, int message, MATRIX *ctm, int *unit);
+void measure_dialog_unit(void);
+void measure_update_last(void);

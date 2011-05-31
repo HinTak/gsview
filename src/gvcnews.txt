@@ -1,4 +1,95 @@
 ----------------------
+Version 2.7 1998-12-23
+----------------------
+All:
+  Changed email address to gsview@ghostgum.com.au.
+  GSview is now owned by Ghostgum Software Pty Ltd,
+  ACN 085 392 632.
+  Text extraction can now cope with pstotext incorrectly
+  returning more than one word at a time.
+  Updated to pstotext 1.8.
+
+  Items missing from this release due to lack of time are:
+  - Translations (some English words appear in the French and
+    German versions).
+  - Edit | Measure in OS/2.
+  - Convert to vector format doesn't work because the pstoedit
+    DLL isn't included.
+Win:
+  Edit | Measure dialog box allows distances to be measured,
+  and custom coordinates to be displayed.
+  View | Full Screen displays the image full screen.  
+  Shortcut is F4, Escape returns to normal display.
+
+Win32:
+  Registry entries for file associations now handle spaces in
+  GSview path.
+
+---------------------------
+Version 2.61beta 1998-11-03
+---------------------------
+All:
+  Put quotes around the uniprint configuration file name.
+  Updated to pstotext 1.7, needed for GS 5.50.
+  Add -dFIXEDMEDIA when using pstotext to prevent the 
+  page size of the nullpage device from being changed.
+  Fixed pstotext bug with Dvips Cork Encoding.
+  Added .prn to default file filter.
+  Increase stack space to 65536 for gs thread.
+  PDF displaying now honours orientation menu.
+  PDF displaying will use CropBox if EPSF Clip is enabled.
+  Added "Go Back" and "Go Forward" menu items which remember
+  the order of previously viewed pages.  These will eventually
+  be used by the PDF Annotation /Page /GoBack.
+  When printing an EPS file, make sure it contains one
+  and only one showpage.  If an EPS file doesn't fit on
+  the page, rescale it.
+  When extracting pages from a PDF file, instruct user to
+  use Print to File using pdfwrite or pswrite.
+  Cursor units can be displayed in finer resolution.
+  Added Advanced PostScript Options to printer setup to
+  add Ctrl+D and prolog/epilog files.
+  Widened fields on status bar.
+  When filename given on command line, don't use it until
+  after the configure wizard has finished.
+  
+Win:
+  Filenames on command line are converted to fully qualified
+  names.
+  Added /E command line option to open file in existing GSview.
+  Added /X command line option to close existing GSview.
+  Added DDE server, service="GSview", topic="GSview", which
+  understands the commands 
+    [FileOpen("filename")]
+    [FileExit()]
+    [NextPage()]
+    [PrevPage()]
+    [GoBack()]
+    [GotoPage(5)]
+    [Command("command line")]
+  The last one only understands "filename" or "/P filename".
+  Don't sent multiple commands together.  GSview won't complain,
+  but the multithreaded asynchrononous execution within GSview
+  means that the first command won't have been completed before
+  the second command is received.  If you need to send multiple
+  commands, send them separately and with pauses inbetween.
+
+Win32:
+  Convert all path names to the short form before calling the
+  ProgMan DDE interface.  This should make the GS start menu
+  item work correctly when using long path names.
+  Fixed pstotext makefile for MS VC++.
+  Fixed GS_DLL yet again - it was inserting an extra backslash.
+  Added interface to Wolfgang Glunz's pstoedit.
+
+OS/2:
+  Turn off hard error reporting when changing directory.
+  This is to avoid getting an error popup when starting GSview
+  when the last directory is inaccessible (e.g. removable media).
+  gvpgs.exe was crashing due to insufficient stack space in
+  the gs thread.
+
+----------------------
 Version 2.6 1998-09-17
 ----------------------
 All:

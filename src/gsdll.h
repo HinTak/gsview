@@ -1,4 +1,4 @@
-/* Copyright (C) 1994-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1994-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of Aladdin Ghostscript.
   
@@ -118,4 +118,3 @@ typedef long (*GSDLLAPI PFN_gsdll_get_bitmap)(unsigned char *, unsigned char **)
 #endif
 
 #endif
-

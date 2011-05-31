@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -17,7 +17,6 @@
 
 /* gvpinit.c */
 /* Initialisation routines for PM GSview */
-/* by Russell Lang */
 #include "gvpm.h"
 
 HELPINIT hi_help;
@@ -38,6 +37,8 @@ ULONG frame_flags =
 	    FCF_MENU |		/* Load menu from resources */
 	    FCF_ACCELTABLE;	/* Load accelerator table from resources */
 #endif
+
+char *command_line;
 
 /* returns TRUE if language change successful */
 BOOL
@@ -216,6 +217,8 @@ gsview_init(int argc, char *argv[])
   int i;
   short *pButtonID;
   ULONG version[3];
+
+    command_line = NULL;
 
     gs_getcwd(workdir, sizeof(workdir));	/* remember the working directory */
     if (DosQuerySysInfo(QSV_VERSION_MAJOR, QSV_VERSION_REVISION, &version, sizeof(version)))
@@ -481,11 +484,20 @@ gsview_init(int argc, char *argv[])
 		    strcat(cmd, "\\");
 	    strcat(cmd, filedir);	/* append relative path */
 	}
-	/* load given file */
-	WinPostMsg(hwnd_bmp, WM_COMMAND, (MPARAM)IDM_DROP, MPFROMP(cmdbase));	/* mp2 is not strictly correct */
+	/* file will be loaded later */
+        command_line = cmdbase;
     }
     return rc;
 }
+
+void
+post_command_line(void)
+{
+    if (command_line)
+	WinPostMsg(hwnd_bmp, WM_COMMAND, (MPARAM)IDM_DROP, 
+	    MPFROMP(command_line));	/* mp2 is not strictly correct */
+}
+
 
 APIRET
 restore_window_position(SWP *pswp)
@@ -923,10 +935,6 @@ char *p;
 int
 config_now(void)
 {
-#ifdef UNUSED
-BOOL assoc_ps;
-BOOL assoc_pdf;
-#endif
 char buf[MAXSTR];
 WIZPAGE *page;
 FILE *f;
@@ -972,15 +980,9 @@ char *p;
     /* at this stage we don't look for fonts, but maybe we should */
     
 
-#ifdef UNUSED
-    assoc_ps = (BOOL)WinSendMsg( WinWindowFromID(find_page_from_id(IDD_CFG4)->hwnd, IDC_CFG41),
-	BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
-    assoc_pdf = (BOOL)WinSendMsg( WinWindowFromID(find_page_from_id(IDD_CFG4)->hwnd, IDC_CFG42),
-	BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+    /* The windows code associates PS and PDF in the registry */
+    /* It isn't done that way in OS/2 */
 
-    if (update_registry(assoc_ps, assoc_pdf))
-	return 1;
-#endif
 
     GetDlgItemText(find_page_from_id(IDD_CFG5)->hwnd, 
 	IDC_CFG52, buf, sizeof(buf));
@@ -1103,6 +1105,7 @@ MRESULT EXPENTRY CfgMainDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	  WinDestroyWindow(hwnd);
 	  hwnd_modeless = (HWND)NULL;
 	  WinSetFocus(HWND_DESKTOP, hwnd_frame);
+	  post_command_line();
           return (MRESULT)TRUE;
       }
       break;
@@ -1111,10 +1114,11 @@ MRESULT EXPENTRY CfgMainDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       WinDestroyWindow(hwnd);
       hwnd_modeless = (HWND)NULL;
       WinSetFocus(HWND_DESKTOP, hwnd_frame);
+      post_command_line();
       return (MRESULT)TRUE;
   }
   return WinDefDlgProc(hwnd, msg, mp1, mp2);
-}	
+}
 
 
 MRESULT EXPENTRY CfgChildDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -35,39 +35,6 @@ do_message(void)
 
 
 
-#ifdef OLD
-/* return TRUE if file length or modification time changed */
-BOOL
-psfile_changed(void)
-{
-struct ftime thisftime;
-long thisflength;
-struct ftime *ft;
-	getftime(fileno(psfile.file), &thisftime);
-	thisflength = filelength(fileno(psfile.file));
-	ft = &psfile.datetime;
-	if (ft->ft_year==0 && ft->ft_month==0 && ft->ft_day==0 && 
-	    ft->ft_hour==0 && ft->ft_min==0 && ft->ft_tsec==0) {
-	    gs_addmess("psfile_changed: ignoring file time, getftime() is returning garbage\n");
-	    return (thisflength != psfile.length);
-	}
-	else
-	    return ( (thisflength != psfile.length) ||
-		memcmp(&thisftime, &psfile.datetime, sizeof(thisftime)) );
-}
-
-void
-psfile_savestat(PSFILE *psf)
-{
-	if (getftime(fileno(psf->file), &psf->datetime)) {
-	    char buf[MAXSTR];
-	    sprintf(buf, "psfile_savestat: getftime() returns error. errno=%d\n", errno);
-	    gs_addmess(buf);
-	}
-	psf->length = filelength(fileno(psf->file));
-}
-
-#else
 /* return TRUE if file length or modification time changed */
 BOOL
 psfile_changed(PSFILE *psf)
@@ -92,7 +59,6 @@ struct stat fstatus;
 	psf->datetime = fstatus.st_mtime;
 	psf->length = fstatus.st_size;
 }
-#endif
 
 
 BOOL 

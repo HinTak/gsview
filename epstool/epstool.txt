@@ -1,4 +1,4 @@
-/* Copyright (C) 1995-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1995-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -17,7 +17,7 @@
 
 /* epstool.txt */
 
-1998-09-13
+1998-12-23
 
 EPSTOOL - Create or extract preview bitmaps in EPS files.
 
@@ -169,6 +169,10 @@ and the current directory will be used for other platforms.
 ================
 Revision History
 ================
+1.07 1998-12-23
+  Cope with badly written EPS files that leave items on
+  the stack or dictionary stack.
+
 1.06 1998-09-13
   Page calculation for descending page order was wrong.
   If a multipage non-EPS file was used as input, the output

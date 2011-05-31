@@ -7,7 +7,7 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 2.6 requires Ghostscript 4.03 - 5.99.
+ GSview 2.7 requires Ghostscript 4.03 - 5.99.
  GSview was inspired by Tim Theisen's X11 Ghostview program.
 2Installation
 ?Installation
@@ -55,14 +55,16 @@ W
  Remove the `GS Tools` group from the Program Manager or Start menu
 
  If you know how to edit the registry, remove the following keys:
-  psfile
-  .eps
-  .ps
-  MIME\Database\Content Type\application/postscript
+  HKEY_CLASSES_ROOT\psfile
+  HKEY_CLASSES_ROOT\.eps
+  HKEY_CLASSES_ROOT\.ps
+  HKEY_CLASSES_ROOT\MIME\Database\Content Type\application/postscript
  If you associated PDF with GSview you will also need to remove
-  pdffile
-  .pdf
-  MIME\Database\Content Type\application/pdf
+  HKEY_CLASSES_ROOT\pdffile
+  HKEY_CLASSES_ROOT\.pdf
+  HKEY_CLASSES_ROOT\MIME\Database\Content Type\application/pdf
+ If you installed Ghostscript with GSview, remove the key
+  HKEY_LOCAL_MACHINE\Software\Aladdin Ghostscript\gsN.NN
 E
 3Manual Installation
 ?Manual Installation
@@ -171,11 +173,16 @@ E
  from Windows 3.1, but does work from Windows 95.
 
 W
- If user profiles are being used under Windows 95,
- GSview will store the INI file in the user profile directory.
- Otherwise, if the environment variable USERPROFILE is defined and is
+ GSview tries to maintain one configuration file for each user.
+ If user profiles are being used under Windows 95 or NT,
+ GSview will store the INI file in the user profile directory,
+ as specified in the registry.  If this can't be found,
+ and the environment variable USERPROFILE is defined and is
  a directory, GSview will store the INI file in this directory.
- This will mean there is one configuration file for each user.
+ If this fails, GSview will store the INI file in the default
+ location, the Windows directory.
+ If the user profile directory exists, but is write protected,
+ GSview will have trouble.
 
 E
  If you wish to stop GSview from displaying the configuration
@@ -189,7 +196,7 @@ E
  user profile directory to the GSview directory, then edit it to
  remove all entries except for:
   [Options]
-  Version=2.6
+  Version=2.7
   GSversion=550
   Configured=1
   GhostscriptDLL=E:\GSTOOLS\gs5.50\gsdll32.dll
@@ -239,7 +246,7 @@ E
 
  The following describes how to install Ghostscript, not GSview.
  The primary documentation on installing Ghostscript is found in
- the Ghostscript file install.txt.
+ the Ghostscript file Install.htm.
 
  Aladdin Ghostscript for the PC is available on the Internet from
   ftp://ftp.cs.wisc.edu/ghost/aladdin/gsNNN???.zip
@@ -279,7 +286,7 @@ E
  If you already have some Type 1 fonts, there are two ways to tell
  Ghostscript about these fonts: editing/replacing the `Fontmap` file,
  or the `GS_FONTPATH` environment variable.  See the Ghostscript
- use.txt and the sample Fontmap files for details.
+ Use.htm and the sample Fontmap files for details.
 
  See the `Include Path` and `Fonts` topics for more details.
 3Include Path
@@ -326,7 +333,7 @@ E
  For more information, see the following topic.
 4File searching
 ?File searching
- (from Ghostscript use.txt)
+ (from Ghostscript Use.htm)
 
  When looking for initialisation files (gs_*.ps, pdf_*.ps), font files, the
  Fontmap file, and files named on the command line, Ghostscript first checks
@@ -461,7 +468,7 @@ E
  include path (`-I` or `GS_LIB`)
 4GS_FONTPATH
 ?GS_FONTPATH
- (From Ghostscript use.txt)
+ (From Ghostscript Use.htm)
 
  Ghostscript has slightly different rules for determining how to find the
  file containing a font with a given name.  It starts by looking for Fontmap
@@ -509,7 +516,7 @@ E
  See also `Fontmap`.
 4Platform Fonts
 ?Platform Fonts
- Platform fonts are described in Ghostscript fonts.txt.
+ Platform fonts are described in Ghostscript Fonts.htm.
 
  WARNING: Text anti-aliasing will not work if platform fonts
  are used.  For this reason, GSview will automatically use
@@ -641,31 +648,27 @@ E
 ?pdf2ps
 ?ps2pdf
  GSview can display and print PDF files, although there are a number
- of problems with the current method.
+ of limitations with the current method.
 
- Known problems with the current implementation are:
+ GSview ignores the page size on the Media menu, and instead uses
+ the /MediaBox from the PDF file.  If `Options` | `EPS Clip` is
+ enabled, GSview will use the /CropBox from the PDF file.
 
- - GSview ignores the page size on the Media menu, and instead uses
- the /MediaBox from the PDF file.
-
- - Doesn't sense if PDF file has been changed during display.
-
- - Extracting PDF pages extracts PostScript rather than PDF.
- See the Ghostscript documentation on pdf2ps.
-
- - GSview needs to `Open` a PDF file to count the pages.  If you
+ GSview needs to `Open` a PDF file to count the pages.  If you
  `Select` the file, GSview will not be able to `Text Extract`,
- `Find`, `Goto Page` or any other operation that needs to know
+ `Find`, `Goto Page` or do any other operation that needs to know
  how many pages are in the document.
 
- - pdfmark link support is crude.
+ pdfmark link support is crude.
 
  To convert a PostScript file to a PDF file, use `File` | `Print`,
  then select the `pdfwrite` device and `Print to File`.
 
- To convert a PDF file to a PostScript file, use `File` |
- `Extract`.  If you reverse the page order, the PostScript file
- will not include the correct DSC %%PageOrder comment.
+ To convert a PDF file to a PostScript file, use `File` | `Print`,
+ then select the `pswrite` device and `Print to File`.
+
+ `File` | `Extract` does not work for PDF files.
+ Extracting PDF pages extracts PostScript rather than PDF.
 
  To batch convert multiple files, look at ps2pdf.bat and pdf2ps.bat
  in the Ghostscript directory.
@@ -675,7 +678,7 @@ P
 W
  gswin32c.exe
 E
- instead of gs.exe.  You will also need to set the Ghostscript
+ instead of gs.exe.  You may also need to set the Ghostscript
  include path using `-I` or the environment variable `GS_LIB`.
 2Opening a Document
 ?File
@@ -808,6 +811,9 @@ E
 ?Redisplay
 ?Goto Page
 ?View
+W
+?Full Screen
+E
  `View` | `Next Page` or the `+` button moves to the next page of a
  document.
  This works even if the document does not contain `DSC` comments.
@@ -829,6 +835,12 @@ E
 
  The `Previous Page`, `Redisplay` and `Goto Page` commands work only if the
  document contains `DSC` comments.
+W
+
+ `View` | `Full Screen` or the `F4` key displays the page full screen
+ (without title bar, scroll bars etc.).
+ To return to normal display, press the Escape key.
+E
 2Zoom
 ?Zoom
  To enlarge a displayed feature, position the cross-hair mouse pointer
@@ -851,7 +863,8 @@ E
  A brief information area at the top of the window is used by
  GSview to display the document filename, the current page number
  and label (if available) and while the cursor is over the image, the
- location of the cursor in co-ordinates specified by `Options` | `Units`.
+ location of the cursor (relative to the lower left corner of
+ the paper) in co-ordinates specified by `Options` | `Units`.
  The cursor location is useful for calculating bounding boxes.
 
  The `Info` command on the `File `menu shows a dialog box with the
@@ -907,6 +920,8 @@ E
 ?uniprint
  The `Print` command on the `File `menu allows printing of the document
  using Ghostscript.
+ The `Print` command is also used for creating bitmap files and
+ `PDF` files.
  A `Printer Setup` dialog box allows selection of
  the Ghostscript printer driver and resolution, the page range
  and the `Spooler` output.
@@ -950,7 +965,9 @@ E
  If `PostScript Printer` is checked, the selected pages will be
  sent direct to the printer queue, without using Ghostscript.
  This is similar to `File | Print File`, except that you can specify
- which pages to print.
+ which pages to print.  The `Advanced` button allows prolog and
+ epilog files to be placed around the PostScript being sent to
+ a PostScript printer.
 
 W
  Under Win32s, GSview and Ghostscript can't send output
@@ -992,8 +1009,30 @@ E
  of available configuration files (*.upp) for the uniprint device.
  If you select one of these configuration files, the configuration file
  name will be placed in the `Options `field of the Printer Setup.
- See the Ghostscript file `devices.txt` for details of how to configure
+ See the Ghostscript file `Devices.htm` for details of how to configure
  the uniprint device.
+3PostScript Printer
+?PostScript Printer
+?Advanced
+ When a PostScript printer is connected via a serial port, it sometimes
+ requires a Ctrl+D character to be sent after the PostScript file,
+ and depending on how well behaved other programs are, sometimes before.
+ This is part of the serial communications protocol used by these
+ printers - it is not part of PostScript.
+ When using the `PostScript Printer `option, you can choose to
+ send Ctrl+D before and/or after the PostScript file.
+
+ Some PostScript printers understand multiple languages, and
+ require a prolog to enable the PostScript mode.
+ For example, HP LaserJet printers (with the PostScript option)
+ require the following prolog
+  ^[%-12345X@PJL JOB
+  @PJL ENTER LANGUAGE = POSTSCRIPT
+ and the following epilog
+  ^[%-12345X@PJL EOJ
+  ^[%12345X
+ The prolog and epilog files allow you to send a file to the
+ printer before and after the PostScript file.
 3Spooler
 ?Spooler
  The
@@ -1056,7 +1095,7 @@ E
  Not every printer supports the use of optional `Properties`.  To find
  out which printers support `Properties` and which `Properties` are
  recognised by each printer, read the Ghostscript
- file devices.txt or look at the Ghostscript source code.
+ file Devices.htm or look at the Ghostscript source code.
 
  There are two ways to add or edit `Properties`.
 
@@ -1117,6 +1156,119 @@ E
   -dBitsPerPixel=24 -dDepletion=1 -dShingling=2 -dBlackCorrect=4
  If the value of a property is `[Not defined]`, that property will
  not be sent to Ghostscript.
+2File conversions and tricks
+?File Conversions
+?Tricks
+ Some common file conversions that can be performed
+ using GSview and Ghostscript are:
+
+ Convert PostScript to PDF.
+ File | `Print`, select pdfwrite, 300dpi, Print to File.
+ With Ghostscript 5.50, fonts with non-standard encodings
+ will be included as bitmaps.  If you choose 72dpi, fonts
+ will look rough.
+
+ Convert PDF to PostScript.
+ File | `Print`, select pswrite, 300dpi, Print to File.
+
+ Convert Level 2 PostScript to Level 1 PostScript.
+ File | `Print`, select psmono, 300dpi, Print to File.
+ Instead of 300dpi, you should use the resolution of your
+ printer.
+
+ Convert to a bitmap.
+ File | `Print`, select bmp16m, 72dpi, Print to File.
+
+ Convert to an editable vector format (pstoedit).
+ Edit | `Convert to vector format` OR convert to PDF
+ using the method above.
+
+ Extract text (pstotext).
+ Edit | `Text Extract`
+
+ Add a preview to an EPS file.
+ Edit | `Add EPS Preview`.   See `Add EPS Preview` for
+ more details.
+
+ Remove preview from an EPS file.
+ Edit | `Extract EPS` | PostScript
+
+ Display with smooth edges.
+ Media | `Display Settings`.  Set `Text Alpha` and
+ `Graphics Alpha` to 4.  You need a display with
+ at least 8 bits per pixel.
+
+ Save the displayed bitmap.
+ Edit | `Copy` to copy to the clipboard.
+ To save to a BMP file, use Edit | `Copy` then `Paste To`...
+
+ Create a bitmap with smooth edges (anti-aliasing).
+ 1. Display with smooth edges and save the display bitmap.
+ OR
+ 2. Convert to ppmraw and set the properties
+    -dTextAlphaBits=4 -dGraphicsAlphaBits=4
+W
+2Convert to vector format
+?Convert to vector format
+?PStoEdit
+ Contrary to what is written below, the pstoedit DLL is not
+ included with GSview 2.7, because it was not publicly available
+ when GSview 2.7 was released.  For information on the availabilty
+ of the pstoedit DLL, see http://www.cs.wisc.edu/~ghost/gsview/
+
+ You can convert a PostScript file to an editable vector format
+ using `pstoedit` by Wolfgang Glunz.
+ `pstoedit` is included with GSview for Win32.
+ It is licensed with the GNU Public Licence.
+ A command line version `pstoedit.exe` and the manual `pstoedit.htm`
+ are included in the gstools\pstoedit directory.
+
+ To use `pstoedit` from within GSview, use
+ `Edit | Convert to vector format`.
+ Three dialog boxes will be shown.
+
+ The first dialog is for pstoedit settings.
+
+ Select an output `Format`.
+
+ `Draw text as polygons` should be selected if the PostScript file
+ contains text and the output format does not support this, e.g. gnuplot.
+ This might produce a large output file.
+
+ When `Map to ISO-Latin1` is selected, pstoedit maps all character codes
+ to the ones defined by the ISO-Latin1 encoding, which is used by
+ HTML and MS-Windows.  This is the default.
+ If you uncheck this item, the encoding from the input PostScript
+ is passed unchanged to the output.
+
+ If the output format does not support curves in the way PostScript
+ does, all curves are approximated by lines. The `Flatness` option
+ is used to control this approximation. This parameter is directly
+ converted to a PostScript setflat command. Small values produce
+ a more accurate approximation, but more line segments.
+
+ Sometimes fonts embedded in a PostScript program do not have a
+ fontname. For example, this happens in PostScript files generated
+ by dvips. In such a case pstoedit uses a replacement font.
+ The default for this is Courier.  Another font can be specified
+ using the `Default Font` option.
+ Some alternative font names are Courier, Helvetica and Times-Roman.
+
+ Some of the output formats support extra options.  See the pstoedit
+ manual for more details.  For example, the java output format
+ uses `Driver Options` to specify the name of the java class.
+
+ The second dialog (omitted if no page numbering is available)
+ specifies the page to be converted, or if supported by the output
+ format, a range of pages to be converted.
+
+ The third dialog specifies the output file name.
+
+ Not all `pstoedit` formats support bitmap graphics.
+ If you need bitmap output, see `File conversions and tricks`.
+
+ For more details please read the pstoedit manual.
+E
 2Text Extract and Find
 ?Text Extract and Find
 ?Text
@@ -1252,9 +1404,9 @@ P
  to a BMP file.
 E
 
- If `Slow Text Extract and Find` is used on a document, GSview creates
- an index of the words in the document.  If any words are marked with
- the mouse, `Copy` will copy these words to the clipboard instead
+ If `Text Extract` or `Find` are used on a document with `PStoText` enabled,
+ GSview creates an index of the words in the document.  If any words are
+ marked with the mouse, `Copy` will copy these words to the clipboard instead
  of copying a bitmap.  Text cannot be marked until either `Text Extract`
  or `Find` has been used with `Options` | `PStoText` enabled.
 2EPS Preview
@@ -1326,6 +1478,44 @@ E
 
  You can add a preview that has no resemblance to the PostScript,
  which is most undesirable.
+W
+2Measure
+?Measure
+?Calculate Transformed Units
+ Lengths can be measured using the cursor location displayed on
+ the status bar, or with the `Edit |` `Measure` dialog box.
+
+ This dialog box shows the start location, finish location,
+ difference between these locations and the length and angle
+ between these locations.
+ The start location is set when you click the left mouse button.
+ The default start location is the lower left corner of the page.
+ The units can be pt, mm, inch, or custom.
+
+ Custom units allows you to display coordinates as they appear
+ in a PostScript file.
+ Custom units are usually specified by starting with an identity
+ matrix and then performing a series of transformations.
+ If a PostScript file invokes landscape orientation using
+  90 rotate
+  0 -595 translate
+ then to display the user coordinates you would enter
+ the following in the Calculate Transformation dialog:
+  Custom
+  initmatrix
+  90 rotate
+  0 -595 translate
+  invertmatrix
+  Ok
+ The Current Transformation Matrix (CTM) is shown in
+ upper part of the dialog.  You can enter a CTM directly
+ if you like maths.
+ It is easier to enter values in the Custom edit fields below this,
+ but these have no effect until one of the transform buttons 
+ (translate, rotate, scale) is selected.
+
+ See also `Units`.
+E
 2Options
 ?Options
  The `Options` menu has the following selections:
@@ -1397,6 +1587,11 @@ E
  on the status bar.  Available units are PostScript points (`pt` = 1/72"),
  millimetres (`mm`) and inches (`in`).
  The default is `pt`.
+
+ The resolution of the units can be increased by selecting
+ `Units `| `Fine Resolution`.
+
+ See also `Measure`.
 3Language
 ?Language
 ?International
@@ -1586,16 +1781,20 @@ E
  `Orientation`, `Resolution`, `Depth` or `Media`.
 3EPS Clip
 ?EPS Clip
+?PDF Crop
  When the `EPS Clip` option is `checked`, GSview will clip the
  display bitmap to the bounding box of an EPS file instead of using the
  page size specified on the `Media` menu.  This is useful when
  adding a bitmap preview to an EPS file.
+ If a PDF file is being displayed, `EPS Clip` will cause the
+ display to be clipped to the PDF crop box.
 
  If `EPS Clip` is `unchecked`, GSview will use the page size
  specified on the `Media` menu for EPS files.  This is the default.
 
  `EPS Clip` does not alter the original document, it only affects
  how much of the document is displayed by GSview.
+
 
  See also `Edit `| `Add EPS Preview`
 3EPS Warn
@@ -1778,7 +1977,7 @@ E
 
  `I`, `i`  File information.  (`File` | `Info`)
 
- `R`, `r`  Redisplay page.  (`View` | `Redisplay`)
+ `R`, `r`, `F5`  Redisplay page.  (`View` | `Redisplay`)
 
  `S`, `s`  Select file: open but don't display.  (`File` | `Select File`)
 
@@ -1806,19 +2005,13 @@ E
  `F3`, Find Next. (`Edit` | `Find Next`)
 
 W
- `Up`  Scroll up 16 pixels.
+ `F4`  Full Screen.  (`View` | `Full Screen`)
 
- `Down`  Scroll down 16 pixels.
+E
+ `Arrow Keys`  Scroll by 1/16 of a screen.
 
- `Left`  Scroll left one screen.
-
- `Right`  Scroll right one screen.
+ `Ctrl + Arrow Keys`  Scroll by one screen.
 P
- `Arrow Keys`  Scroll by 16 pixels.
-
- `Ctrl+Left`  Scroll left one screen.
-
- `Ctrl+Right`  Scroll right one screen.
 
  `Ctrl+Page Up`  Scroll left one screen.
 
@@ -1925,7 +2118,7 @@ P
   gvpm /P filename.ps
 E
  To start GSview and print filename.ps to a file using Ghostscript
- (`File` | `Print To File`) use:
+ (`File` | `Print`) with `Print to File` checked use:
 W
   gsview32 /F filename.ps
 P
@@ -1963,8 +2156,43 @@ E
  To change this, use `/T` to toggle the threading mode, use `/T0` to select
  single-thread mode and `/T1` to select multi-thread mode.
 
+W
+ Instead of opening up a second copy of GSview, you can tell
+ GSview to open a file in an existing GSview, or if GSview
+ is not already running, in a new window using:
+  gsview32 /E filename
+ To tell an existing GSview to exit:
+  gsview32 /X
+
+E
  GSview ignores the case of options:
  /p is the same as /P.
+W
+3Dynamic Data Exchange
+?Dynamic Data Exchange
+?DDE
+ GSview implements a DDE server, service="GSview and topic="GSview".
+ The XTYP_EXECUTE commands that are recognised are:
+  [FileOpen("filename")]
+  [FileExit()]
+  [NextPage()]
+  [PrevPage()]
+  [GoBack()]
+  [GotoPage(5)]
+  [Command("command line")]
+ The [Command()] command only understands "filename" or "/P filename".
+
+ Don't sent multiple commands together.  GSview won't complain,
+ but the multithreaded asynchrononous execution within GSview
+ means that the first command won't have been completed before
+ the second command is received.  If you need to send multiple
+ commands, send them in separately and with pauses inbetween.
+
+ There are two command line options to cause GSview to send a DDE
+ command to another copy of GSview.
+ The /E command line option uses [Command("command line")].
+ The /X command line option uses [FileExit()]
+E
 2World Wide Web
 ?World Wide Web
 ?WWW
@@ -1990,7 +2218,7 @@ W
 P
   GVPM.EXE - A Ghostscript graphical interface
 E
-  Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+  Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   Portions Copyright (C) 1994, Timothy O. Theisen.  All rights reserved.
 
  This file is part of GSview.
@@ -2007,10 +2235,8 @@ E
  described in the Licence.  Among other things, the Licence requires that
  the copyright notice and this notice be preserved on all copies.
 
-     Author: Russell Lang
-   Internet: rjl@aladdin.com
- (This is an alias provided by Aladdin Enterprises.  Russell Lang is not
- an employee or agent of Aladdin Enterprises).
+     Author: Russell Lang, Ghostgum Software Pty Ltd
+   Internet: gsview@ghostgum.com.au
  Please read the `Common Problems` topic, the GSview README.TXT and browse
  the `WWW` page before sending mail to the author.
 
@@ -2228,6 +2454,7 @@ E
  GSview uses Ghostscript to display or print PostScript files.
  `Show Messages` displays the console output from Ghostscript,
  and is most useful when a PostScript error occurs.
+ You may need to scroll back to see the start of the error message.
 
  The text in the `Show Messages` window can be copied to the clipboard.
  If no text is selected, the entire text will be copied to the clipboard.
@@ -2273,5 +2500,3 @@ E
  but since they delete the files listed on the command line
  it would be safer to use gswin32.exe (Win32), gswin32c.exe
  (Win32 console) or gsos2.exe (OS/2).
-
-

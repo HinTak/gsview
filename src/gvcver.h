@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -32,17 +32,19 @@
 
 
 /* undefine BETA for a final release */
-/* #define BETA */
+/*
+#define BETA
 #define BETA_YEAR    1998
-#define BETA_MONTH   10
+#define BETA_MONTH   12
 #define BETA_DAY     31
+*/
 
 
 /* GSview */
 
 #define GSVIEW_PRODUCT "GSview"
-#define GSVIEW_VERSION "2.6"
-#define GSVIEW_DATE    "1998-09-17"
+#define GSVIEW_VERSION "2.7"
+#define GSVIEW_DATE    "1998-12-23"
 #ifdef _Windows
 #ifdef __WIN32__
 #ifdef DECALPHA
