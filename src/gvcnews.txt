@@ -1,3 +1,77 @@
+---------------------------
+Version 4.5 2003-10-18
+---------------------------
+All:
+  Allow PostScript code runs another file with an absolute path,
+  permit ghostscript to read the file if it is in the same
+  directory as the main file.
+
+---------------------------
+Version 4.42beta 2003-09-19
+---------------------------
+All:
+  If adding an EPS preview and cancel is pressed at the "Save As" 
+  dialog, clean up correctly to avoid the "file is locked" error.
+
+  Ghostscript 8.11 can now be broken out of a tight interpreter
+  loop by using the poll function.  This required some changes
+  to GSview to ignore the error return when telling ghostscript
+  to abort.
+
+  Add the ghostscript Resource subdirectory to the ghostscript
+  library path.
+
+  Allow ghostscript to read files in the same directory as the
+  file being opened, when the filename uses an absolute path.
+
+Win:
+  Find pstoedit using the registry on Windows.
+
+  Use custom profile functions for reading printer details, 
+  to allow embedded [] in a printer name for PostScript printer.
+
+  Set the correct margins in gsprint, to allow EPSFitPage and
+  PDFFitPage to work properly.
+
+X11:
+  Remove CR characters from Show Messages window.
+  Add Ctrl+Q shortcut for File | Exit.
+
+  Use the more portable putenv instead of setenv.
+
+---------------------------
+Version 4.41beta 2003-08-06
+---------------------------
+All:
+  When printing, apply the user GS options before setting
+  the page offset.  This prevents a fault caused by interaction
+  with the security code in GS when the page offset was non-zero.
+
+  When adding an EPS preview, initialise the output filename
+  to empty before prompting the user.  Without this initialisation,
+  NT4 failed to display the open file dialog.
+
+Win:
+  Find "GPL Ghostscript" as well as "GNU Ghostscript".
+
+  When saving the registration number fails due to to
+  insufficient privileges, tell the user that Administrator
+  privileges are required.
+
+X11:
+  If the LANG environment variable is not set, don't crash.
+
+  Allow progressive updates to be disabled by editing the 
+  INI file value ProgressiveUpdate.  Disabled is 0, enabled for 
+  local displays is 1 and enabled for all displays is 2.
+  The default is 2 (enbabled).
+  
+  Modify image message queue handling to improve image updates
+  on slow displays.  Ignore SYNC if followed by another SYNC
+  or a PAGE in the queue.  Merge multiples update tiles together.  
+  Ignore update tiles if followed by SYNC or PAGE in the queue.
+  Allow SYNC and PAGE to lengthen the tile update time.
+
 ----------------------
 Version 4.4 2003-04-04
 ----------------------

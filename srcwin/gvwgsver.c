@@ -38,6 +38,7 @@
  */
 #define GS_PRODUCT_AFPL "AFPL Ghostscript"
 #define GS_PRODUCT_ALADDIN "Aladdin Ghostscript"
+#define GS_PRODUCT_GPL "GPL Ghostscript"
 #define GS_PRODUCT_GNU "GNU Ghostscript"
 
 /* Get Ghostscript versions for given product.
@@ -107,6 +108,7 @@ BOOL get_gs_versions(int *pver)
 
     n = get_gs_versions_product(pver, 0, GS_PRODUCT_AFPL);
     n = get_gs_versions_product(pver, n, GS_PRODUCT_ALADDIN);
+    n = get_gs_versions_product(pver, n, GS_PRODUCT_GPL);
     n = get_gs_versions_product(pver, n, GS_PRODUCT_GNU);
 
     if (n >= pver[0]) {
@@ -209,6 +211,8 @@ BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len)
     if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_AFPL))
 	return TRUE;
     if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_ALADDIN))
+	return TRUE;
+    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_GPL))
 	return TRUE;
     if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_GNU))
 	return TRUE;

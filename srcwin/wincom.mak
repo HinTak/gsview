@@ -497,6 +497,7 @@ distclean:
 	-$(RM) $(BD)*.pdb
 	-$(RM) $(BD)*.ilk
 	-$(RM) $(BD)*.exp
+	-$(RM) $(BD)*.htm
 
 veryclean: clean distclean
 	-$(RM) $(BD)*.exe
@@ -557,7 +558,7 @@ srczip:
 	echo $(DISTDIR)/pstotext/rot90.ps >> $(OD)src.txt
 	echo $(DISTDIR)/pstotext/vms.h >> $(OD)src.txt
 	cd ..
-	zip -9 -r -@ $(DISTDIR)$(D)gsv$(GSVIEW_VERSION)src.zip < $(DISTDIR)$(D)$(OD)src.txt
+	zip -X -9 -r -@ $(DISTDIR)$(D)gsv$(GSVIEW_VERSION)src.zip < $(DISTDIR)$(D)$(OD)src.txt
 	cd $(DISTDIR)
 	$(RM) $(OD)src.txt
 
@@ -584,10 +585,11 @@ srctar:
 	echo $(DISTDIR)/se >> $(OD)src_tar.txt
 	echo $(DISTDIR)/sk >> $(OD)src_tar.txt
 	cd ..
-	zip -r -ll -@ $(DISTDIR)$(D)gsview-$(GSVIEW_DOT_VERSION)_src.zip < $(DISTDIR)$(D)$(OD)src_tar.txt
-	zip $(DISTDIR)$(D)gsview-$(GSVIEW_DOT_VERSION)_src.zip $(DISTDIR)$(D)binary$(D)gsview48.png
+	zip -X -r -ll -@ $(DISTDIR)$(D)gsview-$(GSVIEW_DOT_VERSION)_src.zip < $(DISTDIR)$(D)$(OD)src_tar.txt
+	zip -X $(DISTDIR)$(D)gsview-$(GSVIEW_DOT_VERSION)_src.zip $(DISTDIR)$(D)binary$(D)gsview48.png
 	cd $(DISTDIR)
 	echo Copy gsview-$(GSVIEW_DOT_VERSION)_src.zip to Unix, unzip then tar and gzip.
+	-$(RM) $(OD)src_tar.txt
 
 viewonlydist:
 	-mkdir dist
@@ -632,7 +634,7 @@ viewonlydist:
 	cd dist
 	-$(RM) ..$(D)gsv$(GSVIEW_VERSION)w32.zip
 	-$(RM) ..$(D)gsv$(GSVIEW_VERSION)w32.exe
-	zip -9 -@ ..$(D)gsv$(GSVIEW_VERSION)w32.zip < ..$(D)$(OD)files32.txt
+	zip -X -9 -@ ..$(D)gsv$(GSVIEW_VERSION)w32.zip < ..$(D)$(OD)files32.txt
 	cd ..
 	cd dist
 	echo -win32 -setup > setup.rsp
@@ -739,7 +741,7 @@ $(OD)files32.txt: $(SRCWIN)distlist.txt $(SRCWIN)win.mak makefile
 gsv$(GSVIEW_VERSION)w32.zip: distcopy $(OD)files32.txt
 	-$(RM) gsv$(GSVIEW_VERSION)w32.zip 
 	cd dist
-	zip -9 -@ ..$(D)gsv$(GSVIEW_VERSION)w32.zip < ..$(D)$(OD)files32.txt
+	zip -X -9 -@ ..$(D)gsv$(GSVIEW_VERSION)w32.zip < ..$(D)$(OD)files32.txt
 	cd ..
 
 

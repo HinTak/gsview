@@ -105,6 +105,17 @@ struct sound_s sound[NUMSOUND] = {
 USERMEDIA usermedia[IDM_USERSIZE13 - IDM_USERSIZE1 + 1];
 FILE *pstotextOutfile;
 
+typedef struct MESSAGE_s {
+    int message;
+    int param;
+} MESSAGE;
+
+#define MESSAGE_MAX 32
+const int message_max = MESSAGE_MAX;
+int message_count = 0;
+MESSAGE messages[MESSAGE_MAX];
+int xdisplay_local;
+
 char workdir[MAXSTR];
 BOOL in_img_window = FALSE;
 
@@ -124,6 +135,8 @@ void selection_add(void);
 void selection_release(void);
 void *gs_thread(void *arg);
 void do_img_message(int message, int param);
+int find_img_message(int message);
+int process_img_message(void);
 int read_img_message(void);
 void read_message_pipe_fn(gpointer data, gint fd, GdkInputCondition condition);
 void set_menu_sensitive(void);
@@ -197,15 +210,37 @@ do_img_message(int message, int param)
 	}
     }
     else if (message == WM_GSSYNC) {
+	int td;
+	struct timeval tv1;
+	struct timeval tv2;
 	if (!(GTK_WIDGET_FLAGS(img) & GTK_VISIBLE))
 	    gtk_widget_show_all(img);
+	gettimeofday(&tv1, NULL);
 	gtk_widget_draw(img, NULL);
+	gettimeofday(&tv2, NULL);
+	td = (tv2.tv_sec - tv1.tv_sec) * 1000 
+	    + (tv2.tv_usec - tv1.tv_usec) / 1000;
+	image_lock(&image);
+	if (image.open && (td * 2 > image.tile_interval))
+	    image.tile_interval += td + 100;
+	image_unlock(&image);
     }
     else if (message == WM_GSPAGE) {
+	int td;
+	struct timeval tv1;
+	struct timeval tv2;
 	gsdll.state = GS_PAGE;
 	if (display.show_find)
 	    scroll_to_find();
+	gettimeofday(&tv1, NULL);
 	gtk_widget_draw(img, NULL);
+	gettimeofday(&tv2, NULL);
+	td = (tv2.tv_sec - tv1.tv_sec) * 1000 
+	    + (tv2.tv_usec - tv1.tv_usec) / 1000;
+	image_lock(&image);
+	if (image.open && (td * 2 > image.tile_interval))
+		image.tile_interval += td + 100;
+	image_unlock(&image);
 	info_wait(IDS_NOWAIT);
 	selection_release();
     }
@@ -265,7 +300,7 @@ do_img_message(int message, int param)
     }
     else if (message == WM_GSTILE) {
 	GdkRectangle area;
-        image_lock(&image);
+	image_lock(&image);
 	if (image.open) {
 	    int td;
 	    struct timeval tv1;
@@ -279,14 +314,21 @@ do_img_message(int message, int param)
 	    area.width = (tx2 - tx1 + 1) * image.tile_width;
 	    area.height = (ty2 - ty1 + 1) * image.tile_height;
 
-	    image_unlock(&image);
-	    gettimeofday(&tv1, NULL);
-	    gtk_widget_draw(img, &area);
-	    gettimeofday(&tv2, NULL);
-	    image_lock(&image);
+	    if ((option.update == 2) || 
+		((option.update == 1) && (xdisplay_local))) {
+		image_unlock(&image);
+		gettimeofday(&tv1, NULL);
+		gtk_widget_draw(img, &area);
+		gettimeofday(&tv2, NULL);
+		image_lock(&image);
+		td = (tv2.tv_sec - tv1.tv_sec) * 1000 
+		    + (tv2.tv_usec - tv1.tv_usec) / 1000;
+	    }
+	    else {
+		/* make sure we don't called too often */
+		td = 2000;
+	    }
 
-	    td = (tv2.tv_sec - tv1.tv_sec) * 1000 
-		+ (tv2.tv_usec - tv1.tv_usec) / 1000;
 	    if (image.open && (td * 5 > image.tile_interval))
 		image.tile_interval += td + 100;
 	}
@@ -294,6 +336,84 @@ do_img_message(int message, int param)
     }
     else
 	gs_addmessf("Unknown post_img_message %d\n", message);
+}
+
+/* return index of the first message in the queue which contains the 
+ * message id, or 0 if none in queue.
+ */
+int 
+find_img_message(int message)
+{
+    int i;
+    int idx = 0;
+    for (i=1; i<message_count-1; i++) {
+	if (messages[i].message == message) {
+	    idx = i;
+	    break;
+	}
+    }
+    return idx;
+}
+
+/* process messages in the queue */
+int
+process_img_message(void)
+{
+    int message, param;
+    int idx;
+    BOOL ignore;
+    if (message_count) {
+	message = messages[0].message;
+	param = messages[0].param;
+	ignore = FALSE;
+	/* Avoid doing potentially expensive drawing operations
+	 * if there is another one in the queue.
+	 */
+	if (message == WM_GSSYNC) {
+	    if (find_img_message(WM_GSSYNC) || find_img_message(WM_GSPAGE))
+		ignore = TRUE;
+	}
+	else if (message == WM_GSPAGE) {
+	    if (find_img_message(WM_GSPAGE))
+		ignore = TRUE;
+	}
+	else if (message == WM_GSTILE) {
+	    if (find_img_message(WM_GSSYNC) || find_img_message(WM_GSPAGE))
+		ignore = TRUE;
+	    else if ((idx = find_img_message(WM_GSTILE)) != 0) {
+		/* merge tile updates */
+		int nparam = messages[idx].param;
+		int tx1 = (param >> 24) & 0xff;
+		int ty1 = (param >> 16) & 0xff;
+		int tx2 = (param >> 8) & 0xff;
+		int ty2 = (param) & 0xff;
+		int nx1 = (nparam >> 24) & 0xff;
+		int ny1 = (nparam >> 16) & 0xff;
+		int nx2 = (nparam >> 8) & 0xff;
+		int ny2 = (nparam) & 0xff;
+		nx1 = min(tx1, nx1);
+		ny1 = min(ty1, ny1);
+		nx2 = max(tx2, nx2);
+		ny2 = max(ty2, ny2);
+		nparam = (nx1<<24) + (ny1<<16) + (nx2<<8) + ny2;
+		messages[idx].param = nparam;
+		ignore = TRUE;
+	    }
+	}
+	if (!ignore)
+            do_img_message(message, param);
+	/* BEWARE: the previous call can change message count if it lets
+	 * the message loop run
+	 */ 
+	if (message_count > 0)
+	    --message_count;
+	else
+	    message_count = 0;
+	if (message_count > 0) {
+	    memmove(messages, messages+1, message_count * sizeof(messages[0]));
+	}
+    }
+    return 0;
 }
 
 /* read a message from the GS thread to us the GUI thread */
@@ -315,7 +435,11 @@ read_img_message(void)
 	    return -1;
 	}
     }
-    do_img_message(message, param);
+    if (message_count < message_max) {
+	messages[message_count].message = message;
+	messages[message_count].param = param;
+	message_count++;
+    }
     return 0;
 }
 
@@ -338,8 +462,12 @@ void read_message_pipe_fn(gpointer data, gint fd, GdkInputCondition condition)
 	close_img_message();
     }
     else if (condition & GDK_INPUT_READ) {
-	while (read_img_message()==0)
-	    /* keep reading */;
+	while (read_img_message()==0) {
+	    if (message_count >= message_max)
+		process_img_message();
+	}
+	while (message_count)
+	    process_img_message();
     }
     else {
 	if (debug & DEBUG_GENERAL)
@@ -1856,12 +1984,17 @@ int main( int argc, char *argv[] )
      */
     char lang[MAXSTR];
     char *p;
+    gchar *xdisplay;
     memset(lang, 0, sizeof(lang));
-    strncpy(lang, getenv("LANG"), sizeof(lang)-1);
-    p = strchr(lang, '.');
+    strncpy(lang, "LANG=", 5);
+    p = getenv("LANG");
+    if (p) {
+	strncpy(lang+5, p, sizeof(lang)-6);
+	p = strchr(lang, '.');
+    }
     if (p && ((strcmp(p, ".UTF-8") == 0) || (strcmp(p, ".utf8") == 0))) {
 	*p = '\0';	/* remove UTF-8 */
-	setenv("LANG", lang, 1);
+ 	putenv(lang);
     }
     pszLocale = gtk_set_locale();
     setlocale(LC_NUMERIC, "C");
@@ -1869,6 +2002,8 @@ int main( int argc, char *argv[] )
     gdk_rgb_init();
     gtk_widget_set_default_colormap(gdk_rgb_get_cmap());
     gtk_widget_set_default_visual(gdk_rgb_get_visual());
+    xdisplay = gdk_get_display();
+    xdisplay_local = (xdisplay[0] == ':');
 
     gs_getcwd(workdir, sizeof(workdir));
 

@@ -1348,44 +1348,45 @@ HWND gs_showmess_modeless(void)
 }
 
 /* Add string for Ghostscript message window */
+/* Unix version removes all "\r" */
 void
 gs_addmess_count(const char *str, int count)
 {
 const char *s;
 char *p;
-int i, lfcount;
+int i, cr_count;
     /* if debugging, write to stdout */
     if (debug & DEBUG_LOG)
         fwrite(str, 1, count ,stdout);
 
-    /* we need to add \r after each \n, so count the \n's */
-    lfcount = 0;
+    /* Count the \r that we need to remove */
+    cr_count = 0;
     s = str;
     for (i=0; i<count; i++) {
-	if (*s == '\n')
-	    lfcount++;
+	if (*s == '\r')
+	    cr_count++;
 	s++;
     }
-    if (count + lfcount >= TWSCROLL)
+    if (count - cr_count >= TWSCROLL)
 	return;		/* too large */
-    if (count + lfcount + twend >= TWLENGTH-1) {
+    if (count - cr_count + twend >= TWLENGTH-1) {
 	/* scroll buffer */
 	twend -= TWSCROLL;
 	memmove(twbuf, twbuf+TWSCROLL, twend);
     }
     p = twbuf+twend;
     for (i=0; i<count; i++) {
-	if (*str == '\n') {
-	    *p++ = '\r';
-	}
 	if (*str == '\0') {
 	    *p++ = ' ';	/* ignore null characters */
 	    str++;
 	}
+	else if (*str == '\r') {
+	    /* ignore \r */
+	}
 	else
 	    *p++ = *str++;
     }
-    twend += (count + lfcount);
+    twend += (count - cr_count);
     *(twbuf+twend) = '\0';
 }
 

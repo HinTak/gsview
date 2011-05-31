@@ -445,6 +445,15 @@ const char *p;
 	    }
 	    filename[i] = '\0';
 	    code = gs_printf("  (%s)\n", filename);
+	    while (--i) {
+		if ((filename[i] == '\\') || (filename[i] == '/')) {
+		    filename[++i] = '*';
+		    filename[++i] = '\0';
+		    break;
+		}
+	    }
+	    if (i)
+	        code = gs_printf("  (%s)\n", filename);
 	}
 	if (!code && psfile.tname[0]) {
 	    for (p=psfile.tname, i=0; *p && i < sizeof(filename)-2; p++) {
@@ -1089,7 +1098,8 @@ int pcdone;
 	    && ((len = get_gs_input(buf, sizeof(buf)))!=0)) {
 	    code = gs_execute(buf, len);
 	    if (code) {
-		dfclose();
+		if (psfile.file)
+		    dfclose();
 		if (pending.abort) {
 		    gs_addmess("\n--- Aborted ---\n");
 		    return 0;
@@ -1325,6 +1335,7 @@ int exit_code;
 
     /* gsdll.state = UNLOADED; */
     gsdll.state = GS_BUSY;		/* skip IDLE state */
+    pending.abort = FALSE;
 
     post_img_message(WM_GSWAIT, IDS_WAITGSOPEN);
 
@@ -1374,7 +1385,10 @@ int exit_code;
 /*
 	    delayed_message_box(IDS_PROCESS_INIT_FAIL, 0);
 */
-	    post_img_message(WM_GSSHOWMESS, 0);
+	    if ((pending.abort == TRUE) && (code == e_interrupt))
+	        gs_addmess("Ignoring error on abort\n");
+	    else
+		post_img_message(WM_GSSHOWMESS, 0);
 	    pending.unload = TRUE;
 	    break;
 	}
@@ -1407,6 +1421,7 @@ int exit_code;
 	    if (execute_code >= 0)
 		gsdll.run_string_end(gsdll.minst, 0, &exit_code);
 	}
+	pending.abort = FALSE;	/* don't interrupt cleanup */
 	if (gsdll.exit != NULL) {
 	    char buf[256];
 	    code = gsdll.exit(gsdll.minst);

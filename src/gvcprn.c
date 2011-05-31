@@ -1080,20 +1080,22 @@ int method = option.print_method;
 	fputc('\n',optfile);
     }
 
+    if ((proplist = get_properties(device)) != (struct prop_item_s *)NULL) {
+	/* output current property selections */
+	for (i=0; proplist[i].name[0]; i++) {
+	    if (strcmp(proplist[i].value, not_defined) != 0)
+		fprintf(optfile,"-%s=%s\n", proplist[i].name, proplist[i].value);
+	}
+	free((char *)proplist);
+    }
+    p = option.gsother;
+    while ((p = gs_argnext(p, buf, TRUE)) != NULL)
+        fprintf(optfile, "%s\n", buf);
+
+    /* Delay all things that call setpagedevice until the end */
     strcpy(section, (method == PRINT_GDI) ? "GDI" : device);
     strcat(section, " Options");
     if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
-        /* PageOffset */
-	profile_read_string(prf, section, "Xoffset", "0", buf, sizeof(buf)-2);
-	if (sscanf(buf, "%f", &xoffset) != 1)
-	    xoffset = 0;
-	profile_read_string(prf, section, "Yoffset", "0", buf, sizeof(buf)-2);
-	if (sscanf(buf, "%f", &yoffset) != 1)
-	    yoffset = 0;
-	if ((xoffset != 0) || (yoffset != 0))
-	    fprintf(optfile, "-c \042<< /PageOffset [%g %g] >> setpagedevice\042\n-f\n", 
-	    (double)xoffset, (double)yoffset);
-
 	/* Options */
 	profile_read_string(prf, section, "Options", "", buf, sizeof(buf)-2);
 	if (strlen(buf) > 0) {
@@ -1110,21 +1112,22 @@ int method = option.print_method;
 	    else
 		fprintf(optfile, "%s\n", buf);
  	}
+
+        /* PageOffset */
+	profile_read_string(prf, section, "Xoffset", "0", buf, sizeof(buf)-2);
+	if (sscanf(buf, "%f", &xoffset) != 1)
+	    xoffset = 0;
+	profile_read_string(prf, section, "Yoffset", "0", buf, sizeof(buf)-2);
+	if (sscanf(buf, "%f", &yoffset) != 1)
+	    yoffset = 0;
+	if ((xoffset != 0) || (yoffset != 0))
+	    fprintf(optfile, "-c \042<< /PageOffset [%g %g] >> setpagedevice\042\n-f\n", 
+	    (double)xoffset, (double)yoffset);
+
 	profile_close(prf);
     }
 
 
-    if ((proplist = get_properties(device)) != (struct prop_item_s *)NULL) {
-	/* output current property selections */
-	for (i=0; proplist[i].name[0]; i++) {
-	    if (strcmp(proplist[i].value, not_defined) != 0)
-		fprintf(optfile,"-%s=%s\n", proplist[i].name, proplist[i].value);
-	}
-	free((char *)proplist);
-    }
-    p = option.gsother;
-    while ((p = gs_argnext(p, buf, TRUE)) != NULL)
-        fprintf(optfile, "%s\n", buf);
 
     if (   ((method==PRINT_GS) && option.print_fixed_media)
         || ((method==PRINT_GDI) && option.print_gdi_fixed_media)

@@ -413,6 +413,11 @@ PROFILE *prf;
 	}
     }
 
+    profile_read_string(prf, section, "ProgressiveUpdate", "", profile, sizeof(profile));
+    if (sscanf(profile,"%d", &i) == 1) {
+	option.update = i;
+    }
+
     profile_read_string(prf, section, "PrinterDevice", "", profile, sizeof(profile));
     if (strlen(profile)!=0)
 	strncpy(option.printer_device, profile, sizeof(option.printer_device)-1);
@@ -591,6 +596,8 @@ char secver[MAXSTR];
 	}
 	sprintf(profile, "%d", (option.drawmethod - IDM_DRAWMENU));
 	profile_write_string(prf, section, "DrawMethod", profile);
+	sprintf(profile, "%d", option.update);
+	profile_write_string(prf, section, "ProgressiveUpdate", profile);
 
 	profile_write_string(prf, section, "PrinterPort", option.printer_port);
 	profile_write_string(prf, section, "PrinterQueue", 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -50,8 +50,8 @@ PROCESS_INFORMATION piProcInfo;
 #endif
 BOOL global_debug;
 
-#define COPYRIGHT TEXT("Copyright (C) 2001, Ghostgum Software Pty Ltd.  All Rights Reserved.\n")
-#define VERSION TEXT("2000-06-02 gsprint 1.5\n")
+#define COPYRIGHT TEXT("Copyright (C) 2003, Ghostgum Software Pty Ltd.  All Rights Reserved.\n")
+#define VERSION TEXT("2003-09-03 gsprint 1.6\n")
 
 #define MAXSTR 256
 
@@ -927,6 +927,21 @@ int main(int argc, char *argv[])
     int height = GetDeviceCaps(hdc, PHYSICALHEIGHT);
     int xdpi = GetDeviceCaps(hdc, LOGPIXELSX);
     int ydpi = GetDeviceCaps(hdc, LOGPIXELSY);
+    int xoff = GetDeviceCaps(hdc, PHYSICALOFFSETX);
+    int yoff = GetDeviceCaps(hdc, PHYSICALOFFSETY);
+    int hres = GetDeviceCaps(hdc, HORZRES);
+    int vres = GetDeviceCaps(hdc, VERTRES);
+
+    if (opt.debug) {
+	fprintf(stdout, "PHYSICALWIDTH=%d\n", width);
+	fprintf(stdout, "PHYSICALHEIGHT=%d\n", height);
+	fprintf(stdout, "PHYSICALOFFSETX=%d\n", xoff);
+	fprintf(stdout, "PHYSICALOFFSETY=%d\n", yoff);
+	fprintf(stdout, "HORZRES=%d\n", hres);
+	fprintf(stdout, "VERTRES=%d\n", vres);
+	fprintf(stdout, "LOGPIXELSX=%d\n", xdpi);
+	fprintf(stdout, "LOGPIXELSY=%d\n", ydpi);
+    }
 
     // copy all the command line arguments to a buffer
     char command[4096];
@@ -947,6 +962,21 @@ int main(int argc, char *argv[])
     sprintf(command + strlen(command), " -g%dx%d -r%dx%d",
 	width, height, xdpi, ydpi);
     sprintf(command + strlen(command), " -sOutputFile=%%handle%%%08x", hPipeWr);
+
+   { /* Set the margins so that PDFFitPAge and EPSFitPage work better.
+      * This may cause problems here.  It would be better to place it
+      * just before the filename, not before other the ghostscript
+      * options.
+      */
+ 	char margin[256];
+   	sprintf(margin, 
+	    " -c \042<< /.HWMargins [%lg %lg %lg %lg] >> setpagedevice\042 -f",
+	    (double)xoff / xdpi * 72.0,  			/* left */
+	    (double)yoff / ydpi * 72.0,				/* top */
+	    (double)(width - xoff - hres) / xdpi * 72.0,	/* right */
+	    (double)(height - yoff - vres) / ydpi * 72.0);	/* bottom */
+	strcat(command, margin);
+    }
 
     strcat(command, opt.options);
 

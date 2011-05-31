@@ -74,7 +74,7 @@ MENU_ENTRY menu_en[] = {
   { "/File/3LASTFILE",     	NULL, 	GS_CMD,	IDM_LASTFILE3, NULL },
   { "/File/4LASTFILE",     	NULL, 	GS_CMD,	IDM_LASTFILE4, NULL },
   { "/File/sep5",     		NULL,   NULL, 		0, "<Separator>" },
-  { "/File/E_xit",     		NULL, 	GS_CMD,	IDM_EXIT, NULL },
+  { "/File/E_xit",     		"<control>Q", 	GS_CMD,	IDM_EXIT, NULL },
 
   { "/_Edit",      		NULL,   NULL, 	IDM_EDITMENU, "<Branch>" },
 /*

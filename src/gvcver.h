@@ -35,7 +35,7 @@
 /*
 #define BETA
 #define BETA_YEAR    2003
-#define BETA_MONTH   04
+#define BETA_MONTH   11
 #define BETA_DAY     30
 */
 
@@ -62,7 +62,7 @@
 #define GS_PRODUCT  "AFPL Ghostscript"
 #define GS_REVISION_MIN   704
 #define GS_REVISION	  704
-#define GS_REVISION_MAX   899
+#define GS_REVISION_MAX   919
 
 #ifdef _Windows
 #ifdef DECALPHA

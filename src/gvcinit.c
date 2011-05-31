@@ -311,6 +311,7 @@ init_options(void)
     option.img_size.y = CW_USEDEFAULT;
     option.img_max = FALSE;
     option.drawmethod = IDM_DRAWDEF;
+    option.update = 2;	/* Always do progressive update */
     option.unit = IDM_UNITPT;
     option.unitfine = 0;
     option.pstotext = IDM_PSTOTEXTNORM - IDM_PSTOTEXTMENU - 1;
@@ -521,6 +522,12 @@ char temp[MAXSTR];
     if (option.gsversion >= 593)
         strncat(buf, "\\lib", MAXSTR-2-strlen(buf));
     strcat(buf, ";");
+
+    if (option.gsversion >= 810) {
+        strncat(buf, gspath, MAXSTR-2-strlen(buf));
+        strncat(buf, "\\Resource", MAXSTR-2-strlen(buf));
+        strcat(buf, ";");
+    }
 
     strncat(buf, gspath, MAXSTR-1-strlen(buf));
     if (option.gsversion >= 593) {

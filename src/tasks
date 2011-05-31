@@ -95,7 +95,6 @@ dscparse: add dsc_ref, dsc_unref, %%Copyright, %%Version, %%Extensions.
 
 Unix "PS to EPS" fails if bounding box is not automatically calculated.
 
-Change epstool to use bbox device for auto bbox.
-
-Dialog for User defined media should use same units as Options | Units.
-
+gsprint uses full page rather than printable area.  Using -dPDFFitPage
+gives a result that is clipped at the margins.  It may be better to 
+set the margsins using setpagedevice.

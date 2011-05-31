@@ -58,6 +58,11 @@ PLINK=-lpthread -lrt
 #PFLAGS=-DMULTITHREAD
 #PLINK=-lpthread -lrt
 
+# Solaris 8
+#XINCLUDE=-I/usr/openwin/share/lib
+#PFLAGS=-DMULTITHREAD
+#PLINK=-lpthread -lposix4 -lrt
+
 # SGI Irix 6.2
 # without MULTITHREAD
 #XINCLUDE=-I/usr/freeware/include

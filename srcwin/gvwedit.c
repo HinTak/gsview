@@ -82,13 +82,37 @@ char dllname[MAXSTR];
     /* load pstoedit DLL */
     pstoeditModule = LoadLibraryA(dllname);
     if (pstoeditModule < (HINSTANCE)HINSTANCE_ERROR) {
-	gs_addmess("Can't load ");
-        gs_addmess(dllname);
-        gs_addmess("\n");
-	gs_addmess("pstoedit is not available\n");
-	gs_addmess("See help topic 'PStoEdit'\n");
-	pstoeditModule = NULL;
-	return FALSE;
+	/* If that failed, try using the registry to locate pstoedit */
+	LONG rc;
+	HKEY hkey;
+	DWORD cbData;
+	DWORD keytype;
+	TCHAR pstoedit_path[MAXSTR];
+	rc = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\wglunz\\pstoedit",
+		0, KEY_READ, &hkey);
+	if (rc == ERROR_SUCCESS) {
+	    cbData = sizeof(pstoedit_path)-1;
+	    keytype =  REG_SZ;
+	    rc = RegQueryValueEx(hkey, "InstallPath", 0, &keytype, 
+		    (LPBYTE)pstoedit_path, &cbData);
+	    RegCloseKey(hkey);
+	    if (rc == ERROR_SUCCESS) {
+		memset(dllname, 0, sizeof(dllname));
+		convert_widechar(dllname, pstoedit_path, sizeof(dllname)-14);
+		strncat(dllname, "\\pstoedit.dll", 14);
+		pstoeditModule = LoadLibraryA(dllname);
+	    }
+	}
+
+        if (pstoeditModule < (HINSTANCE)HINSTANCE_ERROR) {
+	    gs_addmess("Can't load ");
+	    gs_addmess(dllname);
+	    gs_addmess("\n");
+	    gs_addmess("pstoedit is not available\n");
+	    gs_addmess("See help topic 'PStoEdit'\n");
+	    pstoeditModule = NULL;
+	    return FALSE;
+ 	}
     }
 
     /* check version match */

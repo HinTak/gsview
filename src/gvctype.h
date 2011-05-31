@@ -168,6 +168,8 @@ typedef struct tagOPTIONS {
 	char	gsother[MAXSTR];
 	BOOL	configured;
 	int	drawmethod;	/* OS/2 only */
+	int	update;		/* ProgressiveUpdate, 0=default, */
+			        /*  1=local only, 2=never */
 	char	helpcmd[MAXSTR];
 	POINT	img_origin;
 	POINT	img_size;

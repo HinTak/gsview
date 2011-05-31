@@ -71,24 +71,29 @@ BOOL CALLBACK _export
 EditPropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
 static char device[MAXSTR];	/* contains printer device name */
+PROFILE *prf;
     switch (wmsg) {
 	case WM_INITDIALOG:
 	    /* initialise device name */
 	    strncpy(device, (LPSTR)lParam, sizeof(device)-1);	
-	    if (*editpropname) {
-		char section[MAXSTR];
-		char buf[MAXSTR];
-		if (*editpropname == 's')
-		    SendDlgItemMessage(hDlg, EDITPROP_STRING, BM_SETCHECK, 
-			    (WPARAM)1, 0L);
-		else
-		    SendDlgItemMessage(hDlg, EDITPROP_NUMBER, BM_SETCHECK, 
-			    (WPARAM)1, 0L);
-		SetDlgItemTextA(hDlg, EDITPROP_NAME, editpropname+1);
-		strncpy(section, device, sizeof(section)-1);
-		strncat(section, " values", sizeof(section)-strlen(section)-1);
-		GetPrivateProfileStringA(section, editpropname, "", buf, sizeof(buf)-2, szIniFile);
-		SetDlgItemTextA(hDlg, EDITPROP_VALUE, buf);
+	    if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+	      if (*editpropname) {
+		  char section[MAXSTR];
+		  char buf[MAXSTR];
+		  if (*editpropname == 's')
+		      SendDlgItemMessage(hDlg, EDITPROP_STRING, BM_SETCHECK, 
+			      (WPARAM)1, 0L);
+		  else
+		      SendDlgItemMessage(hDlg, EDITPROP_NUMBER, BM_SETCHECK, 
+			      (WPARAM)1, 0L);
+		  SetDlgItemTextA(hDlg, EDITPROP_NAME, editpropname+1);
+		  strncpy(section, device, sizeof(section)-1);
+		  strncat(section, " values", sizeof(section)-strlen(section)-1);
+		  profile_read_string(prf, section, editpropname, "", 
+			buf, sizeof(buf)-2);
+		  SetDlgItemTextA(hDlg, EDITPROP_VALUE, buf);
+	      }
+	      profile_close(prf);
 	    }
 	    else
 	        SendDlgItemMessage(hDlg, EDITPROP_NUMBER, BM_SETCHECK, (WPARAM)1, 0L);
@@ -110,8 +115,11 @@ static char device[MAXSTR];	/* contains printer device name */
 		if (strlen(name)>1) {
 		    strcpy(section, device);
 		    strcat(section, " values");
-		    WritePrivateProfileStringA(section, name, NULL, szIniFile);
-		    WritePrivateProfileStringA(device, name, NULL, szIniFile);
+		    if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+		      profile_write_string(prf, section, name, NULL);
+		      profile_write_string(prf, device, name, NULL);
+		      profile_close(prf);
+		    }
 		}
 		EndDialog(hDlg, TRUE);
 		}
@@ -137,9 +145,12 @@ static char device[MAXSTR];	/* contains printer device name */
 		if ((strlen(name)>1) && strlen(value)) {
 		    strcpy(section, device);
 		    strcat(section, " values");
-		    WritePrivateProfileStringA(section, name, value, szIniFile);
-		    strtok(value, ",");
-		    WritePrivateProfileStringA(device, name, value, szIniFile);
+		    if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+			profile_write_string(prf, section, name, value);
+			strtok(value, ",");
+			profile_write_string(prf, device, name, value);
+			profile_close(prf);
+		    }
 		}
 		EndDialog(hDlg, TRUE);
 		}
@@ -168,6 +179,7 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
     static char device[MAXSTR];	/* contains printer device name */
     static struct prop_item_s* propitem;
     char section[MAXSTR];
+    PROFILE *prf;
 
     switch (wmsg) {
 	case WM_INITDIALOG:
@@ -187,12 +199,17 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	    EnableWindow(GetDlgItem(hDlg, PROP_VALUE), (iprop != 0));
 	    EnableWindow(GetDlgItem(hDlg, PROP_EDIT), (iprop != 0));
 
-	    strcpy(section, device);
-	    strcat(section, " Options");
-	    GetPrivateProfileStringA(section, "Xoffset", "0", buf, sizeof(buf)-2, szIniFile);
-	    SetDlgItemTextA(hDlg, PROP_XOFFSET, buf);
-	    GetPrivateProfileStringA(section, "Yoffset", "0", buf, sizeof(buf)-2, szIniFile);
-	    SetDlgItemTextA(hDlg, PROP_YOFFSET, buf);
+	    if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+		strcpy(section, device);
+		strcat(section, " Options");
+		profile_read_string(prf, section, "Xoffset", "0", 
+		    buf, sizeof(buf)-2);
+		SetDlgItemTextA(hDlg, PROP_XOFFSET, buf);
+		profile_read_string(prf, section, "Yoffset", "0", 
+		    buf, sizeof(buf)-2);
+		SetDlgItemTextA(hDlg, PROP_YOFFSET, buf);
+		profile_close(prf);
+	    }
 
 	    SetFocus(GetDlgItem(hDlg, IDOK));
 	    return TRUE;
@@ -218,7 +235,11 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			(LPARAM)((LPSTR)notdef));
 		    strcpy(section, device);
 		    strcat(section, " values");
-		    GetPrivateProfileStringA(section, propitem[iprop].name, "", buf, sizeof(buf)-2, szIniFile);
+		    if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+		      profile_read_string(prf, section, propitem[iprop].name, 
+			"", buf, sizeof(buf)-2);
+		      profile_close(prf);
+		    }
 		    buf[strlen(buf)+1] = '\0';	/* put double NULL at end */
 		    p = buf;
 		    if (*p != '\0') {
@@ -305,17 +326,18 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    nHelpTopic = IDS_TOPICPROP;
 		    return FALSE;
 		case IDOK:
-		    for (iprop=0; propitem[iprop].name[0]; iprop++) {
-			WritePrivateProfileStringA(device, 
-			    propitem[iprop].name, propitem[iprop].value, 
-			    szIniFile);
+		    if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+			for (iprop=0; propitem[iprop].name[0]; iprop++) {
+			    profile_write_string(prf, device, 
+				propitem[iprop].name, propitem[iprop].value);
+		      }
+		      strcpy(section, device);
+		      strcat(section, " Options");
+		      GetDlgItemTextA(hDlg, PROP_XOFFSET, buf, sizeof(buf)-2);
+		      profile_write_string(prf, section, "Xoffset", buf);
+		      GetDlgItemTextA(hDlg, PROP_YOFFSET, buf, sizeof(buf)-2);
+		      profile_write_string(prf, section, "Yoffset", buf);
 		    }
-		    strcpy(section, device);
-		    strcat(section, " Options");
-		    GetDlgItemTextA(hDlg, PROP_XOFFSET, buf, sizeof(buf)-2);
-		    WritePrivateProfileStringA(section, "Xoffset", buf, szIniFile);
-		    GetDlgItemTextA(hDlg, PROP_YOFFSET, buf, sizeof(buf)-2);
-		    WritePrivateProfileStringA(section, "Yoffset", buf, szIniFile);
 		    free((char *)propitem);
 		    EndDialog(hDlg, TRUE);
 		    return TRUE;
@@ -559,27 +581,32 @@ AdvPSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    get_help();
 		    return FALSE;
 		case IDOK:
-		    {
+		    { 
 		    char buf[MAXSTR];
 		    char section[MAXSTR];
 		    int prectrld;
 		    int postctrld;
+		    PROFILE *prf;
 		    /* save settings */
-		    GetDlgItemTextA(GetParent(hDlg), cmb4, section, sizeof(section));
-		    prectrld = (int)SendDlgItemMessage(hDlg, ADVPS_PRECTRLD, 
-			BM_GETCHECK, 0, 0);
-		    WritePrivateProfileStringA(section, "PreCtrlD", 
-			prectrld ? "1" : "0", szIniFile);
-		    postctrld = (int)SendDlgItemMessage(hDlg, ADVPS_POSTCTRLD, 
-			BM_GETCHECK, 0, 0);
-		    WritePrivateProfileStringA(section, "PostCtrlD", 
-			postctrld ? "1" : "0", szIniFile);
-		    GetDlgItemTextA(hDlg, ADVPS_PROLOG, buf, sizeof(buf)-1);
-		    WritePrivateProfileStringA(section, "Prolog", 
-			buf, szIniFile);
-		    GetDlgItemTextA(hDlg, ADVPS_EPILOG, buf, sizeof(buf)-1);
-		    WritePrivateProfileStringA(section, "Epilog", 
-			buf, szIniFile);
+		    if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+		      GetDlgItemTextA(GetParent(hDlg), cmb4, 
+			section, sizeof(section));
+		      prectrld = (int)SendDlgItemMessage(hDlg, ADVPS_PRECTRLD, 
+			  BM_GETCHECK, 0, 0);
+		      profile_write_string(prf, section, "PreCtrlD", 
+			  prectrld ? "1" : "0");
+		      postctrld = (int)SendDlgItemMessage(hDlg, ADVPS_POSTCTRLD, 
+			  BM_GETCHECK, 0, 0);
+		      profile_write_string(prf, section, "PostCtrlD", 
+			  postctrld ? "1" : "0");
+		      GetDlgItemTextA(hDlg, ADVPS_PROLOG, buf, sizeof(buf)-1);
+		      profile_write_string(prf, section, "Prolog", buf);
+		      GetDlgItemTextA(hDlg, ADVPS_EPILOG, buf, sizeof(buf)-1);
+		      profile_write_string(prf, section, "Epilog", buf);
+		      profile_close(prf);
+		    }
+
+
 		    EndDialog(hDlg, TRUE);
 		    }
 		    return TRUE;
@@ -1348,6 +1375,7 @@ NewDeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
     char entry[MAXSTR];
     struct prop_item_s *proplist;
     static BOOL bConvert;  /* TRUE if convert, FALSE if printing */
+    PROFILE *prf;
 
     switch (wmsg) {
       case WM_INITDIALOG:
@@ -1439,65 +1467,55 @@ NewDeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		if (idevice == CB_ERR)
 		    return FALSE;
 
-		SendDlgItemMessageA(hDlg, DEVICE_NAME, CB_GETLBTEXT, 
-		    idevice, (LPARAM)(LPSTR)entry);
-		if ( (proplist = get_properties(entry)) != 
-		    (struct prop_item_s *)NULL ) {
-		    free((char *)proplist);
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), TRUE);
-		}
-		else
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), FALSE);
+	        if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+		    char section[MAXSTR];
+		    SendDlgItemMessageA(hDlg, DEVICE_NAME, CB_GETLBTEXT, 
+			idevice, (LPARAM)(LPSTR)entry);
+		    if ( (proplist = get_properties(entry)) != 
+			(struct prop_item_s *)NULL ) {
+			free((char *)proplist);
+			EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), TRUE);
+		    }
+		    else
+			EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), FALSE);
+		    /* now look up entry in gsview.ini */
+		    /* and update DEVICE_RES list box */
+		    profile_read_string(prf, 
+			bConvert ? CONVERTSECTION : DEVSECTION,
+			entry, "", buf, sizeof(buf)-2);
+		    buf[strlen(buf)+1] = '\0';	/* double NULL at end */
+		    SendDlgItemMessage(hDlg, DEVICE_RES, CB_RESETCONTENT, 0, 0L);
+		    p = buf;
+		    if (*p == '\0') {
+			/* no resolutions can be set */
+			EnableWindow(GetDlgItem(hDlg, DEVICE_RES), FALSE);
+			EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), FALSE);
+		    }
+		    else {
+		      EnableWindow(GetDlgItem(hDlg, DEVICE_RES), TRUE);
+		      EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), TRUE);
+		      while (*p!='\0') {
+			res = p;
+			while ((*p!='\0') && (*p!=','))
+			    p++;
+			*p++ = '\0';
+			SendDlgItemMessageA(hDlg, DEVICE_RES, CB_ADDSTRING, 0, 
+			    (LPARAM)((LPSTR)res));
+		      }
+		    }
+		    SendDlgItemMessage(hDlg, DEVICE_RES, CB_SETCURSEL, 0, 0L);
+		    if (SendDlgItemMessageA(hDlg, DEVICE_RES, CB_GETLBTEXT, 
+			    0, (LPARAM)(LPSTR)buf) != CB_ERR)
+			SetDlgItemTextA(hDlg, DEVICE_RES, buf);
 
-		/* now look up entry in gsview.ini */
-		/* and update DEVICE_RES list box */
-		GetPrivateProfileStringA(bConvert ? CONVERTSECTION : DEVSECTION,
-			entry, "", buf, sizeof(buf)-2, szIniFile);
-		buf[strlen(buf)+1] = '\0';	/* double NULL at end */
-		SendDlgItemMessage(hDlg, DEVICE_RES, CB_RESETCONTENT, 0, 0L);
-		p = buf;
-		if (*p == '\0') {
-		    /* no resolutions can be set */
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_RES), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), FALSE);
+		    /* update printer options */
+		    strcpy(section, entry);
+		    strcat(section, " Options");
+		    profile_read_string(prf, section, "Options", "", 
+			    buf, sizeof(buf)-2);
+		    SetDlgItemTextA(hDlg, DEVICE_OPTIONS, buf);
 		}
-		else {
-		  EnableWindow(GetDlgItem(hDlg, DEVICE_RES), TRUE);
-		  EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), TRUE);
-		  while (*p!='\0') {
-		    res = p;
-		    while ((*p!='\0') && (*p!=','))
-			p++;
-		    *p++ = '\0';
-		    SendDlgItemMessageA(hDlg, DEVICE_RES, CB_ADDSTRING, 0, 
-			(LPARAM)((LPSTR)res));
-		  }
-		}
-		SendDlgItemMessage(hDlg, DEVICE_RES, CB_SETCURSEL, 0, 0L);
-		if (SendDlgItemMessageA(hDlg, DEVICE_RES, CB_GETLBTEXT, 
-			0, (LPARAM)(LPSTR)buf) != CB_ERR)
-		    SetDlgItemTextA(hDlg, DEVICE_RES, buf);
-
-		/* update printer options */
-		{ char section[MAXSTR];
-		strcpy(section, entry);
-		strcat(section, " Options");
-		GetPrivateProfileStringA(section, "Options", "", buf, 
-			sizeof(buf)-2, szIniFile);
-		if (buf[0] == '@') {
-		    /* STUPID Windows *sometimes* removes the quotes.
-		     * If the profile string contains quotes at the
-		     * the start *and* end, Windows will remove them.
-		     * Otherwise, quotes will be copied intact.
-		     * The quotes are important, so we have to put
-		     * them back in.
-		     */
-		    memmove(buf+1, buf, strlen(buf)+1);
-		    buf[0] = '\042';
-		    strcat(buf, "\042");
-		}
-		SetDlgItemTextA(hDlg, DEVICE_OPTIONS, buf);
-		}
+	        profile_close(prf);
 		return FALSE;
 	    case DEVICE_RES:
 		/* don't have anything to do */
@@ -1557,7 +1575,10 @@ NewDeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		      strcpy(section, option.printer_device);
 		  strcat(section, " Options");
 		  GetDlgItemTextA(hDlg, DEVICE_OPTIONS, buf, sizeof(buf)-2);
-		  WritePrivateProfileStringA(section, "Options", buf, szIniFile);
+	          if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+		      profile_write_string(prf, section, "Options", buf);
+	              profile_close(prf);
+		  }
 		}
 
 		if (GetDlgItem(hDlg, PAGE_LIST) != (HWND)NULL) {
@@ -1591,29 +1612,22 @@ GDIDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
     char buf[128];
     char entry[MAXSTR];
     struct prop_item_s *proplist;
+    PROFILE *prf;
 
     switch (wmsg) {
       case WM_INITDIALOG:
-	    { char section[MAXSTR];
-	    SendDlgItemMessage(hDlg, option.print_gdi_depth, BM_SETCHECK, 1, 0);
-	    init_fixed_media(hDlg, DEVICE_FIXEDMEDIA, option.print_gdi_fixed_media);
-	    strcpy(section, GDI_ENTRY);
-	    strcat(section, " Options");
-	    GetPrivateProfileStringA(section, "Options", "", buf, 
-		sizeof(buf)-2, szIniFile);
-	    if (buf[0] == '@') {
-		/* STUPID Windows *sometimes* removes the quotes.
-		 * If the profile string contains quotes at the
-		 * the start *and* end, Windows will remove them.
-		 * Otherwise, quotes will be copied intact.
-		 * The quotes are important, so we have to put
-		 * them back in.
-		 */
-		memmove(buf+1, buf, strlen(buf)+1);
-		buf[0] = '\042';
-		strcat(buf, "\042");
-	    }
-	    SetDlgItemTextA(hDlg, DEVICE_OPTIONS, buf);
+	    if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+		char section[MAXSTR];
+		SendDlgItemMessage(hDlg, option.print_gdi_depth, 
+		    BM_SETCHECK, 1, 0);
+		init_fixed_media(hDlg, DEVICE_FIXEDMEDIA, 
+		    option.print_gdi_fixed_media);
+		strcpy(section, GDI_ENTRY);
+		strcat(section, " Options");
+		profile_read_string(prf, section, "Options", "", 
+			buf, sizeof(buf)-2);
+		SetDlgItemTextA(hDlg, DEVICE_OPTIONS, buf);
+	        profile_close(prf);
 	    }
 	    return TRUE;
       case WM_COMMAND:
@@ -1647,12 +1661,14 @@ GDIDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		option.print_gdi_fixed_media = (int)SendDlgItemMessage(
 			hDlg, DEVICE_FIXEDMEDIA, CB_GETCURSEL, 0, 0);
 
-		{ /* get options */
+	        if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+		  /* get options */
 		  char section[MAXSTR];
 		  strcpy(section, GDI_ENTRY);
 		  strcat(section, " Options");
 		  GetDlgItemTextA(hDlg, DEVICE_OPTIONS, buf, sizeof(buf)-2);
-		  WritePrivateProfileStringA(section, "Options", buf, szIniFile);
+		  profile_write_string(prf, section, "Options", buf);
+		  profile_close(prf);
 		}
 		EndDialog(hDlg, TRUE);
 		return TRUE;

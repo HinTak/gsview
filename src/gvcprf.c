@@ -104,7 +104,7 @@ char *p;
 	            prf->section = ns;
 		ps = ns;
 		pe = NULL;
-	        if ( (p = strchr(line+1, ']')) != (char *)NULL )
+	        if ( (p = strrchr(line+1, ']')) != (char *)NULL )
 	            *p = '\0';
 	        if ( (ns->name = (char *)malloc(strlen(line))) == (char *)NULL )
 	            return profile_cleanup(prf);

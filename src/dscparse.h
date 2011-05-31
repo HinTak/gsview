@@ -15,10 +15,11 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* $Id: dscparse.h,v 1.10 2003/01/12 06:32:44 ghostgum Exp $ */
-
-/* dscparse.h */
+/* $Id: dscparse.h,v 1.14 2003/08/08 23:58:14 ghostgum Exp $ */
 /* Interface for the DSC parser. */
+
+#ifndef dscparse_INCLUDED
+#  define dscparse_INCLUDED
 
 /* Some local types that may need modification */
 typedef int GSBOOL;
@@ -38,6 +39,9 @@ typedef unsigned int GSWORD;	/* must be at least 16 bits */
  */
 #ifndef DSC_OFFSET
 # define DSC_OFFSET unsigned long
+#endif
+#ifndef DSC_OFFSET_FORMAT
+# define DSC_OFFSET_FORMAT "lu"	/* for printf */
 #endif
 
 #ifndef dsc_private
@@ -269,6 +273,14 @@ typedef struct CDSCDOSEPS_S {
     GSWORD checksum;
 } CDSCDOSEPS;
 
+/* macbinary header */
+typedef struct CDSCMACBIN_S {
+    GSDWORD data_begin;		/* EPS */
+    GSDWORD data_length;
+    GSDWORD resource_begin;	/* PICT */
+    GSDWORD resource_length;
+} CDSCMACBIN;
+
 /* rather than allocated every string with malloc, we allocate
  * chunks of 4k and place the (usually) short strings in these
  * chunks.
@@ -313,11 +325,11 @@ struct CDSCCOLOUR_S {
     char *name;
     CDSC_COLOUR_TYPE type;
     CDSC_CUSTOM_COLOUR custom;
-    /* If custom is CDSC_COLOUR_RGB, the next three are correct */
+    /* If custom is CDSC_CUSTOM_COLOUR_RGB, the next three are correct */
     float red;
     float green;
     float blue;
-    /* If colourtype is CDSC_COLOUR_CMYK, the next four are correct */
+    /* If colourtype is CDSC_CUSTOM_COLOUR_CMYK, the next four are correct */
     float cyan;
     float magenta;
     float yellow;
@@ -485,6 +497,10 @@ char dummy[1024];
     /* private data */
     /* Added 2002-03-30 */
     int ref_count;
+
+    /* public data */
+    /* Added 2003-07-15 */
+    CDSCMACBIN *macbin;		/* Mac Binary header */
 };
 
 
@@ -549,3 +565,4 @@ int dsc_set_page_bbox(CDSC *dsc, unsigned int page_number,
 
 /* in dscutil.c */
 void dsc_display(CDSC *dsc, void (*dfn)(void *ptr, const char *str));
+#endif /* dscparse_INCLUDED */

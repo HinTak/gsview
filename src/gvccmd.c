@@ -470,11 +470,14 @@ gsview_command(int command)
 		if ( (option.orientation == IDM_PORTRAIT) ||
 		     (option.auto_orientation == TRUE) ) {
 		    char epsname[MAXSTR];
+		    epsname[0] = '\0';
 		    if (dfreopen() != 0)
 			return 0;
 		    if (!get_filename(epsname, TRUE, FILTER_EPS, 0, 
-			    IDS_TOPICPREVIEW))
+			    IDS_TOPICPREVIEW)) {
+			dfclose();
 			return 0;
+		    }
 		    image_lock(view.img);
 		    make_eps_interchange(FALSE, epsname);
 		    image_unlock(view.img);
@@ -489,11 +492,14 @@ gsview_command(int command)
 		if ( (option.orientation == IDM_PORTRAIT) ||
 		     (option.auto_orientation == TRUE) ) {
 		    char epsname[MAXSTR];
+		    epsname[0] = '\0';
 		    if (dfreopen() != 0)
 			return 0;
 		    if (!get_filename(epsname, TRUE, FILTER_EPS, 0, 
-			    IDS_TOPICPREVIEW))
+			    IDS_TOPICPREVIEW)) {
+		        dfclose();
 			return 0;
+		    }
 		    image_lock(view.img);
 		    make_eps_tiff(command, FALSE, epsname);
 		    image_unlock(view.img);
@@ -506,11 +512,14 @@ gsview_command(int command)
 		if ( (option.orientation == IDM_PORTRAIT) ||
 		     (option.auto_orientation == TRUE) ) {
 		    char epsname[MAXSTR];
+		    epsname[0] = '\0';
 		    if (dfreopen() != 0)
 			return 0;
 		    if (!get_filename(epsname, TRUE, FILTER_EPS, 0, 
-			    IDS_TOPICPREVIEW))
+			    IDS_TOPICPREVIEW)) {
+			dfclose();
 			return 0;
+		    }
 		    image_lock(view.img);
 		    make_eps_metafile(FALSE, epsname);
 		    image_unlock(view.img);

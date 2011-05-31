@@ -177,6 +177,9 @@ dsc_error_fn(void *caller_data, CDSC *dsc, unsigned int explanation,
     if (explanation > dsc->max_error)
 	return CDSC_RESPONSE_OK;
 
+    if (caller_data == NULL)	 	/* ignore unused parameter */
+	dsc_debug_print(dsc, "");	/* do nothing */
+
     severity = dsc->severity[explanation];
 
     /* If debug function provided, copy messages there */
@@ -234,6 +237,10 @@ dsc_display(CDSC *dsc, void (*dfn)(void *ptr, const char *str))
     const char *p;
     char buf[MAXSTR];
     void *ptr = dsc->caller_data;
+    CDCS2 *pdcs = dsc->dcs2;
+    CDSCCOLOUR *colour = dsc->colours;
+    char fmtbuf[MAXSTR];
+    const char *offset_fmt = DSC_OFFSET_FORMAT;
     (*dfn)(ptr, "== DSC dump ==\n");
     if (dsc->dsc)
         (*dfn)(ptr, "DSC ");
@@ -241,12 +248,16 @@ dsc_display(CDSC *dsc, void (*dfn)(void *ptr, const char *str))
         (*dfn)(ptr, "EPSF ");
     if (dsc->doseps)
         (*dfn)(ptr, "DOSEPS ");
+    if (dsc->macbin)
+        (*dfn)(ptr, "MacBinary ");
     if (dsc->pdf)
         (*dfn)(ptr, "PDF ");
     if (dsc->pjl)
         (*dfn)(ptr, "PJL ");
     if (dsc->ctrld)
         (*dfn)(ptr, "CTRLD ");
+    if (dsc->dcs2)
+        (*dfn)(ptr, "DCS2.0 ");
     (*dfn)(ptr, "\n");
 
     if (dsc->dsc_version) {
@@ -282,6 +293,12 @@ dsc_display(CDSC *dsc, void (*dfn)(void *ptr, const char *str))
 	    dsc->doseps->tiff_begin, dsc->doseps->tiff_length);
 	(*dfn)(ptr, buf);
     }
+    if (dsc->macbin) {
+	sprintf(buf, "macbin ps=%ld %ld  resource=%ld %ld\n",
+	    dsc->macbin->data_begin, dsc->macbin->data_length,
+	    dsc->macbin->resource_begin, dsc->macbin->resource_length);
+	(*dfn)(ptr, buf);
+    }
     if (dsc->bbox) {
 	sprintf(buf, "boundingbox %d %d %d %d\n",
 	    dsc->bbox->llx, dsc->bbox->lly, dsc->bbox->urx, dsc->bbox->ury);
@@ -303,6 +320,30 @@ dsc_display(CDSC *dsc, void (*dfn)(void *ptr, const char *str))
         sprintf(buf, "language level %d\n", dsc->language_level);
         (*dfn)(ptr, buf);
     }
+    if (dsc->preview != CDSC_NOPREVIEW) {
+	switch (dsc->preview) {
+	    case CDSC_NOPREVIEW:
+		    p = "None";
+		    break;
+	    case CDSC_EPSI:
+		    p = "Interchange";
+		    break;
+	    case CDSC_TIFF:
+		    p = "TIFF";
+		    break;
+	    case CDSC_WMF:
+		    p = "Windows MetaFile";
+		    break;
+	    case CDSC_PICT:
+		    p = "Mac PICT";
+		    break;
+	    default:
+		    p = "Unknown";
+	}
+	sprintf(buf, "preview type %s\n", p);
+	(*dfn)(ptr, buf);
+    }
+
     if (dsc->document_data != CDSC_DATA_UNKNOWN) {
 	switch (dsc->document_data) {
 	    case CDSC_CLEAN7BIT:
@@ -394,20 +435,26 @@ dsc_display(CDSC *dsc, void (*dfn)(void *ptr, const char *str))
         (*dfn)(ptr, buf);
     }
 
-    sprintf(buf, "comments %ld %ld\n", dsc->begincomments, dsc->endcomments);
+    sprintf(fmtbuf, "comments %%%s %%%s\n", offset_fmt, offset_fmt);
+    sprintf(buf, fmtbuf, dsc->begincomments, dsc->endcomments);
     (*dfn)(ptr, buf);
-    sprintf(buf, "preview %ld %ld\n", dsc->beginpreview, dsc->endpreview);
+    sprintf(fmtbuf, "preview %%%s %%%s\n", offset_fmt, offset_fmt);
+    sprintf(buf, fmtbuf, dsc->beginpreview, dsc->endpreview);
     (*dfn)(ptr, buf);
-    sprintf(buf, "defaults %ld %ld\n", dsc->begindefaults, dsc->enddefaults);
+    sprintf(fmtbuf, "defaults %%%s %%%s\n", offset_fmt, offset_fmt);
+    sprintf(buf, fmtbuf, dsc->begindefaults, dsc->enddefaults);
     (*dfn)(ptr, buf);
-    sprintf(buf, "prolog %ld %ld\n", dsc->beginprolog, dsc->endprolog);
+    sprintf(fmtbuf, "prolog %%%s %%%s\n", offset_fmt, offset_fmt);
+    sprintf(buf, fmtbuf, dsc->beginprolog, dsc->endprolog);
     (*dfn)(ptr, buf);
-    sprintf(buf, "setup %ld %ld\n", dsc->beginsetup, dsc->endsetup);
+    sprintf(fmtbuf, "setup %%%s %%%s\n", offset_fmt, offset_fmt);
+    sprintf(buf, fmtbuf, dsc->beginsetup, dsc->endsetup);
     (*dfn)(ptr, buf);
     sprintf(buf, "pages %d\n", dsc->page_pages);
     (*dfn)(ptr, buf);
     for (i=0; i<dsc->page_count; i++) {
-	sprintf(buf, "page %.20s %d  %ld %ld\n",
+        sprintf(fmtbuf, "page %%.20s %%d  %%%s %%%s\n", offset_fmt, offset_fmt);
+	sprintf(buf, fmtbuf,
 	    dsc->page[i].label, dsc->page[i].ordinal, 
 	    dsc->page[i].begin, dsc->page[i].end);
         (*dfn)(ptr, buf);
@@ -444,8 +491,75 @@ dsc_display(CDSC *dsc, void (*dfn)(void *ptr, const char *str))
 	    (*dfn)(ptr, buf);
 	}
     }
-    sprintf(buf, "trailer %ld %ld\n", dsc->begintrailer, dsc->endtrailer);
+    sprintf(fmtbuf, "trailer %%%s %%%s\n", offset_fmt, offset_fmt);
+    sprintf(buf, fmtbuf, dsc->begintrailer, dsc->endtrailer);
     (*dfn)(ptr, buf);
+    if (pdcs) {
+	sprintf(buf, "DCS 2.0 separations\n");
+	(*dfn)(ptr, buf);
+    }
+    while (pdcs) {
+	if (pdcs->location && (dsc_stricmp(pdcs->location, "Local") == 0))
+	    sprintf(buf, " %s %s\n", pdcs->colourname, pdcs->filename);
+	else {
+            sprintf(fmtbuf, " %%s #%%%s %%%s\n", offset_fmt, offset_fmt);
+	    sprintf(buf, fmtbuf, pdcs->colourname, pdcs->begin, pdcs->end);
+	}
+        (*dfn)(ptr, buf);
+	pdcs = pdcs->next;
+    }
+    if (colour) {
+	sprintf(buf, "colours\n");
+	(*dfn)(ptr, buf);
+    }
+    while (colour) {
+	const char *type;
+	switch (colour->type) {
+	    case CDSC_COLOUR_PROCESS:
+		type = "Process";
+		break;
+	    case CDSC_COLOUR_CUSTOM:
+		type = "Custom";
+		break;
+	    default:
+		type = "Unknown";
+	}
+	sprintf(buf, " %s %s", colour->name, type);
+        (*dfn)(ptr, buf);
+	switch (colour->custom) {
+	    case CDSC_CUSTOM_COLOUR_CMYK:
+		sprintf(buf, " CMYK %g %g %g %g\n", colour->cyan, 
+		    colour->magenta, colour->yellow, colour->black);
+		break;
+	    case CDSC_CUSTOM_COLOUR_RGB:
+		sprintf(buf, " RGB %g %g %g\n", 
+		    colour->red, colour->green, colour->blue);
+		break;
+	    default:
+		sprintf(buf, "\n");
+	}
+        (*dfn)(ptr, buf);
+	colour = colour->next;
+    }
+    for (i=0; dsc->media && (i<dsc->media_count); i++) {
+	if (dsc->media[i]) {
+	    sprintf(buf, "media %d   (%.50s) %g %g %g (%.50s) (%.50s)\n", i,
+		dsc->media[i]->name ? dsc->media[i]->name : "", 
+		dsc->media[i]->width, dsc->media[i]->height, 
+		dsc->media[i]->weight, 
+		dsc->media[i]->colour ? dsc->media[i]->colour : "", 
+		dsc->media[i]->type ? dsc->media[i]->type : "");
+	    (*dfn)(ptr, buf);
+	    if (dsc->media[i]->mediabox) {
+	        sprintf(buf, "  mediabox %d %d %d %d\n",
+		    dsc->media[i]->mediabox->llx,
+		    dsc->media[i]->mediabox->llx,
+		    dsc->media[i]->mediabox->llx,
+		    dsc->media[i]->mediabox->llx);
+		    (*dfn)(ptr, buf);
+		}
+	}
+    }
     (*dfn)(ptr, "== END DSC dump ==\n");
 }
 
@@ -551,6 +665,7 @@ int main(int argc, char *argv[])
     CDSC *dsc;
     FILE *infile;
     char buf[256];
+    char bigbuf[4096];
     int count;
     int code;
     unsigned int i;
@@ -565,7 +680,6 @@ int main(int argc, char *argv[])
 
     if (infile == NULL)
 	return 1;
-
 
     /* test 1 - write single byte at a time */
     fprintf(stdout, "TEST 1 - SINGLE BYTE\n");
@@ -594,6 +708,7 @@ int main(int argc, char *argv[])
     dsc_free(dsc);
 
     /* test 3 - write one line at a time a time */
+    /* Only works if the file does not contain null characters */
     fprintf(stdout, "TEST 3 - LINE\n");
     fseek(infile, 0, SEEK_SET);
     dsc = dsc_init(NULL);
@@ -647,6 +762,19 @@ int main(int argc, char *argv[])
     dsc_free(dsc);
     if (mem_file)
 	fclose(mem_file);
+
+    /* test 5 - write multiple bytes at a time */
+    fprintf(stdout, "TEST 5 - %d BYTES\n", sizeof(bigbuf));
+    fseek(infile, 0, SEEK_SET);
+    dsc = dsc_init(NULL);
+    dsc_set_debug_function(dsc, dump_fn);
+    dsc_set_error_function(dsc, dsc_error_fn);
+    while ((count = fread(bigbuf, 1, sizeof(bigbuf), infile))!=0) {
+	dsc_scan_data(dsc, bigbuf, count);
+    }
+    dsc_fixup(dsc);
+    dsc_display(dsc, dump_fn);
+    dsc_free(dsc);
 
     dsc = NULL;
     return 0;

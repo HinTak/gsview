@@ -21,18 +21,21 @@
 
 # Edit VCVER and DEVBASE as required
 !ifndef VCVER
-VCVER=7
+VCVER=71
 !endif
 
 !ifndef DEVBASE
 !if $(VCVER) <= 5
-DEVBASE=E:\Program Files\devstudio
+DEVBASE=C:\Program Files\devstudio
 !endif
 !if $(VCVER) == 6
-DEVBASE=E:\Program Files\Microsoft Visual Studio
+DEVBASE=C:\Program Files\Microsoft Visual Studio
 !endif
 !if $(VCVER) == 7
-DEVBASE=E:\Program Files\Microsoft Visual Studio .NET
+DEVBASE=C:\Program Files\Microsoft Visual Studio .NET
+!endif
+!if $(VCVER) == 71
+DEVBASE=C:\Program Files\Microsoft Visual Studio .NET 2003
 !endif
 !endif
 
@@ -68,7 +71,7 @@ COMPBASE = $(DEVBASE)\vc
 !if $(VCVER) == 6
 COMPBASE = $(DEVBASE)\vc98
 !endif
-!if $(VCVER) == 7
+!if (($(VCVER) == 7) || ($(VCVER) == 71))
 COMPBASE = $(DEVBASE)\Vc7
 PLATLIBDIR=$(COMPBASE)\PlatformSDK\lib
 !endif
@@ -111,7 +114,7 @@ RCOMP="$(DEVBASE)\sharedide\bin\rc" -D_MSC_VER $(CDEFS) $(RIFLAGS)
 HC="$(DEVBASE)\common\tools\hcw" /C /E
 RCOMP="$(DEVBASE)\common\msdev98\bin\rc" -D_MSC_VER $(CDEFS) $(RIFLAGS)
 !endif
-!if $(VCVER) == 7
+!if (($(VCVER) == 7) || ($(VCVER) == 71))
 HC="$(DEVBASE)\Common7\Tools\hcw" /C /E
 RCOMP="$(DEVBASE)\Vc7\bin\rc" -D_MSC_VER $(CDEFS) $(RIFLAGS)
 !endif
