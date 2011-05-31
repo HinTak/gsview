@@ -61,6 +61,21 @@ extern void pserror(char *str);
 #endif
 #include "ps.h"
 
+#ifdef DEBUG_MALLOC
+#if defined(__WIN32__) || defined(OS2)
+#define FAR
+#endif
+void FAR * debug_malloc(size_t size);
+void FAR * debug_calloc(size_t nitems, size_t size);
+void  FAR * debug_realloc(void FAR *block, size_t size);
+void debug_free(void FAR *block);
+#define malloc(size) debug_malloc(size)
+#define calloc(nitems, size) debug_calloc(nitems, size)
+#define realloc(block, size) debug_realloc(block, size)
+#define free(block) debug_free(block)
+extern long allocated_memory;
+#endif
+
 #ifdef BSD4_2
 #define memset(a,b,c) bzero(a,c)
 #endif
@@ -72,6 +87,7 @@ char *psfgets(char *s, int n, FILE *stream);
 #else
 char *psfgets();
 #endif
+
 
 /* length calculates string length at compile time */
 /* can only be used with character constants */
@@ -1687,4 +1703,3 @@ psfgets(s, n, stream)
     *p = '\0';
     return (ferror(stream)) ? NULL : s;
 }
-

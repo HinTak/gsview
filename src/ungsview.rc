@@ -1,0 +1,106 @@
+/* Copyright (C) 1998, Russell Lang.  All rights reserved.
+  
+  This file is part of GSview.
+  
+  This program is distributed with NO WARRANTY OF ANY KIND.  No author
+  or distributor accepts any responsibility for the consequences of using it,
+  or for whether it serves any particular purpose or works at all, unless he
+  or she says so in writing.  Refer to the GSview Free Public Licence 
+  (the "Licence") for full details.
+  
+  Every copy of GSview must include a copy of the Licence, normally in a 
+  plain ASCII text file named LICENCE.  The Licence grants you the right 
+  to copy, modify and redistribute GSview, but only under certain conditions 
+  described in the Licence.  Among other things, the Licence requires that 
+  the copyright notice and this notice be preserved on all copies.
+*/
+
+/* ungsview.rc */
+
+#include <windows.h>
+#include "ungsview.h"
+
+ID_GSVIEW ICON "binary/gvwinun.ico"
+
+IDD_UNSET DIALOG 6, 15, 242, 189
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION ""
+FONT 8, "MS Sans Serif"
+{
+ DEFPUSHBUTTON "&Cancel", IDCANCEL, 73, 160, 50, 14
+ PUSHBUTTON "&OK", IDOK, 13, 160, 50, 14
+ LTEXT "", IDC_PRESSOK, 44, 8, 192, 8
+ LTEXT "", IDC_PROG, 56, 24, 168, 8
+ LTEXT "", IDC_T1, 32, 48, 200, 16, WS_DISABLED | WS_GROUP
+ LTEXT "", IDC_T2, 32, 64, 200, 16, WS_DISABLED | WS_GROUP
+ LTEXT "", IDC_T3, 32, 80, 200, 16, WS_DISABLED | WS_GROUP
+ LTEXT "", IDC_T4, 32, 96, 200, 16, WS_DISABLED | WS_GROUP
+ LTEXT "", IDC_T5, 32, 112, 200, 8, WS_DISABLED | WS_GROUP
+ LTEXT "", IDC_T6, 10, 132, 224, 19
+ LTEXT "", IDC_Y1, 16, 48, 12, 8
+ LTEXT "", IDC_Y2, 16, 64, 12, 8
+ LTEXT "", IDC_Y3, 16, 80, 12, 8
+ LTEXT "", IDC_Y4, 16, 96, 12, 8
+ LTEXT "", IDC_Y5, 16, 112, 12, 8
+ ICON ID_GSVIEW, IDC_GSVIEWICON, 8, 8, 20, 20
+}
+
+
+/* English */
+STRINGTABLE
+BEGIN
+    IDS_OK	"&OK"
+    IDS_CANCEL	"&Cancel"
+    IDS_EXIT	"&Exit"
+    IDS_CAPTION "Remove GSview"
+    IDS_PRESSOK "Press the OK button to remove the programs"
+    IDS_PROG "GSview %s and Aladdin Ghostscript %d.%02d"
+    IDS_T1 "Removing registry entries"
+    IDS_T2 "Restoring registry entries"
+    IDS_T3 "Removing Progam Manager/Start Menu items"
+    IDS_T4 "Removing initialization file"
+    IDS_T5 "Removing Files"
+    IDS_T6 "GSview and Ghostscript were successfully uninstalled."
+    IDS_T7 "Uninstallation failed."
+    IDS_TITLE "GSview and Aladdin Ghostscript"
+END
+
+/* German */
+STRINGTABLE
+BEGIN
+    ID_GERMAN+IDS_OK		"&Ok"
+    ID_GERMAN+IDS_CANCEL	"&Abbruch"
+    ID_GERMAN+IDS_EXIT		"&Ende"
+    ID_GERMAN+IDS_CAPTION "Entferne GSview"
+    ID_GERMAN+IDS_PRESSOK "Drücken Sie OK um die Programme zu entfernen "
+    ID_GERMAN+IDS_PROG "GSview %s und Aladdin Ghostscript %d.%02d"
+    ID_GERMAN+IDS_T1 "Entferne Einträge aus der Registrierungsdatenbank "
+    ID_GERMAN+IDS_T2 "Erstelle Einträge in der Registrierungsdatenbank "
+    ID_GERMAN+IDS_T3 "Entferne Progamm Manager/Startmenü Einträge"
+    ID_GERMAN+IDS_T4 "Entferne Initialisierungsdatei "
+    ID_GERMAN+IDS_T5 "Entferne Dateien "
+    ID_GERMAN+IDS_T6 "GSview und Ghostscript wurden erfolgreich deinstalliert."
+    ID_GERMAN+IDS_T7 "Deinstallation fehlgeschlagen."
+    ID_GERMAN+IDS_TITLE "GSview und Aladdin Ghostscript "
+END
+
+
+/* French */
+STRINGTABLE
+BEGIN
+    ID_FRENCH+IDS_OK		"&Ok"
+    ID_FRENCH+IDS_CANCEL	"&Annuler"
+    ID_FRENCH+IDS_EXIT		"&Fin"
+    ID_FRENCH+IDS_CAPTION "Désinstaller GSview"
+    ID_FRENCH+IDS_PRESSOK "Appuyez sur OK pour désinstaller les programmes"
+    ID_FRENCH+IDS_PROG "GSview %s et Aladdin Ghostscript %d.%02d"
+    ID_FRENCH+IDS_T1 "Suppression des entrées dans la base de registres"
+    ID_FRENCH+IDS_T2 "Restauration des entrées dans la base de registres"
+    ID_FRENCH+IDS_T3 "Suppression des éléments dans le Gestionnaire de programmes/menu Démarrer"
+    ID_FRENCH+IDS_T4 "Suppression du fichier d'initialisation"
+    ID_FRENCH+IDS_T5 "Suppression des fichiers"
+    ID_FRENCH+IDS_T6 "GSview et Ghostscript ont été désinstallés avec succès."
+    ID_FRENCH+IDS_T7 "La désinstallation a échoué."
+    ID_FRENCH+IDS_TITLE "GSview et Aladdin Ghostscript"
+END
+

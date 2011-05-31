@@ -760,10 +760,11 @@ int thisline;
 char buf[2048];
 TEXTINDEX *text;
 int page = psfile.pagenum;
-    if (psfile.text_name[0] == '\0') {
-	free_text_index();
+
+    free_text_index();
+
+    if (psfile.text_name[0] == '\0')
 	return FALSE;
-    }
     
     text_words_size = TEXT_INDEX_CHUNK * 8;
     text_words = malloc(text_words_size);

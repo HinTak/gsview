@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -64,7 +64,7 @@ char *entry;
 	    return (MRESULT)TRUE;
         case DID_OK:
 	    WinDismissDlg(hwnd, 1+(int)WinSendMsg(WinWindowFromID(hwnd, SPOOL_PORT), 
-		LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0));
+		LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0));
             return (MRESULT)TRUE;
 	case DID_CANCEL:
 	    WinDismissDlg(hwnd, 0);
@@ -541,7 +541,7 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	break;
       case WM_CONTROL:
 	if (mp1 == MPFROM2SHORT(PROP_NAME, CBN_LBSELECT)) {
-	    iprop = (int)WinSendMsg(WinWindowFromID(hwnd, PROP_NAME), LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+	    iprop = (int)WinSendMsg(WinWindowFromID(hwnd, PROP_NAME), LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
 	    if (iprop == LIT_NONE)
 	        return FALSE;
 	    /* now look up entry in gsview.ini */
@@ -591,10 +591,10 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    }
 	}
 	if (mp1 == MPFROM2SHORT(PROP_VALUE, CBN_LBSELECT)) {
-	    iprop = (int)WinSendMsg(WinWindowFromID(hwnd, PROP_NAME), LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+	    iprop = (int)WinSendMsg(WinWindowFromID(hwnd, PROP_NAME), LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
 	    if (iprop == LIT_NONE)
 	        return FALSE;
-	    ivalue = (int)WinSendMsg(WinWindowFromID(hwnd, PROP_VALUE), LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+	    ivalue = (int)WinSendMsg(WinWindowFromID(hwnd, PROP_VALUE), LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
 	    if (ivalue == LIT_NONE)
 	        return FALSE;
 	    WinSendMsg(WinWindowFromID(hwnd, PROP_VALUE), LM_QUERYITEMTEXT,  
@@ -604,7 +604,7 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		strcpy(propitem[iprop].value, not_defined);
 	}
 	if (mp1 == MPFROM2SHORT(PROP_VALUE, CBN_EFCHANGE)) {
-	    iprop = (int)WinSendMsg(WinWindowFromID(hwnd, PROP_NAME), LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+	    iprop = (int)WinSendMsg(WinWindowFromID(hwnd, PROP_NAME), LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
 	    if (iprop == LIT_NONE)
 	        return FALSE;
 	    WinQueryWindowText(WinWindowFromID(hwnd, PROP_VALUE), 
@@ -617,7 +617,7 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	switch(LOUSHORT(mp1)) {
 	    case PROP_EDIT:
 	        load_string(IDS_TOPICEDITPROP, szHelpTopic, sizeof(szHelpTopic));
-	        iprop = (int)WinSendMsg(WinWindowFromID(hwnd, PROP_NAME), LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+	        iprop = (int)WinSendMsg(WinWindowFromID(hwnd, PROP_NAME), LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
 		editpropname[0] = '\0';
 		if (iprop != LIT_NONE)
 		    strcpy(editpropname, propitem[iprop].name);
@@ -666,6 +666,138 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     return WinDefDlgProc(hwnd, msg, mp1, mp2);
 }
 
+
+MRESULT EXPENTRY
+UniDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+    static char *ubuf;
+    char uppname[MAXSTR];	/* contains printer device name */
+    int i;
+
+    switch (msg) {
+      case WM_INITDLG:
+	    ubuf = NULL;
+	    /* Delay initialization of the list box until 
+	     * after it is displayed, because searching for 
+	     * configuration files takes several seconds.
+	     */
+	    load_string(IDS_WAIT, uppname, sizeof(uppname));
+	    WinSendMsg(WinWindowFromID(hwnd, UPP_LIST), LM_DELETEALL, 
+		(MPARAM)0, (MPARAM)0);
+	    WinSendMsg( WinWindowFromID(hwnd, UPP_LIST), LM_INSERTITEM, 
+		MPFROMLONG(LIT_END), MPFROMP(uppname) );
+	    WinEnableWindow(WinWindowFromID(hwnd, UPP_LIST), FALSE);
+	    uppname[0] = uppname[1] = '\0';
+	    WinQueryWindowText(WinWindowFromID(WinQueryWindow(hwnd, QW_OWNER),
+		DEVICE_OPTIONS), sizeof(uppname), uppname);
+	    WinSetWindowText(WinWindowFromID(hwnd, UPP_NAME), uppname+1);
+	    WinPostMsg(hwnd, WM_COMMAND, (MPARAM)WM_USER, 
+		MPFROM2SHORT(CMDSRC_OTHER, TRUE));
+	    return (MRESULT)TRUE;
+      case WM_CONTROL:
+	if (mp1 == MPFROM2SHORT(UPP_LIST, LN_SELECT)) {
+	    char dname[MAXSTR];
+	    if (ubuf == NULL)
+		return FALSE;
+	    i = (int)WinSendMsg(WinWindowFromID(hwnd, UPP_LIST), 
+		LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
+	    if (i == LIT_NONE)
+	        return FALSE;
+	    WinSendMsg(WinWindowFromID(hwnd, UPP_LIST), LM_QUERYITEMTEXT,  
+		MPFROM2SHORT(i, sizeof(dname)), MPFROMP(dname));
+	    WinSetWindowText(WinWindowFromID(hwnd, UPP_NAME), 
+		uppmodel_to_name(ubuf, dname));
+	}
+	if (mp1 == MPFROM2SHORT(UPP_LIST, LN_ENTER)) {
+	    WinPostMsg(hwnd, WM_COMMAND, (MPARAM)IDOK, 
+		MPFROM2SHORT(CMDSRC_OTHER, TRUE));
+	}
+	break;
+    case WM_COMMAND:
+	switch(LOUSHORT(mp1)) {
+	    case WM_USER:
+		/* time consuming initialization */
+		{int needed;
+		char *desc, *p, *q;
+		/* draw window immediately */
+		WinShowWindow(hwnd, TRUE);
+		WinInvalidateRect(hwnd, (PRECTL)NULL, TRUE);
+		WinUpdateWindow(hwnd);
+
+		desc = NULL;
+		uppname[0] = uppname[1] = '\0';
+		i = 8192;	/* a guess */
+		if ((ubuf = malloc(i)) == (char *)NULL) {
+		    play_sound(SOUND_ERROR);
+		    WinPostMsg(hwnd, WM_COMMAND, (MPARAM)DID_CANCEL, 
+			MPFROM2SHORT(CMDSRC_OTHER, TRUE));
+		    return (MRESULT)TRUE;	/* no memory */
+		}
+		needed = enum_upp_path(option.gsinclude, ubuf, i);
+		if (needed > i) {
+		    /* our guess wasn't big enough */
+		    free(ubuf);
+		    if ((ubuf = malloc(needed)) == (char *)NULL) {
+			play_sound(SOUND_ERROR);
+			WinPostMsg(hwnd, WM_COMMAND, (MPARAM)DID_CANCEL, 
+			    MPFROM2SHORT(CMDSRC_OTHER, TRUE));
+			return (MRESULT)TRUE;	/* no memory */
+		    }
+		    enum_upp_path(option.gsinclude, ubuf, needed);
+		}
+
+		WinQueryWindowText(WinWindowFromID(WinQueryWindow(hwnd, 
+		    QW_OWNER), DEVICE_OPTIONS), sizeof(uppname), uppname);
+		WinSendMsg(WinWindowFromID(hwnd, UPP_LIST), LM_DELETEALL, 
+		    (MPARAM)0, (MPARAM)0);
+		for (p = ubuf; *p!='\0'; p += strlen(p) + 1) {
+		    q = p + strlen(p) + 1;
+		    if (strcmp(p, uppname+1) == 0)
+			desc = q;
+		    WinSendMsg( WinWindowFromID(hwnd, UPP_LIST), LM_INSERTITEM, 
+			MPFROMLONG(LIT_SORTASCENDING), MPFROMP(q) );
+		    p = q;
+		}
+		if (desc != (LPSTR)NULL) {
+		    i = (int)WinSendMsg( WinWindowFromID(hwnd, UPP_LIST),
+			LM_SEARCHSTRING, 
+			MPFROM2SHORT(LSS_CASESENSITIVE, LIT_FIRST), 
+			MPFROMP(desc) );
+		    if ((i != LIT_ERROR) && (i != LIT_NONE)) {
+			WinSendMsg( WinWindowFromID(hwnd, UPP_LIST),
+			    LM_SELECTITEM, MPFROMLONG(i), MPFROMLONG(TRUE) );
+		        WinSendMsg(WinWindowFromID(hwnd, UPP_LIST), 
+			    LM_SETTOPINDEX, MPFROMLONG(i), (MPARAM)0);
+		    }
+		}
+		WinSetWindowText(WinWindowFromID(hwnd, UPP_NAME), uppname+1);
+		WinEnableWindow(WinWindowFromID(hwnd, UPP_LIST), TRUE);
+		}
+		return (MRESULT)TRUE;
+	    case ID_HELP:
+		get_help();
+		return (MRESULT)TRUE;
+	    case DID_OK:
+		if (WinQueryWindowText(WinWindowFromID(hwnd, UPP_NAME), 
+			sizeof(uppname)-2, uppname+1)) {
+		  uppname[0] = '@';
+		  WinSetWindowText(WinWindowFromID(WinQueryWindow(hwnd, 
+		      QW_OWNER), DEVICE_OPTIONS), uppname);
+		}
+		if (ubuf)
+		    free(ubuf);
+		WinDismissDlg(hwnd, DID_OK);
+            	return (MRESULT)TRUE;
+	    case DID_CANCEL:
+		if (ubuf)
+		    free(ubuf);
+		WinDismissDlg(hwnd, DID_CANCEL);
+		return (MRESULT)TRUE;
+	}
+	break;
+    }
+    return WinDefDlgProc(hwnd, msg, mp1, mp2);
+}
 
 
 char *device_queue_list;
@@ -745,13 +877,15 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		for (i=0; i< psfile.doc->numpages; i++)
 		    psfile.page_list.select[i] = FALSE;
 		psfile.page_list.select[psfile.page_list.current] = TRUE;
-		PageDlgProc(hwnd, msg, mp1, mp2);
+		psfile.page_list.reverse = option.print_reverse;
+		PageMultiDlgProc(hwnd, msg, mp1, mp2);
 	    }
 	    else {
 		psfile.page_list.multiple = FALSE;
 		WinEnableWindow(WinWindowFromID(hwnd, PAGE_ALL), FALSE);
 		WinEnableWindow(WinWindowFromID(hwnd, PAGE_ODD), FALSE);
 		WinEnableWindow(WinWindowFromID(hwnd, PAGE_EVEN), FALSE);
+		WinEnableWindow(WinWindowFromID(hwnd, PAGE_REVERSE), FALSE);
 	        WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST),
 	    	    LM_INSERTITEM, MPFROMLONG(LIT_END), MPFROMP("All") );
 		WinEnableWindow(WinWindowFromID(hwnd, PAGE_LIST), FALSE);
@@ -784,7 +918,8 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    break;
     	case WM_CONTROL:
 	    if (mp1 == MPFROM2SHORT(DEVICE_NAME, CBN_LBSELECT)) {
-		idevice = (int)WinSendMsg(WinWindowFromID(hwnd, DEVICE_NAME), LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+		idevice = (int)WinSendMsg(WinWindowFromID(hwnd, DEVICE_NAME), 
+		    LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
 		if (idevice == LIT_NONE)
 		    return FALSE;
 		WinSendMsg(WinWindowFromID(hwnd, DEVICE_NAME), LM_QUERYITEMTEXT,  MPFROM2SHORT(idevice, sizeof(entry)), MPFROMP(entry));
@@ -836,7 +971,8 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		}
 	        WinSendMsg( WinWindowFromID(hwnd, DEVICE_RES),
 	    	    LM_SELECTITEM, MPFROMLONG(0), MPFROMLONG(TRUE) );
-		if ((int)WinSendMsg(WinWindowFromID(hwnd, DEVICE_RES), LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0)
+		if ((int)WinSendMsg(WinWindowFromID(hwnd, DEVICE_RES), LM_QUERYSELECTION, 
+		    MPFROMSHORT(LIT_FIRST), (MPARAM)0)
 			!= LIT_NONE)
 		    WinSetWindowText(WinWindowFromID(hwnd, DEVICE_RES), buf);
 	    }
@@ -857,7 +993,7 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			    BM_SETCHECK, MPFROMLONG(i), MPFROMLONG(0));
 			if (i) {  /* save selection */
 			    device_queue_index = (int)WinSendMsg(WinWindowFromID(hwnd, SPOOL_PORT), 
-				LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+				LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
 			}
 			WinSendMsg( WinWindowFromID(hwnd, SPOOL_PORT),
 			    LM_SELECTITEM, MPFROMLONG(device_queue_index), 
@@ -911,15 +1047,18 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		    if (!option.print_to_file) {
 			/* save queue name */
 			device_queue_index = 1+(int)WinSendMsg(WinWindowFromID(hwnd, SPOOL_PORT), 
-			    LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+			    LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
 			p = device_queue_list;
 			for (i=2; i<device_queue_index+device_queue_index && strlen(p)!=0; i++)
 			    p += strlen(p)+1;
 			strcpy(option.printer_queue, p);
 		    }
 		    /* save pages numbers */
-	    	    if ( (psfile.doc != (PSDOC *)NULL) && (psfile.doc->numpages != 0))
-		        PageDlgProc(hwnd, msg, mp1, mp2);
+	    	    if ( (psfile.doc != (PSDOC *)NULL) 
+			&& (psfile.doc->numpages != 0)) {
+		        PageMultiDlgProc(hwnd, msg, mp1, mp2);
+			option.print_reverse = psfile.page_list.reverse;
+		    }
 
 		    /* get options */
 		    {PROFILE *prf;
@@ -940,13 +1079,39 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	        case ID_HELP:
 		    get_help();
 		    return (MRESULT)TRUE;
+		case DEVICE_UNIPRINT:
+		    WinQueryWindowText(WinWindowFromID(hwnd, DEVICE_NAME), 
+			 sizeof(buf), buf);
+		    if (strcmp(buf, "uniprint") != 0) {
+		      /* select uniprint device */
+		        i = (int)WinSendMsg( WinWindowFromID(hwnd, DEVICE_NAME),
+	    	    	    LM_SEARCHSTRING, 
+			    MPFROM2SHORT(LSS_CASESENSITIVE, LIT_FIRST),
+		    	    MPFROMP("uniprint") );
+			if ((i == LIT_ERROR) || (i == LIT_NONE)) {
+			    play_sound(SOUND_ERROR);
+			    return FALSE;	/* can't select uniprint */
+			}
+			WinSendMsg( WinWindowFromID(hwnd, DEVICE_NAME),
+			    LM_SELECTITEM, 
+			    MPFROMLONG(i), MPFROMLONG(TRUE) );
+			/* force update of DEVICE_RES */
+			WinSendMsg(hwnd, WM_CONTROL, 
+			    MPFROM2SHORT(DEVICE_NAME, CBN_LBSELECT),
+			    MPFROMLONG(WinWindowFromID(hwnd, DEVICE_NAME)));
+		    }
+		    load_string(IDS_TOPICPRINT, szHelpTopic, 
+			    sizeof(szHelpTopic));
+		    WinDlgBox(HWND_DESKTOP, hwnd, UniDlgProc, hlanguage, 
+			IDD_UNIPRINT, NULL);
+		    return (MRESULT)TRUE;
 		case PAGE_ALL:
 		case PAGE_EVEN:
 		case PAGE_ODD:
-		    return (MRESULT)PageDlgProc(hwnd, msg, mp1, mp2);
+		    return (MRESULT)PageMultiDlgProc(hwnd, msg, mp1, mp2);
 		case DEVICE_PROP:
 		    idevice = (int)WinSendMsg(WinWindowFromID(hwnd, DEVICE_NAME), 
-			LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+			LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), (MPARAM)0);
 		    if (idevice == LIT_NONE)
 		        return (MRESULT)TRUE;
 		    WinSendMsg(WinWindowFromID(hwnd, DEVICE_NAME), LM_QUERYITEMTEXT,  MPFROM2SHORT(idevice, sizeof(entry)), MPFROMP(entry));

@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "1.04  1997-11-21";
+char szVersion[] = "1.05  1997-12-09";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -750,10 +750,10 @@ int code;
 	scan_bbox(&prebmap, &devbbox);
 	if (devbbox.valid) {
 	    /* copy to global bbox as if obtained by PS to EPS */
-	    bbox.llx = devbbox.llx * 72.0 / option.xdpi;
-	    bbox.lly = devbbox.lly * 72.0 / option.ydpi;
-	    bbox.urx = devbbox.urx * 72.0 / option.xdpi;
-	    bbox.ury = devbbox.ury * 72.0 / option.ydpi;
+	    bbox.llx = (int)(devbbox.llx * 72.0 / option.xdpi - 0.5);
+	    bbox.lly = (int)(devbbox.lly * 72.0 / option.ydpi - 0.5);
+	    bbox.urx = (int)(devbbox.urx * 72.0 / option.xdpi + 1.5);
+	    bbox.ury = (int)(devbbox.ury * 72.0 / option.ydpi + 1.5);
 	    bbox.valid = TRUE;
 	}
 	copy_bbox_header(epsfile); /* adjust %%BoundingBox: comment */

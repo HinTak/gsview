@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvpde.rc */
+/* de\gvplang.rc */
 /* OS/2 PM German language resources */
 
 
@@ -86,6 +86,9 @@ BEGIN
 			MENUITEM "~Englisch", IDM_LANGEN
 			MENUITEM "~Französisch", IDM_LANGFR
 			MENUITEM "~Deutsch", IDM_LANGDE
+/*
+			MENUITEM "~Italienisch", IDM_LANGIT
+*/
 		END
 		SUBMENU "PSzuText", IDM_PSTOTEXTMENU
 		BEGIN
@@ -260,4 +263,3 @@ BEGIN
 	IDS_FILTER_TXT	"*.txt"
 END
 
-

@@ -429,6 +429,7 @@ gsview_selectfile(char *filename)
 	    /* open it ourselves */
 	    PSFILE *tpsfile = gsview_openfile(filename);
 	    if (tpsfile) {
+		psfile_free(&psfile);
 		psfile = *tpsfile;
 		post_img_message(WM_GSTITLE, 0);
 		free(tpsfile);	/* Do NOT free doc and page_list.select */
@@ -838,6 +839,7 @@ psfile_free(PSFILE *psf)
 	if (!debug)
 	    unlink(psf->text_name);
         psf->text_name[0] = '\0';
+	free_text_index();
     }
 }
 
@@ -850,4 +852,3 @@ psfile_name(PSFILE *psf)
     /* otherwise return original file name */
     return psf->name;
 }
-

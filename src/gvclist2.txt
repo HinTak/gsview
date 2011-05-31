@@ -1,3 +1,4 @@
+pstotext.1
 pstotext.txt
 pstotxt2.dll
 pstotxt2.exe

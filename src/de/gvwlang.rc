@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvwde.rc */
+/* de\gvwlang.rc */
 
 /* Windows German language resources */
 
@@ -84,6 +84,9 @@ BEGIN
 			MENUITEM "&Englisch", IDM_LANGEN
 			MENUITEM "&Französisch", IDM_LANGFR
 			MENUITEM "&Deutsch", IDM_LANGDE
+/*
+			MENUITEM "&Italienisch", IDM_LANGIT
+*/
 		END
 		POPUP "PSzuText"
 		BEGIN
@@ -234,4 +237,3 @@ BEGIN
 END
 
 
-

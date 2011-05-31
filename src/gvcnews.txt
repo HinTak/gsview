@@ -1,3 +1,70 @@
+----------------------
+Version 2.5 1998-02-20
+----------------------
+Win:
+  Added support for mouse wheel.  
+    No modifier = vertical scroll.
+    Left button = horizontal scroll.
+    Shift = change page,
+    Ctrl = change resolution by a factor of 1.2.
+
+----------------------------------
+Version 2.44 beta 1998-01-14
+----------------------------------
+All:
+  Put sources for each language in a separate directory.
+  Added partial provision for Italian language.
+  Look for zlib DLL on search path as well as GSview directory.
+  Fixed Goto Page dialog problem with duplicate page labels.
+  When extracting pages from a PostScript file, omit leading ^D
+  or PJL commands.
+  Made print "Reverse Pages" sticky.  It is not sticky for
+  extracting pages.
+  Added -dCompatibilityLevel=1.1 to pdfwrite properties.
+Win32:
+  If ProfileDirectory named value in registry doesn't contain
+  a directory name, ignore it.
+  Added explanation "DLL not found" for error 1157 when loading 
+  GS DLL.
+
+----------------------------------
+Version 2.43 beta 1997-12-19
+----------------------------------
+All:
+  Removed a few small memory leaks.
+  uniprint device was being given an incorrect size because
+  the resolution is unknown.  Use -dDEVICEWIDTHPOINTS instead
+  of -dDEVICEWIDTH for this device.
+  Goto Page dialog box now has an edit field so you can type
+  a page number directly.
+Win:
+  Changed setup/configure logs.  Registry changes are now saved
+  as two ordinary REGEDIT4 files, containing before and after state.  
+  Program Manager settings are saved as a set of DDE commands.
+  Added an uninstall program.  Like all install programs, this 
+  works best if you uninstall in the opposite order of installing.
+  If you install GSview twice, the uninstall won't be as clean.
+
+----------------------------------
+Version 2.42 beta 1997-12-13
+----------------------------------
+All:
+  When calculating bounding box from non-white pixels, round the 
+  area outwards by 1 pixel in each direction.
+  "GSview Print" (gvpgs/gvwgs) displays % complete in title bar.
+  Added uniprint button to Print dialog box.  This brings up a
+  list of available uniprint configuration files.
+  Added Reverse page option for print and extract.
+  If a single contiguous block of pages is selected, Odd and Even buttons
+  will select pages within that range.
+  Advance to next page when "Page Down" at end of page.
+  Go back to previous page when "Page Up" at top of page.
+Win:
+  GSview starts "GSview Print" minimized.
+  Fixed /S"printer queue".
+  Complain if no file for /S.
+  Exit after successful /S, /P or /F.
+
 ----------------------------------
 Version 2.4 (rerelease) 1997-11-30
 ----------------------------------

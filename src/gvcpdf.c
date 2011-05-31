@@ -432,6 +432,7 @@ char filename[MAXSTR];
 char *p;
 int i, page, pages;
 PSDOC *doc = psfile.doc;
+BOOL reverse = psfile.page_list.reverse;
     /* convert \ to / in filename */
     strcpy(filename, psfile_name(&psfile));
     for (p=filename; *p; p++)
@@ -462,6 +463,7 @@ PSDOC *doc = psfile.doc;
     fputs(filename, f);
     fputs("\r\n%%Pages: ", f);
     fprintf(f, "%d\r\n", pages);
+    fprintf(f, "%%%%PageOrder: %s\r\n", reverse ? "Descend" : "Ascend");
     fputs("%%EndComments\r\n", f);
     fputs("%%BeginProlog\r\n", f);
     fputs("\
@@ -480,12 +482,14 @@ pdfdict begin\r\n\
 
     /* Send each page */
     page = 1;
-    for (i = 0; i < doc->numpages; i++) {
+    i = reverse ? doc->numpages - 1 : 0;
+    while ( reverse ? (i >= 0)  : (i < doc->numpages) ) {
 	if (psfile.page_list.select[i])  {
 	    fprintf(f, "%%%%Page: %s %d\r\n", doc->pages[i].label, page);
 	    fprintf(f, "%d DoPDFPage\r\n", i+1);
 	    page++;
 	}
+        i += reverse ? -1 : 1;
     }
 
     /* Send trailer */
@@ -638,4 +642,3 @@ int i = 0;
     return FALSE;
 }
 
-

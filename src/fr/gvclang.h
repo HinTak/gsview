@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -15,12 +15,10 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvcfr.h */
+/* fr\gvclang.h */
 /* Common French language defines */
 
-#define GSVIEW_BASEDIR "gsview"
-
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1997, Russell Lang."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1998, Russell Lang."
 #define GSVIEW_COPYRIGHT2 "Tous droits réservés."
 #define GSVIEW_COPYRIGHT3 "Voir le fichier LICENCE pour plus d'informations."
 
@@ -85,7 +83,7 @@
 #define AACOPY19 "Auteur : Russell Lang  (rjl@aladdin.com)"
 #define AACOPY20 "Une interface sous forme de DLL pour Ghostscript."
 #define AACOPY21 "Ce programme fait partie de GSview."
-#define AACOPY22 "Gestionnaire d'impression GSview Win32s/Win16"
+#define AACOPY22 "Gestionaire d'impression GSview Win32s/Win16"
 
 #define AAINPUT "Entrée"
 
@@ -143,6 +141,7 @@
 #define AAALL "&Toutes"
 #define AAODD "I&mpaires"
 #define AAEVEN "Pai&res"
+#define AAREVERSE "&Ordre inverse"
 #else
 #define AAAPROPERTIES "~Propriétés"
 #define AAALLPAGES "~Toutes"
@@ -151,6 +150,7 @@
 #define AAALL "~Toutes"
 #define AAODD "I~mpaires"
 #define AAEVEN "Pai~res"
+#define AAREVERSE "~Ordre inverse"
 #endif
 
 
@@ -199,7 +199,7 @@
 #define AAINSTALL1 "Programme d'installation de GSview"
 #define AAINSTALLINTRO1 "Cet assistant vous guide pendant toute la durée de l'installation de :"
 #define AAINSTALLINTRO2 "Avant de poursuivre l'installation, veuillez-vous assurer que les fichiers listés dans le fichier README.TXT sont présents dans le répertoire courant ou sur trois disquettes."
-#define AAINSTALLINTRO3 "L'installation nécessite 10 Mo d'espace disque."
+#define AAINSTALLINTRO3 "L'installation nécessite 10 M bytes d'espace disque."
 #define AAINSTALLCOPYRIGHT1 "Informations de Copyright :"
 #define AAINSTALLCOPYRIGHT2 "GSview et Aladdin Ghostscript sont deux programmes distincts."
 #define AAINSTALLCOPYRIGHT3 "Ils sont la propriété de différentes personnes morales."
@@ -207,7 +207,7 @@
 #define AAINSTALLGSVER2 "GSview"
 #define AAINSTALLGSVER3 "Ghostscript"
 #define AAINSTALLGSVER4 "Quelle version de Ghostscript voulez-vous utiliser ?"
-#define AAINSTALLDIR1 "Sélectionnez le répertoire d'installation de GSview et Ghostscript :"
+#define AAINSTALLDIR1 "Selectionnez le répertoire d'installation de GSview et Ghostscript :"
 #define AAINSTALLDIR2 "GSview va être installé dans le sous-répertoire :"
 #define AAINSTALLDIR3 "Ghostscript va être installé dans le sous-répertoire :"
 #define AAINSTALLMKDIR1 "Le répertoire spécifié n'existe pas."
@@ -226,6 +226,7 @@
 #define AAINSTALLCONFIGPM5 "Faire une copie de sauvegarde de l'ancien fichier config.sys"
 #define AAINSTALLFINISH "L'installation peut maintenant commencer.  \r\rCliquez sur Démarrer pour poursuivre."
 #define AAINSTALLUNZIP1 "Décompression des fichiers..."
+#define AAINSTALLEA1 "Mise à jour des attributs étendus"
 #define AADIRNOTEXIST "Le répertoire '%s' n'existe pas.  Voulez-vous qu'il soit créé ?"
 #define AAMKDIRFAIL "Impossible de créer le répertoire"
 #define AABETAWARN "Ceci est une version BETA de GSview.  Elle cessera de fonctionner le %04d-%02d-%02d."
@@ -236,8 +237,8 @@
 #define AAPROGMANGROUP3 "Nom :"
 #define AAPROGMANGROUP4 "GS Tools"
 #define AAPROGMANGROUP5 "Le Groupe de programmes \042%s\042 a été créé."
-#define AAPROGMANGROUP6 "L'objet Programme \042GSview\042 a été créé sur le bureau."
-#define AAPMOBJECT1 "Voulez-vous créer un objet Programme pour GSview sur le bureau ?"
+#define AAPROGMANGROUP6 "L'objet de programme \042GSview\042 a été créé sur le bureau."
+#define AAPMOBJECT1 "Voulez-vous créer un objet de programme pour GSview sur le bureau ?"
 #define AAPMOBJECT2 "Créer un objet."
 #define AADONEBAK "L'ancien fichier autoexec.bat a été renommé %s."
 #define AACANTLOAD "Chargement de %s impossible."
@@ -250,7 +251,9 @@
 #define AAZIPNOTFOUND "Impossible de trouver le fichier ZIP."
 #define AAUNZIPCANCELLED "Décompression interrompue.\n"
 #define AACANTALLOCBUF "Allocation de mémoire pour copier le tampon impossible."
-#define AAPROGRAMOBJECTFAILED "Création d'un objet sur le bureau impossible"
+#define AAPROGRAMOBJECTFAILED "Création de l'objet de programme sur le bureau impossible"
+#define AAUNINSTALLTITLE "GSview et Aladdin Ghostscript"
+#define AAUNINSTALLITEM "Désinstaller GSview et Aladdin Ghostscript"
 
 /* configure */
 #define AAGSVIEWC "GSview :"
@@ -267,13 +270,14 @@
 #define AACFG30 "GSview conserve une liste des imprimantes Ghostscript et\
  de leurs résolutions dans son fichier d'initialisation."
 #define AACFG31 "Par défaut, la liste des imprimantes et de leurs résolutions est extraite de la\
- distribution de Ghostscript version 5.01 et il se peut qu'elle soit incomplète."
+ distribution de Ghostscript version 5.10 et il se peut qu'elle soit incomplète."
 #define AACFG32 "Mettre à jour la liste des imprimantes"
 #define AACFG33 "La mise à jour de la liste des imprimantes va remplacer toutes les entrées déjà existantes."
 #define AACFG40 "GSview peut créer des associations de fichiers pour les types de fichiers PostScript et\
  Portable Document Format (PDF)."
-#define AACFG43 "Grâce à ces associations, double-cliquer sur un fichier PostScript ou PDF lancera\
- GSview qui ouvrira ce fichier. Ces associations permettent également à certains navigateurs WWW\
+#define AACFG43 "Grâce à ces associations, double-cliquer sur un fichier PostScript\
+ ou PDF lancera GSview qui ouvrira ce fichier.\
+  Ces associations permettent également à certains navigateurs WWW\
  d'utiliser GSview comme visualisateur pour les fichiers PostScript et PDF."
 #define AACFG41 "Associer les fichiers PostScript (.ps et .eps) avec GSview."
 #define AACFG42 "Associer les fichiers PDF (.pdf) avec GSview."
@@ -281,7 +285,7 @@
  une entrée dans le menu Démarrer."
 #define AACFG51 "Créer Groupe / entrée"
 #define AACFG52 "Nom :"
-#define AACFG53 "GSview peut créer un objet Programme pour GSview sur le bureau.\
+#define AACFG53 "GSview peut créer objet de programme pour GSview sur le bureau.\
  Ceci va associer les fichiers PostScript (.ps and .eps) et PDF (.pdf) avec GSview."
 #define AACFG54 "Créer un objet."
 #define AACFG60 "GSview peut maintenant commencer la configuration. \r\rCliquez sur Démarrer pour poursuivre."
@@ -291,6 +295,7 @@
  \042Options | Configurer Ghostscript...\042."
 #define AACFG73 "La configuration a échoué."
 #define AACFG74 "Configuration interrompue."
+
 
 /* For gvXgs.rc */
 #define AAGSVIEWPRINT "Impression avec GSview"
@@ -318,3 +323,4 @@
 #define AAENGLISH "English"
 #define AADEUTSCH "Deutsch"
 #define AAFRANCAIS "Français"
+#define AAITALIANO "Italiano"

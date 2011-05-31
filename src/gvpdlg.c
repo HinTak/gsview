@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -308,20 +308,151 @@ show_about()
 		WinDlgBox(HWND_DESKTOP, hwnd_frame, AboutDlgProc, hlanguage, IDD_ABOUT, 0);
 }
 
+/* Return TRUE if a contiguous block of pages (>2) is found */
+/* Store start and end of this range in first and last */
+/* If not contiguous, store entire page range in first and last */
+BOOL
+contiguous_range(HWND hwnd, int *first, int *last)
+{
+int i;
+BOOL gap = FALSE;	/* TRUE is gap found after block */
+BOOL contiguous = TRUE;
+int block = 0;		/* number of pages set in a contiguous block */
+BOOL selected;
+    for (i=0; i<psfile.doc->numpages; i++) {
+	selected = (i == (int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+		LM_QUERYSELECTION, MPFROMSHORT(i-1), (MPARAM)0));
+	if (selected && contiguous) {
+	    if (gap)
+		contiguous = FALSE;
+	    else {
+		if (block == 0)
+		    *first = i;
+		else
+		    *last = i+1;
+		block++;
+	    }
+	}
+	else if (!selected && block)
+	    gap = TRUE;
+    }
+    if (block < 2)
+	contiguous = FALSE;
+    if (!contiguous) {
+	*first = 0;
+	*last = psfile.doc->numpages;
+    }
+    return contiguous;
+}
 
 MRESULT EXPENTRY PageDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
 int i;
 int notify_message;
+static BOOL ecdisable;
     switch(msg) {
     case  WM_INITDLG:
+	{char buf[MAXSTR];
+	for (i=0; i<psfile.doc->numpages; i++) {
+	    WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST),
+	    	LM_INSERTITEM, MPFROMLONG(LIT_END), 
+		MPFROMP(psfile.doc->pages[map_page(i)].label) );
+	}
+	WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST),
+	    	LM_SELECTITEM, MPFROMLONG(psfile.page_list.current), MPFROMLONG(TRUE) );
 /*
-	if (page_list.multiple)
-	    load_string(IDS_SELECTPAGES, buf, sizeof(buf));
-	else
-	    load_string(IDS_SELECTPAGE, buf, sizeof(buf));
-	WinSetWindowText(hwnd, buf);
+	if (psfile.page_list.current > 5)
+	    WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST),
+		LM_SETTOPINDEX, MPFROMLONG(psfile.page_list.current - 5), (MPARAM)0 );
 */
+	WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST), LM_QUERYITEMTEXT, 
+		MPFROM2SHORT(psfile.page_list.current, sizeof(buf)), 
+		MPFROMP(buf) );
+	ecdisable = TRUE;
+	WinSetWindowText( WinWindowFromID(hwnd, PAGE_EDIT), buf);
+	ecdisable = FALSE;
+	WinSendMsg( WinWindowFromID(hwnd, PAGE_EDIT), EM_SETSEL, 
+		MPFROM2SHORT(0, 255), (MPARAM)0);
+	}
+	break;
+    case WM_CONTROL:
+	notify_message = SHORT2FROMMP(mp1);
+	if (SHORT1FROMMP(mp1) == PAGE_LIST)
+	  switch (notify_message) {
+	    case LN_ENTER:
+	        if (SHORT1FROMMP(mp1) == PAGE_LIST)
+		    WinPostMsg(hwnd, WM_COMMAND, (MPARAM)DID_OK, MPFROM2SHORT(CMDSRC_OTHER, TRUE));
+		break;
+	    case LN_SELECT:
+		i = (int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+		    LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+		if (i != LIT_NONE) {
+		    char buf[MAXSTR];
+		    WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST), LM_QUERYITEMTEXT, 
+			MPFROM2SHORT(i, sizeof(buf)), MPFROMP(buf) );
+		    /* Update edit field, but stop edit field from
+		     * from altering list box selection */
+		    ecdisable = TRUE;
+		    WinSetWindowText( WinWindowFromID(hwnd, PAGE_EDIT), buf);
+		    ecdisable = FALSE;
+		}
+		break;
+	}
+	else if ( !ecdisable && (SHORT1FROMMP(mp1) == PAGE_EDIT)
+	   && (notify_message = EN_CHANGE) ) {
+	    char buf[MAXSTR];
+	    WinQueryWindowText(WinWindowFromID(hwnd, PAGE_EDIT), 
+		sizeof(buf), buf);
+	    i = (int)WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST), LM_SEARCHSTRING, 
+		MPFROM2SHORT(LSS_CASESENSITIVE, LIT_FIRST),
+		MPFROMP(buf) );
+	    if (i != LIT_NONE) {
+		WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST),
+		    LM_SELECTITEM, MPFROMLONG(i), MPFROMLONG(TRUE) );
+/*
+		if (i > 5) 
+		    WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST),
+			LM_SETTOPINDEX, MPFROMLONG(i - 5), (MPARAM)0 );
+*/
+	    }
+	}
+	break;
+    case  WM_COMMAND:
+      switch(LOUSHORT(mp1)) {
+        case DID_OK:
+	    i = (int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+		LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+	    if (i == LIT_NONE) {
+                WinDismissDlg(hwnd, DID_CANCEL);
+	    }
+	    psfile.page_list.current = i;
+	    for (i=0; i<psfile.doc->numpages; i++) {
+	        psfile.page_list.select[i] = 0;
+	    }
+	    psfile.page_list.select[psfile.page_list.current] = TRUE;
+            WinDismissDlg(hwnd, DID_OK);
+            return (MRESULT)TRUE;
+	case DID_CANCEL:
+	    WinDismissDlg(hwnd, DID_CANCEL);
+	    return (MRESULT)TRUE;
+	case ID_HELP:
+	    get_help();
+	    return (MRESULT)TRUE;
+      }
+      break;
+    }
+    return WinDefDlgProc(hwnd, msg, mp1, mp2);
+}
+
+MRESULT EXPENTRY PageMultiDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+int i;
+int notify_message;
+    switch(msg) {
+    case  WM_INITDLG:
+	if (psfile.page_list.reverse)
+	    WinSendMsg( WinWindowFromID(hwnd, PAGE_REVERSE),
+		BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
 	for (i=0; i<psfile.doc->numpages; i++) {
 	    WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST),
 	    	LM_INSERTITEM, MPFROMLONG(LIT_END), 
@@ -354,15 +485,23 @@ int notify_message;
 	break;
     case  WM_COMMAND:
       switch(LOUSHORT(mp1)) {
+	case DID_CANCEL:
+	    WinDismissDlg(hwnd, DID_CANCEL);
+	    return (MRESULT)TRUE;
         case DID_OK:
-	    i = (int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
-	    psfile.page_list.current = (i == LIT_NONE) ? -1 : i;
+	    psfile.page_list.reverse = 
+		(int)WinSendMsg( WinWindowFromID(hwnd, PAGE_REVERSE), 
+		    BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+	    i = (int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+		LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+	    psfile.page_list.current = (i == LIT_NONE) ? 0 : i;
 	    for (i=0; i<psfile.doc->numpages; i++) {
 	        psfile.page_list.select[i] = 0;
 	    }
 	    if (psfile.page_list.multiple) {
 	        i = LIT_FIRST;
-	        while ( (i = (int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), LM_QUERYSELECTION, (MPARAM)i, (MPARAM)0))
+	        while ( (i = (int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+			LM_QUERYSELECTION, (MPARAM)i, (MPARAM)0))
 		    != LIT_NONE )
 		    psfile.page_list.select[i] = TRUE;
 	    }
@@ -372,20 +511,38 @@ int notify_message;
             return (MRESULT)TRUE;
 	case PAGE_ALL:
 	    WinEnableWindowUpdate(WinWindowFromID(hwnd, PAGE_LIST), FALSE);
-	    for (i=(int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), LM_QUERYITEMCOUNT, (MPARAM)0, (MPARAM)0)-1; i>=0; i--)
-		WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), LM_SELECTITEM, (MPARAM)i, (MPARAM)TRUE);
+	    for (i=(int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+		LM_QUERYITEMCOUNT, (MPARAM)0, (MPARAM)0)-1; i>=0; i--)
+		WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+		    LM_SELECTITEM, (MPARAM)i, (MPARAM)TRUE);
 	    WinEnableWindowUpdate(WinWindowFromID(hwnd, PAGE_LIST), TRUE);
             return (MRESULT)TRUE;
 	case PAGE_ODD:
 	    WinEnableWindowUpdate(WinWindowFromID(hwnd, PAGE_LIST), FALSE);
-	    for (i=(int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), LM_QUERYITEMCOUNT, (MPARAM)0, (MPARAM)0)-1; i>=0; i--)
-		WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), LM_SELECTITEM, (MPARAM)i, (MPARAM)!(i&1));
+	    { int first, last;
+		contiguous_range(hwnd, &first, &last);
+		for (i=(int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+		    LM_QUERYITEMCOUNT, (MPARAM)0, (MPARAM)0)-1; i>=0; i--)
+		    if (i >= first && i < last)
+		        WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+			    LM_SELECTITEM, (MPARAM)i, (MPARAM)!(i&1));
+		    WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+			LM_SETTOPINDEX, MPFROMSHORT(first), (MPARAM)0);
+	    }
 	    WinEnableWindowUpdate(WinWindowFromID(hwnd, PAGE_LIST), TRUE);
             return (MRESULT)TRUE;
 	case PAGE_EVEN:
 	    WinEnableWindowUpdate(WinWindowFromID(hwnd, PAGE_LIST), FALSE);
-	    for (i=(int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), LM_QUERYITEMCOUNT, (MPARAM)0, (MPARAM)0)-1; i>=0; i--)
-		WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), LM_SELECTITEM, (MPARAM)i, (MPARAM)(i&1));
+	    { int first, last;
+		contiguous_range(hwnd, &first, &last);
+		for (i=(int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+		    LM_QUERYITEMCOUNT, (MPARAM)0, (MPARAM)0)-1; i>=0; i--)
+		    if (i >= first && i < last)
+			WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+			    LM_SELECTITEM, (MPARAM)i, (MPARAM)(i&1));
+		    WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), 
+			LM_SETTOPINDEX, MPFROMSHORT(first), (MPARAM)0);
+	    }
 	    WinEnableWindowUpdate(WinWindowFromID(hwnd, PAGE_LIST), TRUE);
             return (MRESULT)TRUE;
 	case ID_HELP:
@@ -411,6 +568,8 @@ int i;
 		gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
 		return FALSE;
 	}
+	// Make psfile.page_list.reverse sticky
+        // psfile.page_list.reverse = FALSE;
 	psfile.page_list.current = *ppage - 1;
 	psfile.page_list.multiple = multiple;
 	if (psfile.page_list.select == (BOOL *)NULL)
@@ -425,7 +584,7 @@ int i;
 		psfile.page_list.select[psfile.page_list.current] = TRUE;
 
 	if (psfile.page_list.multiple)
-	    flag = WinDlgBox(HWND_DESKTOP, hwnd_frame, PageDlgProc, hlanguage, IDD_MULTIPAGE, NULL);
+	    flag = WinDlgBox(HWND_DESKTOP, hwnd_frame, PageMultiDlgProc, hlanguage, IDD_MULTIPAGE, NULL);
 	else
 	    flag = WinDlgBox(HWND_DESKTOP, hwnd_frame, PageDlgProc, hlanguage, IDD_PAGE, NULL);
 	if ((flag == DID_OK) && (psfile.page_list.current >= 0))

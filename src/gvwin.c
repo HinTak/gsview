@@ -294,12 +294,18 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	play_sound(SOUND_EXIT);
 	gsview_close();
 	DestroyWindow(hwndimg);
+	delete_buttons();
 	free_SetScrollInfo();
  	WinHelp(hwndimg,szHelpName,HELP_QUIT,(DWORD)NULL);
 	if (hlib_mmsystem != (HINSTANCE)NULL)
 	    FreeLibrary(hlib_mmsystem);
 	if ((hlanguage != (HINSTANCE)NULL) && (hlanguage != phInstance))
 	    FreeLibrary(hlanguage);
+
+#ifdef DEBUG_MALLOC
+        if (malloc_file)
+	    fclose(malloc_file);
+#endif
 	return 0;
 }
 
@@ -499,7 +505,32 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				bitmap.scrolly = nVscrollPos;
 				UpdateWindow(hwnd);
 			}
-
+			else if (gsdll.state != IDLE) {
+			    /* We are at the top or bottom of the 
+			     * scroll range.  Change page if 
+			     * PageUp or PageDown pressed. */
+			    int numpages = 0;
+			    request_mutex();
+			    if (psfile.doc != (PSDOC *)NULL)
+				numpages = psfile.doc->numpages;
+			    release_mutex();
+			    switch(LOWORD(wParam)) {
+			        case SB_PAGEUP:
+				  if ((psfile.doc != (PSDOC *)NULL)
+					&& (psfile.pagenum != 1)) {
+				    PostMessage(hwnd ,WM_VSCROLL, SB_BOTTOM,0L);
+				    gsview_command(IDM_PREV);
+				  }
+				  break;
+			        case SB_PAGEDOWN:
+				  if ((psfile.doc == (PSDOC *)NULL)
+					|| (psfile.pagenum < numpages)) {
+				    PostMessage(hwnd ,WM_VSCROLL, SB_TOP,0L);
+				    gsview_command(IDM_NEXT);
+				  }
+				  break;
+			    }
+			}
 
 			return(0);
 		case WM_HSCROLL:
@@ -829,6 +860,10 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
+#ifndef WM_MOUSEWHEEL
+#define WM_MOUSEWHEEL 0x020A
+#define WHEEL_DELTA 120
+#endif
 
 /* parent overlapped window */
 LRESULT CALLBACK _export
@@ -841,6 +876,87 @@ RECT rect;
 	return 0;
     } else
     switch(message) {
+#ifdef __WIN32__
+	case WM_MOUSEWHEEL:
+	    /* If Wheel Mice become available with a step size < WHEEL_DELTA,
+	     * this code will need to be rewritten */
+	    if (LOWORD(wParam) == MK_SHIFT) {
+		/* change page */
+		int numpages = 0;
+		int skip = HIWORD(wParam);
+		if (skip > 0x7fff)
+		   skip = skip - 0x10000L;
+		skip = -skip / WHEEL_DELTA;
+		request_mutex();
+		if (psfile.doc != (PSDOC *)NULL)
+		    numpages = psfile.doc->numpages;
+		release_mutex();
+	    
+		if ( (skip < 0)  && 
+		     (psfile.doc != (PSDOC *)NULL) && 
+		     (psfile.pagenum != 1)) {
+			PostMessage(hwnd ,WM_VSCROLL, SB_BOTTOM,0L);
+			gs_page_skip(skip);
+		}
+		else if ( (skip > 0) && 
+		    ((psfile.doc == (PSDOC *)NULL)
+		    || (psfile.pagenum < numpages)) ) {
+			PostMessage(hwnd ,WM_VSCROLL, SB_TOP,0L);
+			if (psfile.doc == (PSDOC *)NULL)
+			    skip = 1;
+			gs_page_skip(skip);
+		}
+	    }
+	    else if (LOWORD(wParam) ==  MK_CONTROL) {
+		float scale = 1.0;
+		int scroll_increment;
+		scroll_increment = HIWORD(wParam);
+		if (scroll_increment > 0x7fff)
+		    scroll_increment -= 0x10000L;
+		scroll_increment = -scroll_increment;
+		if (scroll_increment > 0) {
+		    while (scroll_increment > 0) {
+			scale *= 1.20;
+			scroll_increment -= WHEEL_DELTA;
+		    }
+		    gs_magnify(scale);
+		}
+		else if (scroll_increment < 0) {
+		    while (scroll_increment < 0) {
+			scale /= 1.20;
+			scroll_increment += WHEEL_DELTA;
+		    }
+		    gs_magnify(scale);
+		}
+	    }
+	    else if (LOWORD(wParam) == MK_LBUTTON) {
+		/* horizontal scroll */
+		int scroll_increment;
+		GetClientRect(hwnd, &rect);
+		scroll_increment = HIWORD(wParam);
+		if (scroll_increment > 0x7fff)
+		    scroll_increment -= 0x10000L;
+		scroll_increment = scroll_increment 
+		    * ((rect.right-rect.left)/16) 
+		    / WHEEL_DELTA;
+		PostMessage(hwndimgchild, WM_HSCROLL, 
+		    MAKELONG(SB_FIND, scroll_increment), 0);
+	    }
+	    else {
+		/* vertical scroll */
+		int scroll_increment;
+		GetClientRect(hwnd, &rect);
+		scroll_increment = HIWORD(wParam);
+		if (scroll_increment > 0x7fff)
+		    scroll_increment -= 0x10000L;
+		scroll_increment = -scroll_increment
+		    * ((rect.bottom-rect.top)/16) 
+		    / WHEEL_DELTA;
+		PostMessage(hwndimgchild, WM_VSCROLL, 
+		    MAKELONG(SB_FIND, scroll_increment), 0);
+	    }
+	    return 0;
+#endif
 	case WM_GSV16SPL:
 	    hwndspl = (HWND)lParam;	   /* gsv16spl.c window handle */
 	    return 0;
@@ -1552,8 +1668,9 @@ int i;
 char buf[MAXSTR];
 char fmt[MAXSTR];
 HFONT old_hfont;
-PSDOC *doc = psfile.doc;
+PSDOC *doc;
     request_mutex();
+    doc = psfile.doc;
     SetBkMode(hdc, TRANSPARENT);
     if (info_font)
 	old_hfont = SelectObject(hdc, info_font);

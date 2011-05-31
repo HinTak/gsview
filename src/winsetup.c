@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.;
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.;
   
   This file is part of GSview.
   
@@ -21,7 +21,6 @@
 #define STRICT
 #include <windows.h>
 #include <windowsx.h>
-#include <ddeml.h>
 #include <shellapi.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,6 +43,7 @@
 #include "setupc.h"
 
 void install_init(void);
+int gsview_progman(char *groupname, char *gsviewpath, char *gspath, char *gsargs);
 
 BOOL CALLBACK _export ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK _export MainDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
@@ -67,6 +67,12 @@ char szIniName[]="gsview16.ini";
 #endif
 int is_win32s;
 int is_win4;
+
+#ifdef __WIN32__
+/* early versions of Win32s don't support lstrcpyn */
+#undef lstrcpyn
+#define lstrcpyn(d,s,n) strncpy(d,s,n)
+#endif
 
 int
 dialog(int resource, DLGPROC dlgproc) 
@@ -277,122 +283,51 @@ char buf[16];
     return 0;
 }
 
-#ifdef __BORLANDC__
-#pragma argsused	/* ignore warning for next function */
-#endif
-HDDEDATA CALLBACK 
-DdeCallback(UINT type, UINT fmt, HCONV hconv,
-    HSZ hsz1, HSZ hsz2, HDDEDATA hData, DWORD dwData1, DWORD dwData2)
-{
-  switch (type) {
-    default:
-	return (HDDEDATA)NULL;
-  }
-}
-
-#ifdef __WIN32__
-#define GSVIEW_NAME "GSview"
-#else
-#define GSVIEW_NAME "GSview 16"
-#endif
-
 int
 create_object(void)
 {
-DWORD idInst = 0L;
-FARPROC lpDdeProc;
-HSZ hszServName;
-HSZ hszSysTopic;
-HCONV hConv;
-char setup[MAXSTR+MAXSTR];
-char buf[MAXSTR];
-DWORD dwResult;
-
-    fprintf(unziplogfile, "\n[ProgMan]\n");
-    lpDdeProc = MakeProcInstance((FARPROC)DdeCallback, phInstance);
-    if (DdeInitialize(&idInst, (PFNCALLBACK)lpDdeProc, CBF_FAIL_POKES, 0L)) {
-#ifndef __WIN32__
-	FreeProcInstance(lpDdeProc);
-#endif
-	return 1;
-    }
-    hszServName = DdeCreateStringHandle(idInst, "PROGMAN", CP_WINANSI);
-    hszSysTopic = DdeCreateStringHandle(idInst, "PROGMAN", CP_WINANSI);
-    hConv = DdeConnect(idInst, hszServName, hszSysTopic, (PCONVCONTEXT)NULL);
-    if (hConv == NULL) {
+int rc;
+char gspath[MAXSTR], gsargs[MAXSTR];
+char gsviewpath[MAXSTR];
+    sprintf(gspath, "%s\\%s\\", destdir, gs_basedir);
+    sprintf(gsargs, "%s\\%s;%s\\%s\\fonts", destdir, gs_basedir, 
+	destdir, gs_basedir);
+    sprintf(gsviewpath, "%s\\%s\\", destdir, gsviewbase);
+    rc = gsview_progman(groupname, gsviewpath, gspath, gsargs);
+    if (rc)
 	load_string(IDS_NODDEPROGMAN, error_message, sizeof(error_message));
-	return 1;
-    }
-
-#define DDEEXECUTE(str)\
-    DdeClientTransaction((LPBYTE)str, strlen(str)+1, hConv,\
-	NULL, CF_TEXT, XTYP_EXECUTE, 2000, &dwResult)
-
-    fprintf(unziplogfile, "ShowGroup=\042%s\042,1\n",groupname);
-    sprintf(setup, "[CreateGroup(\042%s\042,%s.grp)][ShowGroup(\042%s\042,1)]",
-	groupname, groupfile, groupname);
-    DDEEXECUTE(setup);
-    fprintf(unziplogfile, "DeleteItem=\042%s\042\n",GSVIEW_NAME);
-    sprintf(setup, "[ReplaceItem(\042%s\042)]", GSVIEW_NAME);
-    DDEEXECUTE(setup);
-    if (!is_win4)
-       sprintf(setup, "[AddItem(\042%s\\%s\\%s\042,\042%s\042, \042%s\\%s\\gsview32.ico\042)]", 
-	  destdir, gsviewbase, GSVIEW_EXENAME, GSVIEW_NAME, destdir, gsviewbase);
-    else
-       sprintf(setup, "[AddItem(\042%s\\%s\\%s\042,\042%s\042)]", 
-	  destdir, gsviewbase, GSVIEW_EXENAME, GSVIEW_NAME);
-    DDEEXECUTE(setup);
-
-/* Win3.1 documentation says you must put quotes around names */
-/* with embedded spaces. */
-/* In Win95, it appears you must put quotes around the EXE name */
-/* and options separately */
-
-    fprintf(unziplogfile, "DeleteItem=\042GSview README\042\n");
-    sprintf(setup, "[ReplaceItem(\042GSview README\042)]");
-    DDEEXECUTE(setup);
-    if (!is_win4)
-	sprintf(setup, "[AddItem(\042notepad.exe %s\\%s\\README.TXT\042,\042GSview README\042)]", 
-	    destdir, gsviewbase);
-    else
-	sprintf(setup, "[AddItem(\042notepad.exe\042 \042%s\\%s\\README.TXT\042,\042GSview README\042,\042notepad.exe\042,1)]", 
-	    destdir, gsviewbase);
-    DDEEXECUTE(setup);
-
-    fprintf(unziplogfile, "DeleteItem=\042Ghostscript\042\n");
-    sprintf(setup, "[ReplaceItem(\042Ghostscript\042)]");
-    DDEEXECUTE(setup);
-    if (!is_win4)
-        sprintf(setup, "[AddItem(\042%s\\%s\\%s -I%s\\%s;%s\\%s\\fonts\042,\042Ghostscript\042, \042%s\\%s\\gstext.ico\042)]", 
-	    destdir, gs_basedir, GS_EXENAME, destdir, gs_basedir, destdir, gs_basedir,  destdir, gs_basedir);
-    else
-        sprintf(setup, "[AddItem(\042%s\\%s\\%s\042 \042-I%s\\%s;%s\\%s\\fonts\042,\042Ghostscript\042)]", 
-	    destdir, gs_basedir, GS_EXENAME, destdir, gs_basedir, destdir, gs_basedir);
-    DDEEXECUTE(setup);
-
-    fprintf(unziplogfile, "DeleteItem=\042Ghostscript README\042\n");
-    sprintf(setup, "[ReplaceItem(\042Ghostscript README\042)]");
-    DDEEXECUTE(setup);
-    if (!is_win4)
-        sprintf(setup, "[AddItem(\042notepad.exe %s\\%s\\README.\042,\042Ghostscript README\042)]", 
-	     destdir, gs_basedir);
-    else
-        sprintf(setup, "[AddItem(\042notepad.exe\042 \042%s\\%s\\README.\042,\042Ghostscript README\042, \042notepad.exe\042,1)]", 
-	     destdir, gs_basedir);
-    DDEEXECUTE(setup);
-#undef DDEXECUTE
-
-    fprintf(unziplogfile, "DeleteGroup=\042%s\042\n", groupname);
-    DdeDisconnect(hConv);
-    DdeUninitialize(idInst);
 
     /* tell user what we have done */
-    load_string(IDS_PROGMANGROUP5, setup, sizeof(setup));
-    sprintf(buf, setup, groupname);
-    SetDlgItemText(find_page_from_id(IDD_DONE)->hwnd, IDD_DONE_GROUP, buf);
+    load_string(IDS_PROGMANGROUP5, gsargs, sizeof(gsargs));
+    sprintf(gspath, gsargs, groupname);
+    SetDlgItemText(find_page_from_id(IDD_DONE)->hwnd, IDD_DONE_GROUP, gspath);
 
-    return 0;
+#ifdef __WIN32__
+    /* Create default registry entries for Ghostscript */
+    if (!is_win32s) {
+	HKEY hkey;
+	LONG lrc;
+	char buf[MAXSTR];
+	sprintf(buf, "SOFTWARE\\Aladdin Ghostscript\\%d.%02d", 
+	    gsver / 100, gsver % 100);
+	lrc = RegCreateKey(HKEY_LOCAL_MACHINE, buf, &hkey);
+	if (lrc == ERROR_SUCCESS) {
+	    lrc = RegSetValueEx(hkey, "GS_LIB", 0, REG_SZ, 
+		(CONST BYTE *)gsargs, strlen(gsargs)+1);
+	    sprintf(buf, "%s\\%s", gspath, GS_DLLNAME);
+	    if (lrc == ERROR_SUCCESS)
+		lrc = RegSetValueEx(hkey, "GS_DLL", 0, REG_SZ, 
+		    (CONST BYTE *)gspath, strlen(gspath)+1);
+	    RegCloseKey(hkey);
+	}
+	if (lrc != ERROR_SUCCESS)
+	    rc = 1;
+    }
+#endif
+
+    return rc;
 }
+
 
 DLGPROC lpMainDlgProc;
 DLGPROC lpChildDlgProc;
@@ -546,6 +481,9 @@ HINSTANCE hInstance;
 	case IDM_LANGFR:
 	    strcat(langdll, "fr");
 	    break;
+	case IDM_LANGIT:
+	    strcat(langdll, "it");
+	    break;
 	case IDM_LANGEN:
 	default:
 	    hlanguage = phInstance;
@@ -579,6 +517,7 @@ LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDM_LANGEN:
                 case IDM_LANGDE:
                 case IDM_LANGFR:
+                case IDM_LANGIT:
                     EndDialog(hDlg, LOWORD(wParam));
                     return(TRUE);
                 default:
@@ -615,6 +554,7 @@ int language;
 	    case IDM_LANGEN:
 	    case IDM_LANGDE:
 	    case IDM_LANGFR:
+	    case IDM_LANGIT:
 		load_language(language);
 	}
     }
@@ -861,17 +801,4 @@ ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return FALSE;
 }
 
-
-/* uninstall */
-/* HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\GSview */
-/*   DisplayName="GSview" */
-/*   UninstallString=""c:\gstools\setup.exe" /uninstall"
-/* delete x:\gstools\* */
-/*    use a log of installed files */
-/* delete .ini file */
-/* delete registry entries */
-/*    only if they really are GSview related */
-/*    keep record of keys added */
-/* delete program group */
-/*    want this to fail if user has added to contents of group */
 

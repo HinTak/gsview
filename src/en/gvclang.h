@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -15,12 +15,10 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvcen.h */
+/* en\gvclang.h */
 /* Common English language defines */
 
-#define GSVIEW_BASEDIR "gsview"
-
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1997 Russell Lang."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1998 Russell Lang."
 #define GSVIEW_COPYRIGHT2 "All rights reserved."
 #define GSVIEW_COPYRIGHT3 "See the file LICENCE for more details."
 
@@ -143,6 +141,7 @@
 #define AAALL "&All"
 #define AAODD "O&dd"
 #define AAEVEN "&Even"
+#define AAREVERSE "&Reverse"
 #else
 #define AAAPROPERTIES "~Properties"
 #define AAALLPAGES "~All Pages"
@@ -151,6 +150,7 @@
 #define AAALL "~All"
 #define AAODD "O~dd"
 #define AAEVEN "~Even"
+#define AAREVERSE "~Reverse"
 #endif
 
 
@@ -252,6 +252,8 @@
 #define AAUNZIPCANCELLED "Unzip cancelled\n"
 #define AACANTALLOCBUF "Can't allocate memory for copy buffer"
 #define AAPROGRAMOBJECTFAILED "Couldn't create desktop program object"
+#define AAUNINSTALLTITLE "GSview and Aladdin Ghostscript"
+#define AAUNINSTALLITEM "Uninstall GSview and Aladdin Ghostscript"
 
 /* configure */
 #define AAGSVIEWC "GSview:"
@@ -266,7 +268,7 @@
 #define AACFG22 "In which directory is Ghostscript located?"
 #define AACFG23 "Search for additional Type 1 fonts in"
 #define AACFG30 "GSview keeps a list of Ghostscript printer devices and\
- resolutions in its initialization file."
+ resolutions in its initialisation file."
 #define AACFG31 "The default list of devices and resolutions is taken from the standard\
  distribution version of Ghostscript 5.01 and may not be complete."
 #define AACFG32 "Update GSview printer list" 
@@ -321,3 +323,5 @@
 #define AAENGLISH "English"
 #define AADEUTSCH "Deutsch"
 #define AAFRANCAIS "Français"
+#define AAITALIANO "Italiano"
+

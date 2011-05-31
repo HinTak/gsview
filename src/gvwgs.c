@@ -54,10 +54,7 @@ FILE *infile;
 
 unsigned long lsize, ldone;
 int pcdone;
-char *pcdonefmt = "Input %d%%";
-char pcdonestr[16];
-RECT pcrect;
-POINT pcpt;
+char title[64];
 
 /* forward declarations */
 void show_about(void);
@@ -67,8 +64,6 @@ int get_args(LPSTR lpszCmdLine, int *pargc, char **pargv[]);
 int parse_args(int argc, char *argv[]);
 void text_update(void);
 LRESULT CALLBACK _export ClientWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-void pc_coord(void);
-void pc_update(HDC hdc);
 int message_box(char *str, int icon);
 void saveas(void);
 void gs_thread(void *arg);
@@ -86,7 +81,7 @@ void gs_thread(void *arg);
 int PASCAL 
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmdShow)
 {
-    int argc;
+    int i, argc;
     char **argv;
     MSG msg;
     phInstance = hInstance;
@@ -124,6 +119,10 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	    unlink(filename);
     }
 
+    for (i=0; i<argc; i++)
+	free(argv[i]);
+    free(argv);
+
     DestroyWindow(hwnd_client);
     return 0;
 }
@@ -137,10 +136,10 @@ TEXTMETRIC tm;
 LOGFONT lf;
 HMENU hmenu;
 RECT rect;
-DWORD version = GetVersion();
 
 	/* figure out which version of Windows */
 #ifdef __WIN32__
+DWORD version = GetVersion();
 	/* Win32s: bit 15 HIWORD is 1 and bit 14 is 0 */
 	/* Win95:  bit 15 HIWORD is 1 and bit 14 is 1 */
 	/* WinNT:  bit 15 HIWORD is 0 and bit 14 is 0 */
@@ -179,7 +178,7 @@ DWORD version = GetVersion();
 	ReleaseDC(NULL, hdc);
 	char_size.x = tm.tmAveCharWidth;
 	char_size.y = tm.tmHeight;
-        status_height = 6*char_size.y/4;
+        status_height = 0 /* 6*char_size.y/4 */;
 
 	hwnd_client = CreateWindow(szAppName, (LPSTR)szAppName,
 		  WS_OVERLAPPEDWINDOW,
@@ -200,7 +199,6 @@ DWORD version = GetVersion();
 		hwnd_client, (HMENU)TEXTWIN_MLE, phInstance, NULL);
 	SendMessage(hwnd_text, WM_SETFONT, (WPARAM)hfont, MAKELPARAM(TRUE, 0));
 	ShowWindow(hwnd_text, SW_SHOWNA);
-        pc_coord();
 
 	return 0;
 }
@@ -211,14 +209,7 @@ DWORD version = GetVersion();
 LRESULT CALLBACK _export
 ClientWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-PAINTSTRUCT ps;
-HDC hdc;
     switch(message) {
-	case WM_PAINT:
-		hdc = BeginPaint(hwnd, &ps);
-	        pc_update(hdc);
-		EndPaint(hwnd, &ps);
-		return 0;
 /*	case WM_CLOSE:   */
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -229,18 +220,14 @@ HDC hdc;
 		SetWindowPos(hwnd_text, HWND_TOP, 0, 0, 
 		    LOWORD(lParam), HIWORD(lParam)-status_height,
 		    SWP_SHOWWINDOW);
-		pc_coord();
 	    }
 	case WM_TEXTUPDATE:
 	    text_update();
 	    break;
 	case WM_PCUPDATE:
-	    sprintf(pcdonestr, pcdonefmt, (int)(wParam));
-	    { HDC hdc;
-	    hdc = GetDC(hwnd_client);
-	    pc_update(hdc);
-	    ReleaseDC(hwnd, hdc);
-	    }
+	    sprintf(title, "%d%% - %s", 
+		(int)(wParam) > 100 ? 100 : (int)(wParam) , szAppName);
+	    SetWindowText(hwnd, title);
 	    return 0;
 	case WM_COMMAND:
 	    switch(LOWORD(wParam)) {
@@ -488,6 +475,7 @@ It is intended that gvwgs be called with temporary files\n";
     /* find length of file */
     fseek(infile, 0L, SEEK_END);
     lsize = ftell(infile);
+    lsize = lsize / 100;	/* to get percent values */
     if (lsize <= 0)
 	lsize = 1;
     fseek(infile, 0L, SEEK_SET);
@@ -508,7 +496,7 @@ AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
         case WM_INITDIALOG:
-            SetDlgItemText(hDlg, ABOUT_VERSION, GVWGS_VERSION);
+            SetDlgItemText(hDlg, ABOUT_VERSION, GSVIEW_VERSION);
             return( TRUE);
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
@@ -536,33 +524,6 @@ show_about(void)
 #endif
 }
 
-void
-pc_coord(void)
-{
-RECT rect;
-    GetClientRect(hwnd_client, &rect);
-    pcrect.left = 2*char_size.x;
-    pcrect.bottom = rect.bottom;
-    pcrect.right = pcrect.left + 20 * char_size.x;
-    pcrect.top = pcrect.bottom - status_height;
-    pcpt.x = pcrect.left;
-    pcpt.y = pcrect.bottom - char_size.y - 2;
-}
-
-void
-pc_update(HDC hdc)
-{
-HBRUSH hbrush;
-HFONT old_hfont;
-    hbrush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
-    FillRect(hdc, &pcrect, hbrush);
-    DeleteObject(hbrush);
-    SetBkMode(hdc, TRANSPARENT);
-    SetTextColor(hdc, GetSysColor(COLOR_BTNTEXT));
-    old_hfont = SelectObject(hdc, hfont);
-    TextOut(hdc, pcpt.x, pcpt.y, pcdonestr, strlen(pcdonestr));
-    SelectObject(hdc, old_hfont);
-}
 
 /* display message */
 int 
@@ -807,8 +768,8 @@ int code;
     while ((len = fread(buf, 1, sizeof(buf), infile)) != 0) {
 	code = gsdll.execute_cont(buf, len);
 	ldone += len;
-	if (pcdone != (ldone * 100 ) / lsize) {
-	    pcdone = (int)((ldone * 100) / lsize);
+	if (pcdone != (int)(ldone / lsize)) {
+	    pcdone = (int)(ldone / lsize);
 	    PostMessage(hwnd_client, WM_PCUPDATE, (WPARAM)pcdone, 0);
 	}
 	if (code) {
@@ -833,8 +794,9 @@ int code;
     /* tell main thread to shut down */
     if ((code == 0) && (!debug))
 	PostMessage(hwnd_client, WM_QUIT, 0, 0);
+    else 
+	ShowWindow(hwnd_client, SW_SHOWNORMAL);
 /*
 */
 }
 
-

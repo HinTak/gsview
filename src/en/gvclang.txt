@@ -7,7 +7,7 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 2.4 requires Ghostscript 4.03 - 5.99.
+ GSview 2.5 requires Ghostscript 4.03 - 5.99.
  GSview was inspired by Tim Theisen's X11 Ghostview program.
 2Installation
 ?Installation
@@ -22,6 +22,16 @@
  See also `Options` | `Language`.
 3Uninstalling GSview and Ghostscript
 ?Uninstalling GSview and Ghostscript
+W
+ To uninstall GSview and Ghostscript from Windows 95 or NT 4.0,
+ use `Add/Remove Programs` from the Windows `Control Panel`.
+
+ For Windows NT 3.5 or Windows 3.1, use the
+ "Uninstall GSview and Aladdin Ghostscript" program
+ in the `GS Tools` group.
+4Manual uninstallation
+?Manual uninstallation
+E
  To uninstall GSview, remove the files in the `gsview ` directory.
  To uninstall Ghostscript, remove the files in the `gsN.NN` directory
  where N.NN is the version number of Ghostscript.
@@ -48,8 +58,11 @@ W
   psfile
   .eps
   .ps
-  pdffile  (if you associated PDF with GSview)
-  .pdf     (if you associated PDF with GSview)
+  MIME\Database\Content Type\application/postscript
+ If you associated PDF with GSview you will also need to remove
+  pdffile
+  .pdf
+  MIME\Database\Content Type\application/pdf
 E
 3Manual Installation
 ?Manual Installation
@@ -147,6 +160,7 @@ E
  If you have problems, try reading the help topic `Common Problems`.
 3Network Installation
 ?Network Installation
+?User Profiles
  Install GSview to a network directory.
 
  When a user starts GSview for the first time, or starts GSview
@@ -175,7 +189,7 @@ E
  user profile directory to the GSview directory, then edit it to
  remove all entries except for:
   [Options]
-  Version=2.4
+  Version=2.5
   GSversion=510
   Configured=1
   GhostscriptDLL=E:\GSTOOLS\gs5.10\gsdll32.dll
@@ -197,6 +211,28 @@ E
  4. Program Manager groups / Start menu items / Program objects
  will NOT be changed.
  If you wish to change these you must use `Options` | `Configure`.
+W
+
+ If a user tries to use the GSview uninstall program, it will
+ try to delete the GSview and Ghostscript files on the network.
+ Make sure the GSview and Ghostscript directories are not writeable
+ by users.
+ To be extra safe, you may wish to remove the file `win32.log` from
+ the GSview directory.  This is the list of files that the
+ uninstall program will remove.
+
+ The uninstall program will also delete all registry keys in
+ `win32new.reg` and then restore the registry keys in `win32old.reg`.
+ These keys are those of the user who installed GSview
+ on the network.  To disable this, delete these files.
+
+ The file `win32dde.log` contains the Program Manager DDE commands
+ that the uninstall program will use.
+
+ If any or all of `win32.log`, `win32new.reg`, `win32old.reg`
+ and `win32dde.log` are missing, the uninstall program will not
+ complain.
+E
 3Ghostscript Installation
 ?Ghostscript Installation
  WARNING: SOME OF THE INFORMATION BELOW IS OLD.
@@ -628,7 +664,8 @@ E
  then select the `pdfwrite` device and `Print to File`.
 
  To convert a PDF file to a PostScript file, use `File` |
- `Extract`.
+ `Extract`.  If you reverse the page order, the PostScript file
+ will not include the correct DSC %%PageOrder comment.
 
  To batch convert multiple files, look at ps2pdf.bat and pdf2ps.bat
  in the Ghostscript directory.
@@ -676,6 +713,8 @@ E
  document to a new document.  For example, ten pages can be extracted
  from the middle of the current document and written to another file,
  which will later be sent to a printer.
+ If you select `Reverse`, the extracted pages will be in descending
+ order.
 
  The `Close` command closes the currently open document.
  This should be used before the current file is changed by another
@@ -844,9 +883,13 @@ E
  user co-ordinates (1/72 inch).
 
  `Orientation `is the default page orientation and is either
- `Portrait `or` Landscape`.
+ `Portrait `or` Landscape`.  See the `Orientation` menu.
 
  `Page Order` is either `Ascending`, `Descending` or `Special`.
+ If `Page Order` is `Descending`, GSview automatically reverses
+ the pages when displaying or printing so they appear in
+ ascending order.  When extracting or printing, GSview can
+ be instructed to print pages in descending (reverse) order.
 
  `Default Media` gives the media name followed by the width and
  height of that media in default user co-ordinates (1/72 inch).
@@ -861,6 +904,7 @@ E
 ?Print
 ?Print To File
 ?Print File
+?uniprint
  The `Print` command on the `File `menu allows printing of the document
  using Ghostscript.
  A `Printer Setup` dialog box allows selection of
@@ -869,6 +913,10 @@ E
 
  All pages, individual pages or any combination may be printed.
  The `All`, `Odd` and `Even` buttons provide quick selection of pages.
+ If a single contiguous block of pages is marked, the `Odd` and `Even`
+ buttons will select odd or even pages within this range.
+ The `Reverse` check box causes the pages to be printed in
+ descending order.
 
 W
  The `mswinpr2` printer driver uses the Windows printer drivers
@@ -936,6 +984,16 @@ E
  printer drivers.
  This is useful for sending a document to a PostScript printer,
  or for sending an output file produced by Ghostscript to a printer.
+
+ The `Options `field contains a Ghostscript command line option
+ for the selected device.
+
+ The `uniprint` button selects the uniprint device and displays a list
+ of available configuration files (*.upp) for the uniprint device.
+ If you select one of these configuration files, the configuration file
+ name will be placed in the `Options `field of the Printer Setup.
+ See the Ghostscript file `devices.txt` for details of how to configure
+ the uniprint device.
 3Spooler
 ?Spooler
  The
@@ -1846,6 +1904,7 @@ W
   gsview32 [/D] [/Tn] /F filename
   gsview32 [/D] [/Tn] /P filename
   gsview32 [/D] [/Tn] /S[port] filename
+  gsview32 [/D] [/Tn] /S["queue"] filename
 P
   gvpm [/D] [/Tn] filename
   gvpm [/D] [/Tn] /F filename
@@ -1879,6 +1938,9 @@ W
  To start GSview and spool filename.ps for printing directly to
  printer port LPT3: use:
   gsview32 /SLPT3: filename.ps
+ To start GSview and spool filename.ps for printing directly to
+ printer queue "HP DeskJet Portable" use:
+  gsview32 /S"HP DeskJet Portable" filename.ps
 E
 
  To start GSview in debug mode use:
@@ -1928,7 +1990,7 @@ W
 P
   GVPM.EXE - A Ghostscript graphical interface
 E
-  Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+  Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   Portions Copyright (C) 1994, Timothy O. Theisen.  All rights reserved.
 
  This file is part of GSview.
@@ -2134,6 +2196,28 @@ E
  environment variable GS_OPTIONS.  When using GSview, it is safest
  not to use GS_OPTIONS at all and to use `Options` |
  `Configure Ghostscript` | `Ghostscript Options` instead.
+W
+2Other Useful Programs
+?Other Useful Programs
+?RedMon
+?PrintFile
+ `RedMon` is a Windows 95 and NT port monitor, which allows you
+ to redirect a printer port to a program.
+ RedMon can be used with Ghostscript and a non-PostScript printer
+ to emulate a PostScript printer.  This emulated PostScript printer
+ can be shared on a computer network and appears as a PostScript
+ printer to network clients.   More details at:
+  http://www.cs.wisc.edu/~ghost/redmon/
+ RedMon also includes a command line utility for writing a file
+ to a Windows printer queue.
+
+ `PrintFile` by Peter Lerup is a Windows GUI application for
+ sending files to a printer.  It provides smart processing for
+ text, PostScript and other files.  It is available from:
+   http://hem1.passagen.se/ptlerup/
+
+ See the Ghostscript `WWW` page for more useful programs.
+E
 2Other Help Topics
 ?Other Help Topics
  These topics are usually accessed by pressing the `Help` button

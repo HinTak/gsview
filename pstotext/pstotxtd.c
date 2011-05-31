@@ -13,7 +13,10 @@
 #ifndef MSDOS
 #ifdef _Windows
 #include <windows.h>
-#include <dir.h>
+#include <io.h>
+#ifndef __BORLANDC__
+#define mktemp(t) _mktemp(t)
+#endif
 #else
 #define INCL_DOS
 #include <os2.h>
@@ -26,7 +29,7 @@
 #include <string.h>
 
 #ifdef MSDOS
-#include <dir.h>
+#include <io.h>
 #include <ctype.h>
 #include "bundle.h"
 #include "ocr.h"
@@ -123,7 +126,11 @@ char *p;
 	p = dllname;
     *p = '\0';
 #ifdef __WIN32__
+#ifdef DECALPHA
+    strcat(dllname, "pstotxta.dll");
+#else
     strcat(dllname, "pstotxt3.dll");
+#endif
 #else
     strcat(dllname, "pstotxt1.dll");
 #endif
@@ -386,7 +393,7 @@ char *gstemp = NULL;
 static void *instance; /* pstotext state */
 
 static int cleanup(void) {
-  int gsstatus, status = 0;
+  int status = 0;
   unload_pstotext();
   if (gs!=NULL) {
 #if defined(_Windows) || defined(MSDOS)
@@ -397,12 +404,12 @@ static int cleanup(void) {
   }
   if (gstemp != NULL)
     unlink(gstemp);
-  if (rotate_path!=NULL & strcmp(rotate_path, "")!=0) unlink(rotate_path);
+  if (rotate_path!=NULL && strcmp(rotate_path, "")!=0) unlink(rotate_path);
   if (ocr_path!=NULL) unlink(ocr_path);
   return status;
 }
 
-static void handler() {
+static void handler(int code) {
   int status = cleanup();
   if (status!=0)
     exit(status);
@@ -484,7 +491,7 @@ static void do_it(char *path) {
     );
 
 #else   /* !MSDOS */
-  sprintf(gs_cmd, "%s -r72 -dNODISPLAY -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE %s %s %s ",
+  sprintf(gs_cmd, "%s -r72 -dNODISPLAY -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE %s %s %s %s %s",
     gscommand,
     (debug ? "" : "-q"),
     ocr_path,

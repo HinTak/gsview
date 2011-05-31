@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvpen.rc */
+/* fr\gvplang.rc */
 /* OS/2 PM French language resources */
 
 MENU ID_GSVIEW 
@@ -89,8 +89,11 @@ BEGIN
 		SUBMENU "~Langue", IDM_LANGMENU
 		BEGIN
 			MENUITEM "~Anglais", IDM_LANGEN
-			MENUITEM "~Français", IDM_LANGFR
+			MENUITEM "~Fran_ais", IDM_LANGFR
 			MENUITEM "Alleman~d", IDM_LANGDE
+/*
+			MENUITEM "~Italien", IDM_LANGIT
+*/
 		END
 		SUBMENU "PS vers ~texte", IDM_PSTOTEXTMENU
 		BEGIN
@@ -100,7 +103,7 @@ BEGIN
 		END
 		MENUITEM "Enregistrer les paramètres ~maintenant", IDM_SETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "Enregistrer les paramètres ~en quittant", IDM_SAVESETTINGS
+		MENUITEM "Enregistrer les paramètres en ~quittant", IDM_SAVESETTINGS
 		MENUITEM "~Protection des fichiers", IDM_SAFER
 		MENUITEM "Enregistrer le ~dernier répertoire", IDM_SAVEDIR
 		MENUITEM "Afficher la ~barre d'outils", IDM_BUTTONSHOW
@@ -270,4 +273,3 @@ BEGIN
 	IDS_FILTER_TXT	"*.txt"
 END
 
-

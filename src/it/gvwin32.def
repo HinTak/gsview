@@ -1,0 +1,4 @@
+LIBRARY		GSVW32IT
+DESCRIPTION	'GSview Italian Language Resources'
+DATA		MULTIPLE SHARED
+EXPORTS		DllEntryPoint

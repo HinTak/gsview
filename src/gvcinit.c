@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -126,6 +126,7 @@ init_options(void)
     strcpy(option.device_resolution, "300");
     option.print_to_file = FALSE;
     option.psprinter = FALSE;
+    option.print_reverse = FALSE;
     option.pdf2ps = 0;
     option.auto_bbox = TRUE;
     option.configured = FALSE;

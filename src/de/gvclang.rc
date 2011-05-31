@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvcde.rc */
+/* de\gvclang.rc */
 /* Common German language resources */
 
 /* button help */
@@ -114,7 +114,7 @@ END
 
 STRINGTABLE
 BEGIN
-	/* help topics - these need to match keywords in gvcXX.doc */
+	/* help topics - these need to match keywords in XX\gvclang.txt */
 	IDS_TOPICROOT,  "Inhaltsübersicht"
 	IDS_TOPICOPEN,  "Datei"
 	IDS_TOPICPRINT, "Drucken"

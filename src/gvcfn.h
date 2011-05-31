@@ -26,6 +26,7 @@ void scroll_to_find(void);
 
 /* in gvpinit.c  or gvwinit.c */
 void show_buttons(void);
+void delete_buttons(void);
 int gsview_create_objects(char *name);
 BOOL load_language(int language);
 void change_language(void);
@@ -33,6 +34,9 @@ void check_language(void);
 void unload_zlib(void);
 BOOL load_zlib(void);
 int config_wizard(void);
+
+/* in gvwdde.c */
+int gsview_progman(char *name, char *gsviewpath, char *gspath, char *gsargs);
 
 /* in gvcinit.c */
 int gsview_printer_profiles(void);
@@ -155,6 +159,9 @@ char *get_devices(void);
 void print_cleanup(void);
 void gsview_saveas(void);
 void gsview_extract(void);
+int enum_upp_path(char *path, char *buffer, int len);
+char *uppname_to_model(char *buffer, char *name);
+char *uppmodel_to_name(char *buffer, char *model);
 BOOL gsview_cprint(char *cfname, char *optfname);
 
 /* in gvctext.c */
@@ -162,6 +169,7 @@ void gsview_text_extract(void);
 void gsview_text_extract_slow(void);
 void gsview_text_find(void);
 void gsview_text_findnext(void);
+void free_text_index(void);
 BOOL make_text_index(void);
 int word_find(int x, int y);
 BOOL wildmatch(char *w, char *s);

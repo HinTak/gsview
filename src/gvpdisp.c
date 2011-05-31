@@ -61,7 +61,7 @@ exec_pgm(char *name, char *arg, PROG* prog)
 	sdata.SessionType = SSF_TYPE_DEFAULT;		/* default is text */
 	sdata.IconFile = NULL;
 	sdata.PgmHandle = 0;
-	sdata.PgmControl = 0;
+	sdata.PgmControl = 0; /* normal, not SSF_CONTROL_MINIMIZE */
 	sdata.InitXPos = 0;
 	sdata.InitYPos = 0;
 	sdata.InitXSize = 0;

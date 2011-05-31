@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -571,6 +571,42 @@ SoundDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
+/* Return TRUE if a contiguous block of pages (>2) is found */
+/* Store start and end of this range in first and last */
+/* If not contiguous, store entire page range in first and last */
+BOOL
+contiguous_range(HWND hDlg, int *first, int *last)
+{
+int i;
+BOOL gap = FALSE;	/* TRUE is gap found after block */
+BOOL contiguous = TRUE;
+int block = 0;		/* number of pages set in a contiguous block */
+BOOL selected;
+    for (i=0; i<psfile.doc->numpages; i++) {
+	selected = (int)SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETSEL, i, 0L);
+	if (selected && contiguous) {
+	    if (gap)
+		contiguous = FALSE;
+	    else {
+		if (block == 0)
+		    *first = i;
+		else
+		    *last = i+1;
+		block++;
+	    }
+	}
+	else if (!selected && block)
+	    gap = TRUE;
+    }
+    if (block < 2)
+	contiguous = FALSE;
+    if (!contiguous) {
+	*first = 0;
+	*last = psfile.doc->numpages;
+    }
+    return contiguous;
+}
+
 
 #ifdef __BORLANDC__
 #pragma argsused
@@ -580,8 +616,88 @@ PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
 	int i;
 	WORD notify_message;
+	static BOOL ecdisable;
 	switch (wmsg) {
 	    case WM_INITDIALOG:
+		{char buf[MAXSTR];
+		for (i=0; i<psfile.doc->numpages; i++) {
+		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_ADDSTRING, 0, 
+			(LPARAM)((LPSTR)psfile.doc->pages[map_page(i)].label));
+		}
+		SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETCURSEL, 
+		    psfile.page_list.current, 0L);
+		SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETTEXT, 
+		    psfile.page_list.current, (LPARAM)buf);
+		ecdisable = TRUE;
+		SetDlgItemText(hDlg, PAGE_EDIT, buf);
+		ecdisable = FALSE;
+		}
+		return TRUE;
+	    case WM_COMMAND:
+		notify_message = GetNotification(wParam,lParam);
+		switch (LOWORD(wParam)) {
+		    case PAGE_EDIT:
+			if (!ecdisable && (notify_message == EN_CHANGE)) {
+			    char buf[MAXSTR];
+			    GetDlgItemText(hDlg, PAGE_EDIT, buf, sizeof(buf));
+			    if ((i = (int)SendDlgItemMessage(hDlg, PAGE_LIST, 
+				    LB_FINDSTRINGEXACT, -1, (LPARAM)buf))
+				!= LB_ERR) {
+				SendDlgItemMessage(hDlg, PAGE_LIST, 
+				    LB_SETCURSEL, i, 0L);
+			    }
+			}
+			return TRUE;
+		    case PAGE_LIST:
+			if (notify_message == LBN_DBLCLK)
+				PostMessage(hDlg, WM_COMMAND, IDOK, 0L);
+		        else if (notify_message == LBN_SELCHANGE) {
+			    char buf[MAXSTR];
+			    i = (int)SendDlgItemMessage(hDlg, PAGE_LIST, 
+				LB_GETCURSEL, 0, 0L);
+			    if (i != LB_ERR) {
+				SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETTEXT, 
+				    i, (LPARAM)buf);
+				/* Update edit field, but stop edit field from
+			         * from altering list box selection */
+				ecdisable = TRUE;
+				SetDlgItemText(hDlg, PAGE_EDIT, buf);
+				ecdisable = FALSE;
+			    }
+			}
+			return FALSE;
+		    case IDOK:
+			i = (int)SendDlgItemMessage(hDlg, PAGE_LIST, 
+				LB_GETCURSEL, 0, 0L);
+			if (i == LB_ERR)
+			    EndDialog(hDlg, FALSE);
+			else {
+			    psfile.page_list.current = i;
+			    EndDialog(hDlg, TRUE);
+			}
+			return TRUE;
+		    case IDCANCEL:
+			EndDialog(hDlg, FALSE);
+			return TRUE;
+		}
+		break;
+	}
+	return FALSE;
+}
+
+
+#ifdef __BORLANDC__
+#pragma argsused
+#endif
+BOOL CALLBACK _export
+PageMultiDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
+{
+	int i;
+	WORD notify_message;
+	switch (wmsg) {
+	    case WM_INITDIALOG:
+		if (psfile.page_list.reverse)
+		    SendDlgItemMessage(hDlg, PAGE_REVERSE, BM_SETCHECK, 1, 0);
 		for (i=0; i<psfile.doc->numpages; i++) {
 		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_ADDSTRING, 0, 
 			(LPARAM)((LPSTR)psfile.doc->pages[map_page(i)].label));
@@ -614,15 +730,35 @@ PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 				MAKELPARAM(0,psfile.doc->numpages-1));
 			return FALSE;
 		    case PAGE_ODD:
-			for (i=(int)SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETCOUNT, 0, 0L)-1; i>=0; i--)
-			    SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETSEL, !(i&1), MAKELPARAM(i,0));
+			{
+			int first, last;
+			contiguous_range(hDlg, &first, &last);
+			for (i=(int)SendDlgItemMessage(hDlg, PAGE_LIST, 
+				LB_GETCOUNT, 0, 0L)-1; i>=0; i--)
+			    if (i >= first && i < last)
+			        SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETSEL, 
+				    !(i&1), MAKELPARAM(i,0));
+			SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETTOPINDEX, 
+			    first, 0L);
+			}
 			return FALSE;
 		    case PAGE_EVEN:
-			for (i=(int)SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETCOUNT, 0, 0L); i>=0; i--)
-			    SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETSEL, (i&1), MAKELPARAM(i,0));
-			SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETTOPINDEX, 0, 0L);
+			{
+			int first, last;
+			contiguous_range(hDlg, &first, &last);
+			for (i=(int)SendDlgItemMessage(hDlg, PAGE_LIST, 
+				LB_GETCOUNT, 0, 0L)-1; i>=0; i--)
+			    if (i >= first && i < last)
+			        SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETSEL, 
+				    (i&1), MAKELPARAM(i,0));
+			SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETTOPINDEX, 
+			    first, 0L);
+			}
 			return FALSE;
 		    case IDOK:
+			psfile.page_list.reverse = 
+			    (int)SendDlgItemMessage(hDlg, PAGE_REVERSE, 
+				BM_GETCHECK, 0, 0);
 			i = (int)SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETCURSEL, 0, 0L);
 			psfile.page_list.current = (i == LB_ERR) ? -1 : i;
 			for (i=0; i<psfile.doc->numpages; i++) {
@@ -649,6 +785,7 @@ get_page(int *ppage, BOOL multiple, BOOL allpages)
 #ifndef __WIN32__
 DLGPROC lpProcPage;
 #endif
+DLGPROC lpProc;
 BOOL flag;
 LPSTR dlgname;
 int i;
@@ -658,6 +795,8 @@ int i;
 		gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
 		return FALSE;
 	}
+	// Make psfile.page_list.reverse sticky
+        // psfile.page_list.reverse = FALSE;
 	psfile.page_list.current = *ppage - 1;
 	psfile.page_list.multiple = multiple;
 	if (psfile.page_list.select == (BOOL *)NULL)
@@ -670,14 +809,18 @@ int i;
 	}
 	psfile.page_list.select[psfile.page_list.current] = TRUE;
 
-	if (psfile.page_list.multiple)
+	if (psfile.page_list.multiple) {
 	    dlgname = "PageMultiDlgBox";
-	else
+	    lpProc = (DLGPROC)PageMultiDlgProc;
+	}
+	else {
 	    dlgname = "PageDlgBox";
+	    lpProc = (DLGPROC)PageDlgProc;
+	}
 #ifdef __WIN32__
-	flag = DialogBoxParam(hlanguage, dlgname, hwndimg, PageDlgProc, (LPARAM)NULL);
+	flag = DialogBoxParam(hlanguage, dlgname, hwndimg, lpProc, (LPARAM)NULL);
 #else
-	lpProcPage = (DLGPROC)MakeProcInstance((FARPROC)PageDlgProc, phInstance);
+	lpProcPage = (DLGPROC)MakeProcInstance((FARPROC)lpProc, phInstance);
 	flag = DialogBoxParam(hlanguage, dlgname, hwndimg, lpProcPage, (LPARAM)NULL);
 	FreeProcInstance((FARPROC)lpProcPage);
 #endif
@@ -1292,4 +1435,3 @@ gs_addmess(char GVFAR *str)
 {
     gs_addmess_count(str, lstrlen(str));
 }
-

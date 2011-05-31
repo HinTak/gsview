@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvpen.rc */
+/* en\gvplang.rc */
 /* OS/2 PM English language resources */
 
 MENU ID_GSVIEW 
@@ -91,6 +91,9 @@ BEGIN
 			MENUITEM "~English", IDM_LANGEN
 			MENUITEM "~French", IDM_LANGFR
 			MENUITEM "~German", IDM_LANGDE
+/*
+			MENUITEM "~Italian", IDM_LANGIT
+*/
 		END
 		SUBMENU "PStoText", IDM_PSTOTEXTMENU
 		BEGIN
@@ -121,7 +124,7 @@ BEGIN
 		MENUITEM "~Redisplay\tR", IDM_REDISPLAY
 		MENUITEM SEPARATOR
 		MENUITEM "Next Page and Home\tSpace", IDM_NEXTHOME
-		MENUITEM "Previous Page and Home\tSpace", IDM_PREVHOME
+		MENUITEM "Previous Page and Home\tBkSp", IDM_PREVHOME
 	END
 
 	SUBMENU "~Orientation", IDM_ORIENTMENU
@@ -270,4 +273,3 @@ BEGIN
 	IDS_FILTER_TXT	"*.txt"
 END
 
-

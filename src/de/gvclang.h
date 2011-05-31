@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
 
   This file is part of GSview.
 
@@ -15,12 +15,10 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvcde.h */
+/* de\gvclang.h */
 /* Common German language defines */
 
-#define GSVIEW_BASEDIR "gsview"
-
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1997 Russell Lang."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1998 Russell Lang."
 #define GSVIEW_COPYRIGHT2 "Alle Rechte vorbehalten."
 #define GSVIEW_COPYRIGHT3 "Siehe Datei LICENCE für mehr Details."
 
@@ -65,7 +63,7 @@
 #define AAABOUTGSV16SPL "Über GSV16SPL"
 #define AAABOUTGSVIEWPRINT "Über  GSview Print"
 #define AACOPY1 "Version:"
-#define AACOPY2 "Bedienung von Ghostscript über graphische Oberfläche"
+#define AACOPY2 "Grafische Bedienung von Ghostscript "
 #define AACOPY3 "Partielles Copyright (C) 1994, Timothy O. Theisen.  Alle Rechte vorbehalten."
 #define AACOPY4 "Dieses Programm wird ohne jede Gewährleistung vertrieben."
 #define AACOPY5 "Keiner der Autoren oder Distributoren ist verantwortlich"
@@ -143,6 +141,7 @@
 #define AAALL "Alle &Seiten"
 #define AAODD "&Ungerade"
 #define AAEVEN "&Gerade"
+#define AAREVERSE "&Absteigend"
 #else
 #define AAAPROPERTIES "~Einstellung"
 #define AAALLPAGES "Alle ~Seiten"
@@ -151,6 +150,7 @@
 #define AAALL "Alle ~Seiten"
 #define AAODD "~Ungerade"
 #define AAEVEN "~Gerade"
+#define AAREVERSE "~Absteigend"
 #endif
 
 /* Properties dialog box */
@@ -195,7 +195,6 @@
 #define AABITS "bits"
 
 /* Installation program */
-/* ENGLISH */
 #define AAINSTALL1 "GSview Installation"
 #define AAINSTALLINTRO1 "Dies Programm soll Ihnen bei der Installation helfen "
 #define AAINSTALLINTRO2 "Bevor Sie mit der Installation fortfahren, stellen Sie bitte sicher, daß sich die Dateien aus  README.TXT im aktuellen Verzeichnis oder auf drei Disketten befinden. "
@@ -251,11 +250,13 @@
 #define AAUNZIPCANCELLED "Entpacken abgebrochen \n"
 #define AACANTALLOCBUF "Kann keinen Speicher für den Kopierpuffer bekommen "
 #define AAPROGRAMOBJECTFAILED  "Kann Desktop Objekt nicht anlegen"
+#define AAUNINSTALLTITLE "GSview und Aladdin Ghostscript "
+#define AAUNINSTALLITEM "GSview und Aladdin Ghostscript löschen"
 
 /* configure */
 #define AAGSVIEWC "GSview:"
 #define AAALADDINGSC "Aladdin Ghostscript:"
-#define AACFG1 "GSview Konfigurieren"  /* ENGLISH */
+#define AACFG1 "GSview Konfigurieren"
 #define AACFG10 "Dieser Wizard hilft Ihnen Gsview zu konfigurieren."
 #define AACFG11 "Wenn Sie einen Eintrag der folgenden Seiten nicht verstehen,\
  dann ändern Sie ihn nicht.  Die Defaults sollten sinnvoll sein."
@@ -320,5 +321,6 @@ Drücken Sie Fertig um weiter zu machen."
 #define AAENGLISH "English"
 #define AADEUTSCH "Deutsch"
 #define AAFRANCAIS "Français"
+#define AAITALIANO "Italiano"
 
 

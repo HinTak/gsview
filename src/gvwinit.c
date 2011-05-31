@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -16,9 +16,8 @@
 */
 
 /* gvwinit.c */
-/* Initialisation routings for Windows GSview */
+/* Initialisation routines for Windows GSview */
 #include "gvwin.h"
-#include <ddeml.h>
 
 /* Open/Save File Dialog Box */
 OPENFILENAME ofn;
@@ -31,8 +30,6 @@ struct buttonlist {
 };
 struct buttonlist *buttonhead, *buttontail;
 int real_button_width;
-
-FILE *logfile;
 
 BOOL parse_args(LPSTR str);
 
@@ -92,6 +89,9 @@ HINSTANCE hInstance;
 	    break;
 	case IDM_LANGFR:
 	    strcat(langdll, "fr");
+	    break;
+	case IDM_LANGIT:
+	    strcat(langdll, "it");
 	    break;
 	case IDM_LANGEN:
 	default:
@@ -154,6 +154,7 @@ LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDM_LANGEN:
                 case IDM_LANGDE:
                 case IDM_LANGFR:
+                case IDM_LANGIT:
                     EndDialog(hDlg, LOWORD(wParam));
                     return(TRUE);
                 default:
@@ -175,6 +176,7 @@ int language;
     if ( ((option.language == IDM_LANGEN) && strnicmp(winlang, "EN", 2))
       || ((option.language == IDM_LANGDE) && stricmp(winlang, "DEU"))
       || ((option.language == IDM_LANGFR) && strnicmp(winlang, "FR", 2))
+      || ((option.language == IDM_LANGIT) && stricmp(winlang, "ITA"))
 	)
     {
 #ifdef __WIN32__
@@ -189,6 +191,7 @@ int language;
 	    case IDM_LANGEN:
 	    case IDM_LANGDE:
 	    case IDM_LANGFR:
+	    case IDM_LANGIT:
 		gsview_language(language);
 	}
     }
@@ -280,6 +283,7 @@ int length = 64;
 	    HKEY hkey;
 	    DWORD keytype;
 	    DWORD cbData;
+	    DWORD fa;
 	    /* Find the user profile directory */
 	    rc = RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\ProfileReconciliation", 0, KEY_READ, &hkey);
 	    if (rc == ERROR_SUCCESS) {
@@ -288,17 +292,22 @@ int length = 64;
 		rc = RegQueryValueEx(hkey, "ProfileDirectory", 0, &keytype, (LPBYTE)szIniFile, &cbData);
 		RegCloseKey(hkey);
 	    }
-	    if (rc == ERROR_SUCCESS)
-		strcat(szIniFile, "\\");
+	    if (rc == ERROR_SUCCESS) {
+		fa = GetFileAttributes(szIniFile);
+		if (fa & FILE_ATTRIBUTE_DIRECTORY)
+		    strcat(szIniFile, "\\");
+		else
+		    szIniFile[0] = '\0';
+	    }
 	    else {
 		    /* If we didn't succeed, use the Windows directory */
 		    szIniFile[0] = '\0';
 	    }
 	}
 	if (szIniFile[0] == '\0') {
+	    DWORD fa;
 	    /* If we didn't succeed, try %USERPROFILE% */
 	    char *p = getenv("USERPROFILE");
-	    DWORD fa;
 	    if (p && *p) {
 		strcpy(szIniFile, p);
 		p = szIniFile + strlen(szIniFile) - 1;
@@ -571,6 +580,17 @@ char filedir[MAXSTR];
 }
 
 
+void
+delete_buttons(void)
+{
+    struct buttonlist *bp = buttonhead;
+    while (bp) {
+	buttonhead = bp->next;
+	free(bp);
+	bp = buttonhead;
+    }
+}
+
 /* create gsview window menu bar, buttons and child window */
 void
 gsview_create()
@@ -726,138 +746,186 @@ RECT rect;
 	}
 }
 
-LONG
-create_registry_type(char *keyname, char *description)
+
+char hkey_root[]="HKEY_CLASSES_ROOT";
+char reg_win32s_error[]="ERROR: You can't set named values under Win32s\n";
+
+void
+reg_quote(char *d, char *s)
+{
+    while (*s) {
+	if (*s == '\\')
+	    *d++ = '\\';
+	*d++ = *s++;
+    }
+    *d = *s;
+}
+
+/* Open the key. If it doesn't exist, create it */
+BOOL
+reg_open_key(FILE *newfile, FILE *oldfile, char *name, HKEY *hkey)
+{
+LONG lrc; 
+    lrc = RegOpenKey(HKEY_CLASSES_ROOT, name, hkey);
+    if (lrc == ERROR_SUCCESS) {
+	if (oldfile) 
+	    fprintf(oldfile, "\n[%s\\%s]\n", hkey_root, name);
+    }
+    else {
+	lrc = RegCreateKey(HKEY_CLASSES_ROOT, name, hkey);
+    }
+    if (newfile)
+	fprintf(newfile, "\n[%s\\%s]\n", hkey_root, name);
+    if (lrc != ERROR_SUCCESS)
+        *hkey = HKEY_CLASSES_ROOT;
+    return (lrc == ERROR_SUCCESS);
+}
+
+
+BOOL
+reg_set_value(FILE *newfile, FILE *oldfile, HKEY hkey, char *name, char *value)
+{
+#ifdef __WIN32__
+DWORD keytype;
+DWORD cbData;
+#endif
+char buf[MAXSTR];
+char qbuf[MAXSTR];
+LONG lenbuf;
+    if (hkey == HKEY_CLASSES_ROOT)
+	return FALSE;
+    if (oldfile) {
+        lenbuf = sizeof(buf);
+	if (name==(char *)NULL) {
+	    if (RegQueryValue(hkey, (LPSTR)name, (LPSTR)buf, &lenbuf)
+		== ERROR_SUCCESS) {
+		if (strlen(buf)) {
+		    reg_quote(qbuf, buf);
+		    fprintf(oldfile, "@=\042%s\042\n", qbuf);
+		}
+	    }
+	}
+#ifdef __WIN32__
+	else if (!is_win32s) {
+	    cbData = sizeof(buf);
+	    keytype =  REG_SZ;
+	    if (RegQueryValueEx(hkey, name, 0, &keytype, 
+		(LPBYTE)buf, &cbData) == ERROR_SUCCESS) {
+	        reg_quote(qbuf, buf);
+	        fprintf(oldfile, "\042%s\042=\042%s\042\n", name, qbuf);
+	    }
+	}
+#endif
+	else {
+	    fprintf(oldfile, reg_win32s_error);
+	    return FALSE;
+	}
+    }
+    if (name==(char *)NULL) {
+	reg_quote(qbuf, value);
+	if (newfile)
+	    fprintf(newfile, "@=\042%s\042\n", qbuf);
+	if (RegSetValue(hkey, NULL, REG_SZ, 
+	    value, strlen(value)) != ERROR_SUCCESS)
+	    return FALSE;
+    }
+#ifdef __WIN32__
+    else if (!is_win32s) {
+	reg_quote(qbuf, value);
+	if (newfile)
+	    fprintf(newfile, "\042%s\042=\042%s\042\n", name, qbuf);
+	if (RegSetValueEx(hkey, name, 0, REG_SZ, 
+	    (CONST BYTE *)value, strlen(value)+1) != ERROR_SUCCESS)
+	    return FALSE;
+    }
+#endif
+    else {
+	if (newfile)
+	    fprintf(newfile, reg_win32s_error);
+	return FALSE;
+    }
+    return TRUE; 
+}
+
+void
+reg_close_key(HKEY *hkey)
+{
+    RegCloseKey(*hkey);
+    *hkey = HKEY_CLASSES_ROOT;
+}
+
+BOOL
+create_registry_type(FILE *newfile, FILE *oldfile, 
+	char *keyname, char *description)
 {
 HKEY hkey;
-HKEY hsubkey;
-LONG rc;
 char buf[MAXSTR];
+char kbuf[MAXSTR];
+const char shellsubkey[]= "\\shell";
+const char opensubkey[] = "\\open";
+const char printsubkey[] = "\\print";
+const char commandsubkey[] = "\\command";
+BOOL flag = TRUE;
 
-LONG lrc;
-LONG lold;
-BOOL oldkey = FALSE;
-char oldvalue[MAXSTR];
-char oldopen[MAXSTR];
-char oldprint[MAXSTR];
-char oldicon[MAXSTR];
-
-const char opensubkey[] = "shell\\open";
-const char printsubkey[] = "shell\\print";
-const char commandsubkey[] = "command";
-
-    /* Save existing key for uninstall */
-    oldvalue[0] = oldopen[0] = oldprint[0] = oldicon[0] = '\0';
-    lrc = RegOpenKey(HKEY_CLASSES_ROOT, keyname, &hkey);
-/*
-    lrc = RegOpenKeyEx(HKEY_CLASSES_ROOT, keyname, 0, KEY_ALL_ACCESS, &hkey);
-*/
-    if (lrc == ERROR_SUCCESS) {
-	oldkey = TRUE;
-        lold = sizeof(oldvalue);
-	RegQueryValue(HKEY_CLASSES_ROOT, keyname, oldvalue, &lold);
-
-	lrc = RegOpenKey(hkey, opensubkey, &hsubkey);
-	if (lrc == ERROR_SUCCESS) {
-	    lold = sizeof(oldopen);
-	    RegQueryValue(hsubkey, commandsubkey, oldopen, &lold);
-	    RegCloseKey(hsubkey);
-	}
-
-	lrc = RegOpenKey(hkey, printsubkey, &hsubkey);
-	if (lrc == ERROR_SUCCESS) {
-	    lold = sizeof(oldprint);
-	    RegQueryValue(hsubkey, commandsubkey, oldprint, &lold);
-	    RegCloseKey(hsubkey);
-	}
-
-	if (is_win4) {
-	    lold = sizeof(oldicon);
-	    RegQueryValue(hkey, "DefaultIcon", oldicon, &lold);
-	}
-	RegCloseKey(hkey);
+    if (flag)
+	flag = reg_open_key(newfile, oldfile, keyname, &hkey);
+    if (flag) {
+	flag = reg_set_value(newfile, oldfile, hkey, NULL, description);
+	reg_close_key(&hkey);
     }
 
-    /* Write new information */
-    if (logfile != (FILE *)NULL)
-	fprintf(logfile, "OpenKey=%s\n", keyname);
-    rc = RegCreateKey(HKEY_CLASSES_ROOT, keyname, &hkey);
-    if (rc != ERROR_SUCCESS)
-	return rc;
+    strcpy(kbuf, keyname);
+    strcat(kbuf, shellsubkey);
+    if (flag)
+	flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
+    if (flag)
+	reg_close_key(&hkey);
 
-    if (logfile != (FILE *)NULL)
-	fprintf(logfile, "DeleteValue=\n");
-    rc = RegSetValue(hkey, NULL, REG_SZ, description, strlen(description));
-
-    if (logfile != (FILE *)NULL)
-	fprintf(logfile, "OpenSubKey=%s\n", opensubkey);
-    if (rc == ERROR_SUCCESS)
-	rc = RegCreateKey(hkey, opensubkey, &hsubkey);
+    strcat(kbuf, opensubkey);
+    if (flag)
+	flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
+    if (flag)
+	reg_close_key(&hkey);
+    strcat(kbuf, commandsubkey);
+    if (flag)
+	flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
     sprintf(buf, "%s%s %%1", szExePath, GSVIEW_EXENAME);
-    if (rc == ERROR_SUCCESS)
-	rc = RegSetValue(hsubkey, commandsubkey, REG_SZ, buf, strlen(buf));
-    if (logfile != (FILE *)NULL)
-	fprintf(logfile, "DeleteKey=%s\n", commandsubkey);
-    RegCloseKey(hsubkey);
-    if (logfile != (FILE *)NULL)
-	fprintf(logfile, "CloseSubKey=\n");
-    /* fprintf(logfile, "DeleteSubKey=%s\n", opensubkey); */
-    
+    if (flag) {
+	flag = reg_set_value(newfile, oldfile, hkey, NULL, buf);
+	reg_close_key(&hkey);
+    }
 
-    if (logfile != (FILE *)NULL)
-	fprintf(logfile, "OpenSubKey=%s\n", printsubkey);
-    if (rc == ERROR_SUCCESS)
-	rc = RegCreateKey(hkey, "shell\\print", &hsubkey);
+    strcpy(kbuf, keyname);
+    strcat(kbuf, shellsubkey);
+    strcat(kbuf, printsubkey);
+    if (flag)
+	flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
+    if (flag)
+	reg_close_key(&hkey);
+    strcat(kbuf, commandsubkey);
+    if (flag)
+	flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
     sprintf(buf, "%s%s /p %%1", szExePath, GSVIEW_EXENAME);
-    if (rc == ERROR_SUCCESS)
-	rc = RegSetValue(hsubkey, commandsubkey, REG_SZ, buf, strlen(buf));
-    if (logfile != (FILE *)NULL)
-	fprintf(logfile, "DeleteKey=%s\n", commandsubkey);
-    RegCloseKey(hsubkey);
-    if (logfile != (FILE *)NULL)
-	fprintf(logfile, "CloseSubKey=\n");
-    /* fprintf(logfile, "DeleteSubKey=%s\n", printsubkey); */
+    if (flag) {
+	flag = reg_set_value(newfile, oldfile, hkey, NULL, buf);
+	reg_close_key(&hkey);
+    }
 
     if (is_win4) {
-	/* icon offset 3 is ID_GSVIEW_DOC */
+	strcpy(kbuf, keyname);
+	strcat(kbuf, "\\DefaultIcon");
+	if (flag)
+	    flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
 	sprintf(buf, "%s%s,3", szExePath, GSVIEW_EXENAME);
-	if (logfile != (FILE *)NULL)
-	    fprintf(logfile, "DeleteKey=%s\n", "DefaultIcon");
-	if (rc == ERROR_SUCCESS)
-	    rc = RegSetValue(hkey, "DefaultIcon", REG_SZ, buf, strlen(buf));
-    }
-
-    RegCloseKey(hkey);
-    if (logfile != (FILE *)NULL) {
-	fprintf(logfile, "CloseKey=\n");
-	if (!oldkey)
-	    fprintf(logfile, "DeleteKey=%s\n", keyname);
-
-	/* Restore previous values */
-	if (oldkey) {
-	    if (logfile != (FILE *)NULL)
-		fprintf(logfile, "CreateKey=%s\n", keyname);
-	    if (oldvalue[0])
-		fprintf(logfile, "SetValue=,%s\n", oldvalue);
-	    if (oldopen[0]) {
-		fprintf(logfile, "CreateSubKey=%s\\%s\n", opensubkey, commandsubkey);
-		fprintf(logfile, "SetValue=,%s\n", oldopen);
-		fprintf(logfile, "CloseSubKey=\n");
-	    }
-	    if (oldprint[0]) {
-		fprintf(logfile, "CreateSubKey=%s\\%s\n", printsubkey, commandsubkey);
-		fprintf(logfile, "SetValue=,%s\n", oldprint);
-		fprintf(logfile, "CloseSubKey=\n");
-	    }
-	    if (is_win4 && oldicon[0]) {
-		fprintf(logfile, "SetValue=DefaultIcon,%s\n", oldicon);
-	    }
-	    fprintf(logfile, "CloseKey=\n");
+	if (flag) {
+	    flag = reg_set_value(newfile, oldfile, hkey, NULL, buf);
+	    reg_close_key(&hkey);
 	}
     }
 
-    return rc;
+    return flag;
 }
+
 
 int
 update_registry(BOOL ps, BOOL pdf)
@@ -867,223 +935,134 @@ char *psmime="application/postscript";
 char *pdfmime="application/pdf";
 char *contentname="Content Type";
 char *extension="Extension";
+#endif
 char buf[MAXSTR];
 HKEY hkey;
-#endif
 char *pskey="psfile";
 char *pdfkey="pdffile";
 char *psext=".ps";
 char *epsext=".eps";
 char *pdfext=".pdf";
-LONG rc = ERROR_SUCCESS;
-char old[MAXSTR];
-LONG lold;
-LONG lrc = !ERROR_SUCCESS;
+char *p;
+FILE *oldfile, *newfile;
+BOOL flag = TRUE;
+const char regheader[]="REGEDIT4\n";
 
     if (!ps && !pdf)
 	return 0;
 
-    if (logfile != (FILE *)NULL)
-	fprintf(logfile, "\n[Registry]\n");
+    strcpy(buf, szExePath);
+    strcat(buf, GSVIEW_ZIP);
+    p = strrchr(buf, '.');
+    /* Write the old registry file, but only if it doesn't exist */
+    strcpy(p, "old.reg");
+    oldfile = fopen(buf, "r");
+    if (oldfile == (FILE *)NULL) {
+        oldfile = fopen(buf, "w");
+	/* If we failed to open the file, the destination is probably 
+	 * read only.  Don't worry, just don't write to the log file.
+	 */
+    }
+    else {
+	fclose(oldfile);
+	oldfile = (FILE *)NULL;
+    }
+
+    /* Write the new registry file */
+    strcpy(p, "new.reg");
+    newfile = fopen(buf, "w");
+
+    if (oldfile != (FILE *)NULL)
+	fprintf(oldfile, regheader);
+    if (newfile != (FILE *)NULL)
+	fprintf(newfile, regheader);
+
     if (ps) {
-
-        if (rc == ERROR_SUCCESS) {
-	    lold = sizeof(old);
-	    lrc = RegQueryValue(HKEY_CLASSES_ROOT, psext, old, &lold);
-	}
-        if (rc == ERROR_SUCCESS)
-	    rc = RegSetValue(HKEY_CLASSES_ROOT, psext, REG_SZ, pskey, strlen(pskey));
-	if (logfile != (FILE *)NULL)
-	    fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", psext);
-	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0')) {
-	    if (logfile != (FILE *)NULL)
-	        fprintf(logfile, "SetValue=%s,%s\n", psext, old);
+	if (flag)
+	    flag = reg_open_key(newfile, oldfile, psext, &hkey);
+	if (flag) {
+	    flag = reg_set_value(newfile, oldfile, hkey, NULL, pskey);
+#ifdef __WIN32__
+	    if (flag && !is_win32s)
+		reg_set_value(newfile, oldfile, hkey, contentname, psmime);
+#endif
+	    reg_close_key(&hkey);
 	}
 
-        if (rc == ERROR_SUCCESS) {
-	    lold = sizeof(old);
-	    lrc = RegQueryValue(HKEY_CLASSES_ROOT, epsext, old, &lold);
+	if (flag)
+	    flag = reg_open_key(newfile, oldfile, epsext, &hkey);
+	if (flag) {
+	    flag = reg_set_value(newfile, oldfile, hkey, NULL, pskey);
+#ifdef __WIN32__
+	    if (flag && !is_win32s)
+		flag = reg_set_value(newfile, oldfile, hkey, 
+		    contentname, psmime);
+#endif
+	    reg_close_key(&hkey);
 	}
-	if (rc == ERROR_SUCCESS)
-	    rc = RegSetValue(HKEY_CLASSES_ROOT, epsext, REG_SZ, pskey, strlen(pskey));
-	if (logfile != (FILE *)NULL)
-	    fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", epsext);
-	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0')) {
-	    if (logfile != (FILE *)NULL)
-		fprintf(logfile, "SetValue=%s,%s\n", epsext, old);
-	}
+
 
 #ifdef __WIN32__
 	/* Don't bother with undelete information for these */
 	if (!is_win32s) {
 	    sprintf(buf, "MIME\\Database\\%s\\%s", contentname, psmime);
-	    if (rc == ERROR_SUCCESS) {
-		rc = RegCreateKey(HKEY_CLASSES_ROOT, buf, &hkey);
-		if (rc == ERROR_SUCCESS) {
-		    rc = RegSetValueEx(hkey, extension, 0, REG_SZ, (CONST BYTE *)psext, strlen(psext)+1);
-		    RegCloseKey(hkey);
-		}
-	    }
-
-	    if (rc == ERROR_SUCCESS) {
-		rc = RegOpenKeyEx(HKEY_CLASSES_ROOT, psext, 0, KEY_SET_VALUE, &hkey);
-		if (rc == ERROR_SUCCESS) {
-		    rc = RegSetValueEx(hkey, contentname, 0, REG_SZ, (CONST BYTE *)psmime, strlen(psmime)+1);
-		    RegCloseKey(hkey);
-		}
-	    }
-	    if (rc == ERROR_SUCCESS) {
-		rc = RegOpenKeyEx(HKEY_CLASSES_ROOT, epsext, 0, KEY_SET_VALUE, &hkey);
-		if (rc == ERROR_SUCCESS) {
-		    rc = RegSetValueEx(hkey, contentname, 0, REG_SZ, (CONST BYTE *)psmime, strlen(psmime)+1);
-		    RegCloseKey(hkey);
-		}
+	    if (flag)
+		flag = reg_open_key(newfile, oldfile, buf, &hkey);
+	    if (flag) {
+		flag = reg_set_value(newfile, oldfile, hkey, extension, psext);
+		reg_close_key(&hkey);
 	    }
 	}
 #endif
-	if (rc == ERROR_SUCCESS)
-	  rc = create_registry_type(pskey, "PostScript");
+	if (flag) 
+	  flag = create_registry_type(newfile, oldfile, pskey, "PostScript");
     }
 
     if (pdf) {
-
-        if (rc == ERROR_SUCCESS) {
-	    lold = sizeof(old);
-	    lrc = RegQueryValue(HKEY_CLASSES_ROOT, pdfext, old, &lold);
-	}
-	if (rc == ERROR_SUCCESS)
-	    rc = RegSetValue(HKEY_CLASSES_ROOT, pdfext, REG_SZ, pdfkey, strlen(pdfkey));
-	if (logfile != (FILE *)NULL)
-	    fprintf(logfile, "OpenKey=%s\nDeleteValue=\nCloseKey=\n", pdfext);
-	if ((lrc == ERROR_SUCCESS) && (old[0] !='\0')) {
-	    if (logfile != (FILE *)NULL)
-		fprintf(logfile, "SetValue=%s,%s\n", pdfext, old);
+	if (flag)
+	    flag = reg_open_key(newfile, oldfile, pdfext, &hkey);
+	if (flag) {
+	    flag = reg_set_value(newfile, oldfile, hkey, NULL, pdfkey);
+#ifdef __WIN32__
+	    if (flag && !is_win32s)
+		reg_set_value(newfile, oldfile, hkey, contentname, pdfmime);
+#endif
+	    reg_close_key(&hkey);
 	}
 
 #ifdef __WIN32__
 	/* Don't bother with undelete information for these */
 	if (!is_win32s) {
 	    sprintf(buf, "MIME\\Database\\%s\\%s", contentname, pdfmime);
-	    if (rc == ERROR_SUCCESS) {
-		rc = RegCreateKey(HKEY_CLASSES_ROOT, buf, &hkey);
-		if (rc == ERROR_SUCCESS) {
-		    rc = RegSetValueEx(hkey, extension, 0, REG_SZ, (CONST BYTE *)pdfext, strlen(pdfext)+1);
-		    RegCloseKey(hkey);
-		}
-	    }
-	    if (rc == ERROR_SUCCESS) {
-		rc = RegOpenKeyEx(HKEY_CLASSES_ROOT, ".pdf", 0, KEY_SET_VALUE, &hkey);
-		if (rc == ERROR_SUCCESS) {
-		    rc = RegSetValueEx(hkey, contentname, 0, REG_SZ, (CONST BYTE *)pdfmime, strlen(pdfmime)+1);
-		    RegCloseKey(hkey);
-		}
+	    if (flag)
+		flag = reg_open_key(newfile, oldfile, buf, &hkey);
+	    if (flag) {
+		flag = reg_set_value(newfile, oldfile, hkey, extension, pdfext);
+		reg_close_key(&hkey);
 	    }
 	}
 #endif
-	if (rc == ERROR_SUCCESS)
-	  rc = create_registry_type(pdfkey, "Portable Document Format");
+
+	if (flag)
+	    flag = create_registry_type(newfile, oldfile, pdfkey, "Portable Document Format");
     }
 
-    if (rc != ERROR_SUCCESS)
-	return 1;
+    if (oldfile)
+	fclose(oldfile);
 
-    return 0;
+    if (newfile)
+	fclose(newfile);
+
+    return !flag;
 }
 
-
-#ifdef __BORLANDC__
-#pragma argsused	/* ignore warning for next function */
-#endif
-HDDEDATA CALLBACK 
-DdeCallback(UINT type, UINT fmt, HCONV hconv,
-    HSZ hsz1, HSZ hsz2, HDDEDATA hData, DWORD dwData1, DWORD dwData2)
-{
-  switch (type) {
-    default:
-	return (HDDEDATA)NULL;
-  }
-}
 
 int
 gsview_create_objects(char *groupname)
 {
-DWORD idInst = 0L;
-FARPROC lpDdeProc;
-HSZ hszServName;
-HSZ hszSysTopic;
-HCONV hConv;
-char setup[MAXSTR+MAXSTR];
-DWORD dwResult;
 char gspath[MAXSTR];
 char *p;
-#ifdef __WIN32__
-#define GSVIEW_NAME "GSview"
-#else
-#define GSVIEW_NAME "GSview 16"
-#endif
-char groupfile[MAXSTR];
-int i;
-char *s, *d;
-
-
-    /* derive group filename from group name */
-    for (i=0, s=groupname, d=groupfile; i<8 && *s; s++) {
-	if (isalpha(*s) || isdigit(*s)) {
-	    *d++ = *s;
-	    i++;
-	} 
-    }
-    *d = '\0';
-    if (strlen(groupfile)==0)
-	strcpy(groupfile, "gstools");
-
-    lpDdeProc = MakeProcInstance((FARPROC)DdeCallback, phInstance);
-    if (DdeInitialize(&idInst, (PFNCALLBACK)lpDdeProc, CBF_FAIL_POKES, 0L)) {
-#ifndef __WIN32__
-	FreeProcInstance(lpDdeProc);
-#endif
-	return 1;
-    }
-    hszServName = DdeCreateStringHandle(idInst, "PROGMAN", CP_WINANSI);
-    hszSysTopic = DdeCreateStringHandle(idInst, "PROGMAN", CP_WINANSI);
-    hConv = DdeConnect(idInst, hszServName, hszSysTopic, (PCONVCONTEXT)NULL);
-    if (hConv == NULL) {
-	gserror(IDS_NOPROGMAN, NULL, 0, SOUND_ERROR);
-	return 1;
-    }
-
-#define DDEEXECUTE(str)\
-    DdeClientTransaction((LPBYTE)str, strlen(str)+1, hConv,\
-	NULL, CF_TEXT, XTYP_EXECUTE, 2000, &dwResult)
-
-    sprintf(setup, "[CreateGroup(\042%s\042,%s.grp)][ShowGroup(\042%s\042,1)]",
-	groupname, groupfile, groupname);
-    DDEEXECUTE(setup);
-    sprintf(setup, "[ReplaceItem(\042%s\042)]", GSVIEW_NAME);
-    DDEEXECUTE(setup);
-    if (!is_win4)
-       sprintf(setup, "[AddItem(\042%s%s\042,\042%s\042, \042%sgsview32.ico\042)]", 
-	  szExePath, GSVIEW_EXENAME, GSVIEW_NAME, szExePath);
-    else
-       sprintf(setup, "[AddItem(\042%s%s\042,\042%s\042)]", 
-	  szExePath, GSVIEW_EXENAME, GSVIEW_NAME);
-    DDEEXECUTE(setup);
-
-/* Win3.1 documentation says you must put quotes around names */
-/* with embedded spaces. */
-/* In Win95, it appears you must put quotes around the EXE name */
-/* and options separately */
-
-    sprintf(setup, "[ReplaceItem(\042GSview README\042)]");
-    DDEEXECUTE(setup);
-    if (!is_win4)
-	sprintf(setup, "[AddItem(\042notepad.exe %sREADME.TXT\042,\042GSview README\042)]", 
-	    szExePath);
-    else
-	sprintf(setup, "[AddItem(\042notepad.exe\042 \042%sREADME.TXT\042,\042GSview README\042,\042notepad.exe\042,1)]", 
-	    szExePath);
-    DDEEXECUTE(setup);
-
+int rc;
     strcpy(gspath, option.gsdll);
     if ((p = strrchr(gspath,'\\')) != (char *)NULL)
 	p++;
@@ -1091,31 +1070,10 @@ char *s, *d;
 	p = gspath;
     *p = '\0';
 
-    sprintf(setup, "[ReplaceItem(\042Ghostscript\042)]");
-    DDEEXECUTE(setup);
-    if (!is_win4)
-        sprintf(setup, "[AddItem(\042%s%s -I%s\042,\042Ghostscript\042, \042%sgstext.ico\042)]", 
-	    gspath, GS_EXENAME, option.gsinclude, gspath);
-    else
-        sprintf(setup, "[AddItem(\042%s%s\042 \042-I%s\042,\042Ghostscript\042)]", 
-	    gspath, GS_EXENAME, option.gsinclude);
-    DDEEXECUTE(setup);
-
-    sprintf(setup, "[ReplaceItem(\042Ghostscript README\042)]");
-    DDEEXECUTE(setup);
-    if (!is_win4)
-        sprintf(setup, "[AddItem(\042notepad.exe %sREADME.\042,\042Ghostscript README\042)]", 
-	     gspath);
-    else
-        sprintf(setup, "[AddItem(\042notepad.exe\042 \042%sREADME.\042,\042Ghostscript README\042, \042notepad.exe\042,1)]", 
-	     gspath);
-    DDEEXECUTE(setup);
-#undef DDEXECUTE
-
-    DdeDisconnect(hConv);
-    DdeUninitialize(idInst);
-
-    return 0;
+    rc = gsview_progman(groupname, szExePath, gspath, option.gsinclude);
+    if (rc)
+	gserror(IDS_NOPROGMAN, NULL, 0, SOUND_ERROR);
+    return rc;
 }
 
 HINSTANCE zlib_hinstance;
@@ -1140,16 +1098,27 @@ BOOL
 load_zlib(void)
 {   
 char buf[MAXSTR];
+#ifdef __WIN32__
+#ifdef DECALPHA
+    char zlibname[] = "zlibda.dll";
+#else
+    char zlibname[] = "zlib32.dll";
+#endif
+#else
+    char zlibname[] = "zlib16.dll";
+#endif
     if (zlib_hinstance != (HINSTANCE)NULL)
 	return TRUE;	/* already loaded */
 
+    /* first look in GSview directory */
     strcpy(buf, szExePath);
-#ifdef __WIN32__
-    strcat(buf, "zlib32.dll");
-#else
-    strcat(buf, "zlib16.dll");
-#endif
+    strcat(buf, zlibname);
     zlib_hinstance = LoadLibrary(buf);
+    if (zlib_hinstance < (HINSTANCE)HINSTANCE_ERROR) {
+	/* if that fails, use the system search path */
+	strcpy(buf, zlibname);
+	zlib_hinstance = LoadLibrary(buf);
+    }
     if (zlib_hinstance >= (HINSTANCE)HINSTANCE_ERROR) {
         gzopen = (PFN_gzopen) GetProcAddress(zlib_hinstance, "gzopen");
 	if (gzopen == NULL) {
@@ -1366,7 +1335,6 @@ char buf[MAXSTR];
 WIZPAGE *page;
 FILE *f;
 char *p;
-char logname[MAXSTR];
 
     /* get info from wizard */
     page = find_page_from_id(IDD_CFG2);
@@ -1406,28 +1374,12 @@ char logname[MAXSTR];
     }
     fclose(f);
     /* at this stage we don't look for fonts, but maybe we should */
-    
-    strcpy(logname, szExePath);
-    strcat(logname, GSVIEW_ZIP);
-    p = strrchr(logname, '.');
-    strcpy(p, ".log");
-    logfile = fopen(logname, "a");	/* append */
-    if (logfile == (FILE *)NULL) {
-	logfile = fopen(logname, "w");	/* don't append */
-        /* if (logfile == (FILE *)NULL) { */
-	    /* We can't write the logfile, probably because the destination */
-	    /* is read only.  Don't worry about this, just remember not */
-	    /* to write to logfile! */
-	/* } */
-    }
 
     assoc_ps = (BOOL)SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, 
 	    IDC_CFG41, BM_GETCHECK, (WPARAM)0, (LPARAM)0);
     assoc_pdf = (BOOL)SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, 
 	    IDC_CFG42, BM_GETCHECK, (WPARAM)0, (LPARAM)0);
     if (update_registry(assoc_ps, assoc_pdf)) {
-	if (logfile != (FILE *)NULL)
-	    fclose(logfile);
 	return 1;
     }
 
@@ -1436,8 +1388,6 @@ char logname[MAXSTR];
     if (SendDlgItemMessage(find_page_from_id(IDD_CFG5)->hwnd, 
 	    IDC_CFG51, BM_GETCHECK, (WPARAM)0, (LPARAM)0)
 	&& gsview_create_objects(buf)) {
-	if (logfile != (FILE *)NULL)
-	    fclose(logfile);
 	return 1;
     }
     
@@ -1449,9 +1399,6 @@ char logname[MAXSTR];
     option.configured = TRUE;
 
     write_profile();
-
-    if (logfile != (FILE *)NULL)
-	fclose(logfile);
 
     return 0;
 }

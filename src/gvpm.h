@@ -56,7 +56,6 @@ typedef unsigned long DWORD;
 #define DEFAULT_GSCOMMAND "gsos2.exe"
 #define DEFAULT_RESOLUTION 96.0
 #define DEFAULT_ZOOMRES 300.0
-#define INIFILE "gvpm.ini"
 #define INISECTION "Options"
 #define DEVSECTION "Devices"
 #define EOLSTR "\r\n"
@@ -134,6 +133,7 @@ typedef struct tagPAGELIST {
 	int current;	/* index of current selection */
 	BOOL multiple;	/* true if multiple selection allowed */
 	BOOL *select;	/* array of selection flags */
+	BOOL reverse;	/* reverse pages when extracting or printing */
 } PAGELIST;
 
 typedef struct tagPSFILE {
@@ -279,6 +279,7 @@ typedef struct tagOPTIONS {
 	char	printer_queue[MAXSTR];
 	BOOL	print_to_file;
 	BOOL	psprinter;
+	BOOL	print_reverse;
 	int	pdf2ps;
 	BOOL	auto_bbox;
 } OPTIONS;
@@ -462,6 +463,7 @@ void update_scroll_bars(void);
 
 /* gvpdlg.c */
 MRESULT EXPENTRY PageDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+MRESULT EXPENTRY PageMultiDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 
 /* in gvpinit.c */
 APIRET gsview_init(int argc, char *argv[]);
@@ -485,4 +487,3 @@ int gp_printfile(char *filename, char *port);
 extern char not_defined[];
 
 #endif
-

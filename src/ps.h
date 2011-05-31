@@ -143,6 +143,14 @@ char *pscopyuntil(FILE *from, FILE *to, long begin, long end,
 char *pscopyuntil();
 #endif
 
+	/* redefine fgets to use a version that handles 
+	 * Unix, PC, or Mac EOL characters
+	 */
+#if NeedFunctionPrototypes
+char *psfgets(char *s, int n, FILE *stream);
+#else
+char *psfgets();
+#endif
 	/* DOS EPS header reading */
 
 #if NeedFunctionPrototypes
@@ -163,4 +171,3 @@ PS_WORD reorder_word(PS_WORD val);
 PS_WORD reorder_word();
 #endif
 
-

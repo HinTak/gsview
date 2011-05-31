@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -23,6 +23,11 @@
 #else
 #include "gvpm.h"
 #endif
+
+#ifndef _MSC_VER  /* Brain damaged MSVC++ 5.0 doesn't support POSIX dirent.h */
+#include <dirent.h>
+#endif
+#include <sys/stat.h>
 
 struct prop_item_s *
 get_properties(char *device)
@@ -255,55 +260,112 @@ gsview_extract()
 
 
 /* Copy the headers, marked pages, and trailer to f */
+/* Reverse the page order if needed and possible */
 void
 psfile_extract(FILE *f)
 {
-    char text[PSLINELENGTH];
+    char line[PSLINELENGTH];
     char *comment;
     BOOL pages_written = FALSE;
-    BOOL pages_atend = FALSE;
+    BOOL pageorder_written = FALSE;
     int pages = 0;
     int page;
     int i;
     long position;
     PSDOC *doc = psfile.doc;
+    int neworder = doc->pageorder;
+    BOOL reverse = psfile.page_list.reverse;
+    BOOL end_header;
+    BOOL line_written;
+
+    if (neworder == NONE)	/* No page order so assume ASCEND */
+	neworder = ASCEND;
+    /* Don't touch SPECIAL pageorder */
+
+    /* reverse means new page order to be DESCEND */
+    if (reverse) {
+	if (neworder == ASCEND)
+	    neworder = DESCEND;
+	else if (neworder == DESCEND) {
+	    /* neworder = DESCEND;*/	/* unchanged */
+	    reverse = FALSE;	/* already reversed, don't do it again */
+	}
+    }
+    else {
+	if (neworder == DESCEND) {
+	    neworder = ASCEND;
+	    reverse = TRUE;	/* reverse it to become ascending */
+	}
+    }
+    /* neworder = page order of the extracted document */
+    /* reverse = reverse the current page order */
 
     for (i=0; i< doc->numpages; i++) {
 	    if (psfile.page_list.select[i]) pages++;
     }
 
-    position = doc->beginheader;
-    while ( (comment = pscopyuntil(psfile.file, f, position,
-			   doc->endheader, "%%Pages:")) != (char *)NULL ) {
+    /* copy header, fixing up %%Pages: and %%PageOrder:
+     * Write a DSC 3.0 %%Pages: or %%PageOrder: in header,
+     * even if document was DSC 2.x.
+     * Remove %%Pages: and %%PageOrder from trailer.
+     */
+    fseek(psfile.file, doc->beginheader, SEEK_SET);
+    position = ftell(psfile.file);
+    while ( position < doc->endheader ) {
+	psfgets(line, sizeof(line), psfile.file);
 	position = ftell(psfile.file);
-	if (pages_written || pages_atend) {
-	    free(comment);
-	    continue;
-	}
-	sscanf(comment+8, "%s", text);
-	if (strcmp(text, "(atend)") == 0) {
-	    fputs(comment, f);
-	    pages_atend = TRUE;
-	} else {
-	    switch (sscanf(comment+8, "%*d %d", &i)) {
-		case 1:
-		    fprintf(f, "%%%%Pages: %d %d\r\n", pages, i);
-		    break;
-		default:
-		    fprintf(f, "%%%%Pages: %d\r\n", pages);
-		    break;
+	end_header = (strncmp(line, "%%EndComments", 13) == 0);
+	if ((line[0] != '%') && (line[0] != ' ') && (line[0] != '+')
+	 && (line[0] != '\t') && (line[0] != '\r') && (line[0] != '\n'))
+	    end_header = TRUE;
+	line_written = FALSE;
+	if (end_header || strncmp(line, "%%Pages:", 8) == 0) {
+	    if (!pages_written) {
+		fprintf(f, "%%%%Pages: %d\r\n", pages);
+		pages_written = TRUE;
 	    }
-	    pages_written = TRUE;
+	    line_written = !end_header;
 	}
-	free(comment);
+	if (end_header || strncmp(line, "%%PageOrder:", 12) == 0) {
+	    if (!pageorder_written) {
+		if (neworder == ASCEND)
+		    fputs("%%PageOrder: Ascend\r\n", f);
+		else if (neworder == DESCEND)
+		    fputs("%%PageOrder: Descend\r\n", f);
+		else 
+		    fputs("%%PageOrder: Special\r\n", f);
+		pageorder_written = TRUE;
+	    }
+	    line_written = !end_header;
+	}
+	if (!line_written) {
+	    fputs(line, f);	
+	}
     }
+    if (doc->beginheader != doc->endheader) {
+	if (!pages_written) {
+	    fprintf(f, "%%%%Pages: %d\r\n", pages);
+	    /* pages_written = TRUE; */
+	}
+	if (!pageorder_written) {
+	    if (neworder == ASCEND)
+		fputs("%%PageOrder: Ascend\r\n", f);
+	    else if (neworder == DESCEND)
+		fputs("%%PageOrder: Descend\r\n", f);
+	    else 
+		fputs("%%PageOrder: Special\r\n", f);
+	    /* pageorder_written = TRUE; */
+	}
+    }
+
     pscopyuntil(psfile.file, f, doc->beginpreview, doc->endpreview, NULL);
     pscopyuntil(psfile.file, f, doc->begindefaults, doc->enddefaults, NULL);
     pscopyuntil(psfile.file, f, doc->beginprolog, doc->endprolog, NULL);
     pscopyuntil(psfile.file, f, doc->beginsetup, doc->endsetup, NULL);
 
     page = 1;
-    for (i = 0; i < doc->numpages; i++) {
+    i = reverse ? doc->numpages - 1 : 0;
+    while ( reverse ? (i >= 0)  : (i < doc->numpages) ) {
 	if (psfile.page_list.select[map_page(i)])  {
 	    comment = pscopyuntil(psfile.file, f, doc->pages[i].begin,
 				  doc->pages[i].end, "%%Page:");
@@ -315,28 +377,243 @@ psfile_extract(FILE *f)
 	    free(comment);
 	    pscopyuntil(psfile.file, f, -1, doc->pages[i].end, NULL);
 	}
+        i += reverse ? -1 : 1;
     }
 
-    position = doc->begintrailer;
-    while ( (comment = pscopyuntil(psfile.file, f, position,
-			   doc->endtrailer, "%%Pages:")) != (char *)NULL ) {
+    /* copy trailer, removing %%Pages: and %%PageOrder: */
+    fseek(psfile.file, doc->begintrailer, SEEK_SET);
+    position = ftell(psfile.file);
+    while ( position < doc->endtrailer ) {
+	psfgets(line, sizeof(line), psfile.file);
 	position = ftell(psfile.file);
-	if (pages_written) {
-	    free(comment);
-	    continue;
+	if (strncmp(line, "%%Pages:", 8) == 0) {
+	    continue;	/* has already been written in header */
 	}
-	switch (sscanf(comment+8, "%*d %d", &i)) {
-	    case 1:
-		fprintf(f, "%%%%Pages: %d %d\r\n", pages, i);
-		break;
-	    default:
-		fprintf(f, "%%%%Pages: %d\r\n", pages);
-		break;
+	else if (strncmp(line, "%%PageOrder:", 12) == 0) {
+	    continue;	/* has already been written in header */
 	}
-	pages_written = TRUE;
-	free(comment);
+	else {
+	    fputs(line, f);	
+	}
     }
 }
+
+#ifdef _MSC_VER
+/* Brain damaged Microsoft C doesn't support POSIX directory operations.
+ * Implement a subset of these ourselves to keep the uniprint
+ * enumeration code happy.
+ */
+struct dirent
+{
+    char        d_name[260];
+};
+
+typedef struct
+{
+    BOOL finished;
+    HANDLE hff;
+    WIN32_FIND_DATA wfd;
+    char pattern[1024];
+    struct dirent de;
+} DIR;
+
+DIR * opendir(const char *dirname);
+struct dirent *readdir(DIR *dir);
+int closedir (DIR *dir);
+
+DIR * opendir(const char *dirname)
+{
+DIR *dp = malloc(sizeof(DIR));
+int i;
+char *p;
+    if (dp == NULL)
+	return NULL;
+    memset((char *)dp, 0, sizeof(DIR));
+    strcpy(dp->pattern, dirname);
+    i = strlen(dp->pattern);
+    for (p = dp->pattern; *p; p++)
+	if (*p == '/')
+	    *p = '\\';
+    if (i && dp->pattern[i-1]!='\\')
+	strcat(dp->pattern, "\\");
+    strcat(dp->pattern, "*");
+    dp->finished = FALSE;
+    dp->hff = NULL;
+    return dp;
+}
+
+int closedir (DIR *dir)
+{
+    if ((dir->hff) && (dir->hff != INVALID_HANDLE_VALUE))
+	FindClose(dir->hff);
+    free(dir);
+}
+
+struct dirent *readdir(DIR *dir)
+{
+    if (dir->finished)
+	return NULL;
+
+    if (dir->hff == NULL) {
+	dir->hff = FindFirstFile(dir->pattern, &dir->wfd);
+        if (dir->hff == INVALID_HANDLE_VALUE) {
+	    dir->finished = TRUE;
+    	    return NULL;
+	}
+    }
+    else {
+	if (!FindNextFile(dir->hff, &dir->wfd)) {
+	    dir->finished = TRUE;
+	    return NULL;
+	}
+    }
+    strcpy(dir->de.d_name, dir->wfd.cFileName); 
+    return &(dir->de);
+}
+#endif
+
+/* Add the file name and description to the list
+ * Return new offset.
+ * If not enough space, don't copy name/description but
+ * still return offset as if data was copied.
+ * This allows caller to work out what buffer size is required.
+ */
+int
+upp_add_list(char *name, char *buffer, int len, int offset)
+{
+char *pd;
+FILE *f;
+char desc[MAXSTR];
+int needed, remaining;
+    if ( (f = fopen(name, "r")) != (FILE *)NULL ) {
+	if (fgets(desc, sizeof(desc)-1, f)) {
+	    strtok(desc, "\042\n");
+	    pd = strtok(NULL, "\042\n");
+	    if (pd && strlen(pd)) {
+	        needed = strlen(name) + strlen(pd) + 3;
+	        remaining = len - offset;
+		if (needed < remaining)  {
+		    strcpy(buffer+offset, name);
+		    offset += strlen(name) + 1;
+		    strcpy(buffer+offset, pd);
+		    offset += strlen(pd) + 1;
+		    buffer[offset] = '\0';  /* double trailing null */
+		}
+		else {
+		    /* don't copy data, but tell caller how much */
+		    /* space it needs  */
+		    offset += strlen(name) + 1;
+		    offset += strlen(pd) + 1;
+		}
+	    }
+	}
+	fclose(f);
+    }
+    return offset;
+}
+
+/* search path for any uniprint configuration files (*.upp),
+ * appending the filename and description of any found to
+ * buffer at offset.  Return updated offset.
+ * If offset > len, then not all data was placed in buffer.
+ */
+int 
+enum_upp(char *path, char *buffer, int len, int offset)
+{    
+DIR *dirp;
+struct dirent* de;
+struct stat st;
+char name[MAXSTR];
+char *p;
+    dirp = opendir(path);
+    if (dirp == NULL)
+	return 2;
+    while ( (de = readdir(dirp)) != NULL) {
+	if (strlen(path) + strlen(de->d_name) + 1 < MAXSTR) {
+	    strcpy(name, path);
+	    strcat(name, "\\");
+	    strcat(name, de->d_name);
+	    if (stat(name, &st) != -1) {
+		if  (st.st_mode & S_IFDIR) {
+		    /* don't recurse into subdirectories */
+		}
+		else {
+		    /* an ordinary file */
+		    p = strrchr(name,'.');
+		    if (p && (stricmp(p, ".upp") == 0)) {
+			offset = upp_add_list(name, buffer, len, offset);
+		    }
+		}
+	    }
+	}
+    }
+    closedir(dirp);
+    return offset;
+}
+
+/* return number of bytes needed */
+int
+enum_upp_path(char *path, char *buffer, int len)
+{
+char pbuf[1024];
+char *p, *q, *r;
+int offset = 0;
+    if (buffer == (char *)NULL)
+	len = 0;
+    if (len >= 2) {
+	buffer[0] = '\0';
+	buffer[1] = '\0';
+    }
+    p = path;
+    while (p) {
+	q = strchr(p, ';');
+	if (q) {
+	    strncpy(pbuf, p, (int)(q-p));
+	    pbuf[(int)(q-p)] = '\0';
+	}
+	else
+	    strcpy(pbuf, p);
+	if (strlen(pbuf)) {
+	    r = pbuf + strlen(pbuf) - 1;
+	    if ( (*r == '\\') || (*r == '/') )
+		*r = '\0';	/* trailing slash will be added later */
+	    offset = enum_upp(pbuf, buffer, len, offset);
+	}
+	if (q)
+	    p = q+1;
+	else
+	    p = NULL;
+    }
+    return offset + 2;
+}
+
+
+char * 
+uppmodel_to_name(char *buffer, char *model)
+{
+char *p, *desc;
+    for (p=buffer; *p; p+=strlen(p)+1) {
+	desc = p + strlen(p) + 1;
+	if (strcmp(desc, model) == 0)
+	    return p;
+	p = desc;
+    }
+    return NULL;
+}
+
+char * 
+uppname_to_model(char *buffer, char *name)
+{
+char *p, *desc;
+    for (p=buffer; *p; p+=strlen(p)+1) {
+	desc = p + strlen(p) + 1;
+	if (strcmp(p, name) == 0)
+	    return desc;
+	p = desc;
+    }
+    return NULL;
+}
+
 
 /* common printer code */
 BOOL
@@ -346,6 +623,7 @@ char buf[MAXSTR];
 int i;
 float print_xdpi, print_ydpi;
 int width, height;
+int widthpt, heightpt;
 struct prop_item_s *proplist;
 FILE *optfile;
 FILE *pcfile;
@@ -441,15 +719,15 @@ PROFILE *prf;
     }
     i = get_paper_size_index();
     if (i < 0) {
-	width = option.user_width;
-	height = option.user_height;
+	widthpt = option.user_width;
+	heightpt = option.user_height;
     }
     else {
-	width = papersizes[i].width;
-	height = papersizes[i].height;
+	widthpt = papersizes[i].width;
+	heightpt = papersizes[i].height;
     }
-    width  = (unsigned int)(width  / 72.0 * print_xdpi + 0.5);
-    height = (unsigned int)(height / 72.0 * print_ydpi + 0.5);
+    width  = (unsigned int)(widthpt  / 72.0 * print_xdpi + 0.5);
+    height = (unsigned int)(heightpt / 72.0 * print_ydpi + 0.5);
 
     /* create options file */
 /*
@@ -465,11 +743,20 @@ PROFILE *prf;
     fprintf(optfile, "-dNOPAUSE\n");
     if (option.safer)
 	fprintf(optfile, "-dSAFER\n");
-    fprintf(optfile, "-sDEVICE=%s\n",option.device_name);
-    fprintf(optfile, "-dDEVICEXRESOLUTION=%g\n", (double)print_xdpi);
-    fprintf(optfile, "-dDEVICEYRESOLUTION=%g\n", (double)print_ydpi);
-    fprintf(optfile, "-dDEVICEWIDTH=%u\n", width);
-    fprintf(optfile, "-dDEVICEHEIGHT=%u\n", height);
+    if (strcmp(option.device_name, "uniprint") == 0) {
+	/* uniprint sets the device name and resolution in */
+	/* a configuration file */
+	/* Since we don't know the resolution, set the page size in points */
+	fprintf(optfile, "-dDEVICEWIDTHPOINTS=%u\n", widthpt);
+	fprintf(optfile, "-dDEVICEHEIGHTPOINTS=%u\n", heightpt);
+    }
+    else {
+	fprintf(optfile, "-sDEVICE=%s\n",option.device_name);
+	fprintf(optfile, "-dDEVICEXRESOLUTION=%g\n", (double)print_xdpi);
+        fprintf(optfile, "-dDEVICEYRESOLUTION=%g\n", (double)print_ydpi);
+	fprintf(optfile, "-dDEVICEWIDTH=%u\n", width);
+	fprintf(optfile, "-dDEVICEHEIGHT=%u\n", height);
+    }
 
     fprintf(optfile, "-sOutputFile=\042");
     for (p=(printtofile) ? output : queue; *p != '\0'; p++)

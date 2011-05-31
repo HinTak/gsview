@@ -60,12 +60,10 @@ char twbuf[TWLENGTH];
 int twend;
 char stdinbuf[MAXSTR];
 
+char *szAppName = "GSview Print";
 unsigned long lsize, ldone;
 int pcdone;
-char *pcdonefmt = "Input %d%%";
-char pcdonestr[16];
-RECTL pcrect;
-POINTL pcpt;
+char title[64];
 
 HWND hwnd_frame;
 HWND hwnd_client;
@@ -165,7 +163,7 @@ RECTL rect;
 	0,			/* frame style is not WS_VISIBLE */
 	&frame_flags,
   	(PSZ)class,		/* client class */
-  	(PSZ)"Ghostscript DLL interface for GSview",	/* title */
+  	(PSZ)szAppName,		/* title */
   	WS_VISIBLE,		/* client style */
   	0,			/* resource module */
   	ID_GSVIEW,		/* resource identifier */
@@ -190,7 +188,7 @@ RECTL rect;
 
     WinQueryWindowRect(hwnd_client, &rect);
 
-    status_height = char_size.y;
+    status_height = 0 /* char_size.y */;
     hwnd_text = WinCreateWindow(
     	hwnd_client,
     	WC_MLE,
@@ -204,14 +202,6 @@ RECTL rect;
 	TEXTWIN_MLE,
 	NULL,
 	NULL);
-
-
-    pcrect.xLeft = 2*char_size.x;
-    pcrect.yBottom = 0;
-    pcrect.xRight = pcrect.xLeft + 16 * char_size.x;
-    pcrect.yTop = pcrect.yBottom + status_height;
-    pcpt.x = pcrect.xLeft;
-    pcpt.y = pcrect.yBottom + char_size.y/4;
 
     /* show window */
     swp.fl = SWP_ACTIVATE | SWP_SHOW;
@@ -258,13 +248,6 @@ IPT ipt = 0;
     WinUpdateWindow(hwnd_text);
 }
 
-void
-pc_update(HPS hps)
-{
-    WinFillRect(hps, &pcrect, SYSCLR_DIALOGBACKGROUND);
-    GpiSetColor(hps, SYSCLR_BUTTONDEFAULT);
-    GpiCharStringAt(hps, &pcpt, strlen(pcdonestr), pcdonestr);
-}
 
 /* The main WndProc */
 MRESULT EXPENTRY 
@@ -278,12 +261,9 @@ ClientWndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    text_update();
 	    break;
 	case WM_PCUPDATE:
-	    sprintf(pcdonestr, pcdonefmt, (int)(mp1));
-	    { HPS hps;
-	    hps = WinGetPS(hwnd_client);
-	    pc_update(hps);
-	    WinReleasePS(hps);
-	    }
+	    sprintf(title, "%d%% - %s", 
+		(int)(mp1) > 100 ? 100 : (int)(mp1) , szAppName);
+	    WinSetWindowText( hwnd_frame, title);
 	    return 0;
 	case WM_SIZE:
 	    {SWP swp;
@@ -322,13 +302,6 @@ ClientWndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		    return (MRESULT)TRUE;
             }
             break;
-	case WM_PAINT:
-	    {HPS hps; RECTL rect;
-	    hps = WinBeginPaint(hwnd, (ULONG)0, &rect);
-	    pc_update(hps);
-	    WinEndPaint(hwnd);
-	    }
-	    return 0;
 	case WM_ERASEBACKGROUND:
 	    WinFillRect((HPS)mp1, (PRECTL)mp2, SYSCLR_DIALOGBACKGROUND);
 	    return (MRESULT)FALSE;	/* we have erased it */
@@ -413,6 +386,7 @@ It is intended that gvpgs be called with temporary files\n";
     /* find length of file */
     fseek(infile, 0L, SEEK_END);
     lsize = ftell(infile);
+    lsize = lsize / 100;	/* to get percent values */
     if (lsize <= 0)
 	lsize = 1;
     fseek(infile, 0L, SEEK_SET);
@@ -625,8 +599,8 @@ char *gs_argv[3];
 	  while ((len = fread(buf, 1, sizeof(buf), infile)) != 0) {
 	    code = gsdll.execute_cont(buf, len);
 	    ldone += len;
-	    if (pcdone != (ldone * 100 ) / lsize) {
-		pcdone = (ldone * 100) / lsize;
+	    if (pcdone != (int)(ldone / lsize)) {
+		pcdone = (int)(ldone / lsize);
 		WinPostMsg(hwnd_client, WM_PCUPDATE, (MPARAM)pcdone, 0);
 	    }
 	    if (code) {
@@ -649,6 +623,10 @@ char *gs_argv[3];
     /* tell main thread to shut down */
     if ((code == 0) && (!debug))
 	WinPostMsg(hwnd_client, WM_QUIT, 0, 0);
+    else {
+        WinSetWindowPos(hwnd_frame, HWND_TOP, 0, 0, 0, 0, 
+		SWP_ACTIVATE | SWP_SHOW | SWP_RESTORE);
+    }
     gstid = 0;
 }
 

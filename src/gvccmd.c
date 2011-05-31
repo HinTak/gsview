@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -279,6 +279,7 @@ gsview_command(int command)
 	case IDM_LANGEN:
 	case IDM_LANGDE:
 	case IDM_LANGFR:
+	case IDM_LANGIT:
 		gsview_language(command);
 		return 0;
 	case IDM_SAFER:
@@ -648,4 +649,3 @@ gsview_language(int new_language)
 	}
 }
 
-

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
 
   This file is part of GSview.
 
@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvwfr.rc */
+/* fr\gvwlang.rc */
 
 /* Windows French language resources */
 
@@ -84,6 +84,9 @@ BEGIN
 			MENUITEM "&Anglais", IDM_LANGEN
 			MENUITEM "&Français", IDM_LANGFR
 			MENUITEM "Alleman&d", IDM_LANGDE
+/*
+			MENUITEM "&Italien", IDM_LANGIT
+*/
 		END
 		POPUP "PS vers &texte"
 		BEGIN
@@ -91,9 +94,9 @@ BEGIN
 			MENUITEM "&Normal", IDM_PSTOTEXTNORM
 			MENUITEM "&Encodage Dvips Cork", IDM_PSTOTEXTCORK
 		END
-		MENUITEM "Enregistrer les paramètres &maintenant", IDM_SETTINGS
+		MENUITEM "Enregistrer les options &maintenant", IDM_SETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "Enregistrer les paramètres &en quittant", IDM_SAVESETTINGS
+		MENUITEM "Enregistrer les options en &quittant", IDM_SAVESETTINGS
 		MENUITEM "&Protection des fichiers", IDM_SAFER
 		MENUITEM "Enregistrer le &dernier répertoire", IDM_SAVEDIR
 		MENUITEM "Afficher la &barre d'outils", IDM_BUTTONSHOW
@@ -144,7 +147,7 @@ BEGIN
 		MENUITEM "Folio", IDM_FOLIO
 		MENUITEM "Quarto", IDM_QUARTO
 		MENUITEM "10x14", IDM_10X14
-		MENUITEM "Taille &personnalisée...", IDM_USERSIZE
+		MENUITEM "&Personnalisé...", IDM_USERSIZE
 	END
 	POPUP "A&ide"
 	BEGIN
@@ -218,7 +221,7 @@ STRINGTABLE
 BEGIN
 	/* filter strings */
 #ifdef __WIN32__
-	IDS_FILTER_PSALL, "Défaut (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|Fichiers PS (*.ps)|*.ps;*.ps.gz|Fichiers EPS (*.eps)|*.eps;*.eps.gz|Fichiers EPI (*.epi)|*.epi;*.epi.gz|Fichiers PDF (*.pdf)|*.pdf;*.pdf.gz|Tous (*.*)|*.*|"
+	IDS_FILTER_PSALL, "Défaut (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf;*.ps.gz;*.eps.gz;*.epi.gz;*.pdf.gz|Fichiers PS (*.ps)|*.ps;*.ps.gz|Fichiers EPS (*.eps)|*.eps;*.eps.gz|Fichiers EPI (*.epi)|*.epi;*.eps.gz|Fichiers PDF (*.pdf)|*.pdf;*.pdf.gz|Tous (*.*)|*.*|"
 #else
 	IDS_FILTER_PSALL, "Défaut (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf|Fichiers PS (*.ps)|*.ps|Fichiers EPS (*.eps)|*.eps|Fichiers EPI (*.epi)|*.epi|Fichiers PDF (*.pdf)|*.pdf|Tous (*.*)|*.*|"
 #endif
@@ -234,4 +237,3 @@ BEGIN
 END
 
 
-

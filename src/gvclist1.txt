@@ -8,6 +8,7 @@ gsviewfr.hlp
 gsvw16de.dll
 gsvw16fr.dll
 gvwgs16.exe
+ungsvw16.exe
 zlib16.dll
 printer.ini
 README.TXT

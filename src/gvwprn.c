@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -311,6 +311,119 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 }
 
 
+/* dialog box for selecting uniprint configuration file */
+#ifdef __BORLANDC__
+#pragma argsused
+#endif
+BOOL CALLBACK _export
+UniDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
+{
+    WORD notify_message;
+    LPSTR p, q;
+    char uppname[MAXSTR];	/* contains printer device name */
+    static LPSTR ubuf;
+    LPSTR desc;
+    int i;
+
+    switch (wmsg) {
+	case WM_INITDIALOG:
+	    ubuf = NULL;
+	    /* Delay initialization of the list box until 
+	     * after it is displayed, because searching for 
+	     * configuration files takes several seconds.
+	     */
+	    load_string(IDS_WAIT, uppname, sizeof(uppname));
+	    SendDlgItemMessage(hDlg, UPP_LIST, LB_RESETCONTENT, 0, (LPARAM)0);
+	    SendDlgItemMessage(hDlg, UPP_LIST, LB_ADDSTRING, 
+		0, (LPARAM)uppname);
+	    EnableWindow(GetDlgItem(hDlg, UPP_LIST), FALSE);
+	    uppname[0] = uppname[1] = '\0';
+	    GetDlgItemText(GetParent(hDlg), 
+		    DEVICE_OPTIONS, (LPSTR)uppname, sizeof(uppname));
+	    SetDlgItemText(hDlg, UPP_NAME, uppname+1);
+	    PostMessage(hDlg, WM_COMMAND, WM_USER, 0L);
+	    return TRUE;
+	case WM_COMMAND:
+	    notify_message = GetNotification(wParam,lParam);
+	    switch (LOWORD(wParam)) {
+		case WM_USER:
+		    /* time consuming initialization */
+		    ShowWindow(hDlg, SW_SHOW);
+		    InvalidateRect(hDlg, NULL, FALSE);
+		    UpdateWindow(hDlg);
+		    desc = NULL;
+		    uppname[0] = uppname[1] = '\0';
+		    i = enum_upp_path(option.gsinclude, NULL, 0);
+		    if ((ubuf = malloc(i)) == (char *)NULL) {
+			play_sound(SOUND_ERROR);
+			PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0L);
+			return TRUE;	/* no memory */
+		    }
+		    enum_upp_path(option.gsinclude, ubuf, i);
+		    GetDlgItemText(GetParent(hDlg), 
+			DEVICE_OPTIONS, (LPSTR)uppname, sizeof(uppname));
+		    SendDlgItemMessage(hDlg, UPP_LIST, LB_RESETCONTENT, 
+			0, (LPARAM)0);
+		    for (p = ubuf; *p; p += lstrlen(p) + 1) {
+			q = p + lstrlen(p) + 1;
+			if (lstrcmp(p, uppname+1) == 0)
+			    desc = q;
+			SendDlgItemMessage(hDlg, UPP_LIST, LB_ADDSTRING, 
+				0, (LPARAM)q);
+			p = q;
+		    }
+		    if (desc != (LPSTR)NULL)
+			SendDlgItemMessage(hDlg, UPP_LIST, LB_SELECTSTRING, 
+			    0, (LPARAM)desc);
+		    SetDlgItemText(hDlg, UPP_NAME, uppname+1);
+		    EnableWindow(GetDlgItem(hDlg, UPP_LIST), TRUE);
+		    return TRUE;	/* we processed the message */
+		case ID_HELP:
+		    get_help();
+		    return FALSE;
+		case UPP_LIST:
+		    if (notify_message == LBN_SELCHANGE) {
+			char dname[MAXSTR];
+			if (ubuf == NULL)
+			    return FALSE;
+			i = (int)SendDlgItemMessage(hDlg, UPP_LIST, 
+			    LB_GETCURSEL, 0, 0L);
+			if (i == LB_ERR)
+			    return FALSE;
+			if (SendDlgItemMessage(hDlg, UPP_LIST, LB_GETTEXTLEN, 
+			      i, (LPARAM)0) + 1 > sizeof(dname))
+			    return FALSE;
+			SendDlgItemMessage(hDlg, UPP_LIST, LB_GETTEXT, 
+			    i, (LPARAM)(LPSTR)dname);
+			SetDlgItemText(hDlg, UPP_NAME, 
+			    uppmodel_to_name(ubuf, dname));
+		    }
+		    else if (notify_message == LBN_DBLCLK) {
+			PostMessage(hDlg, WM_COMMAND, IDOK, (LPARAM)0);
+		    }
+		    return FALSE;
+		case IDOK:
+		    if (GetDlgItemText(hDlg, UPP_NAME, uppname+1, 
+		      sizeof(uppname)-2) != 0) {
+		      uppname[0] = '@';
+		      SetDlgItemText(GetParent(hDlg), 
+			    DEVICE_OPTIONS, uppname);
+		    }
+		    if (ubuf)
+		 	free(ubuf);
+		    EndDialog(hDlg, TRUE);
+		    return TRUE;
+		case IDCANCEL:
+		    if (ubuf)
+		 	free(ubuf);
+		    EndDialog(hDlg, FALSE);
+		    return TRUE;
+	    }
+	    break;
+    }
+    return FALSE;
+}
+
 char *device_queue_list;
 int device_queue_index;
 
@@ -332,7 +445,7 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	switch (wmsg) {
 	    case WM_INITDIALOG:
 #ifndef __WIN32__
-		lpProcPage = (DLGPROC)MakeProcInstance((FARPROC)PageDlgProc, phInstance);
+		lpProcPage = (DLGPROC)MakeProcInstance((FARPROC)PageMultiDlgProc, phInstance);
 #endif
 		p = get_devices();
 		res = p;	/* save for free() */
@@ -377,10 +490,11 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    psfile.page_list.current = psfile.pagenum-1;
 		    psfile.page_list.multiple = TRUE;
 		    for (i=0; i< psfile.doc->numpages; i++)
-			psfile.page_list.select[i] = FALSE;
+			psfile.page_list.select[i] = TRUE;
 		    psfile.page_list.select[psfile.page_list.current] = TRUE;
+		    psfile.page_list.reverse = option.print_reverse;
 #ifdef __WIN32__
-		    PageDlgProc(hDlg, wmsg, wParam, lParam);
+		    PageMultiDlgProc(hDlg, wmsg, wParam, lParam);
 #else
 		    CallWindowProc((WNDPROC)lpProcPage, hDlg, wmsg, wParam, lParam);
 #endif
@@ -390,6 +504,7 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    EnableWindow(GetDlgItem(hDlg, PAGE_ALL), FALSE);
 		    EnableWindow(GetDlgItem(hDlg, PAGE_ODD), FALSE);
 		    EnableWindow(GetDlgItem(hDlg, PAGE_EVEN), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, PAGE_REVERSE), FALSE);
 		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_ADDSTRING, 0, 
 			(LPARAM)((LPSTR)"All"));
 		    EnableWindow(GetDlgItem(hDlg, PAGE_LISTTEXT), FALSE);
@@ -540,11 +655,40 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			else
 			    play_sound(SOUND_ERROR);
 			return FALSE;
+		    case DEVICE_UNIPRINT:
+			{
+#ifndef __WIN32__
+	    		DLGPROC lpProcUni;
+#endif
+		        GetDlgItemText(hDlg, DEVICE_NAME, buf, sizeof(buf));
+			if (strcmp(buf, "uniprint") != 0) {
+			  /* select uniprint device */
+			  if (SendDlgItemMessage(hDlg, DEVICE_NAME, 
+			      CB_SELECTSTRING, 0, 
+			      (LPARAM)(LPSTR)"uniprint")
+			        == CB_ERR) {
+			    play_sound(SOUND_ERROR);
+			    return FALSE;	/* can't select uniprint */
+			  }
+			  SendDlgNotification(hDlg, DEVICE_NAME, CBN_SELCHANGE);
+			}
+			load_string(IDS_TOPICPRINT, szHelpTopic, 
+				sizeof(szHelpTopic));
+#ifdef __WIN32__
+			DialogBoxParam(hlanguage, "UniDlgBox", hDlg, 
+				UniDlgProc, (LPARAM)NULL);
+#else
+			lpProcUni = (DLGPROC)MakeProcInstance((FARPROC)UniDlgProc, phInstance);
+			DialogBoxParam(hlanguage, "UniDlgBox", hDlg, lpProcUni, (LPARAM)entry);
+			FreeProcInstance((FARPROC)lpProcUni);
+#endif
+			}
+			return FALSE;
 		    case PAGE_ALL:
 		    case PAGE_EVEN:
 		    case PAGE_ODD:
 #ifdef __WIN32__
-		    	PageDlgProc(hDlg, wmsg, wParam, lParam);
+		    	PageMultiDlgProc(hDlg, wmsg, wParam, lParam);
 #else
 			CallWindowProc((WNDPROC)lpProcPage, hDlg, wmsg, wParam, lParam);
 #endif
@@ -564,12 +708,16 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 				(LPARAM)(LPSTR)option.printer_queue);
 			}
 			/* get pages */
-			if ((psfile.doc != (PSDOC *)NULL) && (psfile.doc->numpages != 0))
+			if ((psfile.doc != (PSDOC *)NULL) 
+				&& (psfile.doc->numpages != 0)) {
 #ifdef __WIN32__
-			    PageDlgProc(hDlg, wmsg, wParam, lParam);
+			    PageMultiDlgProc(hDlg, wmsg, wParam, lParam);
 #else
-			    CallWindowProc((WNDPROC)lpProcPage, hDlg, wmsg, wParam, lParam);
+			    CallWindowProc((WNDPROC)lpProcPage, hDlg, 
+				wmsg, wParam, lParam);
 #endif
+		            option.print_reverse = psfile.page_list.reverse;
+			}
 #ifndef __WIN32__
 			FreeProcInstance((FARPROC)lpProcPage);
 #endif

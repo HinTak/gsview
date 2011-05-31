@@ -46,6 +46,19 @@
 
 #ifndef RC_INVOKED
 
+#ifdef DEBUG_MALLOC
+void FAR * debug_malloc(size_t size);
+void FAR * debug_calloc(size_t nitems, size_t size);
+void  FAR * debug_realloc(void FAR *block, size_t size);
+void debug_free(void FAR *block);
+#define malloc(size) debug_malloc(size)
+#define calloc(nitems, size) debug_calloc(nitems, size)
+#define realloc(block, size) debug_realloc(block, size)
+#define free(block) debug_free(block)
+extern long allocated_memory;
+extern FILE *malloc_file;
+#endif
+
 /* for gsv16spl.exe 16-bit spooler interface for Win32s */
 #define WM_GSV16SPL WM_USER+1
 extern HWND hwndspl;	/* window handle of gsv16spl.exe */
@@ -54,11 +67,6 @@ extern HWND hwndspl;	/* window handle of gsv16spl.exe */
 #define MAXSTR 256	/* maximum file name length and general string length */
 #define DEVICENAME "mswindll"
 #define DEFAULT_GSCOMMAND "gswin32.exe"
-#ifdef __WIN32__
-#define INIFILE "gsview32.ini"
-#else
-#define INIFILE "gsview16.ini"
-#endif
 #define DEFAULT_RESOLUTION 96.0
 #define DEFAULT_ZOOMRES 300.0
 #define INISECTION "Options"
@@ -117,6 +125,7 @@ typedef struct tagPAGELIST {
 	int current;	/* index of current selection */
 	BOOL multiple;	/* true if multiple selection allowed */
 	BOOL *select;	/* array of selection flags */
+	BOOL reverse;	/* reverse pages when extracting or printing */
 } PAGELIST;
 
 typedef struct tagPSFILE {
@@ -266,6 +275,7 @@ typedef struct tagOPTIONS {
 	char	printer_queue[MAXSTR];
 	BOOL	print_to_file;
 	BOOL	psprinter;
+	BOOL	print_reverse;
 	int	pdf2ps;
 	BOOL	auto_bbox;
 } OPTIONS;
@@ -457,6 +467,9 @@ extern PSBBOX bbox;
 #define GetNotification(wParam,lParam) (HIWORD(wParam))
 #define SendDlgNotification(hwnd, id, notice) \
     SendMessage((hwnd), WM_COMMAND, MAKELONG((id),(notice)), (LPARAM)GetDlgItem((hwnd),(id)))
+/* early versions of Win32s don't support lstrcpyn */
+#undef lstrcpyn
+#define lstrcpyn(d,s,n) strncpy(d,s,n)
 #else
 #define SetClassCursor(hwnd, hcursor) SetClassWord(hwnd, GCW_HCURSOR, (WORD)(hcursor))
 #define GetClassCursor(hwnd) ((HCURSOR)GetClassWord(hwnd, GCW_HCURSOR))
@@ -487,6 +500,7 @@ void cleanup_pgm(PROG *prog);
 
 /* in gvwdlg.c */
 BOOL CALLBACK _export PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK _export PageMultiDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
 
 /* in gvwprn.c */
 BOOL get_portname(char *portname, char *port);
@@ -495,4 +509,3 @@ extern char not_defined[];
 void start_gvwgs(void);
 
 #endif
-

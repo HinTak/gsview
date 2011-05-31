@@ -112,10 +112,10 @@ PSDOC *doc = psfile.doc;
 	    if (gsdll.lock_device && gsdll.device)
 		gsdll.lock_device(gsdll.device, 0);
 	    if (devbbox.valid) {
-		bbox.llx = (int)(devbbox.llx / option.xdpi * 72);
-		bbox.lly = (int)(devbbox.lly / option.ydpi * 72);
-		bbox.urx = (int)(devbbox.urx / option.xdpi * 72 + 1);
-		bbox.ury = (int)(devbbox.ury / option.ydpi * 72 + 1);
+		bbox.llx = (int)(devbbox.llx / option.xdpi * 72 - 0.5);
+		bbox.lly = (int)(devbbox.lly / option.ydpi * 72 - 0.5);
+		bbox.urx = (int)(devbbox.urx / option.xdpi * 72 + 1.5);
+		bbox.ury = (int)(devbbox.ury / option.ydpi * 72 + 1.5);
 		bbox.valid = TRUE;
 	    }
 	    if (!bbox.valid) {
@@ -931,10 +931,10 @@ int lastrow;
 	    scan_bbox(&prebmap, &devbbox);
 	    if (devbbox.valid) {
 	    	/* copy to global bbox as if obtained by PS to EPS */
-	    	bbox.llx = devbbox.llx * 72.0 / option.xdpi;
-	    	bbox.lly = devbbox.lly * 72.0 / option.ydpi;
-	    	bbox.urx = devbbox.urx * 72.0 / option.xdpi;
-	    	bbox.ury = devbbox.ury * 72.0 / option.ydpi;
+	    	bbox.llx = (int)(devbbox.llx * 72.0 / option.xdpi - 0.5);
+	    	bbox.lly = (int)(devbbox.lly * 72.0 / option.ydpi - 0.5);
+	    	bbox.urx = (int)(devbbox.urx * 72.0 / option.xdpi + 1.5);
+	    	bbox.ury = (int)(devbbox.ury * 72.0 / option.ydpi + 1.5);
 	    	bbox.valid = TRUE;
 	    }
 	    else {
@@ -1572,10 +1572,10 @@ write_interchange(FILE *f, LPBITMAP2 pbm, BOOL calc_bbox)
 	    scan_bbox(&prebmap, &devbbox);
 	    if (devbbox.valid) {
 	    	/* copy to global bbox as if obtained by PS to EPS */
-	    	bbox.llx = devbbox.llx * 72.0 / option.xdpi;
-	    	bbox.lly = devbbox.lly * 72.0 / option.ydpi;
-	    	bbox.urx = devbbox.urx * 72.0 / option.xdpi;
-	    	bbox.ury = devbbox.ury * 72.0 / option.ydpi;
+	    	bbox.llx = (int)(devbbox.llx * 72.0 / option.xdpi - 0.5);
+	    	bbox.lly = (int)(devbbox.lly * 72.0 / option.ydpi - 0.5);
+	    	bbox.urx = (int)(devbbox.urx * 72.0 / option.xdpi + 1.5);
+	    	bbox.ury = (int)(devbbox.ury * 72.0 / option.ydpi + 1.5);
 	    	bbox.valid = TRUE;
 	    }
 	    copy_bbox_header(f); /* adjust %%BoundingBox: comment */
@@ -2068,10 +2068,10 @@ unsigned long size;
 	    scan_bbox(&prebmap, pdevbbox);
 	    if (pdevbbox->valid) {
 	    	/* copy to global bbox as if obtained by PS to EPS */
-	    	bbox.llx = pdevbbox->llx * 72.0 / option.xdpi;
-	    	bbox.lly = pdevbbox->lly * 72.0 / option.ydpi;
-	    	bbox.urx = pdevbbox->urx * 72.0 / option.xdpi;
-	    	bbox.ury = pdevbbox->ury * 72.0 / option.ydpi;
+	    	bbox.llx = (int)(pdevbbox->llx * 72.0 / option.xdpi - 0.5);
+	    	bbox.lly = (int)(pdevbbox->lly * 72.0 / option.ydpi - 0.5);
+	    	bbox.urx = (int)(pdevbbox->urx * 72.0 / option.xdpi + 1.5);
+	    	bbox.ury = (int)(pdevbbox->ury * 72.0 / option.ydpi + 1.5);
 	    	bbox.valid = TRUE;
 	    }
 	}
@@ -2242,6 +2242,8 @@ unsigned long size;
 #if defined(_Windows) && !defined(EPSTOOL)
 	    line = NULL;
 #else
+	    free((char *)pbmi);
+	    free(line2);
 	    return 1;
 #endif
 	}
@@ -2357,6 +2359,9 @@ unsigned long size;
 	/* write end marker */
 	write_dword(3, f);
 	write_word(0, f);
+
+        free((char *)pbmi);
+	free(line2);
 
 	return 0;
 }
@@ -2476,4 +2481,3 @@ int code;
 	return code;
 }
 
-

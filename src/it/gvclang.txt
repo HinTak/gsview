@@ -1,0 +1,22 @@
+ GSview Aiuto
+1Overview
+?Overview
+ GSview attualmente sta traducendo in italiano da una persona. Il paragrafo
+ sotto è stato tradotto da un programma destinato all' elaboratore. 
+ 
+ `GSview` è un' interfaccia grafica per Ghostscript sotto MS-Windows o
+ OS/2. Ghostscript è un interpretatore per la lingua di descrizione della pagina
+ di PostScript usata dalle stampanti a laser. Per i documenti dopo le
+ convenzioni di struttura del documento dell' Adobe PostScript, GSview
+ permette che le pagine selezionate siano osservate o stampate. GSview 2.5
+ richiede Ghostscript 4.03 - 5.99. GSview è stato ispirato dal programma del
+ Tim Theisen X11 Ghostview.  
+
+ `GSview` is a graphical interface for Ghostscript under MS-Windows
+ or OS/2.
+ Ghostscript is an interpreter for the PostScript page description language
+ used by laser printers.
+ For documents following the Adobe PostScript Document Structuring
+ Conventions, GSview allows selected pages to be viewed or printed.
+ GSview 2.5 requires Ghostscript 4.03 - 5.99.
+ GSview was inspired by Tim Theisen's X11 Ghostview program.

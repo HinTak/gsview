@@ -12,6 +12,7 @@
  *     the GSview help file where topics may occur at the
  *     same level as a book and after the book.
  *   First line of file is Window Title.
+ * Changed to ANSI C.  rjl   1998-01-10
  *
  * usage:  doc2rtf file.doc file.rtf [file.cnt] [-d]
  *
@@ -46,16 +47,16 @@ struct LIST *keyhead = NULL;
 
 int debug = FALSE;
 
-void footnote();
-void parse();
-void refs();
-void convert();
-void process_line();
-int lookup();
+void parse(FILE *a, FILE *b);
+int lookup(char *s);
+void putquoted(char *s, FILE *f);
+void footnote(char c, char *s, FILE *b);
+void refs(int l, FILE *f);
+void convert(FILE *a, FILE *b);
+void process_line(char *line, FILE *b);
 
-main(argc,argv)
-int argc;
-char **argv;
+int
+main(int argc,char *argv[])
 {
 FILE * infile;
 FILE * outfile;
@@ -99,8 +100,7 @@ FILE * cntfile = NULL;
 }
 
 /* scan the file and build a list of line numbers where particular levels are */
-void parse(a, b)
-FILE *a, *b;
+void parse(FILE *a, FILE *b)
 {
     static char line[MAX_LINE_LEN];
 	char *c;
@@ -161,8 +161,7 @@ FILE *a, *b;
 
 /* look up an in text reference */
 int
-lookup(s)
-char *s;
+lookup(char *s)
 {
 	char *c;
 	char tokstr[MAX_LINE_LEN];
@@ -218,9 +217,7 @@ char *s;
 	return(-1);
 	}
 
-void putquoted(s, f)
-char *s;
-FILE *f;
+void putquoted(char *s, FILE *f)
 {
 	for (; *s; s++) {
 	    if (*s & 0x80) {
@@ -236,10 +233,7 @@ FILE *f;
 
 
 /* search through the list to find any references */
-void
-refs(l, f)
-int l;
-FILE *f;
+void refs(int l, FILE *f)
 {
 	int curlevel;
 	char str[MAX_LINE_LEN];
@@ -273,10 +267,7 @@ FILE *f;
 	}
 
 /* generate an RTF footnote with reference char c and text s */
-void footnote(c, s, b)
-char c;
-char *s;
-FILE *b;
+void footnote(char c, char *s, FILE *b)
 {
 /*  This is the new format, but it doesn't work for HC31
 	fprintf(b,"%c{\\footnote ", c);
@@ -286,9 +277,7 @@ FILE *b;
 	fprintf(b,"}\n",s);
 }
 
-void
-convert(a,b)
-	FILE *a,*b;
+void convert(FILE *a, FILE *b)
 {
     static char line[MAX_LINE_LEN];
 	
@@ -311,10 +300,7 @@ convert(a,b)
 	fprintf(b,"}\n");
 }
 
-void
-process_line(line, b)
-	char *line;
-	FILE *b;
+void process_line(char *line, FILE *b)
 {
     static int line_count = 0;
     static char line2[MAX_LINE_LEN];

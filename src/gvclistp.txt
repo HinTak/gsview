@@ -11,7 +11,7 @@ pstotext/pstotxt2.def
 pstotext/pstotxt2.mak
 pstotext/pstotxt3.def
 pstotext/pstotxt3.mak
-pstotext/pstotxta.mak
+pstotext/pstotxtv.mak
 pstotext/pstotxtd.c
 pstotext/pstotxtm.mak
 pstotext/ptotdll.c

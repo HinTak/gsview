@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -56,6 +56,9 @@ APIRET rc;
 	    break;
 	case IDM_LANGFR:
 	    strcat(langdll, "fr");
+	    break;
+	case IDM_LANGIT:
+	    strcat(langdll, "it");
 	    break;
 	case IDM_LANGEN:
 	default:
@@ -148,6 +151,7 @@ LanguageDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 		case IDM_LANGEN:
 		case IDM_LANGDE:
 		case IDM_LANGFR:
+		case IDM_LANGIT:
                     WinDismissDlg(hwnd, SHORT1FROMMP(mp1));
             }
             break;
@@ -177,6 +181,8 @@ ULONG pcbActual;
 	  ((option.language == IDM_LANGDE) && (pci.country != 49))
 	   ||
 	  ((option.language == IDM_LANGFR) && (pci.country != 33))
+	   ||
+	  ((option.language == IDM_LANGIT) && (pci.country != 39))
 	)
     {	/* GSview language doesn't match country code */
 	language = WinDlgBox(HWND_DESKTOP, hwnd_frame, LanguageDlgProc, hlanguage, IDD_LANG, NULL);
@@ -184,6 +190,7 @@ ULONG pcbActual;
 	    case IDM_LANGEN:
 	    case IDM_LANGDE:
 	    case IDM_LANGFR:
+	    case IDM_LANGIT:
 		gsview_language(language);
 	}
     }

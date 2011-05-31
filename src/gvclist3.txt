@@ -1,3 +1,4 @@
+pstotext.1
 pstotext.txt
 pstotxt3.dll
 pstotxt3.exe
@@ -10,6 +11,7 @@ gsvw32de.dll
 gsvw32fr.dll
 gsv16spl.exe
 gvwgs32.exe
+ungsvw32.exe
 zlib32.dll
 printer.ini
 README.TXT

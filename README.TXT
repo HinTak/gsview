@@ -1,7 +1,7 @@
 ===============================================================
-README.TXT         1997-11-29
+README.TXT         1998-02-20
 ===============================================================
-GSview 2.4 - PostScript previewer.  Needs Ghostscript 5.10.
+GSview 2.5 - PostScript previewer.  Needs Ghostscript 5.10.
 
 ========
 Overview
@@ -43,9 +43,12 @@ Features include:
  - Free (GSview Free Public Licence).
  - Works with Aladdin Ghostscript 4.03 - 5.99 (GSview checks the
    Ghostscript version number).
-New features in version 2.4:
- - Can be compiled with MSVC++ 5.0.  Can be compiled for the
-   DEC Alpha, except for the unzip, zlib and pstotext zlib DLLs.
+Changes in version 2.5:
+ - Printer Setup can now list uniprint configuration files.
+ - Can select all odd or even pages within a range of pages.
+ - Pages can be reversed when printing.
+ - Goto Page now supports typing the page number.
+ - Page Up/Page Down will change page if scroll bar is at end of travel.
  - See gvcnews.txt in the GSview sources for more detailed change
    notes.
 
@@ -58,7 +61,7 @@ Create three 1.44M floppies containing the following files, or
 put them all in the same directory on your hard disk.
 
 Disk 1:
-  For Win32, unzip gsv24w32.zip
+  For Win32, unzip gsv25w32.zip
       README.TXT    (this file)
       LICENCE
       FILE_ID.DIZ
@@ -69,7 +72,7 @@ Disk 1:
       setp32fr.dll  French language resources
       wizunz32.dll  Info-ZIP unzip utility
 
-  For Win16, unzip gsv24w16.zip
+  For Win16, unzip gsv25w16.zip
       README.TXT   (this file)
       LICENCE
       FILE_ID.DIZ
@@ -80,7 +83,7 @@ Disk 1:
       setp16fr.dll  French language resources
       wizunz16.dll  Info-ZIP unzip utility
 
-  For OS/2, unzip gsv24os2.zip
+  For OS/2, unzip gsv25os2.zip
       README.TXT    (this file)
       LICENCE
       FILE_ID.DIZ
@@ -103,8 +106,8 @@ Disk 2:
 Disk 3:
   gs510fn1.zip      Aladdin Ghostscript fonts.
 
-Disk 1 is the contents of gsv24w32.zip or gsv24w16.zip or gsv24os2.zip
-(all of which are contained in gsview24.zip).
+Disk 1 is the contents of gsv25w32.zip or gsv25w16.zip or gsv25os2.zip
+(all of which are contained in gsview25.zip).
 Disks 2 and 3 are obtained from ftp://ftp.cs.wisc.edu/ghost/aladdin/
 
 If using the floppy install method, 10 Mbytes of hard disk space is 
@@ -115,6 +118,9 @@ Aladdin Ghostscript in the destination directories.  If you
 wish to save your Fontmap file, back it up to another directory.
 Make sure that the zip files are transferred in binary mode and
 are all present.
+
+The Ghostscript fonts are used by Ghostscript alone.  Your system 
+Fonts folder will not be modified.
 
 To install from OS/2, run 'os2setup.exe' from disk 1.
 If you do not already have EMX isntalled on your system, you will 
@@ -137,7 +143,7 @@ updating to a later version of Win32s.  Some computers
 will work with Win32s v1.15, others will not.
 To install from MS-Windows, run 'setup.exe' from disk 1.
 If you wish to use the slower 16-bit version, install
-using 'setup16.exe' from gsv24w16.zip.
+using 'setup16.exe' from gsv25w16.zip.
 
 If you don't like automatic installation programs, it is 
 possible to install GSview and Ghostscript manually.  See
@@ -234,6 +240,8 @@ PM GSview has been compiled with EMX/GCC 0.9c and requires
 the emx 0.9c DLL's.  These are available from
   ftp://ftp.cdrom.com/pub/os2/emx09c/emxrt.zip
   ftp://ftp-os2.nmsu.edu/pub/os2/dev/emx/v0.9c/emxrt.zip
+If GSview refuses to run at all, make sure you do not have
+an old version of the emx DLL on your system.
 
 GSview (gsview32.exe) will run under Windows NT, Windows 95 and
 Windows 3.1/Win32s.  It will not run under Windows 3.0.
@@ -280,8 +288,6 @@ involved in developing and maintaining GSview.  These may be sent to
     218 Gallaghers Rd
     GLEN WAVERLEY  VIC  3150
     AUSTRALIA
-Donations are preferred in Australian dollars because it costs 
-AUD$5 to bank an overseas currency cheque.
 Please accompany donations with the following information:
     Your name.
     Your postal address.
@@ -305,6 +311,9 @@ drawn on an Australian bank.
 This offer is valid until 30 June 1998.  If this date has
 passed, send mail to rjl@aladdin.com to find out if the offer
 is still valid.
+For more details see the page
+  http://www.cs.wisc.edu/~ghost/cd.html
+Credit card orders by fax are accepted.
 
 The ps.c module is copyright by Tim Theisen and is covered by the
 licence in the file PUBLIC.

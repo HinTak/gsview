@@ -10,6 +10,8 @@
  *   Conform to HTML 3.2. 
  * Modified by Russell Lang 1997-11-28
  *   Convert {bml* file.bmp} to <IMG SRC="file.gif">
+ * Modified by Russell Lang 1997-12-18
+ *   Convert non-ascii characters to &#nnn;
  *
  * usage:  doc2html gnuplot.doc gnuplot.htm
  *
@@ -364,7 +366,23 @@ process_line(line, b)
                 }
                 break;
             default:
-                line2[j] = line[i];
+		if ((unsigned int)(line[i]) > 127) {
+		    /* quote non-ASCII characters */
+		    unsigned int value = line[i] & 0xff;
+		    unsigned int digit;
+		    line2[j++] = '&';
+		    line2[j++] = '#';
+		    digit = value / 100;
+		    value -= digit * 100;
+		    line2[j++] = digit + '0';
+		    digit = value / 10;
+		    value -= digit * 10;
+		    line2[j++] = digit + '0';
+		    line2[j++] = value + '0';
+		    line2[j] = ';';
+		}
+		else
+                    line2[j] = line[i];
             }
         i++;
         j++;

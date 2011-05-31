@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -179,6 +179,8 @@ PROFILE *prf;
 	    option.language = IDM_LANGDE;
 	else if (strcmp(profile, "fr") == 0)
 	    option.language = IDM_LANGFR;
+	else if (strcmp(profile, "it") == 0)
+	    option.language = IDM_LANGIT;
 	else if (strcmp(profile, "en") == 0)
 	    option.language = IDM_LANGEN;
 	profile_read_string(prf, section, "Origin", "", profile, sizeof(profile));
@@ -326,6 +328,9 @@ PROFILE *prf;
 	profile_read_string(prf, section, "PostScriptPrinter", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
 		option.psprinter = i;
+	profile_read_string(prf, section, "PrintReverse", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+		option.print_reverse = i;
 	for (i=0; i<NUMSOUND; i++) {
 		profile_read_string(prf, section, sound[i].entry, sound[i].file, profile, sizeof(profile));
 		strcpy(sound[i].file, profile);
@@ -358,6 +363,9 @@ PROFILE *prf;
 		break;
 	    case IDM_LANGFR:
 		strcpy(profile, "fr");
+		break;
+	    case IDM_LANGIT:
+		strcpy(profile, "it");
 		break;
 	    case IDM_LANGEN:
 	    default:
@@ -444,6 +452,8 @@ PROFILE *prf;
 	profile_write_string(prf, section, "PrintToFile", profile);
 	sprintf(profile, "%d", (int)option.psprinter);
 	profile_write_string(prf, section, "PostScriptPrinter", profile);
+	sprintf(profile, "%d", (int)option.print_reverse);
+	profile_write_string(prf, section, "PrintReverse", profile);
 	for (i=0; i<NUMSOUND; i++)
 	    profile_write_string(prf, section, sound[i].entry, sound[i].file);
 	profile_write_string(prf, section, "LastFile1", last_files[0]);
@@ -453,3 +463,114 @@ PROFILE *prf;
 	profile_close(prf);
 }
 
+#ifdef DEBUG_MALLOC
+#undef malloc
+#undef calloc
+#undef realloc
+#undef free
+long allocated_memory = 0;
+FILE *malloc_file;
+#define MALLOC_FILE "c:\\gsview.txt"
+
+void FAR * debug_malloc(size_t size)
+{
+    char buf[MAXSTR];
+    void FAR *p = malloc(size+sizeof(long));
+    long FAR *pl = p; 
+    if (pl) {
+	*pl = size;
+	allocated_memory += size;
+	pl++;
+    }
+if (size == 8000)
+gs_addmess("\r\nstop here\r\n");
+if (size == 28000)
+gs_addmess("\r\nstop here\r\n");
+#ifdef UNUSED
+#endif
+    sprintf(buf, "malloc(%ld), allocated = %ld\r\n", 
+	(long)size, allocated_memory);
+    gs_addmess(buf);
+    if (malloc_file == (FILE *)NULL)
+	malloc_file = fopen(MALLOC_FILE, "wb");
+    if (malloc_file != (FILE *)NULL) {
+	fputs(buf, malloc_file);
+	fflush(malloc_file);
+    }
+    return (void _FAR *)pl;
+}
+
+void FAR * debug_calloc(size_t nitems, size_t size)
+{
+    char buf[MAXSTR];
+    long bigsize = (long)nitems * (long)size;
+    void FAR *p = malloc(bigsize+sizeof(long));
+    long FAR *pl = p; 
+    if (pl) {
+	*pl = bigsize;
+	allocated_memory += bigsize;
+	pl++;
+    }
+    sprintf(buf, "calloc(%ld, %ld) %ld, allocated = %ld\r\n", 
+	(long)nitems, (long)size,
+	bigsize, allocated_memory);
+    gs_addmess(buf);
+    if (malloc_file == (FILE *)NULL)
+	malloc_file = fopen(MALLOC_FILE, "wb");
+    if (malloc_file != (FILE *)NULL) {
+	fputs(buf, malloc_file);
+	fflush(malloc_file);
+    }
+    return (void _FAR *)pl;
+}
+
+void  FAR * debug_realloc(void FAR *block, size_t size)
+{
+    char buf[MAXSTR];
+    long FAR *pl = block; 
+    long oldsize = 0;
+    if (pl) {
+	pl--;
+	oldsize = *pl;
+	allocated_memory -= oldsize;
+	pl = realloc((void _FAR *)pl, size+sizeof(long));
+	if (pl) {
+	    *pl = size;
+	    allocated_memory += size;
+	    pl++;
+	}
+    }
+    sprintf(buf, "realloc old %ld, new %ld, allocated = %ld\r\n",
+	oldsize, size, allocated_memory);
+    gs_addmess(buf);
+    if (malloc_file == (FILE *)NULL)
+	malloc_file = fopen(MALLOC_FILE, "wb");
+    if (malloc_file != (FILE *)NULL) {
+	fputs(buf, malloc_file);
+	fflush(malloc_file);
+    }
+    return (void _FAR *)pl;
+}
+
+void debug_free(void FAR *block)
+{
+    char buf[MAXSTR];
+    long FAR *pl = block; 
+    long oldsize = 0;
+    if (pl) {
+	pl--;
+	oldsize = *pl;
+	allocated_memory -= oldsize;
+	free((void _FAR *)pl);
+    }
+    sprintf(buf, "free %ld, allocated = %ld\r\n",
+	oldsize, allocated_memory);
+    gs_addmess(buf);
+    if (malloc_file == (FILE *)NULL)
+	malloc_file = fopen(MALLOC_FILE, "wb");
+    if (malloc_file != (FILE *)NULL) {
+	fputs(buf, malloc_file);
+	fflush(malloc_file);
+    }
+}
+#endif

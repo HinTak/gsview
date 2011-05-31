@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvcen.rc */
+/* en\gvclang.rc */
 /* Common English language resources */
 
 /* button help */
@@ -116,7 +116,7 @@ END
 
 STRINGTABLE
 BEGIN
-	/* help topics - these need to match keywords in gvcXX.doc */
+	/* help topics - these need to match keywords in XX\gvclang.txt */
 	IDS_TOPICROOT,  "Overview"
 	IDS_TOPICOPEN,  "Open"
 	IDS_TOPICPRINT, "Print"
@@ -220,4 +220,3 @@ BEGIN
 	IDS_PROGMANGROUP4 AAPROGMANGROUP4
 END
 
-

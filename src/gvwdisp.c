@@ -110,7 +110,7 @@ char command[MAXSTR*2];
 #endif
 	strcat(command, " ");
 	strcat(command, arg);
-	prog->hinst = (HINSTANCE)WinExec(command, SW_SHOWNORMAL);
+	prog->hinst = (HINSTANCE)WinExec(command, SW_SHOWMINNOACTIVE);
 	if (prog->hinst > (HINSTANCE)31)
 	    prog->valid = TRUE;
 	return prog->valid;
@@ -153,4 +153,3 @@ cleanup_pgm(PROG* prog)
 	prog->hinst = 0;
 }
 
-

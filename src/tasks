@@ -7,7 +7,8 @@ Print to printer device context using mswindll/os2dll device.
 
 Update interval
 
-Win32 accelerators (VK_F1, VK_F3, VK_BACK) while button has mouse capture.
+Win32 accelerators (VK_F1, VK_F3, VK_BACK) don't work 
+while button has mouse capture.
 
 You can use spaces in the Ghostscript path, but I can't figure out
 how to create a Win95 shortcut to "-Ic:\gs tools" using Progman DDE.
@@ -18,30 +19,34 @@ GSgrab needs a start_timer() added just before the main message loop.
 
 Check periodically if file is modified OR redisplay button.
 
-Start gvwgs minimised.  Place % complete in title.  Restore if error.
-
 Test setup from floppies with foreign language.
 
 Create DLLs without code or data, or change to only a small amount of code.
 
-Exit after successful /s print.
-Check /s"Printer name"
-Give useful error message if printer unknown.
-
 Fix /Orientation landscape/seascape values to be more consistent. 
-
-OS/2 "Look for additional fonts" accepts too few characters.
-Fixed - test it.
 
 Why is redisplay of an existing modified file so slow?
 Suspect memory leak.
 
 Forward/backward button using history.
 
-Goto Page: Add edit field linked to listbox (or change to combobox)
-  to allow page number to be typed in.
-
-Reverse print order.
-
 Remember extracted text between uses.
+
+Compile pstotxt3.dll with MSVC++ 5.0.  Currently it compiles,
+but crashes caller.
+
+Check if user profiles work under NT 4.0.  If so, update
+the help file.
+
+Write GS_LIB and GS_DLL registry names on configure if needed.
+Currently they are only written when winsetup is run.
+Implement for OS/2 also.
+
+Option to specify decimal places for cursor position.
+Measure distances by dragging.
+
+Backspace and space don't work when cursor is over button bar.
+
+Write to network printing without connection.
+
 

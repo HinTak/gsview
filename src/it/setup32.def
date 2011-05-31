@@ -1,0 +1,4 @@
+LIBRARY		SETP32IT
+DESCRIPTION	'GSview Setup Italian Language Resources'
+DATA		MULTIPLE SHARED
+EXPORTS		DllEntryPoint

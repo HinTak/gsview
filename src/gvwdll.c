@@ -57,6 +57,10 @@ gs_load_dll_cleanup(void)
     post_img_message(WM_GSSHOWMESS, 0);
 }
 
+#ifndef ERROR_DLL_NOT_FOUND
+#define ERROR_DLL_NOT_FOUND 1157L
+#endif
+
 /* display error message for LoadLibrary */
 #ifdef __BORLANDC__
 #pragma argsused
@@ -84,6 +88,9 @@ int reason;
 	    break;
 	case ERROR_OUTOFMEMORY:		/* 14 */
 	    text_reason = "Out of memory";
+	    break;
+	case ERROR_DLL_NOT_FOUND:	/* 1157 */
+	    text_reason = "DLL not found";
 	    break;
 	default:
 	    text_reason = (char *)NULL;

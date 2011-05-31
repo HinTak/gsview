@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvcfr.rc */
+/* fr\gvclang.rc */
 /* Common French language resources */
 
 /* button help */
@@ -77,8 +77,10 @@ BEGIN
 	IDS_CANNOTRUN, "Impossible d'exécuter "
 	IDS_TOOLONG, "Ligne de commande trop longue : "
 	IDS_NOMORE, "Plus aucune page"
+/* VIEUX
 	IDS_GSCOMMAND, "Commande Ghostscript ?"
-	IDS_NOZOOM, "Affichage de la page nécessaire avant d'agrandir"
+*/
+	IDS_NOZOOM, "Affichage de la page nécessaire avant de zoomer"
 	IDS_USERWIDTH, "Largeur en 1/72 de pouces ?"
 	IDS_USERHEIGHT, "Hauteur en 1/72 de pouces ?"
 	IDS_BADEPS, "Problème lors de la création du fichier EPS"
@@ -114,7 +116,7 @@ END
 
 STRINGTABLE
 BEGIN
-	/* help topics - these need to match keywords in gvcXX.doc */
+	/* help topics - these need to match keywords in XX\gvclang.txt */
 	IDS_TOPICROOT,  "Index"
 	IDS_TOPICOPEN,  "Ouvrir"
 	IDS_TOPICPRINT, "Imprimer"
@@ -131,7 +133,7 @@ BEGIN
 	IDS_TOPICINSTALL, "Installation"
 	IDS_TOPICTEXT, "Extraction de texte et recherche"
 	IDS_TOPICKEYS, "Raccourcis clavier"
-	IDS_TOPICMESS, "Afficher les messages"
+	IDS_TOPICMESS, "Affichier les messages"
 	IDS_TOPICSPOOL, "Gestionnaire d'impression"
 	IDS_TOPICZLIB, "zlib"
 END
@@ -207,11 +209,10 @@ BEGIN
 	IDS_NOPRINTERINI, "Ouverture du fichier printer.ini impossible"
 	IDS_NOINI, "Ouverture du fichier INI impossible"
 	IDS_NEEDTEMP, "Vous devez faire pointer la variable d'environnement TEMP vers un répertoire valide non protégé en écriture. Sans cela, GSview et Aladdin Ghostscript ne pourront pas imprimer"
-	IDS_VERSIONCHANGED, "La version de GSview installée a changé. Voulez-vous procéder à une nouvelle configuration de GSview ?"
 	IDS_GSNOTINSTALLED, "Vous n'avez pas installé Ghostscript. Veuillez lire le fichier README.TXT de GSview."
 	IDS_GSLIBNOTINSTALLED, "Vous n'avez pas installé les fichiers de la DLL de Ghostscript. Veuillez lire le fichier README.TXT de GSview."
 	IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED
-	IDS_NOPROGMAN, "Ouverture de la connexion DDE avec le Gestionnaire de programmes impossible"
+	IDS_NOPROGMAN, AANODDEPROGMAN
 	IDS_WRONGEMX, "Vous avez emx %s.\rVous avez besoin d'emx %s ou ultérieur.\rPM GSview ne pourra pas fonctionner correctement."
 	IDS_GSVIEWVERSION, GSVIEW_VERSION
 	IDS_CFG73, AACFG73
@@ -219,4 +220,3 @@ BEGIN
 	IDS_PROGMANGROUP4 AAPROGMANGROUP4
 END
 
-

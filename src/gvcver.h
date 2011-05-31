@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -23,38 +23,43 @@
  *   README.TXT
  *   FILE_ID.DIZ
  *   gvcnews.txt
- *   gvcXX.txt
- *   gvcXX.h    (for Copyright dates)
+ *   language/gvclang.txt
+ *   language/gvclang.h    (for Copyright dates)
  *   gvpm.mak
  *   gvwin.mak
+ *   gvwinvc.mak
  */
 
 
 /* GSview */
 
 #define GSVIEW_PRODUCT "GSview"
-#define GSVIEW_VERSION "2.4"
-#define GSVIEW_DATE    "1997-11-30"
+#define GSVIEW_VERSION "2.5"
+#define GSVIEW_DATE    "1998-02-20"
 #ifdef _Windows
 #ifdef __WIN32__
 #ifdef DECALPHA
 #define GSVIEW_ZIP     "win32da.zip"
+#define GSVIEW_BASEDIR "gsviewda"
 #else
 #define GSVIEW_ZIP     "win32.zip"
+#define GSVIEW_BASEDIR "gsview"
 #endif
 #else
 #define GSVIEW_ZIP     "win16.zip"
+#define GSVIEW_BASEDIR "gsview16"
 #endif
 #else
 #define GSVIEW_ZIP     "os2.zip"
+#define GSVIEW_BASEDIR "gsview"
 #endif
 
 
 /* undefine BETA for a final release */
 /* #define BETA */
-#define BETA_YEAR    1997
-#define BETA_MONTH   11
-#define BETA_DAY     30
+#define BETA_YEAR    1998
+#define BETA_MONTH   2
+#define BETA_DAY     28
 
 
 /* Ghostscript */
@@ -71,13 +76,16 @@
 #define GSVIEW_EXENAME "gsview32.exe"
 #define GS_EXENAME  "gswin32.exe"
 #define GS_DLLNAME  "gsdll32.dll"
+#define INIFILE "gsview32.ini"
 #else
 #define GSVIEW_EXENAME "gsview16.exe"
 #define GS_EXENAME  "gswin16.exe"
 #define GS_DLLNAME  "gsdll16.dll"
+#define INIFILE "gsview16.ini"
 #endif
 #else
 #define GS_DLLNAME  "gsdll2.dll"
+#define INIFILE "gvpm.ini"
 #endif
 
 /* General */

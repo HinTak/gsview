@@ -1,4 +1,0 @@
-LIBRARY GVPMEN
-DESCRIPTION	'GSview English Language Resources'
-DATA SINGLE SHARED
-EXPORTS  main

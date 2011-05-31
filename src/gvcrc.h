@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -157,6 +157,7 @@
 #define IDM_LANGEN	361
 #define IDM_LANGDE	362
 #define IDM_LANGFR	363
+#define IDM_LANGIT	364
 #define IDD_LANG	365
 
 #define IDM_PSTOTEXTMENU	370
@@ -212,6 +213,9 @@
 #define OPTION_PDF2PS_LEVEL1	 2
 #define OPTION_PDF2PS_NOPROCSET  4
 
+#define PS2PDF_NOPROCSET	465
+#define PS2PDF_LEVEL1	466
+
 #define IDD_PSTOEPS	 470
 #define PSTOEPS_AUTOBBOX  471
 
@@ -231,13 +235,13 @@
 
 #define IDD_PAGE	530
 #define IDD_MULTIPAGE	531
-#define PAGE_LIST	532
-#define PS2PDF_NOPROCSET	12
-#define PS2PDF_LEVEL1	11
-#define PAGE_LISTTEXT	533
-#define PAGE_ALL	534
-#define PAGE_ODD	535
-#define PAGE_EVEN	536
+#define PAGE_EDIT	532
+#define PAGE_LIST	533
+#define PAGE_LISTTEXT	534
+#define PAGE_ALL	535
+#define PAGE_ODD	536
+#define PAGE_EVEN	537
+#define PAGE_REVERSE	538
 
 #define IDD_DEVICE	540
 #define DEVICE_NAME	541
@@ -248,14 +252,19 @@
 #define DEVICE_PSPRINT  546
 #define DEVICE_OPTIONS  547
 #define DEVICE_OPTIONSTEXT  548
+#define DEVICE_UNIPRINT  549
 
-#define IDD_PROP	550
-#define PROP_NAME	551
-#define PROP_VALUE	552
-#define PROP_EDIT	553
-#define PROP_NEW	554
-#define PROP_XOFFSET	555
-#define PROP_YOFFSET	556
+#define IDD_UNIPRINT	550
+#define UPP_LIST	551
+#define UPP_NAME	552
+
+#define IDD_PROP	553
+#define PROP_NAME	554
+#define PROP_VALUE	555
+#define PROP_EDIT	556
+#define PROP_NEW	557
+#define PROP_XOFFSET	558
+#define PROP_YOFFSET	559
 
 #define IDD_EDITPROP	560
 #define EDITPROP_STRING	561
@@ -492,6 +501,8 @@
 #define IDS_CANTALLOCBUF	888
 #define IDS_CFG73		889
 #define IDS_CFG74		890
+#define IDS_UNINSTALLTITLE	891
+#define IDS_UNINSTALLITEM	892
 
 
 /* RCDATA resources */
@@ -525,4 +536,3 @@
 
 /* non standard scroll bar code */
 #define SB_FIND WM_USER
-

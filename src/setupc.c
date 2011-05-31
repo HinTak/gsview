@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1996-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -289,7 +289,9 @@ WIZPAGE *page;
     return 0;
 }
 
+#ifdef __BORLANDC__
 #pragma argsused
+#endif
 int
 make_dir(HWND hwnd)
 {
@@ -321,6 +323,8 @@ int i;
 	    n = 13;
 	if (strncmp(str, "  extracting: ", 14)==0)
 	    n = 14;
+	if (strncmp(str, " extracting: ", 13)==0)
+	    n = 13;
 	if (n!=0) {
 	    fprintf(unziplogfile, "%s\\", unzipprefix);
 	    for (i=n; i<count; i++) {
@@ -426,7 +430,6 @@ char gstoolsdir[MAXSTR];
     }
 
     if (install_gs || install_gsview) {
-	fprintf(unziplogfile, "[Files]\n");
 	if (!rc) {
 	    /* copy unzip DLL so we don't demand load it from floppy */
 	    strcpy(unzipname, gsviewdir);
@@ -632,4 +635,3 @@ int count;
     return 0;
 }
 
-
