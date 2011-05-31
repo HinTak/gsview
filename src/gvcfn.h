@@ -36,7 +36,8 @@ BOOL load_zlib(void);
 int config_wizard(void);
 
 /* in gvwdde.c */
-int gsview_progman(char *name, char *gsviewpath, char *gspath, char *gsargs);
+int gsview_progman(char *name, char *gsviewpath, 
+	int gsver, char *gspath, char *gsargs);
 
 /* in gvcinit.c */
 int gsview_printer_profiles(void);
@@ -93,6 +94,7 @@ void send_orientation_prolog(FILE *f);
 void send_epswarn_prolog(FILE *f);
 void fix_orientation(FILE *f);
 FILE * gp_open_scratch_file(const char *prefix, char *fname, const char *mode);
+void reload_if_changed(void);
 BOOL dfreopen(void);
 void dfclose(void);
 BOOL dsc_scan(PSFILE *psf);
@@ -105,7 +107,7 @@ void psfile_free(PSFILE *);
 char * psfile_name(PSFILE *psf);
 
 /* in gvpdisp.c or gvwdisp.c */
-BOOL psfile_changed(void);
+BOOL psfile_changed(PSFILE *psf);
 void psfile_savestat(PSFILE *psf);
 
 /* in gvccmd.c */

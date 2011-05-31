@@ -106,6 +106,9 @@
 #define MAXSTR 256
 #define DIRSEP '/'
 #define EOLSTR "\n"
+#if defined(SUNOS4)
+#define memmove(d,s,l) bcopy(s,d,l)
+#endif
 #if defined(__NeXT__)
 extern char *getwd (char *pathname);
 #define gs_getcwd(s,n) getwd(s)

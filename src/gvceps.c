@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -158,7 +158,7 @@ PSDOC *doc = psfile.doc;
 	    fprintf(f,"%%BeginDocument: %s\r\n",psfile.name);
 
 	    /* create buffer for PS file copy */
-	    buffer = malloc(COPY_BUF_SIZE);
+	    buffer = (char *)malloc(COPY_BUF_SIZE);
 	    if (buffer == (char *)NULL) {
 	        play_sound(SOUND_ERROR);
 	        fclose(f);
@@ -313,7 +313,7 @@ PSDOC *doc = psfile.doc;
 	}
 	
 	/* create buffer for file copy */
-	buffer = malloc(COPY_BUF_SIZE);
+	buffer = (char *)malloc(COPY_BUF_SIZE);
 	if (buffer == (char *)NULL) {
 	    play_sound(SOUND_ERROR);
 	    fclose(epsfile);
@@ -1500,7 +1500,7 @@ int code;
 	eps_header.checksum = -1;
 	write_doseps_header(&eps_header, epsfile);
 
-	buffer = malloc(COPY_BUF_SIZE);
+	buffer = (char *)malloc(COPY_BUF_SIZE);
 	if (buffer == (char *)NULL) {
 	    play_sound(SOUND_ERROR);
 	    fclose(epsfile);
@@ -1515,13 +1515,14 @@ int code;
 	}
 
 	/* copy EPS file */
-	rewind(tpsfile);
 	if (calc_bbox) {
+	    rewind(tpsfile);
 	    while ( (count = fread(buffer, 1, COPY_BUF_SIZE, tpsfile)) != 0 )
 		fwrite(buffer, 1, count, epsfile);
 	}
 	else {
-	    pscopyuntil(psfile.file, epsfile, psfile.doc->beginheader, psfile.doc->endtrailer, NULL);
+	    pscopyuntil(psfile.file, epsfile, psfile.doc->beginheader,
+		psfile.doc->endtrailer, NULL);
 	}
 	
 	/* copy tiff file */
@@ -2004,7 +2005,7 @@ char id[4];
 	pscopyuntil(psfile.file, epsfile, psfile.doc->beginheader, psfile.doc->endtrailer, NULL);
 	
 	/* copy preview file */
-	buffer = malloc(COPY_BUF_SIZE);
+	buffer = (char *)malloc(COPY_BUF_SIZE);
 	if (buffer == (char *)NULL) {
 	    play_sound(SOUND_ERROR);
 	    fclose(epsfile);
@@ -2225,8 +2226,8 @@ unsigned long size;
 	pbmi->biClrUsed = 0;		/* write out full palette */
 	pbmi->biClrImportant = 0;
 
-	line2 = malloc(prebmap.bytewidth);
-	if (line2 == NULL) {
+	line2 = (BYTE GVFAR *)malloc(prebmap.bytewidth);
+	if (line2 == (BYTE GVFAR *)NULL) {
 	   gserror(0, "not enough memory to copy bitmap", MB_ICONEXCLAMATION, SOUND_ERROR);
 	   return 1;
 	}
@@ -2418,7 +2419,7 @@ int code;
 	}
 
 	/* create buffer for PS file copy */
-	buffer = malloc(COPY_BUF_SIZE);
+	buffer = (char *)malloc(COPY_BUF_SIZE);
 	if (buffer == (char *)NULL) {
 	    release_bitmap();
 	    gserror(0, "not enough memory to copy bitmap", MB_ICONEXCLAMATION, SOUND_ERROR);

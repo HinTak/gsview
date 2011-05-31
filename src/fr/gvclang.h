@@ -22,7 +22,7 @@
 #define GSVIEW_COPYRIGHT2 "Tous droits réservés."
 #define GSVIEW_COPYRIGHT3 "Voir le fichier LICENCE pour plus d'informations."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-1997 Aladdin Enterprises,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-1998 Aladdin Enterprises,"
 #define GS_COPYRIGHT2 "Menlo Park, California, U.S.A. Tous droits réservés."
 #define GS_COPYRIGHT3 "Voir le fichier PUBLIC pour plus d'informations."
 

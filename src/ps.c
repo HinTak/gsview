@@ -39,6 +39,9 @@
  * rjl 1996-08-08
  *   Modified gettext() to skip over trailing ')' of (text)
  *   Modified psscan() to skip over HP LaserJet PJL prologue
+ * rjl 1998-07-02
+ *   Modified %MSEPS Premable kludge to only work when not inside
+ *   %%Begin/%%EndDocument or similar.
  */
 
 #include <stdio.h>
@@ -54,6 +57,9 @@ extern void pserror(char *str);
 #endif
 #ifndef BUFSIZ
 #define BUFSIZ 1024
+#endif
+#ifdef __STDC__
+#include <stdlib.h>
 #endif
 #include <ctype.h>
 #include <X11/Xos.h>		/* #includes the appropriate <string.h> */
@@ -120,7 +126,8 @@ struct documentmedia papersizes[] = {
 
 #if NeedFunctionPrototypes
 static char *readline(char *line, int size, FILE *fp, unsigned long enddoseps, 
-  long *position, unsigned int *line_len, unsigned int *line_count);
+  long *position, unsigned int *line_len, unsigned int *line_count, 
+  int imported);
 #else
 static char *readline();
 #endif
@@ -295,7 +302,8 @@ psscan(file)
     if (fgetc(file) != '\004')
 	fseek(file, position, SEEK_SET);
 
-    if (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count) == NULL) {
+    if (readline(line, sizeof line, file, enddoseps, &position, &line_len, 
+	&line_count, 0) == NULL) {
 	pserror("Warning: empty file.\n");
 	return(NULL);
     }
@@ -303,7 +311,8 @@ psscan(file)
     /* rjl: check for HP LaserJet prologue */
     if (iscomment(line, "\033%-12345X")) {
 	/* found prolog, read until first DSC comment */
-        while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) {
+        while (readline(line, sizeof line, file, enddoseps, &position, 
+		&line_len, &line_count, 0)) {
 	    if (line[0] == '%')
 		break;
 	}
@@ -339,7 +348,7 @@ psscan(file)
     }
 
     preread = 0;
-    while (preread || readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) {
+    while (preread || readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0)) {
 	if (!preread) section_len += line_len;
 	preread = 0;
 	if (line[0] != '%' ||
@@ -491,7 +500,7 @@ psscan(file)
 		    free(doc->media[0].name);
 	    }
 	    preread=1;
-	    while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count) &&
+	    while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0) &&
 		   DSCcomment(line) && iscomment(line+2, "+")) {
 		section_len += line_len;
 		doc->media = (struct documentmedia *)
@@ -594,7 +603,7 @@ psscan(file)
 		    free(doc->media[doc->nummedia].name);
 	    }
 	    preread=1;
-	    while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count) &&
+	    while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0) &&
 		   DSCcomment(line) && iscomment(line+2, "+")) {
 		section_len += line_len;
 		next_char = line + length("%%+");
@@ -634,7 +643,7 @@ psscan(file)
     }
 
     if (DSCcomment(line) && iscomment(line+2, "EndComments")) {
-	readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count);
+	readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0);
 	section_len += line_len;
     }
     doc->endheader = position;
@@ -645,19 +654,19 @@ psscan(file)
     beginsection = position;
     section_len = line_len;
     while (blank(line) &&
-	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) {
+	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0)) {
 	section_len += line_len;
     }
 
     if (doc->epsf && DSCcomment(line) && iscomment(line+2, "BeginPreview")) {
 	doc->beginpreview = beginsection;
 	beginsection = 0;
-	while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count) &&
+	while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0) &&
 	       !(DSCcomment(line) && iscomment(line+2, "EndPreview"))) {
 	    section_len += line_len;
 	}
 	section_len += line_len;
-	readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count);
+	readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0);
 	section_len += line_len;
 	doc->endpreview = position;
 	doc->lenpreview = section_len - line_len;
@@ -670,14 +679,14 @@ psscan(file)
 	section_len = line_len;
     }
     while (blank(line) &&
-	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) {
+	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0)) {
 	section_len += line_len;
     }
 
     if (DSCcomment(line) && iscomment(line+2, "BeginDefaults")) {
 	doc->begindefaults = beginsection;
 	beginsection = 0;
-	while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count) &&
+	while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0) &&
 	       !(DSCcomment(line) && iscomment(line+2, "EndDefaults"))) {
 	    section_len += line_len;
 	    if (!DSCcomment(line)) {
@@ -731,7 +740,7 @@ psscan(file)
 	    }
 	}
 	section_len += line_len;
-	readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count);
+	readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0);
 	section_len += line_len;
 	doc->enddefaults = position;
 	doc->lendefaults = section_len - line_len;
@@ -744,7 +753,7 @@ psscan(file)
 	section_len = line_len;
     }
     while (blank(line) &&
-	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) {
+	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0)) {
 	section_len += line_len;
     }
 
@@ -758,7 +767,7 @@ psscan(file)
 	preread = 1;
 
 	while ((preread ||
-		readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) &&
+		readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0)) &&
 	       !(DSCcomment(line) &&
 	         (iscomment(line+2, "EndProlog") ||
 	          iscomment(line+2, "BeginSetup") ||
@@ -770,7 +779,7 @@ psscan(file)
 	}
 	section_len += line_len;
 	if (DSCcomment(line) && iscomment(line+2, "EndProlog")) {
-	    readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count);
+	    readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0);
 	    section_len += line_len;
 	}
 	doc->endprolog = position;
@@ -784,7 +793,7 @@ psscan(file)
 	section_len = line_len;
     }
     while (blank(line) &&
-	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) {
+	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0)) {
 	section_len += line_len;
     }
 
@@ -796,7 +805,7 @@ psscan(file)
 	beginsection = 0;
 	preread = 1;
 	while ((preread ||
-		readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) &&
+		readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0)) &&
 	       !(DSCcomment(line) &&
 	         (iscomment(line+2, "EndSetup") ||
 	          iscomment(line+2, "Page:") ||
@@ -860,7 +869,7 @@ psscan(file)
 	}
 	section_len += line_len;
 	if (DSCcomment(line) && iscomment(line+2, "EndSetup")) {
-	    readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count);
+	    readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0);
 	    section_len += line_len;
 	}
 	doc->endsetup = position;
@@ -874,7 +883,7 @@ psscan(file)
 	section_len = line_len;
     }
     while (blank(line) &&
-	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) {
+	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0)) {
 	section_len += line_len;
     }
 
@@ -919,7 +928,7 @@ newpage:
 	    section_len = line_len;
 	}
 continuepage:
-	while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count) &&
+	while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0) &&
 	       !(DSCcomment(line) &&
 	         (iscomment(line+2, "Page:") ||
 	          iscomment(line+2, "Trailer") ||
@@ -1022,7 +1031,7 @@ continuepage:
 
     preread = 1;
     while ((preread ||
-	    readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) &&
+	    readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0)) &&
 	   !(DSCcomment(line) && iscomment(line+2, "EOF"))) {
 	if (!preread) section_len += line_len;
 	preread = 0;
@@ -1102,7 +1111,7 @@ continuepage:
     }
     section_len += line_len;
     if (DSCcomment(line) && iscomment(line+2, "EOF")) {
-	readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count);
+	readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0);
 	section_len += line_len;
     }
     doc->endtrailer = position;
@@ -1112,7 +1121,7 @@ continuepage:
     section_len = line_len;
     preread = 1;
     while (preread ||
-	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) {
+	   readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count, 0)) {
 	if (!preread) section_len += line_len;
 	preread = 0;
 	if (DSCcomment(line) && iscomment(line+2, "Page:")) {
@@ -1298,7 +1307,7 @@ gettext(line, next_char)
  */
 
 static char *
-readline(line, size, fp, enddoseps, position, line_len, line_count)
+readline(line, size, fp, enddoseps, position, line_len, line_count, imported)
     char *line;
     int size;
     FILE *fp;
@@ -1306,6 +1315,7 @@ readline(line, size, fp, enddoseps, position, line_len, line_count)
     long *position;
     unsigned int *line_len;
     unsigned int *line_count;
+    int imported;	/* non-zero if inside Begin/EndDocument or similar */
 {
     char text[PSLINELENGTH];	/* Temporary storage for text */
     char save[PSLINELENGTH];	/* Temporary storage for text */
@@ -1338,9 +1348,16 @@ readline(line, size, fp, enddoseps, position, line_len, line_count)
     if (!(DSCcomment(line) && iscomment(line+2, "Begin"))) {
         /* rjl: skip over BUGGY EPS includes from Microsoft Word */
         /* Microsoft's EPSIMP.FLT needs to be fixed */
-	if ( (line[0] == '%') && iscomment(line+1, "MSEPS Preamble") ) {
+        /* One program inserts "%MSEPS Preamble [Softek v3.6]"
+	 * without a finishing "%MSEPS Trailer".  This messed up
+	 * the original kludge.
+	 * We now ignore %MSEPS if inside a Begin/EndDocument or similar.
+	 */
+	if (!imported && (line[0] == '%') && 
+	    iscomment(line+1, "MSEPS Preamble") ) {
 	    strcpy(save, line);
-	    while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count) &&
+	    while (readline(line, size, fp, enddoseps, NULL, &nbytes, 
+		             line_count, 1) &&
 		   !(line[0] == '%' && iscomment(line+1, "MSEPS Trailer"))) {
 		*line_len += nbytes;
 	    }
@@ -1352,7 +1369,7 @@ readline(line, size, fp, enddoseps, position, line_len, line_count)
 	}
     } else if (iscomment(line+7, "Document:")) {
 	strcpy(save, line+7);
-	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count) &&
+	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count, 1) &&
 	       !(DSCcomment(line) && iscomment(line+2, "EndDocument"))) {
 	    *line_len += nbytes;
 	}
@@ -1360,7 +1377,7 @@ readline(line, size, fp, enddoseps, position, line_len, line_count)
 	strcpy(line, save);
     } else if (iscomment(line+7, "Feature:")) {
 	strcpy(save, line+7);
-	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count) &&
+	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count, 1) &&
 	       !(DSCcomment(line) && iscomment(line+2, "EndFeature"))) {
 	    *line_len += nbytes;
 	}
@@ -1368,7 +1385,7 @@ readline(line, size, fp, enddoseps, position, line_len, line_count)
 	strcpy(line, save);
     } else if (iscomment(line+7, "File:")) {
 	strcpy(save, line+7);
-	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count) &&
+	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count, 1) &&
 	       !(DSCcomment(line) && iscomment(line+2, "EndFile"))) {
 	    *line_len += nbytes;
 	}
@@ -1376,7 +1393,7 @@ readline(line, size, fp, enddoseps, position, line_len, line_count)
 	strcpy(line, save);
     } else if (iscomment(line+7, "Font:")) {
 	strcpy(save, line+7);
-	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count) &&
+	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count, 1) &&
 	       !(DSCcomment(line) && iscomment(line+2, "EndFont"))) {
 	    *line_len += nbytes;
 	}
@@ -1384,7 +1401,7 @@ readline(line, size, fp, enddoseps, position, line_len, line_count)
 	strcpy(line, save);
     } else if (iscomment(line+7, "ProcSet:")) {
 	strcpy(save, line+7);
-	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count) &&
+	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count, 1) &&
 	       !(DSCcomment(line) && iscomment(line+2, "EndProcSet"))) {
 	    *line_len += nbytes;
 	}
@@ -1392,7 +1409,7 @@ readline(line, size, fp, enddoseps, position, line_len, line_count)
 	strcpy(line, save);
     } else if (iscomment(line+7, "Resource:")) {
 	strcpy(save, line+7);
-	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count) &&
+	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count, 1) &&
 	       !(DSCcomment(line) && iscomment(line+2, "EndResource"))) {
 	    *line_len += nbytes;
 	}
@@ -1420,7 +1437,7 @@ readline(line, size, fp, enddoseps, position, line_len, line_count)
 		*line_len += num;
 	    }
 	}
-	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count) &&
+	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count, 1) &&
 	       !(DSCcomment(line) && iscomment(line+2, "EndData"))) {
 	    *line_len += nbytes;
 	}
@@ -1437,7 +1454,7 @@ readline(line, size, fp, enddoseps, position, line_len, line_count)
 	    fread(buf, sizeof (char), num, fp);
 	    *line_len += num;
 	}
-	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count) &&
+	while (readline(line, size, fp, enddoseps, NULL, &nbytes, line_count, 1) &&
 	       !(DSCcomment(line) && iscomment(line+2, "EndBinary"))) {
 	    *line_len += nbytes;
 	}

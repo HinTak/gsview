@@ -505,6 +505,44 @@ gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 	return fopen(fname, mode);
 }
 
+/* This is triggered by WM_ACTIVATE.
+ * If the file has changed when we are activated, and Auto
+ * redisplay is set, cause the file to be reloaded and 
+ * redisplayed
+ */
+void
+reload_if_changed()
+{
+char *filename;
+FILE *f;
+BOOL changed = FALSE;
+PSFILE temp_psfile;
+	begin_crit_section();
+	if (psfile.locked) {
+	    end_crit_section();	/* someone else has it */
+	    return;
+	}
+	psfile.locked = TRUE;	/* stop others using it */
+	end_crit_section();
+
+	filename = psfile_name(&psfile);
+
+	if (filename[0] != '\0') {
+	    if ( (f = fopen(filename, "rb")) != (FILE *)NULL ) {
+		temp_psfile = psfile;	/* copy structure */
+		temp_psfile.file = f;
+		changed = psfile_changed(&temp_psfile);
+		fclose(f);
+	    }
+	    psfile.locked = FALSE;
+	}
+        psfile.locked = FALSE;
+
+        if (changed && option.redisplay)
+	    gsview_command(IDM_REDISPLAY);
+}
+
+
 /* reopen psfile */
 /* psfile will then be locked until closed */
 /* return TRUE if OK */
@@ -514,8 +552,6 @@ BOOL
 dfreopen(void)
 {
 char *filename;
-	if (psfile.ispdf)
-	    return TRUE;	/* don't need to reopen */
 	begin_crit_section();
 	if (psfile.locked) {
 	    end_crit_section();	/* someone else has it */
@@ -544,11 +580,17 @@ char *filename;
 	    psfile.locked = FALSE;
 	    return FALSE;
 	}
-	if (psfile_changed()) {  /* doesn't cope with pdf file changing */
+	if (psfile_changed(&psfile)) {  
+	    /* doesn't cope with pdf file changing */
 	    dfclose();
 	    if (debug)
 	        delayed_message_box(IDS_DEBUG_DFCHANGED, 0);
 	    return FALSE;
+	}
+        if (psfile.ispdf) {
+	    /* We needed to open the PDF file to check for changes */
+	    /* but we don't need it open for displaying. */
+	    dfclose();
 	}
 	return TRUE;
 }
@@ -681,6 +723,9 @@ long file_length;
             rewind(psf->file);
 	}
 
+	/* save file date and length */
+	psfile_savestat(psf);
+
 	/* check for PDF */
 	psf->ispdf = FALSE;
 	if ( strncmp("%PDF-", line, 5) == 0 ) {
@@ -691,8 +736,6 @@ long file_length;
 	    return FALSE;	/* we don't know how many pages yet */
 	}
 
-	/* save file */
-	psfile_savestat(psf);
 
 	/* check for documents that start with Ctrl-D */
 	psf->ctrld = (line[0] == '\004');

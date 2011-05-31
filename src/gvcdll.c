@@ -41,6 +41,7 @@ gs_execute(char GVFAR *str, int len)
 #ifdef UNUSED
     if (debug) {
 	char buf[MAXSTR];
+	/* gs_addmess_count(str, len); */
 	sprintf(buf, "gsdll.execute_cont returns %d\n", execute_code);
 	gs_addmess(buf);
     }
@@ -520,7 +521,10 @@ gs_process_trailer(void)
 int
 gs_process_loop2(PENDING *ppend)
 {
+/*
 char buf[MAXSTR];
+*/
+char buf[1024];
 int len;
 int code = 0;
 long lsize, ldone;

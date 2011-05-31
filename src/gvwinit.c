@@ -294,7 +294,7 @@ int length = 64;
 	    }
 	    if (rc == ERROR_SUCCESS) {
 		fa = GetFileAttributes(szIniFile);
-		if (fa & FILE_ATTRIBUTE_DIRECTORY)
+		if ((fa != 0xffffffff) && (fa & FILE_ATTRIBUTE_DIRECTORY))
 		    strcat(szIniFile, "\\");
 		else
 		    szIniFile[0] = '\0';
@@ -310,12 +310,15 @@ int length = 64;
 	    char *p = getenv("USERPROFILE");
 	    if (p && *p) {
 		strcpy(szIniFile, p);
+#ifdef __BORLANDC__
+		OemToCharBuff(szIniFile, szIniFile, lstrlen(szIniFile));
+#endif
 		p = szIniFile + strlen(szIniFile) - 1;
 		if ((*p == '\\') || (*p == '/'))
 		    *p = '\0';
 		/* check if USERPROFILE contains a directory name */
 		fa = GetFileAttributes(szIniFile);
-		if (fa & FILE_ATTRIBUTE_DIRECTORY)
+		if ((fa != 0xffffffff) && (fa & FILE_ATTRIBUTE_DIRECTORY))
 		    strcat(szIniFile, "\\");
 		else
 		    szIniFile[0] = '\0';
@@ -327,6 +330,9 @@ int length = 64;
 	    DIR *d;
 	    if (p && *p) {
 		strcpy(szIniFile, p); 
+#ifdef __BORLANDC__
+		OemToAnsiBuff(szIniFile, szIniFile, lstrlen(szIniFile));
+#endif
 		p = szIniFile + strlen(szIniFile) - 1;
 		if ((*p == '\\') || (*p == '/'))
 		    *p = '\0';
@@ -1070,7 +1076,8 @@ int rc;
 	p = gspath;
     *p = '\0';
 
-    rc = gsview_progman(groupname, szExePath, gspath, option.gsinclude);
+    rc = gsview_progman(groupname, szExePath, 
+		option.gsversion, gspath, option.gsinclude);
     if (rc)
 	gserror(IDS_NOPROGMAN, NULL, 0, SOUND_ERROR);
     return rc;

@@ -279,6 +279,8 @@ char sysini[MAXSTR];
 	/* don't bother running the configure wizard */
 	return 0;
     }
+    /* revert back to our copy of INI file */
+    read_profile(INIFILE);
 
     check_language();	/* offer to change language if doesn't match WIN.INI */
 

@@ -2058,7 +2058,7 @@ PSWP pswpNew, pswpClient, pswp;
 	/* find client window */
 	pswpClient = ((PSWP)mp1) + (FID_CLIENT - FID_SYSMENU);  /* guess */
 	for (i=0; i<sCount; i++)
-	    if (pswp->hwnd == WinWindowFromID(hwnd, FID_CLIENT)) {
+	    if (pswp[i].hwnd == WinWindowFromID(hwnd, FID_CLIENT)) {
 		pswpClient = pswp+i;
 		break;
 	    }
@@ -2112,6 +2112,10 @@ PSWP pswpNew, pswpClient, pswp;
     	sCount = (int)mr;
     	sCount+=2;
 	return (MRESULT)sCount;
+    case WM_ACTIVATE:
+	if (SHORT1FROMMP(mp1) == TRUE)	/* activation */
+	    reload_if_changed();
+	break;
   }
   return (*OldFrameWndProc)(hwnd, mess, mp1, mp2);
 }

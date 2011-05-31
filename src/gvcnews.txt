@@ -1,4 +1,52 @@
 ----------------------
+Version 2.6 1998-09-17
+----------------------
+All:
+  Fixed some Unix compilation problems with epstool.
+  Fixed several bugs in reopening changed document on activation.
+  Updated Ghostscript icons to new Artifex Ghostscript logo.
+  When installing non default GS version, the setup program
+  wrote the GS version to the INI file, but GSview ignored this.
+
+Win32:
+  Reversed mouse wheel horizontal scroll using left mouse button.
+  When too much text was added to the Ghostscript message window,
+  it couldn't be displayed.
+  Fixed GS_DLL written by setup program.
+  Fixed start menu item for Ghostscript README which is now Readme.htm.
+
+----------------------------
+Version 2.51 beta 1998-08-23
+----------------------------
+All:
+  Updated epstool.  Page calculation for descending page order was 
+  wrong;  If a multipage non-EPS file was used as input, the 
+  output didn't contain the correct single page (or copied garbage).
+  Removed DOS EOL characters and ^Z from epstool tar file.
+  Made Select Page dialog box wider.
+  If within %%Begin/EndDocument, ignore %MSEPS Preamble. 
+  (John DiBiasi, 10 April 1998).
+  When GSview is activated, check if open document has been changed -  
+  if so and "Option | Auto Redisplay", reload and redisplay it.
+Win:
+  Borland C++ getenv("USERPROFILE") returns filenames in OEM character 
+  set, but the Windows API for reading INI files needed the filename in 
+  the ANSI character set.  This stopped user profile INI files working 
+  if non ASCII characters were used. (Ruediger Ullrich, 31 March 1998).
+  If USERPROFILE used, but it did not point to a directory, GSview
+  failed to write the INI file.  Under this fault condition it now 
+  writes it in the default location, the windows directory. 
+
+Win32:
+  Fixed Ghostscript registry keys GS_LIB and GS_DLL written by
+  setup program.
+
+OS/2:
+  Fixed problem with parts of the frame window being omitted in
+  foreign language (far eastern) versions of OS/2.
+  (Steffen Klupsch, 6 April 1998).
+
+----------------------
 Version 2.5 1998-02-20
 ----------------------
 Win:

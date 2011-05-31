@@ -146,7 +146,7 @@ char untitle[128];
 }
 
 int
-gsview_progman(char *groupname, char *gsviewpath, char *gspath, char *gsargs)
+gsview_progman(char *groupname, char *gsviewpath, int gsver, char *gspath, char *gsargs)
 {
 DWORD idInst = 0L;
 FARPROC lpDdeProc;
@@ -270,12 +270,22 @@ FILE *ddefile;
 
     sprintf(setup, "[ReplaceItem(\042Ghostscript README\042)]");
     DDEEXECUTE(setup);
-    if (!is_win4)
-        sprintf(setup, "[AddItem(\042notepad.exe %sREADME.\042,\042Ghostscript README\042)]", 
-	     gspath);
-    else
-        sprintf(setup, "[AddItem(\042notepad.exe\042 \042%sREADME.\042,\042Ghostscript README\042, \042notepad.exe\042,1)]", 
-	     gspath);
+    if (gsver >= 540) {
+	if (!is_win4)
+	    sprintf(setup, "[AddItem(\042%sReadme.htm\042,\042Ghostscript README\042)]", 
+		 gspath);
+	else
+	    sprintf(setup, "[AddItem(\042%sReadme.htm\042,\042Ghostscript README\042)]", 
+		 gspath);
+    }
+    else {
+	if (!is_win4)
+	    sprintf(setup, "[AddItem(\042notepad.exe %sREADME.\042,\042Ghostscript README\042)]", 
+		 gspath);
+	else
+	    sprintf(setup, "[AddItem(\042notepad.exe\042 \042%sREADME.\042,\042Ghostscript README\042, \042notepad.exe\042,1)]", 
+		 gspath);
+    }
     DDEEXECUTE(setup);
     if (ddefile)
         fprintf(ddefile, "[DeleteItem(\042%s\042)]\n", "Ghostscript README");

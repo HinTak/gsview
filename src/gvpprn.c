@@ -819,6 +819,8 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     switch (msg) {
 	case WM_INITDLG:
+	    WinSendMsg( WinWindowFromID(hwnd, DEVICE_OPTIONS),
+	    	EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
 	    /* fill in device, resolution list boxes */
 	    p = get_devices();
 	    res = p;	/* save for free() */

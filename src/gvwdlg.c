@@ -1294,7 +1294,7 @@ DLGPROC lpProcPDF2PS;
 
 
 #ifdef __WIN32__
-#define TWLENGTH 65536
+#define TWLENGTH 61440
 #else
 #define TWLENGTH 16384
 #endif

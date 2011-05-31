@@ -22,7 +22,7 @@
 #define GSVIEW_COPYRIGHT2 "All rights reserved."
 #define GSVIEW_COPYRIGHT3 "See the file LICENCE for more details."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-1997 Aladdin Enterprises,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-1998 Aladdin Enterprises,"
 #define GS_COPYRIGHT2 "Menlo Park, California, U.S.A.  All rights reserved."
 #define GS_COPYRIGHT3 "See the file PUBLIC for more details."
 
@@ -198,7 +198,7 @@
 /* Installation program */
 #define AAINSTALL1 "GSview Install"
 #define AAINSTALLINTRO1 "This wizard will help you install"
-#define AAINSTALLINTRO2 "Before continuing installation, make sure you have the files listed in README.TXT in the current directory or on 3 floppy disks."
+#define AAINSTALLINTRO2 "If you are not using the self extracting EXE install, make sure you have the files listed in README.TXT in the current directory or on 3 floppy disks."
 #define AAINSTALLINTRO3 "The installation will require 10 M bytes of hard disk space."
 #define AAINSTALLCOPYRIGHT1 "Copyright Notices"
 #define AAINSTALLCOPYRIGHT2 "GSview and Aladdin Ghostscript are separate programs."
@@ -261,7 +261,7 @@
 #define AACFG1 "GSview Configure"
 #define AACFG10 "This wizard will help you configure GSview."
 #define AACFG11 "If you don't understand an item on the following pages,\
- don't change it.  The default are all sensible."
+ don't change it.  The defaults are all sensible."
 #define AACFG20 "GSview needs to know which version of Ghostscript to use\
  and where it is located."
 #define AACFG21 "Which version of Ghostscript do you wish to use?"

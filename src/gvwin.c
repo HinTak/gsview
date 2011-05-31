@@ -936,7 +936,7 @@ RECT rect;
 		scroll_increment = HIWORD(wParam);
 		if (scroll_increment > 0x7fff)
 		    scroll_increment -= 0x10000L;
-		scroll_increment = scroll_increment 
+		scroll_increment = -scroll_increment 
 		    * ((rect.right-rect.left)/16) 
 		    / WHEEL_DELTA;
 		PostMessage(hwndimgchild, WM_HSCROLL, 
@@ -1057,6 +1057,34 @@ RECT rect;
 	case WM_GSWAIT:
 	    info_wait(wParam);
 	    return 0;
+	case WM_ACTIVATE:
+	    {
+#ifdef WIN32
+	     HWND hwnd_activate = (HWND)lParam;
+#else
+	     HWND hwnd_activate = (HWND)LOWORD(lParam);
+#endif
+	    /* We seem to be activated whenever fActive is non-zero
+	     * and hwnd_activate == NULL
+	     */
+#ifdef UNUSED
+{char buf[256];
+sprintf(buf, "parent=%x child=%x activate=%x\n", 
+  hwndimg, hwndimgchild, hwnd_activate);
+gs_addmess(buf);
+sprintf(buf, "WM_ACTIVATE: wParam=%x lParam=%x\n", wParam, lParam);
+gs_addmess(buf);
+}
+#endif
+	    if ( (LOWORD(wParam) != WA_INACTIVE) &&
+		 ( (hwnd_activate == (HWND)NULL) || 
+		   (hwnd_activate == hwndimg) ||
+		   (hwnd_activate == hwndimgchild)
+		 )
+               )
+	        reload_if_changed();
+	    }
+	    break;
 	case WM_CREATE:
 	    hwndimg = hwnd;
 	    gsview_create();

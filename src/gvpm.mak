@@ -34,11 +34,11 @@ DEBUG=0
 # Language is English (en) or Deutsch (de) or French (fr) or Italian (it)
 LANGUAGE=en
 # GSview version
-GSVIEW_VERSION=25
+GSVIEW_VERSION=26
 
 !if $(USE_EMX)
 # EMX
-DRIVE=e:
+DRIVE=c:
 COMP=gcc
 COMPBASE=$(DRIVE)\emx
 EMXPATH=$(DRIVE)/emx

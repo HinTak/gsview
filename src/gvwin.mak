@@ -21,7 +21,7 @@
 #
 
 # Edit COMPBASE and WIN32 as required
-COMPBASE = e:\bc45
+COMPBASE = c:\bc45
 # DEBUG=1 for Debugging options
 DEBUG=1
 # WIN32 is the default
@@ -30,7 +30,7 @@ WIN32=1
 # This only applies to the utilties, not GSview itself.
 LANGUAGE=en
 # GSview version
-GSVIEW_VERSION=25
+GSVIEW_VERSION=26
 
 # Shouldn't need editing below here
 COMPDIR = $(COMPBASE)\bin

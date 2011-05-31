@@ -23,6 +23,7 @@ SHELL=/bin/sh
 BINDIR=/usr/local/bin
 INCLUDES=-I/usr/openwin/include
 LIBS=
+# if you have a strict ANSI compiler, add -D__STDC__
 DEFINES=-DUNIX -DEPSTOOL -DHAVE_UNISTD_H
 OBJ=o
 CC=gcc

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "1.05  1997-12-09";
+char szVersion[] = "1.06  1998-09-13";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -183,6 +183,7 @@ int code = 0;
 	       return 1;
 	    }
 	    doc = psscan(psfile.file);
+	    psfile.doc = doc;
 	    if (doc == (PSDOC *)NULL) {
 	       fprintf(stderr, "File %s does not contain DSC comments\n", psfile.name);
 	       fclose(psfile.file);
@@ -588,9 +589,9 @@ read_file(char *fname)
     fprintf(stderr, "File %s is empty\n", fname);
   }
 #ifdef MSDOS	/* I hate segmented architectures */
-  if ( (base = farmalloc(length)) == (char *)NULL )
+  if ( (base = (char GVFAR *)farmalloc(length)) == (char *)NULL )
 #else
-  if ( (base = malloc(length)) == (char *)NULL )
+  if ( (base = (char GVFAR *)malloc(length)) == (char *)NULL )
 #endif
   {
     fprintf(stderr, "Can't malloc memory to hold file %s\n", fname);
@@ -696,8 +697,9 @@ psfile_extract_page(FILE *f, int page)
     pscopyuntil(psfile.file, f, doc->beginprolog, doc->endprolog, NULL);
     pscopyuntil(psfile.file, f, doc->beginsetup, doc->endsetup, NULL);
 
+    /* map page number to zero based index */
     if (doc->pageorder == DESCEND) 
-	i = (doc->numpages - 1) - page;
+	i = doc->numpages - page;
     else
 	i = page - 1;
     comment = pscopyuntil(psfile.file, f, doc->pages[i].begin,

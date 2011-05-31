@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1998, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -43,6 +43,24 @@ profile_read_string(PROFILE *prf, char *section, char *entry, char *def, char *b
 BOOL
 profile_write_string(PROFILE *prf, char *section, char *entry, char *value)
 {
+	if (debug) {
+	    BOOL flag = WritePrivateProfileString(section, entry, 
+		value, prf->name);
+	    if (!flag) {
+		char buf[256];
+#ifdef __WIN32__
+		sprintf(buf, "WritePrivateProfileString failed, code %ld\n",
+			GetLastError());
+#else
+		sprintf(buf, "WritePrivateProfileString failed\n");
+#endif
+		gs_addmess(buf);
+		sprintf(buf, "  while writing [%s] %s=%s to %s\n",
+		    section, entry, value, prf->name);
+		gs_addmess(buf);
+	    }
+	    return flag;
+	}
 	return WritePrivateProfileString(section, entry, value, prf->name);
 }
 
@@ -57,4 +75,3 @@ profile_close(PROFILE *prf)
 	return TRUE;
 }
 
-

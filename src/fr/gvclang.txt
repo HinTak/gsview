@@ -8,7 +8,7 @@
  Pour les documents respectant les conventions de structure du langage Adobe
  PostScript, GSview permet de visualiser ou d'imprimer des pages
  sélectionnées.
- GSview 2.5 nécessite Ghostscript version 4.03 - 5.99.
+ GSview 2.6 nécessite Ghostscript version 4.03 - 5.99.
  GSview s'est inspiré du programme Ghostview pour X11 de Tim Theisen.
 2Installation
 ?Installation
@@ -188,11 +188,11 @@ E
  puis d'éditer ce fichier
  en supprimant toutes les entrées sauf :
   [Options]
-  Version=2.5
-  GSversion=510
+  Version=2.6
+  GSversion=550
   Configured=1
-  GhostscriptDLL=E:\GSTOOLS\gs5.10\gsdll32.dll
-  GhostscriptInclude=E:\GSTOOLS\gs5.10;E:\GSTOOLS\gs5.10\fonts
+  GhostscriptDLL=E:\GSTOOLS\gs5.50\gsdll32.dll
+  GhostscriptInclude=E:\GSTOOLS\gs5.50;E:\GSTOOLS\gs5.50\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Lorsqu'un utilisateur lance GSview, son fichier INI sera utilisé normalement.
  La première fois que GSview est exécuté ou
@@ -965,7 +965,7 @@ P
  gvpm.ini.
 E
  La liste standard des types d'imprimantes et des résolutions est
- extraite de la distribution de Ghostscript version 5.10 et il
+ extraite de la distribution de Ghostscript version 5.50 et il
  est possible qu'elle soit incomplète.
 
  Pour imprimer un document sans l'afficher à l'écran, ouvrez le document

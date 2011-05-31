@@ -1,7 +1,7 @@
 ===============================================================
-README.TXT         1998-02-20
+README.TXT         1998-09-17
 ===============================================================
-GSview 2.5 - PostScript previewer.  Needs Ghostscript 5.10.
+GSview 2.6 - PostScript previewer.  Needs Ghostscript 5.50.
 
 ========
 Overview
@@ -43,12 +43,9 @@ Features include:
  - Free (GSview Free Public Licence).
  - Works with Aladdin Ghostscript 4.03 - 5.99 (GSview checks the
    Ghostscript version number).
-Changes in version 2.5:
- - Printer Setup can now list uniprint configuration files.
- - Can select all odd or even pages within a range of pages.
- - Pages can be reversed when printing.
- - Goto Page now supports typing the page number.
- - Page Up/Page Down will change page if scroll bar is at end of travel.
+Changes in version 2.6:
+ - Redisplay changed document when GSview activated.
+ - A handful of bug fixes.
  - See gvcnews.txt in the GSview sources for more detailed change
    notes.
 
@@ -57,7 +54,10 @@ GSview was written by Russell Lang.
 ============
 Installation
 ============
-Create three 1.44M floppies containing the following files, or
+If you have the self extracting archive gsv26550.exe, run it.
+This contains GSview 2.6 and Aladdin Ghostscript 5.50 for Win32.
+
+Otherwise, create three 1.44M floppies containing the following files, or
 put them all in the same directory on your hard disk.
 
 Disk 1:
@@ -95,13 +95,14 @@ Disk 1:
       unzip2.dll    Info-ZIP unzip utility
 
 Disk 2:
-  gs510ini.zip      Aladdin Ghostscript library files
+  gs550ini.zip      Aladdin Ghostscript library files
     PLUS
-  gs510w32.zip      MS-Windows Win32 Aladdin Ghostscript
+  gs550w32.zip      MS-Windows Win32 Aladdin Ghostscript
      OR 
-  gs510os2.zip      OS/2 Aladdin Ghostscript
+  gs550os2.zip      OS/2 Aladdin Ghostscript
 
   (for Windows 3.1/Win16 use gs403ini.zip plus gs403win.zip)
+  (The last 16-bit version of Aladdin Ghostscript was 4.03)
 
 Disk 3:
   gs510fn1.zip      Aladdin Ghostscript fonts.
@@ -205,9 +206,9 @@ To create the GSview online help you need the IBM toolkit.
 Copy gvpm.mak to Makefile and edit COMPBASE and EMXPATH as required.
 Type 'nmake'
 
-To compile GSview for Windows you need Borland C++ 4.5.
-Copy gvwin.mak to Makefile then edit COMPBASE as required.
-Type 'make'.
+To compile GSview for Windows you need Borland C++ 4.5 or 
+MS Visual C++ 5.0.  Copy gvwin.mak (or gvwinvc.mak) to Makefile 
+then edit COMPBASE as required.  Type 'make'.
 
 =====
 Setup
@@ -243,7 +244,7 @@ the emx 0.9c DLL's.  These are available from
 If GSview refuses to run at all, make sure you do not have
 an old version of the emx DLL on your system.
 
-GSview (gsview32.exe) will run under Windows NT, Windows 95 and
+GSview (gsview32.exe) will run under Windows NT, 95, 98 and
 Windows 3.1/Win32s.  It will not run under Windows 3.0.
 
 See the on-line help for more details.
@@ -308,7 +309,7 @@ Windows and OS/2.  The CD-ROM and a printed copy of the Ghostscript
 User Manual by Thomas Merz will be dispatched by air-mail.  
 For surface delivery within Australia, send a cheque for AUD$50 
 drawn on an Australian bank.
-This offer is valid until 30 June 1998.  If this date has
+This offer is valid until 31 December 1998.  If this date has
 passed, send mail to rjl@aladdin.com to find out if the offer
 is still valid.
 For more details see the page

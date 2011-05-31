@@ -11,7 +11,7 @@
  entwickelten PostScript Document Structuring Conventions
  (DSC-Konventionen) entsprechen, auf dem Bildschirm dargestellt und auf
  einen Drucker ausgegeben werden.
- Die Version GSview 2.5 erfordert Ghostscript in der Version 4.03 - 5.99.
+ Die Version GSview 2.6 erfordert Ghostscript in der Version 4.03 - 5.99.
  Grundlage für GSview ist das von Tim Theisen entwickelte Programm
  Ghostview für X11.
 2Installation
@@ -193,11 +193,11 @@ E
  Kopieren Sie gsview32.ini oder gvpm.ini aus dem Systemverzeichnis oder dem Benutzerprofil-Verzeichnis in
  das Gsview Verzeichnis und entfernen alle Einträge bis auf:
   [Options]
-  Version=2.5
-  GSversion=510
+  Version=2.6
+  GSversion=550
   Configured=1
-  GhostscriptDLL=E:\GSTOOLS\gs5.10\gsdll32.dll
-  GhostscriptInclude=E:\GSTOOLS\gs5.10;E:\GSTOOLS\gs5.10\fonts
+  GhostscriptDLL=E:\GSTOOLS\gs5.50\gsdll32.dll
+  GhostscriptInclude=E:\GSTOOLS\gs5.50;E:\GSTOOLS\gs5.50\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Wenn ein Benutzer Gsview startet, dann wird normalerweise seine INI Datei benutzt.
  Startet Gsview das erste Mal oder die Version von Gsview stimmt nicht mit der in der INI Datei überein, dann
@@ -1030,7 +1030,7 @@ P
 E
  gespeichert.
  Die Standard-Liste der Ausgabegeräte und Einstellungen stammt
- aus der Ghostscript Version 5.10, ist aber unter Umständen nicht
+ aus der Ghostscript Version 5.50, ist aber unter Umständen nicht
  vollständig.
 
  Wenn ein Dokument sofort gedruckt werden soll, vorher jedoch auf dem

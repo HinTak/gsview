@@ -7,7 +7,7 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 2.5 requires Ghostscript 4.03 - 5.99.
+ GSview 2.6 requires Ghostscript 4.03 - 5.99.
  GSview was inspired by Tim Theisen's X11 Ghostview program.
 2Installation
 ?Installation
@@ -189,11 +189,11 @@ E
  user profile directory to the GSview directory, then edit it to
  remove all entries except for:
   [Options]
-  Version=2.5
-  GSversion=510
+  Version=2.6
+  GSversion=550
   Configured=1
-  GhostscriptDLL=E:\GSTOOLS\gs5.10\gsdll32.dll
-  GhostscriptInclude=E:\GSTOOLS\gs5.10;E:\GSTOOLS\gs5.10\fonts
+  GhostscriptDLL=E:\GSTOOLS\gs5.50\gsdll32.dll
+  GhostscriptInclude=E:\GSTOOLS\gs5.50;E:\GSTOOLS\gs5.50\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  When a user starts GSview, their INI file will normally be used.
  The first time GSview is run, or when the GSview version doesn't
@@ -966,7 +966,7 @@ P
  gvpm.ini.
 E
  The default list of devices and resolutions is taken from the
- standard distribution version of Ghostscript 5.10 and may not
+ standard distribution version of Ghostscript 5.50 and may not
  be complete.
 
  To print a document without displaying it, open the document

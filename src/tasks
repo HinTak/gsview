@@ -16,6 +16,7 @@ how to create a Win95 shortcut to "-Ic:\gs tools" using Progman DDE.
 View bitmap files with viewjpg/viewbmp/viewpcx
 
 GSgrab needs a start_timer() added just before the main message loop.
+(Don't bother - RedMon is better).
 
 Check periodically if file is modified OR redisplay button.
 
@@ -49,4 +50,13 @@ Backspace and space don't work when cursor is over button bar.
 
 Write to network printing without connection.
 
+Under Win32s with multiple printers connected to the same port,
+printing to a named printer always prints to the first listed
+printer.  If the first listed printer is a bi-directional printer
+but the desired printer is unidirectional, the wrong driver
+complains.  (Mike Uren, 6 April 1998).
+(Too hard - gsv16spl only gets the printer port, not the printer name).
+
+Display full screen (no menu, buttons, sliders etc).
+This requires creating a new client window WS_POPUP.
 

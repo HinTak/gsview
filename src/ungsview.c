@@ -551,12 +551,15 @@ char buf[MAXSTR];
 	DWORD fa;
 	if (p && *p) {
 	    strcpy(szIniFile, p);
+#ifdef __BORLANDC__
+	    OemToCharBuff(szIniFile, szIniFile, lstrlen(szIniFile));
+#endif
 	    p = szIniFile + strlen(szIniFile) - 1;
 	    if ((*p == '\\') || (*p == '/'))
 		*p = '\0';
 	    /* check if USERPROFILE contains a directory name */
 	    fa = GetFileAttributes(szIniFile);
-	    if (fa & FILE_ATTRIBUTE_DIRECTORY)
+	    if ((fa != 0xffffffff) && (fa & FILE_ATTRIBUTE_DIRECTORY))
 		strcat(szIniFile, "\\");
 	    else
 		szIniFile[0] = '\0';
@@ -568,6 +571,9 @@ char buf[MAXSTR];
 	struct stat st;
 	if (p && *p) {
 	    strcpy(szIniFile, p); 
+#ifdef __BORLANDC__
+	    OemToAnsiBuff(szIniFile, szIniFile, lstrlen(szIniFile));
+#endif
 	    p = szIniFile + strlen(szIniFile) - 1;
 	    if ((*p == '\\') || (*p == '/'))
 		*p = '\0';

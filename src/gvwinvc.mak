@@ -22,7 +22,7 @@
 # Path to Microsoft Visual C++ must NOT include spaces
 
 # Edit COMPBASE and WIN32 as required
-DEVBASE = e:\devstudio
+DEVBASE = c:\devstudio
 # DEBUG=1 for Debugging options
 DEBUG=1
 # WIN32 is the default
@@ -33,7 +33,7 @@ ALPHA=0
 # This only applies to the utilties, not GSview itself.
 LANGUAGE=en
 # GSview version
-GSVIEW_VERSION=25
+GSVIEW_VERSION=26
 
 # Shouldn't need editing below here
 COMPBASE = $(DEVBASE)\vc
@@ -48,12 +48,13 @@ CFLAGS=-D_Windows -D__WIN32__ -DDECALPHA -I$(INCDIR)
 WINEXT=32
 CFLAGS=-D_Windows -D__WIN32__ -I$(INCDIR)
 !endif
-CCAUX = cl
-MODEL=32
-CC = cl
 !if $(DEBUG)
 DEBUGLINK=/DEBUG
+CDEBUG=/Zi
 !endif
+CCAUX = cl
+MODEL=32
+CC = cl $(CDEBUG)
 !else
     echo Win16 not supported with MSVC++
 !endif

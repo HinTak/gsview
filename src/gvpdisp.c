@@ -128,16 +128,18 @@ cleanup_pgm(PROG* prog)
 
 /* return TRUE if file length or modification time changed */
 BOOL
-psfile_changed(void)
+psfile_changed(PSFILE *psf)
 {
 time_t thisftime;
 long thisflength;
 struct stat fstatus;
-	fstat(fileno(psfile.file), &fstatus);
+        if (psf == (PSFILE *)NULL)
+	   psf = &psfile;
+	fstat(fileno(psf->file), &fstatus);
 	thisftime = fstatus.st_mtime;
 	thisflength = fstatus.st_size;
-	return ( (thisflength != psfile.length) ||
-		memcmp(&thisftime, &psfile.datetime, sizeof(thisftime)) );
+	return ( (thisflength != psf->length) ||
+		memcmp(&thisftime, &psf->datetime, sizeof(thisftime)) );
 }
 
 void

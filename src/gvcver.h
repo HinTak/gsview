@@ -31,11 +31,18 @@
  */
 
 
+/* undefine BETA for a final release */
+/* #define BETA */
+#define BETA_YEAR    1998
+#define BETA_MONTH   10
+#define BETA_DAY     31
+
+
 /* GSview */
 
 #define GSVIEW_PRODUCT "GSview"
-#define GSVIEW_VERSION "2.5"
-#define GSVIEW_DATE    "1998-02-20"
+#define GSVIEW_VERSION "2.6"
+#define GSVIEW_DATE    "1998-09-17"
 #ifdef _Windows
 #ifdef __WIN32__
 #ifdef DECALPHA
@@ -55,22 +62,16 @@
 #endif
 
 
-/* undefine BETA for a final release */
-/* #define BETA */
-#define BETA_YEAR    1998
-#define BETA_MONTH   2
-#define BETA_DAY     28
-
-
 /* Ghostscript */
 #define GS_PRODUCT  "Aladdin Ghostscript"
+#define GS_REVISION_MIN   403
 #if defined(_Windows) && !defined(__WIN32__)
 #define GS_REVISION	  403		/* this is the last 16-bit version */
+#define GS_REVISION_MAX   403
 #else
-#define GS_REVISION	  510
-#endif
-#define GS_REVISION_MIN   403
+#define GS_REVISION	  550
 #define GS_REVISION_MAX   599
+#endif
 #ifdef _Windows
 #ifdef __WIN32__
 #define GSVIEW_EXENAME "gsview32.exe"

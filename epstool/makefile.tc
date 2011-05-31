@@ -140,7 +140,7 @@ tar:	zip
 	copy src\* epstool
 	-del ..\epstool.tar
 	cd epstool
-	flip -u *
+	flip -u *.*
 	cd ..
 	tar -cvf ../epstool.tar epstool
-
+

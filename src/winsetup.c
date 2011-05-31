@@ -43,7 +43,8 @@
 #include "setupc.h"
 
 void install_init(void);
-int gsview_progman(char *groupname, char *gsviewpath, char *gspath, char *gsargs);
+int gsview_progman(char *groupname, char *gsviewpath, int gsver,
+	char *gspath, char *gsargs);
 
 BOOL CALLBACK _export ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK _export MainDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
@@ -293,14 +294,7 @@ char gsviewpath[MAXSTR];
     sprintf(gsargs, "%s\\%s;%s\\%s\\fonts", destdir, gs_basedir, 
 	destdir, gs_basedir);
     sprintf(gsviewpath, "%s\\%s\\", destdir, gsviewbase);
-    rc = gsview_progman(groupname, gsviewpath, gspath, gsargs);
-    if (rc)
-	load_string(IDS_NODDEPROGMAN, error_message, sizeof(error_message));
-
-    /* tell user what we have done */
-    load_string(IDS_PROGMANGROUP5, gsargs, sizeof(gsargs));
-    sprintf(gspath, gsargs, groupname);
-    SetDlgItemText(find_page_from_id(IDD_DONE)->hwnd, IDD_DONE_GROUP, gspath);
+    rc = gsview_progman(groupname, gsviewpath, gsver, gspath, gsargs);
 
 #ifdef __WIN32__
     /* Create default registry entries for Ghostscript */
@@ -317,13 +311,21 @@ char gsviewpath[MAXSTR];
 	    sprintf(buf, "%s\\%s", gspath, GS_DLLNAME);
 	    if (lrc == ERROR_SUCCESS)
 		lrc = RegSetValueEx(hkey, "GS_DLL", 0, REG_SZ, 
-		    (CONST BYTE *)gspath, strlen(gspath)+1);
+		    (CONST BYTE *)buf, strlen(buf)+1);
 	    RegCloseKey(hkey);
 	}
 	if (lrc != ERROR_SUCCESS)
 	    rc = 1;
     }
 #endif
+
+    if (rc)
+	load_string(IDS_NODDEPROGMAN, error_message, sizeof(error_message));
+
+    /* tell user what we have done */
+    load_string(IDS_PROGMANGROUP5, gsargs, sizeof(gsargs));
+    sprintf(gspath, gsargs, groupname);
+    SetDlgItemText(find_page_from_id(IDD_DONE)->hwnd, IDD_DONE_GROUP, gspath);
 
     return rc;
 }
