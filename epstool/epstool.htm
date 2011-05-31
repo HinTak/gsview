@@ -11,7 +11,7 @@ epstool
 <p>
 EPSTOOL - Create or extract preview bitmaps in EPS files.
 <br>
-Release date: 2001-06-02
+Release date: 2001-11-23
 </p>
 <h2>
 Table of contents
@@ -67,31 +67,37 @@ Usage:  epstool [option] operation filename
    <td><b>Options:</b></td><td></td>
  </tr>
  <tr>
+     <td>&nbsp;&nbsp; -a<i>arg</i>   </td><td>Ghostscript argument</td>
+ </tr>
+ <tr>
      <td>&nbsp;&nbsp; -b          </td><td>Calculate BoundingBox from image</td>
  </tr>
  <tr>
-     <td>&nbsp;&nbsp; -e          </td><td>Ignore DSC warnings</td>
+     <td>&nbsp;&nbsp; -e          </td><td>Ignore DSC warnings (dangerous)</td>
  </tr>
  <tr>
-     <td>&nbsp;&nbsp; -gcommand   </td><td>Ghostscript command</td>
+     <td>&nbsp;&nbsp; -e2         </td><td>Ignore DSC errors (very dangerous)</td>
  </tr>
  <tr>
-     <td>&nbsp;&nbsp; -nnumber    </td><td>Page number to extract</td>
+     <td>&nbsp;&nbsp; -g<i>command</i>   </td><td>Ghostscript command</td>
  </tr>
  <tr>
-     <td>&nbsp;&nbsp; -ofilename  </td><td>Output filename</td>
+     <td>&nbsp;&nbsp; -n<i>number</i>    </td><td>Page number to extract</td>
+ </tr>
+ <tr>
+     <td>&nbsp;&nbsp; -o<i>filename</i>  </td><td>Output filename</td>
  </tr>
  <tr>
      <td>&nbsp;&nbsp; -q          </td><td>Quiet (no messages)</td>
  </tr>
  <tr>
-     <td>&nbsp;&nbsp; -rnumber    </td><td>Preview resolution in dpi</td>
+     <td>&nbsp;&nbsp; -r<i>number</i>    </td><td>Preview resolution in dpi</td>
  </tr>
  <tr>
-     <td>&nbsp;&nbsp; -sWIDTHxHEIGHT </td><td>Size of page used with -b</td>
+     <td>&nbsp;&nbsp; -s<i>WIDTHxHEIGHT</i> </td><td>Size of page used with -b</td>
  </tr>
  <tr>
-     <td>&nbsp;&nbsp; -zdevice    </td><td>Ghostscript device name (for -t6u, -t6p, -tg, -w)</td>
+     <td>&nbsp;&nbsp; -z<i>device</i>    </td><td>Ghostscript device name (for -t6u, -t6p, -tg, -w)</td>
  </tr>
  <tr>
      <td>&nbsp;&nbsp; -d          </td><td>Debug mode (leave temporary files)</td>
@@ -118,7 +124,7 @@ Usage:  epstool [option] operation filename
      <td>&nbsp;&nbsp; -w   </td><td>Add WMF preview         (DOS EPS)</td>
  </tr>
  <tr>
-     <td>&nbsp;&nbsp; -ufilename </td><td>Add user supplied preview (DOS EPS)</td>
+     <td>&nbsp;&nbsp; -u<i>filename</i> </td><td>Add user supplied preview (DOS EPS)</td>
  </tr>
  <tr>
      <td>&nbsp;&nbsp; -p   </td><td>Extract PostScript      (DOS EPS)</td>
@@ -141,7 +147,7 @@ Examples
 <p>
 Create EPS file tiger.eps with TIFF (G3 Fax) preview
 <br><tt>
-&nbsp;  epstool -tg -ztiffg3 -g"gswin32c -Id:\gs;d:\psfonts" -otiger.eps tiger.ps
+&nbsp;  epstool -tg -ztiffg3 -g"gswin32c" -a"-Id:\gs;d:\psfonts" -otiger.eps tiger.ps
 </tt><br>
 Any GS TIFF device can be used, e.g. -ztiffg4, -ztiffpack
 </p>
@@ -149,7 +155,7 @@ Any GS TIFF device can be used, e.g. -ztiffg4, -ztiffpack
 <p>
 Add colour preview (8bit/pixel) to EPS file
 <br><tt>
-&nbsp;  epstool -t6p -zbmp256 -g"gswin32c -Id:\gs;d:\psfonts" -otiger.eps tiger.ps
+&nbsp;  epstool -t6p -zbmp256 -g"gswin32c" -a"-Id:\gs;d:\psfonts" -otiger.eps tiger.ps
 </tt>
 </p>
 
@@ -164,7 +170,7 @@ Extract TIFF preview from tiger.eps
 EPS file has incorrect %%BoundingBox.
 Add TIFF4 preview and calculate %%BoundingBox from bitmap.
 <br><tt>
-&nbsp;  epstool -b -t4 -g"gswin32c -Id:\gs;d:\psfonts" -ogolfer.eps golfer.ps
+&nbsp;  epstool -b -t4 -ogolfer.eps golfer.ps
 </tt>
 </p>
 
@@ -213,7 +219,7 @@ This can be tested with GSview "EPS Warn".
 Under OS/2 or MS-DOS, epstool requires Ghostscript 3.51 or later.
 If you have command line length problems, try setting the Ghostscript
 include path using the GS_LIB environment variable instead of using
--g"c:\gs3.51\gswin32c.exe -Ic:\gs3.51;c:\gs3.51\fonts;c:\psfonts"
+-a"-Ic:\gs3.51;c:\gs3.51\fonts;c:\psfonts"
 </p>
 
 <p>
@@ -298,7 +304,7 @@ Copyright
 </h2>
 
 <p>
-  Copyright (C) 1995-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+  Copyright (C) 1995-2001, Ghostgum Software Pty Ltd.  All rights reserved.
 </p>
   
 <p>
@@ -350,6 +356,38 @@ Other tools that can add previews to EPS files are
 <a name="Revision"></a>
 Revision History
 </h2>
+<h3>
+2.0 2001-11-23
+</h3>
+<p>
+  Release with GSview 4.1.
+<br>
+  Remove %%BoundingBox from trailer when adding it to header.
+<h3>
+1.92 2001-10-20
+</h3>
+<p>
+  Release with GSview 4.05 beta.
+<br>
+  Added -a<i>args</i> to separate arguments from -g.
+  This is needed because program name is surrounded by
+  quotes and so some shells were treating the arguments
+  as part of the program name.
+</p>
+<h3>
+1.91 2001-10-06
+</h3>
+<p>
+  Release with GSview 4.03 beta.
+</p>
+<h3>
+1.9 2001-07-27
+</h3>
+<p>
+  Release with GSview 4.01 beta.
+<br>
+  Ignore DSC warnings with -e1, ignore DSC errors with -e2.
+</p>
 <h3>
 1.8 2001-06-02
 </h3>

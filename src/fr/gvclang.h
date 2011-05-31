@@ -18,6 +18,8 @@
 /* fr\gvclang.h */
 /* Common French language defines */
 
+#define AAFRANCAIS "Français"	/* Francais in code page 1252 */
+
 #define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2001, Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Tous droits réservés."
 #define GSVIEW_COPYRIGHT3 "Voir le fichier LICENCE pour plus d'informations."
@@ -211,7 +213,7 @@
 #define AAPROPERTIES "Propriétés"
 #define AAPROPERTYC "Propriété :"
 #define AAVALUEC "Valeur :"
-#define AAPAGEOFFSETPT "Offset de page (pts)"
+#define AAPAGEOFFSETPT "Offset de page (pt)"
 #define AAXC "X :"
 #define AAYC "Y :"
 
@@ -229,6 +231,8 @@
 /* Advanced Configure dialog box */
 #define AACONFIGUREGS "Configuration avancée"
 #define AAGHOSTSCRIPTDLLC "DLL de Ghostscript :"
+#define AAGHOSTSCRIPTSOC "Ghostscript Shared Object:" /* ENGLISH */
+#define AAGHOSTSCRIPTEXEC "Ghostscript Program:" /* ENGLISH */
 #define AAGHOSTSCRIPTINCC "Chemin de recherche de Ghostscript :"
 #define AAGHOSTSCRIPTOTHERC "Options de Ghostscript :"
 #define AACOPYPRINTERDEF "Copier les paramètres par défaut de l'imprimante"
@@ -441,13 +445,5 @@
 #define AAMHELP "~Aide"
 #define AAMABOUT "~A propos de..."
 #endif
-
-/* Language changing */
-#define AASELECTLANGUAGE "Select Language"   /* Don't translate this */
-#define AAENGLISH "English"
-#define AADEUTSCH "Deutsch"
-#define AAFRANCAIS "Français"
-#define AAITALIANO "Italiano"
-#define AAESPANOL "Español"
 
 #define WINHELPFILE "gsviewfr.hlp"

@@ -24,6 +24,9 @@
 #include <commdlg.h>
 #include <shellapi.h>
 #include <mmsystem.h>
+#ifdef USE_HTMLHELP
+#include <htmlhelp.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -99,6 +102,7 @@ extern HWND hwndspl;	/* window handle of gsv16spl.exe */
 
 #include "gvceps.h"
 #include "gvcprf.h"
+#include "gvctype.h"
 
 /* program details */
 typedef struct tagPROG {
@@ -118,201 +122,6 @@ typedef struct tagBM {
     int		scrolly;
     BOOL	changed;	/* if width or height changed by GS */
 } BMAP;
-
-/*
-typedef struct document PSDOC;
-*/
-
-typedef struct tagPDFLINK {
-    PSBBOX bbox;
-    int page;
-    float border_xr;
-    float border_yr;
-    float border_width;
-    float colour_red;
-    float colour_green;
-    float colour_blue;
-    BOOL  colour_valid;
-    struct tagPDFLINK *next;
-    /* need to add View */
-} PDFLINK;
-
-typedef struct tagPAGELIST {
-	int current;	/* index of current selection */
-	BOOL multiple;	/* true if multiple selection allowed */
-	BOOL *select;	/* array of selection flags */
-	BOOL reverse;	/* reverse pages when extracting or printing */
-} PAGELIST;
-
-typedef struct tagPSFILE {
-	char 	name[MAXSTR];	/* name of selected document file */
-	char	tname[MAXSTR];	/* name of temporary file (gunzipped) */
-	FILE 	*file;		/* selected file */
-	CDSC	*dsc;		/* DSC structure.  NULL if not DSC */
-	PAGELIST page_list;	/* selected page list */
-	int	print_from;
-	int	print_to;
-#define ALL_PAGES 0
-#define ODD_PAGES 1
-#define EVEN_PAGES 2
-	int	print_oddeven;
-	BOOL	print_ignoredsc;
-	int	print_copies;
-	BOOL	locked;		/* To prevent two threads using the file */
-/*	BOOL	ignore_dsc;	/* true if DSC to be ignored */
-	BOOL	ignore_special;	/* true if %%PageOrder: Special to be ignored */
-	int 	pagenum;	/* current page number */
-	BOOL	ctrld;		/* TRUE if file starts with ^D */
-	BOOL	pjl;		/* TRUE if file starts with HP LaserJet PJL prologue */
-	BOOL	gzip;		/* TRUE if file compressed with gzip */
-	BOOL	bzip2;		/* TRUE if file compressed with bzip2 */
-	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
-#ifdef OLD
-	/* Can't use this because VC++ 5.0 and Windows 95 OSR1 & 2
-	 * give incorrect times for days when daylight savings
-	 * changes occur.  Main thread gives correct time, second
-	 * thread gives one hour earlier!
-	 */
-	time_t	datetime;	/* time/date of selected file */
-#else
-	FILETIME filetime;	/* time/date of selected file */
-#endif
-	long	length;		/* length of selected file */
-	BOOL	ispdf;		/* true if PDF document */
-	char 	text_name[MAXSTR];  /* name of file containing extracted text */
-	unsigned long text_offset;  /* file offset after last text search match */
-	int	text_page;	    /* page of last text search match */
-	BOOL	text_extract;       /* TRUE=extracting, FALSE=searching */
-	PSBBOX	text_bbox;	    /* bbox of found word */
-} PSFILE;
-
-/* In the single threaded version, there are three places that
- * process the message loop:
- *  1. Main get message loop in UNLOADED state
- *  2. Peek message loop in BUSY state
- *  3. Get message loop in PAGE state
- * We must avoid recursive calls from the last two message loop handlers.
- * In the multithreaded version, the DLL is handled by a separate thread.
- * User input that affects the GS DLL sets some pending variables, 
- * which are processed later by the appropriate message loop or thread.
- * Changes to the pending structure must be made inside a critical section.
- */
-/* pending structure */
-typedef struct tagPENDING {
-	BOOL	unload;		/* We want to unload the DLL */
-	BOOL	abort;		/* ignore errors and restart the interpreter */
-	BOOL	restart;	/* restart interpreter */
-	BOOL	redisplay;	/* redisplay after interpreter restarted */
-	BOOL	next;		/* move to next page */
-	BOOL	now;		/* We want to do something now */
-	/* if now set, at least one of the following six will be set */
-	int	pagenum;	/* page number to display */
-	PSFILE *psfile;		/* new document to display */
-	BOOL	resize;		/* size, resolution or orientation change */
-	BOOL	text;		/* extract text, don't display */
-	BOOL	pdf2ps;		/* extract PS from PDF, don't display */
-	BOOL	pstoedit;	/* extract using pstoedit, don't display */
-} PENDING;
-
-extern PENDING pending;
-
-typedef struct tagGSINPUT {
-    unsigned long ptr;
-    unsigned long end;
-    BOOL seek;
-} GSINPUT;
-
-typedef struct tagGSDLL_INPUT {
-    int	count;
-    int	index;
-    GSINPUT section[5];	/* header, defaults, prolog, setup, page */
-} GSDLL_INPUT;
-
-
-/* main structure with info about the GS DLL */
-#include "cdll.h"
-#include "cimg.h"
-#include "cview.h"
-
-typedef struct tagMATRIX {
-   float xx, xy, yx, yy, tx, ty;
-} MATRIX;
-
-typedef struct tagMEASURE {
-   float tx, ty;	/* translation */
-   float rotate;	/* rotation */
-   float sx, sy;	/* scaling */
-   int unit;		/* IDM_UNITPT .. IDM_UNITCUSTOM */
-} MEASURE;
-
-/* options that are saved in INI file */
-typedef struct tagOPTIONS {
-	int	language;
-	int	gsversion;
-	char	gsdll[MAXSTR];
-	char	gsinclude[MAXSTR];
-	char	gsother[MAXSTR];
-	BOOL	configured;
-	int	drawmethod;	/* OS/2 only */
-	char	helpcmd[MAXSTR];
-	POINT	img_origin;
-	POINT	img_size;
-	BOOL	img_max;
-	int	unit;
-	BOOL	unitfine;
-	int	pstotext;
-	BOOL	settings;
-	BOOL	button_show;
-	BOOL	fit_page;
-	BOOL	safer;
-	int	media;
-	char	medianame[32];
-	BOOL	media_rotate;
-	int	user_width;
-	int	user_height;
-	BOOL	epsf_clip;
-	BOOL	epsf_warn;
-	BOOL	redisplay;
-	BOOL    ignore_dsc;
-	int	dsc_warn;	/* level of DSC error warnings */
-	BOOL	show_bbox;
-	BOOL	auto_orientation;
-	int	orientation;
-	BOOL	swap_landscape;
-	float	xdpi;
-	float	ydpi;
-	float	zoom_xdpi;
-	float	zoom_ydpi;
-	int	depth;
-	int	alpha_text;
-	int	alpha_graphics;
-	BOOL	save_dir;
-        /* for printing to GS device */
-	char	printer_device[64];	/* Ghostscript device for printing */
-	char	printer_resolution[64];
-	int	print_fixed_media;
-	/* for converting with GS device */
-	char	convert_device[64];
-	char	convert_resolution[64];	/* Ghostscript device for converting */
-	int	convert_fixed_media;
-	/* for printing to GDI device */
-	int	print_gdi_depth;	/* IDC_MONO, IDC_GREY, IDC_COLOUR */
-	int	print_gdi_fixed_media;
-        /* general printing */
-#define PRINT_GDI 0
-#define PRINT_GS 1
-#define PRINT_PS 2
-#define PRINT_CONVERT 3
-	int	print_method;		/* GDI, GS, PS */
-	BOOL	print_reverse;		/* pages to be in reverse order */
-	BOOL	print_to_file;
-	char	printer_port[MAXSTR];	/* for Win32s */
-	char	printer_queue[MAXSTR];	/* for Win32 */
-	int	pdf2ps;
-	BOOL	auto_bbox;
-	MATRIX	ctm;
-	MEASURE measure;
-} OPTIONS;
 
 typedef struct tagDISPLAY {
 	int	width;		/* in pixels */
@@ -337,30 +146,15 @@ typedef struct tagDISPLAY {
 	unsigned long tid;
 } DISPLAY;
 
-extern char last_files[4][MAXSTR];	/* last 4 files used */
-extern int last_files_count;		/* number of files known */
-
-
-#define HISTORY_MAX 32
-typedef struct tagHISTORY {
-    int index;  /* index of next page to store */
-    int count;	/* number of valid pages in history */
-    int pages[HISTORY_MAX];
-} HISTORY;
-extern HISTORY history;		/* history of pages displayed */
-
-
-typedef struct tagTEXTINDEX {
-    int word;	/* offset to word */
-    int line;	/* line number on page */
-    PSBBOX bbox;
-} TEXTINDEX;
-extern TEXTINDEX *text_index;
-extern unsigned int text_index_count;	/* number of words in index */
-extern char *text_words;	/* storage for words */
+/* main structure with info about the GS DLL */
+#include "cdll.h"
+#include "cimg.h"
+#include "cview.h"
 
 /* all the external DLL use "C", not C++ */
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 /* for pstotext DLL */
 typedef int (GSDLLAPI *PFN_pstotextInit)(void **instance);
@@ -400,7 +194,9 @@ extern PFN_bzopen bzopen;
 extern PFN_bzread bzread;
 extern PFN_bzclose bzclose;
 
+#ifdef __cplusplus
 }
+#endif
 
 
 extern BOOL print_silent;	/* /P or /F command line option used */
@@ -423,28 +219,29 @@ extern FILE *debug_file;	/* for gs input logging */
 struct sound_s {
 	char *entry;		/* profile entry */
 	int title;		/* Resource string */
-	char file[MAXSTR];	/* empty, "beep", or .WAV sound to play */
+	TCHAR file[MAXSTR];	/* empty, "beep", or .WAV sound to play */
 };
 extern struct sound_s sound[NUMSOUND];
 #define BEEP "beep"		/* profile entry for a speaker beep */
-typedef BOOL (WINAPI *FPSPS)(LPCSTR, UINT);
+typedef BOOL (WINAPI *FPSPS)(LPCTSTR, UINT);
 extern HINSTANCE hlib_mmsystem;	/* DLL containing sndPlaySound function */
 extern FPSPS lpfnSndPlaySound;	/* pointer to sndPlaySound function if loaded */
 
-extern const char szClassName[];
-extern const char szImgClassName[];
+extern const TCHAR szClassName[];
+extern const TCHAR szImgClassName[];
 extern const char szScratch[];  /* temporary filename prefix */
 extern char *szSpoolPrefix;	/* usually \\spool\ */
-extern char szAppName[MAXSTR];
+extern TCHAR szAppName[MAXSTR];
 extern int nHelpTopic;
-extern char szWait[MAXSTR];
-extern char szExePath[MAXSTR];
+extern TCHAR szWait[MAXSTR];
+extern TCHAR szExePath[MAXSTR];
 extern char szIniFile[MAXSTR];
 extern char szFindText[MAXSTR];
-extern char szHelpName[MAXSTR];		/* buffer for building help filename */
+extern TCHAR szHelpName[MAXSTR];		/* buffer for building help filename */
 extern char previous_filename[MAXSTR];	/* to remember name between file dlg boxes */
 extern char selectname[MAXSTR];		/* for IDM_SELECT */
 extern UINT help_message;		/* message sent by OFN_SHOWHELP */
+extern GSVIEW_ARGS args;		/* Parsed arguments */
 extern HWND hwndimg;			/* gsview main window */
 extern HWND hDlgModeless;		/* any modeless dialog box */
 extern HWND hwnd_measure;		/* measure modeless dialog box */
@@ -453,6 +250,8 @@ extern HWND hwnd_fullscreen;		/* full screen popup of child window */
 extern HWND hwnd_image;			/* full screen or image child window */	
 extern HINSTANCE phInstance;		/* instance of gsview */
 extern HINSTANCE hlanguage;		/* instance of language resources */
+extern UINT nCodePageLanguage;		/* Code page of the GSview language */
+extern UINT nCodePageSystem;		/* Code page of the system */
 extern BOOL is_win31;			/* To allow selective use of win 3.1 features */
 extern BOOL is_winnt;			/* To allow selective use of Windows NT features */
 extern BOOL is_win95;			/* To allow selective use of Windows 95 features */
@@ -474,6 +273,8 @@ extern HBRUSH hbrush_menu;		/* menu background */
 extern int bitmap_scrollx;	/* offset from bitmap to origin of child window */
 extern int bitmap_scrolly;
 extern HFONT info_font;
+extern HFONT hFontAnsi;			/* ANSI (Western European) font */
+extern HFONT hFontGreek;		/* Greek font */
 extern POINT img_offset;		/* offset to gswin child window */
 extern POINT info_file;		/* position of file information */
 extern POINT info_page;		/* position of page information */
@@ -505,7 +306,7 @@ extern BOOL zoom;
 
 extern PSBBOX bbox;
 
-extern char registration_name[MAXSTR];
+extern TCHAR registration_name[MAXSTR];
 extern unsigned int registration_receipt;
 
 /* PRINT_GDI */
@@ -524,10 +325,50 @@ extern HANDLE print_gdi_write_handle;
 #define GetNotification(wParam,lParam) (HIWORD(wParam))
 #define SendDlgNotification(hwnd, id, notice) \
     SendMessage((hwnd), WM_COMMAND, MAKELONG((id),(notice)), (LPARAM)GetDlgItem((hwnd),(id)))
+
+int load_string_a(int id, LPSTR str, int len);
+int message_box_a(LPCSTR str, int icon);
+int convert_multibyte(LPTSTR str, LPCSTR mbstr, int len);
+int convert_widechar(LPSTR mbstr, LPCTSTR str, int len);
+
+#ifdef UNICODE
+#define DialogBoxParamL DialogBoxParamW
+#define CreateDialogParamL CreateDialogParamW
+#define SendDlgItemMessageL SendDlgItemMessageW
+#define SendDlgItemMessageLGetString SendDlgItemMessageW
+#define GetDlgItemTextL GetDlgItemTextW
+#define SetDlgItemTextL SetDlgItemTextW
+#else
+/* Some redirection stuff to allow NT to display text that
+ * doesn't match the system code page
+ */
+BOOL DialogBoxParamL(HINSTANCE hInstance, LPCTSTR lpTemplateName,
+    HWND hWndParent, DLGPROC lpDialogProc, LPARAM dwInitParam);
+HWND CreateDialogParamL(HINSTANCE hInstance, LPCTSTR lpTemplateName,
+    HWND hWndParent, DLGPROC lpDialogProc, LPARAM dwInitParam);
+BOOL SetDlgItemTextL(HWND hDlg, int nlDDlgItem, LPCTSTR lpString);
+BOOL GetDlgItemTextL(HWND hDlg, int nlDDlgItem, LPSTR lpString, 
+    int nMaxCount);
+BOOL LoadStringL(HINSTANCE hlanguage, UINT id, LPTSTR str, int len);
+LONG SendDlgItemMessageL(HWND hDlg, int id, UINT msg, WPARAM wParam, 
+    LPARAM lParam);
+LONG SendDlgItemMessageLGetString(HWND hDlg, int id, UINT msg, WPARAM wParam, 
+  LPARAM lParam);
+#undef SetDlgItemText
+#define SetDlgItemText(hwnd, id, str) SetDlgItemTextL((hwnd), (id), (str))
+#undef CreateDialogParam
+#define CreateDialogParam(hinst, tmpl, hwnd, dlgproc, param) \
+  CreateDialogParamL((hinst), (tmpl), (hwnd), (dlgproc), (param))
+#undef DialogBoxParam
+#define DialogBoxParam(hinst, tmpl, hwnd, dlgproc, param) \
+    DialogBoxParamL((hinst), (tmpl), (hwnd), (dlgproc), (param))
+#undef LoadString
+#define LoadString(hlanguage, id, str, len) \
+    LoadStringL((hlanguage), (id), (str), (len))
 /* early versions of Win32s don't support lstrcpyn */
 #undef lstrcpyn
 #define lstrcpyn(d,s,n) strncpy(d,s,n)
-
+#endif
 
 #ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -538,14 +379,16 @@ extern HANDLE print_gdi_write_handle;
 #include "gvwgsver.h" /* common function prototypes */
 
 /* in gvwin.c */
+int gsview_main(HINSTANCE hInstance, LPSTR lpszCmdLine);
 LRESULT CALLBACK _export MenuButtonProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK _export WndImgProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK _export WndImgChildProc(HWND, UINT, WPARAM, LPARAM);
 BOOL in_child_client_area(void);
+void enable_menu_item(int menuid, int itemid, BOOL enabled);
 
 /* in gvwinit.c */
 void gsview_init0(LPSTR lpszCmdLine);
-BOOL gsview_init1(LPSTR lpszCmdLine);
+BOOL gsview_init1(int argc, char *argv[]);
 void gsview_create(void);
 
 /* in gvwdisp.c */
@@ -567,8 +410,6 @@ void start_gvwgs(void);
 /* gvwimg.cpp */
 void image_color(unsigned int format, int index, 
     unsigned char *r, unsigned char *g, unsigned char *b);
-int image_size(IMAGE *img, int new_width, int new_height, int new_raster, 
-    unsigned int new_format, void *pimage);
 HPALETTE image_create_palette(IMAGE *img);
 HGLOBAL image_copy_dib(IMAGE *img);
 void image_draw(IMAGE *img, HDC hdc, int dx, int dy, int wx, int wy,

@@ -1,3 +1,355 @@
+---------------------------
+Version 4.1 2001-11-22
+---------------------------
+All:
+  PDF links didn't work when EPS Clip, because crop box
+  was stored in page bounding box, not document bounding box.
+
+  When using "Fit Window" and PDF, use crop box not media box.
+
+  PDF without CropBox but with EPS Clip should use PDF MediaBox,
+  not the default media.
+
+  PDF /GoBack now uses history, instead of always going to page-1;
+  However Ghostscript 7.03 and earlier do not give us /GoBack, 
+  so it still doesn't work.  This involved adding code to output 
+  named destinations as "/Action << /Subtype /Named /N /GoBack >>" 
+  and then having GSview remember the action "GoBack".
+  We have submitted a patch for Ghostscript which will allow this
+  to work.
+
+  Added the ability to recognise URI links, but we don't take
+  action on them yet.  Need to resolve security problems first.
+
+  Don't clear last used files when upgrading.
+
+  When adding or adjusting the bounding box in the header, 
+  remove it from the trailer.
+
+  When scanning a DOS EPS file, ignore all after end of PostScript
+  section.  Previously it would read and mostly ignore the data, 
+  but it would complain if a line was longer than 256 characters.
+
+Windows:
+  When printing, using "selection" then clicking on the ghostscript 
+  device selection button would unselect all pages.  
+  When selecting the Ghostscript device, do not call the page
+  dialog procedure if the page list control does not exist.
+
+  When fullscreen, use black for the uncovered area.
+
+  Handle PDF links when fullscreen.
+
+  When using GDI printing, use the offset from the GDI section
+  of the INI file, not the bmp16m section.
+
+OS/2:
+  When fullscreen, use black for the uncovered area.
+
+  Handle PDF links when fullscreen.
+
+  Updated version of pstoedit.
+
+X11:
+  Allow the image window to be "pushed" with the cursor.
+
+  Prevent button bar from taking the focus.
+  Added keyboard scrolling of image window.
+  Added missing keyboard accelerators.
+
+---------------------------
+Version 4.05beta 2001-10-20
+---------------------------
+All:
+  DSC parser didn't initialise orientation field when adding a new page.
+  Make sure DSC parser resets everything needed in CDSC structure.
+
+  Add %%PageCropBox to DSC parser.  This is referenced in
+  Adobe Technical Note #5644 which says it is in DSC 3.0,
+  but it isn't.  It could be useful to Ghostscript for
+  setting the PDF CropBox.  Recognise this in a page and
+  also in the defaults section.  The latter shouldn't happen 
+  because %%CropBox should be used instead.
+
+  In page list box, use '1' if label matches ordinal, 
+  or '1 "i"' if they don't.  This is to cope with documents
+  that reuse the label or set every label to the same string.
+
+  Changed description of "Properties" to refer to devices rather
+  than printers, because it applies to both Convert and Print.
+
+  Adjusted progressive drawing so that if the drawing to the
+  screen is taking too much time, in addition to lengthening
+  the time between updates, also increase the area required
+  before an update occurs.  This provides a noticeable 
+  improvement on old slow computers (486's still have a use
+  in testing).
+
+  Open icon changed to folder, not a document.
+
+Windows:
+  Windows 95 was still putting the INI file in the wrong place.
+
+  Setup includes an empty gsview32.ini, to overwrite any 
+  already in the gsview destination directory.
+  This was created incorrectly, and instead of being empty
+  contained "1 file(s) copied".  Harmless, but not correct.
+
+OS/2:
+  Show Messages dialog was not showing the text.
+  When importing text to the MLE, the buffer size must be set 
+  to the data length and not the actual buffer size.
+
+X11:
+  Print dialog crashed in 4.03 and 4.04.
+
+  Can be built multithreaded on SGI IRIX 6.5, but not 6.2.
+  When built multithreaded on IRIX, gdb can't debug it.
+
+  The X11 INI file is .gsview.ini, not .gsviewrc.  Updated the
+  documentation.
+
+  Add tooltips to button bar.
+
+  Fit to window now gets the correct size, but only because
+  the scroll bar width and window border widths are hard
+  coded into the calculation.
+
+---------------------------
+Version 4.04beta 2001-10-14
+---------------------------
+All:
+  Printing and converting working again.  
+  This was broken for DSC files when file method changed in 4.03 beta.
+
+  Renamed C files from .cpp to .c to make it compile on 
+  non C++ Unix compilers.
+
+Windows:
+  On Windows 95, read the initialisation file from the Windows
+  directory, not the current directory.  Broken in 4.03 beta
+  when platform independent code used for INI files.
+
+  gsprint now allows spaces in filenames.
+
+  gswgs32 does not destroy window if an error occurs.
+  Probably broken since 3.61 beta.
+
+X11:
+  Set and remember the window position.
+  Works on Linux, but will not accurately set/restore the position
+  on other systems.
+  -geometry now uses xoffset and yoffset.  
+
+  Added support for pstoedit, now we need a libpstoedit.so.
+  Initial build of libpstoedit.so will cause a segfault as GSview exits.
+
+  Remove dependence on X11 include files.
+
+  Don't poll during display_update if on single thread
+  and image is locked, to avoid drawing from the image
+  while it is being resized.
+
+  Install now creates parent directories as needed.
+
+  Updated spec file which also copies gsview.desktop and gsview.png.
+
+---------------------------
+Version 4.03beta 2001-10-06
+---------------------------
+All:
+  Use language specific "All" in page list when page
+  numbering not available.
+
+  Rewrote command line argument parser.
+  Added command line argument for
+   /ma4   (page size)
+   /oauto, /oportrait, /olandscape (orientation)
+   /f[DEVICE] (convert to file, optional device)
+   -geometry WIDTHxHEIGHT+XOFFSET+YOFFSET (initial window size and position)
+
+  Add progressive drawing to window as Ghostscript renders, by
+  dividing the image into tiles and keeping track of which tiles
+  have been dirtied.  Update the window when sufficient tiles
+  have been dirtied, or when one tile dirtied a lot and sufficient
+  time (usually 100ms) has passed.  If drawing to the window is
+  slow, increase the time between updates.
+
+  Reading of document now uses GFile structure.  There are three 
+  implementations, C files, Windows files and memory.
+
+  Added conditionals to remove all methods to copy, save or print
+  documents.
+
+  Added %%HiResBoundingBox: and %%CropBox: to DSC parser.
+
+  All files needed for Unix can now compile as plain C.
+  This is necessary because the X11 include files on Solaris
+  didn't contain valid function prototypes and so wouldn't
+  compile with a C++ compiler, even inside extern "C" { }.
+
+  When configuration changed, unload Ghostscript DLL.
+
+  Handle the file being changed or deleted in the 
+  redisplay command code.  Don't complain if the GS thread
+  finds that the file has been deleted.
+
+  Changed A0, A1, A2 sizes to be dynamically loaded from
+  the INI file.  Additional sizes can be added by editing
+  the UserMedia section of the INI file.  Eventually a user
+  interface will be added for adding or removing custom sizes.
+
+  Greek language updates.
+
+OS/2:
+  Fixes to Dutch setup resources.
+
+Win:
+  Redraw scroll bars when image size changes.
+
+  Use platform independent code for writing INI files,
+  because the Win32 version runs very slow on Win2k. 
+
+X11:
+  Add separate configuration for "Ghostscript Program" (gs) and
+  "Ghostscript Shared Object" (libgs.so).  Printing now works.
+  If you have used GSview before, you will need to update your
+  configuration.
+
+  -geometry ignores xoffset and yoffset.  
+  How do you set these with Gtk+?
+
+  Added Dutch translation of menus.
+
+  Will compile on Solaris with a few changes to the makefile.
+
+  Added 8 bit/pixel display using 96 colour palette.
+  Removed 1 bit/pixel display because I can't find a gdk_draw_*()
+  function to do it.
+
+  Fixed ViewerPreProcess code to handle inverted PageOffset.
+  Although PageOffset uses the same units as default user
+  coordinates, the direction is according to device coordinates.  
+  This was needed to fix zoom and epsf clip.
+
+  Works single threaded.  Tested on SGI IRIX 6.2 and SunOS 5.7.
+
+  Use getimeofday instead of ftime because it seems to be more
+  portable.  SGI IRIX doesn't have ftime.
+
+---------------------------
+Version 4.02beta 2001-09-13
+---------------------------
+All:
+  Correctly give DSC long line warning.
+  Correctly handle DSC early trailer warning.
+
+  Added new common problem.  GSview will take a long time to
+  display a file at 700dpi.
+
+  Added Dutch translation.  Help file not yet translated.
+
+  Added A0, A1 and A2 paper sizes.
+
+Win:
+  Compile Greek setup resources using correct code page.
+
+OS/2:
+  Changed code page resources (except Greek) to 850.
+  Change process and PM code page to match language
+  resources, usually 850.
+  Allow language to be selected if the code page is
+  in the PM code page list.
+
+---------------------------
+Version 4.01beta 2001-08-04
+---------------------------
+All:
+  Added Greek translation.
+
+  Changed doc2html to write tags in lower case, convert
+  non-ascii characters in links to &#nnn;
+  Replace isspace() and allow a charset to be specified for Greek.
+
+  Print all pages when "gsview /Ffile.pdf" is used and don't crash.
+
+  When adding TIFF preview to make a DOS EPS file, use the correct
+  size for the PostScript section.  Fix in previous version
+  introduced this bug.
+
+  Added doc2xml.cpp, htmsplit.cpp, xmlwin.xsl, xml2htm.xsl, xml2ipf.xsl,
+  xml2rtf.xsl, xml2htmh.xsl, xml2hhc.xsl, xml2hhk.xsl, gsxml.dtd, test.hhp.  
+  These files aren't finished.
+  This is the first stage in converting the documentation into xml which 
+  will then be used to generate HTML, RTF, IPF and Windows HTML Help.
+  These are for use with XT by James Clark.
+   http://www.jclark.com/xml/xt.html
+
+  doc2html no longer crashes if given a link with a long name.
+
+Win:
+  Changed language loading code to search for DLLs named
+  gsvw32??.dll in the GSview EXE directory.  Each DLL
+  provides a bitmap of its name which is placed on the
+  languages menu.  New languages can be now be added
+  without having to modify the GSview executable.
+  Code will only need to be added if a different
+  character set is needed (e.g. Cyrillic).
+
+  Changed code to allow compilation as UNICODE.
+  It should be possible to link GSview with the Microsoft Layer 
+  for Unicode to allow this to run on Windows 95.
+
+  When using Windows NT and the code page of the resource
+  doesn't match the code page of the system, load resources
+  as Unicode and use the wide version of some APIs to make
+  languages such as Greek display correctly, even if the
+  system has never installed the Greek locale.
+
+  Select Language dialog now uses bitmaps for the names
+  of each language, so they appear correct without the
+  language specific fonts.
+
+  Language menu uses bitmaps if the name can't be drawn
+  in the GSview language.  When the menu has the focus,
+  the colours are drawn reversed for the bitmap.  This
+  appears to be a bug in Windows 95 and NT.  Windows 3.1
+  can do it correctly!  Reversing the black and white
+  palette entries doesn't help - this make the selected
+  menu item display correctly, but unselected it displays
+  in reverse colours, that is the palette is being ignored.
+
+  Changed doc2rtf to only ignore leading spaces for key names
+  not white space.  White space included Greek accented characters.
+
+  Changed uninstall to have silent option -q.
+
+  Changed setup to allow registration details to be set.
+
+  Disabled look up of system sounds, since they haven't been
+  stored in win.ini since before Windows 95.
+
+  Changed 'F' accelerator to "File | Convert".
+
+  Change print page selection dialog for DSC files to use
+  previous dialog with a list box which allows selecting 
+  disjoint ranges of pages.
+
+  Change GSview Print to display the contents of the
+  options file when in debug mode.
+
+OS/2:
+  Changed 'F' accelerator to "File | Convert".
+
+  Change GSview Print to display the contents of the
+  options file when in debug mode.
+
+  Greek language untested.  It will only be enabled if the
+  system code page is set to 869.
+
+X11:
+  Greek language untested.
+
 ----------------------
 Version 4.0 2001-06-02
 ----------------------

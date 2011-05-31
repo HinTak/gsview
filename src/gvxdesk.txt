@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=GSview
+Comment=Postscript and PDF Previewer
+TryExec=gsview
+Exec=gsview
+Icon=gsview.png
+Terminal=0
+Type=Application

@@ -22,8 +22,9 @@
 // We read from the pipe and write GDI commands to the
 // actual printer.
 
+extern "C" {
 #include "gvwin.h"
-// #include "gvcfile.h"
+}
 #include "gvwdib.h"
 #include "gvwpdib.h"
 
@@ -67,7 +68,7 @@ void print_gdi_thread(void *pdummy)
     DWORD dwRead;
     int i;
 
-    CFile *pFile = new CFile((int)pth->hPipeRd);
+    GFile *pFile = gfile_open_handle((int)pth->hPipeRd);
 
     int page = 0;
     BOOL print_it;
@@ -96,7 +97,7 @@ void print_gdi_thread(void *pdummy)
 	    // read a scan line
 	    length = printdib.m_bytewidth;
 	    p = pLine;
-	    while (length && (dwRead = pFile->Read(p, length)) != 0) {
+	    while (length && (dwRead = gfile_read(pFile, p, length)) != 0) {
 		    length -= dwRead;
 		    p += dwRead;
 	    }
@@ -113,9 +114,8 @@ void print_gdi_thread(void *pdummy)
     EndDoc(pth->hdc);
     DeleteDC(pth->hdc);
     pth->hdc = NULL;
-    pFile->Close();
+    gfile_close(pFile);
 
-    delete pFile;
     free(pth);
 
     print_count--;
@@ -134,7 +134,17 @@ BOOL start_gvwgs_with_pipe(HDC hdc)
 {
     STARTUPINFO siStartInfo;
     LPVOID env;
-    char command[MAXSTR+MAXSTR];
+    TCHAR wcommand[MAXSTR+MAXSTR];
+    TCHAR wgsdll[MAXSTR];
+    TCHAR woptname[MAXSTR];
+    TCHAR wpsname[MAXSTR];
+
+    convert_multibyte(wgsdll, option.gsdll, 
+	sizeof(wgsdll)/sizeof(TCHAR)-1);
+    convert_multibyte(woptname, printer.optname, 
+	sizeof(woptname)/sizeof(TCHAR)-1);
+    convert_multibyte(wpsname, printer.psname, 
+	sizeof(wpsname)/sizeof(TCHAR)-1);
 
     PGDI_THREAD *pth= (PGDI_THREAD *)malloc(sizeof(PGDI_THREAD));
     if (pth == NULL) {
@@ -158,15 +168,15 @@ BOOL start_gvwgs_with_pipe(HDC hdc)
     pth->hdc = hdc;
     pth->hPipeRd = print_gdi_read_handle;
 
-    sprintf(command, "\042%s%s\042 %s \042%s\042 \042%s\042 \042%s\042",
+    wsprintf(wcommand, TEXT("\042%s%s\042 %s \042%s\042 \042%s\042 \042%s\042"),
 	szExePath,
 #ifdef DECALPHA
-	"gvwgsda.exe",
+	TEXT("gvwgsda.exe"),
 #else
-	"gvwgs32.exe",
+	TEXT("gvwgs32.exe"),
 #endif
-	debug ? "/d" : "",
-	option.gsdll, printer.optname, printer.psname);
+	debug ? TEXT("/d") : TEXT(""),
+	wgsdll, woptname, wpsname);
 	
 
     info_wait(IDS_WAIT);
@@ -200,7 +210,7 @@ BOOL start_gvwgs_with_pipe(HDC hdc)
     PROCESS_INFORMATION piProcInfo;
 
     if (!CreateProcess(NULL,
-        (char *)command,  /* command line                       */
+        wcommand,      /* command line                       */
         NULL,          /* process security attributes        */
         NULL,          /* primary thread security attributes */
         TRUE,          /* handles are inherited              */
@@ -210,6 +220,7 @@ BOOL start_gvwgs_with_pipe(HDC hdc)
         &siStartInfo,  /* STARTUPINFO pointer                */
 	&piProcInfo)	/* receives PROCESS_INFORMATION  */
 	) {
+        char command[MAXSTR+MAXSTR];
 	// cleanup items created by gsviev_cprint()
 	if (!debug)
 	    unlink(printer.psname);
@@ -225,6 +236,7 @@ BOOL start_gvwgs_with_pipe(HDC hdc)
 	EndDoc(pth->hdc);
 	free(pth);
 	info_wait(IDS_NOWAIT);
+	convert_widechar(command, wcommand, sizeof(command)-1);
 	gserror(IDS_CANNOTRUN, command, MB_ICONHAND, SOUND_ERROR);
 	return FALSE;
     }
@@ -277,23 +289,26 @@ init_print_gdi(HDC hdc)
 
     // open printer, get size and resolution
     DOCINFO di;
+    TCHAR wpsname[MAXSTR];
+    convert_multibyte(wpsname, psfile_name(&psfile), 
+	sizeof(wpsname)/sizeof(TCHAR)-1);
     memset(&di, 0, sizeof(DOCINFO));
     di.cbSize = sizeof(DOCINFO);
-    di.lpszDocName = psfile_name(&psfile);
+    di.lpszDocName = wpsname;
     di.lpszOutput = NULL;
     if (StartDoc(hdc, &di) == SP_ERROR) {
 	DWORD err = GetLastError();
-	LPVOID lpMessageBuffer;
+	LPSTR lpMessageBuffer;
 	char buf[MAXSTR];
 	sprintf(buf, "StartDoc failed, error %d\n", err);
 	gs_addmess(buf);
-	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+	FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER |
 	    FORMAT_MESSAGE_FROM_SYSTEM,
 	    NULL, err,
 	    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* user default language */
-	    (LPTSTR) &lpMessageBuffer, 0, NULL);
+	    (LPSTR)&lpMessageBuffer, 0, NULL);
 	if (lpMessageBuffer) {
-	    gs_addmess((LPTSTR)lpMessageBuffer);
+	    gs_addmess(lpMessageBuffer);
 	    gs_addmess("\r\n");
 	    LocalFree(LocalHandle(lpMessageBuffer));
 	}

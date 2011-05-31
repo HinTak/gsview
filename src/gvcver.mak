@@ -17,15 +17,15 @@
 
 # Partial makefile for language and version
 
-# Language is English (en), Deutsch (de), Spanish (es), French (fr)
-# or Italian (it)
+# Language is English (en), Deutsch (de), Spanish (es), French (fr),
+# Italian (it), Greek (gr) or Dutch (nl)
 # This only applies to the utilties, not GSview itself.
 LANGUAGE=en
 
 # GSview version
-GSVIEW_VERSION=40
-GSVIEW_DOT_VERSION=4.0
-GSVIEW_DATE=2001-06-02
+GSVIEW_VERSION=41
+GSVIEW_DOT_VERSION=4.1
+GSVIEW_DATE=2001-11-23
 
 
 gsvver.h: $(ECHOGSV) gvcver.mak

@@ -17,12 +17,9 @@
 
 /* gvcfile.h */
 
-/* This is a quick and dirty implementation of CFile, providing
- * only those methods used by the non MFC GSview so we don't need 
- * to import all of MFC
- */
+/* GFile is similar but to MFC CFile but is implemented as C, not C++. */
 
-#ifndef _Windows
+#if defined(STDIO) || defined(MEMORYFILE) || !defined(_Windows) || defined(OS2)
 #ifndef UINT
 #define UINT unsigned int
 #endif
@@ -35,43 +32,43 @@
 #ifndef DWORD
 #define DWORD unsigned long
 #endif
-#endif
 #ifndef LPCTSTR
 #define LPCTSTR const char *
+#endif
 #ifndef GENERIC_READ
 #define GENERIC_READ (0x80000000L)
 #endif
 #ifndef FILE_SHARE_READ
 #define FILE_SHARE_READ 0x00000001
 #endif
+#ifndef FALSE
+#define FALSE 0
 #endif
-
-class CFile {
-    public:
-	int m_hFile;
-	CFile(void);
-	CFile(int hFile);
-
-        enum OpenFlags {modeRead = 0x0000, modeWrite = 0x0001,
-	    shareExclusive=0x0010, shareDenyWrite=0x0020, 
-	    modeCreate=0x1000};
-	BOOL Open(LPCTSTR lpszFileName, UINT nOpenFlags);
-	void Close();	// no exceptions
-
-	UINT Read(void *lpBuf, UINT nCount);		// no exceptions
-	UINT CFile::Write(void *lpBuf, UINT nCount);	// no exceptions
-
-        enum {begin, current, end};
-	LONG Seek(LONG lOff, UINT nFrom);
-
-	static void assert(char *file, int line);
-};
-
-#ifndef ASSERT
-#ifdef DEBUG
-#define ASSERT(f) if (!(f)) CFile::assert(__FILE__, __LINE__)
-#else
-#define ASSERT(f)
+#ifndef TRUE
+#define TRUE (!FALSE)
 #endif
 #endif
+
+
+typedef struct GFile_s GFile;
+
+/* for gfile_open nOpenFlags */
+enum OpenFlags {gfile_modeRead = 0x0000, gfile_modeWrite = 0x0001,
+    gfile_shareExclusive=0x0010, gfile_shareDenyWrite=0x0020, 
+    gfile_modeCreate=0x1000};
+
+/* for gfile_seek nFrom */
+enum {gfile_begin, gfile_current, gfile_end};
+
+GFile *gfile_open_handle(int hFile);
+GFile *gfile_open(LPCTSTR lpszFileName, UINT nOpenFlags);
+void gfile_close(GFile *gf);
+UINT gfile_read(GFile *gf, void *lpBuf, UINT nCount);
+UINT gfile_write(GFile *gf, void *lpBuf, UINT nCount);
+LONG gfile_seek(GFile *gf, LONG lOff, UINT nFrom);
+LONG gfile_get_position(GFile *gf);
+LONG gfile_get_length(GFile *gf);
+BOOL gfile_get_datetime(GFile *gf, UINT *pdt_low, UINT *pdt_high);
+BOOL gfile_changed(GFile *gf, LONG length, UINT dt_low, UINT dt_high);
+void gfile_set_memory(GFile *gf, const char *base, long len);
 

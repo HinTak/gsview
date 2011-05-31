@@ -31,14 +31,13 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <time.h>
-#include <gtk/gtk.h>
-#include <gdk/gdkx.h>
-/*
-#include <X11/Xatom.h>
-*/
-#include <semaphore.h>
+#include <sys/time.h>
+#ifdef MULTITHREAD
 #define __USE_GNU	/* we need recursive mutex */
+#include <semaphore.h>
 #include <pthread.h>
+#endif
+#include <gtk/gtk.h>
 
 #define NeedFunctionPrototypes 1
 #define GSDLL_SYNC 4    /* sync_output for device str */ 
@@ -58,7 +57,6 @@ typedef GtkWidget *HWND;
 #define stricmp strcasecmp
 
 /* some of these should be private to gvx.cpp */
-extern Display *dpy;
 extern GtkWidget *window;
 extern GtkWidget *main_vbox;
 extern GtkWidget *menubar;
@@ -101,6 +99,7 @@ extern int infile;
 #include "gdevdsp.h"
 
 #include "dscparse.h"
+#include "gvcfile.h"
 
 #ifndef NODEBUG_MALLOC
 void * debug_malloc(size_t size);
@@ -132,6 +131,17 @@ extern FILE *malloc_file;
 #define COPY_BUF_SIZE 4096
 #define PATHSEP "/"
 #define LPSTR char *
+#define TCHAR char
+#define LPTSTR TCHAR *
+#ifndef LPCTSTR
+#define LPCTSTR const TCHAR *
+#endif
+#define TEXT(x) (x)
+#define convert_multibyte(s, t, len) strncpy((s),(t),(len))
+#define convert_widechar(s, t, len) strncpy((s),(t),(len))
+#define lstrlen(s) strlen(s)
+#define lstrcpy(s,t) strcpy((s),(t))
+#define wsprintf sprintf
 
 /* Windows IDs */
 #define IDOK  1
@@ -160,8 +170,18 @@ extern FILE *malloc_file;
 #define max(x,y)  ( (x) > (y) ? (x) : (y) )
 #endif
 
+typedef struct tagPOINT {
+    int x;
+    int y;
+} POINT;
+
 #include "gvceps.h"
 #include "gvcprf.h"
+#include "gvctype.h"
+
+#ifdef MULTITHREAD
+extern pthread_mutex_t hmutex_ps; 	/* for protecting psfile and pending */
+#endif
 
 /* program details */
 typedef struct tagPROG {
@@ -169,209 +189,10 @@ typedef struct tagPROG {
     int		pid;
 } PROG;
 
-typedef struct document PSDOC;
-
-typedef struct tagPDFLINK {
-    PSBBOX bbox;
-    int page;
-    float border_xr;
-    float border_yr;
-    float border_width;
-    float colour_red;
-    float colour_green;
-    float colour_blue;
-    BOOL  colour_valid;
-    struct tagPDFLINK *next;
-    /* need to add View */
-} PDFLINK;
-
-typedef struct tagPAGELIST {
-	int current;	/* index of current selection */
-	BOOL multiple;	/* true if multiple selection allowed */
-	BOOL *select;	/* array of selection flags */
-	BOOL reverse;	/* reverse pages when extracting or printing */
-} PAGELIST;
-
-typedef struct tagPSFILE {
-	char 	name[MAXSTR];	/* name of selected document file */
-	char	tname[MAXSTR];	/* name of temporary file (gunzipped) */
-	FILE 	*file;		/* selected file */
-	CDSC	*dsc;		/* DSC structure.  NULL if not DSC */
-	PAGELIST page_list;	/* selected page list */
-//	int	print_from;
-//	int	print_to;
-#define ALL_PAGES 0
-#define ODD_PAGES 1
-#define EVEN_PAGES 2
-//	int	print_oddeven;
-	BOOL	print_ignoredsc;
-	int	print_copies;
-	BOOL	locked;		/* To prevent two threads using the file */
-	BOOL	ignore_special;	/* true if %%PageOrder: Special to be ignored */
-	int 	pagenum;	/* current page number */
-	BOOL	ctrld;		/* TRUE if file starts with ^D */
-	BOOL	pjl;		/* TRUE if file starts with HP LaserJet PJL prologue */
-	BOOL	gzip;		/* TRUE if file compressed with gzip */
-	BOOL	bzip2;		/* TRUE if file compressed with bzip2 */
-	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
-#ifdef _Windows
-	struct	ftime datetime;	/* time/date of selected file */
-#else
-	time_t	datetime;	/* time/date of selected file */
-#endif
-	long	length;		/* length of selected file */
-	BOOL	ispdf;		/* true if PDF document */
-	char 	text_name[MAXSTR];  /* name of file containing extracted text */
-	unsigned long text_offset;  /* file offset after last text search match */
-	int	text_page;	    /* page of last text search match */
-	BOOL	text_extract;       /* TRUE=extracting, FALSE=searching */
-	PSBBOX	text_bbox;	    /* bbox of found word */
-} PSFILE;
-
-/* State of GS DLL */
-/* state transitions are between adjacent states only */
-/* except IDLE can be skipped between UNLOADED and BUSY */
-#define UNLOADED 0	/* DLL has not been loaded or has been unloaded */
-#define IDLE     1	/* No input is being sent to DLL */
-#define BUSY     2	/* Input is being sent to DLL */
-#define PAGE     3      /* Waiting at showpage */
-
-/* In the single threaded version, there are three places that
- * process the message loop:
- *  1. Main get message loop in UNLOADED state
- *  2. Peek message loop in BUSY state
- *  3. Get message loop in PAGE state
- * We must avoid recursive calls from the last two message loop handlers.
- * In the multithreaded version, the DLL is handled by a separate thread.
- * User input that affects the GS DLL sets some pending variables, 
- * which are processed later by the appropriate message loop or thread.
- * Changes to the pending structure must be made inside a critical section.
- */
-/* pending structure */
-typedef struct tagPENDING {
-	BOOL	unload;		/* We want to unload the DLL */
-	BOOL	abort;		/* ignore errors and restart the interpreter */
-	BOOL	restart;	/* restart interpreter */
-	BOOL	redisplay;	/* redisplay after interpreter restarted */
-	BOOL	next;		/* move to next page */
-	BOOL	now;		/* We want to do something now */
-	/* if now set, at least one of the following six will be set */
-	int	pagenum;	/* page number to display */
-	PSFILE *psfile;		/* new document to display */
-	BOOL	resize;		/* size, resolution or orientation change */
-	BOOL	text;		/* extract text, don't display */
-	BOOL	pdf2ps;		/* extract PS from PDF, don't display */
-	BOOL	pstoedit;	/* extract using pstoedit, don't display */
-} PENDING;
-
-extern PENDING pending;
-
-extern pthread_mutex_t hmutex_ps; 	/* for protecting psfile and pending */
-
-typedef struct tagGSINPUT {
-    unsigned long ptr;
-    unsigned long end;
-    BOOL seek;
-} GSINPUT;
-
-typedef struct tagGSDLL_INPUT {
-    int	count;
-    int	index;
-    GSINPUT section[5];	/* header, defaults, prolog, setup, page */
-} GSDLL_INPUT;
-
-
 /* main structure with info about the GS DLL */
 #include "cdll.h"
 #include "cimg.h"
 #include "cview.h"
-
-
-typedef struct tagMATRIX {
-   float xx, xy, yx, yy, tx, ty;
-} MATRIX;
-
-typedef struct tagMEASURE {
-   float tx, ty;	/* translation */
-   float rotate;	/* rotation */
-   float sx, sy;	/* scaling */
-   int unit;		/* IDM_UNITPT .. IDM_UNITCUSTOM */
-} MEASURE;
-
-struct POINT {
-    int x;
-    int y;
-};
-
-
-/* options that are saved in INI file */
-typedef struct tagOPTIONS {
-	int	language;
-	int	gsversion;
-	char	gsdll[MAXSTR];
-	char	gsinclude[MAXSTR];
-	char	gsother[MAXSTR];
-	BOOL	configured;
-	int	drawmethod;
-	char	helpcmd[MAXSTR];
-	POINT	img_origin;
-	POINT	img_size;
-	BOOL	img_max;
-	int	unit;
-	BOOL	unitfine;
-	int	pstotext;
-	BOOL	settings;
-	BOOL	button_show;
-	BOOL	fit_page;
-	BOOL	safer;
-	int	media;
-	char	medianame[32];
-	BOOL	media_rotate;
-	int	user_width;
-	int	user_height;
-	BOOL	epsf_clip;
-	BOOL	epsf_warn;
-	BOOL	redisplay;
-	BOOL    ignore_dsc;
-	int	dsc_warn;	/* level of DSC error warnings */
-	BOOL	show_bbox;
-	BOOL	auto_orientation;
-	int	orientation;
-	BOOL	swap_landscape;
-	float	xdpi;
-	float	ydpi;
-	float	zoom_xdpi;
-	float	zoom_ydpi;
-	int	depth;
-	int	alpha_text;
-	int	alpha_graphics;
-	BOOL	save_dir;
-        /* for printing to GS device */
-	char	printer_device[32];	/* Ghostscript device for printing */
-	char	printer_resolution[32];
-	int	print_fixed_media;
-	/* for converting with GS device */
-	char	convert_device[32];
-	char	convert_resolution[32];	/* Ghostscript device for converting */
-	int	convert_fixed_media;
-	/* for printing to GDI device */
-	int	print_gdi_depth;	/* IDC_MONO, IDC_GREY, IDC_COLOUR */
-	int	print_gdi_fixed_media;
-        /* general printing */
-#define PRINT_GDI 0
-#define PRINT_GS 1
-#define PRINT_PS 2
-#define PRINT_CONVERT 3
-	int	print_method;		/* GDI, GS, PS */
-	BOOL	print_reverse;		/* pages to be in reverse order */
-	BOOL	print_to_file;
-	char	printer_port[32];	/* for Win32s */
-	char	printer_queue[MAXSTR];	/* for Win32 */
-	int	pdf2ps;
-	BOOL	auto_bbox;
-	MATRIX	ctm;
-	MEASURE measure;
-} OPTIONS;
 
 typedef struct tagDISPLAY {
 	int	width;
@@ -393,30 +214,15 @@ typedef struct tagDISPLAY {
 	BOOL	saved;		/* interpreter state saved */
 	BOOL	need_header;
 	BOOL	need_trailer;
+#ifdef MULTITHREAD
 	sem_t	event;
 	pthread_t tid;
+#endif
 } DISPLAY;
 
 extern GtkWidget *last_file_widget[4];
 extern char last_files[4][MAXSTR];	/* last 4 files used */
 extern int last_files_count;		/* number of files known */
-
-#define HISTORY_MAX 32
-typedef struct tagHISTORY {
-    int index;  /* index of next page to store */
-    int count;	/* number of valid pages in history */
-    int pages[HISTORY_MAX];
-} HISTORY;
-extern HISTORY history;		/* history of pages displayed */
-
-typedef struct tagTEXTINDEX {
-    int word;	/* offset to word */
-    int line;	/* line number on page */
-    PSBBOX bbox;
-} TEXTINDEX;
-extern TEXTINDEX *text_index;
-extern unsigned int text_index_count;	/* number of words in index */
-extern char *text_words;	/* storage for words */
 
 typedef struct tagPRINTER {
 	int	pid;	 	 /* Ghostscript program doing printing */
@@ -448,6 +254,7 @@ struct sound_s {
 extern struct sound_s sound[NUMSOUND];
 #define BEEP "beep"		/* profile entry for a speaker beep */
 
+extern GSVIEW_ARGS args;		/* Parsed arguments */
 extern char szAppName[MAXSTR];
 extern int nHelpTopic;
 extern char szDocPath[MAXSTR];
@@ -462,10 +269,9 @@ extern const char szScratch[];	/* temporary filename prefix */
 extern const char *szSpoolPrefix;	/* usually \\spool\ */
 extern ULONG os_version;
 extern BOOL multithread;		/* TRUE if running multithreaded */
-extern int geometry_width;
-extern int geometry_height;
-extern int geometry_xoffset;
-extern int geometry_yoffset;
+extern char workdir[MAXSTR];
+extern BOOL print_silent;	/* /P or /F command line option used */
+extern BOOL print_exit;		/* exit on completion of printing */
 
 /*
 extern POINT buttonbar;
@@ -513,7 +319,9 @@ extern char pstotextLine[2048];
 extern int pstotextCount;
 
 /* all the external DLL use "C", not C++ */
+#ifdef __cplusplus
 extern "C" {
+#endif
 /* for zlib gunzip decompression */
 extern void * zlib_hinstance;
 typedef void *gzFile ;
@@ -534,7 +342,9 @@ extern PFN_bzopen bzopen;
 extern PFN_bzread bzread;
 extern PFN_bzclose bzclose;
 
+#ifdef __cplusplus
 }
+#endif
 
 #ifdef NOTUSED
 /* in gvpm.c */
@@ -573,6 +383,7 @@ void close_img_message(void);
 void quit_gsview( GtkWidget *w, gpointer   data);
 gboolean gs_client_event(GtkWidget *widget, GdkEventClient *event, gpointer data);
 void gsview_wcmd( GtkWidget *w, gpointer data);
+gint key_press_event(GtkWidget *widget, GdkEventKey *event);
 gint button_press_event(GtkWidget *widget, GdkEventButton *event);
 gint button_release_event(GtkWidget *widget, GdkEventButton *event);
 gint motion_notify_event(GtkWidget *widget, GdkEventMotion *event);
@@ -584,7 +395,7 @@ void set_last_used(void);
 void set_scroll(int hscroll, int vscroll);
 
 /* in gvxinit.cpp */
-int gsview_init(void);
+int gsview_init(int argc, char *argv[]);
 void enable_menu_item(int menuid, int itemid, BOOL enabled);
 
 /* in gvxdlg.cpp */
@@ -605,6 +416,8 @@ void width_percent(GtkWidget *w, GtkRequisition *req, gpointer data);
 void measure_close(void);
 
 /* in gvxmisc.cpp */
+#define load_string_a load_string
+#define message_box_a message_box
 void exec_program(const char *prog, const char *arg);
 void SetDlgItemText(HWND hwnd, int id, const char *str);
 

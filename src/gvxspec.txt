@@ -1,23 +1,26 @@
 #
-# Spec file for GSview 4.0
+# Spec file for GSview 4.1
 #
-# 4.0 release
-#  2001-06-02 Russell Lang <gsview@ghostgum.com.au>
+# 4.1 release
+#  2001-11-22 Russell Lang <gsview@ghostgum.com.au>
 #
 Summary: PostScript and PDF previewer
 Name: gsview
-Version: 4.0
+Version: 4.1
 Release: 1
 Copyright: Aladdin Free Public License, Ghostgum Software Pty Ltd
 Group: Applications/Graphics
-Source: ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/gsv40src.zip
+Source: ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/beta/gsv41src.zip
 URL: http://www.cs.wisc.edu/~ghost/gsview/
 #Icon: gsview.gif
 #Distribution: Unknown
 Vendor: Ghostgum Software Pty Ltd
 Packager: Russell Lang <gsview@ghostgum.com.au>
 Requires: ghostscript >= 7.00
-BuildRoot: /var/tmp/gsview-root
+BuildRoot: %{_tmppath}/%{name}-%{version}
+
+%{!?_applnkdir: %define _applnkdir /etc/X11/applnk}
+%{!?_icondir: %define _icondir /usr/share/pixmaps}
 
 %description
 GSview is a graphical interface for Ghostscript.
@@ -39,44 +42,66 @@ mkdir $RPM_BUILD_DIR/gsview-%{version}
 #
 # unpack main sources
 cd $RPM_BUILD_DIR/gsview-%{version}
-unzip -a $RPM_SOURCE_DIR/gsv40src.zip
+unzip -a %SOURCE0
 unzip -a epstool.zip
 unzip -a pstotext.zip
-unzip -a src.zip
+# Must convert all files because Greek language is considered binary
+unzip -aa src.zip
+# Files in the binary directory may or may not be binary
+unzip -a -o src.zip "src/binary/*"
 
 %build
 cd $RPM_BUILD_DIR/gsview-%{version}/src
-make -f gvx.mak RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
+make -f gvx.mak RPM_OPT_FLAGS="$RPM_OPT_FLAGS" \
+        GSVIEW_BASE=%{_prefix}          \
+        GSVIEW_BINDIR=%{_bindir}        \
+        GSVIEW_MANDIR=%{_mandir}        \
+        GSVIEW_DOCPATH=%{_docdir}       \
+        GSVIEW_ETCPATH=%{_sysconfdir}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/usr/{bin,man}
-mkdir -p $RPM_BUILD_ROOT/usr/share/doc
-mkdir -p $RPM_BUILD_ROOT/etc/gsview
-cd $RPM_BUILD_DIR/gsview-%{version}/src
-make -f gvx.mak prefix=$RPM_BUILD_ROOT install
-strip $RPM_BUILD_ROOT/usr/bin/gsview
-strip $RPM_BUILD_ROOT/usr/bin/pstotext
-strip $RPM_BUILD_ROOT/usr/bin/epstool
+install -d $RPM_BUILD_ROOT%{_bindir}
+install -d $RPM_BUILD_ROOT%{_mandir}
+install -d $RPM_BUILD_ROOT%{_docdir}
+install -d $RPM_BUILD_ROOT%{_sysconfdir}
+install -d $RPM_BUILD_ROOT%{_applnkdir}/Graphics
+install -d $RPM_BUILD_ROOT%{_icondir}/
 
+cd $RPM_BUILD_DIR/gsview-%{version}/src
+make -f gvx.mak install \
+        GSVIEW_BASE=$RPM_BUILD_ROOT%{_prefix}           \
+        GSVIEW_BINDIR=$RPM_BUILD_ROOT%{_bindir}         \
+        GSVIEW_MANDIR=$RPM_BUILD_ROOT%{_mandir}         \
+        GSVIEW_DOCPATH=$RPM_BUILD_ROOT%{_docdir}        \
+        GSVIEW_ETCPATH=$RPM_BUILD_ROOT%{_sysconfdir}
+
+# desktop/icon files
+install gvxdesk.txt $RPM_BUILD_ROOT%{_applnkdir}/Graphics/gsview.desktop
+install binary/gsview48.png  $RPM_BUILD_ROOT%{_icondir}/gsview.png
+
+%clean
+rm -rf $RPM_BUILD_DIR/%{name}-%{version}
+rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-, root, root)
-%docdir /usr/share/doc/gsview-%{version}
-/usr/share/doc/gsview-%{version}
-%dir /etc/gsview
-%config /etc/gsview/printer.ini
-/usr/bin/epstool
-/usr/bin/gsview
-/usr/bin/gsview-help
-/usr/bin/pstotext
-%dir /usr/man
-%dir /usr/man/man1
-# Something is automatically compressing this file between the 
-# time we install it and the time it gets added to the RPM.
-/usr/man/man1/pstotext.1.gz
+%doc %{_docdir}/*
+%{_bindir}/*
+%dir %{_sysconfdir}/gsview
+%config %{_sysconfdir}/gsview/printer.ini
+%{_mandir}/man*/*
+%{_applnkdir}/Graphics/gsview.desktop
+%{_icondir}/gsview.png
+
 
 %changelog
+* Thu Nov 22 2001 Russell Lang <gsview@ghostgum.com.au>
+- GSview 4.1 release
+* Sat Oct 20 2001 Russell Lang <gsview@ghostgum.com.au>
+- GSview 4.05 beta release
+  Use RPM macros as proposed by Rex Dieter.
+  Install icon and desktop files.
 * Sat Jun 02 2001 Russell Lang <gsview@ghostgum.com.au>
 - GSview 4.0 release
   Mark printer.ini an config file and the documentation files

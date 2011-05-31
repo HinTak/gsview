@@ -35,12 +35,13 @@
 #ifdef BETA
 #include <time.h>
 #endif
+extern "C" {
 #include "gvcfile.h"
+BOOL find_gs(char *gspath, int len, int minver, BOOL bDLL); /* gvwgsver.cpp */
+}
 #include "gvwdib.h"
 #include "gvwpdib.h"
 
-// in gvwgsver.cpp
-BOOL find_gs(char *gspath, int len, int minver, BOOL bDLL);
 
 HANDLE hPipeRd; 	/* We read printer output from this one */
 HANDLE hPipeWr;
@@ -409,10 +410,17 @@ BOOL process_args(GSPRINT_OPTION *opt)
 	}
 	else {
 	    // Something for Ghostscript
-	    if (strlen(thisarg) + 3 < 
+	    if (strlen(thisarg) + 5 < 
 		sizeof(opt->options) - strlen(opt->options) ) {
 		strcat(opt->options, " ");
-		strcat(opt->options, thisarg);
+		if ((thisarg[0] != '\042') && (thisarg[1] != '-')) {
+		    /* filename, not quoted */
+		    strcat(opt->options,"\042");
+		    strcat(opt->options, thisarg);
+		    strcat(opt->options,"\042");
+		}
+		else 
+		    strcat(opt->options, thisarg);
 	    }
 	    else  {
 		fprintf(stdout, "Argument too long: \042%s\042\n", thisarg);
@@ -429,8 +437,8 @@ BOOL process_args(GSPRINT_OPTION *opt)
 	if (*thisarg)
 	    thisarg = thisarg + strlen(thisarg) + 1;
     }
-    return TRUE;
-}
+    return TRUE; 
+} 
 
 void
 write_error(DWORD err)
@@ -971,7 +979,7 @@ int main(int argc, char *argv[])
     _beginthread(CheckProcess, 32768, NULL);
 #endif
 
-    CFile *pFile = new CFile((int)hPipeRd);
+    GFile *pFile = gfile_open_handle((int)hPipeRd);
 
     // now that program is running, we can close our copy of
     // the pipe write handle
@@ -1005,7 +1013,7 @@ int main(int argc, char *argv[])
 	    // read a scan line
 	    length = printdib.m_bytewidth;
 	    p = pLine;
-	    while (length && (dwRead = pFile->Read(p, length)) != 0) {
+	    while (length && (dwRead = gfile_read(pFile, p, length)) != 0) {
 		length -= dwRead;
 		p += dwRead;
 	    }
@@ -1021,10 +1029,8 @@ int main(int argc, char *argv[])
 
     EndDoc(hdc);
     DeleteDC(hdc);
-    pFile->Close();
+    gfile_close(pFile);
     Sleep(2000);
-
-    delete pFile;
 
     return 0;
 }

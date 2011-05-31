@@ -71,21 +71,21 @@ $(LIBDIR)\c$(MODEL)
 !
 !endif
 
-epstool.obj: epstool.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h ../src/gvceps.cpp
-	$(CC) -c $(CFLAGS) -oepstool.obj epstool.cpp
+epstool.obj: epstool.c epstool.h ../src/gvcdsc.h ../src/gvcfile.h ../src/gvceps.c
+	$(CC) -c $(CFLAGS) -oepstool.obj epstool.c
 
 
-gvcdsc.obj: ../src/gvcdsc.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
-	$(CC) -c $(CFLAGS) -ogvcdsc.obj ../src/gvcdsc.cpp
+gvcdsc.obj: ../src/gvcdsc.c epstool.h ../src/gvcdsc.h ../src/gvcfile.h
+	$(CC) -c $(CFLAGS) -ogvcdsc.obj ../src/gvcdsc.c
 
-gvcfile.obj: ../src/gvcfile.cpp ../src/gvcfile.h
-	$(CC) -c $(CFLAGS) -ogvcfile.obj ../src/gvcfile.cpp
+gvcfile.obj: ../src/gvcfile.c ../src/gvcfile.h
+	$(CC) -c $(CFLAGS) -ogvcfile.obj ../src/gvcfile.c
 
-gvceps.obj: ../src/gvceps.cpp epstool.h ../src/gvcdsc.h ../src/gvcfile.h
-	$(CC) -c $(CFLAGS) -ogvceps.cpp ../src/gvceps.cpp
+gvceps.obj: ../src/gvceps.c epstool.h ../src/gvcdsc.h ../src/gvcfile.h
+	$(CC) -c $(CFLAGS) -ogvceps.c ../src/gvceps.c
 
-gvwgsver.obj: ../src/gvwgsver.cpp
-	$(CC) -c $(CFLAGS) -ogvwgsver.cpp ../src/gvwgsver.cpp
+gvwgsver.obj: ../src/gvwgsver.c
+	$(CC) -c $(CFLAGS) -ogvwgsver.c ../src/gvwgsver.c
 
 
 

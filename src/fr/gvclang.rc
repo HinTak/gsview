@@ -44,6 +44,8 @@ END
 
 STRINGTABLE
 BEGIN
+	GSVS(IDS_LANGUAGE, AAFRANCAIS)
+	GSVS(IDS_ELANGUAGE, "French")
 	GSVS(IDS_FILE, "Fichier : ")
 	GSVS(IDS_NOFILE, "Aucun fichier ouvert")
 	GSVS(IDS_PAGE, "Page : ")
@@ -248,6 +250,7 @@ BEGIN
 	GSVS(IDS_PRN_SETTINGS, "Settings")
 	GSVS(IDS_PRN_HELP, AAHELP)			// "Help"
 	GSVS(IDS_PRN_SELECTPAGES, "Select Pages")
+	GSVS(IDS_ALL, AAALL)
 	// PageSize policies
 	GSVS(IDS_PAGESIZE_VARIABLE, "Variable Page Size") /* ENGLISH */
 	GSVS(IDS_PAGESIZE_FIXED, "Fixed Page Size") /* ENGLISH */
@@ -281,51 +284,67 @@ STRINGTABLE
 BEGIN
 	GSVS(CDSC_RESOURCE_BBOX, "This line is incorrect.\012The bounding box must be in integer coordinates,\012not floating point. A floating point bounding box should\012be specified using %%HiResBoundingBox:\012A %%BoundingBox: should still be provided with integer values.\012")
 	GSVS(CDSC_RESOURCE_BBOX2, "\012'OK' will convert the coordinates to integers,\012rounding them outwards.\012'Cancel' will ignore this line.\012")
+	GSVS(CDSC_RESOURCE_BBOX3, "")
 
 
 	GSVS(CDSC_RESOURCE_EARLY_TRAILER, "The trailer is normally at the end of a document.\012This line was found more than 32k bytes from the end\012of the file.  Trailers are not usually this long.\012It is more likely that another PostScript file has been included,")
 	GSVS(CDSC_RESOURCE_EARLY_TRAILER2, "\012without enclosing it in %%BeginDocument / %%EndDocument.\012\012'OK' will assume this is part of an included file.\012'Cancel' will assume this is the trailer.\012")
+	GSVS(CDSC_RESOURCE_EARLY_TRAILER3, "")
 
 	GSVS(CDSC_RESOURCE_EARLY_EOF, "This line normally occurs at the end of a document.\012This line was found more than 100 bytes from the end\012of the file.\012It is more likely that another PostScript file has been included,")
 	GSVS(CDSC_RESOURCE_EARLY_EOF2, "\012without enclosing it in %%BeginDocument / %%EndDocument.\012\012'OK' will assume this is part of an included file.\012'Cancel' will assume this is part of the trailer.\012")
+	GSVS(CDSC_RESOURCE_EARLY_EOF3, "")
 
 	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER, "This %%Page: line occurred in the trailer, which is not legal.\012EPS files should be encapsulated in %%BeginDocument / %%EndDocument.\012If is possible that an EPS file was incorrectly encapsulated,")
 	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER2, "\012and that we have been confused by the %%Trailer in an EPS file.\012\012'OK' will process more pages.\012'Cancel' will ignore this page comment.\012")
+	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER3, "")
 
 	GSVS(CDSC_RESOURCE_PAGE_ORDINAL, "This line is incorrect.\012The two arguments should be a label and an ordinal.\012The ordinal should be 1 for the first page and should\012increase by 1 for each following page.\012The page ordinal is missing or is not in sequence.\012\012It is likely that ")
 	GSVS(CDSC_RESOURCE_PAGE_ORDINAL2, "this line is part of an included file that\012was not enclosed in %%BeginDocument / %%EndDocument.\012\012'OK' will ignore this page, assuming it is part of an\012incorrectly encapsulated EPS file.\012'Cancel' will treat this as a valid page\012")
+	GSVS(CDSC_RESOURCE_PAGE_ORDINAL3, "")
 
 	GSVS(CDSC_RESOURCE_PAGES_WRONG, "%%Pages: doesn't match number of %%Page:\012\012'OK' will adjust the page count to match the number of %%Page:\012comments found.\012'Cancel' will set the page count from %%Pages:\012")
 	GSVS(CDSC_RESOURCE_PAGES_WRONG2,"")
+	GSVS(CDSC_RESOURCE_PAGES_WRONG3,"")
 
 	GSVS(CDSC_RESOURCE_EPS_NO_BBOX, "This EPS file is missing the required %%BoundingBox:\012See the GSview help for details of how to add/adjust the\012bounding box.\012\012'OK' will assume this as an EPS file.\012'Cancel' will assume this is NOT an EPS file.\012")
 	GSVS(CDSC_RESOURCE_EPS_NO_BBOX2, "")
+	GSVS(CDSC_RESOURCE_EPS_NO_BBOX3, "")
 
 	GSVS(CDSC_RESOURCE_EPS_PAGES, "EPS files may have 0 or 1 pages.  This 'EPS' file has\012more than this and so is not an EPS file.\012You cannot use `Print To` `Encapsulated PostScript File` for\012printing multipage files.  The correct method is to connect")
 	GSVS(CDSC_RESOURCE_EPS_PAGES2, "\012the printer to FILE: or to select 'Print to File'.\012\012'OK' will assume this as an EPS file.\012'Cancel' will assume this is NOT an EPS file.\012")
+	GSVS(CDSC_RESOURCE_EPS_PAGES3, "")
 
 	GSVS(CDSC_RESOURCE_NO_MEDIA, "Media was specified with %%DocumentMedia:, but no default.\012media was specified with %%PageMedia:.\012\012'OK' will set the default media to the first listed media.\012'Cancel' will not set a default media.\012") 
 	GSVS(CDSC_RESOURCE_NO_MEDIA2, "") 
+	GSVS(CDSC_RESOURCE_NO_MEDIA3, "") 
 
 	GSVS(CDSC_RESOURCE_ATEND, "This line is incorrect.\012To defer a value, you must use '(atend)', not 'atend'\012\012'OK' will assume that (atend) was meant.\012'Cancel' will ignore this line.\012")
 	GSVS(CDSC_RESOURCE_ATEND2, "")
+	GSVS(CDSC_RESOURCE_ATEND3, "")
 
 	GSVS(CDSC_RESOURCE_DUP_COMMENT, "This comment is duplicated in the header, which is unnecessary.\012The first occurence of a header line takes precedence.\012\012'OK' or 'Cancel' will ignore the duplicate line.\012")
 	GSVS(CDSC_RESOURCE_DUP_COMMENT2, "")
+	GSVS(CDSC_RESOURCE_DUP_COMMENT3, "")
 
 	GSVS(CDSC_RESOURCE_DUP_TRAILER, "This comment is duplicated in the trailer, which is unnecessary.\012The last occurence of a trailer line takes precedence.\012\012'OK' or 'Cancel' will use the duplicate line.\012")
 	GSVS(CDSC_RESOURCE_DUP_TRAILER2, "")
+	GSVS(CDSC_RESOURCE_DUP_TRAILER3, "")
 
 	GSVS(CDSC_RESOURCE_BEGIN_END, "The number of Begin and End comments do not match.\012\012'OK' or 'Cancel' will ignore this mismatch.\012")
 	GSVS(CDSC_RESOURCE_BEGIN_END2, "")
+	GSVS(CDSC_RESOURCE_BEGIN_END3, "")
 
 	GSVS(CDSC_RESOURCE_BAD_SECTION, "This line is incorrect because it should not occur\012within a page.  This probably indicates that an EPS file\012was incorrectly encapsulated.  The line will be ignored.\012\012'OK' or 'Cancel' will ignore this line.\012")
 	GSVS(CDSC_RESOURCE_BAD_SECTION2, "")
+	GSVS(CDSC_RESOURCE_BAD_SECTION3, "")
 
 	GSVS(CDSC_RESOURCE_LONG_LINE, "\012\012Lines in DSC documents must be shorter than 255 characters.\012") 
 	GSVS(CDSC_RESOURCE_LONG_LINE2, "") 
+	GSVS(CDSC_RESOURCE_LONG_LINE3, "") 
 
 	GSVS(CDSC_RESOURCE_INCORRECT_USAGE, "This DSC comment line is incorrect.\012Please refer to the DSC specification.\012\012'OK' or 'Cancel' will ignore this mismatch.\012")
 	GSVS(CDSC_RESOURCE_INCORRECT_USAGE2, "")
+	GSVS(CDSC_RESOURCE_INCORRECT_USAGE3, "")
 
 END

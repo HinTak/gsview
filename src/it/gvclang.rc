@@ -45,6 +45,8 @@ END
 
 STRINGTABLE
 BEGIN
+	GSVS(IDS_LANGUAGE, AAITALIANO)
+	GSVS(IDS_ELANGUAGE, "Italian")
 	GSVS(IDS_FILE, "File: ")
 	GSVS(IDS_NOFILE, "Nessun File")
 	GSVS(IDS_PAGE, "Pagina: ")
@@ -249,6 +251,7 @@ BEGIN
 	GSVS(IDS_PRN_SETTINGS, "Impostazioni")
 	GSVS(IDS_PRN_HELP, AAHELP)			// "Help in linea"
 	GSVS(IDS_PRN_SELECTPAGES, "Seleziona Pagine")
+	GSVS(IDS_ALL, AAALL)
 	// PageSize policies
 	GSVS(IDS_PAGESIZE_VARIABLE, "Variable Page Size") /* ENGLISH */
 	GSVS(IDS_PAGESIZE_FIXED, "Fixed Page Size") /* ENGLISH */
@@ -282,72 +285,86 @@ BEGIN
 "Questa linea non è corretta.\012I limiti del box devono avere le ccordinate espresse in numeri interi,\012non decimali. Un limite del box espresso in numeri decimali dovrebbe\012essere specificando usando %%HiResBoundingBox:\012Un %%BoundingBox: ")
 	GSVS(CDSC_RESOURCE_BBOX2,
 "dovrebbe essere impostato con un valore espresso in un numero intero.\012\012'OK' farà in modo che le coordinate siano convertite in numeri interi\012tramite un arrotondamento.\012'Cancella' farà in modo che questa linea sia ignorata.\012")
+	GSVS(CDSC_RESOURCE_BBOX3, "")
 
 	GSVS(CDSC_RESOURCE_EARLY_TRAILER,
 "Il 'trailer' è solitamente alla fine del documento,\012ma questa linea è stata trovata a più di 32k bytes dalla fine\012del file.  I 'Trailers' non hanno normalmente questa lunghezza.\012E' molto probabile che un altro file PostScript sia stato incluso")
 	GSVS(CDSC_RESOURCE_EARLY_TRAILER2,
 "\012senza essere stato racchiuso in %%BeginDocument / %%EndDocument.\012\012'OK' farà in modo che la riga sia ritenuta come parte di un file incluso.\012'Cancella' farà in modo che la riga sia ritenuta come il 'trailer'.\012")
+	GSVS(CDSC_RESOURCE_EARLY_TRAILER3, "")
 
 	GSVS(CDSC_RESOURCE_EARLY_EOF,
 "Questa linea si trova normalmente alla fine del documento,\012ma è stata trovata a più di 100 bytes dalla fine\012del file.\012E' molto probabile che un altro file PostScript sia stato incluso\012senza essere stato racchiuso in %%BeginDocument / %%EndDocument.\012\012")
 	GSVS(CDSC_RESOURCE_EARLY_EOF2,
 "'OK' farà in modo che la riga sia ritenuta come parte di un file incluso.\012'Cancella' farà in modo che la riga sia ritenuta come parte del 'trailer'.\012")
+	GSVS(CDSC_RESOURCE_EARLY_EOF3, "")
 
 	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER,
 "Questa linea %%Page: si trova nel 'trailer' e questo non è corretto.\012I file EPS dovrebbero essere incapsulati in %%BeginDocument / %%EndDocument.\012E' possibile che un file EPS sia stato incapsulato non correttamente,\012e quello sia stato ")
 	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER2,
 "confuso dal %%Trailer in un file EPS.\012\012'OK' per processare pagine ulteriori.\012'Cancella' per ignorare questo commento di pagina.\012")
+	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER3, "")
 
 	GSVS(CDSC_RESOURCE_PAGE_ORDINAL,
 "Questa linea non è corretta.\012I due argomenti dovrebbero essere una etichetta ed un numero ordinale.\012Il numero ordinale dovrebbe essere 1 per la prima pagina e dovrebbe\012incrementare di 1 per ogni pagina seguente.\012Il numero ordinale di pagina ")
 	GSVS(CDSC_RESOURCE_PAGE_ORDINAL2,
 "è mancante oppure non in sequenza.\012\012E' probabile che questa linea sia parte di un file incluso che\012non è stato incapsulato in %%BeginDocument / %%EndDocument.\012\012'OK' farà in modo che questa pagina sia ignorata, ritenendola parte di un")
-/* This doesn't fit
-"\012file EPS incapsulato scorrettamente.\012'Cancella' farà in modo che questa pagina sia considerata valida\012"
-*/
+	GSVS(CDSC_RESOURCE_PAGE_ORDINAL3, "\012file EPS incapsulato scorrettamente.\012'Cancella' farà in modo che questa pagina sia considerata valida\012")
+
 	GSVS(CDSC_RESOURCE_PAGES_WRONG,
 "%%Pages: non corrisponde al numero di %%Page:\012\012'OK' farà in modo che il conteggio delle pagine venga fatto corrispondere\012al numero dei commenti %%Page: trovati.\012'Cancella' farà in modo che il conteggio delle pagine sia impostato in base ")
 	GSVS(CDSC_RESOURCE_PAGES_WRONG2, "al %%Pages:\012")
+	GSVS(CDSC_RESOURCE_PAGES_WRONG3,"")
 
 	GSVS(CDSC_RESOURCE_EPS_NO_BBOX,
 "Questo file EPS manca del %%BoundingBox: richiesto.\012Vedere l'help di GSview per informazioni su come aggiungere/modificare i\012limiti del box.\012\012'OK' farà in modo che questo file sia ritenuto un EPS.\012'Cancella' farà in modo che questo ")
 	GSVS(CDSC_RESOURCE_EPS_NO_BBOX2, "file non sia considerato un EPS.\012")
+	GSVS(CDSC_RESOURCE_EPS_NO_BBOX3, "")
 
 	GSVS(CDSC_RESOURCE_EPS_PAGES,
 "I files EPS devono avere 0 oppure 1 pagina.  Questo file 'EPS' ne ha\012di più e pertanto non è un file EPS.\012Non è possibile usare `Stampa Su` `Encapsulated PostScript File` per\012la stampa di file multipagina.  Il metodo corretto è di connettere")
 	GSVS(CDSC_RESOURCE_EPS_PAGES2,
 "\012la stampante a FILE: oppure selezionare 'Stampa su File'.\012\012'OK' farà in modo che questo file sia ritenuto un EPS.\012'Cancella' farà in modo che questo file non sia considerato un EPS.\012")
+	GSVS(CDSC_RESOURCE_EPS_PAGES3, "")
 
 	GSVS(CDSC_RESOURCE_NO_MEDIA,
 "La carta è stata impostata con %%DocumentMedia:, ma nessuna carta predefinita\012è stata impostata con %%PageMedia:.\012\012'OK' farà in modo che la carta predefinita sia impostata con la prima voce dell'elenco.\012'Cancella' non imposterà nessuna carta predefinita.\012")
 	GSVS(CDSC_RESOURCE_NO_MEDIA2, "")
+	GSVS(CDSC_RESOURCE_NO_MEDIA3, "") 
 
 	GSVS(CDSC_RESOURCE_ATEND,
 "Questa linea non è corretta.\012Per rimandare un valore, deve essere usato '(atend)' e non 'atend'\012\012'OK' sarà ritenuto che si intendesse usare un (atend).\012'Cancella' ignorerà questa linea.\012")
 	GSVS(CDSC_RESOURCE_ATEND2, "")
+	GSVS(CDSC_RESOURCE_ATEND3, "")
 
 	GSVS(CDSC_RESOURCE_DUP_COMMENT,
 "Questo commento è duplicato in testata e pertanto è superfluo.\012La prima occorrenza trovata della linea di testata prende la precedenza.\012\012'OK' oppure 'Cancella' ignoreranno in ogni caso la linea duplicata.\012")
 	GSVS(CDSC_RESOURCE_DUP_COMMENT2, "")
+	GSVS(CDSC_RESOURCE_DUP_COMMENT3, "")
 
 	GSVS(CDSC_RESOURCE_DUP_TRAILER,
 "Questo commento è duplicato nel 'trailer' e pertanto è superfluo.\012L'ultima occorrenza trovata della linea del 'trailer' prende la precedenza.\012\012'OK' oppure 'Cancella' ignoreranno in ogni caso la linea duplicata.\012")
 	GSVS(CDSC_RESOURCE_DUP_TRAILER2, "")
+	GSVS(CDSC_RESOURCE_DUP_TRAILER3, "")
 
 	GSVS(CDSC_RESOURCE_BEGIN_END,
 "Il numero dei commenti Begin e End non corrisponde.\012\012'OK' oppure 'Cancella' ignoreranno in ogni caso questo accoppiamento inadeguato.\012")
 	GSVS(CDSC_RESOURCE_BEGIN_END2, "")
+	GSVS(CDSC_RESOURCE_BEGIN_END3, "")
 
 	GSVS(CDSC_RESOURCE_BAD_SECTION,
 "Questa linea è scorretta perchè non dovrebbe comparire all'interno\012di una pagina.  Questo indica probabilmente che un file EPS\012è stato incapsulato scorrettamente.  Questa linea sarà ignorata.\012\012'OK' oppure 'Cancella' ignoreranno in ogni caso questa linea.\012")
 	GSVS(CDSC_RESOURCE_BAD_SECTION2, "")
+	GSVS(CDSC_RESOURCE_BAD_SECTION3, "")
 
 	GSVS(CDSC_RESOURCE_LONG_LINE,
 "\012\012Le linee nei documenti DSC devono essere più corte di 255 caratteri.\012")
 	GSVS(CDSC_RESOURCE_LONG_LINE2, "")
+	GSVS(CDSC_RESOURCE_LONG_LINE3, "") 
 
 	GSVS(CDSC_RESOURCE_INCORRECT_USAGE,
 "Questa linea di commento DSC non è corretta.\012Si prega di fare riferimento alle specifiche DSC.\012\012'OK' oppure 'Cancella' ignoreranno in ogni caso questo accoppiamento inadeguato.\012")
 	GSVS(CDSC_RESOURCE_INCORRECT_USAGE2, "")
+	GSVS(CDSC_RESOURCE_INCORRECT_USAGE3, "")
 END
 

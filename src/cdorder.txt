@@ -1,5 +1,5 @@
 =================================================================
-Order for CD-ROM containing GSview and Aladdin Ghostscript.
+Order for CD-ROM containing GSview and AFPL Ghostscript.
 =================================================================
 
 This offer is valid until 30 June 2002.

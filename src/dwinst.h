@@ -59,7 +59,7 @@ public:
 
 	BOOL WriteUninstall(const char *szProg, BOOL bNoCopy);
 	BOOL MakeLog(void);
-	void Uninstall(const char *szProg);
+	void Uninstall(const char *szProg, BOOL bSilent);
 
 	void CleanUp(void);
 

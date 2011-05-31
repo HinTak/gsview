@@ -40,24 +40,51 @@ INSTALL_EXE=install -m 755
 CDEBUG=-g
 LDEBUG=
 
-CFLAGS=-O -Wall -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wtraditional -fno-builtin -fno-common -Wcast-qual -Wwrite-strings $(CDEBUG) -DX11 -DUNIX -DNONAG $(RPM_OPT_FLAGS) `gtk-config --cflags`
-LFLAGS=$(LDEBUG) `gtk-config --libs` -lpthread
+# Linux
+XINCLUDE=
+PFLAGS=-DMULTITHREAD
+PLINK=-lpthread -lrt
+
+# SunOS 5.7
+#XINCLUDE=-I/usr/openwin/share/lib
+#PFLAGS=-DMULTITHREAD
+#PLINK=-lpthread -lrt
+
+# SGI Irix 6.2
+# without MULTITHREAD
+#XINCLUDE=-I/usr/freeware/include
+#PFLAGS=
+#PLINK=-L/usr/freeware/lib32 -rpath /use/freeware/lib32 -L/usr/lib32
+
+# SGI Irix 6.5
+# mutlithreaded, but can't debug with gdb
+#XINCLUDE=-I/usr/freeware/include
+#PFLAGS=-DMULTITHREAD
+#PLINK=-L/usr/freeware/lib32 -rpath /use/freeware/lib32 -L/usr/lib32 -lpthread
+
+# Other possible options are -Wtraditional
+# Compiler flags for C and C++ files.
+CFLAGS=-O -Wall -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -fno-builtin -fno-common -Wcast-qual -Wwrite-strings $(CDEBUG) -DX11 -DUNIX -DNONAG $(RPM_OPT_FLAGS) `gtk-config --cflags` $(XINCLUDE) $(PFLAGS)
+
+# Linker flags
+LFLAGS=$(LDEBUG) $(PLINK) `gtk-config --libs`
 
 OBJS=gvx.$(OBJ) gvxdlg.$(OBJ) gvxdisp.$(OBJ) gvxedit.$(OBJ) gvxeps.$(OBJ)\
    gvxgsver.$(OBJ) gvxinit.$(OBJ) gvxmeas.$(OBJ) gvxmisc.$(OBJ) gvxprn.$(OBJ)\
-   gvccmd.$(OBJ) gvcdisp.$(OBJ) gvceps.$(OBJ) gvcinit.$(OBJ) gvcbeta.$(OBJ)\
-   gvcmeas.$(OBJ) gvcmisc.$(OBJ) gvcprf.$(OBJ) gvcprn.$(OBJ) gvctext.$(OBJ)\
-   gvxdll.$(OBJ) gvcdll.$(OBJ) gvcpdf.$(OBJ)\
+   gvccmd.$(OBJ) gvcdisp.$(OBJ) gvcedit.$(OBJ) gvceps.$(OBJ) gvcfile.$(OBJ) \
+   gvcinit.$(OBJ) gvcbeta.$(OBJ) gvcmeas.$(OBJ) gvcmisc.$(OBJ) gvcprf.$(OBJ) \
+   gvcprn.$(OBJ) gvctext.$(OBJ) gvxdll.$(OBJ) gvcdll.$(OBJ) gvcpdf.$(OBJ)\
    dscparse.$(OBJ) dscutil.$(OBJ)\
    gvcreg.$(OBJ) gvxreg.$(OBJ) gvxres.$(OBJ)\
-   gvxl_de.$(OBJ) gvxl_en.$(OBJ) gvxl_es.$(OBJ) gvxl_fr.$(OBJ) gvxl_it.$(OBJ)\
+   gvxl_de.$(OBJ) gvxl_en.$(OBJ) gvxl_es.$(OBJ) gvxl_fr.$(OBJ)\
+   gvxl_gr.$(OBJ) gvxl_it.$(OBJ) gvxl_nl.$(OBJ)\
    cdll.$(OBJ) cimg.$(OBJ) cview.$(OBJ)
-HDRS=gsvver.h gvx.h dscparse.h gvcfn.h gvcver.h gvxres.h
+HDRS=gsvver.h gvx.h dscparse.h gvcfn.h gvcver.h gvxres.h gvcfile.h gvctype.h gvcedit.h
 
 all: gsview html epstool pstotext
 
-#.cpp.$(OBJ):
-#	$(COMP) $(CFLAGS) -c $*.cpp
+#.c.$(OBJ):
+#	$(COMP) $(CFLAGS) -c $*.c
 
 ECHOGSV=./echogsv
 
@@ -66,24 +93,23 @@ include gvcver.mak
 GSVIEW_DOCDIR=$(GSVIEW_DOCPATH)/gsview-$(GSVIEW_DOT_VERSION)
 
 install: all
-	-mkdir $(prefix)/usr
-	chmod 755 $(prefix)/usr
-	-mkdir $(GSVIEW_BASE)
+	-mkdir -p $(GSVIEW_BASE)
 	chmod 755 $(GSVIEW_BASE)
-	-mkdir $(GSVIEW_BINDIR)
+	-mkdir -p $(GSVIEW_BINDIR)
 	chmod 755 $(GSVIEW_BINDIR)
 	$(INSTALL_EXE) gsview $(GSVIEW_BINDIR)/gsview
 	$(INSTALL_EXE) gvxhelp.txt $(GSVIEW_BINDIR)/gsview-help
 	$(INSTALL_EXE) ../pstotext/pstotext $(GSVIEW_BINDIR)/pstotext
 	$(INSTALL_EXE) ../epstool/epstool $(GSVIEW_BINDIR)/epstool
-	-mkdir $(GSVIEW_MANDIR)
+	-mkdir -p $(GSVIEW_MANDIR)
 	chmod 755  $(GSVIEW_MANDIR)
-	-mkdir $(GSVIEW_MANDIR)/man1
+	-mkdir -p $(GSVIEW_MANDIR)/man1
 	chmod 755  $(GSVIEW_MANDIR)/man1
 	$(INSTALL) ../pstotext/pstotext.1 $(GSVIEW_MANDIR)/man1/pstotext.1
-	-mkdir $(GSVIEW_DOCPATH)
+	$(INSTALL) gsview.1 $(GSVIEW_MANDIR)/man1/gsview.1
+	-mkdir -p $(GSVIEW_DOCPATH)
 	chmod 755 $(GSVIEW_DOCPATH)
-	-mkdir $(GSVIEW_DOCDIR)
+	-mkdir -p $(GSVIEW_DOCDIR)
 	chmod 755  $(GSVIEW_DOCDIR)
 	$(INSTALL) gsview.css $(GSVIEW_DOCDIR)/gsview.css
 	$(INSTALL) cdorder.txt $(GSVIEW_DOCDIR)/cdorder.txt
@@ -94,18 +120,29 @@ install: all
 	$(INSTALL) gvxen.htm  $(GSVIEW_DOCDIR)/gvxen.htm
 	$(INSTALL) gvxes.htm  $(GSVIEW_DOCDIR)/gvxes.htm
 	$(INSTALL) gvxfr.htm  $(GSVIEW_DOCDIR)/gvxfr.htm
+	$(INSTALL) gvxgr.htm  $(GSVIEW_DOCDIR)/gvxgr.htm
 	$(INSTALL) gvxit.htm  $(GSVIEW_DOCDIR)/gvxit.htm
+	$(INSTALL) gvxnl.htm  $(GSVIEW_DOCDIR)/gvxnl.htm
 	$(INSTALL) ../epstool/epstool.htm $(GSVIEW_DOCDIR)/epstool.htm
-	-mkdir $(GSVIEW_ETCPATH)
+	-mkdir -p $(GSVIEW_ETCPATH)
 	chmod 755  $(GSVIEW_ETCPATH)
-	-mkdir $(GSVIEW_ETCPATH)/gsview
+	-mkdir -p $(GSVIEW_ETCPATH)/gsview
 	chmod 755  $(GSVIEW_ETCPATH)/gsview
 	$(INSTALL) printer.ini  $(GSVIEW_ETCPATH)/gsview/printer.ini
+
+tar:
+	rm -rf /var/tmp/gsview
+	$(MAKE)
+	$(MAKE) prefix=/var/tmp/gsview install
+	cd /var/tmp/gsview; tar -cvf ~/gsview.tar *
 
 ./echogsv: echogsv.c
 	$(COMP) -o echogsv echogsv.c
 
-epstool: ../epstool/epstool.cpp ../epstool/epstool.h gvceps.cpp gvceps.h dscparse.cpp
+./codepage: codepage.c
+	$(COMP) -o codepage codepage.c
+
+epstool: ../epstool/epstool.c ../epstool/epstool.h gvceps.c gvceps.h dscparse.c
 	cd ../epstool
 	$(MAKE) -C ../epstool -f makefile.unx
 	cd ../src
@@ -117,124 +154,142 @@ pstotext: ../pstotext/bundle.c ../pstotext/bundle.h ../pstotext/main.c \
 	$(MAKE) -C ../pstotext -f Makefile
 	cd ../src
 
-gvx.$(OBJ): gvx.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvx.cpp
+gvx.$(OBJ): gvx.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvx.c
 
-gvxdlg.$(OBJ): gvxdlg.cpp gvcrc.h $(HDRS)
-	$(COMP) $(CFLAGS) -c gvxdlg.cpp
+gvxdlg.$(OBJ): gvxdlg.c gvcrc.h $(HDRS)
+	$(COMP) $(CFLAGS) -c gvxdlg.c
 
-gvxdll.$(OBJ): gvxdll.cpp gvcrc.h $(HDRS)
-	$(COMP) $(CFLAGS) -c gvxdll.cpp
+gvxdll.$(OBJ): gvxdll.c gvcrc.h $(HDRS)
+	$(COMP) $(CFLAGS) -c gvxdll.c
 
-gvxdisp.$(OBJ): gvxdisp.cpp  $(HDRS)
-	$(COMP) $(CFLAGS) -c gvxdisp.cpp
+gvxdisp.$(OBJ): gvxdisp.c  $(HDRS)
+	$(COMP) $(CFLAGS) -c gvxdisp.c
 
-gvxedit.$(OBJ): gvxedit.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvxedit.cpp
+gvxedit.$(OBJ): gvxedit.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvxedit.c
 
-gvxeps.$(OBJ): gvxeps.cpp gvceps.h $(HDRS)
-	$(COMP) $(CFLAGS) -c gvxeps.cpp
+gvxeps.$(OBJ): gvxeps.c gvceps.h $(HDRS)
+	$(COMP) $(CFLAGS) -c gvxeps.c
 
-gvxgsver.$(OBJ): gvxgsver.cpp $(HDRS) gvcrc.h
-	$(COMP) $(CFLAGS) -c gvxgsver.cpp
+gvxgsver.$(OBJ): gvxgsver.c $(HDRS) gvcrc.h
+	$(COMP) $(CFLAGS) -c gvxgsver.c
 
-gvxinit.$(OBJ): gvxinit.cpp $(HDRS) gvcrc.h
-	$(COMP) $(CFLAGS) -c gvxinit.cpp
+gvxinit.$(OBJ): gvxinit.c $(HDRS) gvcrc.h
+	$(COMP) $(CFLAGS) -c gvxinit.c
 
-gvxl_de.$(OBJ): de/gvxlang.cpp $(HDRS) gvxlang.h gvxlangh.rc de/gvclang.h de/gvclang.rc  
-	$(COMP) $(CFLAGS) -I. -c -o gvxl_de.$(OBJ) de/gvxlang.cpp
+gvxl_de.$(OBJ): de/gvxlang.c $(HDRS) gvxlang.h gvxlangh.rc de/gvclang.h de/gvclang.rc  
+	$(COMP) $(CFLAGS) -I. -c -o gvxl_de.$(OBJ) de/gvxlang.c
 
-gvxl_en.$(OBJ): en/gvxlang.cpp $(HDRS) gvxlang.h gvxlangh.rc en/gvclang.h en/gvclang.rc  
-	$(COMP) $(CFLAGS) -I. -c -o gvxl_en.$(OBJ) en/gvxlang.cpp
+gvxl_en.$(OBJ): en/gvxlang.c $(HDRS) gvxlang.h gvxlangh.rc en/gvclang.h en/gvclang.rc  
+	$(COMP) $(CFLAGS) -I. -c -o gvxl_en.$(OBJ) en/gvxlang.c
 
-gvxl_es.$(OBJ): es/gvxlang.cpp $(HDRS) gvxlang.h gvxlangh.rc es/gvclang.h es/gvclang.rc  
-	$(COMP) $(CFLAGS) -I. -c -o gvxl_es.$(OBJ) es/gvxlang.cpp
+gvxl_es.$(OBJ): es/gvxlang.c $(HDRS) gvxlang.h gvxlangh.rc es/gvclang.h es/gvclang.rc  
+	$(COMP) $(CFLAGS) -I. -c -o gvxl_es.$(OBJ) es/gvxlang.c
 
-gvxl_fr.$(OBJ): fr/gvxlang.cpp $(HDRS) gvxlang.h gvxlangh.rc fr/gvclang.h fr/gvclang.rc  
-	$(COMP) $(CFLAGS) -I. -c -o gvxl_fr.$(OBJ) fr/gvxlang.cpp
+gvxl_fr.$(OBJ): fr/gvxlang.c $(HDRS) gvxlang.h gvxlangh.rc fr/gvclang.h fr/gvclang.rc  
+	$(COMP) $(CFLAGS) -I. -c -o gvxl_fr.$(OBJ) fr/gvxlang.c
 
-gvxl_it.$(OBJ): it/gvxlang.cpp $(HDRS) gvxlang.h gvxlangh.rc it/gvclang.h it/gvclang.rc  
-	$(COMP) $(CFLAGS) -I. -c -o gvxl_it.$(OBJ) it/gvxlang.cpp
+gvxl_gr.$(OBJ): gr/gvxlang.c $(HDRS) gvxlang.h gvxlangh.rc gr/gvclang.h gr/gvclang.rc ./codepage
+	./codepage 1253_8859-7 gr/gvxlang.c gvxlang.c
+	./codepage 1253_8859-7 gr/gvclang.h gvclang.h
+	./codepage 1253_8859-7 gr/gvclang.rc gvclang.rc
+	$(COMP) $(CFLAGS) -I. -c -o gvxl_gr.$(OBJ) gvxlang.c
+	-rm gvxlang.c
+	-rm gvclang.h
+	-rm gvclang.rc
 
-gvxmeas.$(OBJ): gvxmeas.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvxmeas.cpp
+gvxl_it.$(OBJ): it/gvxlang.c $(HDRS) gvxlang.h gvxlangh.rc it/gvclang.h it/gvclang.rc  
+	$(COMP) $(CFLAGS) -I. -c -o gvxl_it.$(OBJ) it/gvxlang.c
 
-gvxmisc.$(OBJ): gvxmisc.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvxmisc.cpp
+gvxl_nl.$(OBJ): nl/gvxlang.c $(HDRS) gvxlang.h gvxlangh.rc nl/gvclang.h nl/gvclang.rc  
+	$(COMP) $(CFLAGS) -I. -c -o gvxl_nl.$(OBJ) nl/gvxlang.c
 
-gvxprn.$(OBJ): gvxprn.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvxprn.cpp
+gvxmeas.$(OBJ): gvxmeas.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvxmeas.c
 
-gvxreg.$(OBJ): gvxreg.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvxreg.cpp
+gvxmisc.$(OBJ): gvxmisc.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvxmisc.c
 
-gvxres.$(OBJ): gvxres.cpp $(HDRS) gvxlang.h
-	$(COMP) $(CFLAGS) -c gvxres.cpp
+gvxprn.$(OBJ): gvxprn.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvxprn.c
 
-gvccmd.$(OBJ): gvccmd.cpp gvcrc.h $(HDRS)
-	$(COMP) $(CFLAGS) -c gvccmd.cpp
+gvxreg.$(OBJ): gvxreg.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvxreg.c
 
-gvcdisp.$(OBJ): gvcdisp.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvcdisp.cpp
+gvxres.$(OBJ): gvxres.c $(HDRS) gvxlang.h
+	$(COMP) $(CFLAGS) -c gvxres.c
 
-gvcdll.$(OBJ): gvcdll.cpp gvcrc.h $(HDRS)
-	$(COMP) $(CFLAGS) -c gvcdll.cpp
+gvccmd.$(OBJ): gvccmd.c gvcrc.h $(HDRS)
+	$(COMP) $(CFLAGS) -c gvccmd.c
 
-dscparse.$(OBJ): dscparse.cpp dscparse.h
-	$(COMP) $(CFLAGS) -c dscparse.cpp
+gvcdisp.$(OBJ): gvcdisp.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcdisp.c
 
-dscutil.$(OBJ): dscutil.cpp dscparse.h
-	$(COMP) $(CFLAGS) -c dscutil.cpp
+gvcdll.$(OBJ): gvcdll.c gvcrc.h $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcdll.c
 
-gvcbeta.$(OBJ): gvcbeta.cpp gvcbeta.h $(HDRS)
-	$(COMP) $(CFLAGS) -c gvcbeta.cpp
+dscparse.$(OBJ): dscparse.c dscparse.h
+	$(COMP) $(CFLAGS) -c dscparse.c
 
-gvceps.$(OBJ): gvceps.cpp gvceps.h $(HDRS)
-	$(COMP) $(CFLAGS) -c gvceps.cpp
+dscutil.$(OBJ): dscutil.c dscparse.h
+	$(COMP) $(CFLAGS) -c dscutil.c
 
-gvcinit.$(OBJ): gvcinit.cpp $(HDRS) gvcrc.h
-	$(COMP) $(CFLAGS) -c gvcinit.cpp
+gvcbeta.$(OBJ): gvcbeta.c gvcbeta.h $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcbeta.c
 
-gvcmeas.$(OBJ): gvcmeas.cpp gvcrc.h $(HDRS)
-	$(COMP) $(CFLAGS) -c gvcmeas.cpp
+gvcedit.$(OBJ): gvcedit.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcedit.c
 
-gvcmisc.$(OBJ): gvcmisc.cpp gvcrc.h $(HDRS)
-	$(COMP) $(CFLAGS) -c gvcmisc.cpp
+gvceps.$(OBJ): gvceps.c gvceps.h $(HDRS)
+	$(COMP) $(CFLAGS) -c gvceps.c
 
-gvcpdf.$(OBJ): gvcpdf.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvcpdf.cpp
+gvcfile.$(OBJ): gvcfile.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcfile.c
 
-gvcprn.$(OBJ): gvcprn.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvcprn.cpp
+gvcinit.$(OBJ): gvcinit.c $(HDRS) gvcrc.h
+	$(COMP) $(CFLAGS) -c gvcinit.c
 
-gvcprf.$(OBJ): gvcprf.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvcprf.cpp
+gvcmeas.$(OBJ): gvcmeas.c gvcrc.h $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcmeas.c
 
-gvcreg.$(OBJ): gvcreg.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvcreg.cpp
+gvcmisc.$(OBJ): gvcmisc.c gvcrc.h $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcmisc.c
 
-gvctext.$(OBJ): gvctext.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c gvctext.cpp
+gvcpdf.$(OBJ): gvcpdf.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcpdf.c
 
-cdll.$(OBJ): cdll.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c cdll.cpp
+gvcprn.$(OBJ): gvcprn.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcprn.c
 
-cimg.$(OBJ): cimg.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c cimg.cpp
+gvcprf.$(OBJ): gvcprf.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcprf.c
 
-cview.$(OBJ): cview.cpp $(HDRS)
-	$(COMP) $(CFLAGS) -c cview.cpp
+gvcreg.$(OBJ): gvcreg.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvcreg.c
+
+gvctext.$(OBJ): gvctext.c $(HDRS)
+	$(COMP) $(CFLAGS) -c gvctext.c
+
+cdll.$(OBJ): cdll.c $(HDRS)
+	$(COMP) $(CFLAGS) -c cdll.c
+
+cimg.$(OBJ): cimg.c $(HDRS)
+	$(COMP) $(CFLAGS) -c cimg.c
+
+cview.$(OBJ): cview.c $(HDRS)
+	$(COMP) $(CFLAGS) -c cview.c
 
 gsview: $(OBJS)
 	$(COMP) $(CFLAGS) -o gsview $(OBJS) $(LFLAGS)
 
-gvdoc: gvdoc.cpp
-	$(COMP) -o gvdoc gvdoc.cpp
+gvdoc: gvdoc.c
+	$(COMP) -o gvdoc gvdoc.c
 	
-doc2html: doc2html.cpp
-	$(COMP) -o doc2html doc2html.cpp
+doc2html: doc2html.c
+	$(COMP) -o doc2html doc2html.c
 
-html: gvxde.htm gvxen.htm gvxes.htm gvxfr.htm gvxit.htm
+html: gvxde.htm gvxen.htm gvxes.htm gvxfr.htm gvxgr.htm gvxit.htm gvxnl.htm
 
 gvxde.htm: doc2html gvdoc de/gvclang.txt
 	./gvdoc X de/gvclang.txt gvx.txt
@@ -260,11 +315,25 @@ gvxfr.htm: doc2html gvdoc fr/gvclang.txt
 	-rm gvxfr.htm
 	mv GSview.htm gvxfr.htm
 
+gvxgr.htm: doc2html gvdoc gr/gvclang.txt
+	./gvdoc X gr/gvclang.txt temp.txt
+	./codepage 1253_8859-7 temp.txt gvx.txt
+	./doc2html gvx.txt GSview.htm ISO-8859-7
+	-rm temp.txt
+	-rm gvxgr.htm
+	mv GSview.htm gvxgr.htm
+
 gvxit.htm: doc2html gvdoc it/gvclang.txt
 	./gvdoc X it/gvclang.txt gvx.txt
 	./doc2html gvx.txt GSview.htm
 	-rm gvxit.htm
 	mv GSview.htm gvxit.htm
+
+gvxnl.htm: doc2html gvdoc nl/gvclang.txt
+	./gvdoc X nl/gvclang.txt gvx.txt
+	./doc2html gvx.txt GSview.htm
+	-rm gvxnl.htm
+	mv GSview.htm gvxnl.htm
 
 gvx.ps: gvx.dvi
 	dvips gvx
@@ -276,11 +345,11 @@ gvx.dvi: gvx.tex titlepag.tex
 gvx.tex: gvx.txt doc2tex
 	doc2tex gvx.txt gvx.tex
 
-doc2tex: doc2tex.cpp
-	$(COMP) -o doc2tex doc2tex*.cpp
+doc2tex: doc2tex.c
+	$(COMP) -o doc2tex doc2tex*.c
 
-langen: gvxl_en.o gvxres.cpp
-	$(COMP) $(CFLAGS) -c -DSTANDALONE gvxres.cpp
+langen: gvxl_en.o gvxres.c
+	$(COMP) $(CFLAGS) -c -DSTANDALONE gvxres.c
 	$(COMP) -o langen gvxres.o gvxl_en.o
 	-rm gvxres.o
 
@@ -305,7 +374,9 @@ clean: language
 	-rm gvxl_en.$(OBJ)
 	-rm gvxl_es.$(OBJ)
 	-rm gvxl_fr.$(OBJ)
+	-rm gvxl_gr.$(OBJ)
 	-rm gvxl_it.$(OBJ)
+	-rm gvxl_nl.$(OBJ)
 	-rm gvxmeas.$(OBJ)
 	-rm gvxmisc.$(OBJ)
 	-rm gvxprn.$(OBJ)
@@ -317,6 +388,7 @@ clean: language
 	-rm dscutil.$(OBJ)
 	-rm gvcdll.$(OBJ)
 	-rm gvcdisp.$(OBJ)
+	-rm gvcedit.$(OBJ)
 	-rm gvceps.$(OBJ)
 	-rm gvcfile.$(OBJ)
 	-rm gvcinit.$(OBJ)
@@ -346,6 +418,8 @@ clean: language
 	-rm gsview.txt
 	-rm echogsv.$(OBJ)
 	-rm echogsv
+	-rm codepage.$(OBJ)
+	-rm codepage
 
 veryclean: clean
 	-rm gsview
@@ -353,4 +427,6 @@ veryclean: clean
 	-rm gvxen.htm
 	-rm gvxes.htm
 	-rm gvxfr.htm
+	-rm gvxgr.htm
 	-rm gvxit.htm
+	-rm gvxnl.htm

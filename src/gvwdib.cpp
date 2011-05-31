@@ -19,6 +19,7 @@
 // DIB.cpp: implementation of the CDIB class.
 
 // To change this back to using MFC:
+// Replace GFile with CFile
 // Exception handling around CFile::Read
 // CDC not HDC
 // delete palette, brush etc, not DeleteObject
@@ -26,8 +27,11 @@
 #define STRICT
 #include <windows.h>
 #include <windowsx.h>
+extern "C" {
 #include "gvcfile.h"
+}
 #include "gvwdib.h"
+
 
 
 #ifdef NOTUSED
@@ -162,11 +166,6 @@ void CDIB::Draw(HDC hdc, int xOffset, int yOffset)
     else {
 	// either device doesn't use palettes
 	// or bitmap does use a colour table
-	if (!(caps & RC_DIBTODEV)) {
-	    LPTSTR message = TEXT("Device doesn't support SetDIBitsToDevice");
-	    TextOut(hdc, 10, 10, message, lstrlen(message));
-	}
-
 	SetStretchBltMode(hdc, COLORONCOLOR);
 // may need to modify target dimensions to allow print preview to work.
 // At present, preview should work if bitmap is at printer resolution.
@@ -206,7 +205,7 @@ CDIB::DrawDump(HDC hdc)
     int cyHeight;
     int cxLeftMargin;
     int x, y;
-    char str[256];
+    TCHAR str[256];
 
     Lock();
 
@@ -221,13 +220,13 @@ CDIB::DrawDump(HDC hdc)
     x = cxLeftMargin;
     y = cyHeight;
     wsprintf(str, 
-	"HeaderSize=%d   Width=%d   Height=%d   Planes=%d   BitCount=%d",
+	TEXT("HeaderSize=%d   Width=%d   Height=%d   Planes=%d   BitCount=%d"),
 	m_bmp.bmp2.biSize, m_bmp.bmp2.biWidth, m_bmp.bmp2.biHeight,
 	(int)m_bmp.bmp2.biPlanes, (int)m_bmp.bmp2.biBitCount);
     TextOut(hdc,x, y, str, lstrlen(str));
     y+= cyHeight;
     wsprintf(str, 
-        "SizeImage=%d   XDPI=%d   YDPI=%d   ClrUsed=%d   ClrImportant=%d",
+        TEXT("SizeImage=%d   XDPI=%d   YDPI=%d   ClrUsed=%d   ClrImportant=%d"),
 	m_bmp.bmp2.biSizeImage, 
 	m_bmp.bmp2.biXPelsPerMeter, m_bmp.bmp2.biYPelsPerMeter,
 	m_bmp.bmp2.biClrUsed, m_bmp.bmp2.biClrImportant);
@@ -505,17 +504,18 @@ CDIB::GetRect(LPRECT prect)
 BOOL 
 CDIB::Read(LPCTSTR lpszFileName)
 {
-    CFile cf;
-    if (!cf.Open(lpszFileName, CFile::modeRead | CFile::shareDenyWrite))
+    GFile *gf;
+    if ( (gf = gfile_open(lpszFileName, gfile_modeRead | gfile_shareDenyWrite))
+	== NULL );
 	return FALSE;
-    BOOL flag = Read(&cf);
-    cf.Close();
+    BOOL flag = Read(gf);
+    gfile_close(gf);
     return flag;
 }
 
 // read bitmap to memory
 BOOL 
-CDIB::Read(CFile *pFile)
+CDIB::Read(GFile *pFile)
 {
     BITMAPFILE bmf;
     BYTE bh[SIZEOF_BITMAPFILE];
@@ -529,7 +529,7 @@ CDIB::Read(CFile *pFile)
     m_valid = FALSE;
     // MFC version of CFile would throw exceptions
     // TRY {
-	if (pFile->Read(&bh, SIZEOF_BITMAPFILE) != SIZEOF_BITMAPFILE) {
+	if (gfile_read(pFile, &bh, SIZEOF_BITMAPFILE) != SIZEOF_BITMAPFILE) {
 		Unlock();
 		return FALSE;
 	}
@@ -555,7 +555,7 @@ CDIB::Read(CFile *pFile)
 	ASSERT(m_bitmap != NULL);
 	
 	p = m_bitmap;
-	while (length && (dwRead = pFile->Read(p, length)) != 0) {
+	while (length && (dwRead = gfile_read(pFile, p, length)) != 0) {
 	    length -= dwRead;
 	    p += dwRead;
 	}
@@ -573,7 +573,7 @@ CDIB::Read(CFile *pFile)
 
 // read bitmap header and palette to memory, but not bits
 BOOL 
-CDIB::ReadHeader(CFile *pFile)
+CDIB::ReadHeader(GFile *pFile)
 {
     BITMAPFILE bmf;
     BYTE bh[SIZEOF_BITMAPFILE];
@@ -588,7 +588,7 @@ CDIB::ReadHeader(CFile *pFile)
     m_valid = FALSE;
     // MFC version of CFile would throw exceptions
     // TRY {
-	if (pFile->Read(&bh, SIZEOF_BITMAPFILE) != SIZEOF_BITMAPFILE) {
+	if (gfile_read(pFile, &bh, SIZEOF_BITMAPFILE) != SIZEOF_BITMAPFILE) {
 	    Unlock();
 	    return FALSE;
 	}
@@ -622,7 +622,7 @@ CDIB::ReadHeader(CFile *pFile)
 	ASSERT(m_bitmap != NULL);
 	
 	p = m_bitmap;
-	while (length && (dwRead = pFile->Read(p, length)) != 0) {
+	while (length && (dwRead = gfile_read(pFile, p, length)) != 0) {
 		length -= dwRead;
 		p += dwRead;
 	}
@@ -837,7 +837,7 @@ BOOL CDIB::NewHeader(LPBYTE pHeader, UINT *pLen)
 }
 
 
-BOOL CDIB::Write(CFile *cf) {
+BOOL CDIB::Write(GFile *gf) {
     UINT len = 0;
     NewHeader(NULL, &len);	// get header size
     LPBYTE p = new BYTE[len];
@@ -847,12 +847,12 @@ BOOL CDIB::Write(CFile *cf) {
 	    return FALSE;
     }
     // Write the headers and palette
-    cf->Write(p, len);
+    gfile_write(gf, p, len);
     delete p;
 
     // Write the bits
     ASSERT(m_bits != NULL);
-    cf->Write(m_bits, m_bmp.bmp2.biSizeImage);
+    gfile_write(gf, m_bits, m_bmp.bmp2.biSizeImage);
     return TRUE;
 }
 
@@ -860,14 +860,14 @@ BOOL CDIB::Write(CFile *cf) {
 BOOL CDIB::Write(LPCTSTR lpszFileName)
 {
     // not implemented
-    CFile cf;
-    if (!cf.Open(lpszFileName, CFile::modeCreate | 
-	CFile::modeWrite | CFile::shareExclusive)) {
+    GFile *gf;
+    if ( (gf = gfile_open(lpszFileName, gfile_modeCreate | 
+	gfile_modeWrite | gfile_shareExclusive)) == NULL ) {
 	ASSERT(FALSE);
 	return FALSE;
     }
-    BOOL flag = Write(&cf);
-    cf.Close();
+    BOOL flag = Write(gf);
+    gfile_close(gf);
     return flag;
 }
 

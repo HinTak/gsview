@@ -37,7 +37,7 @@
 /*
 #define BETA
 #define BETA_YEAR    2001
-#define BETA_MONTH   6
+#define BETA_MONTH   11
 #define BETA_DAY     30
 */
 
@@ -63,7 +63,7 @@
 /* Ghostscript */
 #define GS_PRODUCT  "AFPL Ghostscript"
 #define GS_REVISION_MIN   700
-#define GS_REVISION	  700
+#define GS_REVISION	  703
 #define GS_REVISION_MAX   799
 
 #ifdef _Windows
@@ -72,13 +72,16 @@
 #else
 #define GSVIEW_EXENAME "gsview32.exe"
 #endif
-#define GS_EXENAME  "gswin32.exe"
+#define GS_EXENAME  "gswin32c.exe"
 #define GS_DLLNAME  "gsdll32.dll"
 #define INIFILE "gsview32.ini"
 #else
 #if X11
 #define INIFILE "gsview.ini"
+#define GS_EXENAME  "gs"
+#define GS_DLLNAME  "libgs.so"
 #else
+#define GS_EXENAME  "gsos2.exe"
 #define GS_DLLNAME  "gsdll2.dll"
 #define INIFILE "gvpm.ini"
 #endif

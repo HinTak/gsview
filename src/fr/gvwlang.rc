@@ -18,6 +18,9 @@
 /* fr\gvwlang.rc */
 
 /* Windows French language resources */
+LANGUAGE LANG_FRENCH, SUBLANG_DEFAULT
+
+ID_LANG BITMAP "binary/french.bmp"
 
 gsview_menu MENU
 BEGIN
@@ -87,11 +90,8 @@ BEGIN
 		END
 		POPUP "&Langue"
 		BEGIN
-			MENUITEM "&Anglais", IDM_LANGEN
-			MENUITEM "&Français", IDM_LANGFR
-			MENUITEM "Alleman&d", IDM_LANGDE
-			MENUITEM "&Italien", IDM_LANGIT
-			MENUITEM "&Espagnol", IDM_LANGES
+			MENUITEM "&English", IDM_LANGEN
+			/* Remaining languages are added at run time */
 		END
 		POPUP "PS vers &texte"
 		BEGIN
@@ -233,6 +233,8 @@ END
 STRINGTABLE
 BEGIN
 	/* general strings */
+	IDS_SLANGUAGE, "FR,2"
+	IDS_CODEPAGE, "1252"	/* ISO-Latin-1 */
 	IDS_HELPFILE, WINHELPFILE
 	IDS_SOUNDNOMM, "Chargement de WINMM.DLL impossible\nSons non disponibles"
 END

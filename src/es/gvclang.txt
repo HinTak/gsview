@@ -7,7 +7,7 @@
  utilizado por las impresoras láser.
  Para los documentos construidos siguiendo las especificaciones de Adobe acerca
  de la estructura de los documentos PostScript (DSC), GSview permite
- seleccionar las páginas que serán visualizadas o impresas. GSview 4.0 requiere
+ seleccionar las páginas que serán visualizadas o impresas. GSview 4.1 requiere
  Ghostscript 7.00 - 7.99.
 2Instalación
 ?Instalación
@@ -215,11 +215,11 @@ E
  desde el directorio del perfil de usuario, al directorio de GSview, edítelo y
  elimine todas las entradas excepto:
   [Options]
-  Version=4.0
-  GSversion=700
+  Version=4.1
+  GSversion=703
   Configured=1
-  GhostscriptDLL=e:\gs\gs7.00\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs7.00\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs7.03\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs7.03\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Cuando un usuario inicia GSview, se utiliza normalmente su archivo INI. La
  primera vez que GSview se ejecuta, o cuando la versión de GSview no coincide

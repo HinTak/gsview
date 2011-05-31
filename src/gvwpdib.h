@@ -61,7 +61,7 @@ public:
     BOOL debug;
 
     // implementation
-    BOOL ReadHeader(CFile *cf);
+    BOOL ReadHeader(GFile *cf);
     BOOL GetBlackWhiteIndex();
     BOOL ScanForWhite(LPBYTE pLine);
     BOOL ScanForGrey(LPBYTE pLine);

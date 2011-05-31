@@ -18,32 +18,39 @@
 /* de\gvwlang.rc */
 
 /* Windows German language resources */
+LANGUAGE LANG_GERMAN, SUBLANG_DEFAULT
+
+ID_LANG BITMAP "binary/german.bmp"
 
 gsview_menu MENU
 BEGIN
 	POPUP "&Datei"
 	BEGIN
+#ifndef MEMORYFILE
 		MENUITEM "&Öffnen...\tO", IDM_OPEN
 		MENUITEM "&Auswahl Datei...\tA", IDM_SELECT
+#ifndef VIEWONLY
 		MENUITEM "Speichern &Unter...\tU", IDM_SAVEAS
+#endif
 		MENUITEM "&Schließen\tS", IDM_CLOSE
 		MENUITEM "&Info...\tI", IDM_INFO
 		MENUITEM SEPARATOR
-		MENUITEM "Konvertierung...", IDM_CONVERTFILE
+#ifndef VIEWONLY
+		MENUITEM "Konvertierung...\tF", IDM_CONVERTFILE
 		MENUITEM "&Extrahiere...\tE", IDM_EXTRACT
 		MENUITEM "PS zu EPS", IDM_PSTOEPS
 		MENUITEM SEPARATOR
 		MENUITEM "&Drucken...\tD", IDM_PRINT
-/*
-		MENUITEM "Print To &File...\tF", IDM_PRINTTOFILE
-*/
 		MENUITEM "Drucke Datei...", IDM_SPOOL
 		MENUITEM SEPARATOR
+#endif
 		MENUITEM "Meldungen anzeigen\tM", IDM_GSMESS
 		MENUITEM SEPARATOR
 		MENUITEM SEPARATOR
+#endif /* !MEMORYFILE */
 		MENUITEM "E&nde", IDM_EXIT
 	END
+#ifndef VIEWONLY
 	POPUP "&Bearbeiten"
 	BEGIN
 		MENUITEM "&Kopieren\tCtrl+K", IDM_COPYCLIP
@@ -72,6 +79,7 @@ BEGIN
 		MENUITEM "&Suche...\tCtrl+S", IDM_TEXTFIND
 		MENUITEM "Suche &Nächsten\tF3", IDM_TEXTFINDNEXT
 	END
+#endif
 	POPUP "O&ptionen"
 	BEGIN
 		MENUITEM "&Konfiguration...", IDM_CFG
@@ -87,18 +95,17 @@ BEGIN
 		END
 		POPUP "&Sprache"
 		BEGIN
-			MENUITEM "&Englisch", IDM_LANGEN
-			MENUITEM "&Französisch", IDM_LANGFR
-			MENUITEM "&Deutsch", IDM_LANGDE
-			MENUITEM "&Italienisch", IDM_LANGIT
-			MENUITEM "&Spanisch", IDM_LANGES
+			MENUITEM "&English", IDM_LANGEN
+			/* Remaining languages are added at run time */
 		END
+#ifndef VIEWONLY
 		POPUP "PSzuText"
 		BEGIN
 			MENUITEM "Deaktiviert", IDM_PSTOTEXTDIS
 			MENUITEM "Normal", IDM_PSTOTEXTNORM
 			MENUITEM "Dvips Cork Encoding", IDM_PSTOTEXTCORK
 		END
+#endif
 		POPUP "DSC Warnungen"
 		BEGIN
 			MENUITEM "Aus", IDM_DSC_OFF
@@ -204,8 +211,8 @@ BEGIN
 	"u", IDM_SAVEAS
 	"D", IDM_PRINT
 	"d", IDM_PRINT
-	"F", IDM_PRINTTOFILE
-	"f", IDM_PRINTTOFILE
+	"F", IDM_CONVERTFILE
+	"f", IDM_CONVERTFILE
 #ifdef OLD
 	VK_S, IDM_TEXTFIND, VIRTKEY, CONTROL
 #else
@@ -233,6 +240,8 @@ END
 STRINGTABLE
 BEGIN
 	/* general strings */
+	IDS_SLANGUAGE, "DEU,3"
+	IDS_CODEPAGE, "1252"	/* ISO-Latin-1 */
 	IDS_HELPFILE, WINHELPFILE
 	IDS_SOUNDNOMM, "Kann WINMM.DLL nicht laden\nKlänge nicht verfügbar"
 END

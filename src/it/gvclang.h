@@ -18,6 +18,8 @@
 /* it\gvclang.h */
 /* Common Italian language defines */
 
+#define AAITALIANO "Italiano"
+
 #define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2001 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Tutti i diritti riservati."
 #define GSVIEW_COPYRIGHT3 "Vedere il file LICENCE per maggiori dettagli."
@@ -218,6 +220,8 @@
 /* Advanced Configure dialog box */
 #define AACONFIGUREGS "Configurazione Avanzata"
 #define AAGHOSTSCRIPTDLLC "DLL di Ghostscript:"
+#define AAGHOSTSCRIPTSOC "Ghostscript Shared Object:" /* ENGLISH */
+#define AAGHOSTSCRIPTEXEC "Ghostscript Program:" /* ENGLISH */
 #define AAGHOSTSCRIPTINCC "Includi Percorso Di Ricerca di Ghostscript:"
 #define AAGHOSTSCRIPTOTHERC "Opzioni di Ghostscript:"
 #define AACOPYPRINTERDEF "Copia Stampanti predefinite"
@@ -432,12 +436,5 @@
 #define AAMABOUT "~Informazioni su GSview..."
 #endif
 
-/* Language changing */
-#define AASELECTLANGUAGE "Select Language"   /* Don't translate this */
-#define AAENGLISH "English"
-#define AADEUTSCH "Deutsch"
-#define AAFRANCAIS "Français"
-#define AAITALIANO "Italiano"
-#define AAESPANOL "Español"
 
 #define WINHELPFILE "gsviewit.hlp"

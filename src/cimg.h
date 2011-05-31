@@ -3,7 +3,11 @@
 /* cimg.h */
 
 #ifdef UNIX
+#ifdef MULTITHREAD
 #define GGMUTEX pthread_mutex_t
+#else
+#define GGMUTEX int
+#endif
 #endif
 
 #ifdef _Windows
@@ -76,7 +80,19 @@ struct IMAGE_S {
     unsigned char *bitmap;	/* allocated memory */
 #endif
 
-
+    /* To do progressive update while drawing, maintain a list 
+     * dirty tiles and update them when a tile is too dirty,
+     * or when enough tiles to fill a row are dirty */
+    int tile_width;	/* normally 64 */
+    int tile_height;	/* normally 64 */
+    int tile_columns;
+    int tile_rows;
+    int tile_dirty; 	/* number of dirty tiles */
+    int tile_threshold; /* number of dirty tiles before update */
+    int tile_verydirty_threshold;  /* update when one tile dirtied this much */
+    int tile_time;	/* time in milliseconds since start of day */
+    int tile_interval;	/* minimum time in milliseconds between updates */
+    int *tile;		/* number of times each tile is touched */
 };
 
 void image_lock(IMAGE *img);
@@ -89,6 +105,8 @@ int image_size(IMAGE *img);
 int image_presize(IMAGE *img, int width, int height, int raster,
     unsigned int format);
 int image_preclose(IMAGE *img);
+int image_update_time(IMAGE *img);	/* returns zero if enough time */
+					/* has passed to do an update */
 
 
 void *display_memalloc(void *handle, void *device, unsigned long size);

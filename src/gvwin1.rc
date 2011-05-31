@@ -41,6 +41,7 @@ ID_GSVIEW_DOC ICON "binary/gvwdoc.ico"
 IDP_CROSSHAIR CURSOR "binary/gvwcross.cur"
 IDP_HAND CURSOR "binary/gvwhand.cur"
 
+
 /* button table */
 /* Each button is specified by a menu item identifier */
 /* The button contents is given by a BITMAP with the same identifier */
@@ -221,6 +222,12 @@ BEGIN
 "    pop\015\012"
 "  }\015\012"
 "  ifelse\015\012"
+/* % PageOffset uses pts, but the direction of device coordinates */
+"  dup /DisplayFormat known\015\012"
+"  { dup /DisplayFormat get 131072 and 0 eq }\015\012"
+"  { matrix defaultmatrix 3 get 0 lt }\015\012"
+"  ifelse\015\012"
+"  {flush GSview /PageOffset get dup 1 get neg 1 exch put} if\015\012"
 /* % insert alpha values */
 "  dup /TextAlphaBits GSview /TextAlphaBits get put\015\012"
 "  dup /GraphicsAlphaBits GSview /GraphicsAlphaBits get put\015\012"

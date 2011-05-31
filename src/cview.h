@@ -18,5 +18,5 @@ void view_wait_event(VIEW *view);
 int view_poll(VIEW *view);
 void view_closefile(VIEW *view);
 int view_reopenfile(VIEW *view);
-int view_post_message(VIEW *view, int message, int param);;
+int view_post_message(VIEW *view, int message, int param);
 int view_page_callback(VIEW *view);

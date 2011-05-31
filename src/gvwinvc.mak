@@ -34,11 +34,20 @@ WIN32=1
 # needed for Win32s.
 USEBC=0
 
+# VIEWONLY=1 if you want to disable all methods to save, copy or print
+VIEWONLY=0
+
 # ALPHA=1 for DEC Alpha
 !if "$(PROCESSOR_ARCHITECTURE)"=="ALPHA"
 ALPHA=1
 !else
 ALPHA=0
+!endif
+
+!if $(VIEWONLY)
+CFLAGVIEW=-DVIEWONLY -DMEMORYFILE
+!else
+CFLAGVIEW=
 !endif
 
 # Shouldn't need editing below here
@@ -86,13 +95,19 @@ all: gsview$(WINEXT).exe\
   gsvw$(WINEXT)de.dll gsviewde.hlp setp$(WINEXT)de.dll\
   gsvw$(WINEXT)es.dll gsviewes.hlp setp$(WINEXT)es.dll\
   gsvw$(WINEXT)fr.dll gsviewfr.hlp setp$(WINEXT)fr.dll\
+  gsvw$(WINEXT)gr.dll gsviewgr.hlp setp$(WINEXT)gr.dll\
   gsvw$(WINEXT)it.dll gsviewit.hlp setp$(WINEXT)it.dll\
+  gsvw$(WINEXT)nl.dll gsviewnl.hlp setp$(WINEXT)nl.dll\
   gvwgs$(WINEXT).exe winsetup.exe uninstgs.exe\
   gsprint.exe ..\epstool\epstool.exe\
   gsv16spl.exe
 
 .cpp.obj:
-	$(CC) -c $(CFLAGS) $< 
+	$(CC) -c $(CFLAGS) $(CFLAGVIEW) $< 
+
+# /TP to compile as .cpp
+.c.obj:
+	$(CC) -c $(CFLAGS) $(CFLAGVIEW) $< 
 
 ECHOGSV=echogsv.exe
 
@@ -111,7 +126,7 @@ lib.rsp: makefile
 	echo /NODEFAULTLIB:LIBC.lib >> lib.rsp
         echo "$(LIBDIR)\libcmt.lib" >> lib.rsp
 
-..\epstool\epstool.exe: ..\epstool\epstool.cpp ..\epstool\epstool.h $(HDRS)
+..\epstool\epstool.exe: ..\epstool\epstool.c ..\epstool\epstool.h $(HDRS)
 	cd ..\epstool
 	nmake -f makefile.msc
 	cd ..\src
@@ -128,7 +143,19 @@ gsview$(WINEXT).exe: $(OBJS) gvwin$(WINEXT).res gvwin$(WINEXT).def lib.rsp
 	echo $(OBJ5) >> link.rsp
 	echo $(OBJ6) >> link.rsp
 	echo $(OBJ7) >> link.rsp
+	echo $(OBJ8) >> link.rsp
 	$(LINK) $(DEBUGLINK) /DEF:gvwin$(WINEXT).def /OUT:gsview$(WINEXT).exe @link.rsp @lib.rsp gvwin$(WINEXT).res
+
+gsviewdl.dll: $(OBJS) gvwin$(WINEXT).res gsviewdl.def lib.rsp
+	echo $(OBJ1) > link.rsp
+	echo $(OBJ2) >> link.rsp
+	echo $(OBJ3) >> link.rsp
+	echo $(OBJ4) >> link.rsp
+	echo $(OBJ5) >> link.rsp
+	echo $(OBJ6) >> link.rsp
+	echo $(OBJ7) >> link.rsp
+	echo $(OBJ8) >> link.rsp
+	$(LINK) $(DEBUGLINK) /DLL /DEF:gsviewdl.def /OUT:gsviewdl.dll @link.rsp @lib.rsp gvwin$(WINEXT).res
 
 
 gsvw$(WINEXT)de.dll: gsvw$(WINEXT)de.res de\gvwin32.def
@@ -141,14 +168,20 @@ gsvw$(WINEXT)es.dll: gsvw$(WINEXT)es.res es\gvwin32.def
 gsvw$(WINEXT)fr.dll: gsvw$(WINEXT)fr.res fr\gvwin32.def
 	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:fr\gvwin32.def /OUT:gsvw$(WINEXT)fr.dll gsvw$(WINEXT)fr.res
 
+gsvw$(WINEXT)gr.dll: gsvw$(WINEXT)gr.res gr\gvwin32.def
+	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:gr\gvwin32.def /OUT:gsvw$(WINEXT)gr.dll gsvw$(WINEXT)gr.res
+
 gsvw$(WINEXT)it.dll: gsvw$(WINEXT)it.res it\gvwin32.def
 	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:it\gvwin32.def /OUT:gsvw$(WINEXT)it.dll gsvw$(WINEXT)it.res
+
+gsvw$(WINEXT)nl.dll: gsvw$(WINEXT)nl.res nl\gvwin32.def
+	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:nl\gvwin32.def /OUT:gsvw$(WINEXT)nl.dll gsvw$(WINEXT)nl.res
 
 uninstgs.exe: dwuninst.obj dwuninst.h dwuninst.res dwuninst.def
 	$(LINK) $(DEBUGLINK) /DEF:dwuninst.def /OUT:uninstgs.exe dwuninst.obj @lib.rsp dwuninst.res
 
-winsetup.exe: winsetup.obj winsetup.res winsetup.def dwinst.obj gvcbeta.obj gvwgsver.obj lib.rsp
-	$(LINK) $(DEBUGLINK) /DEF:winsetup.def /OUT:winsetup.exe winsetup.obj dwinst.obj gvcbeta.obj gvwgsver.obj @lib.rsp winsetup.res
+winsetup.exe: winsetup.obj winsetup.res winsetup.def dwinst.obj gvcbetaa.obj gvwgsver.obj lib.rsp
+	$(LINK) $(DEBUGLINK) /DEF:winsetup.def /OUT:winsetup.exe winsetup.obj dwinst.obj gvcbetaa.obj gvwgsver.obj @lib.rsp winsetup.res
 
 setp$(WINEXT)de.dll: setp$(WINEXT)de.res de\setup32.def
 	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:de\setup32.def /OUT:setp$(WINEXT)de.dll setp$(WINEXT)de.res
@@ -159,21 +192,23 @@ setp$(WINEXT)es.dll: setp$(WINEXT)es.res es\setup32.def
 setp$(WINEXT)fr.dll: setp$(WINEXT)fr.res fr\setup32.def
 	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:fr\setup32.def /OUT:setp$(WINEXT)fr.dll setp$(WINEXT)fr.res
 
-setp$(WINEXT)it.dll: setp$(WINEXT)it.res de\setup32.def
+setp$(WINEXT)gr.dll: setp$(WINEXT)gr.res gr\setup32.def
+	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:gr\setup32.def /OUT:setp$(WINEXT)gr.dll setp$(WINEXT)gr.res
+
+setp$(WINEXT)it.dll: setp$(WINEXT)it.res it\setup32.def
 	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:it\setup32.def /OUT:setp$(WINEXT)it.dll setp$(WINEXT)it.res
 
-ungsview.exe: ungsview.obj ungsview.res ungsview.def
-	$(LINK) $(DEBUGLINK) /DEF:ungsview.def /OUT:ungsview.exe ungsview.obj @lib.rsp ungsview.res
-
+setp$(WINEXT)nl.dll: setp$(WINEXT)nl.res nl\setup32.def
+	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:nl\setup32.def /OUT:setp$(WINEXT)nl.dll setp$(WINEXT)nl.res
 
 # Intel
-gvwgs32.exe: gvwgs.cpp gvwgs.h gvwgs32.res lib.rsp
-	$(CC) -c $(CFLAGS) -I"$(INCDIR)" gvwgs.cpp
+gvwgs32.exe: gvwgs.c gvwgs.h gvwgs32.res lib.rsp
+	$(CC) -c $(CFLAGS) -I"$(INCDIR)" gvwgs.c
 	$(LINK) $(DEBUGLINK) /DEF:gvwgs32.def /OUT:gvwgs32.exe gvwgs.obj cdll.obj @lib.rsp gvwgs32.res
 
 # DEC Alpha
-gvwgsda.exe: gvwgs.cpp gvwgs.h gvwgsda.res lib.rsp
-	$(CC) -c $(CFLAGS) -I"$(INCDIR)" gvwgs.cpp
+gvwgsda.exe: gvwgs.c gvwgs.h gvwgsda.res lib.rsp
+	$(CC) -c $(CFLAGS) -I"$(INCDIR)" gvwgs.c
 	$(LINK) $(DEBUGLINK) /DEF:gvwgs32.def /OUT:gvwgsda.exe gvwgs.obj cdll.obj @lib.rsp gvwgs32.res
 
 gsv16spl.exe: gsv16spl.c gsv16spl.rc gsv16spl.def  $(LANGUAGE)\gvclang.h

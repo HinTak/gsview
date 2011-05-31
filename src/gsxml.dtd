@@ -1,0 +1,25 @@
+<!-- 
+  GSview documentation is now kept in XML.
+  This file defines the syntax.
+-->
+
+<!ELEMENT help (helptitle, topic+)>
+<!ELEMENT helptitle (#PCDATA)>
+<!ELEMENT topic (browse, name, key+, body, topic*)>
+<!ATTLIST topic level CDATA #REQUIRED>
+<!ATTLIST topic id ID #REQUIRED>
+<!ELEMENT browse (#PCDATA)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT key (#PCDATA)>
+<!ELEMENT b (#PCDATA)>
+<!ELEMENT fixed (#PCDATA | b)*>
+<!ELEMENT p (#PCDATA | b | fixed | link | windows | winos2 | os2 | x11)*>
+<!ELEMENT body (#PCDATA | p | fixed | windows | winos2 | os2 | x11)*>
+<!ELEMENT link (#PCDATA)>
+<!ATTLIST link href CDATA #REQUIRED>
+<!ELEMENT windows (#PCDATA | b | p | fixed | bmp | gif)*>
+<!ELEMENT winos2 (#PCDATA | b | p | fixed)*>
+<!ELEMENT os2 (#PCDATA | b | p | fixed)*>
+<!ELEMENT x11 (#PCDATA | b | p | fixed)*>
+<!ELEMENT bmp (#PCDATA)>
+<!ELEMENT gif (#PCDATA)>

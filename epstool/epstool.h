@@ -105,8 +105,8 @@
 #define WORD  unsigned short
 #define DWORD unsigned int
 #define UINT  unsigned int
-#define LONG  int
-#define ULONG  unsigned int
+#define LONG  long
+#define ULONG  unsigned long
 #define BOOL  int
 #define READBIN  "r"
 #define WRITEBIN "w"
@@ -128,6 +128,7 @@ extern char *getwd (char *pathname);
 #endif
 #endif
 
+#include "gvcfile.h"
 #include "dscparse.h"
 #include "gvceps.h"
 
@@ -143,6 +144,8 @@ extern char *getwd (char *pathname);
 #define max(x,y)  ( (x) > (y) ? (x) : (y) )
 #endif
 
+#define convert_widechar strncpy
+
 extern BOOL debug;
 extern char oname[MAXSTR];
 extern char upname[MAXSTR];
@@ -155,7 +158,7 @@ typedef struct tagPSFILE {
 	CDSC	*dsc;		/* DSC structure.  NULL if not DSC */
 	int 	pagenum;	/* current page number */
 	char 	name[MAXSTR];	/* name of selected document file */
-	FILE 	*file;		/* selected file */
+	GFile 	*file;		/* selected file */
 	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
 } PSFILE;
 
@@ -166,11 +169,11 @@ typedef struct tagOPTION {
 
 FILE * gp_open_scratch_file(const char *prefix, char *fname, const char *mode);
 void gserror(UINT id, char *str, UINT icon, int sound);
-void pserror(char *str);
+void gs_addmess(const char *str);
 char * gs_getcwd(char *dirname, int size);
 void play_sound(int i);
 char * psfile_name(PSFILE *psf);
-BOOL ps_copy_find(FILE *outfile, FILE *infile, long end, 
+BOOL ps_copy_find(FILE *outfile, GFile *infile, long end, 
 	char *s, int n, const char *comment);
 BOOL find_gsexe(char *gsexe, int len);
 

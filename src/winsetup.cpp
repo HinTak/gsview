@@ -49,13 +49,13 @@
 
 #include "dwinst.h"
 
+extern "C" {
 #include "gvcver.h"
 #include "gvcbeta.h"
 #include "gvwgsver.h"
-/* extern "C" { */
-    int message_box(const char *str, int icon);
-    int load_string(int id, char *str, int len);
-/* } */
+int message_box(const char *str, int icon);
+int load_string(int id, char *str, int len);
+}
 #include "gvcrc.h"
 #include "setup.h"
 #include "gvclang.h"
@@ -468,6 +468,8 @@ centre_dialog(HWND hwnd)
     int height = GetSystemMetrics(SM_CYFULLSCREEN);
     RECT rect;
     GetWindowRect(hwnd, &rect);
+    if (width / height >= 2)
+	width = width / 2;	/* dual monitors */
     MoveWindow(hwnd, (width - (rect.right - rect.left))/2,
 	    (height - (rect.bottom - rect.top))/2,
 	    (rect.right - rect.left),
@@ -732,6 +734,8 @@ char buf[MAXSTR];
     SendDlgItemMessage(page->hwnd, IDC_CREATEFOLDER, BM_SETCHECK, 
 	    g_bCreateFolder ? BST_CHECKED : BST_UNCHECKED, 0);
     EnableWindow(GetDlgItem(page->hwnd, IDC_ALLUSERS), is_winnt);
+    SendDlgItemMessage(page->hwnd, IDC_ALLUSERS, BM_SETCHECK, 
+	    g_bAllUsers ? BST_CHECKED : BST_UNCHECKED, 0);
     
     page = find_page_from_id(IDD_DIR);
     SetDlgItemText(page->hwnd, ID_ANSWER, g_szTargetDir);
@@ -884,7 +888,7 @@ install_prog()
 	
 	// Uninstall any previous version in same directory
 	gs_addmess("Uninstalling previous version...\n");
-	cinst.Uninstall(UNINSTALLPROG);
+	cinst.Uninstall(UNINSTALLPROG, g_bBatch);
 
 	// Get GS version number
 	gs_addmess("Installing GSview...\n");
@@ -1147,7 +1151,7 @@ install_prog()
 		return FALSE;
 		fclose(f);
 	    }
-	    fprintf(f, "GhostscriptDll=%s\n", buf);
+	    fprintf(f, "GhostscriptDLL=%s\n", buf);
 	    if (!get_gs_string(gsver, "GS_LIB", buf, sizeof(buf))) {
 		return FALSE;
 		fclose(f);
@@ -1224,132 +1228,211 @@ install_all()
 	return TRUE;
 }
 
+/* Simplified from gvwreg.cpp */
+#define REG_KEY_NAME "Software\\Ghostgum\\GSview"
+#define REGISTRATION_RECEIPT "Receipt"
+#define REGISTRATION_NUMBER "Number"
+#define REGISTRATION_NAME "Name"
+BOOL
+write_registration(unsigned int reg_receipt, unsigned int reg_number,
+  char *reg_name)
+{
+    LONG rc;
+    HKEY hkey;
+    DWORD dwValue;
+    HKEY root;
+    char *name;
+    char *value;
+   
+    root = HKEY_LOCAL_MACHINE;
+    name = REG_KEY_NAME;
+    value = NULL;
+    if ((rc = RegOpenKeyEx(root, name, 0, 
+	    KEY_ALL_ACCESS, &hkey)) != ERROR_SUCCESS) {
+	/* failed to open key, so try to create it */
+	rc = RegCreateKey(root, name, &hkey);
+    }
+
+    if (rc == ERROR_SUCCESS) {
+	dwValue = (DWORD)reg_receipt;
+	value = REGISTRATION_RECEIPT;
+	rc = RegSetValueEx(hkey, value, 0, REG_DWORD,
+		    (CONST BYTE *)&dwValue, sizeof(DWORD));
+
+	dwValue = (DWORD)(reg_number ^ 0xffff);
+	if (rc == ERROR_SUCCESS) {
+	    value = REGISTRATION_NUMBER;
+	    rc = RegSetValueEx(hkey, value, 0, REG_DWORD,
+		    (CONST BYTE *)&dwValue, sizeof(DWORD));
+	}
+
+	if (rc == ERROR_SUCCESS) {
+	    value = REGISTRATION_NAME;
+	    rc = RegSetValueEx(hkey, value, 0, REG_SZ,
+		    (CONST BYTE *)reg_name, lstrlen(reg_name)+1);
+	}
+	RegCloseKey(hkey);
+    }
+    
+    if (rc != ERROR_SUCCESS) {
+/*
+	registry_error(root, name, value, FALSE, rc);
+*/
+	return FALSE;
+    }
+    return TRUE;
+}
+
 
 BOOL
 init()
 {
-	DWORD dwVersion = GetVersion();
+    DWORD dwVersion = GetVersion();
+    char *szRegName = NULL;
+    int nRegReceipt = 0;
+    int nRegNumber = 0;
 
-	/* find out if we are running under Win32s */
-	/* Win32s */
-	if ( ((HIWORD(dwVersion) & 0x8000)!=0) && 
-	    ((HIWORD(dwVersion) & 0x4000)==0) )
-		is_win32s = TRUE;
-	/* Windows 4.0 */
-	if (LOBYTE(LOWORD(dwVersion)) >= 4)
-	    is_win4 = TRUE;
-	/* Windows NT */
-	if ( (HIWORD(dwVersion) & 0x8000) == 0)
-		is_winnt = TRUE;
+    /* find out if we are running under Win32s */
+    /* Win32s */
+    if ( ((HIWORD(dwVersion) & 0x8000)!=0) && 
+	((HIWORD(dwVersion) & 0x4000)==0) )
+	    is_win32s = TRUE;
+    /* Windows 4.0 */
+    if (LOBYTE(LOWORD(dwVersion)) >= 4)
+	is_win4 = TRUE;
+    /* Windows NT */
+    if ( (HIWORD(dwVersion) & 0x8000) == 0)
+	    is_winnt = TRUE;
 
-	// load strings
-	LoadString(g_hInstance, IDS_TARGET_GROUP, 
-		g_szTargetGroup, sizeof(g_szTargetGroup));
+    if (is_winnt)
+	g_bAllUsers = TRUE;
 
-	// other defaults
-	g_bAssocPS = TRUE;
-	g_bAssocPDF = FALSE;
-	
-	if (LOBYTE(LOWORD(dwVersion)) < 4) {
-        MessageBox(HWND_DESKTOP, 
-			"This install program needs Windows 4.0 or later",
-			g_szAppName, MB_OK);
-		return FALSE;
-	}
-	
-	
-	cinst.SetMessageFunction(message_box);
+    // load strings
+    LoadString(g_hInstance, IDS_TARGET_GROUP, 
+	    g_szTargetGroup, sizeof(g_szTargetGroup));
+
+    // other defaults
+    g_bAssocPS = TRUE;
+    g_bAssocPDF = FALSE;
+    
+    if (LOBYTE(LOWORD(dwVersion)) < 4) {
+    MessageBox(HWND_DESKTOP, 
+		    "This install program needs Windows 4.0 or later",
+		    g_szAppName, MB_OK);
+	    return FALSE;
+    }
+    
+    
+    cinst.SetMessageFunction(message_box);
 
 #define MAXCMDTOKENS 128
 
-	int argc;
-	LPSTR argv[MAXCMDTOKENS];
-	LPSTR p;
-	char command[256];
-	char *args;
-	char *d, *e;
-     
-	p = GetCommandLine();
+    int argc;
+    LPSTR argv[MAXCMDTOKENS];
+    LPSTR p;
+    char command[256];
+    char *args;
+    char *d, *e;
+    int i;
+ 
+    p = GetCommandLine();
 
-	argc = 0;
-	args = (char *)malloc(lstrlen(p)+1);
-	if (args == (char *)NULL)
-		return 1;
-       
-	// Parse command line handling quotes.
-	d = args;
-	while (*p) {
-		// for each argument
+    argc = 0;
+    args = (char *)malloc(lstrlen(p)+1);
+    if (args == (char *)NULL)
+	    return 1;
+   
+    // Parse command line handling quotes.
+    d = args;
+    while (*p) {
+	    // for each argument
 
-		if (argc >= MAXCMDTOKENS - 1)
-			break;
+	    if (argc >= MAXCMDTOKENS - 1)
+		    break;
 
-		e = d;
-		while ((*p) && (*p != ' ')) {
-			if (*p == '\042') {
-				// Remove quotes, skipping over embedded spaces.
-				// Doesn't handle embedded quotes.
-				p++;
-				while ((*p) && (*p != '\042'))
-					*d++ =*p++;
-			}
-			else 
-				*d++ = *p;
-			if (*p)
-				p++;
-		}
-		*d++ = '\0';
-		argv[argc++] = e;
+	    e = d;
+	    while ((*p) && (*p != ' ')) {
+		    if (*p == '\042') {
+			    // Remove quotes, skipping over embedded spaces.
+			    // Doesn't handle embedded quotes.
+			    p++;
+			    while ((*p) && (*p != '\042'))
+				    *d++ =*p++;
+		    }
+		    else 
+			    *d++ = *p;
+		    if (*p)
+			    p++;
+	    }
+	    *d++ = '\0';
+	    argv[argc++] = e;
 
-		while ((*p) && (*p == ' '))
-			p++;	// Skip over trailing spaces
+	    while ((*p) && (*p == ' '))
+		    p++;	// Skip over trailing spaces
+    }
+    argv[argc] = NULL;
+
+    if (strlen(argv[0]) == 0) {
+	    GetModuleFileName(g_hInstance, command, sizeof(command)-1);
+	    argv[0] = command;
+    }
+
+    if ((argc > 2) && (strcmp("-filelist", argv[1])==0)) {
+	    // Probably creating filelist.txt
+	    return make_filelist(argc, argv);
+    }
+
+    for (i=1; i<argc; i++) {
+	if (strcmp(argv[i], "-name") == 0) {
+	    i++;
+	    szRegName = argv[i];
 	}
-	argv[argc] = NULL;
-
-	if (strlen(argv[0]) == 0) {
-		GetModuleFileName(g_hInstance, command, sizeof(command)-1);
-		argv[0] = command;
+	else if (strcmp(argv[i], "-number") == 0) {
+	    char *n;
+	    i++;
+	    n = argv[i];
+	    while (*n && *n != '-')
+		n++;
+	    if (*n == '-')
+		n++;
+	    nRegReceipt = atoi(argv[i]);
+	    nRegNumber = atoi(n);
 	}
-
-	if (argc > 2) {
-		// Probably creating filelist.txt
-		return make_filelist(argc, argv);
+	else {
+	    // Directory specified, so batch mode requested
+	    strncpy(g_szTargetDir, argv[i], sizeof(g_szTargetDir));
+	    g_bBatch = TRUE;
+	    init_temp();	/* find out if TEMP is defined */
 	}
+    }
 
-	// check if batch mode requested
-	// get location of target directory from command line as argv[1]
-	if (argc == 2) {
-		strncpy(g_szTargetDir, argv[1], sizeof(g_szTargetDir));
-		g_bBatch = TRUE;
-		if (is_winnt)
-			g_bAllUsers = TRUE;
-		init_temp();	/* find out if TEMP is defined */
-	}
+    if (szRegName && nRegReceipt)
+	 write_registration(nRegReceipt, nRegNumber, szRegName);
 
-	if (g_bBatch) {
-		if (!install_all()) {
-			// display log showing error
-			g_bBatch = FALSE;
-			create_dialog();
-			goto_page(hwnd_current, IDD_TEXTWIN);
-		        WIZPAGE *page = find_page_from_id(IDD_TEXTWIN);
-			page->next = IDD_FAILED;	/* KLUDGE */
-			EnableWindow(GetDlgItem(page->hwnd, IDNEXT), TRUE);
-			gs_addmess_update();
-		}
-		return TRUE;
-	}
-	
-	// Interactive setup
-        check_language();
-	LoadString(g_hInstance, IDS_TARGET_DIR, 
-		g_szTargetDir, sizeof(g_szTargetDir));
-	
-	// main dialog box
-	if (!create_dialog())
-		return FALSE;
+    if (g_bBatch) {
+	    if (!install_all()) {
+		    // display log showing error
+		    g_bBatch = FALSE;
+		    create_dialog();
+		    goto_page(hwnd_current, IDD_TEXTWIN);
+		    WIZPAGE *page = find_page_from_id(IDD_TEXTWIN);
+		    page->next = IDD_FAILED;	/* KLUDGE */
+		    EnableWindow(GetDlgItem(page->hwnd, IDNEXT), TRUE);
+		    gs_addmess_update();
+	    }
+	    return TRUE;
+    }
+    
+    // Interactive setup
+    check_language();
+    LoadString(g_hInstance, IDS_TARGET_DIR, 
+	    g_szTargetDir, sizeof(g_szTargetDir));
+    
+    // main dialog box
+    if (!create_dialog())
+	    return FALSE;
 
-	return (g_hMain != (HWND)NULL); /* success */
+    return (g_hMain != (HWND)NULL); /* success */
 }
 
 
@@ -1376,8 +1459,14 @@ HINSTANCE hInstance;
 	case IDM_LANGFR:
 	    strcat(langdll, "fr");
 	    break;
+	case IDM_LANGGR:
+	    strcat(langdll, "gr");
+	    break;
 	case IDM_LANGIT:
 	    strcat(langdll, "it");
+	    break;
+	case IDM_LANGNL:
+	    strcat(langdll, "nl");
 	    break;
 	case IDM_LANGEN:
 	default:
@@ -1417,7 +1506,9 @@ LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDM_LANGDE:
                 case IDM_LANGES:
                 case IDM_LANGFR:
+                case IDM_LANGGR:
                 case IDM_LANGIT:
+                case IDM_LANGNL:
                     EndDialog(hDlg, LOWORD(wParam));
                     return(TRUE);
                 default:
@@ -1448,7 +1539,9 @@ int language;
 	    case IDM_LANGDE:
 	    case IDM_LANGES:
 	    case IDM_LANGFR:
+	    case IDM_LANGGR:
 	    case IDM_LANGIT:
+	    case IDM_LANGNL:
 		load_language(language);
 	}
     }
@@ -1841,6 +1934,9 @@ BOOL make_filelist(int argc, char *argv[])
     g_bBatch = TRUE;	// Don't run message loop
 	
     for (i=1; i<argc; i++) {
+		if (strcmp(argv[i], "-filelist") == 0) {
+		    /* ignore */
+		}
 		if (strcmp(argv[i], "-title") == 0) {
 			i++;
 			title = argv[i];
@@ -1857,7 +1953,7 @@ BOOL make_filelist(int argc, char *argv[])
 		    if ((title == NULL) || (strlen(title) == 0) ||
 			(dir == NULL) || (strlen(dir) == 0) ||
 			(list == NULL) || (strlen(list) == 0)) {
-			message_box("Usage: setupgs -title \042Aladdin Ghostscript #.##\042 -dir \042gs#.##\042 -list \042filelist.txt\042 spec1 spec2 specn\n");
+			message_box("Usage: setupgs -filelist -title \042AFPL Ghostscript #.##\042 -dir \042gs#.##\042 -list \042filelist.txt\042 spec1 spec2 specn\n");
 			return FALSE;
 		    }
 		    if (fList == (FILE *)NULL) {

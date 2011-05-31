@@ -12,7 +12,7 @@
  entwickelten PostScript Document Structuring Conventions
  (DSC-Konventionen) entsprechen, auf dem Bildschirm dargestellt und auf
  einen Drucker ausgegeben werden.
- Die Version GSview 4.0 erfordert Ghostscript in der Version 7.00 - 7.99.
+ Die Version GSview 4.1 erfordert Ghostscript in der Version 7.00 - 7.99.
 2Installation
 ?Installation
  Zur Installation von GSview verwenden Sie
@@ -268,15 +268,15 @@ WP
  Benutzerprofil-Verzeichnis in das GSview Verzeichnis und entfernen Sie alle
  Einträge bis auf:
   [Options]
-  Version=4.0
-  GSversion=700
+  Version=4.1
+  GSversion=703
   Configured=1
 W
-  GhostscriptDLL=E:\gs\gs7.00\bin\gsdll32.dll
+  GhostscriptDLL=E:\gs\gs7.03\bin\gsdll32.dll
 P
-  GhostscriptDLL=E:\gs\gs7.00\bin\gsdll2.dll
+  GhostscriptDLL=E:\gs\gs7.03\bin\gsdll2.dll
 WP
-  GhostscriptInclude=E:\gs\gs7.00\lib;E:\gs\fonts
+  GhostscriptInclude=E:\gs\gs7.03\lib;E:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Wenn ein Benutzer GSview startet, dann wird normalerweise seine INI Datei benutzt.
  Startet GSview das erste Mal oder die Version von Gsview stimmt nicht mit der in
@@ -291,17 +291,21 @@ WP
  Wenn Sie dieses Verhalten ändern möchten, so wählen Sie
  `Optionen` | `Fortgeschrittene Konfiguration`.
 
-4. Programmanagergruppen / Startmenüeinträge / Programmobjekte werden NICHT
- verändert
- Wenn Sie dieses Verhalten ändern möchten, so wählen Sie
+ 4. Programmmanagergruppen / Startmenüeinträge / Programmobjekte werden NICHT
+ verändert. Wenn Sie dieses Verhalten ändern möchten, so wählen Sie
  `Optionen` | `Fortgeschrittene Konfiguration`.
 W
 
-  Wenn ein Benutzer das GSview Deinstallationsprogramm aufruft, versucht dieses
- GSview und Ghostscript im Netzwerk zu löschen.  Stellen sie deshalb sicher, daß
+ Wenn ein Benutzer das GSview-Deinstallationsprogramm aufruft, versucht dieses
+ GSview und Ghostscript im Netzwerk zu löschen.  Stellen Sie deshalb sicher, daß
  die Verzeichnisse von GSview und Ghostscript vor Benutzern schreibgeschützt sind.
- Um ganz sicher zu sein, können sie auch die Datei `uninstal.txt` aus dem GSview-
+ Um ganz sicher zu sein, können Sie auch die Datei `uninstal.txt` aus dem GSview-
  Verzeichnis nehmen.
+
+ Alternativ können Sie GSview auf jedem Computer ohne Rückfragen installieren
+ indem Sie das selbstenpackende Archiv durch folgenden Aufruf des Setupprogramms
+ entpacken:
+  setup -name "Your Name" -number XXXXX-XXXXX "c:\ghostgum"
 E
 W
 3GSview vom Datei-Manager oder Windows Explorer starten
@@ -842,7 +846,7 @@ PX
 P
  gvpm.ini
 X
- ~/.gsviewrc
+ ~/.gsview.ini
 PX
  gespeichert.
 
@@ -939,7 +943,7 @@ W
 P
  gvpm.ini
 X
- ~/.gsviewrc
+ ~/.gsview.ini
 E
  geschrieben.
 
@@ -987,7 +991,7 @@ W
 P
  gvpm.ini
 X
- ~/.gsviewrc
+ ~/.gsview.ini
 E
  in diesem Fall um zwei Sektionen ergänzt werden.
  Das folgende Beispiel verdeutlicht, wie die Datei für den cdjcolor-Treiber
@@ -1018,7 +1022,7 @@ W
 P
  gvpm.ini
 X
- ~/.gsviewrc
+ ~/.gsview.ini
 E
  wie folgt an Ghostscript weitergeleitet:
   -dBitsPerPixel=24 -dDepletion=1 -dShingling=2 -dBlackCorrect=4
@@ -1150,7 +1154,7 @@ W
 P
  gvpm.ini
 X
- .gsviewrc
+ .gsview.ini
 E
  gespeichert und entstammt der Standarddistribution von Ghostscript 6.01.
  Sie können andere Geräte oder Auflösungen verwenden.
@@ -1776,9 +1780,15 @@ E
 3Sprache
 ?Sprache
 ?International
- GSview ist in Englisch, Französisch, Deutsch und Italienisch und Spanisch
- verfügbar.
+ GSview ist in Englisch, Niederländisch, Französisch, Deutsch, Griechisch, 
+ Italienisch und Spanisch verfügbar.
  Über die Funktion `Optionen `| `Sprache` können Sie die Einstellung verändern.
+
+ Unter Windows NT können alle verfügbaren Sprachen unabhängig 
+ von den Ländereinstellungen gewählt werden.
+ Auf anderen Systemen hängen  die verfügbaren Sprachen von den Ländereinstellungen
+ ab, insbesondere von den gewählten locales oder Systemcodeseiten (code pages).
+
 3PSzuText
 ?PSzuText
  Gsview unterstützt zwei verschiedene Methoden, um Text zu suchen und
@@ -1836,7 +1846,7 @@ W
 P
  gvpm.ini im OS/2-Systemverzeichnis
 X
- .gsviewrc im Home-Verzeichnis
+ .gsview.ini im Home-Verzeichnis
 E
  gespeichert. Wird das Programm gestartet, liest GSview diese Datei.
 
@@ -2186,6 +2196,9 @@ E
  Über das Menü `Formate` können Sie die Seitengröße auswählen.
  Mögliche Größen sind:
   11x17          11   x 17   inch
+  A0              840 x 1189 mm
+  A1              594 x 840  mm
+  A2              420 x 594  mm
   A3              297 x 420  mm
   A4              210 x 297  mm
   A5              148 x 210  mm
@@ -2249,13 +2262,13 @@ E
 
  `D`, `d`  Alle oder einzelne Seiten drucken.  (`Datei` | `Drucken`)
 
- `F`, `f`  Alle oder einzelne Seiten in eine Datei drucken.
- (`Datei` | `Drucken`) mit der Option `Druck in Datei` aktiviert.
+ `F`, `f`  Wandle alle oder einzelne Seiten in eine PDF- oder
+  Bitmap-Datei. (`Datei` | `Konvertierung`).
 
  `E`, `e`  Mehrere Seiten in andere Datei extrahieren.
  (`Datei` | `Extrahiere`)
 
- `M`, `m`  Ghostscript Meldungen anzeigen. (`Datei` | `Meldungen anzeigen`)
+ `M`, `m`  Ghostscriptmeldungen anzeigen. (`Datei` | `Meldungen anzeigen`)
 
  `<` Auflösung verringern
 
@@ -2293,71 +2306,45 @@ E
  `Ende`  Ende der Seite.
 2Aufruf-Optionen
 ?Aufruf-Optionen
+ GSview ignoriert Groß/Kleinschreibung der Optionen:
+ -p ist dasselbe wie -P.  Unter Windows oder OS/2 kann man auch
+ /p oder /P verwenden.  In den folgenden Beispielen ersetze man `gsview` 
+ durch `gsview32` unter Windows und `gvpm` unter OS/2.
+
  Verwendung:
-W
-  gsview32 [/D] [/Tn] dateiname
-  gsview32 [/D] [/Tn] /F dateiname
-  gsview32 [/D] [/Tn] /P dateiname
-  gsview32 [/D] [/Tn] /S[port] dateiname
-  gsview32 [/D] [/Tn] /S["queue"] dateiname
-P
-  gvpm [/D] [/Tn] dateiname
-  gvpm [/D] [/Tn] /F dateiname
-  gvpm [/D] [/Tn] /P dateiname
-X
-  gsview [-d] dateiname
-  gsview32 [-d] -P dateiname
-  gsview32 [-d] -F dateiname
-E
+  gsview [-d] [-t] [-f[DEVICE]] [-p[QUEUE]]
+    [-mPAPERSIZE] [-oORIENTATION] [-rXDPIxYDPI]
+    [-geometry WIDTHxHEIGHT[+XOFF+YOFF]] dateiname
 
- So starten Sie GSview und zeigen dateiname.ps an:
-W
-  gsview32 dateiname.ps
-P
-  gvpm dateiname.ps
-X
-  gsview dateiname.ps
-E
- So starten Sie GSview und drucken dateiname.ps unter Verwendung von
- Ghostscript. Das ist ähnlich `Datei` | `Drucken`, außer dass Sie nicht
- nach einem Drucker gefragt werden (es wird der zuletzt von GSview verwendete
- Drucker benutzt) und dass GSview sich nach dem Druck beendet.
-W
-  gsview32 /P dateiname.ps
-P
-  gvpm /P dateiname.ps
-X
+ Optionen:
+
+ `dateiname` Um GSview zu starten und dateiname.ps anzuzeigen:
   gsview -P dateiname.ps
-E
- So starten Sie GSview und drucken dateiname.ps unter Verwendung von
- Ghostscript (`Datei` | `Druck in Datei`) in eine Datei:
-W
-  gsview32 /F dateiname.ps
-P
-  gvpm /F dateiname.ps
-X
-  gsview -F dateiname.ps
-E
-W
- So starten Sie GSview und stellen dateiname.ps für die direkte Ausgabe auf
- einen Drucker in den Spooler (`Datei` | `Drucke Datei`):
-  gsview32 /S dateiname.ps
- So starten Sie GSview und stellen dateiname.ps für die direkte Ausgabe auf
- LPT3: in den Spooler:
-  gsview32 /SLPT3: dateiname.ps
- So starten Sie Gsview und stellen dateiname.ps in die Druckerwarteschlange
- "HP DeskJet Portable":
-  gsview32 /S"HP DeskJet Portable" dateiname.ps
-E
 
- So starten S GSview im Debug-Modus:
-W
-  gsview32 /D
-P
-  gvpm /D
-X
-  gsview -d
-E
+ `-p` druckt dateiname.ps mittels Ghostscript.
+ Das ist ahnlich  `Datei` | `Drucken`, ausser dass man nicht
+ nach einem Drucker gefragt wird (es wird der zuletzt von 
+ GSview benutzte Drucker verwendet, oder der Drucker dessen Name
+ angegeben wird) und GSview nach dem Drucken beendet wird:
+  gsview -p dateiname.ps
+
+ `-f` konvertiert eine PostScript-Datei (kein PDF) dateiname.ps
+ in eine Datei mittels Ghostscript (`Datei` | `Konvertierung`):
+  gsview -f dateiname.ps
+
+ `-m`PAPERSIZE setzt das Seitenformat. Alle vordefinierten 
+ Mediengrößen sind gültig.
+
+ `-o`ORIENTATION setzt die Seitenausrichtung auf `auto`, 
+ `portrait`, `landscape`, `upsidedown` oder `seascape`.
+
+ `-r`XDPIxYDPI setzt die Anzeige-, Konvertierungs- oder Druckauflösung.
+
+ Um eine Datei auf A4-Papier in Querformat mit 96dpi anzuzeigen:
+  gsview -ma4 -olandscape -r96x96 dateiname.ps
+
+ `-d` Debug-Modus.
+
  Im Debug-Modus werden die temporären Dateien von GSview nicht gelöscht, so
  daß sie nach dem Beenden von GSview überprüft werden können.
  Im Debug-Modus werden außerdem detailliertere Meldungen
@@ -2366,38 +2353,36 @@ E
 WP
  c:\gsview.txt
 X
- standard output
+ STDOUT
 E
  zu schreiben, verwendet man -d9.
 
-WP
- GSview läuft
-W
- unter Windows 95 und Windows NT multithreaded, unter Windows 3.1 / Win32s
- dagegen singlethreaded.
-P
- multithreaded.
-WP
- Den Threading-Modus können Sie mit der Option `/T` ändern.
- Dabei wählen Sie mit `/T0` den Single-Thread--Modus aus und mit `/T1` den
+ `-t` Multi-threading.  GSview läuft standardmäßig multithreaded,
+ außer für Windows 3.1/Win32s.
+ Den Threading-Modus können Sie mit der Option `-t` ändern.
+ Dabei wählen Sie mit `-t0` den Single-Thread-Modus aus und mit `-t1` den
  Multi-Thread-Modus.
-E
 
 W
- Statt eine zweite Instanz von GSview zu starten, kann man GSview anweisen,
- eine Datei in einem existierenden GSview zu öffnen, oder falls GSview noch
- nicht läuft, doch eine neue Instanz zu starten:
-  gsview32 /E dateiname
- Um ein laufendes GSview zu beenden, gibt man ein:
-  gsview32 /X
+ Windows unterstützt einige weitere Kommandozeilenoptionen.
 
-E
- Bei diesen Optionen gibt es keinen Unterschied zwischen Groß- und
- Kleinschreibung. Beispiel:
-WP
- /p bewirkt das gleiche wie /P.
+ `-s` spoolt eine Datei direkt zum Drucker ohne Ghostscript zu verwenden.
+ GSview wird beendet wenn die Datei gespoolt wurde.
+ Einige Beispiele sind:
+  gsview -s dateiname.ps
+  gsview -sLPT3: dateiname.ps
+  gsview -s"HP DeskJet Portable" dateiname.ps
+
+ `-e` verwendet DDE um eine Datei in einem bestehenden GSview zu öffnen oder, 
+ wenn GSview noch nicht lßuft, in in einem neuen Fenster:
+  gsview -e filename
+
+ `-x` nutzt DDE um ein bestehendes GSview zu schließen.
+  gsview -x
 X
- -p bewirkt das gleiche wie -P.
+ Unter GNU/Linux kann man auch folgend Optionen verwenden:
+  gsview -v     (Versionsanzeige)
+  gsview -h     (Hilfefunktion)
 E
 W
 3Dynamischer Datenaustausch (DDE)
@@ -2671,7 +2656,7 @@ E
  Ändern Sie dies in "Printers | Postscript tab | Advanced... |
  Data format group box | ASCII data".
 
- `Problem:` DerVersuch irgendeine Datei zu öffnen ergibt:
+ `Problem:` Der Versuch irgendeine Datei zu öffnen ergibt:
   `Unrecoverable error: configurationerror in setpagedevice`
   Failed to open device or install ViewerPreProcess hook: returns -26
   Page size may have been too large or resolution too high.
@@ -2680,10 +2665,18 @@ E
  Entweder die Seitengröße oder die Auflösung ist zu groß. Reduzieren
  sie diese entsprechend.
  Es ist jedoch auch möglich, daß sie die Option `-dFIXEDMEDIA` in der
- Ghostscript Umgebungsvariablen GS_OPTIONS angegeben haben.
- Wenn sie mit Gsview arbeiten, so sollten sie GS_OPTIONS am besten
+ Ghostscript-Umgebungsvariablen GS_OPTIONS angegeben haben.
+ Wenn sie mit GSview arbeiten, so sollten sie GS_OPTIONS am besten
  gar nicht benutzen, stattdessen verwenden sie bitte `Optionen` |
- `Konfiguriere Ghostscript` | `Ghostscript Optionen`.
+ `Konfiguriere Ghostscript` | `Ghostscript-Optionen`.
+
+ `Problem:` GSview hangt oder braucht sehr lange um eine Datei anzuzeigen.
+
+ Die Auflosung oder die Seitengröße kann zu hoch sein.
+ Senken sie die Auflösung auf 96dpi (Standard) mittels
+ `Formate`| `Anzeige Einstellungen`.
+ Ändern Sie die Seitengröße mit dem  `Format`-Menü.
+
 W
 2Andere nützliche Programme
 ?Andere nützliche Programme
@@ -2691,20 +2684,20 @@ W
 ?PrintFile
  `RedMon` ist ein Windows 95 und NT Port Monitor, der es einem erlaubt,
  einen Druckerport an ein Programm umzuleiten.
- RedMon kann zusammen mit Ghostscript und einem nicht Postscript fähigem
- Drucker benutzt werden um einen Postscript Drucker zu emulieren. Dieser
+ RedMon kann zusammen mit Ghostscript und einem nicht postscriptfähigem
+ Drucker benutzt werden, um einen Postscriptdrucker zu emulieren. Dieser
  emulierte Drucker kann als Netzwerkdrucker anderen Computern zur
  Verfügung gestellt werden. Weiteres unter:
    http://www.cs.wisc.edu/~ghost/redmon/
  RedMon beinhaltet außerdem ein Kommandozeilenprogramm um eine
- Datei in eine Windows Druckerwarteschlange zu stellen.
+ Datei in eine Windows-Druckerwarteschlange zu stellen.
 
- `PrintFile` von Peter Lerup ist eine Windows Applikation um Dateien an
- Drucken zu schicken. Es beinhaltet smarte Verarbeitung von Text,
- Postscript und anderen Dateien. Es ist erhältlich unter:
+ `PrintFile` von Peter Lerup ist eine Windows-Applikation um Dateien an
+ Drucker zu schicken. Es erlaubt die intelligente Verarbeitung von Text-,
+ Postscript- und anderen Dateien. Es ist erhältlich unter:
    http://hem1.passagen.se/ptlerup/
- Sehen sie auf die Ghostscript `WWW` Seite für weitere nützliche
- Programme.
+ Sehen sie auf der Ghostscript-`WWW`-Seite nach weiteren nützlichen
+ Programmen nach.
 E
 2Weitere Hilfethemen
 ?Weitere Hilfethemen
@@ -2732,13 +2725,13 @@ WX
 3bzip2
 ?bzip2
  Wenn Sie versuchen eine Datei zu öffnen, die mit bzip2 gepackt
- wurde, dann versucht GSview die bzip2-DLL zu laden und es
+ wurde, dann versucht GSview die bzip2-DLL zu laden und die Datei
  in eine temporäre Datei zu entpacken.
 
 W
  Wenn Sie die Fehlermeldung `Failed to load bzip2 DLL...`  bekommen,
- dann ist diese Bibliothek wahrscheinlich nicht verfügbar. Holen Sie diese
- von demselben  Server, von dem Sie auch GSview geholt haben oder von
+ dann ist diese Bibliothek wahrscheinlich nicht verfügbar. Laden Sie diese
+ von demselben  Server, von dem Sie auch GSview geladen haben oder von
   ftp://ftp.cs.wisc.edu/ghost/ghostgum/
  Kopieren Sie die bzip2-DLL in dasselbe Verzeichnis wie GSview EXE.
  libbz2.dll ist für Win32. Zur Zeit ist leider keine bzip2 DLL für Win16

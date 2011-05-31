@@ -22,14 +22,21 @@
 WINZIPSE_XE="C:\Program Files\WinZip Self-Extractor\WZIPSE32.EXE"
 !endif
 
-OBJ1=gvwin.obj gvwdde.obj gvwdde2.obj gvwdll.obj gvwdisp.obj gvwdlg.obj
-OBJ2=gvwclip.obj gvwedit.obj gvweps.obj gvwmeas.obj gvwmisc.obj gvwprf.obj 
-OBJ3=gvwprn.obj gvcmeas.obj gvcmeas2.obj gvcmisc.obj gvcdisp.obj gvccmd.obj 
-OBJ4=gvcprn.obj gvceps.obj gvcinit.obj gvctext.obj dscparse.obj dscutil.obj 
-OBJ5=gvwimg.obj gvcdll.obj gvcpdf.obj gvwinit.obj gvcbeta.obj gvwgsver.obj
-OBJ6=gvcreg.obj gvwreg.obj gvwfile.obj gvwdib.obj gvwpdib.obj gvwpgdi.obj
-OBJ7=cdll.obj cimg.obj cview.obj
-OBJS=$(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ6) $(OBJ7)
+OBJ1=gvwin.obj gvwcp.obj gvwdll.obj gvwdisp.obj gvwdlg.obj
+OBJ2=gvwdde.obj gvwdde2.obj gvwmisc.obj gvcprf.obj
+OBJ3=gvcmisc.obj gvcdisp.obj gvccmd.obj gvcinit.obj
+OBJ4=dscparse.obj dscutil.obj gvwimg.obj gvcdll.obj gvcpdf.obj gvwinit.obj
+OBJ5=gvcbeta.obj gvwgsver.obj gvcreg.obj gvwreg.obj gvwfile.obj
+OBJ6=cdll.obj cimg.obj cview.obj
+!if $(VIEWONLY)
+OBJ7=viewonly.obj
+OBJ8=viewonly.obj
+!else
+OBJ7=gvwclip.obj gvwedit.obj gvweps.obj gvwprn.obj gvwmeas.obj gvcedit.obj gvcmeas.obj gvcmeas2.obj 
+OBJ8=gvcprn.obj gvceps.obj  gvctext.obj gvwdib.obj gvwpdib.obj gvwpgdi.obj
+!endif
+
+OBJS=$(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ6) $(OBJ7) $(OBJ8)
 
 GSHDRS=iapi.h errors.h gdevdsp.h
 HDRS=gsvver.h gvcrc.h gvwin.h dscparse.h gvcfn.h gvcver.h gvcfile.h gvwdib.h gvwpdib.h gvwgsver.h $(GSHDRS)
@@ -64,6 +71,21 @@ gsvw$(WINEXT)fr.res: $(HDRS) gvwin2.rc fr\gvclang.h fr\gvclang.rc fr\gvwlang.rc
 	-del gvclang.rc
 	-del gvwlang.rc
 
+gsvw$(WINEXT)gr.res: $(HDRS) gvwin2.rc gr\gvclang.h gr\gvclang.rc gr\gvwlang.rc greek2uc.exe
+#	greek2uc gr\gvclang.h  gvclang.h
+#	greek2uc gr\gvclang.rc gvclang.rc
+#	greek2uc gr\gvwlang.rc gvwlang.rc
+#	greek2uc gvwin2.rc temp.rc
+#	$(RCOMP) -i"$(INCDIR)" -r -fogsvw$(WINEXT)gr.res temp.rc
+#	-del temp.rc
+	copy gr\gvclang.h  gvclang.h
+	copy gr\gvclang.rc gvclang.rc
+	copy gr\gvwlang.rc gvwlang.rc
+	$(RCOMP) -i"$(INCDIR)" -r -fogsvw$(WINEXT)gr.res -c1253 gvwin2.rc
+	-del gvclang.h
+	-del gvclang.rc
+	-del gvwlang.rc
+
 gsvw$(WINEXT)it.res: $(HDRS) gvwin2.rc it\gvclang.h it\gvclang.rc it\gvwlang.rc
 	copy it\gvclang.h  gvclang.h
 	copy it\gvclang.rc gvclang.rc
@@ -73,82 +95,98 @@ gsvw$(WINEXT)it.res: $(HDRS) gvwin2.rc it\gvclang.h it\gvclang.rc it\gvwlang.rc
 	-del gvclang.rc
 	-del gvwlang.rc
 
+gsvw$(WINEXT)nl.res: $(HDRS) gvwin2.rc nl\gvclang.h nl\gvclang.rc nl\gvwlang.rc
+	copy nl\gvclang.h  gvclang.h
+	copy nl\gvclang.rc gvclang.rc
+	copy nl\gvwlang.rc gvwlang.rc
+	$(RCOMP) -i"$(INCDIR)" -r -fogsvw$(WINEXT)nl.res gvwin2
+	-del gvclang.h
+	-del gvclang.rc
+	-del gvwlang.rc
+
 gvwin$(WINEXT).res: $(HDRS) gvwin1.rc gvwin2.rc en\gvclang.h en\gvclang.rc en\gvwlang.rc
 	copy en\gvclang.h  gvclang.h
 	copy en\gvclang.rc gvclang.rc
 	copy en\gvwlang.rc gvwlang.rc
-	$(RCOMP) -i"$(INCDIR)" -r -fogvwin$(WINEXT).res gvwin1
+	$(RCOMP) -i"$(INCDIR)" $(CFLAGVIEW) -r -fogvwin$(WINEXT).res gvwin1
 #	-del gvclang.h
 #	-del gvclang.rc
 #	-del gvwlang.rc
 
 gsprint.obj: gsprint.cpp gvcfile.h gvwdib.h gvwpdib.h gsvver.h gvcver.h
+	$(CC) $(CFLAGS) -c gsprint.cpp
 
-gvwin.obj: gvwin.cpp $(HDRS)
+gvwin.obj: gvwin.c $(HDRS)
 
-gvwclip.obj: gvwclip.cpp $(HDRS)
+gvwcp.obj: gvwclip.c $(HDRS)
 
-gvwdisp.obj: gvwdisp.cpp $(HDRS)
+gvwclip.obj: gvwclip.c $(HDRS)
 
-gvwdlg.obj: gvwdlg.cpp $(HDRS)
+gvwdisp.obj: gvwdisp.c $(HDRS)
 
-gvwdll.obj: gvwdll.cpp $(HDRS)
+gvwdlg.obj: gvwdlg.c $(HDRS)
 
-gvwedit.obj: gvwedit.cpp $(HDRS)
+gvwdll.obj: gvwdll.c $(HDRS)
 
-gvweps.obj: gvweps.cpp gvceps.h $(HDRS)
+gvwedit.obj: gvwedit.c $(HDRS)
 
-gvwgsver.obj: gvwgsver.cpp $(HDRS)
+gvweps.obj: gvweps.c gvceps.h $(HDRS)
 
-gvwimg.obj: gvwimg.cpp $(HDRS)
+gvwgsver.obj: gvwgsver.c $(HDRS)
 
-gvwinit.obj: gvwinit.cpp $(HDRS)
+gvwimg.obj: gvwimg.c $(HDRS)
 
-gvwmeas.obj: gvwmeas.cpp $(HDRS)
+gvwinit.obj: gvwinit.c $(HDRS)
 
-gvwmisc.obj: gvwmisc.cpp $(HDRS)
+gvwmeas.obj: gvwmeas.c $(HDRS)
 
-gvwprn.obj: gvwprn.cpp $(HDRS)
+gvwmisc.obj: gvwmisc.c $(HDRS)
 
-gvccmd.obj: gvccmd.cpp $(HDRS)
+gvwprn.obj: gvwprn.c $(HDRS)
 
-gvcdisp.obj: gvcdisp.cpp $(HDRS)
+gvccmd.obj: gvccmd.c $(HDRS)
 
-gvcdll.obj: gvcdll.cpp $(HDRS)
+gvcdisp.obj: gvcdisp.c $(HDRS)
 
-cdll.obj: cdll.cpp $(HDRS)
+gvcdll.obj: gvcdll.c $(HDRS)
 
-cimg.obj: cimg.cpp $(HDRS)
+cdll.obj: cdll.c $(HDRS)
 
-cview.obj: cview.cpp $(HDRS)
+cimg.obj: cimg.c $(HDRS)
 
-dscparse.obj: dscparse.cpp dscparse.h
+cview.obj: cview.c $(HDRS)
 
-dscutil.obj: dscutil.cpp dscparse.h
+dscparse.obj: dscparse.c dscparse.h
 
-gvcbeta.obj: gvcbeta.cpp gvcbeta.h $(HDRS)
+dscutil.obj: dscutil.c dscparse.h
 
-gvceps.obj: gvceps.cpp gvceps.h $(HDRS)
+gvcbeta.obj: gvcbeta.c gvcbeta.h $(HDRS)
 
-gvcinit.obj: gvcinit.cpp $(HDRS)
+gvcedit.obj: gvcedit.c $(HDRS)
 
-gvcmeas.obj: gvcmeas.cpp $(HDRS)
+gvceps.obj: gvceps.c gvceps.h $(HDRS)
 
-gvcmeas2.obj: gvcmeas2.cpp $(HDRS)
+gvcinit.obj: gvcinit.c $(HDRS)
 
-gvcmisc.obj: gvcmisc.cpp $(HDRS)
+gvcmeas.obj: gvcmeas.c $(HDRS)
 
-gvcpdf.obj: gvcpdf.cpp $(HDRS)
+gvcmeas2.obj: gvcmeas2.c $(HDRS)
 
-gvcprn.obj: gvcprn.cpp $(HDRS)
+gvcmfile.obj: gvcmfile.c gvcfile.h
 
-gvctext.obj: gvctext.cpp $(HDRS)
+gvcmisc.obj: gvcmisc.c $(HDRS)
 
-gvcreg.obj: gvcreg.cpp $(HDRS)
+gvcpdf.obj: gvcpdf.c $(HDRS)
 
-gvwreg.obj: gvwreg.cpp $(HDRS)
+gvcprn.obj: gvcprn.c $(HDRS)
 
-gvwfile.obj: gvwfile.cpp gvcfile.h
+gvctext.obj: gvctext.c $(HDRS)
+
+gvcreg.obj: gvcreg.c $(HDRS)
+
+gvwreg.obj: gvwreg.c $(HDRS)
+
+gvwfile.obj: gvwfile.c gvcfile.h
 
 gvwdib.obj: gvwdib.cpp $(HDRS)
 
@@ -156,8 +194,10 @@ gvwpdib.obj: gvwpdib.cpp $(HDRS)
 
 gvwpgdi.obj: gvwpgdi.cpp $(HDRS)
 
-winunzip.obj: winunzip.cpp wizdll.h
-	$(CC) -c $(CFLAGS) $*.cpp
+viewonly.obj: viewonly.c $(HDRS)
+
+winunzip.obj: winunzip.c wizdll.h
+	$(CC) -c $(CFLAGS) $*.c
 
 dwuninst.res: dwuninst.rc dwuninst.h
 	$(RCOMP) -i"$(INCDIR)" -r $*.rc
@@ -166,8 +206,13 @@ winsetup.res: winsetup.rc setup.h $(LANGUAGE)\gvclang.h
 	copy $(LANGUAGE)\gvclang.h  gvclang.h
 	$(RCOMP) -i"$(INCDIR)" -r $*.rc
 
-setupc.obj: setupc.cpp setup.h setupc.h gvcrc.h gvcbeta.h
-	$(CC) -c $(CFLAGS) setupc.cpp
+setupc.obj: setupc.c setup.h setupc.h gvcrc.h gvcbeta.h
+	$(CC) -c $(CFLAGS) setupc.c
+
+gvcbetaa.obj: gvcbeta.c gvcbeta.h $(HDRS)
+	copy gvcbeta.c gvcbetaa.c
+	$(CC) -c $(CFLAGS) gvcbetaa.c
+	-del gvcbetaa.c
 
 winsetup.obj: winsetup.cpp setup.h gvcrc.h gvcbeta.h dwinst.h $(LANGUAGE)\gvclang.h 
 	copy $(LANGUAGE)\gvclang.h gvclang.h
@@ -195,28 +240,43 @@ setp$(WINEXT)fr.res: winsetup.rc fr\gvclang.h gvcver.h gvcrc.h setup.h
 	$(RCOMP) -i"$(INCDIR)" -r -fosetp$(WINEXT)fr.res winsetup
 	-del gvclang.h
 
+setp$(WINEXT)gr.res: winsetup.rc gr\gvclang.h gvcver.h gvcrc.h setup.h
+	copy gr\gvclang.h gvclang.h
+	$(RCOMP) -i"$(INCDIR)" -r -fosetp$(WINEXT)gr.res -c1253 winsetup
+	-del gvclang.h
+
 setp$(WINEXT)it.res: winsetup.rc it\gvclang.h gvcver.h gvcrc.h setup.h
 	copy it\gvclang.h gvclang.h
 	$(RCOMP) -i"$(INCDIR)" -r -fosetp$(WINEXT)it.res winsetup
 	-del gvclang.h
 
-ungsview.res: ungsview.rc ungsview.h
-	$(RCOMP) -i"$(INCDIR)" -r $*.rc
+setp$(WINEXT)nl.res: winsetup.rc nl\gvclang.h gvcver.h gvcrc.h setup.h
+	copy nl\gvclang.h gvclang.h
+	$(RCOMP) -i"$(INCDIR)" -r -fosetp$(WINEXT)nl.res winsetup
+	-del gvclang.h
 
-ungsview.obj: ungsview.cpp ungsview.h
-	$(CC) -c $(CFLAGS) ungsview.cpp
-
-gvdoc.exe: gvdoc.cpp
-	$(CCAUX) -I"$(INCDIR)" $(CLFLAG) gvdoc.cpp
+gvdoc.exe: gvdoc.c
+	$(CCAUX) -I"$(INCDIR)" $(CLFLAG) gvdoc.c
 
 gsview.txt: $(LANGUAGE)\gvclang.txt gvdoc.exe
 	gvdoc W $(LANGUAGE)\gvclang.txt gsview.txt
 
-doc2rtf.exe: doc2rtf.cpp
-	$(CCAUX) -I"$(INCDIR)" $(CLFLAG) doc2rtf.cpp
+doc2rtf.exe: doc2rtf.c
+	$(CCAUX) -I"$(INCDIR)" $(CLFLAG) doc2rtf.c
 
-doc2html.exe: doc2html.cpp
-	$(CCAUX) -I"$(INCDIR)" $(CLFLAG) doc2html.cpp
+doc2html.exe: doc2html.c
+	$(CCAUX) -I"$(INCDIR)" $(CLFLAG) doc2html.c
+
+doc2xml.exe: doc2xml.c
+	$(CCAUX) -I"$(INCDIR)" $(CLFLAG) doc2xml.c
+
+docutil.exe: docutil.c
+	$(CCAUX) -I"$(INCDIR)" $(CLFLAG) docutil.c
+
+codepage.exe: codepage.c
+	$(CCAUX) -I"$(INCDIR)" $(CLFLAG) codepage.c
+
+gsview.dvi: gsview.tex titlepag.tex
 
 gsview.dvi: gsview.tex titlepag.tex
 	-latex gsview
@@ -225,8 +285,8 @@ gsview.dvi: gsview.tex titlepag.tex
 gsview.tex: gsview.txt doc2tex.exe
 	doc2tex gsview.txt gsview.tex
 
-doc2tex.exe: doc2tex.cpp
-	$(CCAUX) -I"$(INCDIR)" $(CLFLAG) doc2tex.cpp
+doc2tex.exe: doc2tex.c
+	$(CCAUX) -I"$(INCDIR)" $(CLFLAG) doc2tex.c
 
 gsviewen.hlp: gvdoc.exe doc2rtf.exe en\gvclang.txt en\gsview.hpj
 	copy en\gsview.hpj gsviewen.hpj
@@ -268,6 +328,16 @@ gsviewfr.hlp: gvdoc.exe doc2rtf.exe fr\gvclang.txt fr\gsview.hpj
 	-del gsview.txt
 	-del gsview.rtf
 
+gsviewgr.hlp: gvdoc.exe doc2rtf.exe gr\gvclang.txt gr\gsview.hpj
+	copy gr\gsview.hpj gsviewgr.hpj
+	gvdoc W gr\gvclang.txt gsview.txt
+	doc2rtf gsview.txt gsview.rtf
+	$(HC) gsviewgr.hpj
+	rename gsviewgr.hlp gsviewgr.hlp
+	-del gsviewgr.hpj
+	-del gsview.txt
+	-del gsview.rtf
+
 gsviewit.hlp: gvdoc.exe doc2rtf.exe it\gvclang.txt it\gsview.hpj
 	copy it\gsview.hpj gsviewit.hpj
 	gvdoc W it\gvclang.txt gsview.txt
@@ -278,10 +348,20 @@ gsviewit.hlp: gvdoc.exe doc2rtf.exe it\gvclang.txt it\gsview.hpj
 	-del gsview.txt
 	-del gsview.rtf
 
+gsviewnl.hlp: gvdoc.exe doc2rtf.exe nl\gvclang.txt nl\gsview.hpj
+	copy nl\gsview.hpj gsviewnl.hpj
+	gvdoc W nl\gvclang.txt gsview.txt
+	doc2rtf gsview.txt gsview.rtf
+	$(HC) gsviewnl.hpj
+	rename gsviewnl.hlp gsviewnl.hlp
+	-del gsviewnl.hpj
+	-del gsview.txt
+	-del gsview.rtf
+
 gsview.htm: doc2html.exe gsview.txt
 	doc2html gsview.txt gsview.htm
 
-html: doc2html.exe en\gvclang.txt de\gvclang.txt es\gvclang.txt fr\gvclang.txt it\gvclang.txt
+html: doc2html.exe codepage.exe en\gvclang.txt de\gvclang.txt es\gvclang.txt fr\gvclang.txt gr\gvclang.txt it\gvclang.txt nl\gvclang.txt
 	gvdoc W en\gvclang.txt gsview.txt
 	doc2html gsview.txt gsviewen.htm
 	-del gsview.txt
@@ -294,13 +374,35 @@ html: doc2html.exe en\gvclang.txt de\gvclang.txt es\gvclang.txt fr\gvclang.txt i
 	gvdoc W fr\gvclang.txt gsview.txt
 	doc2html gsview.txt gsviewfr.htm
 	-del gsview.txt
+	gvdoc W gr\gvclang.txt temp.txt
+	codepage 1253_8859-7 temp.txt gsview.txt
+	-del temp.txt
+	doc2html gsview.txt gsviewgr.htm ISO-8859-7
+	-del gsview.txt
 	gvdoc W it\gvclang.txt gsview.txt
 	doc2html gsview.txt gsviewit.htm
+	-del gsview.txt
+	gvdoc W nl\gvclang.txt gsview.txt
+	doc2html gsview.txt gsviewnl.htm
 	-del gsview.txt
 	gvdoc P en\gvclang.txt gsview.txt
 	doc2html gsview.txt os2help.htm
 	-del gsview.txt
 
+
+xml: doc2xml.exe docutil.exe
+	doc2xml en\gvclang.txt temp.xml
+	xt temp.xml xmlwin.xsl test.xml
+	xt test.xml xml2htm.xsl test.htm
+	xt test.xml xml2ipf.xsl test.ipf
+	xt test.xml xml2rtf.xsl test.rtf
+	xt test.xml xml2htmh.xsl testh.htm
+	-mkdir html
+	docutil --post-htmh testh.htm 
+	xt test.xml xml2hhc.xsl temp.hhc
+	docutil --post-hhc temp.hhc test.hhc
+	xt test.xml xml2hhk.xsl temp.hhk
+	docutil --post-hhk temp.hhk test.hhk
 
 gvwgs$(WINEXT).res: gvwgs.rc gvwgs.h $(ICONS) $(LANGUAGE)\gvclang.h 
 	copy $(LANGUAGE)\gvclang.h gvclang.h
@@ -369,7 +471,9 @@ gsv$(GSVIEW_VERSION)wda.zip:
 	echo setpdade.dll >> filesda.txt
 	echo setpdaes.dll >> filesda.txt
 	echo setpdafr.dll >> filesda.txt
+	echo setpdagr.dll >> filesda.txt
 	echo setpdait.dll >> filesda.txt
+	echo setpdanl.dll >> filesda.txt
 #	Copy the files into place
 	-mkdir ..\gsview
 	copy refresh.htm ..\Readme.htm
@@ -379,17 +483,21 @@ gsv$(GSVIEW_VERSION)wda.zip:
 	copy cdorder.txt ..\gsview\cdorder.txt
 	copy regorder.txt ..\gsview\regorder.txt
 	copy gsviewda.exe ..\gsview\gsviewda.exe
-	copy NUL > ..\gsview\gsview32.ini
+	copy NUL ..\gsview\gsview32.ini
 	copy binary\gvwin1.ico ..\gsview\gsview32.ico
 	copy gsviewen.hlp ..\gsview\gsviewen.hlp
 	copy gsviewde.hlp ..\gsview\gsviewde.hlp
 	copy gsviewes.hlp ..\gsview\gsviewes.hlp
 	copy gsviewfr.hlp ..\gsview\gsviewfr.hlp
+	copy gsviewgr.hlp ..\gsview\gsviewgr.hlp
 	copy gsviewit.hlp ..\gsview\gsviewit.hlp
+	copy gsviewnl.hlp ..\gsview\gsviewnl.hlp
 	copy gsvwdade.dll ..\gsview\gsvwdade.dll
 	copy gsvwdaes.dll ..\gsview\gsvwdaes.dll
 	copy gsvwdafr.dll ..\gsview\gsvwdafr.dll
+	copy gsvwdagr.dll ..\gsview\gsvwdagr.dll
 	copy gsvwdait.dll ..\gsview\gsvwdait.dll
+	copy gsvwdanl.dll ..\gsview\gsvwdanl.dll
 	copy gvwgsda.exe ..\gsview\gvwgsda.exe
 	copy printer.ini ..\gsview\printer.ini
 	copy uninstgs.exe ..\gsview\uninstgs.exe
@@ -397,7 +505,9 @@ gsv$(GSVIEW_VERSION)wda.zip:
 	copy setpdade.dll ..\setpdade.dll
 	copy setpdaes.dll ..\setpdaes.dll
 	copy setpdafr.dll ..\setpdafr.dll
+	copy setpdagr.dll ..\setpdagr.dll
 	copy setpdait.dll ..\setpdait.dll
+	copy setpdanl.dll ..\setpdanl.dll
 # assume zlib32.dll is in ..\gsview\zlib32.dll
 # assume libbz2.dll is in ..\gsview\libbz2.dll
 	echo GSview $(GSVIEW_DOT_VERSION)> filel_da.tmp
@@ -429,11 +539,15 @@ distcopy:
 	copy gsviewde.hlp ..\gsview\gsviewde.hlp
 	copy gsviewes.hlp ..\gsview\gsviewes.hlp
 	copy gsviewfr.hlp ..\gsview\gsviewfr.hlp
+	copy gsviewgr.hlp ..\gsview\gsviewgr.hlp
 	copy gsviewit.hlp ..\gsview\gsviewit.hlp
+	copy gsviewnl.hlp ..\gsview\gsviewnl.hlp
 	copy gsvw32de.dll ..\gsview\gsvw32de.dll
 	copy gsvw32es.dll ..\gsview\gsvw32es.dll
 	copy gsvw32fr.dll ..\gsview\gsvw32fr.dll
+	copy gsvw32gr.dll ..\gsview\gsvw32gr.dll
 	copy gsvw32it.dll ..\gsview\gsvw32it.dll
+	copy gsvw32nl.dll ..\gsview\gsvw32nl.dll
 	copy gvwgs32.exe ..\gsview\gvwgs32.exe
 	copy printer.ini ..\gsview\printer.ini
 	copy NUL > ..\gsview\gsview32.ini
@@ -442,7 +556,9 @@ distcopy:
 	copy setp32de.dll ..\setp32de.dll
 	copy setp32es.dll ..\setp32es.dll
 	copy setp32fr.dll ..\setp32fr.dll
+	copy setp32gr.dll ..\setp32gr.dll
 	copy setp32it.dll ..\setp32it.dll
+	copy setp32nl.dll ..\setp32nl.dll
 # assume zlib32.dll is in ..\gsview\zlib32.dll
 # assume libbz2.dll is in ..\gsview\libbz2.dll
 	copy ..\pstoedit\pstoedit.htm ..\gsview\pstoedit.htm
@@ -465,7 +581,9 @@ files32.txt:
 	echo setp32de.dll >> files32.txt
 	echo setp32es.dll >> files32.txt
 	echo setp32fr.dll >> files32.txt
+	echo setp32gr.dll >> files32.txt
 	echo setp32it.dll >> files32.txt
+	echo setp32nl.dll >> files32.txt
 
 gsv$(GSVIEW_VERSION)w32.zip: strip distcopy files32.txt
 	cd ..
@@ -488,7 +606,7 @@ gsv$(GSVIEW_VERSION)w32.exe: strip distcopy gsv$(GSVIEW_VERSION)w32.zip
 	echo GSview is Copyright (C) 2001 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview\LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win32. > dialog.txt
-	echo GSview uses Aladdin Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
+	echo GSview uses AFPL Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
 	$(WINZIPSE_XE) gsv$(GSVIEW_VERSION)w32 @setup.rsp
 # Don't delete temporary files, because make continues
 # before these files are used.
@@ -510,6 +628,7 @@ clean: language
 	-del gsvver.h
 	-del gvwin.obj
 	-del gvwclip.obj
+	-del gvwcp.obj
 	-del gvwdib.obj
 	-del gvwdisp.obj
 	-del gvwdlg.obj
@@ -534,6 +653,7 @@ clean: language
 	-del dscparse.obj
 	-del dscutil.obj
 	-del gvcdisp.obj
+	-del gvcedit.obj
 	-del gvceps.obj
 	-del gvcinit.obj
 	-del gvcmeas.obj
@@ -542,6 +662,7 @@ clean: language
 	-del gvcdll.obj
 	-del gvcpdf.obj
 	-del gvcprn.obj
+	-del gvcprf.obj
 	-del gvcreg.obj
 	-del gvctext.obj
 	-del gsview16.map
@@ -597,6 +718,16 @@ clean: language
 	-del gsvw32fr.exp
 	-del gsvw32fr.pdb
 	-del gsvw32fr.tds
+	-del gsvw32gr.map
+	-del gsvw32gr.ilc
+	-del gsvw32gr.ild
+	-del gsvw32gr.ilf
+	-del gsvw32gr.ils
+	-del gsvw32gr.ilk
+	-del gsvw32gr.lib
+	-del gsvw32gr.exp
+	-del gsvw32gr.pdb
+	-del gsvw32gr.tds
 	-del gsvw32it.map
 	-del gsvw32it.ilc
 	-del gsvw32it.ild
@@ -607,11 +738,23 @@ clean: language
 	-del gsvw32it.exp
 	-del gsvw32it.pdb
 	-del gsvw32it.tds
+	-del gsvw32nl.map
+	-del gsvw32nl.ilc
+	-del gsvw32nl.ild
+	-del gsvw32nl.ilf
+	-del gsvw32nl.ils
+	-del gsvw32nl.ilk
+	-del gsvw32nl.lib
+	-del gsvw32nl.exp
+	-del gsvw32nl.pdb
+	-del gsvw32nl.tds
 	-del gsvw16de.map
 	-del gsvw16en.map
 	-del gsvw16es.map
 	-del gsvw16fr.map
+	-del gsvw16gr.map
 	-del gsvw16it.map
+	-del gsvw16nl.map
 	-del gvwlang.obj
 	-del gvwin16.res
 	-del gvwin32.res
@@ -619,7 +762,9 @@ clean: language
 	-del gsviewde.txt
 	-del gsviewes.txt
 	-del gsviewfr.txt
+	-del gsviewgr.txt
 	-del gsviewit.txt
+	-del gsviewnl.txt
 	-del gsview.rtf
 	-del doc2html.obj
 	-del doc2html.exe
@@ -628,6 +773,12 @@ clean: language
 	-del doc2rtf.tds
 	-del doc2tex.obj
 	-del doc2tex.exe
+	-del doc2xml.obj
+	-del doc2xml.exe
+	-del docutil.obj
+	-del docutil.exe
+	-del codepage.obj
+	-del codepage.exe
 	-del gvdoc.exe
 	-del gvdoc.obj
 	-del gvdoc.tds
@@ -666,14 +817,6 @@ clean: language
 	-del uninstgs.exp
 	-del uninstgs.pdb
 	-del uninstgs.tds
-	-del setp16de.res
-	-del setp16de.map
-	-del setp16es.res
-	-del setp16es.map
-	-del setp16fr.res
-	-del setp16fr.map
-	-del setp16it.res
-	-del setp16it.map
 	-del setp32de.res
 	-del setp32de.map
 	-del setp32de.ilc
@@ -707,6 +850,17 @@ clean: language
 	-del setp32fr.exp
 	-del setp32fr.pdb
 	-del setp32fr.tds
+	-del setp32gr.res
+	-del setp32gr.map
+	-del setp32gr.ilc
+	-del setp32gr.ild
+	-del setp32gr.ilf
+	-del setp32gr.ils
+	-del setp32gr.ilk
+	-del setp32gr.lib
+	-del setp32gr.exp
+	-del setp32gr.pdb
+	-del setp32gr.tds
 	-del setp32it.res
 	-del setp32it.map
 	-del setp32it.ilc
@@ -718,8 +872,20 @@ clean: language
 	-del setp32it.exp
 	-del setp32it.pdb
 	-del setp32it.tds
+	-del setp32nl.res
+	-del setp32nl.map
+	-del setp32nl.ilc
+	-del setp32nl.ild
+	-del setp32nl.ilf
+	-del setp32nl.ils
+	-del setp32nl.ilk
+	-del setp32nl.lib
+	-del setp32nl.exp
+	-del setp32nl.pdb
+	-del setp32nl.tds
 	-del setupc.obj
 	-del winunzip.obj
+	-del gvcbetaa.obj
 	-del gvwgs.obj
 	-del gvwgs16.res
 	-del gvwgs16.map
@@ -752,25 +918,34 @@ veryclean: clean
 	-del gsviewde.hlp
 	-del gsviewes.hlp
 	-del gsviewfr.hlp
+	-del gsviewgr.hlp
 	-del gsviewit.hlp
+	-del gsviewnl.hlp
 	-del gsvw$(WINEXT)de.dll
 	-del gsvw$(WINEXT)es.dll
 	-del gsvw$(WINEXT)fr.dll
+	-del gsvw$(WINEXT)gr.dll
 	-del gsvw$(WINEXT)it.dll
+	-del gsvw$(WINEXT)nl.dll
 	-del gsview.htm
-	-del gsv16spl.exe
+# This doesn't get made by MSVC++
+#	-del gsv16spl.exe
 	-del gvwgs$(WINEXT).exe
 	-del winsetup.exe
 	-del setp$(WINEXT)de.dll
 	-del setp$(WINEXT)es.dll
 	-del setp$(WINEXT)fr.dll
+	-del setp$(WINEXT)gr.dll
 	-del setp$(WINEXT)it.dll
+	-del setp$(WINEXT)nl.dll
 	-del uninstgs.exe
 	-del files32.txt
 	-del gsviewen.htm
 	-del gsviewde.htm
 	-del gsviewes.htm
 	-del gsviewfr.htm
+	-del gsviewgr.htm
 	-del gsviewit.htm
+	-del gsviewnl.htm
 	-del os2help.htm
 	-del gsprint.exe

@@ -18,6 +18,7 @@
 /* de\gvplang.rc */
 /* OS/2 PM German language resources */
 
+CODEPAGE 850
 
 MENU ID_GSVIEW
 BEGIN
@@ -30,14 +31,11 @@ BEGIN
 		MENUITEM "~Info...\tI", IDM_INFO
 		MENUITEM SEPARATOR
 		MENUITEM SEPARATOR
-		MENUITEM "Konvertierung...", IDM_CONVERTFILE
+		MENUITEM "Konvertierung...\tF", IDM_CONVERTFILE
 		MENUITEM "~Extrahiere...\tE", IDM_EXTRACT
 		MENUITEM "PS zu EPS", IDM_PSTOEPS
 		MENUITEM SEPARATOR
 		MENUITEM "~Drucken...\tD", IDM_PRINT
-/*
-		MENUITEM "Print To ~File...\tF", IDM_PRINTTOFILE
-*/
 		MENUITEM "Drucke Datei...", IDM_SPOOL
 		MENUITEM SEPARATOR
 		MENUITEM "Meldungen anzeigen\tM", IDM_GSMESS
@@ -90,11 +88,8 @@ BEGIN
 		END
 		SUBMENU "~Sprache", IDM_LANGMENU
 		BEGIN
-			MENUITEM "~Englisch", IDM_LANGEN
-			MENUITEM "~Französisch", IDM_LANGFR
-			MENUITEM "~Deutsch", IDM_LANGDE
-			MENUITEM "~Italienisch", IDM_LANGIT
-			MENUITEM "~Spanisch", IDM_LANGES
+			MENUITEM "~English", IDM_LANGEN
+			/* Remaining languages are added at run time */
 		END
 		SUBMENU "PSzuText", IDM_PSTOTEXTMENU
 		BEGIN
@@ -232,10 +227,10 @@ BEGIN
 	"D", IDM_PRINT, SHIFT
 	"d", IDM_PRINT
 	"d", IDM_PRINT, SHIFT
-	"F", IDM_PRINTTOFILE
-	"F", IDM_PRINTTOFILE, SHIFT
-	"f", IDM_PRINTTOFILE
-	"f", IDM_PRINTTOFILE, SHIFT
+	"F", IDM_CONVERTFILE
+	"F", IDM_CONVERTFILE, SHIFT
+	"f", IDM_CONVERTFILE
+	"f", IDM_CONVERTFILE, SHIFT
 	"E", IDM_EXTRACT
 	"E", IDM_EXTRACT, SHIFT
 	"e", IDM_EXTRACT
@@ -266,6 +261,8 @@ END
 STRINGTABLE
 BEGIN
 	/* general strings */
+	IDS_SLANGUAGE, "49"
+	IDS_CODEPAGE, "850"	/* IBM Western Europe */
 	IDS_HELPFILE, "gvpmde.hlp"
 	IDS_HELPTITLE, "GSview Hilfe"
 	IDS_SIGSEGV "Segmentation violation or Floating Point Exception in Ghostscript or second GSview thread\015Please exit GSview"

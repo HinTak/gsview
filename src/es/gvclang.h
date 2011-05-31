@@ -15,8 +15,10 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* en\gvclang.h */
-/* Common English language defines */
+/* es\gvclang.h */
+/* Common Spanish language defines */
+
+#define AAESPANOL "Español"	/* Espaniol in code page 1252 */
 
 #define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2001 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Reservados todos los derechos."
@@ -228,6 +230,8 @@
 /* Advanced Configure dialog box */
 #define AACONFIGUREGS "Configuración avanzada"
 #define AAGHOSTSCRIPTDLLC "Ghostscript DLL:"
+#define AAGHOSTSCRIPTSOC "Ghostscript Shared Object:" /* ENGLISH */
+#define AAGHOSTSCRIPTEXEC "Ghostscript Program:" /* ENGLISH */
 #define AAGHOSTSCRIPTINCC "Camino de búsqueda de Ghostscript:"
 #define AAGHOSTSCRIPTOTHERC "Opciones de Ghostscript:"
 #define AACOPYPRINTERDEF "Copiar los valores predeterminados para la impresora"
@@ -441,12 +445,5 @@
 #define AAMABOUT "Acerca de..."
 #endif
 
-/* Language changing */
-#define AASELECTLANGUAGE "Select Language"   /* Don't translate this */
-#define AAENGLISH "English"
-#define AADEUTSCH "Deutsch"
-#define AAFRANCAIS "Français"
-#define AAITALIANO "Italiano"
-#define AAESPANOL "Español"
 
 #define WINHELPFILE "gsviewes.hlp"

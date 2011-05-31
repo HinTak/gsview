@@ -15,16 +15,6 @@ Remember extracted text between uses.
 
 Write to network printer without connection.
 
-Under Win32s with multiple printers connected to the same port,
-printing to a named printer always prints to the first listed
-printer.  If the first listed printer is a bi-directional printer
-but the desired printer is unidirectional, the wrong driver
-complains.  (Mike Uren, 6 April 1998).
-(Too hard - gsv16spl only gets the printer port, not the printer name).
-
-Copy to clipboard from 16-bit GSview dies in GSDLL16.DLL under NT.
-(Don't fix - 32-bit version should be used)
-
 Provide some means for clearing all pages in OS/2 multiple 
 selection list box.
 
@@ -57,8 +47,6 @@ Ghostscript mswinpr2 always shows dialog when called from RedMon.
 
 X11 uniprint settings.
 
-Allow old select pages dialog when printing (which allows you to 
-select disjoint ranges of pages), when non Windows GDI print.
 Add "current page" option to new print dialog.
 
 Remember different printer names for different print methods.
@@ -82,5 +70,13 @@ Make GSview Print display the contents of the response file.
 
 Disable the collate control if it becomes enabled.
 
-Allow silent uninstall from GSview installer.
+Move less use media sizes to a sub menu "Other".
+Leave A4, A3 and Letter on the main menu.
+
+Windows 2000 indexing service.
+
+X11 ideas from Jack.  Fit to window width, separate menu command/button.
+Hand interface for dragging page instead of using scroll bars.
+
+External PDF links.
 

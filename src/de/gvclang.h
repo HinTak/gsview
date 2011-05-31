@@ -18,6 +18,8 @@
 /* de\gvclang.h */
 /* Common German language defines */
 
+#define AADEUTSCH "Deutsch"
+
 #define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2001 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Alle Rechte vorbehalten."
 #define GSVIEW_COPYRIGHT3 "Siehe Datei LICENCE für mehr Details."
@@ -199,7 +201,7 @@
 #define AAPROPERTIES "Einstellung"
 #define AAPROPERTYC "Einstellung:"
 #define AAVALUEC "Wert:"
-#define AAPAGEOFFSETPT "Seiten-Offset (Points)"
+#define AAPAGEOFFSETPT "Seiten-Offset (pt)"
 #define AAXC "X:"
 #define AAYC "Y:"
 
@@ -217,6 +219,8 @@
 /* Advanced Configure dialog box */
 #define AACONFIGUREGS "Fortgeschrittene Konfigurierung"
 #define AAGHOSTSCRIPTDLLC "Ghostscript-DLL:"
+#define AAGHOSTSCRIPTSOC "Ghostscript Shared Object:"
+#define AAGHOSTSCRIPTEXEC "Ghostscript-Programm:"
 #define AAGHOSTSCRIPTINCC "Ghostscript-Suchpfad:"
 #define AAGHOSTSCRIPTOTHERC "Ghostscript-Optionen:"
 #define AACOPYPRINTERDEF "Kopiere Druckervoreinstellungen"
@@ -287,8 +291,8 @@
 #define AAREG1 "Bitte geben Sie ihren Namen und ihre Registrierungsnummer ein"
 #define AAREG2 ""
 #define AANAG1 "GSview ist Copyright 2001 Ghostgum Software Pty Ltd."
-#define AANAG2 "Bitte unterstützen Sie die Entwicklung von GSview"
-#define AANAG3 "durch ihre Registrierung."
+#define AANAG2 "Bitte unterstützen Sie durch Ihre Registrierung"
+#define AANAG3 "die Entwicklung von GSview."
 #define AANAG4 "GSview kann online registriert werden bei"
 #define AANAG5 "    http:/\057www.ghostgum.com.au/"
 
@@ -353,7 +357,7 @@
 #define AAUNINSTALLITEM "GSview und AFPL Ghostscript löschen"
 
 /* setup program */
-#define AAINSTALLSPACE "Diese Installation benötigt 3 M bytes Plattenplatz"
+#define AAINSTALLSPACE "Diese Installation benötigt 5 MB Plattenplatz"
 #define AAGSVIEWREQUIRES "GSview benötigt ferner"
 #define AAVIEWREADMEDETAILS "Lesen Sie bitte in Readme, wie Sie Ghostscript bekommen."
 #define AACOPYRIGHTNOTICE "Copyright-Anmerkung"
@@ -429,13 +433,5 @@ Drücken Sie Fertig um weiter zu machen."
 #define AAMABOUT "~Über..."
 #endif
 
-
-/* Language changing */
-#define AASELECTLANGUAGE "Select Language"   /* Don't translate this */
-#define AAENGLISH "English"
-#define AADEUTSCH "Deutsch"
-#define AAFRANCAIS "Français"
-#define AAITALIANO "Italiano"
-#define AAESPANOL "Español"
 
 #define WINHELPFILE "gsviewde.hlp"

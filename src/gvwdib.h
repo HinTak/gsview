@@ -119,13 +119,13 @@ public:
 	BOOL Init(HGLOBAL hglobal);	// read a bitmap in global memory
 	void Release();
 
-	BOOL Read(CFile *pFile);	// read a bitmap from file
+	BOOL Read(GFile *pFile);	// read a bitmap from file
 //	BOOL Read(UINT resource);	// read a bitmap from resources
 	BOOL Read(LPCTSTR lpszFilename);
-	BOOL ReadHeader(CFile *pFile);	// read bitmap header and palette
+	BOOL ReadHeader(GFile *pFile);	// read bitmap header and palette
 
 	BOOL Write(LPCTSTR lpszFilename);
-	BOOL Write(CFile *cf);
+	BOOL Write(GFile *cf);
 	HGLOBAL MakeGlobalDIB(void);
 
 #ifdef NOTUSED
@@ -181,4 +181,9 @@ public:
 	HPALETTE m_palette;
 //	CCriticalSection m_critical_section;	
 };
+
+#ifndef ASSERT
+#define ASSERT(f)
+#endif
+
 

@@ -18,6 +18,9 @@
 /* es\gvwlang.rc */
 
 /* Windows Spanish language resources */
+LANGUAGE LANG_SPANISH, SUBLANG_DEFAULT
+
+ID_LANG BITMAP "binary/spanish.bmp"
 
 gsview_menu MENU
 BEGIN
@@ -87,11 +90,8 @@ BEGIN
         END
         POPUP "&Idioma"
         BEGIN
-            MENUITEM "&Inglés", IDM_LANGEN
-            MENUITEM "&Francés", IDM_LANGFR
-            MENUITEM "&Alemán", IDM_LANGDE
-            MENUITEM "I&taliano", IDM_LANGIT
-            MENUITEM "&Español", IDM_LANGES
+	    MENUITEM "&English", IDM_LANGEN
+	    /* Remaining languages are added at run time */
         END
         POPUP "Conversión a &texto"
         BEGIN
@@ -223,6 +223,8 @@ END
 STRINGTABLE
 BEGIN
     /* general strings */
+    IDS_SLANGUAGE "ES,2"
+    IDS_CODEPAGE, "1252"	/* ISO-Latin-1 */
     IDS_HELPFILE, WINHELPFILE
     IDS_SOUNDNOMM, "No puedo cargar WINMM.DLL\nSonidos no disponibles"
 END

@@ -18,32 +18,39 @@
 /* en\gvwlang.rc */
 
 /* Windows English language resources */
+LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
+
+ID_LANG BITMAP "binary/english.bmp"
 
 gsview_menu MENU
 BEGIN
 	POPUP "&File"
 	BEGIN
+#ifndef MEMORYFILE
 		MENUITEM "&Open...\tO", IDM_OPEN
 		MENUITEM "&Select File...\tS", IDM_SELECT
+#ifndef VIEWONLY
 		MENUITEM "Save &As...\tA", IDM_SAVEAS
+#endif
 		MENUITEM "&Close\tC", IDM_CLOSE
 		MENUITEM "&Info...\tI", IDM_INFO
 		MENUITEM SEPARATOR
-		MENUITEM "Convert...", IDM_CONVERTFILE
+#ifndef VIEWONLY
+		MENUITEM "Convert...\tF", IDM_CONVERTFILE
 		MENUITEM "&Extract...\tE", IDM_EXTRACT
 		MENUITEM "PS to EPS", IDM_PSTOEPS
 		MENUITEM SEPARATOR
 		MENUITEM "&Print...\tP", IDM_PRINT
-/*
-		MENUITEM "Print To &File...\tF", IDM_PRINTTOFILE
-*/
 		MENUITEM "Print File...", IDM_SPOOL
 		MENUITEM SEPARATOR
+#endif
 		MENUITEM "Show Messages\tM", IDM_GSMESS 
 		MENUITEM SEPARATOR
 		MENUITEM SEPARATOR
+#endif /* !MEMORYFILE */
 		MENUITEM "E&xit", IDM_EXIT
 	END
+#ifndef VIEWONLY
 	POPUP "&Edit"
 	BEGIN
 		MENUITEM "&Copy\tCtrl+C", IDM_COPYCLIP
@@ -72,6 +79,7 @@ BEGIN
 		MENUITEM "&Find...\tCtrl+F", IDM_TEXTFIND
 		MENUITEM "Find &Next\tF3", IDM_TEXTFINDNEXT
 	END
+#endif
 	POPUP "O&ptions"
 	BEGIN
 		MENUITEM "Easy Configure...", IDM_CFG
@@ -88,17 +96,16 @@ BEGIN
 		POPUP "&Language"
 		BEGIN
 			MENUITEM "&English", IDM_LANGEN
-			MENUITEM "&French", IDM_LANGFR
-			MENUITEM "&German", IDM_LANGDE
-			MENUITEM "&Italian", IDM_LANGIT
-			MENUITEM "&Spanish", IDM_LANGES
+			/* Remaining languages are added at run time */
 		END
+#ifndef VIEWONLY
 		POPUP "PStoText"
 		BEGIN
 			MENUITEM "Disabled", IDM_PSTOTEXTDIS
 			MENUITEM "Normal", IDM_PSTOTEXTNORM
 			MENUITEM "Dvips Cork Encoding", IDM_PSTOTEXTCORK
 		END
+#endif
 		POPUP "DSC Warnings"
 		BEGIN
 			MENUITEM "Off", IDM_DSC_OFF
@@ -204,8 +211,8 @@ BEGIN
 	"a", IDM_SAVEAS
 	"P", IDM_PRINT
 	"p", IDM_PRINT
-	"F", IDM_PRINTTOFILE
-	"f", IDM_PRINTTOFILE
+	"F", IDM_CONVERTFILE
+	"f", IDM_CONVERTFILE
 #ifdef OLD
 	VK_F, IDM_TEXTFIND, VIRTKEY, CONTROL
 #else
@@ -233,6 +240,8 @@ END
 STRINGTABLE
 BEGIN
 	/* general strings */
+	IDS_SLANGUAGE, "EN,2"
+	IDS_CODEPAGE, "1252"	/* ISO-Latin-1 */
 	IDS_HELPFILE, WINHELPFILE
 	IDS_SOUNDNOMM, "Can't load WINMM.DLL\nSounds will be unavailable"
 END

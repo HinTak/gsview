@@ -17,30 +17,33 @@
 # makefile.msc - for Microsoft Visual C++ 5.0
 # EPSTOOL
 
-CFLAGS=-D__WIN32__ -DEPSTOOL -I..\src -I.
+CFLAGS=-D__WIN32__ -DEPSTOOL -I..\src -I. -DSTDIO
 CC=cl
 
-OBJS=epstool.obj gvceps.obj dscparse.obj dscutil.obj gvwgsver.obj
+OBJS=epstool.obj gvceps.obj dscparse.obj dscutil.obj gvwgsver.obj gvcfile.obj
 
 all: epstool.exe
 
-.cpp.obj:
-	$(CC) $(CFLAGS) -c $*.cpp
+.c.obj:
+	$(CC) $(CFLAGS) -c $*.c
 
-epstool.obj: epstool.cpp epstool.h ../src/dscparse.h ../src/gvceps.cpp
-	$(CC) -c $(CFLAGS) epstool.cpp
+epstool.obj: epstool.c epstool.h ../src/dscparse.h ../src/gvceps.c
+	$(CC) -c $(CFLAGS) epstool.c
 
-dscparse.obj: ../src/dscparse.cpp epstool.h ../src/dscparse.h
-	$(CC) -c $(CFLAGS) ../src/dscparse.cpp
+dscparse.obj: ../src/dscparse.c epstool.h ../src/dscparse.h
+	$(CC) -c $(CFLAGS) ../src/dscparse.c
 
-dscutil.obj: ../src/dscutil.cpp epstool.h ../src/dscparse.h
-	$(CC) -c $(CFLAGS) ../src/dscutil.cpp
+dscutil.obj: ../src/dscutil.c epstool.h ../src/dscparse.h
+	$(CC) -c $(CFLAGS) ../src/dscutil.c
 
-gvceps.obj: ../src/gvceps.cpp epstool.h ../src/dscparse.h
-	$(CC) -c $(CFLAGS) ../src/gvceps.cpp
+gvceps.obj: ../src/gvceps.c epstool.h ../src/dscparse.h
+	$(CC) -c $(CFLAGS) ../src/gvceps.c
 
-gvwgsver.obj: ../src/gvwgsver.cpp
-	$(CC) -c $(CFLAGS) ../src/gvwgsver.cpp
+gvcfile.obj: ../src/gvcfile.c ../src/gvcfile.h
+	$(CC) -c $(CFLAGS) ../src/gvcfile.c
+
+gvwgsver.obj: ../src/gvwgsver.c
+	$(CC) -c $(CFLAGS) ../src/gvwgsver.c
 
 epstool.exe: $(OBJS)
 	link /SUBSYSTEM:console /OUT:epstool.exe $(OBJS) user32.lib advapi32.lib 
@@ -61,7 +64,7 @@ clean:
 	-del files.txt
 
 files.txt: makefile.msc
-	echo epstool/epstool.cpp>files.txt
+	echo epstool/epstool.c>files.txt
 	echo epstool/epstool.h>>files.txt
 	echo epstool/epstool.def>>files.txt
 	echo epstool/epstool.htm>>files.txt
@@ -70,12 +73,12 @@ files.txt: makefile.msc
 	echo epstool/makefile.tc>>files.txt
 	echo epstool/makefile.unx>>files.txt
 	echo src/LICENCE>>files.txt
-	echo src/gvceps.cpp>>files.txt
+	echo src/gvceps.c>>files.txt
 	echo src/gvceps.h>>files.txt
-	echo src/dscparse.cpp>>files.txt
-	echo src/dscutil.cpp>>files.txt
+	echo src/dscparse.c>>files.txt
+	echo src/dscutil.c>>files.txt
 	echo src/dsc.h>>files.txt
-	echo src/gvwgsver.cpp>>files.txt
+	echo src/gvwgsver.c>>files.txt
 	echo epstool.exe>>files.txt
 	echo epstool2.exe>>files.txt
 	echo epstool.htm>>files.txt

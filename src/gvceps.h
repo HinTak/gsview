@@ -29,9 +29,9 @@
 #pragma pack(1)		/* align structures to byte boundaries */
 #endif
 
-// WARNING - these structures might not have byte packing.
-// When you read BMP files, do not use sizeof(structure).
-// Use RGB3_LENGTH instead of sizeof(RGB3)
+/* WARNING - these structures might not have byte packing. */
+/* When you read BMP files, do not use sizeof(structure). */
+/* Use RGB3_LENGTH instead of sizeof(RGB3) */
 
 #ifndef BITMAP1AND2
 #define BITMAP1AND2
@@ -179,7 +179,7 @@ void scan_bbox(PREBMAP *pprebmap, PSBBOX *devbbox);
 void write_dword(DWORD val, FILE *f);
 void write_word(WORD val, FILE *f);
 
-void ps_copy(FILE *outfile, FILE *infile, long begin, long end);
-char * ps_fgets(char *s, int n, FILE *stream);
-BOOL ps_copy_find(FILE *outfile, FILE *infile, long end, 
+void ps_copy(FILE *outfile, GFile *infile, long begin, long end);
+char * ps_fgets(char *s, int n, GFile *stream);
+BOOL ps_copy_find(FILE *outfile, GFile *infile, long end, 
 	char *s, int n, const char *comment);

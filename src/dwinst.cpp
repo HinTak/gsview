@@ -877,7 +877,7 @@ BOOL CInstall::MakeLog()
 
 // Uninstall existing GSview
 
-void CInstall::Uninstall(const char *szProg)
+void CInstall::Uninstall(const char *szProg, BOOL bSilent)
 {
     char ungsprog[MAXSTR];
     char szFileName[MAXSTR];
@@ -914,6 +914,10 @@ void CInstall::Uninstall(const char *szProg)
     strcat(buf, "\042 \042");
     strcat(buf, szFileName);
     strcat(buf, "\042");
+
+    // be silent when uninstalling
+    if (bSilent)
+        strcat(buf, " -q");
 
     siStartInfo.cb = sizeof(STARTUPINFO);
     siStartInfo.lpReserved = NULL;

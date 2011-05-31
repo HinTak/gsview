@@ -45,7 +45,7 @@ typedef int  (pstoedit_checkversion_func) (unsigned int callersversion );
 
 typedef int  (pstoedit_plainC_func) (int argc,const char * const argv[],const char * const psinterpreter );
 /* psinterpreter can be set to 0, in which case pstoedit tries to locate one on his own. */
-typedef struct DriverDescription_S * (getPstoeditDriverInfo_plainC_func)();
+typedef struct DriverDescription_S * (getPstoeditDriverInfo_plainC_func)(void);
 /* returned result must be freed via a call to clearPstoeditDriverInfo_plainC !! */
 /* the end of the array is indicated by p->symbolicname == 0 */
 typedef void  (clearPstoeditDriverInfo_plainC_func)(struct DriverDescription_S * ptr);

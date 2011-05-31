@@ -70,5 +70,17 @@ extern int string_it_len;
 extern MENU_ENTRY menu_it[];
 extern int menu_it_len;
 
+/* Greek */
+extern STRING_ENTRY string_gr[];
+extern int string_gr_len;
+extern MENU_ENTRY menu_gr[];
+extern int menu_gr_len;
+
+/* Dutch */
+extern STRING_ENTRY string_nl[];
+extern int string_nl_len;
+extern MENU_ENTRY menu_nl[];
+extern int menu_nl_len;
+
 void check_string_order(STRING_ENTRY *st, int stlen);
 

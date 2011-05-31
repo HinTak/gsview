@@ -28,25 +28,28 @@ DEFINES=-DUNIX -DEPSTOOL -DHAVE_UNISTD_H
 OBJ=o
 CC=gcc
 
-OBJS=epstool.$(OBJ) gvceps.$(OBJ) dscparse.$(OBJ) dscutil.$(OBJ)
+OBJS=epstool.$(OBJ) gvceps.$(OBJ) gvcfile.$(OBJ) dscparse.$(OBJ) dscutil.$(OBJ)
 
 all: epstool
 
-.cpp.$(OBJ):
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $*.cpp
+.c.$(OBJ):
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $*.c
 
 
-epstool.$(OBJ): epstool.cpp epstool.h ../src/dscparse.h ../src/gvceps.h
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c epstool.cpp -o epstool.$(OBJ)
+epstool.$(OBJ): epstool.c epstool.h ../src/dscparse.h ../src/gvceps.h
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c epstool.c -o epstool.$(OBJ)
 
-dscparse.$(OBJ): ../src/dscparse.cpp epstool.h ../src/dscparse.h ../src/gvceps.h
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c ../src/dscparse.cpp -o dscparse.$(OBJ)
+dscparse.$(OBJ): ../src/dscparse.c epstool.h ../src/dscparse.h ../src/gvceps.h
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c ../src/dscparse.c -o dscparse.$(OBJ)
 
-dscutil.$(OBJ): ../src/dscutil.cpp ../src/dscparse.h
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c ../src/dscutil.cpp -o dscutil.$(OBJ)
+dscutil.$(OBJ): ../src/dscutil.c ../src/dscparse.h
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c ../src/dscutil.c -o dscutil.$(OBJ)
 
-gvceps.$(OBJ): ../src/gvceps.cpp epstool.h ../src/dscparse.h ../src/gvceps.h
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c ../src/gvceps.cpp -o gvceps.$(OBJ)
+gvceps.$(OBJ): ../src/gvceps.c epstool.h ../src/dscparse.h ../src/gvceps.h
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c ../src/gvceps.c -o gvceps.$(OBJ)
+
+gvcfile.$(OBJ): ../src/gvcfile.c ../src/gvcfile.h
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c ../src/gvcfile.c -o gvcfile.$(OBJ)
 
 epstool: $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) -o epstool $(OBJS) $(LIBS) 
@@ -54,6 +57,7 @@ epstool: $(OBJS)
 clean:
 	-$(RM) epstool.$(OBJ)
 	-$(RM) gvceps.$(OBJ)
+	-$(RM) gvcfile.$(OBJ)
 	-$(RM) dscparse.$(OBJ)
 	-$(RM) dscutil.$(OBJ)
 

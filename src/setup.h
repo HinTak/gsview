@@ -49,8 +49,8 @@
 #define IDD_CONFIG	340
 #define IDD_CONFIG_TEXT	341
 
-#define IDD_FILE	350
-#define IDD_FILE_TEXT	351
+#define IDD_FILE	380
+#define IDD_FILE_TEXT	381
 
 #define IDD_ASSOC	400
 

@@ -8,7 +8,7 @@
  Per i documenti che si attengono all'Adobe Postscript Document Structiring
  Conventions, GSview permette alle pagine selezionate di essere viste o
  stampate.
- GSview 4.0 necessita di Ghostscript 7.00 - 7.99.
+ GSview 4.1 necessita di Ghostscript 7.00 - 7.99.
 2knstallazione
 ?Installazione
  E' consigliabile usare lo specifico programma di installazione per
@@ -216,11 +216,11 @@ E
  cartella del profilo utente alla cartella di GSview, quindi modificarlo
  togliendo tutte le registrazioni, ad eccezione di:
   [Options]
-  Version=4.0
-  GSversion=700
+  Version=4.1
+  GSversion=703
   Configured=1
-  GhostscriptDLL=e:\gs\gs7.00\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs7.00\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs7.03\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs7.03\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Quando un utente avvia GSview, il suo file INI sarà usato normalmente.
  La prima volta che GSview viene avviato, o quando la versione di GSview non

@@ -18,6 +18,8 @@
 /* fr\gvplang.rc */
 /* OS/2 PM French language resources */
 
+CODEPAGE 850
+
 MENU ID_GSVIEW 
 BEGIN
 /*
@@ -94,11 +96,8 @@ BEGIN
 		END
 		SUBMENU "~Langue", IDM_LANGMENU
 		BEGIN
-			MENUITEM "~Anglais", IDM_LANGEN
-			MENUITEM "~Français", IDM_LANGFR
-			MENUITEM "Alleman~d", IDM_LANGDE
-			MENUITEM "~Italien", IDM_LANGIT
-			MENUITEM "~Espagnol", IDM_LANGES
+			MENUITEM "~English", IDM_LANGEN
+			/* Remaining languages are added at run time */
 		END
 		SUBMENU "PS vers ~texte", IDM_PSTOTEXTMENU
 		BEGIN
@@ -274,6 +273,8 @@ END
 STRINGTABLE
 BEGIN
 	/* general strings */
+        IDS_SLANGUAGE, "33"
+	IDS_CODEPAGE, "850"	/* IBM Western Europe */
 	IDS_HELPFILE, "gvpmfr.hlp"
 	IDS_HELPTITLE, "Aide de GSview"
 	IDS_SIGSEGV "Segmentation violation or Floating Point Exception in Ghostscript or second GSview thread\015Please exit GSview"

@@ -82,10 +82,16 @@ all: gsview$(WINEXT).exe\
   gsvw$(WINEXT)de.dll gsviewde.hlp setp$(WINEXT)de.dll\
   gsvw$(WINEXT)es.dll gsviewes.hlp setp$(WINEXT)es.dll\
   gsvw$(WINEXT)fr.dll gsviewfr.hlp setp$(WINEXT)fr.dll\
+  gsvw$(WINEXT)gr.dll gsviewgr.hlp setp$(WINEXT)gr.dll\
   gsvw$(WINEXT)it.dll gsviewit.hlp setp$(WINEXT)it.dll\
+  gsvw$(WINEXT)nl.dll gsviewnl.hlp setp$(WINEXT)nl.dll\
   gvwgs$(WINEXT).exe gsv16spl.exe $(WININSTALL)
 
 .cpp.obj:
+	$(CC) -c $(CFLAGS) {$< }
+
+# -P to compile as .cpp
+.c.obj:
 	$(CC) -c $(CFLAGS) {$< }
 
 ECHOGSV=echogsv.exe
@@ -117,8 +123,8 @@ gvwin16.def, +
 gvwin16.res
 !
 
-gsvw32de.dll: gvwlang.cpp gsvw32de.res de\gvwin32.def
-	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
+gsvw32de.dll: gvwlang.c gsvw32de.res de\gvwin32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
 	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0d32 +
 gvwlang.obj +
@@ -129,8 +135,8 @@ de\gvwin32.def, +
 gsvw32de.res
 !
 
-gsvw16de.dll: gvwlang.cpp gsvw16de.res de\gvwin16.def
-	$(CC) -ml -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
+gsvw16de.dll: gvwlang.c gsvw16de.res de\gvwin16.def
+	$(CC) -ml -c -v -WD -w -I"$(INCDIR)" gvwlang.c
 	$(LINK16) -Twd -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0dl +
 gvwlang.obj +
@@ -141,8 +147,8 @@ de\gvwin16.def, +
 gsvw16de.res
 !
 
-gsvw32es.dll: gvwlang.cpp gsvw32es.res es\gvwin32.def
-	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
+gsvw32es.dll: gvwlang.c gsvw32es.res es\gvwin32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
 	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0d32 +
 gvwlang.obj +
@@ -153,8 +159,8 @@ es\gvwin32.def, +
 gsvw32es.res
 !
 
-gsvw32fr.dll: gvwlang.cpp gsvw32fr.res fr\gvwin32.def
-	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
+gsvw32fr.dll: gvwlang.c gsvw32fr.res fr\gvwin32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
 	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0d32 +
 gvwlang.obj +
@@ -165,8 +171,20 @@ fr\gvwin32.def, +
 gsvw32fr.res
 !
 
-gsvw16fr.dll: gvwlang.cpp gsvw16fr.res fr\gvwin16.def
-	$(CC) -ml -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
+gsvw32gr.dll: gvwlang.c gsvw32gr.res gr\gvwin32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
+	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0d32 +
+gvwlang.obj +
+,gsvw32gr.dll,gsvw32gr, +
+$(LIBDIR)\import32 +
+$(LIBDIR)\cw32mt, +
+gr\gvwin32.def, +
+gsvw32gr.res
+!
+
+gsvw16fr.dll: gvwlang.c gsvw16fr.res fr\gvwin16.def
+	$(CC) -ml -c -v -WD -w -I"$(INCDIR)" gvwlang.c
 	$(LINK16) -Twd -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0dl +
 gvwlang.obj +
@@ -177,8 +195,8 @@ fr\gvwin16.def, +
 gsvw16fr.res
 !
 
-gsvw32it.dll: gvwlang.cpp gsvw32it.res it\gvwin32.def
-	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
+gsvw32it.dll: gvwlang.c gsvw32it.res it\gvwin32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
 	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0d32 +
 gvwlang.obj +
@@ -189,8 +207,8 @@ it\gvwin32.def, +
 gsvw32it.res
 !
 
-gsvw16it.dll: gvwlang.cpp gsvw16it.res it\gvwin16.def
-	$(CC) -ml -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
+gsvw16it.dll: gvwlang.c gsvw16it.res it\gvwin16.def
+	$(CC) -ml -c -v -WD -w -I"$(INCDIR)" gvwlang.c
 	$(LINK16) -Twd -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0dl +
 gvwlang.obj +
@@ -199,6 +217,18 @@ $(LIBDIR)\import +
 $(LIBDIR)\cwl, +
 it\gvwin16.def, +
 gsvw16it.res
+!
+
+gsvw32nl.dll: gvwlang.c gsvw32nl.res nl\gvwin32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
+	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0d32 +
+gvwlang.obj +
+,gsvw32nl.dll,gsvw32nl, +
+$(LIBDIR)\import32 +
+$(LIBDIR)\cw32mt, +
+nl\gvwin32.def, +
+gsvw32nl.res
 !
 
 uninstgs.exe: dwuninst.cpp dwuninst.h dwuninst.res dwuninst.def
@@ -239,8 +269,8 @@ winsetup.res
 !
 !endif
 
-setp32de.dll: gvwlang.cpp setp32de.res de\setup32.def
-	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
+setp32de.dll: gvwlang.c setp32de.res de\setup32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
 	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0d32 +
 gvwlang.obj +
@@ -251,8 +281,8 @@ de\setup32.def, +
 setp32de.res
 !
 
-setp32es.dll: gvwlang.cpp setp32es.res es\setup32.def
-	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
+setp32es.dll: gvwlang.c setp32es.res es\setup32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
 	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0d32 +
 gvwlang.obj +
@@ -263,8 +293,8 @@ es\setup32.def, +
 setp32es.res
 !
 
-setp32fr.dll: gvwlang.cpp setp32fr.res fr\setup32.def
-	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
+setp32fr.dll: gvwlang.c setp32fr.res fr\setup32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
 	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0d32 +
 gvwlang.obj +
@@ -275,8 +305,20 @@ fr\setup32.def, +
 setp32fr.res
 !
 
-setp32it.dll: gvwlang.cpp setp32it.res it\setup32.def
-	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
+setp32gr.dll: gvwlang.c setp32gr.res gr\setup32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
+	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0d32 +
+gvwlang.obj +
+,setp32gr.dll,setp32gr, +
+$(LIBDIR)\import32 +
+$(LIBDIR)\cw32mt, +
+gr\setup32.def, +
+setp32gr.res
+!
+
+setp32it.dll: gvwlang.c setp32it.res it\setup32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
 	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0d32 +
 gvwlang.obj +
@@ -287,40 +329,16 @@ it\setup32.def, +
 setp32it.res
 !
 
-setp16de.dll: gvwlang.cpp setp16de.res de\setup16.def
-	$(CC) -ml -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
-	$(LINK16) -Twd -c -m -s $(DEBUGLINK) @&&!
-$(LIBDIR)\c0dl +
+setp32nl.dll: gvwlang.c setp32nl.res nl\setup32.def
+	$(CC) -c -v -WD -w -I"$(INCDIR)" gvwlang.c
+	$(LINK) -Tpd -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0d32 +
 gvwlang.obj +
-,setp16de.dll,setp16de, +
-$(LIBDIR)\import +
-$(LIBDIR)\cwl, +
-de\setup16.def, +
-setp16de.res
-!
-
-setp16fr.dll: gvwlang.cpp setp16fr.res fr\setup16.def
-	$(CC) -ml -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
-	$(LINK16) -Twd -c -m -s $(DEBUGLINK) @&&!
-$(LIBDIR)\c0dl +
-gvwlang.obj +
-,setp16fr.dll,setp16fr, +
-$(LIBDIR)\import +
-$(LIBDIR)\cwl, +
-fr\setup16.def, +
-setp16fr.res
-!
-
-setp16it.dll: gvwlang.cpp setp16it.res it\setup16.def
-	$(CC) -ml -c -v -WD -w -I"$(INCDIR)" gvwlang.cpp
-	$(LINK16) -Twd -c -m -s $(DEBUGLINK) @&&!
-$(LIBDIR)\c0dl +
-gvwlang.obj +
-,setp16it.dll,setp16it, +
-$(LIBDIR)\import +
-$(LIBDIR)\cwl, +
-it\setup16.def, +
-setp16it.res
+,setp32nl.dll,setp32nl, +
+$(LIBDIR)\import32 +
+$(LIBDIR)\cw32mt, +
+nl\setup32.def, +
+setp32nl.res
 !
 
 ungsview.exe: ungsview.obj ungsview.res ungsview.def
@@ -348,8 +366,8 @@ ungsview.res
 !endif
 
 
-gvwgs32.exe: gvwgs.cpp gvwgs.h gvwgs32.res
-	$(CC) -c -v -tWM -WE -w -I"$(INCDIR)" gvwgs.cpp
+gvwgs32.exe: gvwgs.c gvwgs.h gvwgs32.res
+	$(CC) -c -v -tWM -WE -w -I"$(INCDIR)" gvwgs.c
 	$(LINK) -Tpe -aa -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0w32 +
 gvwgs.obj +
@@ -360,8 +378,8 @@ gvwgs32.def, +
 gvwgs32.res
 !
 
-gvwgs16.exe: gvwgs.cpp gvwgs.h gvwgs16.res
-	$(CC) -c $(CFLAGS) gvwgs.cpp
+gvwgs16.exe: gvwgs.c gvwgs.h gvwgs16.res
+	$(CC) -c $(CFLAGS) gvwgs.c
 	$(LINK16) -Twe -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0w$(MODEL) +
 gvwgs.obj +
@@ -393,11 +411,15 @@ strip: all
 	$(COMPDIR)\tdstrp32 gsvw32de.dll
 	$(COMPDIR)\tdstrp32 gsvw32es.dll
 	$(COMPDIR)\tdstrp32 gsvw32fr.dll
+	$(COMPDIR)\tdstrp32 gsvw32gr.dll
 	$(COMPDIR)\tdstrp32 gsvw32it.dll
+	$(COMPDIR)\tdstrp32 gsvw32nl.dll
 	$(COMPDIR)\tdstrp32 winsetup.exe
 	$(COMPDIR)\tdstrp32 setp32de.dll
 	$(COMPDIR)\tdstrp32 setp32es.dll
 	$(COMPDIR)\tdstrp32 setp32fr.dll
+	$(COMPDIR)\tdstrp32 setp32gr.dll
 	$(COMPDIR)\tdstrp32 setp32it.dll
+	$(COMPDIR)\tdstrp32 setp32nl.dll
 	$(COMPDIR)\tdstrp32 uninstgs.exe
 

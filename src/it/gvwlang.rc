@@ -18,6 +18,9 @@
 /* it\gvwlang.rc */
 
 /* Windows Italian language resources */
+LANGUAGE LANG_ITALIAN, SUBLANG_DEFAULT
+
+ID_LANG BITMAP "binary/italian.bmp"
 
 gsview_menu MENU
 BEGIN
@@ -87,11 +90,8 @@ BEGIN
 		END
 		POPUP "&Lingua"
 		BEGIN
-			MENUITEM "Ingl&ese", IDM_LANGEN
-			MENUITEM "&Francese", IDM_LANGFR
-			MENUITEM "Te&desco", IDM_LANGDE
-			MENUITEM "&Italiano", IDM_LANGIT
-			MENUITEM "&Spagnolo", IDM_LANGES
+			MENUITEM "&English", IDM_LANGEN
+			/* Remaining languages are added at run time */
 		END
 		POPUP "&PStoText"
 		BEGIN
@@ -228,6 +228,8 @@ END
 STRINGTABLE
 BEGIN
 	/* general strings */
+	IDS_SLANGUAGE "ITA,3"
+	IDS_CODEPAGE, "1252"	/* ISO-Latin-1 */
 	IDS_HELPFILE, WINHELPFILE
 	IDS_SOUNDNOMM, "Non è possibile caricare WINMM.DLL\nI suoni non saranno disponibili"
 END

@@ -7,7 +7,7 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 4.0 requires Ghostscript 7.00 - 7.99.
+ GSview 4.1 requires Ghostscript 7.00 - 7.99.
 2Installation
 ?Installation
 W
@@ -237,11 +237,11 @@ WP
  user profile directory to the GSview directory, then edit it to
  remove all entries except for:
   [Options]
-  Version=4.0
-  GSversion=700
+  Version=4.1
+  GSversion=703
   Configured=1
-  GhostscriptDLL=e:\gs\gs7.00\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs7.00\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs7.03\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs7.03\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  When a user starts GSview, their INI file will normally be used.
  The first time GSview is run, or when the GSview version doesn't
@@ -271,6 +271,11 @@ W
  by users.
  To be extra safe, you may wish to remove the file `uninstal.txt` from
  the GSview directory.
+
+ Alternatively, if you want install GSview on each computer without
+ any prompting, unzip the self extracting archive then run the setup
+ program as follows:
+  setup -name "Your Name" -number XXXXX-XXXXX "c:\ghostgum"
 E
 W
 3Running GSview from the File Manager or Windows Explorer
@@ -771,7 +776,7 @@ PX
 P
  gvpm.ini.
 X
- ~/.gsviewrc
+ ~/.gsview.ini
 PX
 
  The default list of devices and resolutions is taken from the
@@ -841,18 +846,19 @@ E
  The `Properties` button allows some Ghostcript devices to configure
  extra properties and a page offset to be specified.
 
- A page offset can be specified for each printer.
+ A page offset can be specified for each device.
  The page offset is useful for correcting a mismatch between the page
  origin of a Ghostscript printer device and a particular printer.
  Increasing the X value will translate the image towards the right.
- Increasing the Y value will translate the image downwards.
+ Increasing the Y value will usually translate the image downwards.
 
  `Properties` are typically used to set BitsPerPixel for a colour
- printer or other types of colour or density correction.
+ printer, or other types of colour or density correction,
+ or PDF distiller parameters.
 
- `Properties` are specific to a particular printer.  Changing
- the value of the `BitsPerPixel` property on one printer does not
- change it for any other printer.
+ `Properties` are specific to a particular device.  Changing
+ the value of the `BitsPerPixel` property on one device does not
+ change it for any other device.
 
  When you press the `OK` button in the `Properties` dialog
  box, the current settings are written to the
@@ -861,20 +867,20 @@ W
 P
  gvpm.ini
 X
- ~/.gsviewrc
+ ~/.gsview.ini
 E
 
  file.
 
  Some `Properties` are predefined in GSview, but these may not
  match those available in Ghostscript.  The `Edit `and `New`
- buttons allow you to modify available `Properties` for that printer.
+ buttons allow you to modify available `Properties` for that device.
  See the `Edit Properties` topic for more details.
 4Edit Properties
 ?Edit Properties
- Not every printer supports the use of optional `Properties`.  To find
- out which printers support `Properties` and which `Properties` are
- recognised by each printer, read the Ghostscript
+ Not every device supports the use of optional `Properties`.  To find
+ out which devices support `Properties` and which `Properties` are
+ recognised by each device, read the Ghostscript
  file Devices.htm or look at the Ghostscript source code.
 
  There are two ways to add or edit `Properties`.
@@ -897,13 +903,13 @@ E
 
  The second method is to manually edit the GSview INI file.
 
- For each printer, you must add two sections to the
+ For each device, you must add two sections to the
 W
  gsview32.ini
 P
  gvpm.ini
 X
- ~/.gsviewrc
+ ~/.gsview.ini
 E
  file.
  The following example shows how to add property information
@@ -934,7 +940,7 @@ W
 P
  gvpm.ini
 X
- ~/.gsviewrc
+ ~/.gsview.ini
 E
  as follows:
   -dBitsPerPixel=24 -dDepletion=1 -dShingling=2 -dBlackCorrect=4
@@ -1064,7 +1070,7 @@ W
 P
  gvpm.ini
 X
- .gsviewrc
+ .gsview.ini
 E
  and is taken from the standard distribution version of Ghostscript 6.01.
  You can use other devices or resolutions.
@@ -1638,8 +1644,15 @@ E
 3Language
 ?Language
 ?International
- GSview is available in English, French, German, Italian and Spanish.
+ GSview is available in English, Dutch, French, German, Greek,
+ Italian and Spanish.
  To change the language use `Options` | `Language`.
+
+ On Windows NT, all existing languages are available to be
+ selected, independent of the regional settings.
+ On other systems, the language availability depends on the
+ selected regional settings, in particular the chosen locale
+ or system code page.
 3PStoText
 ?PStoText
  GSview has two methods of extracting and searching text.
@@ -1696,7 +1709,7 @@ W
 P
  gvpm.ini in the OS/2 system directory.
 X
- .gsviewrc in your home directory.
+ .gsview.ini in your home directory.
 E
  GSview reads this file during startup.
 
@@ -2024,6 +2037,9 @@ E
  The `Media` menu also allows selection of page size.
  Available page sizes are:
   11x17          11   x 17   inch
+  A0              840 x 1189 mm
+  A1              594 x 840  mm
+  A2              420 x 594  mm
   A3              297 x 420  mm
   A4              210 x 297  mm
   A5              148 x 210  mm
@@ -2084,8 +2100,8 @@ E
 
  `P`, `p`  Print all or some pages to a printer.  (`File` | `Print`)
 
- `F`, `f`  Print all or some pages to a File.  (`File` | `Print`) with
- `Print to File` checked.
+ `F`, `f`  Convert all or some pages to a PDF or bitmap File.
+ (`File` | `Convert`).
 
  `E`, `e`  Extract some pages to another File.  (`File` | `Extract`)
 
@@ -2126,78 +2142,45 @@ E
  `End`  Scroll to bottom of page.
 2Command line options
 ?Command line options
+ GSview ignores the case of options:
+ -p is the same as -P.  On Windows or OS/2, you can also
+ use /p or /P.  In the samples below, replace `gsview` with
+ `gsview32` on Windows and `gvpm` on OS/2.
+
  Usage:
-W
-  gsview32 [/D] [/Tn] filename
-  gsview32 [/D] [/Tn] /F filename
-  gsview32 [/D] [/Tn] /P filename
-  gsview32 [/D] [/Tn] /S[port] filename
-  gsview32 [/D] [/Tn] /S["queue"] filename
-P
-  gvpm [/D] [/Tn] filename
-  gvpm [/D] [/Tn] /F filename
-  gvpm [/D] [/Tn] /P filename
-X
-  gsview [-d] filename
-  gsview32 [-d] -P filename (not yet implemented)
-  gsview32 [-d] -F filename (not yet implemented)
+  gsview [-d] [-t] [-f[DEVICE]] [-p[QUEUE]]
+    [-mPAPERSIZE] [-oORIENTATION] [-rXDPIxYDPI]
+    [-geometry WIDTHxHEIGHT[+XOFF+YOFF]] filename
 
- Other options are
-  -help
-  -version
-  -geometry WIDTHxHEIGHT
-E
+ Options:
 
- To start GSview and display filename.ps use:
-W
-  gsview32 filename.ps
-P
-  gvpm filename.ps
-X
+ `filename` To start GSview and display filename.ps:
   gsview filename.ps
-E
- To start GSview and print filename.ps using Ghostscript.
- This is similar to `File` | `Print`, except that
- you will not be prompted for a printer (it will use
- the printer most recently used by GSview) and GSview
- will exit after printing has finished.
-W
-  gsview32 /P filename.ps
-P
-  gvpm /P filename.ps
-X
-  gsview -P filename.ps
-E
- To start GSview and convert filename.ps to a file using Ghostscript
- (`File` | `Convert`) use:
-W
-  gsview32 /F filename.ps
-P
-  gvpm /F filename.ps
-X
-  gsview -F filename.ps
-E
-W
- To start GSview and spool filename.ps for printing directly to
- a printer (`File` | `Print File`) use:
-  gsview32 /S filename.ps
- To start GSview and spool filename.ps for printing directly to
- printer port LPT3: use:
-  gsview32 /SLPT3: filename.ps
- To start GSview and spool filename.ps for printing directly to
- printer queue "HP DeskJet Portable" use:
-  gsview32 /S"HP DeskJet Portable" filename.ps
- GSview will exit when the file has been spooled.
-E
 
- To start GSview in debug mode use:
-W
-  gsview32 /D
-P
-  gvpm /D
-X
-  gsview -d
-E
+ `-p` prints filename.ps using Ghostscript.
+ This is similar to `File` | `Print`, except that you will
+ not be prompted for a printer (it will use the printer most
+ recently used by GSview, or the printer name you provide)
+ and GSview will exit after printing has finished:
+  gsview -p filename.ps
+
+ `-f` converts a PostScript file (not PDF) filename.ps
+ to a file using Ghostscript (`File` | `Convert`):
+  gsview -f filename.ps
+
+ `-m`PAPERSIZE sets the paper size.  Any of the predefined
+ sizes on the media menu are valid.
+
+ `-o`ORIENTATION sets the orientation and may be one of
+ `auto`, `portrait`, `landscape`, `upsidedown` or `seascape`.
+
+ `-r`XDPIxYDPI sets the display, convert or print resolution.
+
+ To display a file with A4 paper, landscape orientation
+ and 96dpi:
+  gsview -ma4 -olandscape -r96x96 filename.ps
+
+ `-d` Debug mode.
  In debug mode GSview will `not` remove its temporary files.
  This is to allow inspection of these files after GSview has finished.
  Debug mode also produces more verbose output for `File `| `Show Messages`.
@@ -2209,32 +2192,31 @@ X
 E
  use -d9
 
-WP
- GSview by default runs
-W
- multi-threaded under Windows 95 and Windows NT, and single-threaded under
- Windows 3.1 / Win32s.
-P
- multithreaded.
-WP
- To change this, use `/T` to toggle the threading mode, use `/T0` to select
- single-thread mode and `/T1` to select multi-thread mode.
-E
+ `-t` Multi-threading.  GSview by default runs multi-threaded,
+ except for Windows 3.1/Win32s.
+ To change this, use `-t` to toggle the threading mode, use `-t0` to select
+ single-thread mode and `-t1` to select multi-thread mode.
 
 W
- Instead of opening up a second copy of GSview, you can tell
- GSview to open a file in an existing GSview, or if GSview
- is not already running, in a new window using:
-  gsview32 /E filename
- To tell an existing GSview to exit:
-  gsview32 /X
+ Windows supports a few additional command line options.
 
-E
- GSview ignores the case of options:
-WP
- /p is the same as /P.
+ `-s` spools a file directly to the printer, without using Ghostscript.
+ GSview will exit when the file has been spooled.
+ Some examples are:
+  gsview -s filename.ps
+  gsview -sLPT3: filename.ps
+  gsview -s"HP DeskJet Portable" filename.ps
+
+ `-e` uses DDE to open a file in an existing GSview, or if GSview
+ is not already running, in a new window using.
+  gsview -e filename
+
+ `-x` uses DDE to tell an existing GSview to close.
+  gsview -x
 X
- -p is the same as -P.
+ On GNU/Linux you an also use:
+  gsview -v     (display version)
+  gsview -h     (display help)
 E
 W
 3Dynamic Data Exchange
@@ -2500,6 +2482,13 @@ E
  environment variable GS_OPTIONS.  When using GSview, it is safest
  not to use GS_OPTIONS at all and to use `Options` |
  `Advanced Configure` | `Ghostscript Options` instead.
+
+ `Problem:` GSview hangs or takes a very long time when displaying a file.
+
+ Resolution may have been set too high or page size too large.
+ Reduce the resolution to the default 96dpi using
+ `Media `| `Display Settings`.
+ Change the page size with the `Media` menu.
 W
 2Other Useful Programs
 ?Other Useful Programs

@@ -18,6 +18,8 @@
 /* en\gvclang.h */
 /* Common English language defines */
 
+#define AAENGLISH "English"
+
 #define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2001 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "All rights reserved."
 #define GSVIEW_COPYRIGHT3 "See the file LICENCE for more details."
@@ -211,7 +213,7 @@
 #define AAPROPERTIES "Properties"
 #define AAPROPERTYC "Property:"
 #define AAVALUEC "Value:"
-#define AAPAGEOFFSETPT "Page Offset (pts)"
+#define AAPAGEOFFSETPT "Page Offset (pt)"
 #define AAXC "X:"
 #define AAYC "Y:"
 
@@ -229,6 +231,8 @@
 /* Advanced Configure dialog box */
 #define AACONFIGUREGS "Advanced Configure"
 #define AAGHOSTSCRIPTDLLC "Ghostscript DLL:"
+#define AAGHOSTSCRIPTSOC "Ghostscript Shared Object:"
+#define AAGHOSTSCRIPTEXEC "Ghostscript Program:"
 #define AAGHOSTSCRIPTINCC "Ghostscript Include Path:"
 #define AAGHOSTSCRIPTOTHERC "Ghostscript Options:"
 #define AACOPYPRINTERDEF "Copy Printer Defaults"
@@ -299,10 +303,10 @@
 #define AAREG1 "Please enter your name and registration number"
 #define AAREG2 ""
 #define AANAG1 "GSview is Copyright 2001 Ghostgum Software Pty Ltd."
-#define AANAG2 "Please support the development of GSview"
-#define AANAG3 "by registering it."
+#define AANAG2 "Please support the development of GSview by registering it."
+#define AANAG3 ""
 #define AANAG4 "GSview can be registered online at"
-/* Borland Resource Compiler has a bug - it can handle "//" inside a string */
+/* Borland Resource Compiler has a bug - it can't handle "//" inside a string */
 #define AANAG5 "    http:/\057www.ghostgum.com.au/"
 
 
@@ -366,7 +370,7 @@
 #define AAUNINSTALLITEM "Uninstall GSview and AFPL Ghostscript"
 
 /* setup program */
-#define AAINSTALLSPACE "This installation will require 3 M bytes of hard disk space"
+#define AAINSTALLSPACE "This installation will require 5 M bytes of hard disk space"
 #define AAGSVIEWREQUIRES "GSview also requires"
 #define AAVIEWREADMEDETAILS "View the Readme file for details of how to obtain Ghostscript."
 #define AACOPYRIGHTNOTICE "Copyright Notice"
@@ -442,13 +446,5 @@
 #define AAMHELP "~Help"
 #define AAMABOUT "~About..."
 #endif
-
-/* Language changing */
-#define AASELECTLANGUAGE "Select Language"   /* Don't translate this */
-#define AAENGLISH "English"
-#define AADEUTSCH "Deutsch"
-#define AAFRANCAIS "Français"
-#define AAITALIANO "Italiano"
-#define AAESPANOL "Español"
 
 #define WINHELPFILE "gsviewen.hlp"

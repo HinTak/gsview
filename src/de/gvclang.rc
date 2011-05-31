@@ -45,6 +45,8 @@ END
 
 STRINGTABLE
 BEGIN
+	GSVS(IDS_LANGUAGE, AADEUTSCH)
+	GSVS(IDS_ELANGUAGE, "German")
 	GSVS(IDS_FILE, "Datei: ")
 	GSVS(IDS_NOFILE, "Keine Datei")
 	GSVS(IDS_PAGE, "Seite: ")
@@ -248,6 +250,7 @@ BEGIN
 	GSVS(IDS_PRN_SETTINGS, "Einstellungen")
 	GSVS(IDS_PRN_HELP, AAHELP)			// "Hilfe"
 	GSVS(IDS_PRN_SELECTPAGES, "Seiten auswählen")
+	GSVS(IDS_ALL, AAALL)
 	// PageSize policies
 	GSVS(IDS_PAGESIZE_VARIABLE, "Veränderliche Seitengröße")
 	GSVS(IDS_PAGESIZE_FIXED, "Feste Seitengröße")
@@ -279,51 +282,67 @@ STRINGTABLE
 BEGIN
 	GSVS(CDSC_RESOURCE_BBOX, "Diese Zeile ist falsch.\012Die bounding box muss in ganzen Zahlen angegeben\012werden, nicht als Gleitkommazahl. Eine Gleitkomma-bounding-box sollte mit\012%%HiResBoundingBox:\012angegeben werden. Eine ganzzahlige %%BoundingBox: sollte zusätzlich angegeben werden.\012")
 	GSVS(CDSC_RESOURCE_BBOX2, "\012'OK' wandelt die Koordinaten durch Aufrunden\012 in ganze Zahlen um.\012'Abbruch' übergeht diese Zeile.\012")
+	GSVS(CDSC_RESOURCE_BBOX3, "")
 
 
 	GSVS(CDSC_RESOURCE_EARLY_TRAILER, "Der Trailer ist normalerweise am Ende eines Dokumentes.\012Diese Zeile wurde mehr als 32k byte vor dem Dateiende\012 gefunden. Trailer sind normalerweise nicht so lang.\012Es ist wahrscheinlicher, dass eine andere PostScript-Datei eingebunden wurde,")
 	GSVS(CDSC_RESOURCE_EARLY_TRAILER2, "\012ohne sie in %%BeginDocument / %%EndDocument einzuschliessen.\012\012'OK' nimmt an, dass es sich um einen Teil der eingebundenen Datei handelt.\012'Abbruch' nimmt an, es ist der Trailer.\012")
+	GSVS(CDSC_RESOURCE_EARLY_TRAILER3, "")
 
 	GSVS(CDSC_RESOURCE_EARLY_EOF, "Diese Zeile ist normalerweise am Ende eines Dokumentes.\012Die Zeile wurde mehr als 100 byte vor dem Dateiende\012gefunden.\012Es ist wahrscheinlicher, dass eine andere PostScript-Datei eingebunden wurde,")
 	GSVS(CDSC_RESOURCE_EARLY_EOF2, "\012ohne sie in %%BeginDocument / %%EndDocument einzuschliessen.\012\012'OK' nimmt an, dass es sich um einen Teil der eingebundenen Datei handelt.\012'Abbruch' nimmt an, sie ist Bestandteil des Trailers.\012")
+	GSVS(CDSC_RESOURCE_EARLY_EOF3, "")
 
 	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER, "Diese %%Page:-Zeile kam im Trailer vor, was nicht zulässig ist.\012EPS-Dateien sollten in %%BeginDocument / %%EndDocument eingeschlossen sein.\012Es ist möglich, dass eine EPS-Datei unkorrekt eingeschlossen wurde,")
 	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER2, "\012und dass wir vom %%Trailer in der EPS-Datei verwirrt wurden.\012\012'OK' verarbeitet weitere Seiten.\012'Abbruch' ignoriert diesen Seitenkommentar.\012")
+	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER3, "")
 
 	GSVS(CDSC_RESOURCE_PAGE_ORDINAL, "Diese Zeile ist falsch.\012Die beiden Argumente sollten ein Label und eine Ordinalzahl sein.\012Die Zahl sollte 1 für die erste Seite sein und um 1\012für jede folgende Seite wachsen.\012Die Seitenzahl fehlt oder passt nicht in die Folge.\012\012Es ist wahrscheinlich, ")
 	GSVS(CDSC_RESOURCE_PAGE_ORDINAL2, "dass diese Zeile Teil einer eingebundenen Datei ist,\012die nicht in %%BeginDocument / %%EndDocument eingebunden wurde.\012\012'OK' ignoriert diese Seite und nimmt an, sie sei Teil einer falsch \012eingebetteten EPS-Datei.\012'Abbruch' behandelt die Seite als gültig.\012")
+	GSVS(CDSC_RESOURCE_PAGE_ORDINAL3, "")
 
 	GSVS(CDSC_RESOURCE_PAGES_WRONG, "%%Pages: entsprechen nicht der Zahl in %%Page:\012\012'OK' passt den Seitenzähler an die Zahl der gefundenen %%Page:-\012Kommentare an.\012'Abbruch' setzt den Seitenzähler auf den Wert von %%Pages:\012")
 	GSVS(CDSC_RESOURCE_PAGES_WRONG2,"")
+	GSVS(CDSC_RESOURCE_PAGES_WRONG3,"")
 
 	GSVS(CDSC_RESOURCE_EPS_NO_BBOX, "Diese EPS-Datei enthält nicht die erforderliche %%BoundingBox:\012Siehe in der GSview-Hilfe: Details des Hinzufügens/Anpassens der\012bounding box.\012\012'OK' nimmt an, dass es sich um eine EPS-Datei handelt.\012")
 	GSVS(CDSC_RESOURCE_EPS_NO_BBOX2, "'Abbruch' nimmt an, dass es sich um KEINE EPS-Datei handelt.\012")
+	GSVS(CDSC_RESOURCE_EPS_NO_BBOX3, "")
 
 	GSVS(CDSC_RESOURCE_EPS_PAGES, "EPS-Dateien haben 0 oder 1 Seite.  Diese 'EPS'-Datei hat\012mehr als 1 Seite und ist also keine EPS-Datei.\012Sie können nicht `Drucke in` `Encapsulated PostScript File` zum\012Drucken mehrseitiger Dateien benutzen.  Die richtige Methode ist den Drucker")
 	GSVS(CDSC_RESOURCE_EPS_PAGES2, "\012mit DATEI: zu verbinden oder 'Druck in Datei' zu wählen.\012\012'OK' nimmt an, dass es sich um eine EPS-Datei handelt.\012'Abbruch' nimmt an, dass es sich um KEINE EPS-Datei handelt.\012")
+	GSVS(CDSC_RESOURCE_EPS_PAGES3, "")
 
 	GSVS(CDSC_RESOURCE_NO_MEDIA, "Ein Medium wurde mit %%DocumentMedia: angegeben, aber kein Standardwert.\012Ein Medium wurde mit %%PageMedia: angegeben.\012\012'OK' setzt das erste aufgelistete Medium als Standard.\012'Abbruch' setzt kein Standardmedium.\012") 
 	GSVS(CDSC_RESOURCE_NO_MEDIA2, "") 
+	GSVS(CDSC_RESOURCE_NO_MEDIA3, "") 
 
 	GSVS(CDSC_RESOURCE_ATEND, "Diese Zeile ist falsch.\012Um einen Wert auf später zu verschieben, muss man '(atend)' verwenden, nicht 'atend'\012\012'OK' nimmt an, dass (atend) gemeint war.\012'Abbruch' ignoriert diese Zeile.\012")
 	GSVS(CDSC_RESOURCE_ATEND2, "")
+	GSVS(CDSC_RESOURCE_ATEND3, "")
 
 	GSVS(CDSC_RESOURCE_DUP_COMMENT, "Dieser Kommentar wird im Header wiederholt, was unnötig ist.\012Das erste Vorkommen einer Header-Zeile hat Vorrang.\012\012'OK' oder 'Abbruch' ignorieren die gedoppelte Zeile.\012")
 	GSVS(CDSC_RESOURCE_DUP_COMMENT2, "")
+	GSVS(CDSC_RESOURCE_DUP_COMMENT3, "")
 
 	GSVS(CDSC_RESOURCE_DUP_TRAILER, "Dieser Kommentar wird im Trailer wiederholt, was unnötig ist.\012Das letzte Vorkommen einer Trailer-Zeile hat Vorrang.\012\012'OK' oder 'Abbruch' verwenden die gedoppelte Zeile.\012")
 	GSVS(CDSC_RESOURCE_DUP_TRAILER2, "")
+	GSVS(CDSC_RESOURCE_DUP_TRAILER3, "")
 
 	GSVS(CDSC_RESOURCE_BEGIN_END, "Die Nummern der Begin- und End-Kommentare stimmen nicht überein.\012\012'OK' oder 'Abbruch' übergehen diesen Fehler.\012")
 	GSVS(CDSC_RESOURCE_BEGIN_END2, "")
+	GSVS(CDSC_RESOURCE_BEGIN_END3, "")
 
 	GSVS(CDSC_RESOURCE_BAD_SECTION, "Diese Zeile ist falsch, da sie nicht innerhalb\012 einer Seite vorkommen dürfte. Das weißsst wahrscheinlich auf eine\012 falsch eingebundene EPS-Datei hin.  Die Zeile wird ignoriert.\012\012'OK' oder 'Abbruch' übergehen diese Zeile.\012")
 	GSVS(CDSC_RESOURCE_BAD_SECTION2, "")
+	GSVS(CDSC_RESOURCE_BAD_SECTION3, "")
 
 	GSVS(CDSC_RESOURCE_LONG_LINE, "\012\012Zeilen in DSC-Dokumenten müssen kürzer als 255 Zeichen sein.\012") 
 	GSVS(CDSC_RESOURCE_LONG_LINE2, "") 
+	GSVS(CDSC_RESOURCE_LONG_LINE3, "") 
 
 	GSVS(CDSC_RESOURCE_INCORRECT_USAGE, "Diese DSC-Kommentarzeile ist falsch.\012Schlagen Sie in der DSC Specifikation nach.\012\012'OK' oder 'Abbruch' übergehen diesen Fehler.\012")
 	GSVS(CDSC_RESOURCE_INCORRECT_USAGE2, "")
+	GSVS(CDSC_RESOURCE_INCORRECT_USAGE3, "")
 
 END

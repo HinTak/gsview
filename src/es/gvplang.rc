@@ -18,6 +18,8 @@
 /* es\gvplang.rc */
 /* OS/2 PM Spanish language resources */
 
+CODEPAGE 850
+
 MENU ID_GSVIEW
 BEGIN
 /*
@@ -94,11 +96,8 @@ BEGIN
         END
         SUBMENU "~Idioma", IDM_LANGMENU
         BEGIN
-            MENUITEM "~Inglés", IDM_LANGEN
-            MENUITEM "~Francés", IDM_LANGFR
-            MENUITEM "~Alemán", IDM_LANGDE
-            MENUITEM "I~taliano", IDM_LANGIT
-            MENUITEM "~Español", IDM_LANGES
+	    MENUITEM "~English", IDM_LANGEN
+	    /* Remaining languages are added at run time */
         END
         SUBMENU "Conversión a ~texto", IDM_PSTOTEXTMENU
         BEGIN
@@ -253,6 +252,8 @@ END
 STRINGTABLE
 BEGIN
     /* general strings */
+    IDS_SLANGUAGE, "34"
+    IDS_CODEPAGE, "850"	/* IBM Western Europe */
     IDS_HELPFILE, "gvpmes.hlp"
     IDS_HELPTITLE, "Ayuda de GSview"
     IDS_SIGSEGV "Violación de la segmentación o excepción de coma flotante en Ghostscript o GSview\015Por favor, salga de GSview"

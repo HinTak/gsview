@@ -1,5 +1,5 @@
 NAME		winsetup
-DESCRIPTION	'Install GSview and Aladdin Ghostscript'
+DESCRIPTION	'Install GSview'
 EXETYPE		WINDOWS
 HEAPSIZE	4096
 STACKSIZE	32768

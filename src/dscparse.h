@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, 2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -107,6 +107,8 @@ typedef enum {
   CDSC_REQUIREMENTS	     = 218,	/* IGNORED %%Requirements: */
   CDSC_DOCUMENTNEEDEDFONTS   = 219,	/* IGNORED %%DocumentNeededFonts: */
   CDSC_DOCUMENTSUPPLIEDFONTS = 220,	/* IGNORED %%DocumentSuppliedFonts: */
+  CDSC_HIRESBOUNDINGBOX	     = 221,	/* %%HiResBoundingBox: */
+  CDSC_CROPBOX	     	     = 222,	/* %%CropBox: */
 
 /* Preview section */
   CDSC_BEGINPREVIEW	= 301,	/* %%BeginPreview */
@@ -152,6 +154,7 @@ typedef enum {
 /* also %%Begin/EndResource, %%Begin/EndProcSet */
   CDSC_INCLUDEFONT	= 707,	/* IGNORED %%IncludeFont: */
   CDSC_VIEWINGORIENTATION = 708, /* %%ViewingOrientation: */
+  CDSC_PAGECROPBOX	= 709,	/* %%PageCropBox: */
 
 /* Trailer section */
   CDSC_TRAILER		= 800,	/* %%Trailer */
@@ -205,6 +208,13 @@ typedef struct CDSCBBOX_S {
     int ury;
 } CDSCBBOX;
 
+typedef struct CDSCFBBOX_S {
+    float fllx;
+    float flly;
+    float furx;
+    float fury;
+} CDSCFBBOX;
+
 typedef struct CDSCMEDIA_S {
     const char *name;
     float width;	/* PostScript points */
@@ -236,6 +246,8 @@ typedef struct CDSCPAGE_S {
     const CDSCMEDIA *media;
     CDSCBBOX *bbox;  /* PageBoundingBox, also used by GSview for PDF CropBox */
     CDSCCTM *viewing_orientation;
+    /* Added 2001-10-19 */
+    CDSCFBBOX *crop_box;  /* CropBox */
 } CDSCPAGE;
 
 /* binary DOS EPS header */
@@ -405,6 +417,10 @@ struct CDSC_S {
     int (*dsc_error_fn)(P5(void *caller_data, CDSC *dsc, 
 	unsigned int explanation, const char *line, unsigned int line_len));
 
+    /* public data */
+    /* Added 2001-10-01 */
+    CDSCFBBOX *hires_bbox;	/* the hires document bounding box */
+    CDSCFBBOX *crop_box;	/* the size of the trimmed page */
 };
 
 

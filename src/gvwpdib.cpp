@@ -43,7 +43,7 @@ CPrintDIB::~CPrintDIB()
 }
 
 
-BOOL CPrintDIB::ReadHeader(CFile *cf)
+BOOL CPrintDIB::ReadHeader(GFile *cf)
 {
     if (m_bits != NULL)
 	    delete [] m_bits;
