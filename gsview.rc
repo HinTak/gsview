@@ -1,0 +1,371 @@
+/*
+ * gsview.rc -- Resources for GSVIEW.EXE, a graphical interface for 
+ *              MS-Windows Ghostscript
+ * Copyright (C) 1993  Russell Lang
+ */
+
+#include <windows.h>
+#include "gsview.h"
+#include "gsview2.rc"	/* language independent resources */
+
+gsview_menu MENU
+BEGIN
+	POPUP "&File"
+	BEGIN
+		MENUITEM "&Open...\tO", IDM_OPEN
+		MENUITEM "&Next Page\t+", IDM_NEXT
+		MENUITEM "Pre&vious Page\t-", IDM_PREV
+		MENUITEM "&Goto Page...\tG", IDM_GOTO
+		MENUITEM "&Redisplay\tR", IDM_REDISPLAY
+		MENUITEM "&Info...\tI", IDM_INFO
+		MENUITEM SEPARATOR
+		MENUITEM "&Select File...\tS", IDM_SELECT
+		MENUITEM "&Print...\tP", IDM_PRINT
+		MENUITEM "Print To &File...\tF", IDM_PRINTTOFILE
+		MENUITEM "Print File...", IDM_SPOOL
+		MENUITEM "&Extract...\tE", IDM_EXTRACT
+		MENUITEM "PS to EPS", IDM_PSTOEPS
+		MENUITEM SEPARATOR
+		MENUITEM "E&xit", IDM_EXIT
+	END
+	POPUP "&Edit"
+	BEGIN
+		MENUITEM "&Copy\tCtrl+C", IDM_COPYCLIP
+		MENUITEM SEPARATOR
+		MENUITEM "&Paste To...", IDM_PASTETO
+		MENUITEM "Convert &Bitmap", IDM_CONVERT
+		MENUITEM SEPARATOR
+		POPUP "&Add EPS Preview"
+		BEGIN
+		    MENUITEM "&Interchange", IDM_MAKEEPSI
+		    MENUITEM "&TIFF", IDM_MAKEEPST
+		    MENUITEM "&Windows Metafile", IDM_MAKEEPSW
+		END
+		POPUP "&Extract EPS"
+		BEGIN
+		    MENUITEM "&PostScript", IDM_EXTRACTPS
+		    MENUITEM "Pre&view", IDM_EXTRACTPRE
+		END
+	END
+	POPUP "O&ptions"
+	BEGIN
+		MENUITEM "&Ghostscript Command...", IDM_GSCOMMAND
+		MENUITEM "Sounds...", IDM_SOUNDS
+		MENUITEM "&Save Settings", IDM_SETTINGS
+		MENUITEM SEPARATOR
+		MENUITEM "Save Settings on &Exit", IDM_SAVESETTINGS
+		MENUITEM "Save Last &Directory", IDM_SAVEDIR
+		MENUITEM "&Button Bar", IDM_BUTTONSHOW
+		MENUITEM "&Quick Open", IDM_QUICK
+		MENUITEM "Auto &Redisplay", IDM_AUTOREDISPLAY
+		MENUITEM "EPS &Clip", IDM_EPSFCLIP
+		MENUITEM "EPS &Warn", IDM_EPSFWARN
+	END
+	POPUP "&Orientation"
+	BEGIN
+		MENUITEM "&Portrait", IDM_PORTRAIT
+		MENUITEM "&Landscape", IDM_LANDSCAPE
+		MENUITEM "&Upside-down", IDM_UPSIDEDOWN
+		MENUITEM "&Seascape", IDM_SEASCAPE
+		MENUITEM SEPARATOR
+		MENUITEM "Swap Landscape", IDM_SWAPLANDSCAPE
+	END
+	POPUP "&Media"
+	BEGIN
+		MENUITEM "&Resolution...", IDM_RESOLUTION
+		MENUITEM SEPARATOR
+		MENUITEM "Letter", IDM_LETTER
+		MENUITEM "Tabloid", IDM_TABLOID
+		MENUITEM "Ledger", IDM_LEDGER
+		MENUITEM "Legal", IDM_LEGAL
+		MENUITEM "Statement", IDM_STATEMENT
+		MENUITEM "Executive", IDM_EXECUTIVE
+		MENUITEM "A3", IDM_A3
+		MENUITEM "A4", IDM_A4
+		MENUITEM "A5", IDM_A5
+		MENUITEM "B4", IDM_B4
+		MENUITEM "B5", IDM_B5
+		MENUITEM "Folio", IDM_FOLIO
+		MENUITEM "Quarto", IDM_QUARTO
+		MENUITEM "10x14", IDM_10X14
+		MENUITEM "User Defined...", IDM_USERSIZE
+	END
+	POPUP "&Help"
+	BEGIN
+		MENUITEM "&Contents", IDM_HELPCONTENT
+		MENUITEM "&Search for Help on...", IDM_HELPSEARCH
+		MENUITEM SEPARATOR
+		MENUITEM "&About...", IDM_ABOUT
+	END
+END
+
+gsview_accel ACCELERATORS
+BEGIN
+	"O", IDM_OPEN
+	"o", IDM_OPEN
+	"N", IDM_NEXT
+	"n", IDM_NEXT
+	"+", IDM_NEXT
+	"V", IDM_PREV
+	"v", IDM_PREV
+	"-", IDM_PREV
+	"G", IDM_GOTO
+	"g", IDM_GOTO
+	"I", IDM_INFO
+	"i", IDM_INFO
+	"R", IDM_REDISPLAY
+	"r", IDM_REDISPLAY
+	"S", IDM_SELECT
+	"s", IDM_SELECT
+	"P", IDM_PRINT
+	"p", IDM_PRINT
+	"F", IDM_PRINTTOFILE
+	"f", IDM_PRINTTOFILE
+	"E", IDM_EXTRACT
+	"e", IDM_EXTRACT
+	VK_F1, IDM_HELPCONTENT, VIRTKEY
+	"^C", IDM_COPYCLIP
+	VK_INSERT, IDM_COPYCLIP, VIRTKEY, CONTROL
+END
+
+
+STRINGTABLE
+BEGIN
+	/* general strings */
+	IDS_FILTER, "Default (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|Bitmap Files (*.bmp)|*.bmp|TIFF Files (*.tif)|*.tif|Metafiles (*.wmf)|*.wmf|"
+	IDS_TITLE, "Ghostview for Windows"
+	IDS_HELPFILE, "gsview.hlp"
+	IDS_WRONGGS, "Incompatible Ghostscript"
+	IDS_BUSY, "Ghostview is busy.\nClear busy state?"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_FILE, "File: "
+	IDS_NOFILE, "No File"
+	IDS_PAGE, "Page: "
+	IDS_NOPAGE, "No page numbering available"
+	IDS_LANDSCAPE, "Landscape"
+	IDS_PORTRAIT, "Portrait"
+	IDS_ASCEND, "Ascending"
+	IDS_DESCEND, "Descending"
+	IDS_SPECIAL, "Special"
+	IDS_EPSF, "EPS"
+	IDS_EPSI, "EPS with Interchange Preview"
+	IDS_EPST, "EPS with TIFF Preview"
+	IDS_EPSW, "EPS with Metafile Preview"
+	IDS_DSC, "DSC"
+	IDS_NOTDSC, "No DSC comments"
+	IDS_PAGEINFO, "Page: \"%s\"  %d of %d"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_OUTPUTFILE, "Output Filename"
+	IDS_PRINTINGALL, "No DSC comments\nPrinting all pages"
+	IDS_PRINTFILE, "Print File"
+	IDS_NOSPOOL, "Print Manager is disabled\nEnable it now ?"
+	IDS_SELECTPAGE, "Select Page"
+	IDS_SELECTPAGES, "Select Pages"
+	IDS_TIMEOUT, "Timeout waiting for Ghostscript"
+	IDS_NOTIMER, "No Timer available"
+	IDS_NOTOPEN, "No document open"
+	IDS_CANNOTRUN, "Can't run "
+	IDS_TOOLONG, "Command line too long: "
+	IDS_WAIT, "Wait"
+	IDS_NOMORE, "No more pages"
+	IDS_GSCOMMAND, "Ghostscript command ?"
+	IDS_RES, "Display resolution (dpi) ?"
+	IDS_USERWIDTH, "Width in 1/72 inch units ?"
+	IDS_USERHEIGHT, "Height in 1/72 inch units ?"
+	IDS_BADEPS, "Problem making EPS file"
+	IDS_NOPREVIEW, "Not a DOS EPS file or\nNo binary preview"
+	IDS_CFILEOPEN, "cfile is already open"
+	IDS_CFILEERR, "Can't open temporary cfile"
+	IDS_PIPEERR, "Pipe error"
+	IDS_CANCELDONE, "%d%% done"
+END
+
+STRINGTABLE
+BEGIN
+	/* sound type types*/
+	IDS_SOUNDNAME, "Sound File"
+	IDS_SNDPAGE, "Output Page"
+	IDS_SNDNOPAGE, "No Page"
+	IDS_SNDNONUMBER, "No Numbering"
+	IDS_SNDNOTOPEN, "Not Open"
+	IDS_SNDERROR, "Error"
+	IDS_SNDTIMEOUT,	"Timeout"
+	IDS_SNDSTART, "Start"
+	IDS_SNDEXIT, "Exit"
+	IDS_SOUNDNOMM, "Can't load MMSYSTEM.DLL\nSounds will be unavailable"
+	IDS_NONE, "<None>"
+	IDS_SPKR, "<Speaker Beep>"
+END
+
+STRINGTABLE
+BEGIN
+	/* help topics - these need to match keywords in gsview.doc */
+	IDS_TOPICROOT,  "Overview"
+	IDS_TOPICOPEN,  "Open"
+	IDS_TOPICPRINT, "Print"
+	IDS_TOPICEDIT, "Edit"
+	IDS_TOPICGSCMD, "Ghostscript Command"
+	IDS_TOPICSOUND, "Sounds"
+	IDS_TOPICMEDIA, "Media"
+	IDS_TOPICPSTOEPS, "PS to EPS"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_BBPROMPT,  "Click at left"
+	IDS_BBPROMPT1, "Click at bottom"
+	IDS_BBPROMPT2, "Click at right"
+	IDS_BBPROMPT3, "Click at top"
+	IDS_EPSONEPAGE, "An EPS file must be a single page document.\nSee help on 'PS to EPS'"
+	IDS_EPSQPAGES, "Is this a single page document ?"
+	IDS_EPSNOBBOX, "Could not obtain Bounding Box"
+END
+
+AboutDlgBox DIALOG 20, 32, 256, 156
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Ghostview for Windows"
+BEGIN
+	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 218, 5, 32, 14
+	LTEXT "GSVIEW.EXE", -1, 32, 8, 64, 8
+	RTEXT "Version:", -1, 96, 8, 32, 8
+	LTEXT "", ABOUT_VERSION, 130, 8, 80, 8
+	LTEXT "A Ghostscript graphical interface", -1, 32, 16, 128, 8
+	LTEXT "This program is free software; you can redistribute it and/or modify", -1, 8, 28, 240, 8
+	LTEXT "it under the terms of the GNU General Public License as published by", -1, 8, 36, 240, 8
+	LTEXT "the Free Software Foundation; either version 2 of the License, or", -1, 8, 44, 240, 8
+	LTEXT "(at your option) any later version.", -1, 8, 52, 240, 8
+	LTEXT "This program is distributed in the hope that it will be useful", -1, 8, 64, 240, 8
+	LTEXT "but WITHOUT ANY WARRANTY; without even the implied warranty of", -1, 8, 72, 240, 8
+	LTEXT "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the", -1, 8, 80, 240, 8
+	LTEXT "GNU General Public License for more details.", -1, 8, 88, 240, 8
+	LTEXT "You should have received a copy of the GNU General Public License", -1, 8, 100, 240, 8
+	LTEXT "along with this program; if not, write to the Free Software", -1, 8, 108, 240, 8
+	LTEXT "Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.", -1, 8, 116, 240, 8
+	LTEXT "", -1, 8, 124, 240, 8
+	LTEXT "Author: Russell Lang  (rjl@monu1.cc.monash.edu.au)", -1, 8, 138, 240, 8
+	ICON "gsview", ABOUT_ICON, 8, 8, 0, 0
+END
+
+InputDlgBox DIALOG 48, 32, 192, 56
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Input"
+BEGIN
+	LTEXT "", ID_PROMPT, 6, 6, 180, 10
+	CONTROL "", ID_ANSWER, "edit", ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD, 6, 18, 180, 12
+	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 23, 36, 32, 14
+	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 83, 36, 32, 14
+	CONTROL "&Help", ID_HELP, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 143, 36, 32, 14
+END
+
+InfoDlgBox DIALOG 20, 32, 175, 107
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Info"
+BEGIN
+	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 136, 89, 32, 14
+	RTEXT "File:", -1, 24, 8, 32, 8
+	LTEXT "", INFO_FILE, 60, 8, 110, 8
+	RTEXT "Type:", -1, 24, 16, 32, 8
+	LTEXT "", INFO_TYPE, 60, 16, 110, 8
+	RTEXT "Title:", -1, 24, 24, 32, 8
+	LTEXT "", INFO_TITLE, 60, 24, 110, 8
+	RTEXT "Date:", -1, 24, 32, 32, 8
+	LTEXT "", INFO_DATE, 60, 32, 110, 8
+	RTEXT "BoundingBox:", -1, 8, 40, 48, 8
+	LTEXT "", INFO_BBOX, 60, 40, 80, 8
+	RTEXT "Orientation:", -1, 8, 48, 48, 8
+	LTEXT "", INFO_ORIENT, 60, 48, 60, 8
+	RTEXT "Default Media:", -1, 8, 64, 48, 8
+	LTEXT "", INFO_DEFMEDIA, 60, 64, 60, 8
+	RTEXT "Page Order:", -1, 8, 56, 48, 8
+	LTEXT "", INFO_ORDER, 60, 56, 60, 8
+	RTEXT "Pages:", -1, 8, 72, 48, 8
+	LTEXT "", INFO_NUMPAGES, 60, 72, 60, 8
+	RTEXT "Page:", -1, 8, 80, 48, 8
+	LTEXT "", INFO_PAGE, 60, 80, 60, 8
+	RTEXT "Bitmap:", -1, 8, 92, 48, 8, SS_RIGHT | WS_CHILD | WS_VISIBLE | WS_GROUP
+	LTEXT "", INFO_BITMAP, 60, 92, 60, 8
+	ICON "gsview", INFO_ICON, 8, 8, 0, 0
+END
+
+SoundDlgBox DIALOG 16, 40, 204, 94
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Sounds"
+BEGIN
+	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 12, 32, 14
+	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 32, 32, 14
+	CONTROL "&Test", SOUND_TEST, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 164, 52, 32, 14
+	CONTROL "&Help", ID_HELP, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 164, 72, 32, 14
+	LTEXT "Event:", -1, 8, 4, 32, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CONTROL "", SOUND_EVENT, "LISTBOX", LBS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 16, 70, 64
+	LTEXT "Sound:", -1, 90, 4, 33, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CONTROL "", SOUND_FILE, "LISTBOX", LBS_STANDARD | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 90, 16, 64, 64
+	LTEXT "", SOUND_PATH, 90, 83, 70, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+END
+
+SpoolDlgBox DIALOG 32, 40, 110, 63
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select Printer Port"
+BEGIN
+	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 72, 14, 32, 14
+	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 72, 36, 32, 14
+	CONTROL "", SPOOL_PORT, "LISTBOX", LBS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 8, 56, 50
+END
+
+CancelDlgBox DIALOG 32, 40, 120, 48
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE
+BEGIN
+	CTEXT "Printing", -1, 8, 4, 104, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CTEXT "", CANCEL_PCDONE, 8, 16, 104, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 44, 30, 32, 14
+END
+
+PageDlgBox DIALOG 64, 32, 80, 142
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+BEGIN
+	CONTROL "", PAGE_LIST, "LISTBOX", LBS_NOTIFY | LBS_MULTIPLESEL | LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 8, 28, 128
+	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 8, 32, 14
+	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 32, 32, 14
+	CONTROL "&All", PAGE_ALL, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 64, 32, 14
+	CONTROL "O&dd", PAGE_ODD, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 88, 32, 14
+	CONTROL "&Even", PAGE_EVEN, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 112, 32, 14
+END
+
+DeviceDlgBox DIALOG 16, 40, 212, 94
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select Device"
+BEGIN
+	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 12, 40, 14
+	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 32, 40, 14
+	CONTROL "&Properties", DEVICE_PROP, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 52, 40, 14
+	CONTROL "&Help", ID_HELP, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 164, 72, 40, 14
+	LTEXT "Device:", -1, 8, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CONTROL "", DEVICE_NAME, "COMBOBOX", CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 16, 70, 70
+	LTEXT "Resolution:", DEVICE_RESTEXT, 90, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CONTROL "", DEVICE_RES, "COMBOBOX", CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP, 90, 16, 64, 70
+END
+
+PropDlgBox DIALOG 16, 40, 204, 94
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Edit Properties"
+BEGIN
+	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 12, 32, 14
+	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 32, 32, 14
+	CONTROL "&Help", ID_HELP, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 164, 72, 32, 14
+	LTEXT "Property:", -1, 8, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CONTROL "", PROP_NAME, "COMBOBOX", CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 16, 70, 70
+	LTEXT "Value:", -1, 90, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CONTROL "", PROP_VALUE, "COMBOBOX", CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP, 90, 16, 64, 70
+END
+
+BoundingBoxDlgBox DIALOG 12, 24, 120, 15
+STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_EX_TOPMOST
+CAPTION "BoundingBox"
+BEGIN
+	CTEXT "", BB_PROMPT, 4, 4, 112, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+END
