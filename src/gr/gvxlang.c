@@ -122,6 +122,7 @@ MENU_ENTRY menu_gr[] = {
   { "/Επιλογές/Γλώσσα/_Francais", 	NULL,		GS_CMD, IDM_LANGFR, "<CheckItem>" },
   { "/Επιλογές/Γλώσσα/_Italiano", 	NULL,		GS_CMD, IDM_LANGIT, "<CheckItem>" },
   { "/Επιλογές/Γλώσσα/_Nederlands", 	NULL,		GS_CMD, IDM_LANGNL, "<CheckItem>" },
+  { "/Επιλογές/Γλώσσα/Svenska", 	NULL,		GS_CMD, IDM_LANGSE, "<CheckItem>" },
   { "/Επιλογές/PS σε _κείμενο",      		NULL,   NULL, 		0, "<Branch>" },
   { "/Επιλογές/PS σε κείμενο/Απενεργοποιημένη", 	NULL,		GS_CMD, IDM_PSTOTEXTDIS, "<CheckItem>" },
   { "/Επιλογές/PS σε κείμενο/Κανονική", 	NULL,		GS_CMD, IDM_PSTOTEXTNORM, "<CheckItem>" },

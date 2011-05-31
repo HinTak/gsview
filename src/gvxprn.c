@@ -52,7 +52,7 @@ void new_prop_dialog(GtkWidget *w, gpointer data);
 void prop_dialog(GtkWidget *w, gpointer data);
 void advanced_ps_dialog(GtkWidget *w, gpointer data);
 int print_dialog_box(BOOL convert);
-gint delete_print_message(GtkWidget *widget, GdkEvent event, gpointer data);
+gint delete_print_message(GtkWidget *widget, GdkEvent *event, gpointer data);
 void percent_print_message(int percent);
 void add_print_message(char *str, int len) ;
 void close_print_message(void);
@@ -1251,7 +1251,7 @@ GtkWidget *print_window;
 GtkWidget *print_text;
 /* should have a label which show % printed */
 
-gint delete_print_message(GtkWidget *widget, GdkEvent event, gpointer data)
+gint delete_print_message(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
     if (debug & DEBUG_GENERAL)
 	gs_addmess("delete_print_message:\n");

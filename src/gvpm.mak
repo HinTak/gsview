@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -101,6 +101,7 @@ all: gvpm.exe\
  gvpmgr.hlp gvpmgr.dll setup2gr.dll\
  gvpmit.hlp gvpmit.dll setup2it.dll\
  gvpmnl.hlp gvpmnl.dll setup2nl.dll\
+ gvpmse.hlp gvpmse.dll setup2se.dll\
  gvpgs.exe\
  os2setup.exe
 
@@ -324,6 +325,24 @@ gvpmnl.dll: gvpmnl.res nl\gvplang.def gvplang.c
 	rc gvpmnl.res gvpmnl.dll
 !endif
 
+gvpmse.res: gvpmse.hlp gvcrc.h gvpm2.rc se\gvclang.h se\gvclang.rc se\gvplang.rc gvpm3.rc binary\gvpm1.ico codepage.exe $(HDRS)
+	codepage 1252_850 se\gvclang.h gvclang.h
+	codepage 1252_850 se\gvclang.rc gvclang.rc
+	codepage 1252_850 se\gvplang.rc gvplang.rc
+	copy gvpm2.rc+gvplang.rc+gvphlpse.rc+gvclang.rc+gvpm3.rc gvpmse.rc
+	rc -i $(COMPBASE)\include -r $*.rc
+	-del gvclang.rc
+	-del gvplang.rc
+	-del gvclang.h
+	codepage 1252_850 $(LANGUAGE)\gvclang.h gvclang.h
+
+gvpmse.dll: gvpmse.res se\gvplang.def gvplang.c
+!if $(USE_EMX)
+	$(COMP) -Zdll -Zso -Zsys -Zomf -c gvplang.c
+	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj gvplang.obj, gvpmse.dll, ,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, se\gvplang.def
+	rc gvpmse.res gvpmse.dll
+!endif
+
 gvpm.res: gvpm1.rc gvpm.h binary\gvpm1.ico gvpmen.hlp gvcrc.h en\gvclang.h gvpm1.rc en\gvclang.rc en\gvplang.rc gvpm3.rc codepage.exe $(HDRS)
 	codepage 1252_850 en\gvclang.h gvclang.h
 	codepage 1252_850 en\gvclang.rc gvclang.rc
@@ -473,6 +492,17 @@ setup2nl.dll: setup2nl.res nl\setup2.def gvplang.c
 	rc setup2nl.res setup2nl.dll
 !endif
 
+setup2se.res: os2setup.rc setup.h gvcrc.h gvcver.h se\gvclang.h codepage.exe
+	codepage 1252_850 se\gvclang.h gvclang.h
+	rc -i $(COMPBASE)\include -r os2setup.rc setup2se.res
+
+setup2se.dll: setup2se.res se\setup2.def gvplang.c
+!if $(USE_EMX)
+	$(COMP) -Zdll -Zso -Zsys -Zomf -c gvplang.c
+	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj gvplang.obj, setup2se.dll, ,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, se\setup2.def
+	rc setup2se.res setup2se.dll
+!endif
+
 
 gvdoc.exe: gvdoc.c
 !if $(USE_EMX)
@@ -567,13 +597,22 @@ gvpmnl.hlp: nl\gvclang.txt  codepage.exe gvdoc.exe doc2ipf.exe
 	-del gvc.txt
 	-del gvpm.txt
 
+gvpmse.hlp: se\gvclang.txt  codepage.exe gvdoc.exe doc2ipf.exe
+	codepage 1252_850 se\gvclang.txt gvc.txt
+	gvdoc P gvc.txt gvpm.txt
+	doc2ipf gvpm.txt gvpmse.ipf gvphlpse.rc
+	ipfc gvpmse.ipf
+	rename gvpmse.hlp gvpmse.hlp
+	-del gvc.txt
+	-del gvpm.txt
+
 gvpmen.inf: gvpmen.hlp
 	ipfc /INF gvpmen.ipf
 	rename gvpmen.INF gvpmen.inf
 
 html: gvpm.htm gsview.htm
 
-gvpm.htm: doc2html.exe en\gvclang.txt
+gvpm.htm: gvdoc.exe doc2html.exe en\gvclang.txt
 	gvdoc P en\gvclang.txt gvpm.txt
 	doc2html gvpm.txt GSview.htm
 	-del gvpm.htm
@@ -648,12 +687,14 @@ gsv$(GSVIEW_VERSION)os2.zip:
 	copy gvpmgr.hlp ..
 	copy gvpmit.hlp ..
 	copy gvpmnl.hlp ..
+	copy gvpmse.hlp ..
 	copy gvpmde.dll ..
 	copy gvpmes.dll ..
 	copy gvpmfr.dll ..
 	copy gvpmgr.dll ..
 	copy gvpmit.dll ..
 	copy gvpmnl.dll ..
+	copy gvpmse.dll ..
 	copy gvpgs.exe ..
 	copy os2setup.exe ..
 	copy setup2de.dll ..
@@ -662,6 +703,7 @@ gsv$(GSVIEW_VERSION)os2.zip:
 	copy setup2gr.dll ..
 	copy setup2it.dll ..
 	copy setup2nl.dll ..
+	copy setup2se.dll ..
 	copy printer.ini ..\printer.ini
 	cd ..
 	-del os2.zip
@@ -669,7 +711,7 @@ gsv$(GSVIEW_VERSION)os2.zip:
 	echo Redistribution of this OS/2 GSview MUST be accompanied by the> README2.TXT
 	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> README2.TXT
 	-del gsv$(GSVIEW_VERSION)os2.zip
-	zip -9 gsv$(GSVIEW_VERSION)os2.zip os2.zip os2setup.exe unzip2.dll setup2de.dll setup2es.dll setup2fr.dll setup2gr.dll setup2it.dll setup2nl.dll
+	zip -9 gsv$(GSVIEW_VERSION)os2.zip os2.zip os2setup.exe unzip2.dll setup2de.dll setup2es.dll setup2fr.dll setup2gr.dll setup2it.dll setup2nl.dll setup2se.dll
 	zip -9 gsv$(GSVIEW_VERSION)os2.zip README2.TXT Readme.htm gsview.css cdorder.txt regorder.txt FILE_ID.DIZ LICENCE
 	-del README2.TXT
 	-del Readme.htm
@@ -686,12 +728,14 @@ gsv$(GSVIEW_VERSION)os2.zip:
 	-del gvpmgr.hlp
 	-del gvpmit.hlp
 	-del gvpmnl.hlp
+	-del gvpmse.hlp
 	-del gvpmde.dll
 	-del gvpmes.dll
 	-del gvpmfr.dll
 	-del gvpmgr.dll
 	-del gvpmit.dll
 	-del gvpmnl.dll
+	-del gvpmse.dll
 	-del gvpgs.exe
 	-del os2setup.exe
 	-del setup2de.dll
@@ -700,6 +744,7 @@ gsv$(GSVIEW_VERSION)os2.zip:
 	-del setup2gr.dll
 	-del setup2it.dll
 	-del setup2nl.dll
+	-del setup2se.dll
 	-del printer.ini
 	cd src
 
@@ -783,6 +828,7 @@ clean: language
 	-del setup2gr.map
 	-del setup2it.map
 	-del setup2nl.map
+	-del setup2se.map
 	-del gvpmen.map
 	-del gvpmde.map
 	-del gvpmes.map
@@ -790,6 +836,7 @@ clean: language
 	-del gvpmgr.map
 	-del gvpmit.map
 	-del gvpmnl.map
+	-del gvpmse.map
 	-del gvpmen.ipf
 	-del gvpmde.ipf
 	-del gvpmes.ipf
@@ -797,6 +844,7 @@ clean: language
 	-del gvpmgr.ipf
 	-del gvpmit.ipf
 	-del gvpmnl.ipf
+	-del gvpmse.ipf
 	-del gvpmen.rc
 	-del gvpmde.rc
 	-del gvpmes.rc
@@ -804,6 +852,7 @@ clean: language
 	-del gvpmgr.rc
 	-del gvpmit.rc
 	-del gvpmnl.rc
+	-del gvpmse.rc
 	-del gvphlpen.rc
 	-del gvphlpde.rc
 	-del gvphlpes.rc
@@ -811,6 +860,7 @@ clean: language
 	-del gvphlpgr.rc
 	-del gvphlpit.rc
 	-del gvphlpnl.rc
+	-del gvphlpse.rc
 	-del codepage.exe
 
 veryclean: clean
@@ -821,6 +871,7 @@ veryclean: clean
 	-del gvpmgr.dll
 	-del gvpmit.dll
 	-del gvpmnl.dll
+	-del gvpmse.dll
 	-del gvpmen.hlp
 	-del gvpmde.hlp
 	-del gvpmes.hlp
@@ -828,6 +879,7 @@ veryclean: clean
 	-del gvpmgr.hlp
 	-del gvpmit.hlp
 	-del gvpmnl.hlp
+	-del gvpmse.hlp
 	-del gvpm.inf
 	-del gvpm.tex
 	-del gvpm.htm
@@ -840,4 +892,5 @@ veryclean: clean
 	-del setup2gr.dll
 	-del setup2it.dll
 	-del setup2nl.dll
+	-del setup2se.dll
 	-del echogsv.exe

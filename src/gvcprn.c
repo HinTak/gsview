@@ -207,13 +207,13 @@ gsview_extract()
     CDSC *dsc = psfile.dsc;
 
     if (psfile.name[0] == '\0') {
-	    gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
-	    return;
+	gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
+	return;
     }
 
     if (dsc == (CDSC *)NULL) {
-	    gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
-	    return;
+	gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
+	return;
     }
     
     if (psfile.ispdf && (dsc->page_count == 0)) {
@@ -224,12 +224,10 @@ gsview_extract()
     }
 
     if (psfile.ispdf) {
-	if (option.gsversion > 510) {
-	    TCHAR buf[MAXSTR];
-	    load_string(IDS_USEPDFWRITE, buf, sizeof(buf));
-	    message_box(buf, MB_ICONASTERISK | MB_OK);
-	    return;
-	}
+	TCHAR buf[MAXSTR];
+	load_string(IDS_USEPDFWRITE, buf, sizeof(buf));
+	message_box(buf, MB_ICONASTERISK | MB_OK);
+	return;
     }
 
     nHelpTopic = IDS_TOPICOPEN;
@@ -237,48 +235,31 @@ gsview_extract()
 	if (!get_page(&thispage, TRUE, FALSE))
 	    return;
 
-    if (psfile.ispdf) {
-	/* this doesn't work for GS >= 5.50 */
-        if (!get_pdf2ps_options())
-	    return;
-    }
 
     if (!get_filename(output, TRUE, FILTER_PS, 0, IDS_TOPICOPEN))
-	    return;
+	return;
 
-    if ((f = fopen(output, "wb")) == (FILE *)NULL) {
-	    return;
-    }
+    if ((f = fopen(output, "wb")) == (FILE *)NULL)
+	return;
 
     load_string(IDS_WAITWRITE, szWait, sizeof(szWait));
     info_wait(IDS_WAITWRITE);
-    if (psfile.ispdf) {
+    if (dfreopen() != 0) {
 	fclose(f);
-	gsview_pdf2ps(output);
-	info_wait(IDS_NOWAIT);
+	unlink(output);
+	gserror(0, "Couldn't reopen document", MB_ICONEXCLAMATION, SOUND_NOTOPEN);
 	return;
-/*
-	pdf_extract(f);
-*/
     }
-    else  {
-	if (dfreopen() != 0) {
-	    fclose(f);
-	    unlink(output);
-	    gserror(0, "Couldn't reopen document", MB_ICONEXCLAMATION, SOUND_NOTOPEN);
-	    return;
-	}
-	if (dsc->page_count != 0)
-	    psfile_extract(f, 1);
-	else {
-	    ps_copy(f, psfile.file, dsc->begincomments, dsc->endcomments);
-	    ps_copy(f, psfile.file, dsc->begindefaults, dsc->enddefaults);
-	    ps_copy(f, psfile.file, dsc->beginprolog, dsc->endprolog);
-	    ps_copy(f, psfile.file, dsc->beginsetup, dsc->endsetup);
-	    ps_copy(f, psfile.file, dsc->begintrailer, dsc->endtrailer);
-	}
-	dfclose();
+    if (dsc->page_count != 0)
+	psfile_extract(f, 1);
+    else {
+	ps_copy(f, psfile.file, dsc->begincomments, dsc->endcomments);
+	ps_copy(f, psfile.file, dsc->begindefaults, dsc->enddefaults);
+	ps_copy(f, psfile.file, dsc->beginprolog, dsc->endprolog);
+	ps_copy(f, psfile.file, dsc->beginsetup, dsc->endsetup);
+	ps_copy(f, psfile.file, dsc->begintrailer, dsc->endtrailer);
     }
+    dfclose();
 
     fclose(f);
 
@@ -317,7 +298,7 @@ copy_setup(FILE *f, GFile *infile, int copies)
 
 /* Copy the headers, marked pages, and trailer to f */
 /* Reverse the page order if needed and possible */
-void
+BOOL
 psfile_extract(FILE *f, int copies)
 {
     char line[DSC_LINE_LENGTH+1];
@@ -366,7 +347,8 @@ psfile_extract(FILE *f, int copies)
      */
     position = gfile_seek(psfile.file, dsc->begincomments, gfile_begin);
     while ( position < dsc->endcomments ) {
-	ps_fgets(line, sizeof(line), psfile.file);
+	if (ps_fgets(line, sizeof(line), psfile.file) == NULL)
+	    return FALSE;
 	position = gfile_seek(psfile.file, 0, gfile_current);
 	end_header = (strncmp(line, "%%EndComments", 13) == 0);
 	if ((line[0] != '%') && (line[0] != ' ') && (line[0] != '+')
@@ -423,8 +405,9 @@ psfile_extract(FILE *f, int copies)
 	if (psfile.page_list.select[map_page(i)])  {
 	    char buf[MAXSTR];
 	    /* modify ordinal of %%Page: comment */
-	    gfile_seek(psfile.file, dsc->page[i].begin, gfile_begin);
-	    ps_fgets(buf, sizeof(buf)-1, psfile.file);
+	    position = gfile_seek(psfile.file, dsc->page[i].begin, gfile_begin);
+	    if (ps_fgets(buf, sizeof(buf)-1, psfile.file) == NULL)
+	        return FALSE;
 
 	    /* reached end of %%Page: line */
 	    if (dsc->page[i].label)
@@ -441,7 +424,8 @@ psfile_extract(FILE *f, int copies)
     /* copy trailer, removing %%Pages: and %%PageOrder: */
     position = gfile_seek(psfile.file, dsc->begintrailer, gfile_begin);
     while ( position < dsc->endtrailer ) {
-	ps_fgets(line, sizeof(line), psfile.file);
+	if (ps_fgets(line, sizeof(line), psfile.file) == NULL)
+	    return FALSE;
         position = gfile_seek(psfile.file, 0, gfile_current);
 	if (strncmp(line, "%%Pages:", 8) == 0) {
 	    continue;	/* has already been written in header */
@@ -453,6 +437,7 @@ psfile_extract(FILE *f, int copies)
 	    fputs(line, f);	
 	}
     }
+    return TRUE;
 }
 
 #ifdef _MSC_VER
@@ -848,7 +833,8 @@ copy_for_printer(FILE *pcfile, BOOL convert)
 			    dsc->endtrailer);
 		    }
 		else
-		    psfile_extract(pcfile, copies);
+		    if (!psfile_extract(pcfile, copies))
+		        return FALSE;
 	    }
 	}
     }
@@ -957,6 +943,7 @@ int method = option.print_method;
     }
 
     if (!copy_for_printer(pcfile, convert)) {
+	gs_addmess("Failed to copy document to temporary file for printing\n");
 	unlink(psname);
 	return FALSE;
     }

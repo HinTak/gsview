@@ -80,3 +80,7 @@ Hand interface for dragging page instead of using scroll bars.
 
 External PDF links.
 
+Auto resize using %%PageMedia.  This should be added to gs_page_skip,
+and probably only operate if Auto Orientation is enabled.
+
+Redisplay after pstoedit.

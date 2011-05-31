@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -90,8 +90,8 @@ BEGIN
         END
         POPUP "&Idioma"
         BEGIN
-	    MENUITEM "&English", IDM_LANGEN
-	    /* Remaining languages are added at run time */
+        MENUITEM "&English", IDM_LANGEN
+        /* Remaining languages are added at run time */
         END
         POPUP "Conversión a &texto"
         BEGIN
@@ -99,7 +99,7 @@ BEGIN
             MENUITEM "Normal", IDM_PSTOTEXTNORM
             MENUITEM "Página de códigos Dvips Cork", IDM_PSTOTEXTCORK
         END
-        POPUP "Mensajes DSC"
+        POPUP "Comentarios DSC"
         BEGIN
             MENUITEM "Desactivar", IDM_DSC_OFF
             MENUITEM "Mostrar errores", IDM_DSC_ERROR
@@ -224,7 +224,7 @@ STRINGTABLE
 BEGIN
     /* general strings */
     IDS_SLANGUAGE "ES,2"
-    IDS_CODEPAGE, "1252"	/* ISO-Latin-1 */
+    IDS_CODEPAGE, "1252"    /* ISO-Latin-1 */
     IDS_HELPFILE, WINHELPFILE
     IDS_SOUNDNOMM, "No puedo cargar WINMM.DLL\nSonidos no disponibles"
 END

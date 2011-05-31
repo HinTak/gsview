@@ -96,6 +96,7 @@ MENU_ENTRY menu_de[] = {
   { "/Optionen/Sprache/_Français", 	NULL,		GS_CMD, IDM_LANGFR, "<CheckItem>" },
   { "/Optionen/Sprache/_Italiano", 	NULL,		GS_CMD, IDM_LANGIT, "<CheckItem>" },
   { "/Optionen/Sprache/_Nederlands", 	NULL,		GS_CMD, IDM_LANGNL, "<CheckItem>" },
+  { "/Optionen/Sprache/Svenska", 	NULL,		GS_CMD, IDM_LANGSE, "<CheckItem>" },
   { "/Optionen/PSzuText",      		NULL,   NULL, 		0, "<Branch>" },
   { "/Optionen/PSzuText/Deaktiviert", 	NULL,		GS_CMD, IDM_PSTOTEXTDIS, "<CheckItem>" },
   { "/Optionen/PSzuText/Normal", 	NULL,		GS_CMD, IDM_PSTOTEXTNORM, "<CheckItem>" },

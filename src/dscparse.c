@@ -404,6 +404,36 @@ dsc_fixup(CDSC *dsc)
     /* flush last partial line */
     dsc_scan_data(dsc, NULL, 0);
 
+
+    /* Fix DSC error: EOF before end of %%BeginData */
+    if (dsc->eof && (dsc->skip_lines || dsc->skip_bytes)) {
+	switch (dsc->scan_section) {
+	    case scan_comments:
+		dsc->endcomments = DSC_END(dsc);
+		break;
+	    case scan_preview:
+		dsc->endpreview = DSC_END(dsc);
+		break;
+	    case scan_defaults:
+		dsc->enddefaults = DSC_END(dsc);
+		break;
+	    case scan_prolog:
+		dsc->endprolog = DSC_END(dsc);
+		break;
+	    case scan_setup:
+		dsc->endsetup = DSC_END(dsc);
+		break;
+	    case scan_pages:
+		if (dsc->page_count)
+		    dsc->page[dsc->page_count-1].end = DSC_END(dsc);
+		break;
+	    case scan_trailer:
+	    case scan_eof:
+		dsc->endtrailer = DSC_END(dsc);
+		break;
+	}
+    }
+    
     /* Fix DSC error: code between %%EndSetup and %%Page */
     if (dsc->page_count && (dsc->page[0].begin != dsc->endsetup)
 		&& (dsc->endsetup != dsc->beginsetup)) {

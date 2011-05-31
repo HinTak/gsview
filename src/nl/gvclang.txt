@@ -7,7 +7,7 @@
  dat door laserprinters wordt gebruikt.
  Bij documenten opgemaakt volgens de "Adobe PostScript Document Structuring"
  laat GSview toe geselecteerde bladzijden te bekijken en af te drukken.
- Voor GSview 4.1 is vereist 7.00 - 7.99.
+ Voor GSview 4.2 is vereist 7.03 - 7.99.
 2Installatie
 ?Installatie
 W
@@ -19,8 +19,8 @@ X
 E
  U dient Ghostscript afzonderlijk te installeren.
 
- Indien u GSview zelf manueel wilt installeren, gelieve dan eerst het onderwerp `Manueel Installeren`
- te raadplegen.
+ Indien u GSview zelf manueel wilt installeren, gelieve dan eerst het onderwerp
+  `Manueel Installeren` te raadplegen.
 
  Alle opties worden automatisch ingesteld bij het eerste opstarten van GSview.
  Indien u later om een of andere reden de instellingen wilt aanpassen, ga dan naar
@@ -41,10 +41,10 @@ E
 ?Het installeren van Ghostscript.
 W
  AFPL Ghostscript voor Win32 wordt geleverd als zelfuitpakkend bestand dat ook
- automatisch wordt ge‹nstalleerd.
+ automatisch wordt geïnstalleerd.
 P
  AFPL Ghostscript voor OS/2 komt als *.zip bestand en dient manueel te worden
- ge‹nstalleerd.
+ geïnstalleerd.
 X
  AFPL Ghostscript wordt geleverd als RPM pakket of louter in broncodes die u dan
  zelf moet compileren.
@@ -68,7 +68,7 @@ P
  Verwijder ook het `GSviewobject ` van de Werkplek.
 
  Evenzeer, om Ghostscript manueel te verwijderen, dient u alle bestanden en
- directory's te verwijderen waar Ghostscript werd ge‹nstalleerd.
+ directory's te verwijderen waar Ghostscript werd geïnstalleerd.
 W
  Om GSview te verwijderen dient u de directory `gsview ` en alle bestanden daarin
  te verwijderen, alsook het bestand `gsview32.ini ` in de
@@ -78,7 +78,7 @@ W
  Onder Windows NT/2000 dient u ook het bestand gsview32.ini in de gebruikers
  directories te verwijderen.
 
- Verwijder de `Ghostgum` groep van de Program Manager of het Start menu
+ Verwijder de `Ghostgum` groep uit de Program Manager en/of het Start menu
 
  Indien u weet hoe registry.dat te bewerken, wis dan de volgende verwijzingen:
   HKEY_CLASSES_ROOT\psfile
@@ -96,7 +96,8 @@ W
  Om Ghostscript manueel te de-installeren, verwijder de bestanden in de `gsN.NN`
  directory waarbij N.NN het versienummer is van Ghostscript.
 X
- Indien GSview werd ge‹nstalleerd door middel van het RPM pakket, maak dan gebruik van `rpm` om te de-installeren.
+ Indien GSview werd geïnstalleerd door middel van het RPM pakket, maak dan gebruik
+ van `rpm` om te de-installeren.
 
  Of anders, verwijder `gsview`, `gsview-hulp`, `pstotext` en `epstool`
  uit de /usr/bin directory,
@@ -114,186 +115,178 @@ X
 WP
  Aanbevolen is gebruik te maken van het installatie programma om GSview te
  installeren. Volgende instructies beschrijven op welke manier GSview kan
- ge‹nstalleerd worden gebruik maken van het installatie programma.
+ geïnstalleerd worden gebruik maken van het installatie programma.
 
  Stel de omgevingsvariabele TEMP voor tijdelijk bestanden
  in naar een directory TEMP.  bijvoorbeeld:
    SET TEMP=c:\temp
  De directory moet bestaan en moet beschikbaar zijn voor lezen/schrijven.
 
- First you need to install Ghostscript, plus its library files and fonts.
- You need the Ghostscript version listed in `Overview`.
- This version of GSview will not work with other versions of Ghostscript.
- Install Ghostscript in a directory c:\gs\gsN.NN
- (Replace N.NN by the Ghostscript version number.)
+ Om te beginnen u dient u  Ghostscript te installeren inclusief de bibliotheek
+ bestanden en fonts. U dient de Ghostscript versie te gebruiken zoals staat
+ aangegeven in het Overzicht. Deze versie van GSview zal niet werken met andere
+ versies van Ghostscript. Installeer Ghostscript in een directory
+ c:\gs\gsN.NN (Vervang N.NN door het Ghostscript versie nummer.)
 
- Make a directory c:\ghostgum\gsview
+ Creëer een directory c:\ghostgum\gsview
 
- Next install
+ Installeer vervolgens
 P
- PM GSview by copying gvpm.exe, gvpgs.exe,
- gvpmde.dll, gvpmes.dll, gvpmfr.dll, gvpmit.dll,
- gvpmen.hlp, gvpmde.hlp, gvpmes.hlp, gvpmfr.hlp, gvpmit.hlp
- and printer.ini
+ Installeer vervolgens PM GSview (OS/2) door gvpm.exe, gvpgs.exe, gvpmde.dll,
+ gvpmes.dll, gvpmfr.dll, gvpmit.dll, gvpmen.hlp, gvpmde.hlp, gvpmes.hlp,
+ gvpmfr.hlp, gvpmit.hlp en printer.ini te kopiëren naar de c:\ghostgum\gsview directory.
 W
- GSview for Windows by copying gsview32.exe, gsv16spl.exe, gvwgs32.exe,
- gsvw32de.dll, gsvw32es.dll, gsvw32fr.dll, gsvw32it.dll,
- gsviewen.hlp, gsviewde.hlp, gsviewes.hlp, gsviewfr.hlp, gsviewit.hlp
- and printer.ini
+ GSview voor Windows door gsview32.exe, gsv16spl.exe, gvwgs32.exe,
+ gsvw32de.dll, gsvw32es.dll, gsvw32fr.dll, gsvw32it.dll, gsviewen.hlp, gsviewde.hlp,
+ gsviewes.hlp, gsviewfr.hlp, gsviewit.hlp and printer.ini
 WP
- to the `c:\ghostgum\gsview` directory.
+ naar de `c:\ghostgum\gsview` directory te kopiëren.
 
 P
- Start GSview then follow the instructions given in the
- configuration wizard.  This will automatically configure
- `Options` | `Advanced Configure`, copy a list of known
- printers to the INI file,
- and create a GSview program object on the desktop.
+ Start dan GSview volgens de instructies aangegeven in de configuratie gids.
+ Zodoende zal automatisch worden geactiveerd `Opties` | `Geavanceerde Configuratie` ,
+ wordt een lijst van een aantal courante printers naar het INI bestand gekopiëerd,
+ wordt een GSview programmaobject op de werkplek gecreëerd. Indien u later
+ opnieuw wenst gebruik te maken van de configuratiegids, maak gebruik van
+ `Opties` | `Eenvoudige Configatie`.
 
- If you want to run the configure wizard later, use
- `Options` | `Easy Configure`.
 W
- Start GSview and select the appropriate version of Ghostscript
- (usually the latest).  To change this later, use
- `Options` | `Easy Configure`.
+ Start GSview en selecteer de gepaste versie van Ghostscript (normaal gezien
+ de jongste). Wilt u later een en ander wijzigen, ga dan naar `Opties` | `Eenvoudige Configatie`.
 E
 
- For more control over configuration, see `Advanced Manual Installation`.
-3Advanced Manual Installation
-?Advanced Manual Installation
-WP
- Instead of using `Options` | `Easy Configure`, use
- `Options` | `Advanced Configure`.
+ Voor meer over de  configuratie, zie `Geavanceerde  manuele installatie`.
 
- First correctly set the three text fields (see `Advanced Configure`).
+3Geavanceerde  manuele installatie
+?Geavanceerde  manuele installatie
+WP
+ In plaats van `Opties` | `Eenvoudige Configuratie`, gebruik `Opties`|`Geavanceerde  configuratie`.
 
 P
- Exit GSview, then append printer.ini to the GSview INI file
- (c:\os2\gvpm.ini).
-
- Create a desktop program object for GSview, associating it
- with the file extensions .ps, .eps and .pdf.
-
+ Sluit dan GSview af, en koppel dan GSview INI aan printer.ini (c:\os2\gvpm.ini).
+ [COPY gvpm.ini + printer.ini /A gvpm.ini].
+ Creëer op de werkplek een programmaobject object voor GSview, en koppel het
+ met de bestanden met als extensie .ps, .eps en .pdf.  Indien u beschikt over
+ Type 1 fonts, dan kan u  Ghostscript daar gebruik van laten maken. Voor meer
+ hierover en voorbeelden zie Fontmap.os2 en Fontmap.atm meegeleverd met Ghostscript.
 W
- On the `Advanced Configure` dialog, either select the checkboxes
- `Copy printer defaults`, `Associate .ps files with GSview` and
- `Create Start Menu items`, or perform the following three steps.
+ Kies een van volgende twee procedures in het dialoogkader `Geavanceerde configuratie`.
+ Ofwel:
+ `Kopieëer printer eigenschappen` + `Koppel *.ps bestanden met GSview` en
+ `Creëer Start Menu items`, .
+ Ofwel - voer volgende drie stappen uit:
 
- 1. Exit GSview, then append printer.ini to the GSview INI file
- (c:\windows\gsview32.ini)
+ 1. Sluit GSview af, en koppel dan printer.ini aan GSview32.INI
+ (c:\windows\gsview32.ini) - [COPY GSview32.ini + printer.ini /A  GSview32.ini]
 
- 2. Add the .ps and .eps (and optionally the .pdf) file types to
- the `Registry`.
+ 2. Voeg de  *.ps en *.eps (en eventueel *.pdf) toe aan het registerbestand `Registry.dat`.
 
- 3. Create a Program Manager or Start Menu item for GSview.
+ 3. Creëer een programmaobject of snelkoppeling voor GSview.
+
 X
- After starting GSview, use `Options` | `Advanced Configure`.
- Set the Ghostscript version number to match your copy of Ghostscript.
- If `gs -h` reports 5.50, enter 550.  If `gs -h` reports 6.50, enter 650.
- Correctly set the following three text fields (see `Advanced Configure`).
+ Nadat GSview werd opgestart, ga naar `Opties` | `Geavanceerde configuratie`.
+ Pas het Ghostscript versie nummmer aan aan dat van Ghostscript.
+ Bijvoorbeeld, wanneer `gs -h` retourneert 5.50, tik dan in 550.
+ Stel eerst de drie tekstvelden in (zie `Geavanceerde configuratie`].
 E
-
- If you have some Type 1 fonts on your system, it may be possible to
- tell Ghostscript to use them.  See `Fontmap.os2` and `Fontmap.atm`
- supplied with Ghostscript for examples.  See the `Fonts` topic.
-
- If you have problems, try reading the help topic `Common Problems`.
+ Indien u beschikt over Type 1 fonts, dan kan u  Ghostscript daar gebruik van
+ laten maken. Voor meer hierover en voorbeelden zie Fontmap.os2 en Fontmap.atm
+ meegeleverd met Ghostscript. Zie ook het onderwerp `Fonts`.
+ Indien u problemen ondervindt, zie het  hulp onderwerp `Veel gestelde vragen`.
 WP
-3Network Installation
-?Network Installation
-?User Profiles
- Install GSview to a network directory.
+3Netwerk Installatie
+?Netwerk Installatie
+?Gebruikers profielen
+ GSview installeren naar een netwerk directory.
 
- When a user starts GSview for the first time, or starts GSview
- after the version number has changed, GSview will configure
- the local computer.
-
- Using a UNC path when installing GSview will not work
- from Windows 3.1, but does work from Windows 95.
+ Wanneer GSview voor het eerst wordt opgestart, of wanneer GSview wordt
+ opgestart nadat het versienumer werd gewijzigd, zal GSview zichzelf
+ automatisch  configureren.
+ Een UNC pad gebruiken bij het installeren werkt niet met Windows 3.1
+ maar wel met Windows 95/98/Me.
 
 W
- GSview tries to maintain one configuration file for each user.
- If user profiles are being used under Windows 95 or NT,
- GSview will store the INI file in the user profile directory,
- as specified in the registry.  If this can't be found,
- and the environment variable USERPROFILE is defined and is
- a directory, GSview will store the INI file in this directory.
- If this fails, GSview will store the INI file in the default
- location, the Windows directory.
- If the user profile directory exists, but is write protected,
- GSview will have trouble.
-
+ GSview stelt principieel èèn comfiguratiebestand in per gebruiker.
+ Onder Windows 95/98/Me of NT/2000/XP, wordt dit
+ bestand bewaard in de directory gespecifieerd in het bestand
+ registry.dat.  Is dat laatste bestand niet beschikbaar,
+ dan wordt het configuratiebestand opgeslagen in de directory
+ zoals aangegeven in de omgevingsvariable USERPROFILE.
+ Indien ook dit niet kan wordt het configuratiebestand opgeslagen
+ in de directory C:\Windows.
+ Als de directory met het configuratiebestand bestaat maar
+ schrijfbeveiligd werd, dan zullen er problemen ontstaan tijdens
+ de installatie.
 WP
- If you wish to stop GSview from displaying the `Easy Configure`
- when GSview is first run, or whenever GSview is upgraded,
- place an INI file in the GSview directory.
- `Remember to remove this file before upgrading GSview in the future.`
- This should contain only those entries that you wish to overwrite
- in the users configuration.
- The suggested technique is to install GSview, then configure it.
- Copy gsview32.ini or gvpm.ini from the system directory or your
- user profile directory to the GSview directory, then edit it to
- remove all entries except for:
+ Wil u niet dat GSview de Eenvoudige configuratie toont bij
+ een eerste opstart of bij een upgrade, plaats dan een INI bestand
+ in de GSview directory. Vergeet dan niet dit bestand te verwijderen
+ bij een eventuele volgende bijwerking van GSview. Dat ini bestand
+ mag dan enkel de instructies bevatten die MOETEN OVERSCHREVEN
+ worden! U gaat dus best tewerk als hierna beschreven:
+ Kopiëer gsview32.ini (Windows) of gvpm.ini (OS/2) van de
+ systeem- of gebruikersdirectory naar de GSview directory, en
+ verwijder alle instructies UITGENOMEN:
   [Options]
-  Version=4.1
-  GSversion=703
+  Version=4.2
+  GSversion=704
   Configured=1
-  GhostscriptDLL=e:\gs\gs7.03\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs7.03\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs7.04\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs7.04\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
- When a user starts GSview, their INI file will normally be used.
- The first time GSview is run, or when the GSview version doesn't
- match the INI file, the following will occur:
+  Wanneer een gebruiker GSview opstart wordt normaliter zijn INI bestand
+  ingelezen. Wanneer GSview voor het allereerst wordt opgestart, of
+  wanneer het GSview versienummer niet overeenstemt met datgene
+  in het INI bestand, dan verlopen de zaken zich als volgt:
 
- 1. The INI file in the GSview directory will be read, overriding
- the users INI file.
+ 1. Het INI bestand in de GSview directory wordt ingelezen.
 
- 2. The list of printers will be updated from printer.ini in
- the GSview directory.
+ 2. De printerslijst wordt bijgewerkt aan de hand van printer.ini in
+    de GSview directory.
 
- 3. File associations (.ps, .eps, .pdf) will NOT be made or changed.
- If you wish to change these you must use `Options` | `Advanced Configure`.
+ 3. Koppelingen worden NIET ingesteld noch aangepast (.ps, .eps, .pdf).
+   Wilt u dit toch aanpassen dan moet u gaan naar
+   `Opties| Geavanceerde configuratie`.
 
- 4. Program Manager groups / Start menu items / Program objects
- will NOT be changed.
- If you wish to change these you must use `Options` | `Advanced Configure`.
-W
+ 4. De Programma Manager / Start menu onderdelen / Programmaobjecten
+    worden niet gewijzigd. Wilt u dit toch aanpassen, dan moet u gaan
+    naar `Opties` | `Geavanceerde configuratie`.
+ W
+ Wordt op een Windows NT4/2000, geïnstalleerd, dan wordt bij het selecteren
+ van "Alle Gebruikers" gsview32.ini in de GSview directory opgeslagen.
 
- If you are installing on Windows NT4/2000, and you select "All Users",
- then the installer will write this gsview32.ini into your GSview
- directory.
 
- If a user tries to use the GSview uninstall program, it will
- try to delete the GSview and Ghostscript files on the network.
- Make sure the GSview and Ghostscript directories are not writeable
- by users.
- To be extra safe, you may wish to remove the file `uninstal.txt` from
- the GSview directory.
+ Wanneer GSview wordt verwijderd aan de hand van het GSview
+ de-installatieprigramma, zullen ook alle GSview en Ghostscript
+ bestanden op het netwerk worden verwijderd.
+ Waak er dus over dat de GSview enGhostscript directory's niet
+ door de gebruikers kunnen worden gewijzigd.
+ Als extra voorzorgsmaatregel kan u eventueel het bestand
+ `uninstal.txt` uit de GSview directory verwijderen.
 
- Alternatively, if you want install GSview on each computer without
- any prompting, unzip the self extracting archive then run the setup
- program as follows:
-  setup -name "Your Name" -number XXXXX-XXXXX "c:\ghostgum"
+ Wanneer u GSview wil installeren zonder enige tussenkomst
+ van de gebruiker, voer het zelf-uitpakkend bestand uit
+ en start dan de installatie als volgt:
+ setup -naam "Uw naam" -number XXXXX-XXXXX "c:\ghostgum"
 E
 W
-3Running GSview from the File Manager or Windows Explorer
-?Registration Info Editor
-?File Manager
-?Windows Explorer
+3GSview met het Windows bestandsbeheer of de Verkenner
+?Over registry.dat
+?Bestandsbeheer
+?Windows Verkenner
 ?Registry
- If you used the GSview setup.exe program and answered `yes` to
- all the questions, the following configuration has already occurred.
- If you didn't update the registry during GSview installation,
- the following information explains how to do it manually.
+ Indien `ja` werd geantwoordt op alle vragen tijdens de installatie,
+ dan werd de alles reeds ingesteld zoals het hoort.
+ Indien dit niet hetgeval was, lees dan volgende uitleg
+ over de manuele aanpassing van registry.dat.
 
- To run GSview when a PostScript file is double clicked in the
- File Manager, the following sequence must be followed to teach
- File Manager about PostScript files.
+ Om GSview te starten als een PostScript bestand werd aangeklikt
+ in het bestandsbeheer, moet de volgende procedure worden gevolgd.
 
- From the `Program Manager`, run the Registration Info Editor using
- `File `| `Run...` then type `regedit`.
- From the `Registration Info Editor` select `Edit `| `Add File Type...`
- then enter the following fields:
+ Vanuit het `Bestandsbeheer`, start de Registry Editor middels
+ `Bestand `| `Start...` en tik dan in `regedit`.
+ Vanuit de `Registry Editor` selecteer `Bewerken `| `Bestandstype toevoegen...`
+ en vul dan het volgende in:
   Identifier = psfile
   Filetype = PostScript
   Action = Open
@@ -302,146 +295,146 @@ W
   Action = Print
   Command = c:\ghostgum\gsview\gsview32 /p %1
   Uses DDE = unchecked
- Then press `OK`.
+ Klik daarna op `OK`.
 
- From the `File Manager`, select `File `| `Associate` then
- enter the following fields:
-  Files with Extension = ps
-  Associate With = PostScript (gsview)
- Then press `OK`.
+ Vanuit het `Bestandsbeheer`, selecteer `Bestand `| `Koppelen` en vul
+ vervolgens deze velden aan:
+  Bestanden met extensie = ps
+  Koppelen met = PostScript (gsview)
+ Klik daarna op `OK`.
 
- That's it!  Now when you double click on a PostScript file,
- the `File Manager` will run GSview.  When you drop a PostScript
- file on the `Print Manager`, GSview will print the file.
- If you have a PostScript printer, this won't be useful.
- In this case you will need to remove the Print action from
- the registry.
+ En dat is het dan!  Wanneer u nu dubbelklikt op een  PostScript bestand
+ zal het `Bestandsbeheer` GSview opstarten.  Wanneer u een PostScript
+ bestand op het afdrukobject neerzet, zal GSview het bestand afdrukken.
+ U heeft hier wel niets aan indien u niet over een  PostScript printer,
+ beschikt. In dit laatste geval moet u de koppeling uit registry.dat
+ verwijderen.
 
- For Windows 95, the configuration is instead made using Windows
- Explorer.
+ In Windows 95/98/Me wordt alles ingesteld aan de hand van de verkenner.
 
- Start `Windows Explorer`.  Select `View `| `Options `.  Select the
- `File Types` tab.  Select the `New Type` button.
- Enter the following fields:
-  Description of type = PostScript
-  Associated Extension = PS EPS
- Press the `New` button, then enter
-  Action = open
-  Application used to perform action = c:\ghostgum\gsview\gsview32.exe
- Press the `OK` button
+ Start de `Verkenner`.  Selecteer `Beeld `| `Opties `.  Selecteer dan
+ `Bestandstypes` tab.  Selecteer dan `Niew Typ`.
+ Vul dan de velden in:
+  Type= PostScript
+  Extensie = PS EPS
+ Klik op de `Niew` knop, en tik dan in:
+  Actie = open
+  Toepassing = c:\ghostgum\gsview\gsview32.exe
+ Klik dan op `OK`.
 
- Press the `New` button, then enter
-  Action = print
-  Application used to perform action = c:\ghostgum\gsview\gsview32.exe /p
- Press the `OK` button
+ Klik op de  `Niew` knop, en tik dan in:
+  Actie = afdrukken
+  Toepsassing = c:\ghostgum\gsview\gsview32.exe /p
+ Klik dan op `OK`.
 
- Press the `Close `button.
+ Klik dan op `Sluiten.
 
- Press the `Close `button.
+ Klik dan op `Sluiten`.
 E
-2Registration
-?Registration
- If you wish to support the development of GSview or wish
- to disable the GSview nag screen, please consider registering
- GSview.  There is no requirement for you to register GSview.
- GSview is made available with the Aladdin Free Public Licence,
- contained in the file `LICENCE`.
- This allows free use, but restricts commercial distribution.
+2Registratie
+?Registratie
+ Indien u de ontwikkeling van GSview of wilt steunen en
+ het  GSview pestschermpje wilt uigeschakeld hebben,  overweeg dan
+ GSView te registreren.  Registratie is echter niet vereist.
+ GSview werd beschikbaar gesteld via  het Aladdin Free Public Licence,
+ inbegrepen in het bestand `LICENCE`.
+ Dit laat vrij gebruik toe, maar sluit commerciële distributie uit.
 
- The registration fee is currently AUD$40.
- GSview can be registered online at
+ Momenteel bedraagt de registratievergoeding AUD$40.
+ GSview registreren kan online op de locatie:
   http://www.ghostgum.com.au/
- or by faxing or mailing the
- registration form which can be found in the file `regorder.txt`
- in the GSview directory.
- Ghostgum Software prefers that you use the online registration.
-2Document Structuring Conventions
-?Document Structuring Conventions
+ ofwel door het registratieformilier dat u in het bestand
+ `regorder.txt` kan vinden door te faxen of per email
+ te verzenden.
+ Online registratie geniet de voorkeur.
+2DSC: Afspraken over de structuur
+?DSC: Afspraken over de structuuDocument
 ?DSC
-?Encapsulated PostScript
+?Ingekapselde PostScript Bestanden (EPSF: Encapsulated Postscript Files)
 ?EPSF
 ?EPS
- Adobe has defined a set of extended comment conventions that provide
- additional information about the page structure and resource
- requirements of a PostScript file.
- If a file contains these Document Structuring Convention (DSC) comments,
- GSview can display pages in random order using `Goto Page` and display pages
- in reverse order using `Previous Page`.  Selected pages can be extracted to
- another file or printed.
+ Adobe heeft een aantal regels vastgelegd en toelichtingen verstrekt
+ over de paginaopbouw van een Postscript bestand .
+ Indien een bestand DSC gegevens bevat, kunnen pagina's in
+ willekeurige volgorde worden getoond en afgedrukt aan de hand van
+ `Ga naar` of `Terug`. Geselecteerde pagina's kunnen worden
+ afgedrukt of weggeschreven naar een nieuw bestand.
 
- If a file does not contain DSC comments, GSview can only
- display the pages in the original order.
+ Indien het bestand geen DSC gegevens bevat kan GSview enkel maar
+ de pagina's in de originele volgorde tonenr.
 
- DSC conforming files start with the comment line:
+ DSC compatible bestanden beginnen met het commentaar:
   %!PS-Adobe-3.0
- where the number 3.0 may change and is the DSC version number.
- Some programs write PostScript files with a control-D as the first
- character of the file, followed by the comment line mentioned above.
- GSview will correctly report that these files are not DSC conforming,
- but will still display them with page selection features available.
- Complain to the author of the program that produced the PostScript file.
- To make the file DSC conforming, edit it to remove the control-D character.
+ waarbij het nummer 3.0 variabel is en het DSC versie nummer voorstelt.
+ Sommige programma's slaan PS bestanden op met een control-D als
+ eerste teken, en laten pas dan de boven vermelde commentaar volgen.
+ GSview zal deze bestanden niet als DSC conform beschouwen, maar zal
+ ze desalniettemin met tonen (inclusief keuze opties).
+ Stuur eventueel een klacht over aan de auteur van het bestand,
+ en maak het bestand DCS conform door de control-D uit het bestand
+ te wissen.
 
- DSC conforming files contain lines such as:
+ DSC conforme bestanden bevatten gegvens als:
   %%Pages: 24
   %%Page: 1 1
- These lines tell GSview how many pages a document contains and
- where they start.  GSview uses this information to select
- individual pages.
+ Aan de hand van deze gegevens kanl GSview uitmaken hoeveel bladzijden
+ een bestand bevat, waar te beginnen en hoe indivuduele bladzijden te
+ selecteren.
 
- Encapsulated PostScript Files (EPSF) are single page documents
- that contain a subset of the `DSC` comments and PostScript commands.
- EPS files start with the comment line:
+ EPSF-bestanden [Encapsulated PostScript Files] bestaan uit
+ afzonderlijke bladzijden bevattende met elk `DSC` commentaar en
+ PostScript opdrachten.
+ EPS bestanden beginnen met het commentaar:
   %!PS-Adobe-3.0 EPSF-3.0
- EPS files are commonly used for inclusion in other documents and
- for this reason require the bounding box comment:
+ EPS bestanden worden meestal gebruikt als invoeging in andere
+ documenten en bevatten derrhalve het "bounding box" commentaar:
    %%BoundingBox: llx lly urx ury
- where llx, lly, urx and ury are integers giving the x and y co-ordinates
- of the lower left and upper right corners of a bounding box which encloses
- all marks made on the page.
+ waarbij llx, lly, urx and ury de  x en y coördinaten weergeven
+ beneden links en boven rechts van de "bindmerktekens" op de bladzijde.
 
- Some EPS files contain a preview of the PostScript document.
- This preview can be a Windows Metafile, a TIFF file, or an Interchange
- preview (EPSI format).
- For the Windows Metafile or TIFF file preview, the EPS file under DOS
- contains a binary header which specifies the location and lengths of
- the preview and PostScript language sections of the EPS file.
- For the Interchange format, the preview is contained in DSC comments
- starting with
+ Sommige EPS bestanden bevatten een afdrukvoorbeeld van het PostScript.
+ bestand. Dit voorbeeld kan in *.met, *.tiff of EPSI formaat zijn.
+ Voor *.met en *.tiff bestanden onder Dos bevat het EPS bestand bevat
+ een binaire kop met de gegevens over het afdrukvoorbeeld.
+ Om algemene conmpabliteit te verzekeren wordt het afdrukvoorbeeld
+ ingekapseld in DSC commnentaar die begint met:
   %%BeginPreview: width height depth lines
- An EPS file with a preview can be created from an EPS file without a
- preview using `Add EPS Preview`.
+ Een afdrukvoorbeeld kan aan een EPS bestand zonder worden toegevoegd
+ middels de opdracht `Add EPS Preview`.
 
- GSview may give warnings when documents contain incorrect DSC
- comments.  This can be changed with `Options` | `DSC Warnings`.
+ GSview kan er u opmerkzaam op maken dat een bestand  onjuiste DSC
+ commentaar bevat. Dit kan worden ingesleld, zie hiervoor:
+ `Opties` | `DSC-waarschuwingen`.
 2Portable Document Format
 ?Portable Document Format
 ?PDF
 ?pdf2ps
 ?ps2pdf
- GSview can display and print PDF files, although there are a number
- of limitations with the current method.
+ GSview toont en drukt PDF bestanden af. Er zijn echter wel een
+ aantal beperkingen.
 
- When displaying, GSview ignores the page size on the Media menu,
- and instead uses the /MediaBox from the PDF file.
- If `Options` | `EPS Clip` is enabled, GSview will use the /CropBox
- from the PDF file.
+ GSview maakt geen gebruik paginainstellingen, en gebruikt in de plaats
+ de /MediaBox instructie van het PDF bestand.
+ Wanneer `Opties` | `EPS Knipsel` werd geactiveerd zal GSview gebruik
+ maken van de /CropBox instructie in het PDF bestand.
 
- GSview needs to `Open` a PDF file to count the pages.  If you
- `Select` the file, GSview will not be able to `Text Extract`,
- `Find`, `Goto Page` or do any other operation that needs to know
- how many pages are in the document.
+ Om de bladzijden te kunnen tellen, moet GSview eerst het PDF bestand
+ openen. Bij het enkel maar selecteren van het bestand zullen geen
+ opdrachten zoals `Zoeken`, `Ga naar` etc... kunnen uitgevoerd worden.
 
- pdfmark link support is crude.
+ Er is slechts een beperkte ondersteuning van het omzetten van PDF
+ naar PostScript en vice versa.
 
- To convert a PostScript file to a PDF file, use `File` | `Convert`,
- then select the `pdfwrite` device.
+ Wilt u een PostScript bestand naar PDF om te zetten, gebruik dan
+ `Bestand` | `Omzetten`, selecteer eerst een bestand en daarna
+ `pdfwrite`.
 
- To convert a PDF file to a PostScript file, use `File` | `Convert`,
- then select the `pswrite` device.
+ Wilt u een PDF bestand naar PostScript om te zetten, gebruik dan
+ `Bestand` | `Omzetten`, selecteer eerst een bestand en daarna
+ `pswrite`.
 
- `File` | `Extract` does not work for PDF files.
- Extracting PDF pages extracts PostScript rather than PDF.
+ De menu optie `Bestand` | `Uitpakken` is niet mogelijk voor PDF
+ bestanden, aangezien uit PDF enkel PostScript kan worden uitgepakt.
 
 
  To batch convert multiple files, look at
@@ -844,18 +837,19 @@ E
  The `Properties` button allows some Ghostcript devices to configure
  extra properties and a page offset to be specified.
 
- A page offset can be specified for each printer.
+ A page offset can be specified for each device.
  The page offset is useful for correcting a mismatch between the page
  origin of a Ghostscript printer device and a particular printer.
  Increasing the X value will translate the image towards the right.
- Increasing the Y value will translate the image downwards.
+ Increasing the Y value will usually translate the image downwards.
 
  `Properties` are typically used to set BitsPerPixel for a colour
- printer or other types of colour or density correction.
+ printer, or other types of colour or density correction,
+ or PDF distiller parameters.
 
- `Properties` are specific to a particular printer.  Changing
- the value of the `BitsPerPixel` property on one printer does not
- change it for any other printer.
+ `Properties` are specific to a particular device.  Changing
+ the value of the `BitsPerPixel` property on one device does not
+ change it for any other device.
 
  When you press the `OK` button in the `Properties` dialog
  box, the current settings are written to the
@@ -871,13 +865,13 @@ E
 
  Some `Properties` are predefined in GSview, but these may not
  match those available in Ghostscript.  The `Edit `and `New`
- buttons allow you to modify available `Properties` for that printer.
+ buttons allow you to modify available `Properties` for that device.
  See the `Edit Properties` topic for more details.
 4Edit Properties
 ?Edit Properties
- Not every printer supports the use of optional `Properties`.  To find
- out which printers support `Properties` and which `Properties` are
- recognised by each printer, read the Ghostscript
+ Not every device supports the use of optional `Properties`.  To find
+ out which devices support `Properties` and which `Properties` are
+ recognised by each device, read the Ghostscript
  file Devices.htm or look at the Ghostscript source code.
 
  There are two ways to add or edit `Properties`.
@@ -900,7 +894,7 @@ E
 
  The second method is to manually edit the GSview INI file.
 
- For each printer, you must add two sections to the
+ For each device, you must add two sections to the
 W
  gsview32.ini
 P
@@ -1250,19 +1244,11 @@ WP
 ?PStoEdit
  You can convert a PostScript or PDF file to an editable vector
  format using `pstoedit` by Wolfgang Glunz.
- `pstoedit` is licensed with the GNU Public Licence.
- Binaries are included in GSview with the permission of Wolfgang Glunz.
- A command line version `pstoedit.exe` and the manual `pstoedit.htm`
- are included in the
-W
- pstoedit
-P
- pstoedt2
-WP
- directory.
- The home page of pstoedit is
-  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/
- For updates to pstoedit, look at the pstoedit home page, or at
+ `pstoedit` is licensed with the GNU Public Licence and is not
+ included with GSview.  You will need to download it separately
+ from the pstoedit homepage
+  http://www.pstoedit.net/pstoedit
+ or from
   http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
 
  To use `pstoedit` from within GSview, use
@@ -1641,8 +1627,15 @@ E
 3Language
 ?Language
 ?International
- GSview is available in English, French, German, Italian and Spanish.
+ GSview is available in English, Dutch, French, German, Greek,
+ Italian and Spanish.
  To change the language use `Options` | `Language`.
+
+ On Windows NT, all existing languages are available to be
+ selected, independent of the regional settings.
+ On other systems, the language availability depends on the
+ selected regional settings, in particular the chosen locale
+ or system code page.
 3PStoText
 ?PStoText
  GSview has two methods of extracting and searching text.
@@ -2027,6 +2020,9 @@ E
  The `Media` menu also allows selection of page size.
  Available page sizes are:
   11x17          11   x 17   inch
+  A0              840 x 1189 mm
+  A1              594 x 840  mm
+  A2              420 x 594  mm
   A3              297 x 420  mm
   A4              210 x 297  mm
   A5              148 x 210  mm
@@ -2129,79 +2125,45 @@ E
  `End`  Scroll to bottom of page.
 2Command line options
 ?Command line options
+ GSview ignores the case of options:
+ -p is the same as -P.  On Windows or OS/2, you can also
+ use /p or /P.  In the samples below, replace `gsview` with
+ `gsview32` on Windows and `gvpm` on OS/2.
+
  Usage:
-W
-  gsview32 [/D] [/Tn] filename
-  gsview32 [/D] [/Tn] /F filename
-  gsview32 [/D] [/Tn] /P filename
-  gsview32 [/D] [/Tn] /S[port] filename
-  gsview32 [/D] [/Tn] /S["queue"] filename
-P
-  gvpm [/D] [/Tn] filename
-  gvpm [/D] [/Tn] /F filename
-  gvpm [/D] [/Tn] /P filename
-X
-  gsview [-d] filename
-  gsview32 [-d] -P filename (not yet implemented)
-  gsview32 [-d] -F filename (not yet implemented)
+  gsview [-d] [-t] [-f[DEVICE]] [-p[QUEUE]]
+    [-mPAPERSIZE] [-oORIENTATION] [-rXDPIxYDPI]
+    [-geometry WIDTHxHEIGHT[+XOFF+YOFF]] filename
 
- Other options are
-  -help
-  -version
-  -geometry WIDTHxHEIGHT
-E
+ Options:
 
- To start GSview and display filename.ps use:
-W
-  gsview32 filename.ps
-P
-  gvpm filename.ps
-X
+ `filename` To start GSview and display filename.ps:
   gsview filename.ps
-E
- To start GSview and print filename.ps using Ghostscript.
- This is similar to `File` | `Print`, except that
- you will not be prompted for a printer (it will use
- the printer most recently used by GSview) and GSview
- will exit after printing has finished.
-W
-  gsview32 /P filename.ps
-P
-  gvpm /P filename.ps
-X
-  gsview -P filename.ps
-E
- To start GSview and convert a PostScript file (not PDF) filename.ps
- to a file using Ghostscript
- (`File` | `Convert`) use:
-W
-  gsview32 /F filename.ps
-P
-  gvpm /F filename.ps
-X
-  gsview -F filename.ps
-E
-W
- To start GSview and spool filename.ps for printing directly to
- a printer (`File` | `Print File`) use:
-  gsview32 /S filename.ps
- To start GSview and spool filename.ps for printing directly to
- printer port LPT3: use:
-  gsview32 /SLPT3: filename.ps
- To start GSview and spool filename.ps for printing directly to
- printer queue "HP DeskJet Portable" use:
-  gsview32 /S"HP DeskJet Portable" filename.ps
- GSview will exit when the file has been spooled.
-E
 
- To start GSview in debug mode use:
-W
-  gsview32 /D
-P
-  gvpm /D
-X
-  gsview -d
-E
+ `-p` prints filename.ps using Ghostscript.
+ This is similar to `File` | `Print`, except that you will
+ not be prompted for a printer (it will use the printer most
+ recently used by GSview, or the printer name you provide)
+ and GSview will exit after printing has finished:
+  gsview -p filename.ps
+
+ `-f` converts a PostScript file (not PDF) filename.ps
+ to a file using Ghostscript (`File` | `Convert`):
+  gsview -f filename.ps
+
+ `-m`PAPERSIZE sets the paper size.  Any of the predefined
+ sizes on the media menu are valid.
+
+ `-o`ORIENTATION sets the orientation and may be one of
+ `auto`, `portrait`, `landscape`, `upsidedown` or `seascape`.
+
+ `-r`XDPIxYDPI sets the display, convert or print resolution.
+
+ To display a file with A4 paper, landscape orientation
+ and 96dpi:
+  gsview -ma4 -olandscape -r96x96 filename.ps
+
+ `-d` Debug mode.
  In debug mode GSview will `not` remove its temporary files.
  This is to allow inspection of these files after GSview has finished.
  Debug mode also produces more verbose output for `File `| `Show Messages`.
@@ -2213,32 +2175,31 @@ X
 E
  use -d9
 
-WP
- GSview by default runs
-W
- multi-threaded under Windows 95 and Windows NT, and single-threaded under
- Windows 3.1 / Win32s.
-P
- multithreaded.
-WP
- To change this, use `/T` to toggle the threading mode, use `/T0` to select
- single-thread mode and `/T1` to select multi-thread mode.
-E
+ `-t` Multi-threading.  GSview by default runs multi-threaded,
+ except for Windows 3.1/Win32s.
+ To change this, use `-t` to toggle the threading mode, use `-t0` to select
+ single-thread mode and `-t1` to select multi-thread mode.
 
 W
- Instead of opening up a second copy of GSview, you can tell
- GSview to open a file in an existing GSview, or if GSview
- is not already running, in a new window using:
-  gsview32 /E filename
- To tell an existing GSview to exit:
-  gsview32 /X
+ Windows supports a few additional command line options.
 
-E
- GSview ignores the case of options:
-WP
- /p is the same as /P.
+ `-s` spools a file directly to the printer, without using Ghostscript.
+ GSview will exit when the file has been spooled.
+ Some examples are:
+  gsview -s filename.ps
+  gsview -sLPT3: filename.ps
+  gsview -s"HP DeskJet Portable" filename.ps
+
+ `-e` uses DDE to open a file in an existing GSview, or if GSview
+ is not already running, in a new window using.
+  gsview -e filename
+
+ `-x` uses DDE to tell an existing GSview to close.
+  gsview -x
 X
- -p is the same as -P.
+ On GNU/Linux you an also use:
+  gsview -v     (display version)
+  gsview -h     (display help)
 E
 W
 3Dynamic Data Exchange
@@ -2299,7 +2260,7 @@ P
 X
   gsview - A Ghostscript graphical interface
 E
-  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+  Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
 
  This file is part of GSview.
 
@@ -2504,6 +2465,13 @@ E
  environment variable GS_OPTIONS.  When using GSview, it is safest
  not to use GS_OPTIONS at all and to use `Options` |
  `Advanced Configure` | `Ghostscript Options` instead.
+
+ `Problem:` GSview hangs or takes a very long time when displaying a file.
+
+ Resolution may have been set too high or page size too large.
+ Reduce the resolution to the default 96dpi using
+ `Media `| `Display Settings`.
+ Change the page size with the `Media` menu.
 W
 2Other Useful Programs
 ?Other Useful Programs

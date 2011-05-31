@@ -106,7 +106,6 @@ typedef struct tagPENDING {
 	PSFILE *psfile;		/* new document to display */
 	BOOL	resize;		/* size, resolution or orientation change */
 	BOOL	text;		/* extract text, don't display */
-	BOOL	pdf2ps;		/* extract PS from PDF, don't display */
 	BOOL	pstoedit;	/* extract using pstoedit, don't display */
 } PENDING;
 
@@ -223,7 +222,6 @@ typedef struct tagOPTIONS {
 	BOOL	print_to_file;
 	char	printer_port[MAXSTR];	/* for Win32s */
 	char	printer_queue[MAXSTR];	/* for Win32 */
-	int	pdf2ps;
 	BOOL	auto_bbox;
 	MATRIX	ctm;
 	MEASURE measure;

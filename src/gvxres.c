@@ -92,6 +92,10 @@ const char *get_string(int id)
 	    st = string_nl;
 	    stlen = string_nl_len;
 	    break;
+	case IDM_LANGSE:
+	    st = string_se;
+	    stlen = string_se_len;
+	    break;
 	case IDM_LANGEN:
 	default:
 	    st = string_en;

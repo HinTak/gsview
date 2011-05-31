@@ -400,7 +400,7 @@ void enable_menu_item(int menuid, int itemid, BOOL enabled);
 
 /* in gvxdlg.cpp */
 /* dialog callbacks */
-gint modal_delete(GtkWidget *widget, GdkEvent event, gpointer data);
+gint modal_delete(GtkWidget *widget, GdkEvent *event, gpointer data);
 void modal_ok(GtkWidget *w, gpointer data);
 void modal_cancel(GtkWidget *w, gpointer data);
 int modal_dialog(GtkWidget *w, GtkWidget *okw, GtkWidget *cancelw) ;

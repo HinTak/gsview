@@ -1,4 +1,4 @@
-#  Copyright (C) 2000-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 2000-2002, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -54,13 +54,13 @@ PLINK=-lpthread -lrt
 # without MULTITHREAD
 #XINCLUDE=-I/usr/freeware/include
 #PFLAGS=
-#PLINK=-L/usr/freeware/lib32 -rpath /use/freeware/lib32 -L/usr/lib32
+#PLINK=-L/usr/freeware/lib32 -rpath /usr/freeware/lib32 -L/usr/lib32
 
 # SGI Irix 6.5
 # mutlithreaded, but can't debug with gdb
 #XINCLUDE=-I/usr/freeware/include
 #PFLAGS=-DMULTITHREAD
-#PLINK=-L/usr/freeware/lib32 -rpath /use/freeware/lib32 -L/usr/lib32 -lpthread
+#PLINK=-L/usr/freeware/lib32 -rpath /usr/freeware/lib32 -L/usr/lib32 -lpthread
 
 # Other possible options are -Wtraditional
 # Compiler flags for C and C++ files.
@@ -77,7 +77,7 @@ OBJS=gvx.$(OBJ) gvxdlg.$(OBJ) gvxdisp.$(OBJ) gvxedit.$(OBJ) gvxeps.$(OBJ)\
    dscparse.$(OBJ) dscutil.$(OBJ)\
    gvcreg.$(OBJ) gvxreg.$(OBJ) gvxres.$(OBJ)\
    gvxl_de.$(OBJ) gvxl_en.$(OBJ) gvxl_es.$(OBJ) gvxl_fr.$(OBJ)\
-   gvxl_gr.$(OBJ) gvxl_it.$(OBJ) gvxl_nl.$(OBJ)\
+   gvxl_gr.$(OBJ) gvxl_it.$(OBJ) gvxl_nl.$(OBJ) gvxl_se.$(OBJ)\
    cdll.$(OBJ) cimg.$(OBJ) cview.$(OBJ)
 HDRS=gsvver.h gvx.h dscparse.h gvcfn.h gvcver.h gvxres.h gvcfile.h gvctype.h gvcedit.h
 
@@ -123,6 +123,7 @@ install: all
 	$(INSTALL) gvxgr.htm  $(GSVIEW_DOCDIR)/gvxgr.htm
 	$(INSTALL) gvxit.htm  $(GSVIEW_DOCDIR)/gvxit.htm
 	$(INSTALL) gvxnl.htm  $(GSVIEW_DOCDIR)/gvxnl.htm
+	$(INSTALL) gvxse.htm  $(GSVIEW_DOCDIR)/gvxse.htm
 	$(INSTALL) ../epstool/epstool.htm $(GSVIEW_DOCDIR)/epstool.htm
 	-mkdir -p $(GSVIEW_ETCPATH)
 	chmod 755  $(GSVIEW_ETCPATH)
@@ -204,6 +205,9 @@ gvxl_it.$(OBJ): it/gvxlang.c $(HDRS) gvxlang.h gvxlangh.rc it/gvclang.h it/gvcla
 
 gvxl_nl.$(OBJ): nl/gvxlang.c $(HDRS) gvxlang.h gvxlangh.rc nl/gvclang.h nl/gvclang.rc  
 	$(COMP) $(CFLAGS) -I. -c -o gvxl_nl.$(OBJ) nl/gvxlang.c
+
+gvxl_se.$(OBJ): se/gvxlang.c $(HDRS) gvxlang.h gvxlangh.rc se/gvclang.h se/gvclang.rc  
+	$(COMP) $(CFLAGS) -I. -c -o gvxl_se.$(OBJ) se/gvxlang.c
 
 gvxmeas.$(OBJ): gvxmeas.c $(HDRS)
 	$(COMP) $(CFLAGS) -c gvxmeas.c
@@ -289,7 +293,7 @@ gvdoc: gvdoc.c
 doc2html: doc2html.c
 	$(COMP) -o doc2html doc2html.c
 
-html: gvxde.htm gvxen.htm gvxes.htm gvxfr.htm gvxgr.htm gvxit.htm gvxnl.htm
+html: gvxde.htm gvxen.htm gvxes.htm gvxfr.htm gvxgr.htm gvxit.htm gvxnl.htm gvxse.htm
 
 gvxde.htm: doc2html gvdoc de/gvclang.txt
 	./gvdoc X de/gvclang.txt gvx.txt
@@ -335,6 +339,12 @@ gvxnl.htm: doc2html gvdoc nl/gvclang.txt
 	-rm gvxnl.htm
 	mv GSview.htm gvxnl.htm
 
+gvxse.htm: doc2html gvdoc se/gvclang.txt
+	./gvdoc X se/gvclang.txt gvx.txt
+	./doc2html gvx.txt GSview.htm
+	-rm gvxse.htm
+	mv GSview.htm gvxse.htm
+
 gvx.ps: gvx.dvi
 	dvips gvx
 
@@ -377,6 +387,7 @@ clean: language
 	-rm gvxl_gr.$(OBJ)
 	-rm gvxl_it.$(OBJ)
 	-rm gvxl_nl.$(OBJ)
+	-rm gvxl_se.$(OBJ)
 	-rm gvxmeas.$(OBJ)
 	-rm gvxmisc.$(OBJ)
 	-rm gvxprn.$(OBJ)
@@ -430,3 +441,4 @@ veryclean: clean
 	-rm gvxgr.htm
 	-rm gvxit.htm
 	-rm gvxnl.htm
+	-rm gvxse.htm

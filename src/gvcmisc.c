@@ -379,9 +379,6 @@ PROFILE *prf;
     profile_read_string(prf, section, "AutoRedisplay", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
 	    option.redisplay = i;
-    profile_read_string(prf, section, "PDF2PS", "", profile, sizeof(profile));
-    if (sscanf(profile,"%d", &i) == 1)
-	    option.pdf2ps = i;
     profile_read_string(prf, section, "AutoBoundingBox", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
 	    option.auto_bbox = i;
@@ -574,8 +571,6 @@ PROFILE *prf;
 	profile_write_string(prf, section, "Safer", profile);
 	sprintf(profile, "%d", (int)option.redisplay);
 	profile_write_string(prf, section, "AutoRedisplay", profile);
-	sprintf(profile, "%d", (int)option.pdf2ps);
-	profile_write_string(prf, section, "PDF2PS", profile);
 	sprintf(profile, "%d", (int)option.auto_bbox);
 	profile_write_string(prf, section, "AutoBoundingBox", profile);
 	sprintf(profile, "%d", (int)option.save_dir);

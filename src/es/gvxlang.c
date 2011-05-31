@@ -121,6 +121,7 @@ MENU_ENTRY menu_es[] = {
   { "/Opciones/Idioma/_Français", 	NULL,		GS_CMD, IDM_LANGFR, "<CheckItem>" },
   { "/Opciones/Idioma/_Italiano", 	NULL,		GS_CMD, IDM_LANGIT, "<CheckItem>" },
   { "/Opciones/Idioma/_Nederlands", 	NULL,		GS_CMD, IDM_LANGNL, "<CheckItem>" },
+  { "/Opciones/Idioma/Svenska", 	NULL,		GS_CMD, IDM_LANGSE, "<CheckItem>" },
   { "/Opciones/Conversión a _texto",      		NULL,   NULL, 		0, "<Branch>" },
   { "/Opciones/Conversión a texto/Desactivado", 	NULL,		GS_CMD, IDM_PSTOTEXTDIS, "<CheckItem>" },
   { "/Opciones/Conversión a texto/Normal", 	NULL,		GS_CMD, IDM_PSTOTEXTNORM, "<CheckItem>" },

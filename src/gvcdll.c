@@ -20,11 +20,14 @@
 #include "gvc.h"
 #include <stdarg.h>
 
+#define GS_UNSAFE 703
+
 GSDLL gsdll;		/* the main DLL structure */
 IMAGE image;		/* display device */
 VIEW view;
 PENDING pending;	/* operations that must wait */
 int execute_code;	/* return code from gsapi_run_string_continue */
+
 
 /* forward declarations */
 #ifndef VIEWONLY
@@ -38,6 +41,7 @@ int d_save(void);
 int d_restore(void);
 int d_init1(void);
 int d_init2(void);
+int d_permitread(void);
 int d_pdf_page(int pagenum);
 int get_gs_input(char *buf, int blen);
 int send_trailer(void);
@@ -58,17 +62,17 @@ gs_execute(const char *str, int len)
 	0, &exit_code);
     if (execute_code == e_NeedInput)
 	execute_code = 0;	/* normal return */
-#ifdef NOTUSED
     if (debug & DEBUG_GENERAL) {
 	char buf[MAXSTR];
+	gs_addmessf("\n----Begin %d bytes----\n", len);
+	gs_addmess_count(str, len);
+	gs_addmessf("\n----End of %d bytes----\n", len);
 /*
-	 gs_addmessf("\n----Begin %d bytes----\n", len);
-	 gs_addmess_count(str, len);
-	 gs_addmessf("\n----End of %d bytes----\n", len);
 */
 	sprintf(buf, "gsdll.run_string_continue returns %d\n", execute_code);
 	gs_addmess(buf);
     }
+#ifdef NOTUSED
 #endif
     return execute_code;
 }
@@ -401,13 +405,80 @@ long dmode24 =
      DISPLAY_LITTLEENDIAN | DISPLAY_BOTTOMFIRST;
 #endif
 
+int
+d_permitread(void)
+{
+int code = 0;
+char filename[MAXSTR+MAXSTR];
+int i;
+const char *p;
+    /* Allow document files to be opened */
+    if (option.safer && (gsdll.revision_number > GS_UNSAFE)) {
+	if (gsdll.revision_number == 704) {
+	    /* There is a local/global allocation problem in GS 7.04 */
+	    /* which we try to avoid with the following */
+	    code = gs_printf( "currentglobal true setglobal\n");
+	}
+	if (!code)
+	    code = gs_printf("<<\n");
+	if (!code)
+	    code = gs_printf(" /PermitFileReading [\n");
+	if (!code && psfile.name[0]) {
+	    for (p=psfile.name, i=0; *p && i < sizeof(filename)-2; p++) {
+		if (*p == '\\') {
+		    filename[i++] = '\\';
+		    filename[i++] = '\\';
+		    filename[i++] = '\\';
+		}
+		filename[i++] = *p;
+	    }
+	    filename[i] = '\0';
+	    code = gs_printf("  (%s)\n", filename);
+	}
+	if (!code && psfile.tname[0]) {
+	    for (p=psfile.name, i=0; *p && i < sizeof(filename)-2; i++) {
+		if (*p == '\\') {
+		    filename[i++] = '\\';
+		    filename[i++] = '\\';
+		    filename[i++] = '\\';
+		}
+		filename[i++] = *p;
+	    }
+	    filename[i] = '\0';
+	    code = gs_printf("  (%s)\n", filename);
+	}
+
+	if (!code)
+	    code = gs_printf(" ]\n");
+	if (!code)
+	    code = gs_printf(" /PermitFileWriting []\n");
+	if (!code)
+	    code = gs_printf(" /PermitFileControl []\n");
+	if (!code)
+	    code = gs_printf(" >> setuserparams\n");
+	if (gsdll.revision_number == 704) {
+	    /* There is a local/global allocation problem in GS 7.04 */
+	    /* which we try to avoid with the following */
+	    if (!code)
+	        code = gs_printf( "setglobal\n");
+	}
+    }
+    if (code)
+	gs_addmessf("Failed to setuserparams for SAFER\n");
+    return code;
+}
+
+
 /* open device and install viewer hooks */
 int
 d_init2(void)
 {
-int code;
+int code = 0;
 int depth;
 long dmode;
+
+    if (!code)
+        code = d_permitread();
 
     /* calculate depth */
     depth = real_depth(option.depth);
@@ -430,20 +501,36 @@ long dmode;
 	    dmode = dmode24;
 	    break;
     }
-    code = gs_printf("<< /OutputDevice /%s /DisplayFormat %ld /DisplayHandle %ld\n",
+
+    if (!code)
+	code = gs_printf("<< /OutputDevice /%s /DisplayFormat %ld /DisplayHandle %ld\n",
 	    DEVICENAME, dmode, &view);
+    if (!code && option.safer && (gsdll.revision_number > GS_UNSAFE))
+	code = gs_printf("/.LockSafetyParams true\n");
     if (!code)
         code = send_prolog(IDR_VIEWER);
     if (!code)
         code = gs_printf(">> setpagedevice\n");
+
+    if (!code && option.safer && (gsdll.revision_number > GS_UNSAFE)) {
+	if (gsdll.revision_number == 704) {
+	    /* There is a local/global allocation problem in GS 7.04 */
+	    /* which we try to avoid with the following */
+	    code = gs_printf(
+		"currentglobal true setglobal .locksafe setglobal\n");
+        }
+	else  
+	    code = gs_printf(".locksafe\n");
+    }
 
     if (code) {
 	char buf[256];
 	sprintf(buf,"Failed to open device or install ViewerPreProcess hook: returns %d\n", code);
 	gs_addmess(buf);
 	pending.unload = TRUE;
-	if ( (code == -13)	/* limitcheck */
-	     || (code == -8)	/* invalidexit */
+	if ( (code == e_limitcheck)
+	     || (code == e_invalidexit)
+	     || (code == e_VMerror)
 	   ) {
 	    gs_addmess("Page size may have been too large or resolution too high.\nResetting page size and resolution\n");
 	    if (option.xdpi > DEFAULT_RESOLUTION)
@@ -453,7 +540,24 @@ long dmode;
 	    post_img_message(WM_COMMAND, IDM_A4);
 	}
     }
-    else
+
+    if (!code)
+	/* run Ghostscript with a stopped */
+	code = gs_printf("\
+/GSview_stopped\n\
+{\n\
+ { currentfile run } stopped\n\
+ { $error /errorname get /VMerror eq\n\
+  { $error begin command errorname end signalerror }\n\
+  { handleerror quit }\n\
+  ifelse\n\
+ }\n\
+ if\n\
+}\n\
+def\n\
+GSview_stopped\n");
+
+    if (!code)
 	display.init = TRUE;
     return code;
 }
@@ -1499,14 +1603,21 @@ char **argv;
 	p += strlen(p)+1;
 	*p = '\0';
 
-	if (! (pending.text && (gsdll.revision_number < 500)) )
-	  /* don't use -dSAFER when gsversion < 500 and using pstotext */
-	  if (option.safer) {
-	    strcpy(p, "-dSAFER");
+        if (gsdll.revision_number > GS_UNSAFE) {
+	    /* after selecting the initial device, we need to execute 
+	     * .locksafe
+	     */
+	    strcpy(p, "-dNOSAFER");
 	    p += strlen(p)+1;
 	    *p = '\0';
-	  }
-
+	}
+	else {
+	    if (option.safer) {
+		strcpy(p, "-dSAFER");
+		p += strlen(p)+1;
+		*p = '\0';
+	    }
+	}
 
 	if (option.alpha_text > 1) {
 	    strcpy(p, "-dNOPLATFONTS");
@@ -1780,6 +1891,10 @@ int real_orientation;
     /* Don't let anyone stuff around with the page size now */
     gs_printf("/setpagedevice { pop } def\n");
 
+    if (option.safer && (gsdll.revision_number > GS_UNSAFE)) {
+	d_permitread();
+	gs_printf(".locksafe\n");
+    }
 
     if (psfile.ispdf) {
 	int i;

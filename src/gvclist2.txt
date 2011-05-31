@@ -2,8 +2,6 @@ pstotext.1
 pstotext.txt
 pstotxt2.dll
 pstotxt2.exe
-pstoedit.dll
-pstoedit.exe
 gvpm.exe
 gvpmde.dll
 gvpmes.dll
@@ -11,6 +9,7 @@ gvpmfr.dll
 gvpmgr.dll
 gvpmit.dll
 gvpmnl.dll
+gvpmse.dll
 gvpmen.hlp
 gvpmde.hlp
 gvpmes.hlp
@@ -18,6 +17,7 @@ gvpmfr.hlp
 gvpmgr.hlp
 gvpmit.hlp
 gvpmnl.hlp
+gvpmse.hlp
 gvpm.ico
 gvpgs.exe
 zlib2.dll

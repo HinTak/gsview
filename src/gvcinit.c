@@ -76,7 +76,7 @@ int parse_argv(GSVIEW_ARGS *args, int argc, char *argv[])
 		    }
 		    break;
 		case 'e':
-		    args->existing = 1;
+		    args->existing = i;	/* send all after this */
 		    break;
 		case 'x':
 		    args->exit_existing = 1;
@@ -355,7 +355,6 @@ init_options(void)
     option.print_method = PRINT_GS;
 #endif
     option.print_reverse = FALSE;
-    option.pdf2ps = 0;
     option.auto_bbox = TRUE;
     option.configured = FALSE;
     memset(usermedia, 0, sizeof(usermedia));
@@ -364,11 +363,10 @@ init_options(void)
 void
 gsview_initc(int argc, char *argv[])
 {
+    gs_addmessf("%s %s %s\n", GSVIEW_PRODUCT, GSVIEW_DOT_VERSION, GSVIEW_DATE);
     if (debug) {
 	int i;
 	char filedir[MAXSTR];
-	gs_addmessf("%s %s %s\n", GSVIEW_PRODUCT, 
-	    GSVIEW_DOT_VERSION, GSVIEW_DATE);
 	gs_addmess("Debugging ON\n");
 	if (multithread)
 	   gs_addmess("Multi Threaded\n");

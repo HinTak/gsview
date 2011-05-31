@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -1351,7 +1351,7 @@ gs_addmessf("HtmlHelp: %s HH_DISPLAY_TOPIC %s\n", strh, strb);
 		 )
                )
 	        if (dfchanged() != 0)
-		    gsview_command(IDM_REDISPLAY);
+		    PostMessage(hwnd, WM_COMMAND, IDM_REDISPLAY, 0);
 	    }
 	    break;
 	case WM_CREATE:
@@ -2239,6 +2239,7 @@ gsview_close()
 #ifndef VIEWONLY
     unload_zlib();
     unload_bzip2();
+    unload_pstoedit();
 #endif
     if (hpen_btnshadow)
 	DeletePen(hpen_btnshadow);

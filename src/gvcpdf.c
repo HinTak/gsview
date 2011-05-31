@@ -141,9 +141,15 @@ userdict /pdfmark { \
     ifelse \
    } \
    { dup dup /Action eq exch /A eq or \
-     { ( ) print ==only ( <<) print \
-       { ( ) print exch ==only ( ) print ==only } forall \
-       ( >>) print \
+     { dup type /nametype eq \
+       { \
+         ( ) print ==only ( ) print ==only \
+       } \
+       { ( ) print ==only ( <<) print \
+         { ( ) print exch ==only ( ) print ==only } forall \
+         ( >>) print \
+       } \
+       ifelse \
      } \
      { ( ) print ==only ( ) print ==only \
      } \
@@ -842,87 +848,6 @@ pdfdict begin\r\n\
     /* Send trailer */
     fputs("%%Trailer\r\n", f);
     fputs("currentdict pdfclose\r\nend\r\nend\r\nend\r\n%%EOF\r\n", f);
-    return TRUE;
-}
-
-/* This doesn't work in GS 5.50 because pdf_2ps.ps has been removed */
-/* Alternative convert PDF to PS */
-BOOL
-gsview_pdf2ps_common(char *psname, char *optname, char *output)
-{
-char buf[MAXSTR];
-FILE *optfile;
-FILE *pcfile;
-char *p;
-    /*  ASSUMES psfile.file is valid */
-
-    /* create temporary file containing pages to print */
-    psname[0] = '\0';
-    if ( (pcfile = gp_open_scratch_file(szScratch, psname, "wb")) == (FILE *)NULL) {
-	gserror(IDS_NOTEMP, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
-	play_sound(SOUND_ERROR);
-	return FALSE;
-    }
-
-    fprintf(pcfile, "PSFile (w) file /PSout exch def\n");
-
-    if (!pdf_extract(pcfile, 1)) {
-	fclose(pcfile);
-	return FALSE;
-    }
-
-#ifdef UNUSED
-    fprintf(pcfile, "(");
-    for (p=psfile_name(&psfile); *p != '\0'; p++)
-	if (*p == '\\')
-	    fputc('/',pcfile);
-	    /* fputc('\\',pcfile); */
-	else
-	    fputc(*p,pcfile);
-    fprintf(pcfile, ") run\n");
-#endif
-
-    fclose(pcfile);
-
-    /* create options file */
-    optname[0] = '\0';
-    if ( (optfile = gp_open_scratch_file(szScratch, optname, "w")) == (FILE *)NULL) {
-	    play_sound(SOUND_ERROR);
-	    return FALSE;
-    }
-    fprintf(optfile, "-I\042%s\042\n", option.gsinclude);
-/*
-    fprintf(optfile, "-q\n");
-*/
-    fprintf(optfile, "-dNOPAUSE\n");
-    fprintf(optfile, "-dNODISPLAY\n");
-/* Can't use SAFER because we need to open PSFile
-   Rely on PDF files not usually being able to open files
-    if (option.safer)
-	fprintf(optfile, "-dSAFER\n");
-*/
-    if (option.pdf2ps & OPTION_PDF2PS_BINARYOK)
-        fprintf(optfile, "-dPSBinaryOK\n");
-    if (option.pdf2ps & OPTION_PDF2PS_LEVEL1)
-	fprintf(optfile, "-dPSLevel1\n");
-    if (option.pdf2ps & OPTION_PDF2PS_NOPROCSET)
-	fprintf(optfile, "-dPSNoProcSet\n");
-
-    fprintf(optfile, "-sPSFile=\042");
-    for (p=output; *p != '\0'; p++)
-	if (*p == '\\')
-	    /* fputc('/',optfile); */
-	    fputc('\\',optfile);
-	else
-	    fputc(*p,optfile);
-    fputc('\042',optfile);
-    fputc('\n',optfile);
-
-    p = option.gsother;
-    while ((p = gs_argnext(p, buf, TRUE)) != NULL)
-        fprintf(optfile, "%s\n", buf);
-
-    fclose(optfile);
     return TRUE;
 }
 #endif

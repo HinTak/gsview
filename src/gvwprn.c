@@ -1156,38 +1156,6 @@ start_gvwgs(void)
 
 
 
-/* Convert a range of pages from PDF to PS */
-void
-gsview_pdf2ps(char *output)
-{
-	if (psfile.name[0] == '\0') {
-		gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
-		return;
-	}
-	
-	if (!gsview_pdf2ps_common(printer.psname, printer.optname, output))
-	    return;
-
-	if (is_win32s) 
-	{
-	    /* Win16 and Win32s can't load GS DLL twice */
-	    /* We must unload the current GS DLL */
-	    if (gsdll.open)
-		pending.unload = TRUE;
-	    /* printer_pending will cause start_gvwgs() to be run */
-	    /* from main message loop, after displaying GS DLL */
-	    /* has unloaded */
-	    win32s_printer_pending = TRUE;
-	    return;
-	}
-
-        start_gvwgs();
-	return;
-}
-
-
-
-
 #ifdef __BORLANDC__
 #pragma argsused
 #endif

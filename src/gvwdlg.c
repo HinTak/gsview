@@ -1235,59 +1235,6 @@ display_settings()
 	    DisplaySettingsDlgProc, (LPARAM)NULL);
 }
 
-/* dialog box for selecting PDF2PS options */
-#ifdef __BORLANDC__
-#pragma argsused
-#endif
-BOOL CALLBACK _export
-PDF2PSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
-{
-	int i;
-	switch (wmsg) {
-	    case WM_INITDIALOG:
-		/* set Print to File check box */
-		if (option.pdf2ps & OPTION_PDF2PS_BINARYOK)
-		    SendDlgItemMessage(hDlg, PDF2PS_BINARYOK, BM_SETCHECK, 1, 0);
-		if (option.pdf2ps & OPTION_PDF2PS_LEVEL1)
-		    SendDlgItemMessage(hDlg, PDF2PS_LEVEL1, BM_SETCHECK, 1, 0);
-		if (option.pdf2ps & OPTION_PDF2PS_NOPROCSET)
-		    SendDlgItemMessage(hDlg, PDF2PS_NOPROCSET, BM_SETCHECK, 1, 0);
-		return TRUE;
-	    case WM_COMMAND:
-		switch (LOWORD(wParam)) {
-		    case ID_HELP:
-			get_help();
-		        return FALSE;
-		    case IDOK:
-			/* get Print to File status */
-			i = (int)SendDlgItemMessage(hDlg, PDF2PS_BINARYOK, BM_GETCHECK, 0, 0);
-			option.pdf2ps = (option.pdf2ps & (~OPTION_PDF2PS_BINARYOK)) | (i ? OPTION_PDF2PS_BINARYOK : 0);
-			i = (int)SendDlgItemMessage(hDlg, PDF2PS_LEVEL1, BM_GETCHECK, 0, 0);
-			option.pdf2ps = (option.pdf2ps & (~OPTION_PDF2PS_LEVEL1)) | (i ? OPTION_PDF2PS_LEVEL1 : 0);
-			i = (int)SendDlgItemMessage(hDlg, PDF2PS_NOPROCSET, BM_GETCHECK, 0, 0);
-			option.pdf2ps = (option.pdf2ps & (~OPTION_PDF2PS_NOPROCSET)) | (i ? OPTION_PDF2PS_NOPROCSET : 0);
-			EndDialog(hDlg, TRUE);
-			return TRUE;
-		    case IDCANCEL:
-			EndDialog(hDlg, FALSE);
-			return TRUE;
-		}
-		break;
-	}
-	return FALSE;
-}
-
-
-BOOL
-get_pdf2ps_options(void)
-{
-int flag;
-    nHelpTopic = IDS_TOPICOPEN;
-    flag = DialogBoxParamL(hlanguage, MAKEINTRESOURCE(IDD_PDF2PS), hwndimg, 
-	PDF2PSDlgProc, (LPARAM)NULL);
-    return flag;
-}
-
 
 
 /* Text Window for Ghostscript Messages */
@@ -1299,7 +1246,7 @@ int flag;
 #else
 #define TWLENGTH 16384
 #endif
-#define TWSCROLL 1024
+#define TWSCROLL 2048
 char twbuf[TWLENGTH];
 int twend;
 

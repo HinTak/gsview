@@ -71,6 +71,17 @@ src/nl/gvplang.rc
 src/nl/gvplang.def
 src/nl/gvwlang.rc
 src/nl/gvxlang.c
+src/se/setup32.def
+src/se/setup2.def
+src/se/gsview.hpj
+src/se/gvwin32.def
+src/se/gvclang.h
+src/se/gvclang.rc
+src/se/gvclang.txt
+src/se/gvplang.rc
+src/se/gvplang.def
+src/se/gvwlang.rc
+src/se/gvxlang.c
 src/binary/gsview48.png
 src/binary/english.bmp
 src/binary/dutch.bmp
@@ -79,6 +90,7 @@ src/binary/german.bmp
 src/binary/greek.bmp
 src/binary/italian.bmp
 src/binary/spanish.bmp
+src/binary/swedish.bmp
 src/binary/gvpm1.ico
 src/binary/gvpgs.ico
 src/binary/gsos2.ico

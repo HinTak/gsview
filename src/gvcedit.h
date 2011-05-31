@@ -1,4 +1,4 @@
-/* Copyright (C) 1998-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1998-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   

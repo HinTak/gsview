@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -1095,71 +1095,71 @@ install_prog()
 	     * This INI file will cause auto-configuration if
 	     * the user runs GSview for the first time, or was
 	     * previously using a different version of GSview.
+	     * If Ghostscript isn't already installed, don't bother.
 	     */
-	    FILE *f;
-	    char buf[256];
+	    int gsver = 0;
 	    int count;
 	    int *ver;
-	    int gsver;
-	    const char *p = cinst.GetUninstallName();
-	    strcpy(szProgram, g_szTargetDir);
-	    strcat(szProgram, "\\");
-	    strcat(szProgram, cinst.GetMainDir());
-	    strcat(szProgram, "\\");
-	    strcat(szProgram, szIniName);
-	    gs_addmess("Writing ");
-	    gs_addmess(szProgram);
-	    gs_addmess("\n");
-	    if ((f = fopen(szProgram, "w")) == (FILE *)NULL) {
-		gs_addmess("Failed\n");
-		return FALSE;
-	    }
-	    fprintf(f, "[Options]\n");
-	    /* Skip over "GSview 3.6" to get to version number */
-	    while (*p && *p != ' ')
-		p++;
-	    while (*p && *p == ' ')
-		p++;
-	    fprintf(f, "Version=%s\n", p);
 
 	    count = 1;
 	    get_gs_versions(&count);
-	    if (count < 1)
-		return FALSE;
-	    ver = (int *)malloc((count+1)*sizeof(int));
-	    if (ver == (int *)NULL)
-		return FALSE;
-	    ver[0] = count+1;
-	    if (!get_gs_versions(ver)) {
+	    if (count >= 1) {
+		ver = (int *)malloc((count+1)*sizeof(int));
+		if (ver == (int *)NULL)
+		    return FALSE;
+		ver[0] = count+1;
+		if (get_gs_versions(ver)) {
+		    for (int i=1; i<=ver[0]; i++) {
+			if (ver[i] > gsver)
+			    gsver = ver[i];
+		    }
+		}
 		free(ver);
-		return FALSE;
 	    }
-	    gsver = 0;
-	    for (int i=1; i<=ver[0]; i++) {
-		if (ver[i] > gsver)
-		    gsver = ver[i];
-	    }
-	    free(ver);
 	    if (gsver == 0) {
 		gs_addmess("If installing for all users, you must install Ghostscript first.\n");
-		fclose(f);
-		return FALSE;
 	    }
-	    fprintf(f, "GSversion=%d\n", gsver);
+	    else {
+		FILE *f;
+		char buf[256];
+		const char *p = cinst.GetUninstallName();
 
-	    if (!get_gs_string(gsver, "GS_DLL", buf, sizeof(buf))) {
-		return FALSE;
+		strcpy(szProgram, g_szTargetDir);
+		strcat(szProgram, "\\");
+		strcat(szProgram, cinst.GetMainDir());
+		strcat(szProgram, "\\");
+		strcat(szProgram, szIniName);
+		gs_addmess("Writing ");
+		gs_addmess(szProgram);
+		gs_addmess("\n");
+		if ((f = fopen(szProgram, "w")) == (FILE *)NULL) {
+		    gs_addmess("Failed\n");
+		    return FALSE;
+		}
+		fprintf(f, "[Options]\n");
+		/* Skip over "GSview 3.6" to get to version number */
+		while (*p && *p != ' ')
+		    p++;
+		while (*p && *p == ' ')
+		    p++;
+		fprintf(f, "Version=%s\n", p);
+
+		fprintf(f, "GSversion=%d\n", gsver);
+
+		if (!get_gs_string(gsver, "GS_DLL", buf, sizeof(buf))) {
+		    return FALSE;
+		    fclose(f);
+		}
+		fprintf(f, "GhostscriptDLL=%s\n", buf);
+		if (!get_gs_string(gsver, "GS_LIB", buf, sizeof(buf))) {
+		    return FALSE;
+		    fclose(f);
+		}
+		fprintf(f, "GhostscriptInclude=%s\n", buf);
+		fprintf(f, "GhostscriptOther=-dNOPLATFONTS -sFONTPATH=\042c:\\psfonts\042\n");
+		fprintf(f, "Configured=1\n");
 		fclose(f);
 	    }
-	    fprintf(f, "GhostscriptDLL=%s\n", buf);
-	    if (!get_gs_string(gsver, "GS_LIB", buf, sizeof(buf))) {
-		return FALSE;
-		fclose(f);
-	    }
-	    fprintf(f, "GhostscriptInclude=%s\n", buf);
-	    fprintf(f, "GhostscriptOther=-dNOPLATFONTS -sFONTPATH=\042c:\\psfonts\042\n");
-	    fprintf(f, "Configured=1\n");
-	    fclose(f);
 	}
 
 	if (install_autoexec)
@@ -1468,6 +1468,9 @@ HINSTANCE hInstance;
 	case IDM_LANGNL:
 	    strcat(langdll, "nl");
 	    break;
+	case IDM_LANGSE:
+	    strcat(langdll, "se");
+	    break;
 	case IDM_LANGEN:
 	default:
 	    g_hLanguage = g_hInstance;
@@ -1509,6 +1512,7 @@ LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDM_LANGGR:
                 case IDM_LANGIT:
                 case IDM_LANGNL:
+                case IDM_LANGSE:
                     EndDialog(hDlg, LOWORD(wParam));
                     return(TRUE);
                 default:
@@ -1542,6 +1546,7 @@ int language;
 	    case IDM_LANGGR:
 	    case IDM_LANGIT:
 	    case IDM_LANGNL:
+	    case IDM_LANGSE:
 		load_language(language);
 	}
     }

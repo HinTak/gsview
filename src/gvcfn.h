@@ -174,7 +174,6 @@ BOOL pstoeps_warn(void);
 void change_sounds(void);
 BOOL install_gsdll(void);
 void display_settings(void);
-BOOL get_pdf2ps_options(void);
 void gs_showmess(void);
 HWND gs_showmess_modeless(void);
 void gs_addmess_count(const char *str, int count);
@@ -189,6 +188,7 @@ void ps_to_eps(void);
 
 /* in gvwedit.c or gvpedit.c */
 #ifndef VIEWONLY
+int unload_pstoedit(void);
 int gsview_pstoedit(void);
 void process_pstoedit(void *arg);
 #endif
@@ -204,7 +204,7 @@ void paste_to_file(void);
 void add_copies(FILE *f, int copies);
 struct prop_item_s * get_properties(const char *device);
 void gsview_spool(char *, char *);
-void psfile_extract(FILE *f, int copies);
+BOOL psfile_extract(FILE *f, int copies);
 char *get_devices(BOOL convert);
 void print_cleanup(void);
 void gsview_saveas(void);
@@ -285,7 +285,6 @@ int pdf_page_init(int pagenum);
 int pdf_page(void);
 int pdf_checktag(const char *str, int len);
 int pdf_extract(FILE *f, int copies);
-BOOL gsview_pdf2ps_common(char *psname, char *optname, char *output);
 int pdf_orientation(int page);
 BOOL pdf_get_link(int index, PDFLINK *link);
 void pdf_free_link(void);
@@ -298,7 +297,6 @@ int pdf_scan(void);
 /* gvwprn.c or gvpprn.c */
 #ifndef VIEWONLY
 void gsview_print(BOOL convert);
-void gsview_pdf2ps(char *output);
 BOOL get_page_range(HWND hwnd, int method);
 void printer_cleanup(void);
 BOOL query_printer(void);

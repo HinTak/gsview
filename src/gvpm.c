@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -171,6 +171,7 @@ exit_func(void)
     else
 	write_profile_last_files();	/* always save MRU files */
     unload_zlib();
+    unload_pstoedit();
     if (debug & DEBUG_MEM) {
 	/* flush message queue of quit message */
         QMSG q_mess;		/* queue message */
@@ -1210,22 +1211,22 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		cxClient = SHORT1FROMMP(mp2);
 
 #ifdef OLD
-		cyAdjust = min(bitmap.height, cyClient) - cyClient;
+		cyAdjust = min(image.height, cyClient) - cyClient;
 		cyClient += cyAdjust;
 #else
-		if (bitmap.height < cyClient) {
+		if (image.height < cyClient) {
 		    /* shrink window */
-		    cyAdjust = bitmap.height - cyClient;
+		    cyAdjust = image.height - cyClient;
 		}
 		else {
 		    if (!fullscreen && fit_page_enabled) {
 			/* We just got a GSDLL_SIZE and option.fitpage was TRUE */
-			/* enlarge window to smaller of bitmap height */
+			/* enlarge window to smaller of image height */
 			/* and height if client extended to bottom of screen */
 		        SWP swp;
 			DosSleep(50);  /* see note below */
 		        WinQueryWindowPos(WinQueryWindow(hwnd, QW_PARENT), &swp);
-			cyAdjust = min(bitmap.height, cyClient + swp.y)
+			cyAdjust = min(image.height, cyClient + swp.y)
 			    - cyClient;
 		    }
 		    else
@@ -1234,7 +1235,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		cyClient += cyAdjust;
 #endif
 
-		nVscrollMax = max(0, bitmap.height - cyClient);
+		nVscrollMax = max(0, image.height - cyClient);
 		nVscrollPos = min(nVscrollPos, nVscrollMax);
 		scroll_pos.y = nVscrollMax - nVscrollPos;
 
@@ -1251,7 +1252,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 			MPFROMLONG(nVscrollPos), MPFROM2SHORT(0, nVscrollMax));
 		    if (image.open)
 			WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, 
-			    MPFROM2SHORT(cyClient, bitmap.height),
+			    MPFROM2SHORT(cyClient, image.height),
 			    MPFROMLONG(0));
 		    else
 			WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, 
@@ -1259,22 +1260,22 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		}
 
 #ifdef OLD
-		cxAdjust = min(bitmap.width,  cxClient) - cxClient;
+		cxAdjust = min(image.width,  cxClient) - cxClient;
 		cxClient += cxAdjust;
 #else
-		if (bitmap.width < cxClient) {
+		if (image.width < cxClient) {
 		    /* shrink window */
-		    cxAdjust = bitmap.width - cxClient;
+		    cxAdjust = image.width - cxClient;
 		}
 		else {
 		    if (fit_page_enabled) {
 			/* We just got a GSDLL_SIZE and option.fitpage was TRUE */
-			/* enlarge window to smaller of bitmap width */
+			/* enlarge window to smaller of image width */
 			/* and width if client extended to right of screen */
 		        SWP swp;
 			DosSleep(50);  /* see note below */
 		        WinQueryWindowPos(WinQueryWindow(hwnd, QW_PARENT), &swp);
-			cxAdjust = min(bitmap.width, 
+			cxAdjust = min(image.width, 
 			    cxClient + WinQuerySysValue(HWND_DESKTOP, SV_CXFULLSCREEN) -
 				(swp.x + swp.cx) /* Windows uses rect.right */)
 			    - cxClient;
@@ -1285,7 +1286,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		cxClient += cxAdjust;
 #endif
 
-		nHscrollMax = max(0, bitmap.width - cxClient);
+		nHscrollMax = max(0, image.width - cxClient);
 		nHscrollPos = min(nHscrollPos, nHscrollMax);
 		scroll_pos.x = nHscrollPos;
 
@@ -1302,7 +1303,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 			MPFROMLONG(nHscrollPos), MPFROM2SHORT(0, nHscrollMax));
 		    if (image.open)
 			WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, 
-			    MPFROM2SHORT(cxClient, bitmap.width), 
+			    MPFROM2SHORT(cxClient, image.width), 
 			    MPFROMLONG(0));
 		    else
 			WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, 
@@ -1415,6 +1416,34 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		        paint_bitmap(hps, &rect, nHscrollPos, nVscrollMax - nVscrollPos);
 		    WinValidateRect(hwnd, &rect, FALSE);
 		    WinReleasePS(hps);
+		}
+	    }
+	    else if (gsdll.state != GS_IDLE) {
+		/* We are at the top or bottom of the 
+		 * scroll range.  Change page if 
+		 * PageUp or PageDown pressed. */
+		int numpages = 0;
+		request_mutex();
+		if (psfile.dsc != (CDSC *)NULL)
+		    numpages = psfile.dsc->page_count;
+		release_mutex();
+		switch(SHORT2FROMMP(mp2)) {
+		    case SB_PAGEUP:
+		      if ((psfile.dsc != (CDSC *)NULL)
+			    && (psfile.pagenum != 1)) {
+			WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), 
+				MPFROM2SHORT(0, SB_BOTTOM));
+			gsview_command(IDM_PREV);
+		      }
+		      break;
+		    case SB_PAGEDOWN:
+		      if ((psfile.dsc == (CDSC *)NULL)
+			    || (psfile.pagenum < numpages)) {
+			WinSendMsg(hwnd, WM_VSCROLL, MPFROMLONG(0), 
+				MPFROM2SHORT(0, SB_TOP));
+			gsview_command(IDM_NEXT);
+		      }
+		      break;
 		}
 	    }
 	    break;

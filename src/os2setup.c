@@ -95,6 +95,9 @@ APIRET rc;
 	case IDM_LANGNL:
 	    strcat(langdll, "nl");
 	    break;
+	case IDM_LANGSE:
+	    strcat(langdll, "se");
+	    break;
 	case IDM_LANGEN:
 	default:
 	    hlanguage = 0;
@@ -128,6 +131,7 @@ LanguageDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 		case IDM_LANGGR:
 		case IDM_LANGIT:
 		case IDM_LANGNL:
+		case IDM_LANGSE:
                     WinDismissDlg(hwnd, SHORT1FROMMP(mp1));
             }
             break;
@@ -167,6 +171,7 @@ ULONG pcbActual;
 	    case IDM_LANGGR:
 	    case IDM_LANGIT:
 	    case IDM_LANGNL:
+	    case IDM_LANGSE:
 		load_language(language);
 	}
     }

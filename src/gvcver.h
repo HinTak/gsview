@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -36,9 +36,9 @@
 /* undefine BETA for a final release */
 /*
 #define BETA
-#define BETA_YEAR    2001
-#define BETA_MONTH   11
-#define BETA_DAY     30
+#define BETA_YEAR    2002
+#define BETA_MONTH   03
+#define BETA_DAY     31
 */
 
 
@@ -62,7 +62,7 @@
 
 /* Ghostscript */
 #define GS_PRODUCT  "AFPL Ghostscript"
-#define GS_REVISION_MIN   700
+#define GS_REVISION_MIN   703
 #define GS_REVISION	  703
 #define GS_REVISION_MAX   799
 

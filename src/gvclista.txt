@@ -9,11 +9,13 @@ gsviewes.hlp
 gsviewfr.hlp
 gsviewit.hlp
 gsviewnl.hlp
+gsviewse.hlp
 gsvwdade.dll
 gsvwdaes.dll
 gsvwdafr.dll
 gsvwdait.dll
 gsvwdanl.dll
+gsvwdase.dll
 gvwgsda.exe
 zlibda.dll
 printer.ini

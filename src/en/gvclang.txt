@@ -7,7 +7,7 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 4.1 requires Ghostscript 7.00 - 7.99.
+ GSview 4.2 requires Ghostscript 7.03 - 7.99.
 2Installation
 ?Installation
 W
@@ -237,11 +237,11 @@ WP
  user profile directory to the GSview directory, then edit it to
  remove all entries except for:
   [Options]
-  Version=4.1
-  GSversion=703
+  Version=4.2
+  GSversion=704
   Configured=1
-  GhostscriptDLL=e:\gs\gs7.03\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs7.03\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs7.04\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs7.04\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  When a user starts GSview, their INI file will normally be used.
  The first time GSview is run, or when the GSview version doesn't
@@ -263,7 +263,7 @@ W
 
  If you are installing on Windows NT4/2000, and you select "All Users",
  then the installer will write this gsview32.ini into your GSview
- directory.
+ directory.  You must have installed Ghostscript first.
 
  If a user tries to use the GSview uninstall program, it will
  try to delete the GSview and Ghostscript files on the network.
@@ -1253,19 +1253,11 @@ WP
 ?PStoEdit
  You can convert a PostScript or PDF file to an editable vector
  format using `pstoedit` by Wolfgang Glunz.
- `pstoedit` is licensed with the GNU Public Licence.
- Binaries are included in GSview with the permission of Wolfgang Glunz.
- A command line version `pstoedit.exe` and the manual `pstoedit.htm`
- are included in the
-W
- pstoedit
-P
- pstoedt2
-WP
- directory.
- The home page of pstoedit is
-  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/
- For updates to pstoedit, look at the pstoedit home page, or at
+ `pstoedit` is licensed with the GNU Public Licence and is not
+ included with GSview.  You will need to download it separately
+ from the pstoedit homepage
+  http://www.pstoedit.net/pstoedit
+ or from
   http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
 
  To use `pstoedit` from within GSview, use
@@ -1513,7 +1505,7 @@ E
 W
  Easy configure allows you to select which version of
  Ghostscript to use.  It is assumed that you have already installed
- AFPL Ghostscript 7.00 or later.
+ AFPL Ghostscript 7.03 or later.
  If you do not have Ghostscript installed, see the topic
  `Obtaining Ghostscript`.
  For more control over configuration of GSview, see
@@ -2277,7 +2269,7 @@ P
 X
   gsview - A Ghostscript graphical interface
 E
-  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+  Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
 
  This file is part of GSview.
 

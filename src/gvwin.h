@@ -47,6 +47,9 @@
 #ifdef _MSC_VER
 #define DLLEXPORT __declspec(dllimport)
 #define GSDLLEXPORT __declspec(dllimport)
+#else
+#define DLLEXPORT _import
+#define GSDLLEXPORT _export
 #endif
 
 #ifndef RC_INVOKED

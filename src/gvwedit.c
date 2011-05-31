@@ -1,4 +1,4 @@
-/* Copyright (C) 1998-1999, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1998-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -34,25 +34,27 @@ struct DriverDescription_S * pstoedit_driver_info;
 int
 unload_pstoedit(void)
 {
-    gs_addmess("Unloading pstoedit\n");
-    /* If we are using the old pstoedit dll 300, we can't
-     * We can't free the driver info because we didn't allocate it.
-     * A small amount of memory will be leaked.
-     * If using pstoedit dll 301, we use clearPstoeditDriverInfo.
-     */
-    if ( clearPstoeditDriverInfo != 
-	(clearPstoeditDriverInfo_plainC_func *)NULL ) {
-	clearPstoeditDriverInfo(pstoedit_driver_info);
-    }
-    pstoedit_driver_info = NULL;
-    clearPstoeditDriverInfo = NULL;
+    if (pstoeditModule) {
+	gs_addmess("Unloading pstoedit\n");
+	/* If we are using the old pstoedit dll 300,
+	 * we can't free the driver info because we didn't allocate it.
+	 * A small amount of memory will be leaked.
+	 * If using pstoedit dll 301, we use clearPstoeditDriverInfo.
+	 */
+	if ( clearPstoeditDriverInfo != 
+	    (clearPstoeditDriverInfo_plainC_func *)NULL ) {
+	    clearPstoeditDriverInfo(pstoedit_driver_info);
+	}
+	pstoedit_driver_info = NULL;
+	clearPstoeditDriverInfo = NULL;
 
-    setPstoeditOutputFunction = NULL;
-    getPstoeditDriverInfo_plainC = NULL;
-    pstoedit_plainC = NULL;
-    FreeLibrary(pstoeditModule);
-    pstoeditModule = NULL;
-    memset(&p2e, 0, sizeof(p2e));
+	setPstoeditOutputFunction = NULL;
+	getPstoeditDriverInfo_plainC = NULL;
+	pstoedit_plainC = NULL;
+	FreeLibrary(pstoeditModule);
+	pstoeditModule = NULL;
+	memset(&p2e, 0, sizeof(p2e));
+    }
     return 0;
 }
 
@@ -85,6 +87,7 @@ char dllname[MAXSTR];
         gs_addmess("\n");
 	gs_addmess("pstoedit is not available\n");
 	gs_addmess("See help topic 'PStoEdit'\n");
+	pstoeditModule = NULL;
 	return FALSE;
     }
 
@@ -306,7 +309,6 @@ int pagenum;
 	flag = extract_temp(p2e.temp_filename);
 
     if (!flag) {
-	unload_pstoedit();
 	post_img_message(WM_GSSHOWMESS, 0);
 	return FALSE;
     }

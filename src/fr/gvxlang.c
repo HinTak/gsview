@@ -120,6 +120,7 @@ MENU_ENTRY menu_fr[] = {
   { "/Options/Langue/_Français", 	NULL,		GS_CMD, IDM_LANGFR, "<CheckItem>" },
   { "/Options/Langue/_Italiano", 	NULL,		GS_CMD, IDM_LANGIT, "<CheckItem>" },
   { "/Options/Langue/_Nederlands", 	NULL,		GS_CMD, IDM_LANGNL, "<CheckItem>" },
+  { "/Options/Langue/Svenska", 	NULL,		GS_CMD, IDM_LANGSE, "<CheckItem>" },
   { "/Options/PS vers _texte",      		NULL,   NULL, 		0, "<Branch>" },
   { "/Options/PS vers _texte/Désactivé", 	NULL,		GS_CMD, IDM_PSTOTEXTDIS, "<CheckItem>" },
   { "/Options/PS vers _texte/Normal", 	NULL,		GS_CMD, IDM_PSTOTEXTNORM, "<CheckItem>" },

@@ -119,6 +119,7 @@ MENU_ENTRY menu_nl[] = {
   { "/Opties/Taal/_Français", 	NULL,		GS_CMD, IDM_LANGFR, "<CheckItem>" },
   { "/Opties/Taal/_Italiano", 	NULL,		GS_CMD, IDM_LANGIT, "<CheckItem>" },
   { "/Opties/Taal/_Nederlands", 	NULL,		GS_CMD, IDM_LANGNL, "<CheckItem>" },
+  { "/Opties/Taal/Svenska", 	NULL,		GS_CMD, IDM_LANGSE, "<CheckItem>" },
   { "/Opties/PStoText",      		NULL,   NULL, 		0, "<Branch>" },
   { "/Opties/PStoText/Uitgeschakeld", 	NULL,		GS_CMD, IDM_PSTOTEXTDIS, "<CheckItem>" },
   { "/Opties/PStoText/Normaal", 	NULL,		GS_CMD, IDM_PSTOTEXTNORM, "<CheckItem>" },

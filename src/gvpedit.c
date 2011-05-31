@@ -1,4 +1,4 @@
-/* Copyright (C) 1998, 2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1998, 2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -36,20 +36,22 @@ PSTOEDIT p2e;
 int
 unload_pstoedit(void)
 {
-    gs_addmess("Unloading pstoedit\n");
-    /* 
-     * If using pstoedit dll 301, we use clearPstoeditDriverInfo.
-     */
-    clearPstoeditDriverInfo(pstoedit_driver_info);
-    pstoedit_driver_info = NULL;
-    clearPstoeditDriverInfo = NULL;
+    if (pstoeditModule) {
+	gs_addmess("Unloading pstoedit\n");
+	/* 
+	 * If using pstoedit dll 301, we use clearPstoeditDriverInfo.
+	 */
+	clearPstoeditDriverInfo(pstoedit_driver_info);
+	pstoedit_driver_info = NULL;
+	clearPstoeditDriverInfo = NULL;
 
-    setPstoeditOutputFunction = NULL;
-    getPstoeditDriverInfo_plainC = NULL;
-    pstoedit_plainC = NULL;
-    DosFreeModule(pstoeditModule);
-    pstoeditModule = (HMODULE)NULL;
-    memset(&p2e, 0, sizeof(p2e));
+	setPstoeditOutputFunction = NULL;
+	getPstoeditDriverInfo_plainC = NULL;
+	pstoedit_plainC = NULL;
+	DosFreeModule(pstoeditModule);
+	pstoeditModule = (HMODULE)NULL;
+	memset(&p2e, 0, sizeof(p2e));
+    }
     return 0;
 }
 
@@ -91,6 +93,7 @@ load_pstoedit(void)
       gs_addmess("Failed\n");
       gs_addmess("pstoedit is not available\n");
       gs_addmess("See help topic 'PStoEdit'\n");
+      pstoeditModule = NULL;
       return FALSE;
     }
   }

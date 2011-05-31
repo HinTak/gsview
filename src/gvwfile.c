@@ -162,7 +162,6 @@ UINT gfile_write(GFile *gf, void *lpBuf, UINT nCount)
 LONG gfile_seek(GFile *gf, LONG lOff, UINT nFrom)
 {
     DWORD dwMoveMethod;
-    LONG lMoveHigh = 0;
     ASSERT(gf != NULL);
     ASSERT(gf->m_hFile != 0);
     switch(nFrom) {
@@ -178,7 +177,7 @@ LONG gfile_seek(GFile *gf, LONG lOff, UINT nFrom)
 	    break;
     }
     // return value on error is 0xffffffff
-    return SetFilePointer((HANDLE)gf->m_hFile, lOff, &lMoveHigh, dwMoveMethod);
+    return SetFilePointer((HANDLE)gf->m_hFile, lOff, NULL, dwMoveMethod);
 }
 
 LONG gfile_get_position(GFile *gf)

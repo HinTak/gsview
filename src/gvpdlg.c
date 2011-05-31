@@ -1396,54 +1396,6 @@ display_settings(void)
 	WinDlgBox(HWND_DESKTOP, hwnd_frame, DisplaySettingsDlgProc, hlanguage, IDD_DSET, NULL);
 }
 
-/* dialog box for selecting PDF2PS options */
-MRESULT EXPENTRY
-PDF2PSDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
-{
-    int i;
-    switch (msg) {
-	case WM_INITDLG:
-		if (option.pdf2ps & OPTION_PDF2PS_BINARYOK)
-		    WinSendMsg( WinWindowFromID(hwnd, PDF2PS_BINARYOK),
-			BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
-		if (option.pdf2ps & OPTION_PDF2PS_LEVEL1)
-		    WinSendMsg( WinWindowFromID(hwnd, PDF2PS_LEVEL1),
-			BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
-		if (option.pdf2ps & OPTION_PDF2PS_NOPROCSET)
-		    WinSendMsg( WinWindowFromID(hwnd, PDF2PS_NOPROCSET),
-			BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
-		break;
-	case WM_COMMAND:
-            switch(SHORT1FROMMP(mp1)) {
-		case ID_HELP:
-		    nHelpTopic = IDS_TOPICOPEN;
-		    get_help();
-		    return (MRESULT)TRUE;
-                case DID_OK:
-		    /* get Print to File status */
-		    i = (int)WinSendMsg( WinWindowFromID(hwnd, PDF2PS_BINARYOK), BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
-		    option.pdf2ps = (option.pdf2ps & (~OPTION_PDF2PS_BINARYOK)) | (i ? OPTION_PDF2PS_BINARYOK : 0);
-		    i = (int)WinSendMsg( WinWindowFromID(hwnd, PDF2PS_LEVEL1), BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
-		    option.pdf2ps = (option.pdf2ps & (~OPTION_PDF2PS_LEVEL1)) | (i ? OPTION_PDF2PS_LEVEL1 : 0);
-		    i = (int)WinSendMsg( WinWindowFromID(hwnd, PDF2PS_NOPROCSET), BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
-		    option.pdf2ps = (option.pdf2ps & (~OPTION_PDF2PS_NOPROCSET)) | (i ? OPTION_PDF2PS_NOPROCSET : 0);
-                    WinDismissDlg(hwnd, DID_OK);
-		    return (MRESULT)TRUE;
-		case DID_CANCEL:
-		    WinDismissDlg(hwnd, DID_CANCEL);
-		    return (MRESULT)TRUE;
-	    }
-	    break;
-    }
-    return WinDefDlgProc(hwnd, msg, mp1, mp2);
-}
-
-BOOL
-get_pdf2ps_options(void)
-{
-    nHelpTopic = IDS_TOPICOPEN;
-    return (WinDlgBox(HWND_DESKTOP, hwnd_frame, PDF2PSDlgProc, hlanguage, IDD_PDF2PS, NULL) == DID_OK);
-}
 
 /* Text Window for Ghostscript Messages */
 /* uses OS/2 MLE control */

@@ -82,5 +82,11 @@ extern int string_nl_len;
 extern MENU_ENTRY menu_nl[];
 extern int menu_nl_len;
 
+/* Swedish */
+extern STRING_ENTRY string_se[];
+extern int string_se_len;
+extern MENU_ENTRY menu_se[];
+extern int menu_se_len;
+
 void check_string_order(STRING_ENTRY *st, int stlen);
 

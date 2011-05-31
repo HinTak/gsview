@@ -456,23 +456,23 @@ PSFILE *tpsfile;
 			break;
 		    }
 		}
-		if (!found)
-		  for (i=IDM_MEDIAFIRST; i<IDM_MEDIALAST; i++) {
-		    get_menu_string(IDM_MEDIAMENU, i, thismedia, 
-		    sizeof(thismedia));
-		    if (!stricmp(thismedia, dsc->page_media->name)) {
-			gsview_media(i);
-			found = 1;
-			break;
-		    }
-		  }
-		if (!found)
-		  if (i == IDM_USERSIZE) {
+		if (!found) {
+		      for (i=IDM_MEDIAFIRST; i<IDM_MEDIALAST; i++) {
+			get_menu_string(IDM_MEDIAMENU, i, thismedia, 
+			sizeof(thismedia));
+			if (!stricmp(thismedia, dsc->page_media->name)) {
+			    gsview_media(i);
+			    found = 1;
+			    break;
+			}
+		      }
+		}
+		if (!found) {
 		    gsview_media(IDM_USERSIZE);
 		    option.user_width  = (int)dsc->page_media->width;
 		    option.user_height = (int)dsc->page_media->height;
 		    gsview_check_usersize();
-		  }
+		}
 	    }
 	}
     }

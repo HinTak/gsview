@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "2.0  2001-11-23";
+char szVersion[] = "2.1  2002-02-07";
 
 char iname[MAXSTR];
 char oname[MAXSTR];

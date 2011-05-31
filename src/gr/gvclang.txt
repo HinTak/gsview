@@ -12,9 +12,9 @@
  παρέχει τη δυνατότητα επιλογής συγκεκριμένων σελίδων για εξέταση
  ή για εκτύπωση.
 
- Για τη λειτουργία του GSview 4.1 απαιτείται η ύπαρξη στο σύστημα του
+ Για τη λειτουργία του GSview 4.2 απαιτείται η ύπαρξη στο σύστημα του
  μεταγλωττιστή εντολών Ghostscript και συγκεκριμένα μιας εκδοχής του
- μεταγλωττιστή Ghostscript μεταξύ 7.00 και 7.99.
+ μεταγλωττιστή Ghostscript μεταξύ 7.03 και 7.99.
 2Εγκατάσταση
 ?Εγκατάσταση
 W
@@ -169,15 +169,15 @@ WP
  Στη συνέχεια εγκαταστήστε
 P
  το πρόγραμμα PM GSview αντιγράφοντας τα αρχεία gvpm.exe, gvpgs.exe,
- gvpmde.dll, gvpmes.dll, gvpmfr.dll, gvpmgr.dll, gvpmit.dll, gvpmnl.dll
- gvpmen.hlp, gvpmde.hlp, gvpmes.hlp, gvpmfr.hlp, gvpmgr.hlp,
- gvpmit.hlp, gvpmnl.hlp και printer.ini
+ gvpmde.dll, gvpmes.dll, gvpmfr.dll, gvpmgr.dll, gvpmit.dll, gvpmnl.dll,
+ gvpmse.dll, gvpmen.hlp, gvpmde.hlp, gvpmes.hlp, gvpmfr.hlp, gvpmgr.hlp,
+ gvpmit.hlp, gvpmnl.hlp, gvpmse.hlp και printer.ini
 W
  το πρόγραμμα GSview για Windows αντιγράφοντας τα αρχεία gsview32.exe,
  gsv16spl.exe, gvwgs32.exe, gsvw32de.dll, gsvw32es.dll, gsvw32fr.dll,
- gsvw32gr.dll, gsvw32it.dll, gsvw32nl.dll, gsviewen.hlp, gsviewde.hlp,
- gsviewes.hlp, gsviewfr.hlp, gsviewgr.hlp, gsviewit.hlp, gsviewnl.hlp
- και printer.ini
+ gsvw32gr.dll, gsvw32it.dll, gsvw32nl.dll, gsviewse.dll, gsviewen.hlp,
+ gsviewde.hlp, gsviewes.hlp, gsviewfr.hlp, gsviewgr.hlp, gsviewit.hlp,
+ gsviewnl.hlp, gsviewse.hlp και printer.ini
 WP
  στον κατάλογο `c:\ghostgum\gsview`.
 
@@ -303,11 +303,11 @@ WP
  στην επεξεργασία του αρχείου και αφαιρέστε όλες τις καταχωρήσεις εκτός
  από τις ακόλουθες:
   [Options]
-  Version=4.1
-  GSversion=703
+  Version=4.2
+  GSversion=704
   Configured=1
-  GhostscriptDLL=d:\gs\gs7.03\bin\gsdll32.dll
-  GhostscriptInclude=d:\gs\gs7.03\lib;d:\gs\fonts
+  GhostscriptDLL=d:\gs\gs7.04\bin\gsdll32.dll
+  GhostscriptInclude=d:\gs\gs7.04\lib;d:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Κάθε φορά που ένας χρήστης εκτελεί το GSview, θα χρησιμοποιείται
  κανονικά το αρχείο INI το οποίο αντιστοιχεί στο συγκεκριμένο χρήστη.
@@ -336,7 +336,8 @@ W
  Εάν η εγκατάσταση του GSview πραγματοποιείται σε περιβάλλον
  Windows NT4/2000 και επιλέξατε "Για όλους τους χρήστες",
  τότε το πρόγραμμα εγκατάστασης θα αποθηκεύσει το αρχείο gsview32.ini
- στον κατάλογο εγκατάστασης του GSview.
+ στον κατάλογο εγκατάστασης του GSview. Προηγουμένως θα πρέπει να έχει
+ ήδη ολοκληρωθεί η εγκατάσταση του συνόλου των προγραμμάτων Ghostscript.
 
  Εάν κάποιος χρήστης προσπαθήσει να χρησιμοποιήσει το πρόγραμμα
  κατάργησης της εγκατάστασης του GSview, τότε το πρόγραμμα θα προσπαθήσει
@@ -1650,21 +1651,11 @@ WP
  γράφημα διανυσματικής μορφής χρησιμοποιώντας το σύνολο προγραμμάτων
  `pstoedit` του Wolfgang Glunz.
  Το σύνολο προγραμμάτων `pstoedit` διανέμεται σύμφωνα με την άδεια χρήσης
- GNU (GNU Public Licence).
- Εκτελέσιμα αντίγραφα του συνόλου των προγραμμάτων συμπεριλαμβάνονται
- μαζί με τη διανομή του GSview με τη σύμφωνη άδεια του Wolfgang Glunz.
- Στο φάκελο
-W
- pstoedit
-P
- pstoedt2
-WP
- μπορούν να βρεθούν μια έκδοση γραμμής εντολών του προγράμματος, το
- `pstoedit.exe`, καθώς και ένα εγχειρίδιο χρήσης, το `pstoedit.htm`.
- Η αρχική ιστοσελίδα για το σύνολο προγραμμάτων pstoedit είναι
-  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/
- Για την πλέον πρόσφατη εκδοχή του συνόλου των προγραμμάτων pstoedit,
- εξετάστε είτε την αρχική ιστοσελίδα του pstoedit είτε την ιστοσελίδα
+ GNU (GNU Public Licence) και δεν συμπεριλαμβάνονται στη διανομή του
+ GSview. Για να χρησιμοποιήσετε το σύνολο των προγραμμάτων pstoedit θα
+ πρέπει να προμηθευθείτε ξεχωριστά από την αρχική ιστοσελίδα του pstoedit
+  http://www.pstoedit.net/pstoedit
+ ή από την ιστοσελίδα
   http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
 
  Για να χρησιμοποιήσετε το `pstoedit` μέσα από το GSview, επιλέξτε
@@ -1983,7 +1974,7 @@ E
 W
  Με την επιλογή` Τυπική διαμόρφωση` μπορείτε να καθορίσετε την εκδοχή
  του μεταγλωττιστή Ghostscript που πρόκειται να χρησιμοποιηθεί.
- Θεωρείται δεδομένο ότι ήδη έχει εγκατασταθεί η εκδοχή 7.0 ή μεταγενέστερη
+ Θεωρείται δεδομένο ότι ήδη έχει εγκατασταθεί η εκδοχή 7.03 ή μεταγενέστερη
  του μεταγλωττιστή AFPL Ghostscript.
  Εάν δεν έχετε ήδη εγκαταστήσει το μεταγλωττιστή Ghostscript, ανατρέξτε στην
  ενότητα `GhostScript, τρόπος προμήθειας`.
@@ -2154,7 +2145,7 @@ E
 ?Γλώσσα
 ?Διεθνείς εκδόσεις
  Το GSview είναι διαθέσιμο στη Αγγλική, Γαλλική, Γερμανική, Ελληνική,
- Ισπανική, Ιταλική και Ολλανδική γλώσσα.
+ Ισπανική, Ιταλική, Ολλανδική και Σουηδική γλώσσα.
  Για να καθορίσετε τη γλώσσα που θέλετε να χρησιμοποιηθεί από το GSview
  θα πρέπει να χρησιμοποιήστε την επιλογή `Επιλογές` | `Γλώσσα`.
 
@@ -2970,7 +2961,7 @@ P
 X
   gsview - Περιβάλλον εργασίας γραφικών για GhostScript
 E
-  Πνευματικά δικαιώματα (C) 1993-2001, Ghostgum Software Pty Ltd.
+  Πνευματικά δικαιώματα (C) 1993-2002, Ghostgum Software Pty Ltd.
   Με επιφύλαξη κάθε νόμιμου δικαιώματος.
 
  Το αρχείο αυτό αποτελεί τμήμα του συνόλου των προγραμμάτων GSview.

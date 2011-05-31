@@ -553,13 +553,13 @@ int badarg;
 	    int i;
 	    LPSTR line;
 	    int len = 0;
-	    for (i=1; i<argc; i++)
+	    for (i=args.existing+1; i<argc; i++)
 		len += strlen(argv[i]) + 3; /* "\042arg\042 " */
 	    line = (LPSTR)malloc(len+1);
 	    if (line == NULL)
 		return FALSE;
 	    line[0] = '\0';
-	    for (i=1; i<argc; i++) {
+	    for (i=args.existing+1; i<argc; i++) {
 		strcat(line, "\042");
 		strcat(line, argv[i]);
 		strcat(line, "\042 ");

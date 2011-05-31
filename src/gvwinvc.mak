@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -98,6 +98,7 @@ all: gsview$(WINEXT).exe\
   gsvw$(WINEXT)gr.dll gsviewgr.hlp setp$(WINEXT)gr.dll\
   gsvw$(WINEXT)it.dll gsviewit.hlp setp$(WINEXT)it.dll\
   gsvw$(WINEXT)nl.dll gsviewnl.hlp setp$(WINEXT)nl.dll\
+  gsvw$(WINEXT)se.dll gsviewse.hlp setp$(WINEXT)se.dll\
   gvwgs$(WINEXT).exe winsetup.exe uninstgs.exe\
   gsprint.exe ..\epstool\epstool.exe\
   gsv16spl.exe
@@ -177,6 +178,9 @@ gsvw$(WINEXT)it.dll: gsvw$(WINEXT)it.res it\gvwin32.def
 gsvw$(WINEXT)nl.dll: gsvw$(WINEXT)nl.res nl\gvwin32.def
 	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:nl\gvwin32.def /OUT:gsvw$(WINEXT)nl.dll gsvw$(WINEXT)nl.res
 
+gsvw$(WINEXT)se.dll: gsvw$(WINEXT)se.res se\gvwin32.def
+	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:se\gvwin32.def /OUT:gsvw$(WINEXT)se.dll gsvw$(WINEXT)se.res
+
 uninstgs.exe: dwuninst.obj dwuninst.h dwuninst.res dwuninst.def
 	$(LINK) $(DEBUGLINK) /DEF:dwuninst.def /OUT:uninstgs.exe dwuninst.obj @lib.rsp dwuninst.res
 
@@ -200,6 +204,9 @@ setp$(WINEXT)it.dll: setp$(WINEXT)it.res it\setup32.def
 
 setp$(WINEXT)nl.dll: setp$(WINEXT)nl.res nl\setup32.def
 	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:nl\setup32.def /OUT:setp$(WINEXT)nl.dll setp$(WINEXT)nl.res
+
+setp$(WINEXT)se.dll: setp$(WINEXT)se.res se\setup32.def
+	$(LINK) /DLL /NODEFAULTLIB /NOENTRY /MACHINE:$(LINKMACHINE) /DEF:se\setup32.def /OUT:setp$(WINEXT)se.dll setp$(WINEXT)se.res
 
 # Intel
 gvwgs32.exe: gvwgs.c gvwgs.h gvwgs32.res lib.rsp

@@ -19,7 +19,7 @@
 
 #include "gvx.h"
 #include "en/gvclang.h"
-gint modal_delete(GtkWidget *widget, GdkEvent event, gpointer data);
+gint modal_delete(GtkWidget *widget, GdkEvent *event, gpointer data);
 void modal_ok(GtkWidget *w, gpointer data);
 void modal_cancel(GtkWidget *w, gpointer data);
 void modal_yes(GtkWidget *w, gpointer data);
@@ -41,7 +41,7 @@ void width_percent(GtkWidget *w, GtkRequisition *req, gpointer data)
     req->width = req->width * ((int)data) / 100;
 }
 
-gint modal_delete(GtkWidget *widget, GdkEvent event, gpointer data)
+gint modal_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
     if (debug & DEBUG_GENERAL)
 	gs_addmess("modal_delete:\n");
@@ -1245,12 +1245,6 @@ void display_settings(void)
     }
 
     gtk_widget_destroy(window);
-}
-
-BOOL get_pdf2ps_options(void)
-{
-    gs_addmess("get_pdf2ps_options: not implemented\n");
-    return FALSE;
 }
 
 gint

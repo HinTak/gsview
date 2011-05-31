@@ -144,7 +144,7 @@ BOOL result;
 char *cmd = (char *)malloc(strlen(str) + 64);
     if (cmd == (char *)NULL)
 	return FALSE;
-    sprintf(cmd, "[Command(\042%s\042)]", str);
+    sprintf(cmd, "[Command(%s)]", str);
     result = dde_execute(cmd);
     free(cmd);
     return result; 

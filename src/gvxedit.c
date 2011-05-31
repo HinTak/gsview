@@ -1,4 +1,4 @@
-/* Copyright (C) 1998-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1998-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -38,26 +38,28 @@ BOOL pstoedit_dialog(void);
 int
 unload_pstoedit(void)
 {
-    gs_addmess("Unloading pstoedit\n");
-    /* If we are using the old pstoedit dll 300, we can't
-     * We can't free the driver info because we didn't allocate it.
-     * A small amount of memory will be leaked.
-     * If using pstoedit dll 301, we use clearPstoeditDriverInfo.
-     */
-    if ( clearPstoeditDriverInfo != 
-	(clearPstoeditDriverInfo_plainC_func *)NULL ) {
-	clearPstoeditDriverInfo(pstoedit_driver_info);
-    }
-    pstoedit_driver_info = NULL;
-    clearPstoeditDriverInfo = NULL;
+    if (pstoeditModule) {
+	gs_addmess("Unloading pstoedit\n");
+	/* If we are using the old pstoedit dll 300, we can't
+	 * We can't free the driver info because we didn't allocate it.
+	 * A small amount of memory will be leaked.
+	 * If using pstoedit dll 301, we use clearPstoeditDriverInfo.
+	 */
+	if ( clearPstoeditDriverInfo != 
+	    (clearPstoeditDriverInfo_plainC_func *)NULL ) {
+	    clearPstoeditDriverInfo(pstoedit_driver_info);
+	}
+	pstoedit_driver_info = NULL;
+	clearPstoeditDriverInfo = NULL;
 
-    setPstoeditOutputFunction = NULL;
-    getPstoeditDriverInfo_plainC = NULL;
-    pstoedit_plainC = NULL;
-    if (pstoeditModule)
-	dlclose(pstoeditModule);
-    pstoeditModule = NULL;
-    memset(&p2e, 0, sizeof(p2e));
+	setPstoeditOutputFunction = NULL;
+	getPstoeditDriverInfo_plainC = NULL;
+	pstoedit_plainC = NULL;
+	if (pstoeditModule)
+	    dlclose(pstoeditModule);
+	pstoeditModule = NULL;
+	memset(&p2e, 0, sizeof(p2e));
+    }
     return 0;
 }
 
@@ -161,97 +163,6 @@ char dllname[MAXSTR];
     return TRUE;
 }
 
-#ifdef NOTUSED
-/* dialog box for pstoedit options */
-BOOL CALLBACK _export
-PStoEditDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
-{
-struct DriverDescription_S * dd;
-char buf[MAXSTR];
-float u;
-    switch (wmsg) {
-	case WM_INITDIALOG:
-	    {
-	      char defformat[MAXSTR];
-	      defformat[0] = '\0';
-	      SendDlgItemMessage(hDlg, EDIT_FORMAT, LB_RESETCONTENT, 
-		(WPARAM)0, (LPARAM)0);
-	      dd = p2e.driver_info;
-	      while(dd && (dd->symbolicname) ) {
-		sprintf(buf, "%s:  %s %s", dd->symbolicname, dd->explanation,
-			dd->additionalInfo);
-		if (strcmp(dd->symbolicname, p2e.format->symbolicname) == 0)
-		    strcpy(defformat, buf);
-		SendDlgItemMessageA(hDlg, EDIT_FORMAT, LB_ADDSTRING, 0, 
-		    (LPARAM)((LPSTR)buf));
-		dd++;
-	      }
-	      SendDlgItemMessageA(hDlg, EDIT_FORMAT, LB_SELECTSTRING, -1, 
-		    (LPARAM)((LPSTR)defformat));
-
-	      SendDlgItemMessage(hDlg, EDIT_DT, BM_SETCHECK, 
-			    (WPARAM)p2e.draw_text_as_polygon, 0L);
-	      SendDlgItemMessage(hDlg, EDIT_LATIN1, BM_SETCHECK, 
-			    (WPARAM)p2e.map_to_latin1, 0L);
-	      if (p2e.flatness > 0) {
-	          sprintf(buf, "%g", p2e.flatness);
-	          SetDlgItemTextA(hDlg, EDIT_FLAT, buf);
-	      }
-	      SetDlgItemTextA(hDlg, EDIT_FONT, p2e.default_font);
-	      SetDlgItemTextA(hDlg, EDIT_OPTION, p2e.driver_option);
-
-	      
-	    }
-	    return TRUE;
-	case WM_COMMAND:
-	    switch (LOWORD(wParam)) {
-		case ID_HELP:
-		    get_help();
-		    return FALSE;
-		case IDOK:
-		    /* get format */
-		    SendDlgItemMessageA(hDlg, EDIT_FORMAT, LB_GETTEXT, 
-			(int)SendDlgItemMessage(hDlg, EDIT_FORMAT, 
-			    LB_GETCURSEL, 0, 0L), (LPARAM)(LPSTR)buf);
-		    strtok(buf, ":");
-		    dd = p2e.driver_info;
-		    p2e.format = dd;
-		    while(dd && (dd->symbolicname) ) {
-			if (strcmp(dd->symbolicname, buf) == 0) {
-			    p2e.format = dd;
-			    break;
-			}
-			dd++;
-		    }
-
-		    GetDlgItemTextA(hDlg, EDIT_OPTION, p2e.driver_option,
-			sizeof(p2e.driver_option));
-		    GetDlgItemTextA(hDlg, EDIT_FONT, p2e.default_font,
-			sizeof(p2e.default_font));
-
-		    p2e.draw_text_as_polygon = (BOOL)SendDlgItemMessage(hDlg, 
-			EDIT_DT, BM_GETCHECK, 0, 0);
-		    p2e.map_to_latin1 = (BOOL)SendDlgItemMessage(hDlg, 
-			EDIT_LATIN1, BM_GETCHECK, 0, 0);
-
-		    p2e.flatness = (float)GetDlgItemTextA(hDlg, 
-			EDIT_FLAT, buf, sizeof(buf));
-		    if ( (sscanf(buf, "%f", &u) == 1) && (u > 0.0))
-			p2e.flatness = u;
-		    else
-			p2e.flatness = 0.0;
-
-		    EndDialog(hDlg, TRUE);
-		    return TRUE;
-		case IDCANCEL:
-		    EndDialog(hDlg, FALSE);
-		    return TRUE;
-	    }
-	    break;
-    }
-	return FALSE;
-}
-#endif
 
 BOOL pstoedit_dialog(void)
 {
@@ -517,13 +428,6 @@ int pagenum;
     
     /* will need to do the remaining items on the GS thread */
 
-#ifdef NOTUSED
-    /* If pstoedit.dll calls gswin32c.exe, then it uses GS in
-     * a separate process.  In that case we can start another
-     * thread without out disturbing our instance of the GS DLL.
-     */
-    _beginthread(process_pstoedit, 131072, NULL);
-#else
     /* pstoedit will probably run Ghostscript as a separate process,
      * but it might be changed to use libgs.so at some stage, so
      * play safe and unload Ghostscript first.
@@ -533,7 +437,6 @@ int pagenum;
     pending.now = TRUE;	
 
     pending.pstoedit = TRUE;
-#endif
 
     return flag;
 }

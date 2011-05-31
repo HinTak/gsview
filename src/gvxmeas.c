@@ -78,7 +78,7 @@ typedef struct tagCTMDLG {
 
 void measure_dialog_unitx(void);
 void calc_ctm(GtkWidget *w, gpointer data);
-gint measure_delete(GtkWidget *widget, GdkEvent event, gpointer data);
+gint measure_delete(GtkWidget *widget, GdkEvent *event, gpointer data);
 void show_calc_dialog(void);
 void update_ctm_text(CTMTEXT *t, MATRIX *ctm);
 void update_dialog_ctm(CTMDLG *dlg, MATRIX *ctm);
@@ -200,7 +200,7 @@ void calc_ctm(GtkWidget *w, gpointer data)
     measure_update_last();
 }
 
-gint measure_delete(GtkWidget *widget, GdkEvent event, gpointer data)
+gint measure_delete(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
     measure_close();
     return TRUE;

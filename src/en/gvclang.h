@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,11 +20,11 @@
 
 #define AAENGLISH "English"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2001 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2002 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "All rights reserved."
 #define GSVIEW_COPYRIGHT3 "See the file LICENCE for more details."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2001 artofcode LLC,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2002 artofcode LLC,"
 #define GS_COPYRIGHT2 "Benicia, California, U.S.A.  All rights reserved."
 #define GS_COPYRIGHT3 "See the file PUBLIC for more details."
 
@@ -166,12 +166,6 @@
 #define AAEPILOGFILE "Epilog File"
 #define AABROWSE "Browse"
 
-/* PDF2PS dialog box */
-#define AAPDFTOPS	"PDF to PostScript"
-#define AABINARYOK	"Binary"
-#define AAPSLEVEL1	"PostScript Level 1"
-#define AANOPROCSET	"No Prolog"
-
 /* PS2EPS dialog box */
 #define AAPSTOEPS "PS to EPS"
 #define AAPSTOEPSREAD "Have you read help `PS to EPS` ?"
@@ -302,7 +296,7 @@
 #define AAONLINEREG "Online Registration"
 #define AAREG1 "Please enter your name and registration number"
 #define AAREG2 ""
-#define AANAG1 "GSview is Copyright 2001 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview is Copyright 2002 Ghostgum Software Pty Ltd."
 #define AANAG2 "Please support the development of GSview by registering it."
 #define AANAG3 ""
 #define AANAG4 "GSview can be registered online at"

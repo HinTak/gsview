@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2001, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -66,15 +66,16 @@ typedef struct lang_s {
 } lang_t;
 
 /* The list of language DLLs available */
-int nlang = 7;
-lang_t lang[7] = {
+const int nlang = 8;
+lang_t lang[8] = {
 {IDM_LANGEN, "en", "English", "English"},
 {IDM_LANGDE, "de", "Deutsch", "German"},
 {IDM_LANGFR, "fr", "Français", "French"},
 {IDM_LANGGR, "gr", "Ellenika", "Greek"},
 {IDM_LANGIT, "it", "Italian", "Italian"},
 {IDM_LANGES, "es", "Español", "Spanish"},
-{IDM_LANGNL, "nl", "Nederlands", "Dutch"}
+{IDM_LANGNL, "nl", "Nederlands", "Dutch"},
+{IDM_LANGSE, "se", "Svenska", "Swedish"}
 };
 
 int language_id(const char *str)
@@ -147,6 +148,9 @@ get_menu_string(int menuid, int itemid, char *str, int len)
 	    menu_item = menu_nl;
 	    menu_len = menu_nl_len;
 	    break;
+	case IDM_LANGSE:
+	    menu_item = menu_se;
+	    menu_len = menu_se_len;
 	case IDM_LANGEN:
 	default:
 	    menu_item = menu_en;
@@ -212,6 +216,10 @@ GtkWidget *find_menu_widget(int id)
 	case IDM_LANGNL:
 	    menu_item = menu_nl;
 	    menu_len = menu_nl_len;
+	    break;
+	case IDM_LANGSE:
+	    menu_item = menu_se;
+	    menu_len = menu_se_len;
 	    break;
 	case IDM_LANGEN:
 	default:
@@ -354,6 +362,10 @@ void add_main_menu(GtkWidget *window)
 	case IDM_LANGNL:
 	    menu_item = menu_nl;
 	    menu_len = menu_nl_len;
+	    break;
+	case IDM_LANGSE:
+	    menu_item = menu_se;
+	    menu_len = menu_se_len;
 	    break;
 	case IDM_LANGEN:
 	default:
@@ -813,6 +825,7 @@ int load_language(int language)
 	case IDM_LANGES:
 	case IDM_LANGIT:
 	case IDM_LANGNL:
+	case IDM_LANGSE:
 	case IDM_LANGEN:
 	return TRUE;
     }
@@ -855,8 +868,8 @@ void change_language(void)
     switch (option.language) {
 	case IDM_LANGDE:
     	    strcat(szHelpName, "gvxde.htm");
-	    st = string_es;
-	    stlen = string_es_len;
+	    st = string_de;
+	    stlen = string_de_len;
 	    break;
 	case IDM_LANGFR:
     	    strcat(szHelpName, "gvxfr.htm");
@@ -882,6 +895,11 @@ void change_language(void)
     	    strcat(szHelpName, "gvxnl.htm");
 	    st = string_nl;
 	    stlen = string_nl_len;
+	    break;
+	case IDM_LANGSE:
+    	    strcat(szHelpName, "gvxse.htm");
+	    st = string_se;
+	    stlen = string_se_len;
 	    break;
 	case IDM_LANGEN:
 	default:
@@ -925,6 +943,7 @@ int get_language(void)
     GtkWidget *button_gr;
     GtkWidget *button_it;
     GtkWidget *button_nl;
+    GtkWidget *button_se;
     int rc = 0;
 
     language_value = IDM_LANGEN;
@@ -983,6 +1002,12 @@ int get_language(void)
 		  GTK_SIGNAL_FUNC(language_select), (gpointer)IDM_LANGNL);
     gtk_widget_show(button_nl);
 
+    button_se = gtk_button_new_with_label(get_string(IDS_AASVENSKA));
+    gtk_box_pack_start(GTK_BOX(vbox), button_se, TRUE, TRUE, 5);
+    gtk_signal_connect(GTK_OBJECT(button_se), "clicked",
+		  GTK_SIGNAL_FUNC(language_select), (gpointer)IDM_LANGSE);
+    gtk_widget_show(button_se);
+
     /* show dialog and wait for language or close */
     gtk_window_set_focus(GTK_WINDOW(window), button_en);
     gtk_window_set_modal(GTK_WINDOW(window), TRUE);
@@ -1012,6 +1037,7 @@ void check_language(void)
       || ((option.language == IDM_LANGGR) && check_locale("gr"))
       || ((option.language == IDM_LANGIT) && check_locale("it"))
       || ((option.language == IDM_LANGNL) && check_locale("nl"))
+      || ((option.language == IDM_LANGNL) && check_locale("se"))
 	)
     {
         /* GSview language doesn't match locale, prompt user */
@@ -1024,6 +1050,7 @@ void check_language(void)
 	    case IDM_LANGGR:
 	    case IDM_LANGIT:
 	    case IDM_LANGNL:
+	    case IDM_LANGSE:
 		gsview_language(language);
 	}
     }
@@ -1036,10 +1063,6 @@ void post_args(void)
  */
 }
 
-void gsview_pdf2ps(char *output)
-{
-    gs_addmess("gsview_pdf2ps: not implemented\n");
-}
 
 /***************************/
 

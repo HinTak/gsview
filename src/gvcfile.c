@@ -155,7 +155,8 @@ LONG gfile_seek(GFile *gf, LONG lOff, UINT nFrom)
     }
     if ((origin == SEEK_SET) && (lOff == 0))
 	rewind(gf->m_file);
-    return fseek(gf->m_file, lOff, origin);
+    fseek(gf->m_file, lOff, origin);
+    return ftell(gf->m_file);
 }
 
 LONG gfile_get_position(GFile *gf)

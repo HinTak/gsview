@@ -1,3 +1,101 @@
+----------------------
+Version 4.2 2002-02-07
+----------------------
+All:
+  Allow GSview to work in unsafe mode with GS <= 7.03.  
+  This was broken by the security fixes of 4.12 beta.
+
+  Language updates.
+
+  Run ghostscript within a stopped context so that correct
+  error handler is used.  If error is /VMerror, resend
+  error outside the stopped so that GSview gets the return
+  code, to allow it to recognise when the page size/resolution
+  is set to large.  For all other errors, quit ghostscript.
+
+  Need to set PermitFileWriting and PermitFileControl in
+  addition to PermitFileReading, as a result of a last minute
+  change to GS 7.04.
+
+  If using GS 7.04, use "true setglobal" before setuserparams
+  and .locksafe to avoid a bug.
+
+  Allow custom page sizes that do not match the dsc known media
+  or media menu to select "User Defined".  Broken in 4.03 beta.
+
+OS/2:
+  When at top/bottom of page, make PageUp/PageDown move to
+  previous/next page.
+
+---------------------------
+Version 4.12beta 2002-01-24
+---------------------------
+All:
+  The pdfmark prolog now accepts /Action /Goto.  Broken in 4.1.
+
+  Printing or converting a PostScript file with Macintosh line
+  endings caused GSview to spin.
+
+  Some additions for proposed security fixes to Ghostscript.
+
+  Added "/.LockSafetyParms true" when opening the display device.
+  To allow the GSview to change from -dNODISPLAY to the display
+  device, add -dNOSAFER to the initialisation options and
+  call .locksafe immediately after the display device is selected.
+  This allows the display device to be selected and prevents
+  it being changed to another device that isn't safe.
+
+  Add the document filename and temporary uncompressed filename
+  to the files Ghostscript is permitted to read, to allow them
+  to be accessed in safe mode.
+
+  Allow SAFER to be used for pstotext.
+
+  Removed old pdf2ps code which was removed in GS 5.50.
+
+  Fixed page size and resolution reset when insufficient memory.
+  This was broken when we changed to the display device, which
+  returns e_VMerror not e_limitcheck for insufficient memory.
+
+  Remove pstoedit from the GSview distribution.
+  Originally pstoedit contained code only by Wolfgang Glunz
+  who had given permission to include a binary version of 
+  pstoedit in the GSview distribution.  pstoedit now includes
+  a number of third party drivers which makes licensing difficult.
+  GSview documentation has been updated to refer people to
+  the URL where they can obtain pstoedit.
+
+  Unload pstoedit on the same thread which loads it.  
+  This generally means that pstoedit is not unloaded until
+  GSview exits.  This is needed to avoid a problem with
+  incompatible run time libraries between GSview and pstoedit
+  on Linux.
+
+  Allow DSC parser to cope with EOF before %%BeginData section ends.
+
+  Added Swedish translation.
+
+Win:
+  Fixed "gsview /E filename".
+
+  Installer no longer fails if installing for all users
+  when Ghostscript is not already installed.
+
+  Redisplay a modified file immediately when you activate GSview
+  from the taskbar, instead of waiting until the next message to
+  processed by the queue.
+
+X11:
+  When using the German language, some Spanish text would appear.
+
+  Delete event handlers were passing the event by value not pointer.
+
+  Unload pstoedit on main thread, to avoid crash in pthread exit code.
+
+OS/2:
+  Using Fit Window to Page with PDF files now resizes correctly,
+  instead of shrinking to a midget window.
+
 ---------------------------
 Version 4.1 2001-11-22
 ---------------------------

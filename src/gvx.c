@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -1892,6 +1892,7 @@ int main( int argc, char *argv[] )
     }
 #endif
 
+    unload_pstoedit();
     measure_close();
     psfile_free(&psfile);
     pdf_free_link();

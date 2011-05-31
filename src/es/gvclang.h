@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd. All rights reserved.
 
   This file is part of GSview.
 
@@ -18,13 +18,13 @@
 /* es\gvclang.h */
 /* Common Spanish language defines */
 
-#define AAESPANOL "Español"	/* Espaniol in code page 1252 */
+#define AAESPANOL "Español" /* Espaniol in code page 1252 */
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2001 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2002 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Reservados todos los derechos."
 #define GSVIEW_COPYRIGHT3 "Léase el archivo LICENCE para más detalles."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2001 artofcode LLC,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2002 artofcode LLC,"
 #define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Reservados todos los derechos."
 #define GS_COPYRIGHT3 "Léase el archivo PUBLIC para más detalles."
 
@@ -107,7 +107,7 @@
 
 /* DSC error dialog box */
 #define AADSC "Reglas de Estructuración de Documentos (DSC)"
-#define AAIGNOREALLDSC "Ignorar DSC"
+#define AAIGNOREALLDSC "Ignorar comentarios DSC"
 
 /* Info dialog box */
 #define AAINFO  "Información"
@@ -165,12 +165,6 @@
 #define AAPROLOGFILE "Archivo prólogo"
 #define AAEPILOGFILE "Archivo epílogo"
 #define AABROWSE "Examinar"
-
-/* PDF2PS dialog box */
-#define AAPDFTOPS   "PDF a PostScript"
-#define AABINARYOK  "Binario"
-#define AAPSLEVEL1  "Nivel PostScript 1"
-#define AANOPROCSET "Sin prólogo"
 
 /* PS2EPS dialog box */
 #define AAPSTOEPS "PS a EPS"
@@ -230,8 +224,8 @@
 /* Advanced Configure dialog box */
 #define AACONFIGUREGS "Configuración avanzada"
 #define AAGHOSTSCRIPTDLLC "Ghostscript DLL:"
-#define AAGHOSTSCRIPTSOC "Ghostscript Shared Object:" /* ENGLISH */
-#define AAGHOSTSCRIPTEXEC "Ghostscript Program:" /* ENGLISH */
+#define AAGHOSTSCRIPTSOC "Objeto compartido de Ghostscript:" 
+#define AAGHOSTSCRIPTEXEC "Programa Ghostscript:" 
 #define AAGHOSTSCRIPTINCC "Camino de búsqueda de Ghostscript:"
 #define AAGHOSTSCRIPTOTHERC "Opciones de Ghostscript:"
 #define AACOPYPRINTERDEF "Copiar los valores predeterminados para la impresora"
@@ -301,7 +295,7 @@
 #define AAONLINEREG "Registro -en línea-"
 #define AAREG1 "Por favor, escriba su nombre y el número de registro"
 #define AAREG2 ""
-#define AANAG1 "GSview is Copyright 2001 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview está registrado Copyright 2002 Ghostgum Software Pty Ltd."
 #define AANAG2 "Por favor, colabore con el desarrollo de GSview"
 #define AANAG3 "registrándose."
 #define AANAG4 "El registro -en línea- de GSview puede hacerse en"
