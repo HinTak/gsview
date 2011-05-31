@@ -68,7 +68,7 @@ get_string(char *prompt, char *answer)
 	strncpy(get_string_prompt, prompt, MAXSTR);
 	strncpy(get_string_answer, answer, MAXSTR);
 	
-	if (WinDlgBox(HWND_DESKTOP, hwnd_frame, InputDlgProc, 0, IDD_INPUT, NULL)
+	if (WinDlgBox(HWND_DESKTOP, hwnd_frame, InputDlgProc, hlanguage, IDD_INPUT, NULL)
 	   == DID_OK) {
 		strncpy(answer, get_string_answer, MAXSTR);
 		get_string_busy = FALSE;
@@ -78,6 +78,84 @@ get_string(char *prompt, char *answer)
 	return FALSE;
 }
 
+
+MRESULT EXPENTRY 
+SubFileDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
+{
+static char filter[80];
+static char filename[MAXSTR];
+static BOOL is_wild;
+char *p;
+int i;
+    switch(mess) {
+	case WM_INITDLG:
+	    is_wild = FALSE;
+	    filename[0] = '\0';
+	    filter[0] = '\0';
+	    strcpy(filter, ((PFILEDLG)WinQueryWindowULong(hwnd, QWL_USER))->pszIType);
+	    for (p=filter; *p; p++) {
+	        if (*p == ';')
+		    *p = '\0';
+	    }
+	    p++;
+	    *p = '\0';	/* double trailing NULL */
+	    break;
+    	case WM_CONTROL:
+	    if (mp1 == MPFROM2SHORT(DID_FILENAME_ED, EN_CHANGE)) {
+		WinQueryWindowText(WinWindowFromID(hwnd, DID_FILENAME_ED),
+                    	sizeof(filename), filename);
+		is_wild = (strchr(filename, '*') || strchr(filename, '?'));
+	    }
+	    if (mp1 == MPFROM2SHORT(DID_FILTER_CB, CBN_LBSELECT)) {
+		i = (int)WinSendMsg(WinWindowFromID(hwnd, DID_FILTER_CB), LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
+		if (i == LIT_NONE)
+		    return FALSE;
+		WinSendMsg(WinWindowFromID(hwnd, DID_FILTER_CB), LM_QUERYITEMTEXT,  MPFROM2SHORT(i, sizeof(filter)), MPFROMP(filter));
+		if (filter[0] == '<')
+		    strcpy(filter, "*.*");
+		for (p=filter; *p; p++) {
+		    if (*p == ';')
+			*p = '\0';
+		}
+		p++;
+		*p = '\0';	/* double trailing NULL */
+	    }
+	    break;
+	case FDM_VALIDATE:
+	    if ( (((PFILEDLG)WinQueryWindowULong(hwnd, QWL_USER))->fl) & 
+		FDS_OPEN_DIALOG ) {
+		/* check that file exists */
+		FILE *f;
+		if ( (f=fopen((char *)mp1, "rb")) != (FILE *)NULL ) {
+		    fclose(f);
+		    return (MRESULT)TRUE;
+		}
+		play_sound(SOUND_ERROR);
+		return (MRESULT)FALSE;
+	    }
+	    /* return FALSE if Open dialog box and file doesn't exist */
+	    return (MRESULT)TRUE;	/* dismiss dialog */
+	case FDM_FILTER:
+	    if (is_wild) {
+		if (wildmatch(filename, (char *)mp1))
+		    return (MRESULT)TRUE;	/* add to list box */
+	    }
+	    else {
+		p = filter;
+		while (*p) {
+		    if (wildmatch(p, (char *)mp1))
+			return (MRESULT)TRUE;	/* add to list box */
+		    p += strlen(p) + 1;
+		}
+	    }
+	    return (MRESULT)FALSE;	/* ignore file */
+    }
+    return WinDefFileDlgProc(hwnd, mess, mp1, mp2);
+}
+
+#define MAXFILTER 10
+char *file_filter[MAXFILTER+1];
+char file_filter_buffer[MAXSTR];
 
 BOOL 
 get_filename(char *filename, BOOL save, int filter, int title, int help)
@@ -101,17 +179,36 @@ int i;
 	    load_string(title, szTitle, sizeof(szTitle));
 	    FileDlg.pszTitle = szTitle;
 	}
-	gs_getcwd(FileDlg.szFullFile, sizeof(FileDlg.szFullFile));
-	for (p=FileDlg.szFullFile; *p; p++) {
-	    if (*p == '/')
-		*p = '\\';
+	if (*filename) {
+	    strcpy(FileDlg.szFullFile, filename);
 	}
-	i = strlen(FileDlg.szFullFile);
-	if (i && FileDlg.szFullFile[i-1]!='\\') {
-	    strcat(FileDlg.szFullFile, "\\");
+	else {
+	    gs_getcwd(FileDlg.szFullFile, sizeof(FileDlg.szFullFile));
+	    for (p=FileDlg.szFullFile; *p; p++) {
+		if (*p == '/')
+		    *p = '\\';
+	    }
+	    i = strlen(FileDlg.szFullFile);
+	    if (i && FileDlg.szFullFile[i-1]!='\\') {
+		strcat(FileDlg.szFullFile, "\\");
+		i++;
+	    }
+	}
+
+	load_string(IDS_FILTER_BASE+filter, file_filter_buffer, sizeof(file_filter_buffer));
+	i = 0;
+	p=strtok(file_filter_buffer,"|");
+	FileDlg.pszIType = p;		/* default is first */
+	while (p && (i<MAXFILTER)) {
+	    p = strtok(NULL, "|");
+	    file_filter[i] = p;
 	    i++;
 	}
-	load_string(IDS_FILTER_BASE+filter, FileDlg.szFullFile+i, sizeof(FileDlg.szFullFile)-i);
+	FileDlg.papszITypeList = (PAPSZ)file_filter;
+
+	/* sub class window to alter "List files of Type" behaviour */
+	FileDlg.pfnDlgProc = SubFileDlgProc;
+
 	WinFileDlg(HWND_DESKTOP, hwnd_frame, &FileDlg);
 	if (FileDlg.lReturn == DID_OK) {
 	    f = (FILE *)NULL;
@@ -160,7 +257,7 @@ InfoDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 void
 show_info()
 {
-	WinDlgBox(HWND_DESKTOP, hwnd_frame, InfoDlgProc, 0, IDD_INFO, NULL);
+	WinDlgBox(HWND_DESKTOP, hwnd_frame, InfoDlgProc, hlanguage, IDD_INFO, NULL);
 }
 
 
@@ -169,8 +266,10 @@ MRESULT EXPENTRY AboutDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
   switch(msg) {
     case WM_INITDLG:
+/*
 	WinSetWindowText( WinWindowFromID(hwnd, ABOUT_VERSION),
 	    	GSVIEW_VERSION );
+*/
 	break;
     case WM_BUTTON1DBLCLK:
 	{POINTL pt;
@@ -206,13 +305,12 @@ MRESULT EXPENTRY AboutDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 void
 show_about()
 {
-		WinDlgBox(HWND_DESKTOP, hwnd_frame, AboutDlgProc, 0, IDD_ABOUT, 0);
+		WinDlgBox(HWND_DESKTOP, hwnd_frame, AboutDlgProc, hlanguage, IDD_ABOUT, 0);
 }
 
 
 MRESULT EXPENTRY PageDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
-char buf[40];
 int i;
 int notify_message;
     switch(msg) {
@@ -327,9 +425,9 @@ int i;
 		psfile.page_list.select[psfile.page_list.current] = TRUE;
 
 	if (psfile.page_list.multiple)
-	    flag = WinDlgBox(HWND_DESKTOP, hwnd_frame, PageDlgProc, 0, IDD_MULTIPAGE, NULL);
+	    flag = WinDlgBox(HWND_DESKTOP, hwnd_frame, PageDlgProc, hlanguage, IDD_MULTIPAGE, NULL);
 	else
-	    flag = WinDlgBox(HWND_DESKTOP, hwnd_frame, PageDlgProc, 0, IDD_PAGE, NULL);
+	    flag = WinDlgBox(HWND_DESKTOP, hwnd_frame, PageDlgProc, hlanguage, IDD_PAGE, NULL);
 	if ((flag == DID_OK) && (psfile.page_list.current >= 0))
 		*ppage = psfile.page_list.current + 1;
 	return (flag == DID_OK);
@@ -398,7 +496,7 @@ QMSG q_mess;		/* queue message */
 	    gserror(IDS_EPSNOBBOX, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    return FALSE;
 	}
-	hwnd_modeless = WinLoadDlg(HWND_DESKTOP, hwnd_frame, BoundingBoxDlgProc, (HMODULE)0, IDD_BBOX, NULL);
+	hwnd_modeless = WinLoadDlg(HWND_DESKTOP, hwnd_frame, BoundingBoxDlgProc, hlanguage, IDD_BBOX, NULL);
 	WinSetWindowPos(hwnd_modeless, HWND_TOP, 0, 0, 0, 0, SWP_ZORDER | SWP_ACTIVATE);
 	while (hwnd_modeless) {
 	    /* wait for bounding box to be obtained */
@@ -406,6 +504,48 @@ QMSG q_mess;		/* queue message */
 	        WinDispatchMsg(hab, &q_mess);
 	}
 	return bbox.valid;
+}
+
+/* dialog box for warning PSTOEPS warning and auto/manual bbox selection */
+MRESULT EXPENTRY
+PSTOEPSDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+    switch (msg) {
+	case WM_INITDLG:
+		if (option.auto_bbox)
+		    WinSendMsg( WinWindowFromID(hwnd, PSTOEPS_AUTOBBOX),
+			BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
+		break;
+	case WM_COMMAND:
+            switch(SHORT1FROMMP(mp1)) {
+		case ID_HELP:
+		    load_string(IDS_TOPICPSTOEPS, szHelpTopic, sizeof(szHelpTopic));
+		    get_help();
+		    return (MRESULT)TRUE;
+                case DID_OK:
+                case IDYES:
+		    /* get Print to File status */
+		    option.auto_bbox = (int)WinSendMsg( WinWindowFromID(hwnd, PSTOEPS_AUTOBBOX), BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+                    WinDismissDlg(hwnd, IDYES);
+		    return (MRESULT)TRUE;
+		case IDNO:
+		    load_string(IDS_TOPICPSTOEPS, szHelpTopic, sizeof(szHelpTopic));
+		    get_help();
+		    WinDismissDlg(hwnd, IDNO);
+		    return (MRESULT)TRUE;
+		case DID_CANCEL:
+		    WinDismissDlg(hwnd, DID_CANCEL);
+		    return (MRESULT)TRUE;
+	    }
+	    break;
+    }
+    return WinDefDlgProc(hwnd, msg, mp1, mp2);
+}
+
+BOOL
+pstoeps_warn(void)
+{
+    return (WinDlgBox(HWND_DESKTOP, hwnd_frame, PSTOEPSDlgProc, hlanguage, IDD_PSTOEPS, NULL) == IDYES);
 }
 
 /* sounds stuff */
@@ -516,7 +656,7 @@ void
 change_sounds(void)
 {
 	load_string(IDS_TOPICSOUND, szHelpTopic, sizeof(szHelpTopic));
-	WinDlgBox(HWND_DESKTOP, hwnd_frame, SoundDlgProc, 0, IDD_SOUND, NULL);
+	WinDlgBox(HWND_DESKTOP, hwnd_frame, SoundDlgProc, hlanguage, IDD_SOUND, NULL);
 }
 
 MRESULT EXPENTRY SoundDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
@@ -844,8 +984,8 @@ InstallDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 BOOL
 install_gsdll(void)
 {
-	load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
-	if (WinDlgBox(HWND_DESKTOP, hwnd_frame, InstallDlgProc, 0, IDD_INSTALL, NULL)
+	load_string(IDS_TOPICGSCMD, szHelpTopic, sizeof(szHelpTopic));
+	if (WinDlgBox(HWND_DESKTOP, hwnd_frame, InstallDlgProc, hlanguage, IDD_INSTALL, NULL)
 	   == DID_OK) {
 		option.configured = TRUE;
 		return TRUE;
@@ -894,9 +1034,7 @@ enable_alpha(HWND hwnd)
 	    	LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), MPFROMLONG(0) );
     if (i == LIT_NONE)
 	return;
-    i = index_to_depth[i];
-    if (!i)
-	i = display.planes * display.bitcount;
+    i = real_depth(index_to_depth[i]);
     i = (i >= 8);
     WinEnableWindow(WinWindowFromID(hwnd, DSET_TALPHA), i);
     WinEnableWindow(WinWindowFromID(hwnd, DSET_GALPHA), i);
@@ -926,9 +1064,13 @@ DisplaySettingsDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 	    SetDlgItemText(hwnd, DSET_ZOOMRES, buf);
 	    WinSendMsg( WinWindowFromID(hwnd, DSET_DEPTH),
 	    	LM_DELETEALL, MPFROMLONG(0), MPFROMLONG(0) );
-	    for (i=0; i<sizeof(depthlist)/sizeof(char *); i++)
+	    for (i=0; i<sizeof(depthlist)/sizeof(char *); i++) {
+		strcpy(buf, depthlist[i]);
+		if (strcmp(buf, "Default")==0)
+		    load_string(IDS_DEFAULT, buf, sizeof(buf)-1);
 	        WinSendMsg( WinWindowFromID(hwnd, DSET_DEPTH),
-	    	    LM_INSERTITEM, MPFROMSHORT(LIT_END), MPFROMP(depthlist[i]) );
+	    	    LM_INSERTITEM, MPFROMSHORT(LIT_END), MPFROMP(buf) );
+	    }
 	    WinSendMsg( WinWindowFromID(hwnd, DSET_DEPTH),
 		LM_SELECTITEM, MPFROMSHORT(depth_to_index(option.depth)), MPFROMSHORT(TRUE));
 	    WinSendMsg( WinWindowFromID(hwnd, DSET_TALPHA),
@@ -948,9 +1090,13 @@ DisplaySettingsDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 	    enable_alpha(hwnd);
 	    WinSendMsg( WinWindowFromID(hwnd, DSET_DRAWMETHOD),
 	    	LM_DELETEALL, MPFROMLONG(0), MPFROMLONG(0) );
-	    for (i=0; i<sizeof(drawlist)/sizeof(char *); i++)
+	    for (i=0; i<sizeof(drawlist)/sizeof(char *); i++) {
+		strcpy(buf, drawlist[i]);
+		if (strcmp(buf, "Default")==0)
+		    load_string(IDS_DEFAULT, buf, sizeof(buf)-1);
 	        WinSendMsg( WinWindowFromID(hwnd, DSET_DRAWMETHOD),
-	    	    LM_INSERTITEM, MPFROMSHORT(LIT_END), MPFROMP(drawlist[i]) );
+	    	    LM_INSERTITEM, MPFROMSHORT(LIT_END), MPFROMP(buf) );
+	    }
 	    WinSendMsg( WinWindowFromID(hwnd, DSET_DRAWMETHOD),
 		LM_SELECTITEM, MPFROMSHORT(draw_to_index(option.drawmethod)), MPFROMSHORT(TRUE));
     	    break;
@@ -1058,7 +1204,10 @@ DisplaySettingsDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 		    }
 		    }
                     WinDismissDlg(hwnd, DID_OK);
-                    break;
+		    return (MRESULT)TRUE;
+		case DID_CANCEL:
+		    WinDismissDlg(hwnd, DID_CANCEL);
+		    return (MRESULT)TRUE;
 		case ID_HELP:
 		    load_string(IDS_TOPICDSET, szHelpTopic, sizeof(szHelpTopic));
 		    get_help();
@@ -1073,9 +1222,57 @@ DisplaySettingsDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 void
 display_settings(void)
 {
-	WinDlgBox(HWND_DESKTOP, hwnd_frame, DisplaySettingsDlgProc, 0, IDD_DSET, NULL);
+	WinDlgBox(HWND_DESKTOP, hwnd_frame, DisplaySettingsDlgProc, hlanguage, IDD_DSET, NULL);
 }
 
+/* dialog box for selecting PDF2PS options */
+MRESULT EXPENTRY
+PDF2PSDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+    int i;
+    switch (msg) {
+	case WM_INITDLG:
+		if (option.pdf2ps & OPTION_PDF2PS_BINARYOK)
+		    WinSendMsg( WinWindowFromID(hwnd, PDF2PS_BINARYOK),
+			BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
+		if (option.pdf2ps & OPTION_PDF2PS_LEVEL1)
+		    WinSendMsg( WinWindowFromID(hwnd, PDF2PS_LEVEL1),
+			BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
+		if (option.pdf2ps & OPTION_PDF2PS_NOPROCSET)
+		    WinSendMsg( WinWindowFromID(hwnd, PDF2PS_NOPROCSET),
+			BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
+		break;
+	case WM_COMMAND:
+            switch(SHORT1FROMMP(mp1)) {
+		case ID_HELP:
+		    load_string(IDS_TOPICOPEN, szHelpTopic, sizeof(szHelpTopic));
+		    get_help();
+		    return (MRESULT)TRUE;
+                case DID_OK:
+		    /* get Print to File status */
+		    i = (int)WinSendMsg( WinWindowFromID(hwnd, PDF2PS_BINARYOK), BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+		    option.pdf2ps = (option.pdf2ps & (~OPTION_PDF2PS_BINARYOK)) | (i ? OPTION_PDF2PS_BINARYOK : 0);
+		    i = (int)WinSendMsg( WinWindowFromID(hwnd, PDF2PS_LEVEL1), BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+		    option.pdf2ps = (option.pdf2ps & (~OPTION_PDF2PS_LEVEL1)) | (i ? OPTION_PDF2PS_LEVEL1 : 0);
+		    i = (int)WinSendMsg( WinWindowFromID(hwnd, PDF2PS_NOPROCSET), BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+		    option.pdf2ps = (option.pdf2ps & (~OPTION_PDF2PS_NOPROCSET)) | (i ? OPTION_PDF2PS_NOPROCSET : 0);
+                    WinDismissDlg(hwnd, DID_OK);
+		    return (MRESULT)TRUE;
+		case DID_CANCEL:
+		    WinDismissDlg(hwnd, DID_CANCEL);
+		    return (MRESULT)TRUE;
+	    }
+	    break;
+    }
+    return WinDefDlgProc(hwnd, msg, mp1, mp2);
+}
+
+BOOL
+get_pdf2ps_options(void)
+{
+    load_string(IDS_TOPICOPEN, szHelpTopic, sizeof(szHelpTopic));
+    return (WinDlgBox(HWND_DESKTOP, hwnd_frame, PDF2PSDlgProc, hlanguage, IDD_PDF2PS, NULL) == DID_OK);
+}
 
 /* Text Window for Ghostscript Messages */
 /* uses OS/2 MLE control */
@@ -1134,7 +1331,7 @@ void
 gs_showmess(void)
 {
         load_string(IDS_TOPICMESS, szHelpTopic, sizeof(szHelpTopic));
-	WinDlgBox(HWND_DESKTOP, hwnd_frame, TextDlgProc, 0, IDD_TEXTWIN, NULL);
+	WinDlgBox(HWND_DESKTOP, hwnd_frame, TextDlgProc, hlanguage, IDD_TEXTWIN, NULL);
 }
 
 /* Add string for Ghostscript message window */
@@ -1159,4 +1356,3 @@ gs_addmess(char *str)
     gs_addmess_count(str, strlen(str));
 }
 
-

@@ -40,11 +40,10 @@ int message_box(char *str, int icon)
 	return MessageBox(hwndimg, str, szAppName, icon | MB_OK);
 }
 
-int
+void
 delayed_message_box(int id, int icon)
 {
     PostMessage(hwndimg, WM_GSMESSBOX, (WPARAM)id, (LPARAM)icon);
-    return 0;
 }
 
 #pragma argsused
@@ -66,7 +65,7 @@ get_menu_string(int menuid, int itemid, char *str, int len)
 int
 load_string(int id, char *str, int len)
 {
-	return LoadString(phInstance, id, str, len);
+	return LoadString(hlanguage, id, str, len);
 }
 
 void
@@ -155,7 +154,7 @@ int code = -1;
 	hglobal = LoadResource(phInstance, 
 	    FindResource(phInstance, MAKEINTRESOURCE(resource), RT_RCDATA));
 	if ( (prolog = (LPSTR)LockResource(hglobal)) != (LPSTR)NULL) {
-	    code = gs_execute(prolog, strlen(prolog));
+	    code = gs_execute(prolog, lstrlen(prolog));
 	    FreeResource(hglobal);
 	}
 	return code;

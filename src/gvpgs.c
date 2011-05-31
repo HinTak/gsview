@@ -38,6 +38,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "gvcrc.h"
 #include "gsdll.h"
 #include "gvpgs.h"
@@ -50,6 +51,8 @@ int parse_arg(int argc, char *argv[]);
 void gs_thread(void *arg);
 void show_about(void);
 void saveas(void);
+int init_window(HAB hab);
+int message_box(char *str, int icon);
 
 #define TWLENGTH 8192
 #define TWSCROLL 1024
@@ -205,7 +208,7 @@ RECTL rect;
 
     pcrect.xLeft = 2*char_size.x;
     pcrect.yBottom = 0;
-    pcrect.xRight = pcrect.xLeft + 10 * char_size.x;
+    pcrect.xRight = pcrect.xLeft + 16 * char_size.x;
     pcrect.yTop = pcrect.yBottom + status_height;
     pcpt.x = pcrect.xLeft;
     pcpt.y = pcrect.yBottom + char_size.y/4;
@@ -237,6 +240,7 @@ IPT ipt = 0;
 	return;
     if (DosRequestMutexSem(text_mutex, 10000) == ERROR_TIMEOUT)
 	DosBeep(100, 100);
+    WinEnableWindowUpdate(hwnd_text, FALSE);
     WinSendMsg( hwnd_text, MLM_DISABLEREFRESH, 0, 0);
     /* delete current contents */
     ipt = (IPT)WinSendMsg( hwnd_text, MLM_QUERYTEXTLENGTH, 0, 0); /* get current length */
@@ -248,6 +252,7 @@ IPT ipt = 0;
     WinSendMsg( hwnd_text, MLM_IMPORT, (MPARAM)&ipt, (MPARAM)twend);
     WinSendMsg( hwnd_text, MLM_SETSEL, (MPARAM)twend, (MPARAM)twend);
     WinSendMsg( hwnd_text, MLM_ENABLEREFRESH, 0, 0);
+    WinEnableWindowUpdate(hwnd_text, TRUE);
     DosReleaseMutexSem(text_mutex);
     WinInvalidateRect(hwnd_text, (PRECTL)NULL, TRUE);
     WinUpdateWindow(hwnd_text);
@@ -428,7 +433,7 @@ BOOL
 gs_free_dll(void)
 {
 char buf[MAXSTR];
-APIRET rc;
+APIRET rc = 0;
 int code;
 
 	if (gsdll.hmodule == (HMODULE)NULL)
@@ -443,7 +448,7 @@ int code;
 	if (gsdll.hmodule) {
 	    rc = DosFreeModule(gsdll.hmodule);
 #ifdef DEBUG
-	    sprintf(buf,"DosFreeModule returns %d\n", rc);
+	    sprintf(buf,"DosFreeModule returns %ld\n", rc);
 	    gs_addmess(buf);
 #endif
 	}
@@ -476,7 +481,7 @@ gsdll_callback(int message, char *str, unsigned long count)
 char buf[MAXSTR];
     switch (message) {
 	case GSDLL_STDIN:
-	    sprintf(buf,"Callback: STDIN %p %d   stdin not supported\n", str, count);
+	    sprintf(buf,"Callback: STDIN %p %ld   stdin not supported\n", str, count);
 	    gs_addmess(buf);
 	    message_box("GSDLL_CALLBACK: stdin not supported\n",0);
 	    return 0;
@@ -507,12 +512,8 @@ gs_load_dll(void)
 APIRET rc;
 char buf[MAXSTR+40];
 long revision;
-char fullname[1024];
 const char *shortname;
-char *p;
 const char *dllname;
-int gs_argc;
-char *gs_argv[3];
 	if (gsdll.hmodule)
 	    return TRUE;
 	dllname = gsdllname;
@@ -536,52 +537,52 @@ char *gs_argv[3];
 	if (rc == 0) {
 	    gs_addmess("Loaded Ghostscript DLL\n");
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_REVISION", (PFN *)(&gsdll.revision)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_REVISION, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_REVISION, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    /* check DLL version */
 	    gsdll.revision(NULL, NULL, &revision, NULL);
-	    if (revision != GS_REVISION) {
+	    if ( (revision < GS_REVISION) || (revision > GS_REVISION_MAX) ) {
 		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld\n", revision, (long)GS_REVISION);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_INIT", (PFN *)(&gsdll.init)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_INIT, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_INIT, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_EXECUTE_BEGIN", (PFN *)(&gsdll.execute_begin)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_BEGIN, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_EXECUTE_BEGIN, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_EXECUTE_CONT", (PFN *)(&gsdll.execute_cont)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_CONT, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_EXECUTE_CONT, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_EXECUTE_END", (PFN *)(&gsdll.execute_end)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_END, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_EXECUTE_END, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_EXIT", (PFN *)(&gsdll.exit)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXIT, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_EXIT, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	}
 	else {
-	    sprintf(buf, "Can't load Ghostscript DLL %s \nDosLoadModule rc = %d\n", gsdllname, rc);
+	    sprintf(buf, "Can't load Ghostscript DLL %s \nDosLoadModule rc = %ld\n", gsdllname, rc);
 	    gs_addmess(buf);
 	    gs_load_dll_cleanup();
 	    return FALSE;
@@ -598,14 +599,10 @@ char buf[MAXSTR];
 int len;
 int code;
 HAB hab;
-HMQ hmq;
 int gs_argc;
 char *gs_argv[3];
 
     hab = WinInitialize(0);
-/* if you use the following line, the message queue doesn't get processed
-    hmq = WinCreateMsgQueue(hab, 0);
-*/
 
     if (!gs_load_dll())
 	return;
@@ -646,9 +643,6 @@ char *gs_argv[3];
     }
     gs_free_dll();
 
-/*
-    WinDestroyMsgQueue(hmq);
-*/
     WinTerminate(hab);
 
     /* tell main thread to shut down */
@@ -688,24 +682,9 @@ saveas(void)
 {
 FILEDLG FileDlg;
 FILE *f;
-char *p;
-int i;
 	memset(&FileDlg, 0, sizeof(FILEDLG));
 	FileDlg.cbSize = sizeof(FILEDLG);
 	FileDlg.fl = FDS_CENTER | FDS_SAVEAS_DIALOG;
-/*
-	getcwd(FileDlg.szFullFile, sizeof(FileDlg.szFullFile));
-	for (p=FileDlg.szFullFile; *p; p++) {
-	    if (*p == '/')
-		*p = '\\';
-	}
-	i = strlen(FileDlg.szFullFile);
-	if (i && FileDlg.szFullFile[i-1]!='\\') {
-	    strcat(FileDlg.szFullFile, "\\");
-	    i++;
-	}
-	load_string(IDS_FILTER_BASE+filter, FileDlg.szFullFile+i, sizeof(FileDlg.szFullFile)-i);
-*/
 	WinFileDlg(HWND_DESKTOP, hwnd_frame, &FileDlg);
 	if (FileDlg.lReturn == DID_OK) {
 	    if ((f = fopen(FileDlg.szFullFile, "wb")) == (FILE *)NULL) {
@@ -718,3 +697,4 @@ int i;
 	return;
 }
 
+

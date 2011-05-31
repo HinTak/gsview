@@ -23,7 +23,6 @@
 /* Open/Save File Dialog Box */
 OPENFILENAME ofn;
 char szOFilename[MAXSTR];	/* filename for OFN */
-char szOFilter[256];		/* filter for OFN */
 /* buttons */
 WNDPROC lpfnButtonWndProc;	/* default button WndProc */
 struct buttonlist {
@@ -68,6 +67,114 @@ gsview_init0(LPSTR lpszCmdLine)
 
 char workdir[MAXSTR];
 
+/* returns TRUE if language change successful */
+BOOL
+load_language(int language)
+{   /* load language dependent resources */
+char langdll[MAXSTR];
+HINSTANCE hInstance;
+    /* load language dependent resources */
+    strcpy(langdll, szExePath);
+#ifdef __WIN32__
+    strcat(langdll, "gsvw32");
+#else
+    strcat(langdll, "gsvw16");
+#endif
+    switch (language) {
+	case IDM_LANGDE:
+	    strcat(langdll, "de");
+	    break;
+	default:
+	    strcat(langdll, "en");
+    }
+    strcat(langdll, ".dll");
+    hInstance = LoadLibrary(langdll);
+    if (hInstance >= (HINSTANCE)HINSTANCE_ERROR) {
+	if (hlanguage)
+	    FreeLibrary(hlanguage);
+	hlanguage = hInstance;
+
+	load_string(IDS_GSVIEWVERSION, langdll, sizeof(langdll));
+	if (strcmp(GSVIEW_VERSION, langdll) != 0)
+	    message_box("Language resources version doesn't match GSview EXE", 0);
+
+	return TRUE;
+    }
+    
+    return FALSE;
+}
+
+void
+change_language(void)
+{
+char *p;
+    hmenu = LoadMenu(hlanguage, "gsview_menu");
+    SetMenu(hwndimg, hmenu);
+    haccel = LoadAccelerators(hlanguage, "gsview_accel");
+
+    WinHelp(hwndimg,szHelpName,HELP_QUIT,(DWORD)NULL);
+    /* get path to help file */
+    strcpy(szHelpName, szExePath);
+    p = szHelpName + strlen(szHelpName);
+    load_string(IDS_HELPFILE, p, sizeof(szHelpName) - (int)(p-szHelpName));
+
+    load_string(IDS_TOPICROOT, szHelpTopic, sizeof(szHelpTopic));
+    init_check_menu();
+    InvalidateRect(hwndimg, (LPRECT)NULL, FALSE);
+}
+
+#pragma argsused
+/* language dialog box */
+BOOL CALLBACK _export
+LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch(message) {
+        case WM_COMMAND:
+            switch(LOWORD(wParam)) {
+		case IDOK:
+                case IDCANCEL:
+                    EndDialog(hDlg, 0);
+                    return(TRUE);
+                case IDM_LANGEN:
+                case IDM_LANGDE:
+                    EndDialog(hDlg, LOWORD(wParam));
+                    return(TRUE);
+                default:
+                    return(FALSE);
+            }
+    }
+    return(FALSE);
+}
+
+/* prompt to change language if Windows language doesn't match */
+/* GSview language */
+void 
+check_language(void)
+{
+char winlang[MAXSTR];
+int language;
+    GetProfileString("Intl", "sLanguage", "ENG", winlang, sizeof(winlang));
+    /* if Window language doesn't match GSview language */
+    if ( ((option.language == IDM_LANGEN) && strnicmp(winlang, "EN", 2))
+      || ((option.language == IDM_LANGDE) && stricmp(winlang, "DEU"))
+	)
+    {
+#ifdef __WIN32__
+	language = DialogBoxParam(hlanguage, "LanguageDlgBox", hwndimg, LanguageDlgProc, (LPARAM)NULL);
+#else
+	DLGPROC lpProcLanguage;
+	lpProcLanguage = (DLGPROC)MakeProcInstance((FARPROC)LanguageDlgProc, phInstance);
+	language = DialogBoxParam(hlanguage, "LanguageDlgBox", hwndimg, lpProcLanguage, (LPARAM)NULL);
+	FreeProcInstance((FARPROC)lpProcLanguage);
+#endif
+	switch (language) {
+	    case IDM_LANGEN:
+	    case IDM_LANGDE:
+		gsview_language(language);
+	}
+    }
+}
+
 /* main initialisation */
 void
 gsview_init1(LPSTR lpszCmdLine)
@@ -103,6 +210,7 @@ int length = 64;
 #endif
 
 	multithread = FALSE;
+#ifdef __WIN32__
 	if (is_win95 || is_winnt) {
 	    display.event = CreateEvent(NULL, TRUE, FALSE, NULL);
   	    if (display.event)
@@ -119,8 +227,11 @@ int length = 64;
 	    }
 	}
 	else {
+#ifndef __WIN32__   /* OLD Win32s method */
 	   szSpoolPrefix = "";	/* no spooler in Win32s */
+#endif
 	}
+#endif
 
 	/* get path to EXE */
 	GetModuleFileName(phInstance, szExePath, sizeof(szExePath));
@@ -135,16 +246,19 @@ int length = 64;
 	/* strcpy(szIniFile, szExePath); */
 	strcat(szIniFile, INIFILE);
 
-	/* get path to help file */
-	strcpy(szHelpName, szExePath);
-	p = szHelpName + strlen(szHelpName);
-	LoadString(phInstance, IDS_HELPFILE, p, sizeof(szHelpName) - (p-szHelpName));
+	getcwd(workdir, sizeof(workdir));
+	/* defaults if entry not in gsview.ini */
+ 	init_options();
+	/* read entries from gsview.ini */
+	read_profile(szIniFile);
 
-	/* help message for GetOpenFileName Dialog Box */
-	help_message = RegisterWindowMessage(HELPMSGSTRING);
-	LoadString(phInstance, IDS_TOPICROOT, szHelpTopic, sizeof(szHelpTopic));
+	if (!load_language(option.language)) {
+	    message_box("Couldn't load language specific resources.  Resetting to English.", 0);
+	    option.language = IDM_LANGEN;
+	    if (!load_language(option.language))
+		message_box("Couldn't load English resources.  Please reinstall GSview", 0);
+	}
 
-        load_string(IDS_WAIT, szWait, sizeof(szWait));	/* generic wait message */
 	/* register the child image window class */
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;
 	wndclass.lpfnWndProc = WndImgChildProc;
@@ -155,7 +269,7 @@ int length = 64;
 /*
 	wndclass.hCursor = LoadCursor((HINSTANCE)NULL, IDC_CROSS);
 */
-	wndclass.hCursor = LoadCursor(phInstance,MAKEINTRESOURCE(IDP_CROSSHAIR)); 
+	wndclass.hCursor = hcCrossHair = LoadCursor(phInstance,MAKEINTRESOURCE(IDP_CROSSHAIR)); 
 	wndclass.hbrBackground =  GetStockObject(LTGRAY_BRUSH);
 	wndclass.lpszMenuName = NULL;
 	wndclass.lpszClassName = szImgClassName;
@@ -174,21 +288,18 @@ int length = 64;
 	wndclass.lpszClassName = szClassName;
 	RegisterClass(&wndclass);
 
-	hmenu = LoadMenu(phInstance, "gsview_menu");
-	haccel = LoadAccelerators(phInstance, "gsview_accel");
-
-	getcwd(workdir, sizeof(workdir));
-	/* defaults if entry not in gsview.ini */
- 	init_options();
-	/* read entries from gsview.ini */
-	read_profile(szIniFile);
-
 	/* create parent window */
 	hwndimg = CreateWindow(szClassName, (LPSTR)szAppName,
 		  WS_OVERLAPPEDWINDOW,
 		  option.img_origin.x, option.img_origin.y, 
 		  option.img_size.x, option.img_size.y, 
 		  NULL, NULL, phInstance, (void FAR *)NULL);
+
+	/* help message for GetOpenFileName Dialog Box */
+	help_message = RegisterWindowMessage(HELPMSGSTRING);
+
+	change_language();
+        load_string(IDS_WAIT, szWait, sizeof(szWait));	/* generic wait message */
 
 	/* load DLL for sounds */
 	/* MMSYSTEM.DLL requires Windows 3.1, so to allow gsview to run
@@ -221,13 +332,15 @@ int length = 64;
 #endif
 #endif
 
+#ifdef __WIN32__
 	if (is_win32s)
+#endif
 	    multithread = FALSE;	/* Win32s doesn't support multithreading */
 
 	gsview_initc(lpszCmdLine);
 
 	if (!parse_args(lpszCmdLine))
-	    message_box("Error parsing command line", 0);
+	    gserror(IDS_PARSEERROR, NULL, 0, SOUND_ERROR);
 }
 
 BOOL
@@ -248,7 +361,7 @@ char filedir[MAXSTR];
 	return FALSE;
 
     p = szFile;
-    while (*str) {
+    while (!error && *str) {
 	if ((*str == '/') || (*str == '-')) {
 	    /* a command line switch */
 	    if ((str[1] == 'D') || (str[1] == 'd')) {
@@ -347,7 +460,7 @@ char filedir[MAXSTR];
     }
 
     /* if a print option or filename was specified, pass it on */
-    if (!error && strlen(szFile)) {
+    if (!error && lstrlen(szFile)) {
 	GlobalUnlock(hglobal);
 	PostMessage(hwndimg, WM_COMMAND, IDM_DROP, (LPARAM)hglobal);
     }
@@ -364,7 +477,6 @@ void
 gsview_create()
 {
 int i;
-char cReplace;
 WNDCLASS wndclass;
 HGLOBAL hglobal;
 short FAR *pButtonID;
@@ -379,15 +491,9 @@ HFONT old_hfont;
 RECT rect;
 
 	/* setup OPENFILENAME struct */
-	if (!LoadString(phInstance, IDS_FILTER, szOFilter, sizeof(szOFilter)-1))
-		return;
-	cReplace = szOFilter[strlen(szOFilter)-1];
-	for (i=0; szOFilter[i] != '\0'; i++)
-	    if (szOFilter[i] == cReplace)
-		szOFilter[i] = '\0';
+	ofn.lpstrFilter = (LPSTR)NULL;
 	ofn.lStructSize = sizeof(OPENFILENAME);
 	ofn.hwndOwner = hwndimg;
-	ofn.lpstrFilter = szOFilter;
 	ofn.nFilterIndex = FILTER_PS;
 	ofn.lpstrFile = szOFilename;
 	ofn.nMaxFile = sizeof(szOFilename);
@@ -396,10 +502,7 @@ RECT rect;
 	ofn.lpstrTitle = (LPSTR)NULL;
 	ofn.lpstrInitialDir = (LPSTR)NULL;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_SHOWHELP;
-	LoadString(phInstance, IDS_TOPICROOT, szHelpTopic, sizeof(szHelpTopic));
-
-	/* add menu to image window */
-	SetMenu(hwndimg, hmenu);
+	load_string(IDS_TOPICROOT, szHelpTopic, sizeof(szHelpTopic));
 
 	/* get default text size */
 	hdc = GetDC(hwndimg);
@@ -443,9 +546,8 @@ RECT rect;
 	info_page.x = info_rect.left + 36 * char_size.x + 2;
 	info_page.y = 2;
 
-	init_check_menu();
-
 	hcWait = LoadCursor((HINSTANCE)NULL, IDC_WAIT);
+	hcHand = LoadCursor(phInstance,MAKEINTRESOURCE(IDP_HAND)); 
 
 	/* add buttons */
 	lpfnMenuButtonProc = (WNDPROC)MakeProcInstance((FARPROC)MenuButtonProc, phInstance);
@@ -553,21 +655,21 @@ char *p;
 
     if (rc == ERROR_SUCCESS)
 	rc = RegCreateKey(hkey, "shell\\open", &hsubkey);
-    sprintf(buf, "%sgsview32.exe %%1", szExePath);
+    sprintf(buf, "%s%s %%1", szExePath, GSVIEW_EXENAME);
     if (rc == ERROR_SUCCESS)
 	rc = RegSetValue(hsubkey, "command", REG_SZ, buf, strlen(buf));
     RegCloseKey(hsubkey);
 
     if (rc == ERROR_SUCCESS)
 	rc = RegCreateKey(hkey, "shell\\print", &hsubkey);
-    sprintf(buf, "%sgsview32.exe /p %%1", szExePath);
+    sprintf(buf, "%s%s /p %%1", szExePath, GSVIEW_EXENAME);
     if (rc == ERROR_SUCCESS)
 	rc = RegSetValue(hsubkey, "command", REG_SZ, buf, strlen(buf));
     RegCloseKey(hsubkey);
 
     if (is_win4) {
 	/* icon offset 3 is ID_GSVIEW_DOC */
-	sprintf(buf, "%sgsview32.exe,3", szExePath);
+	sprintf(buf, "%s%s,3", szExePath, GSVIEW_EXENAME);
 	if (rc == ERROR_SUCCESS)
 	    rc = RegSetValue(hkey, "DefaultIcon", REG_SZ, buf, strlen(buf));
     }
@@ -580,18 +682,20 @@ char *p;
 int
 update_registry(BOOL ps, BOOL pdf)
 {
-HKEY hkey;
-char *pskey="psfile";
-char *pdfkey="pdffile";
+#ifdef __WIN32__
 char *psmime="application/postscript";
 char *pdfmime="application/pdf";
 char *contentname="Content Type";
 char *extension="Extension";
+char buf[MAXSTR];
+HKEY hkey;
+#endif
+char *pskey="psfile";
+char *pdfkey="pdffile";
 char *psext=".ps";
 char *epsext=".eps";
 char *pdfext=".pdf";
 LONG rc = ERROR_SUCCESS;
-char buf[MAXSTR];
 
     if (!ps && !pdf)
 	return 0;
@@ -601,55 +705,59 @@ char buf[MAXSTR];
 	    rc = RegSetValue(HKEY_CLASSES_ROOT, psext, REG_SZ, pskey, strlen(pskey));
 	if (rc == ERROR_SUCCESS)
 	    rc = RegSetValue(HKEY_CLASSES_ROOT, epsext, REG_SZ, pskey, strlen(pskey));
+#ifdef __WIN32__
 	if (!is_win32s) {
 	    sprintf(buf, "MIME\\Database\\%s\\%s", contentname, psmime);
 	    if (rc == ERROR_SUCCESS) {
 		rc = RegCreateKey(HKEY_CLASSES_ROOT, buf, &hkey);
 		if (rc == ERROR_SUCCESS) {
-		    rc = RegSetValueEx(hkey, extension, NULL, REG_SZ, (CONST BYTE *)psext, strlen(psext)+1);
+		    rc = RegSetValueEx(hkey, extension, 0, REG_SZ, (CONST BYTE *)psext, strlen(psext)+1);
 		    RegCloseKey(hkey);
 		}
 	    }
 
 	    if (rc == ERROR_SUCCESS) {
-		rc = RegOpenKeyEx(HKEY_CLASSES_ROOT, psext, NULL, KEY_SET_VALUE, &hkey);
+		rc = RegOpenKeyEx(HKEY_CLASSES_ROOT, psext, 0, KEY_SET_VALUE, &hkey);
 		if (rc == ERROR_SUCCESS) {
-		    rc = RegSetValueEx(hkey, contentname, NULL, REG_SZ, (CONST BYTE *)psmime, strlen(psmime)+1);
+		    rc = RegSetValueEx(hkey, contentname, 0, REG_SZ, (CONST BYTE *)psmime, strlen(psmime)+1);
 		    RegCloseKey(hkey);
 		}
 	    }
 	    if (rc == ERROR_SUCCESS) {
-		rc = RegOpenKeyEx(HKEY_CLASSES_ROOT, epsext, NULL, KEY_SET_VALUE, &hkey);
+		rc = RegOpenKeyEx(HKEY_CLASSES_ROOT, epsext, 0, KEY_SET_VALUE, &hkey);
 		if (rc == ERROR_SUCCESS) {
-		    rc = RegSetValueEx(hkey, contentname, NULL, REG_SZ, (CONST BYTE *)psmime, strlen(psmime)+1);
+		    rc = RegSetValueEx(hkey, contentname, 0, REG_SZ, (CONST BYTE *)psmime, strlen(psmime)+1);
 		    RegCloseKey(hkey);
 		}
 	    }
 	}
+#endif
 	if (rc == ERROR_SUCCESS)
 	  rc = create_registry_type(pskey, "PostScript");
     }
 
     if (pdf) {
 	if (rc == ERROR_SUCCESS)
-	    rc = RegSetValue(HKEY_CLASSES_ROOT, ".pdf", REG_SZ, pdfkey, strlen(pdfkey));
+	    rc = RegSetValue(HKEY_CLASSES_ROOT, pdfext, REG_SZ, pdfkey, strlen(pdfkey));
+#ifdef __WIN32__
 	if (!is_win32s) {
 	    sprintf(buf, "MIME\\Database\\%s\\%s", contentname, pdfmime);
 	    if (rc == ERROR_SUCCESS) {
 		rc = RegCreateKey(HKEY_CLASSES_ROOT, buf, &hkey);
 		if (rc == ERROR_SUCCESS) {
-		    rc = RegSetValueEx(hkey, extension, NULL, REG_SZ, (CONST BYTE *)pdfext, strlen(pdfext)+1);
+		    rc = RegSetValueEx(hkey, extension, 0, REG_SZ, (CONST BYTE *)pdfext, strlen(pdfext)+1);
 		    RegCloseKey(hkey);
 		}
 	    }
 	    if (rc == ERROR_SUCCESS) {
-		rc = RegOpenKeyEx(HKEY_CLASSES_ROOT, ".pdf", NULL, KEY_SET_VALUE, &hkey);
+		rc = RegOpenKeyEx(HKEY_CLASSES_ROOT, ".pdf", 0, KEY_SET_VALUE, &hkey);
 		if (rc == ERROR_SUCCESS) {
-		    rc = RegSetValueEx(hkey, contentname, NULL, REG_SZ, (CONST BYTE *)pdfmime, strlen(pdfmime)+1);
+		    rc = RegSetValueEx(hkey, contentname, 0, REG_SZ, (CONST BYTE *)pdfmime, strlen(pdfmime)+1);
 		    RegCloseKey(hkey);
 		}
 	    }
 	}
+#endif
 	if (rc == ERROR_SUCCESS)
 	  rc = create_registry_type(pdfkey, "Portable Document Format");
     }
@@ -686,28 +794,36 @@ char gspath[MAXSTR];
 char *p;
 BOOL register_ps;
 BOOL register_pdf;
+char buf[MAXSTR];
+#ifdef __WIN32__
+#define GSVIEW_NAME "GSview"
+#else
+#define GSVIEW_NAME "GSview 16"
+#endif
 
-    register_ps = (message_box("Create file association between GSview and PostScript (.ps and .eps) files?",
-	MB_YESNO) == IDYES);
-    register_pdf = (message_box("Create file association between GSview and Portable Document Format (.pdf) files?",
-	MB_YESNO) == IDYES);
+    load_string(IDS_ASSOCPS, buf, sizeof(buf)-1);
+    register_ps = (message_box(buf, MB_YESNO) == IDYES);
+    load_string(IDS_ASSOCPDF, buf, sizeof(buf)-1);
+    register_pdf = (message_box(buf, MB_YESNO) == IDYES);
     if (update_registry(register_ps, register_pdf))
-	message_box("Error updating registry", 0);
+	gserror(IDS_REGERROR, NULL, 0, SOUND_ERROR);
 
-    if (message_box("Create Program Manager Group for GSview?", 
-	MB_YESNO) != IDYES)
+    load_string(IDS_CREATEGROUP, buf, sizeof(buf)-1);
+    if (message_box(buf, MB_YESNO) != IDYES)
 	return 0;
 
     lpDdeProc = MakeProcInstance((FARPROC)DdeCallback, phInstance);
     if (DdeInitialize(&idInst, (PFNCALLBACK)lpDdeProc, CBF_FAIL_POKES, 0L)) {
+#ifndef __WIN32__
 	FreeProcInstance(lpDdeProc);
+#endif
 	return 1;
     }
     hszServName = DdeCreateStringHandle(idInst, "PROGMAN", CP_WINANSI);
     hszSysTopic = DdeCreateStringHandle(idInst, "PROGMAN", CP_WINANSI);
     hConv = DdeConnect(idInst, hszServName, hszSysTopic, (PCONVCONTEXT)NULL);
     if (hConv == NULL) {
-	message_box("Couldn't open DDE connection to Program Manager\n", 0);
+	gserror(IDS_NOPROGMAN, NULL, 0, SOUND_ERROR);
 	return 1;
     }
 
@@ -717,14 +833,14 @@ BOOL register_pdf;
 
     sprintf(setup, "[CreateGroup(\042GS Tools\042,gstools.grp)][ShowGroup(\042GS Tools\042,1)]");
     DDEEXECUTE(setup);
-    sprintf(setup, "[ReplaceItem(\042GSview\042)]");
+    sprintf(setup, "[ReplaceItem(\042%s\042)]", GSVIEW_NAME);
     DDEEXECUTE(setup);
     if (!is_win4)
-       sprintf(setup, "[AddItem(\042%sgsview32.exe\042,\042GSview\042, \042%sgsview32.ico\042)]", 
-	  szExePath, szExePath);
+       sprintf(setup, "[AddItem(\042%s%s\042,\042%s\042, \042%sgsview32.ico\042)]", 
+	  szExePath, GSVIEW_EXENAME, GSVIEW_NAME, szExePath);
     else
-       sprintf(setup, "[AddItem(\042%sgsview32.exe\042,\042GSview\042)]", 
-	  szExePath);
+       sprintf(setup, "[AddItem(\042%s%s\042,\042%s\042)]", 
+	  szExePath, GSVIEW_EXENAME, GSVIEW_NAME);
     DDEEXECUTE(setup);
 
 /* Win3.1 documentation says you must put quotes around names */
@@ -752,11 +868,11 @@ BOOL register_pdf;
     sprintf(setup, "[ReplaceItem(\042Ghostscript\042)]");
     DDEEXECUTE(setup);
     if (!is_win4)
-        sprintf(setup, "[AddItem(\042%sgswin32.exe -I%s\042,\042Ghostscript\042, \042%sgstext.ico\042)]", 
-	    gspath, option.gsinclude, gspath);
+        sprintf(setup, "[AddItem(\042%s%s -I%s\042,\042Ghostscript\042, \042%sgstext.ico\042)]", 
+	    gspath, GS_EXENAME, option.gsinclude, gspath);
     else
-        sprintf(setup, "[AddItem(\042%sgswin32.exe\042 \042-I%s\042,\042Ghostscript\042)]", 
-	    gspath, option.gsinclude);
+        sprintf(setup, "[AddItem(\042%s%s\042 \042-I%s\042,\042Ghostscript\042)]", 
+	    gspath, GS_EXENAME, option.gsinclude);
     DDEEXECUTE(setup);
 
     sprintf(setup, "[ReplaceItem(\042Ghostscript README\042)]");

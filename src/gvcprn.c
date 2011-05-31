@@ -128,6 +128,7 @@ char output[MAXSTR];
 FILE *infile;
 UINT count;
 char *buffer;
+int filter;
 
     output[0] = '\0';
     if (psfile.name[0] == '\0') {
@@ -135,8 +136,10 @@ char *buffer;
 	    return;
     }
 
+    filter = psfile.ispdf ? FILTER_PDF :
+	( psfile.doc && psfile.doc->epsf ? FILTER_EPS : FILTER_PS );
     load_string(IDS_TOPICOPEN, szHelpTopic, sizeof(szHelpTopic));
-    if (!get_filename(output, TRUE, FILTER_PS, 0, IDS_TOPICOPEN))
+    if (!get_filename(output, TRUE, filter, 0, IDS_TOPICOPEN))
 	    return;
 
     if ((f = fopen(output, "wb")) == (FILE *)NULL) {
@@ -206,6 +209,11 @@ gsview_extract()
 	if (!get_page(&thispage, TRUE, FALSE))
 	    return;
 
+    if (psfile.ispdf) {
+	if (!get_pdf2ps_options())
+	    return;
+    }
+
     if (!get_filename(output, TRUE, FILTER_PS, 0, IDS_TOPICOPEN))
 	    return;
 
@@ -216,7 +224,13 @@ gsview_extract()
     load_string(IDS_WAITWRITE, szWait, sizeof(szWait));
     info_wait(IDS_WAITWRITE);
     if (psfile.ispdf) {
+	fclose(f);
+	gsview_pdf2ps(output);
+	info_wait(IDS_NOWAIT);
+	return;
+/*
 	pdf_extract(f);
+*/
     }
     else  {
 	if (!dfreopen()) {
@@ -326,7 +340,7 @@ psfile_extract(FILE *f)
 
 /* common printer code */
 BOOL
-gsview_cprint(BOOL to_file, char *psname, char *optname)
+gsview_cprint(char *psname, char *optname)
 {
 char buf[MAXSTR];
 int i;
@@ -337,6 +351,8 @@ FILE *optfile;
 FILE *pcfile;
 char *p;
 static char output[MAXSTR]; /* output filename for printing */
+static char queue[MAXSTR];  /* output queue if not printing to file */
+BOOL printtofile=FALSE;
 float xoffset = 0;
 float yoffset = 0;
 char section[MAXSTR];
@@ -375,6 +391,10 @@ PROFILE *prf;
     }
     else {
 	if (psfile.ispdf) {
+	    if (option.psprinter) {
+	        gserror(IDS_PRINTPDFPS, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
+		return FALSE;
+	    }
 	    if (!pdf_extract(pcfile)) {
 		fclose(pcfile);
 		return FALSE;
@@ -390,14 +410,24 @@ PROFILE *prf;
     }
 
     fclose(pcfile);
+
+    if (option.psprinter) {
+	if (!gp_printfile(psname, option.printer_queue)) {
+	    play_sound(SOUND_ERROR);
+	    return FALSE;
+	}
+	unlink(psname);
+	return FALSE;	/* don't continue with Ghostscript */
+    }
 	
-    if (to_file || (strcmp(option.printer_port, "FILE:")==0)) {
+    if (option.print_to_file || (strcmp(option.printer_queue, "FILE:")==0)) {
+	printtofile = TRUE;
 	if (!get_filename(output, TRUE, FILTER_ALL, IDS_OUTPUTFILE, IDS_TOPICPRINT))
 	    return FALSE;
     }
     else {
-	strcpy(output, szSpoolPrefix);
-	strcat(output, option.printer_port);
+	strcpy(queue, szSpoolPrefix);
+	strcat(queue, option.printer_queue);
     }
 
     /* calculate image size */
@@ -442,7 +472,7 @@ PROFILE *prf;
     fprintf(optfile, "-dDEVICEHEIGHT=%u\n", height);
 
     fprintf(optfile, "-sOutputFile=\042");
-    for (p=output; *p != '\0'; p++)
+    for (p=(printtofile) ? output : queue; *p != '\0'; p++)
 	if (*p == '\\')
 	    /* fputc('/',optfile); */
 	    fputc('\\',optfile);
@@ -484,4 +514,3 @@ PROFILE *prf;
     return TRUE;
 }
 
-

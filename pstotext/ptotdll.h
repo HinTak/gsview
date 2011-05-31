@@ -1,7 +1,7 @@
 /* Copyright (C) 1996, Digital Equipment Corporation.         */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Thu Aug  1 11:35:30 PDT 1996 by mcjones   */
+/* Last modified on Fri Oct 11 16:57:17 PDT 1996 by mcjones   */
 /*      modified on Mon Jul 29 14:29:00 UTC 1996 by rjl       */
 
 /* Interface to ptotdll.c, which is based on OCR_PS.m3, a module of
@@ -31,7 +31,9 @@ int DLLEXPORT pstotextInit(void **instance);
    the address of that data.  Return zero if successful, or
    PSTOTEXT_INIT_MALLOC if not enough storage could be allocated. */
 
-#define PSTOTEXT_INIT_MALLOC 100
+int DLLEXPORT pstotextSetCork(void *instance, int value);
+/* Assume the Cork encoding for dvips-produced fonts if value==1, or
+   the old text layout if value==0. (Default is value==0.) */
 
 int DLLEXPORT pstotextFilter(
   /* input parameters: */
@@ -58,6 +60,11 @@ int DLLEXPORT pstotextFilter(
   pstotextFilter normally returns 0, but a nonzero result implies an
   error: */
 
+int DLLEXPORT pstotextExit(void *instance);
+/* Free the storage pointed to by instance. */
+
+/* return codes from pstotextInit and pstotextFilter */
+#define PSTOTEXT_INIT_MALLOC 100
 #define PSTOTEXT_FILTER_BADENCODINGNUMBER   200
 #define PSTOTEXT_FILTER_TOOMANYGLYPHINDEXES 201
 #define PSTOTEXT_FILTER_BADFONTNUMBER       202
@@ -65,7 +72,4 @@ int DLLEXPORT pstotextFilter(
 #define PSTOTEXT_FILTER_BADQS               204
 #define PSTOTEXT_FILTER_BADGLYPHINDEX       205
 
-int DLLEXPORT pstotextExit(void *instance);
-/* Free the storage pointed to by instance. */
-
-
+

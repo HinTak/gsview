@@ -1,4 +1,100 @@
 ----------------------
+Version 2.1 1996-11-04
+----------------------
+All:
+ German translation updates.
+PM:
+ When first run, ask "Select Language" if GSview language doesn't match
+ OS/2 language.
+
+----------------------------
+Version 2.04 beta 1996-10-25
+----------------------------
+All:
+ Remember printer queue names and print to file names separately
+ to prevent Open File dialog box from trying to display a printer.
+ Crashed when quick text search attempted on PDF file.
+ German translation updates.
+ Don't get stuck in "Wait..." state when attempting, but failing,
+ to load pstotext a second time.
+PM:
+ Help buttons were broken when language resources moved to DLL.
+ Palette for old bitmap was wrong.
+
+----------------------------
+Version 2.03 beta 1996-10-17
+----------------------------
+All:
+ Added pstotext dvips Cork Encoding option.
+ Options | Quick Text is now Options | PStoText | Disabled.
+ Still needs a few documentation fixes for German.
+ Changed doc2xxx programs to get title from first line of file.
+PM:
+ Printing was broken when language resources moved to DLL.
+ Don't list printers that are connected to FILE, because
+ printing to them from a non-PM thread locks up PM.
+Win32:
+ Fixed scroll bar redraw bug in WinNT 4.0.
+
+----------------------------
+Version 2.02 beta 1996-10-10
+----------------------------
+All:
+ Split the language specific resources into a separate DLL,
+ so a single GSview EXE now dynamically loads the selected 
+ language resources.
+ Bug with Zoom was causing GSview to jump to first page.
+ Full German translation.
+
+----------------------------
+Version 2.01 beta 1996-09-20
+----------------------------
+All:
+ German translation by Thomas Pfeiffer.
+ Added pdfmark code for /LNK links
+ Fixed handling of PDF files with non zero /Rotate.
+ Ignore Orientation menu for PDF files.
+ Allow resolution to be set for pdfwrite device.
+ When using File | Extract on PDF file, extract PS instead of
+ just writing a wrapper.
+ If limitcheck when opening display device, reset page size and resolution. 
+ Fixed LF only problem in pstotext.txt
+ Added OS/2 and Win32 command line pstotext EXEs which use pstotext DLL.
+ Force Text/GraphicsAlpha=1 if depth<8, to avoid setpagedevice error.
+ Changed large page size warning to 2m x 2m.
+ Fixed "User Defined" page size on startup.
+ Ignore SYNC after GSview generated setpagedevice, to avoid 
+ unnecessary redraw.
+ Previously the EPSF Clip was needed when writing a preview.  Now the
+ clipping will happen automatically.
+ Orientation must be portrait when adding an EPS preview.
+ Automatically calculate bbox from non white pixels.  Old method of 
+ manually clicking at left, bottom, right and top is still available.
+ Made "Print to File" sticky.
+ Can now create WMF previews bigger than 64k, by segmenting
+ into a number of bitmaps each < 64k.
+ WMF preview is written directly, without using GDI APIs.
+ TIFF 6 preview supports colour, uncompressed or compressed with packbits.
+ File | Print has checkbox "PostScript Printer" which is similar
+ to Extract followed by Print File.
+ Recover when current file deleted and new file opened.
+ Don't lock up or use 100% CPU when File | Close and already closed.
+Win:
+ Reduce the number of redraws when displaying found text.
+ Allow Print to File, even when no Windows printers installed.
+ Remember if window is maximized.
+Win16:
+ Compiles and runs.  It is not intended to make this available precompiled.
+PM:
+ Put gvpm.ico in the same directory as gvpm.exe, to help WPS find
+ the correct icon.
+ Changed file dialog box behaviour.  "Type of file" now controls a 
+ file extension filter instead of an EA filter.
+ Now supports os2prn driver for printing (slowly) using any OS/2
+ printer driver that supports bitmaps.
+ Can now add WMF preview.
+
+----------------------
 Version 2.0 1996-08-11
 ----------------------
 All:

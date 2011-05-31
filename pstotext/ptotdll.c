@@ -1,7 +1,7 @@
 /* Copyright (C) 1995-1996, Digital Equipment Corporation.    */
 /* All rights reserved.                                       */
 /* See the file pstotext.txt for a full description.          */
-/* Last modified on Thu Aug  1 11:35:39 PDT 1996 by mcjones   */
+/* Last modified on Fri Oct 11 16:42:13 PDT 1996 by mcjones   */
 /*      modified on Sun Jul 28 00:00:00 UTC 1996 by rjl       */
 
 /* This module is based on OCR_PS.m3, a module of the Virtual Paper
@@ -10,6 +10,15 @@
 
 #include <math.h>
 #include "ptotdll.h"
+
+#include <string.h>
+#ifdef NEED_PROTO
+#include <stdlib.h>
+#endif
+
+#ifndef NULL
+#define NULL 0
+#endif
 
 #define BOOLEAN int
 #define FALSE 0
@@ -156,22 +165,22 @@ static char *DvipsGlyphs[] = {
   /* 07x */
     "8", "9", ":", ";",
     "!" /* exclamdown */, "=", "?" /* questiondown */, "?",
-  /* 10x */
+  /* 010x */
     "@", "A", "B", "C", "D", "E", "F", "G",
-  /* 11x */
+  /* 011x */
     "H", "I", "J", "K", "L", "M", "N", "O",
-  /* 12x */
+  /* 012x */
     "P", "Q", "R", "S", "T", "U", "V", "W",
-  /* 13x */
+  /* 013x */
     "X", "Y", "Z", "[",
     "``", "]", "\223" /* circumflex */, "\227" /* dotaccent */,
-  /* 14x */
+  /* 014x */
     "`", "a", "b", "c", "d", "e", "f", "g",
-  /* 15x */
+  /* 015x */
     "h", "i", "j", "k", "l", "m", "n", "o",
-  /* 16x */
+  /* 016x */
     "p", "q", "r", "s", "t", "u", "v", "w",
-  /* 17x */
+  /* 017x */
     "x", "y", "z",
     "--",    /* en dash */
     "---",   /* em dash */
@@ -180,8 +189,130 @@ static char *DvipsGlyphs[] = {
     "\250"   /* dieresis */
   };
 
+#define FIRSTCorkSpecialGlyphs FirstDvips
+#define LASTCorkSpecialGlyphs (FirstDvips+0277)
+static char *CorkSpecialGlyphs[] = {
+  /* 000 - accents for lowercase letters */
+    "`",
+    "'",
+    "^",
+    "~",
+    "\230",  /* umlaut/dieresis */
+    "\235",  /* hungarumlaut */
+    "\232",  /* ring */
+    "\237",  /* hacek/caron */
+    "\226",  /* breve */
+    "\257",  /* macron */
+    "\227",  /* dot above/dotaccent */
+    "\270",  /* cedilla */
+    "\236",  /* ogonek */
+  /* 015 - miscellaneous */
+    "'",     /* single base quote/quotesinglbase */
+    "<",     /* single opening guillemet/guilsinglleft */
+    ">",     /* single closing guillemet/guilsinglright */
+    "``",    /* english opening quotes/quotedblleft */
+    "''",    /* english closing quotes/quotedblright */
+    ",,",    /* base quotes/quotedblbase */
+    "<<",    /* opening guillemets/guillemotleft */
+    ">>",    /* closing guillemets/guillemotright */
+    "--",    /* en dash/endash */
+    "---",   /* em dash/emdash */
+    "",      /* compound work mark (invisible)/ */
+    "o",     /* perthousandzero (used in conjunction with %) */
+    "\220",  /* dotless i/dotlessi */
+    "j",     /* dotless j */
+    "ff",    /* ligature ff */
+    "fi",    /* ligature fi */
+    "fl",    /* ligature fl */
+    "ffi",   /* ligature ffi */
+    "ffl",   /* ligature ffl */
+    "_",     /* visible space */
+  /* 041 - ASCII */
+         "!", "\"", "#", "$", "%", "&", "'",
+    "(", ")", "*", "+", ",", "-", ".", "/",
+    "0", "1", "2", "3", "4", "5", "6", "7",
+    "8", "9", ":", ";", "<", "=", ">", "?",
+    "@", "A", "B", "C", "D", "E", "F", "G",
+    "H", "I", "J", "K", "L", "M", "N", "O",
+    "P", "Q", "R", "S", "T", "U", "V", "W",
+    "X", "Y", "Z", "[", "\\","]", "^", "_",
+    "`", "a", "b", "c", "d", "e", "f", "g",
+    "h", "i", "j", "k", "l", "m", "n", "o",
+    "p", "q", "r", "s", "t", "u", "v", "w",
+    "x", "y", "z", "{", "|", "}", "~", "\255", /* hyphenchar (hanging) */
+  /* 200 - letters for eastern European languages from latin-2 */
+    "A\226", /* Abreve */
+    "A\236", /* Aogonek */
+    "C\264", /* Cacute */
+    "C\237", /* Chacek */
+    "D\237", /* Dhacek */
+    "E\237", /* Ehacek */
+    "E\236", /* Eogonek */
+    "G\226", /* Gbreve */
+    "L\264", /* Lacute */
+    "L\237", /* Lhackek */
+    "L/",    /* Lslash/Lstroke */
+    "N\264", /* Nacute */
+    "N\237", /* Nhachek */
+    "\\NG",   /* Eng */
+    "O\235", /* Ohungarumlaut */
+    "R\264", /* Racute */
+    "R\237", /* Rhacek */
+    "S\264", /* Sacute */
+    "S\237", /* Shacek */
+    "S\270", /* Scedilla */
+    "T\237", /* Thacek */
+    "T\270", /* Tcedilla */
+    "U\235", /* Uhungarumlaut */
+    "U\232", /* Uring */
+    "Y\250", /* Ydieresis */
+    "Z\264", /* Zacute */
+    "Z\237", /* Zhacek */
+    "Z\227", /* Zdot */
+    "IJ",    /* IJ */
+    "I\227", /* Idot */
+    "\\dj",   /* dbar */
+    "\247",  /* section */
+    "a\226", /* abreve */
+    "a\236", /* aogonek */
+    "c\222", /* cacute */
+    "c\237", /* chacek */
+    "d\237", /* dhacek */
+    "e\237", /* ehacek */
+    "e\236", /* eogonek */
+    "g\226", /* gbreve */
+    "l\222", /* lacute */
+    "l\237", /* lhacek */
+    "l/",    /* lslash */
+    "n\222", /* nacute */
+    "n\237", /* nhacek */
+    "\\ng",  /* eng */
+    "o\235", /* ohungarumlaut */
+    "r\222", /* racute */
+    "r\237", /* rhacek */
+    "s\222", /* sacute */
+    "s\237", /* shacek */
+    "s\270", /* scedilla */
+    "t\237", /* thacek */
+    "t\270", /* tcedilla */
+    "u\235", /* uhungarumlaut */
+    "u\232", /* uring */
+    "y\230", /* ydieresis */
+    "z\222", /* zacute */
+    "z\237", /* zhacek */
+    "z\227", /* zdot */
+    "ij",    /* ij */
+    "\241",  /* exclamdown */
+    "\277",  /* questiondown */
+    "\243"   /* sterling */
+  /* 0300-0377 is same as ISO 8859/1 except:
+       0337 is Ess-zed and 0377 is ess-zed/germandbls */
+};
+
 /* There are gaps in the set of printable ISOLatin1 characters: */
-/*CONST ISOLatin1Gaps = SET OF [0..255] {8_0..8_37, 8_177..8_217, 8_231, 8_234};*/
+/*CONST ISOLatin1Gaps = SET OF [0..255] {
+    8_0..8_37, 8_177..8_217, 8_231, 8_234};
+*/
 
 typedef struct {
   double blx, bly, toprx, topry; /* font matrix in character coordinates */
@@ -215,6 +346,7 @@ typedef struct {
   MetricsTable *metrics;
   int encodingSize;
   EncodingTable *encoding;
+  BOOLEAN dvipsIsCork; /* assume Cork rather than "OT1" for dvips output */
   int fontSize;
   FontTable *font;
 
@@ -225,7 +357,7 @@ typedef struct {
   double x0, y0, x1, y1; /* initial and final currentpoint */
 
   BOOLEAN nonEmptyPage;
-  int blx, bly, toprx, topry; /* bounding box of last word output */
+  long blx, bly, toprx, topry; /* bounding box of last word output */
   char word[1000]; /* last word output */
   int state;
   /* state-specific components: */
@@ -233,16 +365,44 @@ typedef struct {
   /* state_metrics: */ int metrics_m, metrics_i;
 } T;
 
+#ifdef NEED_PROTO
+static int ReadChar(char **instr);
+static void UnreadChar(char **instr);
+static int ReadInt(char **instr);
+static long ReadLong(char **instr);
+static int ParseInverseTransform(T *t, char *instr);
+static int ParseEncoding(T *t, char *instr);
+static int ParseEncodingMore(T *t, char *instr);
+static void ReadPair(double *x, double *y, char **instr);
+static int ParseFont(T *t, char *instr);
+static int ParseMetrics(T *t, char *instr);
+static int ParseMetricsMore(T *t, char *instr);
+static void Itransform(T *t, double *x1, double *y1, double x0, double y0);
+static void Output(
+  T *t, char **pre, char **word, int *llx, int *lly, int *urx, int *ury);
+static BOOLEAN SameDirection(double x0, double y0, double x1, double y1);
+static int ParseString(
+  T *t, char *instr, char **pre, char **word, char **post, 
+  int *llx, int *lly, int *urx, int *ury);
+#endif
+
 int DLLEXPORT pstotextInit(instance) void **instance; {
   T *t;
   int i;
-  double identity[] = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
 
   t = (T *)malloc(sizeof(T));
   if (t == NULL) return PSTOTEXT_INIT_MALLOC;
 
   t->state = state_normal;
-  for (i = 0; i<6; i++) t->itransform[i] = identity[i];
+
+  /* Initialize t->itransform to the identity transform. */
+  t->itransform[0] = 1.0;
+  t->itransform[1] = 0.0;
+  t->itransform[2] = 0.0;
+  t->itransform[3] = 1.0;
+  t->itransform[4] = 0.0;
+  t->itransform[5] = 0.0;
+
   t->metricsSize = t->encodingSize = t->fontSize = 100;
 
   t->metrics = (MetricsTable *)malloc(t->metricsSize * sizeof(Metrics));
@@ -259,6 +419,8 @@ int DLLEXPORT pstotextInit(instance) void **instance; {
   }
   for(i=0;i<t->encodingSize;i++)(*t->encoding)[i] = NULL;
 
+  t->dvipsIsCork = FALSE;
+
   t->font = (FontTable *)malloc(t->fontSize * sizeof(Font));
   if (t->font == NULL) {
     free(t);
@@ -273,6 +435,12 @@ int DLLEXPORT pstotextInit(instance) void **instance; {
   *instance = t;
 
   return 0;
+}
+
+int DLLEXPORT pstotextSetCork(instance, value) void *instance; int value; {
+  T *t = (T *)instance;
+  t->dvipsIsCork = value;
+  return 0;  
 }
 
 int DLLEXPORT pstotextExit(instance) void *instance; {
@@ -296,7 +464,18 @@ static void UnreadChar(instr) char **instr; {
 
 static int ReadInt(instr) char **instr; {
   int i = 0;
-  int sign = +1;
+  int sign = 1;
+  int c;
+  while ((c = ReadChar(instr))==' ') /* skip */ ;
+  if (c=='-') {sign = -1; c = ReadChar(instr); }
+  while ('0' <= c && c <= '9') {i = i*10+(c-'0'); c = ReadChar(instr);}
+  UnreadChar(instr);
+  return i*sign;
+}
+
+static long ReadLong(instr) char **instr; {
+  long i = 0;
+  int sign = 1;
   int c;
   while ((c = ReadChar(instr))==' ') /* skip */ ;
   if (c=='-') {sign = -1; c = ReadChar(instr); }
@@ -307,7 +486,7 @@ static int ReadInt(instr) char **instr; {
 
 static int ParseInverseTransform(t, instr) T *t; char *instr; {
   int i;
-  for (i = 0; i<6; i++) t->itransform[i] = ReadInt(&instr) / 100.0;
+  for (i = 0; i<6; i++) t->itransform[i] = ReadLong(&instr) / 100.0;
   return 0;
 }
 
@@ -317,7 +496,7 @@ static int ParseEncoding(t, instr) T *t; char *instr; {
   int n = ReadInt(&instr);
   int i;
   if (e<0) return PSTOTEXT_FILTER_BADENCODINGNUMBER;
-  if (t->encoding_n>256) return PSTOTEXT_FILTER_TOOMANYGLYPHINDEXES;
+  if (n>256) return PSTOTEXT_FILTER_TOOMANYGLYPHINDEXES;
 
   /* Grow "t->encoding" if necessary. */
   if (t->encodingSize<=e) {
@@ -372,8 +551,8 @@ static int ParseEncodingMore(t, instr) T *t; char *instr; {
 #define GuessDescend -0.3
 
 static void ReadPair(/*out*/ x, /*out*/ y, instr) double *x, *y; char **instr; {
-  *x = ReadInt(instr) / 100.0;
-  *y = ReadInt(instr) / 100.0;
+  *x = ReadLong(instr) / 100.0;
+  *y = ReadLong(instr) / 100.0;
 }
 
 static int ParseFont(t, instr) T *t; char *instr; {
@@ -501,7 +680,7 @@ static void Output(t, pre, word, llx, lly, urx, ury)
   int *llx, *lly, *urx, *ury; {
   /* Output the next word. */
   double x0, y0, x1, y1, x2, y2, x3, y3;
-  int blx, bly, toprx, topry, mid;
+  long blx, bly, toprx, topry, mid;
   Font f;
 
   f = (*t->font)[t->f];
@@ -617,18 +796,17 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
 
       /* If any element of the current encoding is in the range used
 	 by Microsoft TrueType, assume this character is, too. */
-      int k = 0, tt = FALSE;
-      for(;;) {
-	if (FirstTT1 <= (*enc)[k] && (*enc)[k] <= LastTT2)
-	  tt = TRUE;
-	if (tt || k == sizeof(*enc)/sizeof((*enc)[0])) break;
-	k++;
+      int k; BOOLEAN tt = FALSE;
+      for(k = 0; !tt && k < sizeof(*enc)/sizeof((*enc)[0]); k++) {
+	if (FirstTT1 <= (*enc)[k] && (*enc)[k] <= LastTT2) tt = TRUE;
       }
       if (tt) glyph = FirstTT1 + (int)in;
-      else if (in == '\r') ; /* Adobe Illustrator does this... */
-      else if (in == '\t') ; /* MacDraw Pro does this... */
-      else if (in == '\032') ; /* MS Word on Mac does this... */
-      /* else return PSTOTEXT_FILTER_BADGLYPHINDEX; ... and lots of other stuff! */
+      /* There are too many other exceptions to actually trap this:
+        else if (in == '\r') ; // Adobe Illustrator does this...
+        else if (in == '\t') ; // MacDraw Pro does this...
+        else if (in == '\032') ; // MS Word on Mac does this...
+        else return PSTOTEXT_FILTER_BADGLYPHINDEX;
+      */
     }
     if (glyph == 0) 
       /* skip */;
@@ -644,17 +822,29 @@ static int ParseString(t, instr, pre, word, post, llx, lly, urx, ury)
       l += lstr;
     }
     else if (glyph <= LastDvips) {
-      if (glyph <= LASTDvipsGlyphs) {
-	char *str = DvipsGlyphs[glyph-FIRSTDvipsGlyphs];
-	int lstr = strlen(str);
-	strncpy(&buf[l], str, lstr);
-	l += lstr;
+      char *str; int lstr; char tempstr[2];
+      if (t->dvipsIsCork) {
+        if (glyph <= LASTCorkSpecialGlyphs)
+          str = CorkSpecialGlyphs[glyph-FIRSTCorkSpecialGlyphs];
+        else if (glyph == FIRSTCorkSpecialGlyphs+0337)
+          str = "SS";
+        else if (glyph == FIRSTCorkSpecialGlyphs+0377)
+          str = "\337";
+        else {
+          tempstr[0] = glyph-FIRSTCorkSpecialGlyphs; tempstr[1] = '\0';
+          str = &tempstr[0];
+        }
       }
+      else if (glyph <= LASTDvipsGlyphs)
+        /* Assume old text layout (OT1?). */
+	str = DvipsGlyphs[glyph-FIRSTDvipsGlyphs];
       else {
-	/* E.g., U encoding or Cork encoding */
-	buf[l] = UnknownChar;
-	l++;
+        tempstr[0] = UnknownChar; tempstr[1] = '\0';
+        str = &tempstr[0];
       }
+      lstr = strlen(str);
+      strncpy(&buf[l], str, lstr);
+      l += lstr;
     }
     else if (glyph <= LastTT2) {
       if (FirstTT2 <= glyph) glyph -= FirstTT2-FirstTT1;
@@ -787,3 +977,4 @@ int DLLEXPORT pstotextFilter(instance, instr, pre, word, post, llx, lly, urx, ur
   }
   return 0;
 }
+

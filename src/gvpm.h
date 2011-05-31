@@ -56,7 +56,6 @@ typedef unsigned long DWORD;
 #define DEFAULT_GSCOMMAND "gsos2.exe"
 #define DEFAULT_RESOLUTION 96.0
 #define DEFAULT_ZOOMRES 300.0
-#define HELPFILE "gvpm.hlp"
 #define INIFILE "gvpm.ini"
 #define INISECTION "Options"
 #define DEVSECTION "Devices"
@@ -68,6 +67,7 @@ typedef unsigned long DWORD;
 #define GVHUGE
 #define LPSTR char *
 #define IDYES MBID_YES
+#define IDNO MBID_NO
 #define IDOK  MBID_OK
 #define IDCANCEL  MBID_CANCEL
 #define HINSTANCE HMODULE
@@ -116,13 +116,19 @@ typedef struct tagBM {
 
 typedef struct document PSDOC;
 
-typedef struct tagPSBBOX {
-	int	llx;
-	int	lly;
-	int	urx;
-	int	ury;
-	int	valid;
-} PSBBOX;
+typedef struct tagPDFLINK {
+    PSBBOX bbox;
+    int page;
+    float border_xr;
+    float border_yr;
+    float border_width;
+    float colour_red;
+    float colour_green;
+    float colour_blue;
+    BOOL  colour_valid;
+    struct tagPDFLINK *next;
+    /* need to add View */
+} PDFLINK;
 
 typedef struct tagPAGELIST {
 	int current;	/* index of current selection */
@@ -188,6 +194,7 @@ typedef struct tagPENDING {
 	PSFILE *psfile;		/* new document to display */
 	BOOL	resize;		/* size, resolution or orientation change */
 	BOOL	text;		/* extract text, don't display */
+	BOOL	pdf2ps;		/* extract PS from PDF, don't display */
 } PENDING;
 
 extern PENDING pending;
@@ -213,6 +220,7 @@ typedef struct tagGSDLL {
 	PFN_gsdll_execute_end	execute_end;
 	PFN_gsdll_get_bitmap	get_bitmap;
 	PFN_gsdll_lock_device	lock_device;
+	GSDLL_CALLBACK		callback;
 
 	/* pointer to os2dll or mswindll device */
 	unsigned char	*device;
@@ -225,6 +233,7 @@ typedef struct tagGSDLL {
 
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
+	int	language;
 	char	gsdll[MAXSTR];
 	char	gsinclude[MAXSTR];
 	char	gsother[MAXSTR];
@@ -234,8 +243,8 @@ typedef struct tagOPTIONS {
 	POINTL	img_size;
 	BOOL	img_max;
 	int	unit;
+	int	pstotext;
 	BOOL	quick_open;
-	BOOL	quick_text;
 	BOOL	settings;
 	BOOL	button_show;
 	BOOL	fit_page;
@@ -262,6 +271,11 @@ typedef struct tagOPTIONS {
 	char	device_name[32];
 	char	device_resolution[32];
 	char	printer_port[32];
+	char	printer_queue[MAXSTR];
+	BOOL	print_to_file;
+	BOOL	psprinter;
+	int	pdf2ps;
+	BOOL	auto_bbox;
 } OPTIONS;
 
 typedef struct tagDISPLAY {
@@ -327,12 +341,14 @@ typedef int (GSDLLAPI *PFN_pstotextFilter)(void *instance, char *instr,
     char **pre, char **word, char **post,
     int *llx, int *lly, int *urx, int *ury);
 typedef int (GSDLLAPI *PFN_pstotextExit)(void *instance);
+typedef int (GSDLLAPI *PFN_pstotextSetCork)(void *instance, int value);
 extern HMODULE pstotextModule;
 FILE *pstotextOutfile;
 void *pstotextInstance;
-PFN_pstotextInit pstotextInit;
-PFN_pstotextFilter pstotextFilter;
-PFN_pstotextExit pstotextExit;
+extern PFN_pstotextInit pstotextInit;
+extern PFN_pstotextFilter pstotextFilter;
+extern PFN_pstotextExit pstotextExit;
+extern PFN_pstotextSetCork pstotextSetCork;
 char pstotextLine[2048];
 int pstotextCount;
 
@@ -362,7 +378,7 @@ extern PFN_MciPlayFile pfnMciPlayFile;
 extern char szAppName[MAXSTR];
 extern char szHelpTopic[MAXSTR];
 extern char szExePath[MAXSTR];
-extern char szHelpFile[MAXSTR];
+extern char szHelpName[MAXSTR];
 extern char szWait[MAXSTR];
 extern char szFindText[MAXSTR];
 extern char szIniFile[MAXSTR];
@@ -383,11 +399,17 @@ extern HWND hwnd_button;
 extern HWND hwnd_help;
 extern HWND hwnd_modeless;		/* any modeless dialog box */
 extern HWND hptr_crosshair;
+extern HWND hptr_hand;
+extern HWND hwnd_menu;
+extern HACCEL haccel;
+extern HMODULE hlanguage;
 extern POINTL buttonbar;
 extern POINTL statusbar;
 extern POINTL info_file;
 extern POINTL info_page;
 extern RECTL info_coord;
+extern int on_link;			/* TRUE if we were or are over link */
+extern int on_link_page;		/* page number of link target */
 MRESULT EXPENTRY ClientWndProc(HWND, ULONG, MPARAM, MPARAM);
 MRESULT EXPENTRY FrameWndProc(HWND, ULONG, MPARAM, MPARAM);
 MRESULT EXPENTRY StatusWndProc(HWND, ULONG, MPARAM, MPARAM);
@@ -395,6 +417,7 @@ MRESULT EXPENTRY ButtonWndProc(HWND, ULONG, MPARAM, MPARAM);
 extern PFNWP OldFrameWndProc;
 extern int percent_done;		/* percentage of document processed */
 extern int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
+extern BOOL ignore_sync;		/* ignore next GSDLL_SYNC */
 
 
 extern PROG pdfconv;
@@ -417,6 +440,9 @@ extern PSBBOX bbox;
 /* in gvpm.c */
 void update_scroll_bars(void);
 
+/* gvpdlg.c */
+MRESULT EXPENTRY PageDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+
 /* in gvpinit.c */
 APIRET gsview_init(int argc, char *argv[]);
 
@@ -436,7 +462,6 @@ BOOL gs_close(void);
 #endif
 BOOL get_portname(char *portname, char *port);
 int gp_printfile(char *filename, char *port);
-void gsview_print(BOOL);
 extern char not_defined[];
 
 #endif

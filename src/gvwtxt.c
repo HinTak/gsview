@@ -15,8 +15,8 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvwdlg.c */
-/* Dialog boxes for Windows GSview */
+/* gvwtxt.c */
+/* text dialog box for Windows GSview */
 #include "gvwin.h"
 
 void gs_addmess_update(HWND hwnd);
@@ -68,7 +68,7 @@ TextDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			MessageBeep(-1);
 			return(FALSE);
 		    }
-		    strncpy(p, twbuf+start, end-start);
+		    lstrcpyn(p, twbuf+start, end-start);
 		    GlobalUnlock(hglobal);
 		    OpenClipboard(hDlg);
 		    EmptyClipboard();
@@ -84,19 +84,39 @@ TextDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 
+#ifndef __WIN32__
+DLGPROC lpfnTextDlgProc;
+#endif
+HWND hwnd_text;
+
 /* create modeless dialog box with multiline edit control */
 HWND 
 gs_showmess_modeless(void)
 {
-    return CreateDialogParam( phInstance, MAKEINTRESOURCE(IDD_TEXTWIN), HWND_DESKTOP, TextDlgProc, (LPARAM)NULL);
+#ifdef __WIN32__
+    hwnd_text = CreateDialogParam(phInstance, MAKEINTRESOURCE(IDD_TEXTWIN), HWND_DESKTOP, TextDlgProc, (LPARAM)NULL);
+#else
+    lpfnTextDlgProc = (DLGPROC)MakeProcInstance((FARPROC)TextDlgProc, phInstance);
+    hwnd_text = CreateDialogParam(phInstance, MAKEINTRESOURCE(IDD_TEXTWIN), HWND_DESKTOP, lpfnTextDlgProc, (LPARAM)NULL);
+#endif
+    return hwnd_text;
 }
 
+void
+gs_showmess_destroy(void)
+{
+    if (hwnd_text && IsWindow(hwnd_text))
+	DestroyWindow(hwnd_text);
+#ifndef __WIN32__
+    FreeProcInstance((FARPROC)lpfnTextDlgProc);
+#endif
+}
 
 /* Add string for Ghostscript message window */
 void
-gs_addmess_count(char *str, int count)
+gs_addmess_count(char GVFAR *str, int count)
 {
-char *p;
+LPSTR p;
 int i, lfcount;
     /* we need to add \r after each \n, so count the \n's */
     lfcount = 0;
@@ -125,28 +145,28 @@ int i, lfcount;
 }
 
 void
-gs_addmess(char *str)
+gs_addmess(char GVFAR *str)
 {
-    gs_addmess_count(str, strlen(str));
+    gs_addmess_count(str, lstrlen(str));
 }
 
 void
 gs_addmess_update(HWND hwnd)
 {
 HWND hwndtext = GetDlgItem(hwndmess, TEXTWIN_MLE);
+    DWORD linecount;
     SendMessage(hwndtext, WM_SETREDRAW, FALSE, 0);
     SetDlgItemText(hwnd, TEXTWIN_MLE, twbuf);
 #ifdef __WIN32__
-    {
-    DWORD linecount;
     /* EM_SETSEL, followed by EM_SCROLLCARET doesn't work */
     linecount = SendDlgItemMessage(hwnd, TEXTWIN_MLE, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
     SendDlgItemMessage(hwnd, TEXTWIN_MLE, EM_LINESCROLL, (WPARAM)0, (LPARAM)linecount-18);
-    }
 #else
-    SendDlgItemMessage(hwnd, TEXTWIN_MLE, EM_SETSEL, (WPARAM)0, MAKELPARAM(strlen(twbuf), strlen(twbuf)));
+    linecount = SendDlgItemMessage(hwnd, TEXTWIN_MLE, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
+    SendDlgItemMessage(hwnd, TEXTWIN_MLE, EM_LINESCROLL, (WPARAM)0, MAKELPARAM(linecount-18, 0));
 #endif
     SendMessage(hwndtext, WM_SETREDRAW, TRUE, 0);
     InvalidateRect(hwndtext, (LPRECT)NULL, TRUE);
     UpdateWindow(hwndtext);
 }
+

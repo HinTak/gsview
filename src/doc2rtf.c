@@ -5,8 +5,15 @@
  * This involves stripping all lines with a leading digit or
  * a leading @, #, or %.
  * Modified by Maurice Castro from doc2gih.c by Thomas Williams 
+ * Further modified for PM GSview by Russell Lang  1996-10-15
+ *   Write Win4 contents file.  Not working yet because Win4
+ *     considers a book to end when another book starts.
+ *     It does not support the hierarchical structure of
+ *     the GSview help file where topics may occur at the
+ *     same level as a book and after the book.
+ *   First line of file is Window Title.
  *
- * usage:  doc2rtf file.doc file.rtf [-d]
+ * usage:  doc2rtf file.doc file.rtf [file.cnt] [-d]
  *
  */
 
@@ -21,6 +28,7 @@
 #define MAX_LINE_LEN	1024
 #define TRUE 1
 #define FALSE 0
+char *hex = "0123456789ABCDEF";
 
 struct LIST
 {
@@ -51,13 +59,17 @@ char **argv;
 {
 FILE * infile;
 FILE * outfile;
-	if (argc==4 && argv[3][0]=='-' && argv[3][1]=='d')
-		debug = TRUE;
+FILE * cntfile = NULL;
+	if (argc>1 && argv[argc-1][0]=='-' && argv[argc-1][1]=='d') {
+	    debug = TRUE;
+	    argc--;
+	}
 
-	if (argc != 3 && !debug) {
+        if ( (argc > 4) || (argc < 3) ) {
 		fprintf(stderr,"Usage: %s infile outfile\n", argv[0]);
 		return(1);
 	}
+
 	if ( (infile = fopen(argv[1],"r")) == (FILE *)NULL) {
 		fprintf(stderr,"%s: Can't open %s for reading\n",
 			argv[0], argv[1]);
@@ -67,20 +79,38 @@ FILE * outfile;
 		fprintf(stderr,"%s: Can't open %s for writing\n",
 			argv[0], argv[2]);
 	}
-	parse(infile);
+	if (argc==4) {
+	  if ( (cntfile = fopen(argv[3],"w")) == (FILE *)NULL) {
+	    fprintf(stderr,"%s: Can't open %s for writing\n",
+		argv[0], argv[3]);
+	  }
+	}
+	if (cntfile) {
+	    char basename[256];
+	    strcpy(basename, argv[2]);
+	    strtok(basename, ".");
+	    strcat(basename, ".hlp");
+	    fprintf(cntfile, ":Base %s\n", basename);
+	}
+
+	parse(infile, cntfile);
 	convert(infile,outfile);
 	return(0);
 }
 
 /* scan the file and build a list of line numbers where particular levels are */
-void parse(a)
-FILE *a;
+void parse(a, b)
+FILE *a, *b;
 {
     static char line[MAX_LINE_LEN];
 	char *c;
 	int lineno=0;
 	int lastline=0;
-
+    struct LIST *lasttopic=NULL;
+    if (fgets(line, MAX_LINE_LEN, a)) {
+	if (b)
+	    fprintf(b, ":Title %s", line+1);
+    }
     while (fgets(line,MAX_LINE_LEN,a)) 
     {
 	lineno++;
@@ -96,6 +126,19 @@ FILE *a;
 		c = strtok(&(line[1]),"\n");
 		strcpy(list->string, c);
 		list->next = NULL;
+		if (b) {
+		    if (lasttopic) {
+/* Doesn't work, so just dump all at the top level
+			if (list->level > lasttopic->level) {
+			    fprintf(b, "%d %s\n", lasttopic->level, lasttopic->string);
+			    fprintf(b, "%d %s=loc%d\n", lasttopic->level+1, lasttopic->string, lasttopic->line);
+			}
+			else
+*/
+			    fprintf(b, "%d %s=loc%d\n", lasttopic->level, lasttopic->string, lasttopic->line);
+		    }
+		    lasttopic = list;
+		}
 	}
 	if (line[0]=='?')
 	{
@@ -111,6 +154,8 @@ FILE *a;
 		keylist->next = NULL;
 	}
 	}
+	if (b)
+	    fprintf(b, "%d %s=loc%d\n", lasttopic->level, lasttopic->string, lasttopic->line);
 	rewind(a);
     }
 
@@ -137,6 +182,7 @@ char *s;
 		}
 
 	/* then try titles */
+#ifdef GNUPLOT
 	match = strtok(tokstr, " \n\t");
 	l = 0; /* level */
 	
@@ -158,8 +204,36 @@ char *s;
 			break;
 		list = list->next;
 		}
+#else
+    /* we list keys explicitly, rather than building them from multiple levels  */
+    list = head;
+    while (list != NULL)
+    {
+        c = list->string;
+        while (isspace(*c)) c++;
+        if (!strcmp(s, c)) return(list->line);
+        list = list->next;
+        }
+#endif
 	return(-1);
 	}
+
+void putquoted(s, f)
+char *s;
+FILE *f;
+{
+	for (; *s; s++) {
+	    if (*s & 0x80) {
+		fputc((char)0x5c, f);
+		fputc((char)0x27, f);
+		fputc(hex[(*s&0xf0)>>4], f);
+		fputc(hex[(*s)&0x0f], f);
+	    }
+	    else
+		fputc(*s, f);
+	}
+}
+
 
 /* search through the list to find any references */
 void
@@ -189,7 +263,9 @@ FILE *f;
 		{
 			c = list->string;
 			while (isspace(*c)) c++;
-			fprintf(f,"\\par{\\uldb %s}",c);
+			fprintf(f,"\\par{\\uldb ");
+			putquoted(c, f);
+			fprintf(f,"}");
 			fprintf(f,"{\\v loc%d}\n",list->line);
 			}
 		list = list->next;
@@ -202,8 +278,13 @@ char c;
 char *s;
 FILE *b;
 {
-	fprintf(b,"%c{\\footnote %c %s}\n",c,c,s);
-	}
+/*  This is the new format, but it doesn't work for HC31
+	fprintf(b,"%c{\\footnote ", c);
+*/
+	fprintf(b,"%c{\\footnote %c ", c, c);
+	putquoted(s, b);
+	fprintf(b,"}\n",s);
+}
 
 void
 convert(a,b)
@@ -216,6 +297,9 @@ convert(a,b)
 	fprintf(b,"\\deff0");				/* default font font 0 */
 	/* font table: font 0 proportional, font 1 fixed */
 	fprintf(b,"{\\fonttbl{\\f0\\fswiss Arial;}{\\f1\\fmodern Courier New;}}\n");
+
+	/* skip title line */
+	fgets(line, MAX_LINE_LEN, a);
 
 	/* process each line of the file */
     while (fgets(line,MAX_LINE_LEN,a)) {
@@ -240,7 +324,6 @@ process_line(line, b)
 	static int startpage = 1;
 	char str[MAX_LINE_LEN];
 	char topic[MAX_LINE_LEN];
-	char *hex = "0123456789ABCDEF";
 	int k, l;
 	static int tabl=0;
 	static int para=0;
@@ -338,7 +421,7 @@ process_line(line, b)
 			default:
 				if (line[i] & 0x80) {
 				    /* extended characters so use hexadecimal */
-				    line2[j++] = (char)0x5e; /* \ */
+				    line2[j++] = (char)0x5c; /* \ */
 				    line2[j++] = (char)0x27; /* ' */
 				    line2[j++] = hex[(line[i]&0xf0)>>4];
 				    line2[j] = hex[(line[i]&0x0f)];

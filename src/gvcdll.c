@@ -33,7 +33,7 @@ int execute_code;	/* return code from gsdll.execute_cont */
 int gs_process_pstotext(void);
 
 int
-gs_execute(char *str, int len)
+gs_execute(char GVFAR *str, int len)
 {
     if (gsdll.execute_cont == NULL)
 	return 255;
@@ -156,9 +156,9 @@ int	yoffset;	  /* page origin offset in 1/72" */
     if (!code)
 	code = gs_printf("GSview /Orientation %d put\n", display.orientation);
     if (!code)
-	code = gs_printf("GSview /TextAlphaBits %d put\n", option.alpha_text);
+	code = gs_printf("GSview /TextAlphaBits %d put\n", real_depth(option.depth) >= 8 ? option.alpha_text : 1);
     if (!code)
-	code = gs_printf("GSview /GraphicsAlphaBits %d put\n", option.alpha_graphics);
+	code = gs_printf("GSview /GraphicsAlphaBits %d put\n", real_depth(option.depth) >= 8 ?  option.alpha_graphics : 1);
 
     return code;
 }
@@ -201,7 +201,6 @@ d_init1(void)
 /TextAlphaBits 1 def /GraphicsAlphaBits 1 def\nend\n");
 }
 
-
 /* open device and install viewer hooks */
 int
 d_init2(void)
@@ -210,23 +209,12 @@ int code;
 int depth;
 
     /* calculate depth */
-    if (option.depth)
-	depth = option.depth;
-    else
-        depth = display.planes * display.bitcount;
-    if (depth > 8)
-	depth = 24;
-    else if (depth >=8)
-	depth = 8;
-    else if (depth >=4)
-	depth = 4;
-    else 
-	depth = 1;
-
+    depth = real_depth(option.depth);
 
     /* set the device depth and size */
     /* single pixel size hides window */
     /* open device */
+    ignore_sync = TRUE;	 /* ignore GSDLL_SYNC from this setpagedevice */
     code = gs_printf("<< /OutputDevice /%s /BitsPerPixel %d \n",
 	    DEVICENAME, depth);
     if (!code)
@@ -239,6 +227,14 @@ int depth;
 	sprintf(buf,"Failed to open device or install ViewerPreProcess hook: returns %d\n", code);
 	gs_addmess(buf);
 	pending.unload = TRUE;
+	if (code == -13) {  /* limitcheck */
+	    gs_addmess("Page size may have been too large or resolution too high.\nResetting page size and resolution\n");
+	    if (option.xdpi > DEFAULT_RESOLUTION)
+		option.xdpi = option.ydpi = DEFAULT_RESOLUTION;
+	    if (zoom)
+		option.zoom_xdpi = option.zoom_ydpi = 300;
+	    post_img_message(WM_COMMAND, IDM_A4);
+	}
     }
     else
 	display.init = TRUE;
@@ -294,7 +290,7 @@ char buf[MAXSTR];
 unsigned long len;
 unsigned long ptr;
 int code = 0;
-int prevlen;
+int prevlen = 0;
 PSDOC *doc = psfile.doc;
     ptr = doc->begintrailer;
     fseek(psfile.file, ptr, SEEK_SET);
@@ -341,6 +337,11 @@ PSDOC *doc = psfile.doc;
 		gs_addmess(buf);
 		/* add header */
 		if (doc->lenheader != 0) {
+		    if (debug) {
+			sprintf(buf, "adding header %ld %ld\n", 
+			    doc->beginheader, doc->endheader);
+		 	gs_addmess(buf);
+		    }
 		    gsdll.input[i].ptr = doc->beginheader;
 		    gsdll.input[i].end = doc->endheader;
 		    gsdll.input[i].seek = TRUE;
@@ -348,6 +349,11 @@ PSDOC *doc = psfile.doc;
 		}
 		/* add defaults */
 		if (doc->lendefaults != 0) {
+		    if (debug) {
+			sprintf(buf, "adding defaults %ld %ld\n", 
+			    doc->begindefaults, doc->enddefaults);
+		 	gs_addmess(buf);
+		    }
 		    gsdll.input[i].ptr = doc->begindefaults;
 		    gsdll.input[i].end = doc->enddefaults;
 		    gsdll.input[i].seek = TRUE;
@@ -355,6 +361,11 @@ PSDOC *doc = psfile.doc;
 		}
 		/* add prolog */
 		if (doc->lenprolog != 0) {
+		    if (debug) {
+			sprintf(buf, "adding prolog %ld %ld\n", 
+			    doc->beginprolog, doc->endprolog);
+		 	gs_addmess(buf);
+		    }
 		    gsdll.input[i].ptr = doc->beginprolog;
 		    gsdll.input[i].end = doc->endprolog;
 		    gsdll.input[i].seek = TRUE;
@@ -362,6 +373,11 @@ PSDOC *doc = psfile.doc;
 		}
 		/* add setup */
 		if (doc->lensetup != 0) {
+		    if (debug) {
+			sprintf(buf, "adding setup %ld %ld\n", 
+			    doc->beginsetup, doc->endsetup);
+		 	gs_addmess(buf);
+		    }
 		    gsdll.input[i].ptr = doc->beginsetup;
 		    gsdll.input[i].end = doc->endsetup;
 		    gsdll.input[i].seek = TRUE;
@@ -375,6 +391,11 @@ PSDOC *doc = psfile.doc;
 	    /* add page */
 	    sprintf(buf, "Displaying page %d\n", psfile.pagenum);
 	    gs_addmess(buf);
+	    if (debug) {
+		sprintf(buf, "adding page %d %ld %ld\n", page,
+		    doc->pages[page].begin, doc->pages[page].end);
+		gs_addmess(buf);
+	    }
 	    gsdll.input[i].ptr = doc->pages[page].begin;
 	    gsdll.input[i].end = doc->pages[page].end;
 	    gsdll.input[i].seek = TRUE;
@@ -386,6 +407,11 @@ PSDOC *doc = psfile.doc;
 	    /* add complete file */
 	    sprintf(buf, "Displaying DSC file %s without pages\n", filename);
 	    gs_addmess(buf);
+	    if (debug) {
+		sprintf(buf, "adding DSC file without pages %ld %ld\n", 
+		    doc->beginheader, doc->endtrailer);
+		gs_addmess(buf);
+	    }
 	    gsdll.input[0].ptr = doc->beginheader;
 	    gsdll.input[0].end = doc->endtrailer;
 	    gsdll.input[0].seek = TRUE;
@@ -402,6 +428,11 @@ PSDOC *doc = psfile.doc;
 	fseek(psfile.file, 0, SEEK_END);
 	gsdll.input[0].end = ftell(psfile.file);
 	gsdll.input[0].seek = TRUE;
+	if (debug) {
+	    sprintf(buf, "adding complete file %ld %ld\n", 
+		(long)0, gsdll.input[0].end);
+	    gs_addmess(buf);
+	}
 	gsdll.input_count = 1;
 	gsdll.input_index = 0;
         display.need_trailer = FALSE;
@@ -427,6 +458,7 @@ gs_process_trailer(void)
 		return FALSE;
 	}
 	else {
+	    pdf_free_link();
 	    if (send_trailer()) {
 		dfclose();
 		return FALSE;
@@ -473,6 +505,7 @@ int i;
 	if (ppend->resize) {
 	    if (!code)
 		code = d_resize();
+	    ignore_sync = TRUE;		/* ignore next sync */
 	    if (!code)
 		code = gs_printf("<< >> //systemdict /setpagedevice get exec\n");
 	}
@@ -492,6 +525,14 @@ int i;
     }
 
     /* move to desired page */
+    if (psfile.doc != (PSDOC *)NULL) {
+	if (ppend->pagenum < 0)
+	    ppend->pagenum = psfile.pagenum;
+	if (psfile.doc->numpages && (ppend->pagenum > (int)psfile.doc->numpages))
+	     ppend->pagenum = psfile.doc->numpages;
+	if (ppend->pagenum < 0)
+	    ppend->pagenum = 1;
+    }
     if (ppend->pagenum > 0)
 	psfile.pagenum = ppend->pagenum;
     ppend->pagenum = 0;
@@ -528,6 +569,9 @@ int i;
 	    return code;
 	}
 
+	pdf_free_link();
+        gs_printf("userdict /pdfmark {(%%GSVIEW_PDF_MARK: ) print ==only ( ) print ] == flush} bind put\n");
+
         /* calculate document length */
 	ldone = 0;
 	lsize = 0;
@@ -552,6 +596,10 @@ int i;
 		    gs_addmess("\n--- Begin offending input ---\n");
 		    gs_addmess_count(buf, len);
 		    gs_addmess("\n--- End offending input ---\n");
+		    /* a file offset of 0 really means that it reached the end of the data */
+		    /* need to fix this eventually */
+		    sprintf(buf, "file offset = %ld\n", gsdll.input[gsdll.input_index].ptr);
+		    gs_addmess(buf);
 		    sprintf(buf, "gsdll_execute_cont returns %d\n", code);
 		    gs_addmess(buf);
 		}
@@ -595,7 +643,7 @@ gs_process_loop1(void)
 {
 PENDING lpending;
 int code = 0;
-    while (!pending.unload) {
+    while (!pending.unload && !pending.abort) {
 	if (!pending.now) {
 	    if (szWait[0] != '\0')
 	        post_img_message(WM_GSWAIT, IDS_NOWAIT);
@@ -761,7 +809,7 @@ int code;
 		get_message();	/* process one message */
 	}
 
-	if ( (code = gs_dll_init(gsdll_callback, NULL)) != 0 ) {
+	if ( (code = gs_dll_init(gsdll.callback, NULL)) != 0 ) {
 	    delayed_message_box(IDS_PROCESS_INIT_FAIL, 0);
 	    post_img_message(WM_GSSHOWMESS, 0);
 	    pending.unload = TRUE;
@@ -787,6 +835,7 @@ int code;
 		    pending.resize = FALSE;
 		    pending.next = FALSE;
 		    post_img_message(WM_GSSHOWMESS, 0);
+		    post_img_message(WM_GSWAIT, IDS_NOWAIT); /* shouldn't be needed */
 		}
 	    }
 	}
@@ -1035,7 +1084,7 @@ argv[i] = NULL;
 	    }
 	}
 
-	code = gsdll.init(callback, hwndimg, argc, argv);
+	code = gsdll.init((GSDLL_CALLBACK)callback, hwndimg, argc, argv);
 free((void *)argv);
 	if (code) {
 	    sprintf(buf,"gsdll_init returns %d\n", code);
@@ -1062,15 +1111,16 @@ void *pstotextInstance;
 PFN_pstotextInit pstotextInit;
 PFN_pstotextFilter pstotextFilter;
 PFN_pstotextExit pstotextExit;
+PFN_pstotextSetCork pstotextSetCork;
 char pstotextLine[2048];
 int pstotextCount;
 
 int
-callback_pstotext(char *str, unsigned long count)
+callback_pstotext(char GVFAR *str, unsigned long count)
 {
     if (pstotextInstance) {
 	if (debug)
-	    gs_addmess_count(str, count);
+	    gs_addmess_count(str, (int)count);
 	if (pstotextOutfile) {
 	    char *d, *e;
 	    char *pre, *post;
@@ -1078,8 +1128,12 @@ callback_pstotext(char *str, unsigned long count)
 	    int status;
 	    char ch;
 	    if (sizeof(pstotextLine) > count + pstotextCount) { 
-		memcpy(pstotextLine+pstotextCount, str, count);
-		pstotextCount += count;
+#if defined(_Windows) && !defined(__WIN32)
+		_fmemcpy(pstotextLine+pstotextCount, str, (int)count);
+#else
+		memcpy(pstotextLine+pstotextCount, str, (int)count);
+#endif
+		pstotextCount += (int)count;
 		pstotextLine[pstotextCount] = '\0';
 		e = strchr(pstotextLine, '\n');
 		while ( e != NULL ) {
@@ -1089,8 +1143,17 @@ callback_pstotext(char *str, unsigned long count)
 		    status = pstotextFilter(pstotextInstance, pstotextLine, 
 			&pre, &d, &post,
 			&llx, &lly, &urx, &ury);
-		    if (status)
+		    *e = ch;	/* restore character after \n */
+		    memmove(pstotextLine, e, (int)(pstotextCount - (e-pstotextLine)));
+		    pstotextCount -= (int)(e-pstotextLine);
+		    pstotextLine[pstotextCount] = '\0';
+		    e = strchr(pstotextLine, '\n');
+		    if (status) {
+			char buf[MAXSTR];
+			sprintf(buf, "\npstotextFilter error %d\n", status);
+			gs_addmess(buf);
 			return 1;
+		    }
 		    if (d) {
 			if (pre) {
 			    if (*pre == ' ')
@@ -1102,11 +1165,6 @@ callback_pstotext(char *str, unsigned long count)
 			if (post)
 			    fputs(post, pstotextOutfile);
 		    }
-		    *e = ch;	/* restore character after \n */
-		    memmove(pstotextLine, e, pstotextCount - (e-pstotextLine));
-		    pstotextCount -= (e-pstotextLine);
-		    pstotextLine[pstotextCount] = '\0';
-		    e = strchr(pstotextLine, '\n');
 		}
 	    }
 	    else
@@ -1117,18 +1175,21 @@ callback_pstotext(char *str, unsigned long count)
     return 0;
 }
 
-/* This handles extracting text from PS file, but not from PDF file */
+/* This handles extracting text from PS or PDF file */
 int 
 gs_process_pstotext(void)
 {
 int code;
 char buf[MAXSTR];
-int angle;
+int angle = 0;
 int len;
 long lsize, ldone;
 int pcdone;
     if (load_pstotext())
 	return 1;
+  
+    if (option.pstotext == IDM_PSTOTEXTCORK - IDM_PSTOTEXTMENU - 1)
+        pstotextSetCork(pstotextInit, TRUE);
 
     gs_addmess("Extracting text using pstotext...\n");
 
@@ -1142,6 +1203,8 @@ int pcdone;
     percent_pending = FALSE;
     percent_done = 0;
     post_img_message(WM_GSWAIT, IDS_WAITTEXT);
+
+    gs_printf("/setpagedevice { pop } def\n");
 
     switch (option.orientation) {
 	case IDM_LANDSCAPE:
@@ -1183,8 +1246,6 @@ int pcdone;
 	unload_pstotext();
 	return code;
     }
-
-    gs_printf("/setpagedevice { pop } def\n");
 
     if (psfile.ispdf) {
 	int i;

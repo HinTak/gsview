@@ -36,13 +36,17 @@
 
 #include "gvcver.h"
 #include "gvcbeta.h"
+#include "gvcrc.h"
 #include "setup.h"
+#include "gvclang.h"
 
 int unzip(char *zipname);
 int load_unzip(LPSTR lpszDllName, HINSTANCE hInstance, HWND hmain, HWND hlist);
 int free_unzip(void);
 HWND gs_showmess_modeless(void);
+void gs_showmess_destroy(void);
 void gs_addmess(char *str);
+void gs_addmess_update(HWND hwnd);
 
 BOOL CALLBACK _export GeneralDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK _export InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
@@ -54,11 +58,17 @@ char sourcedir[MAXSTR];
 char destdir[MAXSTR];
 char unzipname[MAXSTR];
 char winsetup[MAXSTR];
+char gsviewbase[MAXSTR];
 HINSTANCE phInstance;
 char get_string_answer[MAXSTR];
 char szAppName[]="GSview Install";
-char szIniName[]="gsview32.ini";
+#ifdef __WIN32__
 char szUnzipDll[] = "wizunz32.dll";
+char szIniName[]="gsview32.ini";
+#else
+char szUnzipDll[] = "wizunz16.dll";
+char szIniName[]="gsview16.ini";
+#endif
 char error_message[MAXSTR];
 char no_error[] = "";
 int is_win32s;
@@ -109,7 +119,11 @@ gs_chdir(char *dirname)
 #endif
 }
 
-
+int
+load_string(int id, char *str, int len)
+{
+	return LoadString(phInstance, id, str, len);
+}
 
 /* INCLUDE COMMON CODE */
 #include "setup.c"
@@ -129,7 +143,6 @@ unzip_to_dir(char *filename, char *destination)
 {
     /* start unzip session */  
     char fullname[256];
-    char arg[256];
     FILE *f;
     int file_exists = 0;
     char cwd[256];
@@ -171,45 +184,6 @@ unzip_to_dir(char *filename, char *destination)
     }
     return rc;
 }
-
-/* This is only needed for GS 4.01 */
-#if (GS_REVISION == 401)
-/* replace Ghostscript gs_init.ps with one supplied by GSview */
-int
-patch_ghostscript(void)
-{
-char dest[MAXSTR];
-char src[MAXSTR];
-char line[MAXSTR];
-FILE *infile, *outfile;
-    /* first rename old gs_init.ps */
-    sprintf(dest, "%s\\%s\\gs_init.ps", destdir, GS_BASEDIR); 
-    sprintf(line, "%s\\%s\\gs_init.bak", destdir, GS_BASEDIR);
-    if ( (outfile = fopen(line, "r")) == (FILE *)NULL ) {
-	/* no need to make backup */
-	rename(dest, line);
-    }
-    else
-	fclose(outfile);
-
-    /* copy patched gs_init.ps to GS directory */
-    sprintf(src, "%s\\%s\\gs_init.ps", destdir, GSVIEW_BASEDIR); 
-
-    if ( (infile = fopen(src, "r")) == (FILE *)NULL) {
-	sprintf(error_message, "Can't open %s for reading", src);
-	return 1;
-    }
-    if ( (outfile = fopen(dest, "w")) == (FILE *)NULL)  {
-	sprintf(error_message, "Can't create %s for writing", dest);
-	return 1;
-    }
-    while (fgets(line, sizeof(line), infile))
-	fputs(line, outfile);
-    fclose(outfile);
-    fclose(infile);
-    return 0;
-}
-#endif
 
 
 int
@@ -312,19 +286,19 @@ DdeCallback(UINT type, UINT fmt, HCONV hconv,
 int
 create_object(void)
 {
-char buf[MAXSTR];
 DWORD idInst = 0L;
 FARPROC lpDdeProc;
 HSZ hszServName;
 HSZ hszSysTopic;
 HCONV hConv;
-HDDEDATA hData;
 char setup[MAXSTR+MAXSTR];
 DWORD dwResult;
 
     lpDdeProc = MakeProcInstance((FARPROC)DdeCallback, phInstance);
     if (DdeInitialize(&idInst, (PFNCALLBACK)lpDdeProc, CBF_FAIL_POKES, 0L)) {
+#ifndef __WIN32__
 	FreeProcInstance(lpDdeProc);
+#endif
 	return 1;
     }
     hszServName = DdeCreateStringHandle(idInst, "PROGMAN", CP_WINANSI);
@@ -344,11 +318,11 @@ DWORD dwResult;
     sprintf(setup, "[ReplaceItem(\042GSview\042)]");
     DDEEXECUTE(setup);
     if (!is_win4)
-       sprintf(setup, "[AddItem(\042%s\\%s\\gsview32.exe\042,\042GSview\042, \042%s\\%s\\gsview32.ico\042)]", 
-	  destdir, GSVIEW_BASEDIR, destdir, GSVIEW_BASEDIR);
+       sprintf(setup, "[AddItem(\042%s\\%s\\%s\042,\042GSview\042, \042%s\\%s\\gsview32.ico\042)]", 
+	  destdir, gsviewbase, GSVIEW_EXENAME, destdir, gsviewbase);
     else
-       sprintf(setup, "[AddItem(\042%s\\%s\\gsview32.exe\042,\042GSview\042)]", 
-	  destdir, GSVIEW_BASEDIR);
+       sprintf(setup, "[AddItem(\042%s\\%s\\%s\042,\042GSview\042)]", 
+	  destdir, gsviewbase, GSVIEW_EXENAME);
     DDEEXECUTE(setup);
 
 /* Win3.1 documentation says you must put quotes around names */
@@ -360,20 +334,20 @@ DWORD dwResult;
     DDEEXECUTE(setup);
     if (!is_win4)
 	sprintf(setup, "[AddItem(\042notepad.exe %s\\%s\\README.TXT\042,\042GSview README\042)]", 
-	    destdir, GSVIEW_BASEDIR);
+	    destdir, gsviewbase);
     else
 	sprintf(setup, "[AddItem(\042notepad.exe\042 \042%s\\%s\\README.TXT\042,\042GSview README\042,\042notepad.exe\042,1)]", 
-	    destdir, GSVIEW_BASEDIR);
+	    destdir, gsviewbase);
     DDEEXECUTE(setup);
 
     sprintf(setup, "[ReplaceItem(\042Ghostscript\042)]");
     DDEEXECUTE(setup);
     if (!is_win4)
-        sprintf(setup, "[AddItem(\042%s\\%s\\gswin32.exe -I%s\\%s;%s\\%s\\fonts\042,\042Ghostscript\042, \042%s\\%s\\gstext.ico\042)]", 
-	    destdir, GS_BASEDIR, destdir, GS_BASEDIR, destdir, GS_BASEDIR,  destdir, GS_BASEDIR);
+        sprintf(setup, "[AddItem(\042%s\\%s\\%s -I%s\\%s;%s\\%s\\fonts\042,\042Ghostscript\042, \042%s\\%s\\gstext.ico\042)]", 
+	    destdir, GS_BASEDIR, GS_EXENAME, destdir, GS_BASEDIR, destdir, GS_BASEDIR,  destdir, GS_BASEDIR);
     else
-        sprintf(setup, "[AddItem(\042%s\\%s\\gswin32.exe\042 \042-I%s\\%s;%s\\%s\\fonts\042,\042Ghostscript\042)]", 
-	    destdir, GS_BASEDIR, destdir, GS_BASEDIR, destdir, GS_BASEDIR);
+        sprintf(setup, "[AddItem(\042%s\\%s\\%s\042 \042-I%s\\%s;%s\\%s\\fonts\042,\042Ghostscript\042)]", 
+	    destdir, GS_BASEDIR, GS_EXENAME, destdir, GS_BASEDIR, destdir, GS_BASEDIR);
     DDEEXECUTE(setup);
 
     sprintf(setup, "[ReplaceItem(\042Ghostscript README\042)]");
@@ -434,7 +408,7 @@ DWORD version = GetVersion();
 	/* copy unzip program for faster loading */
 	strcpy(unzipname, destdir);
 	strcat(unzipname, "\\");
-	strcat(unzipname, GSVIEW_BASEDIR);
+	strcat(unzipname, gsviewbase);
 	mkdir(unzipname);
 	strcat(unzipname, "\\");
 	strcat(unzipname, szUnzipDll);
@@ -453,37 +427,61 @@ DWORD version = GetVersion();
 	strcpy(buf, destdir);
 	if (strlen(buf) == 2)
 	    strcat(buf, "\\");	/* is root directory */
-	if (!rc)
-	    rc = unzip_to_dir(GSVIEW_ZIP, buf);
-	if (!rc)
-	    rc = unzip_to_dir(GS_INIZIP, buf);
-	if (!rc)
-	    rc = unzip_to_dir(GS_W32ZIP, buf);
 	if (!rc) {
-	    strcat(buf, "\\");
-	    strcat(buf, GS_BASEDIR);
-	    rc = unzip_to_dir(GS_FN1ZIP, buf);
+	    char buf2[MAXSTR];
+	    strcpy(buf2, buf);
+	    if (strlen(buf2) && (buf2[strlen(buf2)-1] != '\\'))
+	        strcat(buf2, "\\");
+	    strcat(buf2, gsviewbase);
+	    mkdir(buf2);
+	    rc = unzip_to_dir(GSVIEW_ZIP, buf2);
+	}
+	if (!rc) {
+	    int skip_gs = FALSE;
+	    if (already_installed()) {
+		char buf3[MAXSTR];
+		char buf4[MAXSTR];
+		load_string(IDS_SKIPGSINSTALL, buf3, sizeof(buf3));
+		sprintf(buf4, buf3, GS_VERSION);
+		if (message_box(buf4, MB_YESNO) == MBID_YES)
+		    skip_gs = TRUE;
+	    }
+		
+	    if (!skip_gs) {
+		if (!rc)
+		    rc = unzip_to_dir(GS_INIZIP, buf);
+		if (!rc)
+#ifdef __WIN32__
+		    rc = unzip_to_dir(GS_W32ZIP, buf);
+#else
+		    rc = unzip_to_dir(GS_W16ZIP, buf);
+#endif
+		if (!rc) {
+		    if (strlen(buf) && (buf[strlen(buf)-1] != '\\'))
+			strcat(buf, "\\");
+		    strcat(buf, GS_BASEDIR);
+		    rc = unzip_to_dir(GS_FN1ZIP, buf);
+		}
+	    }
 	}
 	gs_chdir(workdir);
 	if (rc) {
 	    MSG msg;
 	    /* wait for user to read error message */
+	    gs_addmess("unzip error");
+	    gs_addmess_update(hwndmess);
 	    while (hwndmess && IsWindow(hwndmess) && 
 		GetMessage(&msg, (HWND)NULL, 0, 0)) {
 		    TranslateMessage(&msg);
 		    DispatchMessage(&msg);
 	    }
 	}
-	if (hwndmess && IsWindow(hwndmess))
-	    DestroyWindow(hwndmess);
+	gs_showmess_destroy();
 	free_unzip();
     }
 
     /* remove unneeded unzip DLL */
     unlink(unzipname);
-
-    if (!rc)
-	rc = patch_ghostscript();
 
     if (!rc)
 	rc = update_config();
@@ -495,8 +493,7 @@ DWORD version = GetVersion();
 	rc = create_object();
 
     if (!rc) {
-	sprintf(buf, "Installation successful.\r\
-A Program Manager group named \042GS Tools\042 has been created.");
+        load_string(IDS_SETUPOK, buf, sizeof(buf));
 	if (!batch)
 	    message_box(buf, MB_MOVEABLE | MB_OK);
     }
@@ -509,7 +506,6 @@ int PASCAL
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmdShow)
 {
     int rc;
-    LPSTR p;
     /* copy the hInstance into a variable so it can be used */
     phInstance = hInstance;
     if (lpszCmdLine[0] != '\0') {
@@ -530,6 +526,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	}
 	batch = TRUE;
     }
+    load_string(IDS_GSVIEWBASE, gsviewbase, sizeof(gsviewbase));
 
     if (beta_warn())
 	return 1;
@@ -537,8 +534,10 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
     rc = install();
 
     if (rc) {
+	char mess[256];
         char buf[256];
-	sprintf(buf, "Installation aborted\012%s", error_message);
+	load_string(IDS_INSTALLABORT, mess, sizeof(mess));
+	sprintf(buf, mess, error_message);
 	message_box(buf, MB_MOVEABLE | MB_OK);
     }
 

@@ -20,6 +20,7 @@
 /* by Russell Lang */
 #include "gvpm.h"
 
+HELPINIT hi_help;
 APIRET init1(void); 
 APIRET init2(void); 
 APIRET restore_window_position(SWP *pswp);
@@ -31,9 +32,150 @@ ULONG frame_flags =
             FCF_VERTSCROLL |	/* vertical scroll bar */
             FCF_HORZSCROLL |	/* horizontal scroll bar */
 	    FCF_TASKLIST |	/* show it in window list */
-	    FCF_ICON |		/* Load icon from resources */
+	    FCF_ICON;		/* Load icon from resources */
+#ifdef UNUSED
+/* need to load these from a different module */
 	    FCF_MENU |		/* Load menu from resources */
 	    FCF_ACCELTABLE;	/* Load accelerator table from resources */
+#endif
+
+/* returns TRUE if language change successful */
+BOOL
+load_language(int language)
+{   /* load language dependent resources */
+char langdll[MAXSTR];
+char buf[MAXSTR];
+HMODULE hmodule;
+APIRET rc;
+    /* load language dependent resources */
+    strcpy(langdll, szExePath);
+    strcat(langdll, "gvpm");
+    switch (language) {
+	case IDM_LANGDE:
+	    strcat(langdll, "de");
+	    break;
+	default:
+	    strcat(langdll, "en");
+    }
+    strcat(langdll, ".dll");
+    rc = DosLoadModule(buf, sizeof(buf), langdll, &hmodule);
+    if (!rc) {
+	if (hlanguage)
+	    DosFreeModule(hlanguage);
+	hlanguage = hmodule;
+
+	load_string(IDS_GSVIEWVERSION, langdll, sizeof(langdll));
+	if (strcmp(GSVIEW_VERSION, langdll) != 0)
+	    message_box("Language resources version doesn't match GSview EXE", 0);
+
+	return TRUE;
+    }
+
+    return FALSE;
+}
+
+void
+change_language(void)
+{
+char *p;
+char helptitle[MAXSTR];
+    WinEnableWindowUpdate(hwnd_frame, FALSE);
+    if (haccel)
+	WinDestroyAccelTable(haccel);
+    if (hwnd_menu)
+	WinDestroyWindow(hwnd_menu);
+    hwnd_menu = WinLoadMenu(hwnd_frame, hlanguage, ID_GSVIEW);
+    haccel = WinLoadAccelTable(hab, hlanguage, ID_GSVIEW);
+    WinSetAccelTable(hab, haccel, hwnd_frame);
+    frame_flags |= (FCF_MENU | FCF_ACCELTABLE);
+    WinSendMsg(hwnd_frame, WM_UPDATEFRAME, (MPARAM)(frame_flags), (MPARAM)0);
+
+    /* get path to help file */
+    strcpy(szHelpName, szExePath);
+    p = szHelpName + strlen(szHelpName);
+    load_string(IDS_HELPFILE, p, sizeof(szHelpName) - (int)(p-szHelpName));
+    load_string(IDS_HELPTITLE, helptitle, sizeof(helptitle));
+
+    if (hwnd_help)
+	WinDestroyHelpInstance(hwnd_help);
+    /* create help window */
+    hi_help.cb = sizeof(HELPINIT);
+    hi_help.ulReturnCode = 0;
+    hi_help.pszTutorialName = NULL;
+    hi_help.phtHelpTable = NULL;
+    hi_help.hmodAccelActionBarModule = 0;
+    hi_help.idAccelTable = 0;
+    hi_help.idActionBar = 0;
+    hi_help.pszHelpWindowTitle=(PSZ)helptitle;
+    hi_help.hmodHelpTableModule = 0;
+    hi_help.fShowPanelId = 0;
+    hi_help.pszHelpLibraryName = (PSZ)szHelpName;
+    hwnd_help = WinCreateHelpInstance(hab, &hi_help);
+    if (!hwnd_help || hi_help.ulReturnCode) {
+	char buf[512];
+	sprintf(buf, "WinCreateHelpInstance helpfile=%s handle=%ld, rc=%ld",  
+	    szHelpName, hwnd_help, hi_help.ulReturnCode);
+	message_box(buf, 0);
+    }
+    if (hwnd_help)
+	WinAssociateHelpInstance(hwnd_help, hwnd_frame);
+
+    load_string(IDS_TOPICROOT, szHelpTopic, sizeof(szHelpTopic));
+    init_check_menu();
+
+    WinEnableWindowUpdate(hwnd_frame, TRUE);
+    WinShowWindow(hwnd_frame, TRUE);
+}
+
+MRESULT EXPENTRY 
+LanguageDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
+{
+    switch(mess) {
+        case WM_COMMAND:
+            switch(SHORT1FROMMP(mp1)) {
+		case DID_CANCEL:
+                case DID_OK:
+                    WinDismissDlg(hwnd, 0);
+                    break;
+		case IDM_LANGEN:
+		case IDM_LANGDE:
+                    WinDismissDlg(hwnd, SHORT1FROMMP(mp1));
+            }
+            break;
+    }
+    return WinDefDlgProc(hwnd, mess, mp1, mp2);
+}
+
+void 
+check_language(void)
+{
+int language;
+COUNTRYCODE pcc;
+COUNTRYINFO pci;
+ULONG pcbActual;
+    pcc.country = 0;	/* ask about default country */
+    pcc.codepage = 0;
+    if (DosQueryCtryInfo(sizeof(pci), &pcc, &pci, &pcbActual) != 0)
+	return;	/* give up */
+
+   if (pcbActual == 0)
+	return;
+
+    if (  ((option.language == IDM_LANGEN) &&
+	  !((pci.country == 99) || (pci.country == 61) ||
+	    (pci.country == 44) || (pci.country == 1)))
+	   ||
+	  ((option.language == IDM_LANGDE) && (pci.country != 49))
+	)
+    {	/* GSview language doesn't match country code */
+	language = WinDlgBox(HWND_DESKTOP, hwnd_frame, LanguageDlgProc, hlanguage, IDD_LANG, NULL);
+	switch (language) {
+	    case IDM_LANGEN:
+	    case IDM_LANGDE:
+		gsview_language(language);
+	}
+    }
+}
 
 APIRET
 gsview_init(int argc, char *argv[])
@@ -43,7 +185,7 @@ gsview_init(int argc, char *argv[])
   unsigned char button_class[] = "gvButtonClass";
   APIRET rc = 0;
   SWP swp;
-  char *cmd, *cmdbase, *p;
+  char *cmd, *cmdbase;
   char **argp;
   char filedir[MAXSTR];
   char workdir[MAXSTR];
@@ -79,6 +221,15 @@ gsview_init(int argc, char *argv[])
     init_options();
     read_profile(szIniFile);
 
+    if (!load_language(option.language)) {
+	message_box("Couldn't load language specific resources.  Resetting to English.", 0);
+	option.language = IDM_LANGEN;
+	if (!load_language(option.language)) {
+	    message_box("Couldn't load English resources.  Please reinstall GSview", 0);
+	    return -1;
+	}
+    }
+
     if (!WinRegisterClass(	/* register this window class */
   	hab,			/* anchor block */
   	(PSZ)class,		/* class name */
@@ -99,6 +250,8 @@ gsview_init(int argc, char *argv[])
   	ID_GSVIEW,		/* resource identifier */
   	&hwnd_bmp);		/* pointer to client */
 
+    change_language();
+
     if (!WinRegisterClass(	/* register this window class */
   	hab,			/* anchor block */
   	(PSZ)status_class,	/* class name */
@@ -116,6 +269,7 @@ gsview_init(int argc, char *argv[])
 	return -1;
 
     hptr_crosshair = WinLoadPointer(HWND_DESKTOP, 0, IDP_CROSSHAIR);
+    hptr_hand = WinLoadPointer(HWND_DESKTOP, 0, IDP_HAND);
 
     /* get initial size and position of status window */
     WinQueryWindowRect(hwnd_bmp, &rect);
@@ -197,10 +351,11 @@ gsview_init(int argc, char *argv[])
     init2();
 
 #ifdef __EMX__
-    if (_emx_vcmp < 0x302e3868) {
+    if (_emx_vcmp < 0x302e3962) {
 	char buf[MAXSTR];
-	sprintf(buf, "You have emx %s.\rYou need emx %s or later.\rPM GSview will not run correctly.",
-	    _emx_vprt, EMX_NEEDED);
+	char mess[MAXSTR];
+	load_string(IDS_WRONGEMX, mess, sizeof(mess)-1);
+	sprintf(buf, mess, _emx_vprt, EMX_NEEDED);
 	message_box(buf, MB_ICONEXCLAMATION);
     }
 #endif
@@ -386,22 +541,22 @@ restore_window_position(SWP *pswp)
 APIRET init1() 
 {
     char buf[MAXSTR];
-    char name[MAXSTR];
     char *tail, *env;
     APIRET rc = 0;
+    char *p;
 
     PTIB pptib;
     PPIB pppib;
 
     if ( (rc = DosGetInfoBlocks(&pptib, &pppib)) != 0 ) {
-	sprintf(buf,"init1: Couldn't get pid, rc = \n", rc);
+	sprintf(buf,"init1: Couldn't get pid, rc = %ld\n", rc);
 	error_message(buf);
 	return rc;
     }
 
     /* get path to EXE */
     if ( (rc = DosQueryModuleName(pppib->pib_hmte, sizeof(szExePath), szExePath)) != 0 ) {
-	sprintf(buf,"init1: Couldn't get module name, rc = %d\n", rc);
+	sprintf(buf,"init1: Couldn't get module name, rc = %ld\n", rc);
 	error_message(buf);
 	return FALSE;
     }
@@ -409,8 +564,9 @@ APIRET init1()
 	tail++;
 	*tail = '\0';
     }
-    strcpy(szHelpFile, szExePath);
-    strcat(szHelpFile, HELPFILE);
+    strcpy(szHelpName, szExePath);
+    p = szHelpName + strlen(szHelpName);
+    load_string(IDS_HELPFILE, p, sizeof(szHelpName) - (int)(p-szHelpName));
 
     /* get path to INI directory */
     if ((env = getenv("SYSTEM_INI")) != (char *)NULL) {
@@ -490,6 +646,6 @@ APIRET rc;
     rc = !WinCreateObject("WPProgram", "GSview", setup, "<WP_DESKTOP>",
 	CO_REPLACEIFEXISTS);
     if (rc)
-        message_box("Couldn't create desktop program object", 0);
+        gserror(IDS_PROGRAMOBJECTFAILED, NULL, 0, SOUND_ERROR);
     return rc;
 }

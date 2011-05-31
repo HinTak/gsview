@@ -1,24 +1,24 @@
 =================================================================== 
-pstotext.txt    1 August 1996
+pstotext.txt    11 October 1996
 =================================================================== 
-pstotext 1.3 - PostScript text extractor.  Requires Ghostscript.
+pstotext 1.5 - PostScript text extractor.  Requires Ghostscript.
 
-The files pstotxt2.dll (OS/2) pstotxt3.dll (Win32), and pstotext.zip
-(sources) constitute the pstotext package, which was written by Paul
-McJones and Andrew Birrell of Digital Equipment Corporation's Systems
-Research Center.  These files are copyright by Digital Equipment
-Corporation.  You may use them subject to the attached END USER
-LICENSE AGREEMENT.
+The files pstotxt1.dll (Win16), pstotxt2.dll (OS/2) pstotxt3.dll (Win32), 
+and pstotext.zip (sources) constitute the pstotext package, which was 
+written by Paul McJones and Andrew Birrell of Digital Equipment 
+Corporation's Systems Research Center.  These files are copyright by 
+Digital Equipment Corporation.  You may use them subject to the attached 
+END USER LICENSE AGREEMENT.
 
 You can build a Unix command-line version of pstotext using the source
 files in pstotext.zip (use makefile).  Alternatively, you can fetch 
 this version from:
-    http://www.research.digital.com/SRC/virtualpaper/pstotext.html
+    http://www.research.digital.com/SRC/virtualpaper/pstotext.html
 
 pstotext was developed as a part of the Virtual Paper system, which 
 is a high-quality viewer for computer-generated or scanned documents. 
 See:
-    http://www.research.digital.com/SRC/virtualpaper/
+    http://www.research.digital.com/SRC/virtualpaper/
 
 We appreciate Russell Lang's willingness to incorporate pstotext in
 GSview, and his help in redesigning the API to the DLL module and
@@ -129,3 +129,4 @@ FAR 52 227-19 when applicable, or in subparagraph (c) (1) (ii) of the
 Rights in Technical Data and Computer Software clause at DFARS
 252.227-7013, and in similar clauses in the NASA FAR Supplement.
 Contractor/manufacturer is Digital Equipment Corporation.
+

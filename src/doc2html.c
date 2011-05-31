@@ -3,8 +3,11 @@
  *        World Wide Web (WWW) HyperText Markup Language (HTML) format
  *
  * Created by Russell Lang from doc2ipf by Roger Fearick from 
- * doc2rtf by M Castro from doc2gih by Thomas Williams.
- * 1994-11-03
+ *   doc2rtf by M Castro from doc2gih by Thomas Williams.
+ *   1994-11-03
+ * Modified by Russell Lang 1996-10-15
+ *   obtain title from first line of doc file.
+ *   Conform to HTML 3.2. 
  *
  * usage:  doc2html gnuplot.doc gnuplot.htm
  *
@@ -38,7 +41,6 @@ struct LIST *keylist = NULL;
 struct LIST *keyhead = NULL;
 
 int debug = FALSE;
-char title[256];
 
 void parse();
 void refs();
@@ -72,13 +74,10 @@ FILE * outfile;
         fprintf(stderr,"%s: Can't open %s for writing\n",
             argv[0], argv[2]);
       }
-      strcpy(title, argv[2]);
     }
     else {
         outfile = stdout;
-        strcpy(title, argv[1]);
     }
-    strtok(title, ".");	 /* remove type */
     parse(infile);
     convert(infile,outfile);
     return(0);
@@ -92,6 +91,9 @@ FILE *a;
     char *c;
     int lineno=0;
     int lastline=0;
+
+    /* skip title line */
+    fgets(line,MAX_LINE_LEN,a);
 
     while (fgets(line,MAX_LINE_LEN,a)) 
     {
@@ -222,12 +224,15 @@ convert(a,b)
     static char line[MAX_LINE_LEN];
     
     /* generate html header */
+    fprintf(b,"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2//EN\">\n");
     fprintf(b,"<HTML>\n");
     fprintf(b,"<HEAD>\n");
-    fprintf(b,"<TITLE>%s</TITLE>\n", title);
+    fgets(line,MAX_LINE_LEN,a);
+    strtok(line, "\n");
+    fprintf(b,"<TITLE>%s</TITLE>\n", line+1);
     fprintf(b,"</HEAD>\n");
     fprintf(b,"<BODY>\n");
-    fprintf(b,"<H1>%s</H1><P>\n", title);
+    fprintf(b,"<H1>%s</H1><P>\n", line+1);
 
     /* process each line of the file */
         while (fgets(line,MAX_LINE_LEN,a)) {
@@ -392,7 +397,11 @@ process_line(line, b)
                 tabl = 1;
                 para = 0;
                 }
-          else
+          else if (strncmp(line2+1, "{bml", 4)==0)
+	  {
+		/* do nothing, ignore line */
+	      }
+	  else 
           {
 		if (tabl) {
 		    fprintf(b,"</PRE>\n"); /* rjl */
@@ -421,9 +430,9 @@ process_line(line, b)
 		fprintf( stderr, "%d: %s\n", line_count, &line2[1] ) ;
             k=lookup(&line2[1]) ;
 	    /* output unique ID and section title */
-            fprintf(b,"<HR><A NAME=\042%d\042>\n<H%c>", line_count, line[0]=='1'?line[0]:line[0]-1);
+            fprintf(b,"<HR>\n<H%c><A NAME=\042%d\042>", line[0]=='1'?line[0]:line[0]-1, line_count);
             fprintf(b,&(line2[1])); /* title */
-            fprintf(b,"</H%c>\n<P>", line[0]=='1'?line[0]:line[0]-1) ;
+            fprintf(b,"</A></H%c>\n<P>", line[0]=='1'?line[0]:line[0]-1) ;
           } else
             fprintf(stderr, "unknown control code '%c' in column 1, line %d\n",
                 line[0], line_count);
@@ -432,3 +441,4 @@ process_line(line, b)
     }
 }
 
+

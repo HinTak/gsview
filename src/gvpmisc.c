@@ -43,7 +43,7 @@ message_box(char *str, int icon)
 }
 
 /* delayed message box, usually because we are on the other thread */
-int
+void
 delayed_message_box(int id, int icon)
 {
     WinPostMsg(hwnd_bmp, WM_GSMESSBOX, MPFROMLONG(id), MPFROMLONG(icon));
@@ -78,7 +78,7 @@ MENUITEM mi;
 int
 load_string(int id, char *str, int len)
 {
-	return WinLoadString(hab, 0, id, len, str);
+	return WinLoadString(hab, hlanguage, id, len, str);
 }
 
 
@@ -103,7 +103,6 @@ char *p;
 void
 play_sound(int num)
 {
-ULONG rc;
 	if (strlen(sound[num].file)==0)
 	    return;
 	if (!(pfnMciPlayFile) || (strcmp(sound[num].file,BEEP)==0)) {
@@ -126,8 +125,7 @@ ULONG rc;
 void
 info_wait(int id)
 {
-POINTL pt, pt_save;
-RECTL rect;
+POINTL pt;
 	if (id)
     	    load_string(id, szWait, sizeof(szWait));
 	else 
@@ -231,4 +229,3 @@ char name[MAXSTR];
    DosFreeResource(rcdata);
 }
 
-

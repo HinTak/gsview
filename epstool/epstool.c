@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "0.72 alpha 1996-07-29";
+char szVersion[] = "1.0  1996-10-13";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -39,9 +39,11 @@ int op = 0;
 #define EXTRACTPRE	2
 #define INTERCHANGE	3
 #define TIFF4 		4
-#define TIFF5		5
-#define TIFFGS		6
-#define USER		7
+#define TIFF6U		5
+#define TIFF6P		6
+#define TIFFGS		7
+#define USER		8
+#define WMF		9
 
 /* KLUDGE variables */
 PSDOC *doc;
@@ -75,6 +77,11 @@ void play_sound(int i)
 int
 main(int argc, char *argv[])
 {
+#ifdef UNIX
+	strcpy(devname, "pbmraw");
+#else
+	strcpy(devname, "bmpmono");
+#endif
 	if (scan_args(argc, argv))
 	   return 1;
 #if defined(__EMX__) || defined(MSDOS)
@@ -87,13 +94,14 @@ main(int argc, char *argv[])
 	   return 1;
 	}
 	doc = psscan(psfile.file);
+	psfile.doc = doc;
 	if (doc == (PSDOC *)NULL) {
 	   fprintf(stderr, "File %s does not contain DSC comments\n", psfile.name);
 	   fclose(psfile.file);
 	   return 1;
 	}
 
-	if (op==INTERCHANGE || op==TIFF4 || op==TIFF5 || op==TIFFGS)
+	if (op==INTERCHANGE || op==TIFF4 || op==TIFF6U || op==TIFF6P || op==TIFFGS || op==WMF)
 	   return add_preview();
 	if (op==USER)
 	   return make_eps_user();
@@ -225,13 +233,6 @@ int code = 0;
 	}
 	fprintf(tempfile, "\nquit\n");
 	fclose(tempfile);
-	if (op != TIFFGS) {
-#ifdef UNIX
-	    strcpy(devname, "pbmraw");
-#else
-	    strcpy(devname, "bmpmono");
-#endif
-        }
 #ifdef UNIX
 	sprintf(gscommand, "%s -dNOPAUSE -dQUIET -sDEVICE=%s -sOutputFile=\042%s\042 -r%d -g%dx%d %s",
 	   gsname, devname, bmpname, resolution, width, height, tempname);
@@ -274,8 +275,12 @@ int code = 0;
 		code = make_eps_interchange(calc_bbox);
 	    else if (op == TIFF4)
 		code = make_eps_tiff(IDM_MAKEEPST4, calc_bbox);
-	    else if (op == TIFF5)
-		code = make_eps_tiff(IDM_MAKEEPST, calc_bbox);
+	    else if (op == TIFF6U)
+		code = make_eps_tiff(IDM_MAKEEPST6U, calc_bbox);
+	    else if (op == TIFF6P)
+		code = make_eps_tiff(IDM_MAKEEPST6P, calc_bbox);
+	    else if (op == WMF)
+		code = make_eps_metafile(calc_bbox);
 	    else
 		fprintf(stderr, "Unknown operation %d\n", op);
 	}
@@ -286,8 +291,9 @@ int code = 0;
 	        unlink(ename);	/* remove temporary file */
 	}
 
-	if (!code && !quiet)
-	    fprintf(stderr, "Add_preview was successful\n");
+	if (!quiet)
+	    fprintf(stderr, "Add_preview %s\n", 
+		code ? "failed" : "was successful");
 
 	return code;
 }
@@ -353,18 +359,21 @@ int count;
 		    fprintf(stderr,"Can't select two operations");
 		    return 1;
 		  }
-		  if (argp[2]=='4') {
+		  if (argp[2] && argp[2]=='4') {
 		    op = TIFF4;
 		    got_op = TRUE;
 		  }
-		  else if (argp[2]=='5') {
-		    op = TIFF5;
+		  else if (argp[2] && argp[2]=='6' && argp[3] && toupper(argp[3])=='U') {
+		    op = TIFF6U;
 		    got_op = TRUE;
 		  }
-		  else if (argp[2]) {
+		  else if (argp[2] && argp[2]=='6' && argp[3] && toupper(argp[3])=='P') {
+		    op = TIFF6P;
+		    got_op = TRUE;
+		  }
+		  else if (argp[2] && toupper(argp[2])=='G') {
 		    op = TIFFGS;
 		    got_op = TRUE;
-		    strcpy(devname, argp+2);
 		  }
 		  else {
 		      fprintf(stderr,"Missing TIFF type or device name for -t\n");
@@ -377,6 +386,18 @@ int count;
 		    return 1;
 		  }
 		  op = INTERCHANGE;
+		  got_op = TRUE;
+		  break;
+		case 'z':
+		  if (argp[2])
+		      strcpy(devname, argp+2);
+		  break;
+		case 'w':
+		  if (got_op) {
+		    fprintf(stderr,"Can't select two operations");
+		    return 1;
+		  }
+		  op = WMF;
 		  got_op = TRUE;
 		  break;
 		case 'u':
@@ -439,7 +460,7 @@ void
 do_help(void)
 {
    fprintf(stderr,"Usage:  epstool [option] operation filename\n");
-   fprintf(stderr,"  Copyright (C) 1995 Russell Lang.  All rights reserved.\n");
+   fprintf(stderr,"  Copyright (C) 1995, 1996 Russell Lang.  All rights reserved.\n");
    fprintf(stderr,"  Version: %s\n", szVersion);
    fprintf(stderr,"  Options:\n");
    fprintf(stderr,"     -b             Calculate BoundingBox from image\n");
@@ -448,11 +469,14 @@ do_help(void)
    fprintf(stderr,"     -ofilename     Output filename\n");
    fprintf(stderr,"     -q             Quiet (no messages)\n");
    fprintf(stderr,"     -rnumber       Preview resolution in dpi\n");
+   fprintf(stderr,"     -zdevice       Ghostscript device name\n");
    fprintf(stderr,"  Operations: (one only)\n");
    fprintf(stderr,"     -i             Add Interchange preview   (EPSI)\n");
    fprintf(stderr,"     -t4            Add TIFF4 preview         (DOS EPS)\n");
-   fprintf(stderr,"     -t5            Add TIFF5 preview         (DOS EPS)\n");
-   fprintf(stderr,"     -ttiffg3       Add GS TIFF preview       (DOS EPS)\n");
+   fprintf(stderr,"     -t6u           Add TIFF6 uncompressed    (DOS EPS)\n");
+   fprintf(stderr,"     -t6p           Add TIFF6 packbits        (DOS EPS)\n");
+   fprintf(stderr,"     -tg            Add GS TIFF preview       (DOS EPS)\n");
+   fprintf(stderr,"     -w             Add WMF preview           (DOS EPS)\n");
    fprintf(stderr,"     -ufilename     Add user supplied preview (DOS EPS)\n");
    fprintf(stderr,"     -p             Extract PostScript        (DOS EPS)\n");
    fprintf(stderr,"     -v             Extract Preview           (DOS EPS)\n");
@@ -660,4 +684,3 @@ psfile_extract_page(FILE *f, int page)
     }
 }
 
-

@@ -27,6 +27,9 @@ void scroll_to_find(void);
 /* in gvpinit.c  or gvwinit.c */
 void show_buttons(void);
 int gsview_create_objects(void);
+BOOL load_language(int language);
+void change_language(void);
+void check_language(void);
 
 /* in gvcinit.c */
 void init_options(void);
@@ -47,7 +50,7 @@ void write_profile(void);
 void post_img_message(int message, int param);
 void get_help(void);
 int message_box(char *str, int icon);
-int delayed_message_box(int id, int icon);
+void delayed_message_box(int id, int icon);
 void check_menu_item(int menuid, int itemid, BOOL checked);
 int get_menu_string(int menuid, int itemid, char *str, int len);
 int load_string(int id, char *str, int len);
@@ -63,6 +66,7 @@ char * gs_getcwd(char *dirname, int size);
 void transform_cursorpos(float *x, float *y);
 void transform_point(float *x, float *y);
 void itransform_point(float *x, float *y);
+int real_depth(int depth);
 int get_paper_size_index(void);
 void gs_size(PENDING *pend);
 void gs_resize(void);
@@ -100,11 +104,12 @@ int gsview_command(int command);
 BOOL not_open(void);
 BOOL not_dsc(void);
 BOOL order_is_special(void);
-void gserror(UINT id, char *str, UINT icon, int sound);
+void gserror(UINT id, LPSTR str, UINT icon, int sound);
 void pserror(char *str);
 int not_implemented(void);
 void gsview_check_usersize(void);
 void gsview_unzoom(void);
+void gsview_language(int new_language);
 
 /* in gvpdlg.c or gvwdlg.c */
 BOOL get_filename(char *filename, BOOL save, int filter, int title, int help);
@@ -113,13 +118,15 @@ BOOL get_page(int *ppage, BOOL multiple, BOOL allpages);
 void show_info(void);
 void show_about(void);
 BOOL get_bbox(void);
+BOOL pstoeps_warn(void);
 void change_sounds(void);
 BOOL install_gsdll(void);
 void display_settings(void);
+BOOL get_pdf2ps_options(void);
 void gs_showmess(void);
 HWND gs_showmess_modeless(void);
-void gs_addmess_count(char *str, int count);
-void gs_addmess(char *str);
+void gs_addmess_count(char GVFAR *str, int count);
+void gs_addmess(char GVFAR *str);
 
 /* in gvcprf.c or gvwprf.c */
 PROFILE * profile_open(char *filename);
@@ -132,7 +139,6 @@ void ps_to_eps(void);
 /* see gvceps.h */
 
 /* in gvpeps.c or gvwclip.c */
-void make_eps_metafile(void);
 void clip_convert(void);
 void paste_to_file(void);
 
@@ -144,7 +150,7 @@ char *get_devices(void);
 void print_cleanup(void);
 void gsview_saveas(void);
 void gsview_extract(void);
-BOOL gsview_cprint(BOOL to_file, char *cfname, char *optfname);
+BOOL gsview_cprint(char *cfname, char *optfname);
 
 /* in gvctext.c */
 void gsview_text_extract(void);
@@ -153,15 +159,16 @@ void gsview_text_find(void);
 void gsview_text_findnext(void);
 BOOL make_text_index(void);
 int word_find(int x, int y);
+BOOL wildmatch(char *w, char *s);
 
 /* in gvcdll.c */
-int gs_execute(char *str, int len);
+int gs_execute(char GVFAR *str, int len);
 int gs_printf(const char *fmt, ...);
 void gs_process(void);
 int gs_page_skip(int skip);
 char * gs_argnext(char *argline, char *arg);
 int gs_dll_init(GSDLL_CALLBACK callback, char *devname);
-int callback_pstotext(char *str, unsigned long count);
+int callback_pstotext(char GVFAR *str, unsigned long count);
 
 /* in gvpdll.c or gvwdll.c */
 extern GSDLL gsdll;
@@ -169,7 +176,15 @@ void gs_load_dll_cleanup(void);
 BOOL gs_load_dll(void);
 BOOL gs_free_dll(void);
 BOOL gsdll_close(void);
+#ifdef _Windows
+#ifdef __WIN32__
+int _export gsdll_callback(int message, char *str, unsigned long count);
+#else
+int _far _export gsdll_callback(int message, char FAR *str, unsigned long count);
+#endif
+#else
 int gsdll_callback(int message, char *str, unsigned long count);
+#endif
 int get_message(void);
 int peek_message(void);
 void wait_event(void);
@@ -186,8 +201,16 @@ int pdf_head(void);
 int pdf_makedoc(int first, int last);
 int pdf_trailer(void);
 int pdf_page(int pagenum);
-int pdf_checktag(char *str, int len);
+int pdf_checktag(LPSTR str, int len);
 int pdf_extract(FILE *f);
+BOOL gsview_pdf2ps_common(char *psname, char *optname, char *output);
 int pdf_orientation(void);
+BOOL pdf_get_link(int index, PDFLINK *link);
+void pdf_free_link(void);
+BOOL is_link(float x, float y, PDFLINK *link);
 
+
+/* gvwprn.c or gvpprn.c */
+void gsview_print(void);
+void gsview_pdf2ps(char *output);
 

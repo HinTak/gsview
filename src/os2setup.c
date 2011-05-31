@@ -32,9 +32,12 @@
 #define GVFAR
 #define IDYES MBID_YES
 
-#include "setup.h"
 #include "gvcver.h"
+#include "gvcbeta.h"
 #include "gvcprf.h"
+#include "gvcrc.h"
+#include "setup.h"
+#include "gvclang.h"
 
 
 #define EMXZIP    "emxrt.zip"
@@ -46,6 +49,7 @@ MRESULT EXPENTRY InputDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 char workdir[MAXSTR];
 char bootdrive[MAXSTR];
 char destdir[MAXSTR];
+char gsviewbase[MAXSTR];
 char unzipname[MAXSTR];
 HAB hab;
 HWND hwnd_dlg;
@@ -103,6 +107,12 @@ gs_chdir(char *dirname)
 	return _chdir2(dirname);
 #endif
 #endif
+}
+
+int
+load_string(int id, char *str, int len)
+{
+	return WinLoadString(hab, 0, id, len, str);
 }
 
 
@@ -322,45 +332,6 @@ unzip(char *filename, char *destination)
     return 0;
 }
 
-/* This is only needed for GS 4.01 */
-#if (GS_REVISION == 401)
-/* replace Ghostscript gs_init.ps with one supplied by GSview */
-int
-patch_ghostscript(void)
-{
-char dest[MAXSTR];
-char src[MAXSTR];
-char line[MAXSTR];
-FILE *infile, *outfile;
-    /* first rename old gs_init.ps */
-    sprintf(dest, "%s\\%s\\gs_init.ps", destdir, GS_BASEDIR); 
-    sprintf(line, "%s\\%s\\gs_init.bak", destdir, GS_BASEDIR);
-    if ( (outfile = fopen(line, "r")) == (FILE *)NULL ) {
-	/* no need to make backup */
-	rename(dest, line);
-    }
-    else
-	fclose(outfile);
-
-    /* copy patched gs_init.ps to GS directory */
-    sprintf(src, "%s\\%s\\gs_init.ps", destdir, GSVIEW_BASEDIR); 
-
-    if ( (infile = fopen(src, "r")) == (FILE *)NULL) {
-	sprintf(error_message, "Can't open %s for reading", src);
-	return 1;
-    }
-    if ( (outfile = fopen(dest, "w")) == (FILE *)NULL)  {
-	sprintf(error_message, "Can't create %s for writing", dest);
-	return 1;
-    }
-    while (fgets(line, sizeof(line), infile))
-	fputs(line, outfile);
-    fclose(outfile);
-    fclose(infile);
-    return 0;
-}
-#endif
-
 
 int
 update_config(void)
@@ -485,7 +456,7 @@ char setup[MAXSTR];
 APIRET rc;
     strcpy(buf, destdir);
     strcat(buf, "\\");
-    strcat(buf, GSVIEW_BASEDIR);
+    strcat(buf, gsviewbase);
     strcat(buf, "\\gvpm.exe");
     sprintf(setup, "EXENAME=%s;ASSOCFILTER=*.ps,*.eps,*.pdf", buf);
     rc = !WinCreateObject("WPProgram", "GSview", setup, "<WP_DESKTOP>",
@@ -524,12 +495,18 @@ int rc;
 
     /* unzip GSview and Ghostscript */
     if (!rc) {
-	rc = unzip(GSVIEW_ZIP, destdir);
+	strcpy(buf, destdir);
+	strcat(buf, "\\");
+	strcat(buf, gsviewbase);
+	mkdir(buf, 0);
+	rc = unzip(GSVIEW_ZIP, buf);
     }
     if (!rc) {
 	char eabuf[MAXSTR];
 	strcpy(buf, destdir);
-	strcat(buf, "\\gsview\\");
+	strcat(buf, "\\");
+	strcat(buf, gsviewbase);
+	strcat(buf, "\\");
 	strcpy(eabuf, buf);
 	strcat(buf,   "gvpm.exe");
 	strcat(eabuf, "gvpm.eas");
@@ -541,23 +518,33 @@ int rc;
 	if (!emx)
 	    rc = unzip(EMXZIP, buf);
     }
-    if (!rc)
-	rc = unzip(GS_INIZIP, destdir);
-    if (!rc)
-	rc = unzip(GS_OS2ZIP, destdir);
     if (!rc) {
-	strcpy(buf, destdir);
-	strcat(buf, "\\");
-	strcat(buf, GS_BASEDIR);
-	rc = unzip(GS_FN1ZIP, buf);
+	int skip_gs = FALSE;
+	if (already_installed()) {
+	    char buf3[MAXSTR];
+	    char buf4[MAXSTR];
+	    load_string(IDS_SKIPGSINSTALL, buf3, sizeof(buf3));
+	    sprintf(buf4, buf3, GS_VERSION);
+	    if (message_box(buf4, MB_YESNO) == MBID_YES)
+		skip_gs = TRUE;
+	}
+		
+	if (!skip_gs) {
+	    if (!rc)
+		rc = unzip(GS_INIZIP, destdir);
+	    if (!rc)
+		rc = unzip(GS_OS2ZIP, destdir);
+	    if (!rc) {
+		strcpy(buf, destdir);
+		strcat(buf, "\\");
+		strcat(buf, GS_BASEDIR);
+		rc = unzip(GS_FN1ZIP, buf);
+	    }
+	}
     }
 
     /* remove unneeded unzip */
     unlink(unzipname);
-
-    if (!rc) {
-	rc = patch_ghostscript();
-    }
 
     if (!rc) {
 	rc = update_config();
@@ -575,9 +562,10 @@ int rc;
     }
 
     if (!rc) {
-	if (!batch)
-	    message_box("Installation successful.\012A GSview program object has been created on the desktop", 
-		MB_MOVEABLE | MB_OK);
+	if (!batch) {
+            load_string(IDS_SETUPOK, buf, sizeof(buf));
+	    message_box(buf, MB_MOVEABLE | MB_OK);
+	}
     }
     return rc;
 }
@@ -597,6 +585,7 @@ main(int argc, char *argv[])
 	strncpy(destdir, argv[1], sizeof(destdir)-1);
 	batch = TRUE;
     }
+    load_string(IDS_GSVIEWBASE, gsviewbase, sizeof(gsviewbase));
 
     if (beta_warn())
 	rc = 1;

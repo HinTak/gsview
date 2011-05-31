@@ -58,3 +58,5 @@
 #define TEXTWIN_MLE	571
 #define TEXTWIN_COPY	572
 
+#define IDS_INSTALLABORT 900
+

@@ -72,6 +72,12 @@ extern GSDLL_CALLBACK pgsdll_callback;
 			/* non zero error code until gsdll_execute_cont() */
 			/* returns */
 
+/* return values from gsdll_init() */
+#define GSDLL_INIT_IN_USE  100    /* DLL is in use */
+#define GSDLL_INIT_QUIT    101    /* quit or EOF during init */
+                                  /* This is not an error. */
+                                  /* gsdll_exit() must not be called */
+
 
 /* DLL exported  functions */
 /* for load time dynamic linking */
@@ -86,6 +92,8 @@ int GSDLLAPI gsdll_lock_device(unsigned char *device, int flag);
 HGLOBAL GSDLLAPI gsdll_copy_dib(unsigned char GSFAR *device);
 HPALETTE GSDLLAPI gsdll_copy_palette(unsigned char GSFAR *device);
 void GSDLLAPI gsdll_draw(unsigned char GSFAR *device, HDC hdc, LPRECT dest, LPRECT src);
+int GSDLLAPI gsdll_get_bitmap_row(unsigned char *device, LPBITMAPINFOHEADER pbmih,
+    LPRGBQUAD prgbquad, LPBYTE *ppbyte, unsigned int row);
 #else
 unsigned long gsdll_get_bitmap(unsigned char *device, unsigned char **pbitmap);
 #endif
@@ -103,8 +111,11 @@ typedef int (GSDLLAPI *PFN_gsdll_lock_device)(unsigned char GSFAR *, int);
 typedef HGLOBAL (GSDLLAPI *PFN_gsdll_copy_dib)(unsigned char GSFAR *);
 typedef HPALETTE (GSDLLAPI *PFN_gsdll_copy_palette)(unsigned char GSFAR *);
 typedef void (GSDLLAPI *PFN_gsdll_draw)(unsigned char GSFAR *, HDC, LPRECT, LPRECT);
+typedef int (GSDLLAPI *PFN_gsdll_get_bitmap_row)(unsigned char *device, LPBITMAPINFOHEADER pbmih,
+    LPRGBQUAD prgbquad, LPBYTE *ppbyte, unsigned int row);
 #else
 typedef long (*GSDLLAPI PFN_gsdll_get_bitmap)(unsigned char *, unsigned char **);
 #endif
 
 #endif
+

@@ -33,8 +33,8 @@ FILE *pf;
 char section[MAXSTR];
 char *key, *value;
 PROFILE *prf;
-    if (message_box("Update GSview printer list, overwriting any existing entries?", 
-	MB_YESNO) != IDYES)
+    load_string(IDS_UPDATEPRINTER, buf, sizeof(buf)-1);
+    if (message_box(buf, MB_YESNO) != IDYES)
 	return;
 
     /* open an INI file and copy everything to user ini file
@@ -44,12 +44,12 @@ PROFILE *prf;
     strcat(buf, "printer.ini");
     pf = fopen(buf, "r");
     if (!pf) {
-	message_box("Can't open printer.ini", 0);
+	gserror(IDS_NOPRINTERINI, NULL, 0, SOUND_ERROR);
 	return;
     }
     prf = profile_open(szIniFile);
     if (!prf) {
-	message_box("Can't open INI file", 0);
+	gserror(IDS_NOINI, NULL, 0, SOUND_ERROR);
 	return;
     }
     while (fgets(buf, sizeof(buf)-1, pf)) {
@@ -87,6 +87,7 @@ PROFILE *prf;
 void
 init_options(void)
 {
+    option.language = IDM_LANGEN;
     default_gsdll(option.gsdll);
     default_gsinclude(option.gsinclude);
     option.gsother[0] = '\0';
@@ -99,13 +100,13 @@ init_options(void)
     option.drawmethod = IDM_DRAWDEF;
     option.unit = IDM_UNITPT;
     option.quick_open = TRUE;
-    option.quick_text = FALSE;
+    option.pstotext = IDM_PSTOTEXTNORM - IDM_PSTOTEXTMENU - 1;
     option.settings = TRUE;
     option.button_show = TRUE;
     option.fit_page = TRUE;
     option.safer = TRUE;
-    option.media = IDM_LETTER;
-    strcpy(option.medianame, "letter");
+    option.media = IDM_A4;
+    strcpy(option.medianame, "A4");
     option.user_width = 610;
     option.user_height = 792;
     option.epsf_clip = FALSE;
@@ -125,6 +126,10 @@ init_options(void)
     option.save_dir = TRUE;
     strcpy(option.device_name, "deskjet");
     strcpy(option.device_resolution, "300");
+    option.print_to_file = FALSE;
+    option.psprinter = FALSE;
+    option.pdf2ps = 0;
+    option.auto_bbox = TRUE;
     option.configured = FALSE;
 }
 
@@ -151,21 +156,29 @@ init_check_menu(void)
 {
     int i;
     char thismedia[20];
-    for (i=IDM_LETTER; i<IDM_USERSIZE; i++) {
-	get_menu_string(IDM_MEDIAMENU, i, thismedia, sizeof(thismedia));
-	if (!stricmp(thismedia, option.medianame)) {
-	    break;
+    if (!stricmp(option.medianame, MEDIA_USERDEFINED)) {
+	option.media = IDM_USERSIZE;
+    }
+    else {
+	for (i=IDM_LETTER; i<IDM_MEDIALAST; i++) {
+	    if (get_menu_string(IDM_MEDIAMENU, i, thismedia, sizeof(thismedia))) {
+		if (!stricmp(thismedia, option.medianame)) {
+		    option.media = i;
+		    strncpy(option.medianame, thismedia, sizeof(option.medianame));
+		    break;
+		}
+	    }
 	}
     }
-    option.media = i;
-    strncpy(option.medianame,thismedia,sizeof(option.medianame));
+
     /* update menus */
     check_menu_item(IDM_UNITMENU, option.unit, TRUE);
+    check_menu_item(IDM_LANGMENU, option.language, TRUE);
+    check_menu_item(IDM_PSTOTEXTMENU, option.pstotext + IDM_PSTOTEXTMENU + 1, TRUE);
     check_menu_item(IDM_ORIENTMENU, option.orientation, TRUE);
     check_menu_item(IDM_ORIENTMENU, IDM_SWAPLANDSCAPE, option.swap_landscape);
     check_menu_item(IDM_MEDIAMENU, option.media, TRUE);
     check_menu_item(IDM_OPTIONMENU, IDM_QUICK_OPEN, option.quick_open);
-    check_menu_item(IDM_OPTIONMENU, IDM_QUICK_TEXT, option.quick_text);
     check_menu_item(IDM_OPTIONMENU, IDM_SAVESETTINGS, option.settings);
     check_menu_item(IDM_OPTIONMENU, IDM_BUTTONSHOW, option.button_show);
     check_menu_item(IDM_OPTIONMENU, IDM_FITPAGE, option.fit_page);
@@ -250,9 +263,7 @@ FILE *f;
 char buf[MAXSTR];
 char *p;
     if (!getenv("TEMP")) {
-	message_box("You must set the environment variable TEMP to a valid \
-writeable directory.  Without this, GSview and Aladdin Ghostscript \
-will not be able to print", 0);
+	gserror(IDS_NEEDTEMP, NULL, 0, 0);
 	putenv("TEMP=c:\\");   /* just in case the user ignores us */
     }
 
@@ -262,11 +273,12 @@ will not be able to print", 0);
     if (beta_warn())
 	return 1;	/* don't run */
 
-    if (message_box("The installed version of GSview has changed. \
-Proceed with configuration of GSview?", MB_YESNO) != IDYES) {
-	message_box("GSview has not been configured correctly.  \
-Please read the Installation help and then correctly set\
-\042Options | Configure Ghostscript\042", 0);
+    check_language();	/* offer to change language if doesn't match WIN.INI */
+
+    load_string(IDS_VERSIONCHANGED, buf, sizeof(buf)-1);
+    if (message_box(buf, MB_YESNO) != IDYES) {
+        load_string(IDS_CONFIGURECANCELLED, buf, sizeof(buf)-1);
+	message_box(buf, 0);
 	return 0;
     }
     
@@ -277,8 +289,7 @@ Please read the Installation help and then correctly set\
     /* check if Ghostscript really has been installed */
     /* first look for the DLL */
     if ( (f = fopen(option.gsdll, "rb")) == (FILE *)NULL ) {
-	message_box("You have not installed Ghostscript.  \
-Please read the GSview README.TXT file.", 0);
+	gserror(IDS_GSNOTINSTALLED, NULL, 0, SOUND_ERROR);
 	return 0;
     }
     fclose(f);
@@ -290,8 +301,7 @@ Please read the GSview README.TXT file.", 0);
 	*(++p) = '\0';
     strcat(buf, "gs_init.ps");
     if ( (f = fopen(buf, "rb")) == (FILE *)NULL ) {
-	message_box("You have not installed the Ghostscript library files.  \
-Please read the GSview README.TXT file.", 0);
+	gserror(IDS_GSLIBNOTINSTALLED, NULL, 0, SOUND_ERROR);
 	return 0;
     }
     fclose(f);
@@ -308,7 +318,8 @@ Please read the GSview README.TXT file.", 0);
     /* update for platform, e.g. registry, progman, object */
     gsview_create_objects();
 
-    message_box("Configuration complete", 0);
+    load_string(IDS_CONFIGURECOMPLETE, buf, sizeof(buf)-1);
+    message_box(buf, 0);
     return 0;
 }
 

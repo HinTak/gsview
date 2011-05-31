@@ -29,14 +29,9 @@ exec_pgm(char *name, char *arg, PROG* prog)
 	char buf[MAXSTR];
 	CHAR progname[MAXSTR];
 	PROG pg;
-	int pipe_handle[2];
 	PTIB pptib;
 	PPIB pppib;
 
-/*
-	if (prog->valid)
-		stop_pgm(prog);
-*/
 	memset(&pg, 0, sizeof(PROG));
 
 	if (DosGetInfoBlocks(&pptib, &pppib)) {
@@ -53,7 +48,6 @@ exec_pgm(char *name, char *arg, PROG* prog)
 	/* because new program is a different EXE type, 
 	 * we must use start session not DosExecPgm() */
 	sdata.Length = sizeof(sdata);
-/*	sdata.Related = SSF_RELATED_CHILD;	/* to be a child  */
 	sdata.Related = SSF_RELATED_INDEPENDENT;
 	sdata.FgBg = SSF_FGBG_BACK;		/* start in background */
 	sdata.TraceOpt = 0;
@@ -61,13 +55,9 @@ exec_pgm(char *name, char *arg, PROG* prog)
 	sdata.PgmName = progname;
 	sdata.PgmInputs = arg;
 	sdata.TermQ = 0;
-/*
-	sdata.TermQ = gsview.term_queue_name;
-*/
 	sdata.Environment = pppib->pib_pchenv;	/* use Parent's environment */
 	sdata.InheritOpt =  0;
 	sdata.InheritOpt = SSF_INHERTOPT_PARENT;
-/*	sdata.InheritOpt = withpipe ? SSF_INHERTOPT_PARENT : 0; */
 	sdata.SessionType = SSF_TYPE_DEFAULT;		/* default is text */
 	sdata.IconFile = NULL;
 	sdata.PgmHandle = 0;
@@ -90,7 +80,7 @@ message_box(buf, 0);
 	    rc = DosStartSession(&sdata, &pg.session_id, &pg.process_id);
 	}
 	if (rc) {
-	    sprintf(buf,"\"%s %s\", rc = %d\n", sdata.PgmName, sdata.PgmInputs, rc);
+	    sprintf(buf,"\"%s %s\", rc = %ld\n", sdata.PgmName, sdata.PgmInputs, rc);
 	    gserror(IDS_CANNOTRUN, buf, MB_ICONHAND, SOUND_ERROR);
 	    load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
 	    get_help();
@@ -159,4 +149,3 @@ struct stat fstatus;
 	psf->length = fstatus.st_size;
 }
 
-

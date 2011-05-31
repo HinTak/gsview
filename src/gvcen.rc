@@ -1,0 +1,225 @@
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+  
+  This file is part of GSview.
+  
+  This program is distributed with NO WARRANTY OF ANY KIND.  No author
+  or distributor accepts any responsibility for the consequences of using it,
+  or for whether it serves any particular purpose or works at all, unless he
+  or she says so in writing.  Refer to the GSview Free Public Licence 
+  (the "Licence") for full details.
+  
+  Every copy of GSview must include a copy of the Licence, normally in a 
+  plain ASCII text file named LICENCE.  The Licence grants you the right 
+  to copy, modify and redistribute GSview, but only under certain conditions 
+  described in the Licence.  Among other things, the Licence requires that 
+  the copyright notice and this notice be preserved on all copies.
+*/
+
+/* gvcen.rc */
+/* Common English language resources */
+
+/* button help */
+STRINGTABLE
+BEGIN
+	IDM_OPEN, "Open..."
+	IDM_PRINT, "Print..."
+	IDM_INFO, "Info..."
+	IDM_HELPCONTENT, "Help"
+	IDM_GOTO, "Goto Page..."
+	IDM_NEXT, "Next Page"
+	IDM_PREV, "Previous Page"
+	IDM_NEXTSKIP, "Skip forwards 5 pages"
+	IDM_PREVSKIP, "Skip backwards 5 pages"
+	IDM_MAGPLUS, "Increase Resolution"
+	IDM_MAGMINUS, "Decrease Resolution"
+	IDM_TEXTFIND, "Find..."
+	IDM_TEXTFINDNEXT, "Find Next"
+END
+
+
+STRINGTABLE
+BEGIN
+	IDS_FILE, "File: "
+	IDS_NOFILE, "No File"
+	IDS_PAGE, "Page: "
+	IDS_NOPAGE, "No page numbering available"
+	IDS_PAGESPECIAL, "Page ordering is Special.  Pages can not be reliably reordered.  See help 'Common Problems'.  Continue?"
+	IDS_LANDSCAPE, "Landscape"
+	IDS_PORTRAIT, "Portrait"
+	IDS_ASCEND, "Ascending"
+	IDS_DESCEND, "Descending"
+	IDS_SPECIAL, "Special"
+	IDS_PAGEINFO, "Page: \042%s\042  %d of %d"
+	IDS_LINKPAGE, "Link to page %d"
+	IDS_DEFAULT, "Default"
+	IDS_NOTDEFTAG, "[Not defined]"
+	IDS_EPSF, "EPS"
+	IDS_EPSI, "EPS with Interchange Preview"
+	IDS_EPST, "EPS with TIFF Preview"
+	IDS_EPSW, "EPS with Metafile Preview"
+	IDS_DSC, "DSC"
+	IDS_NOTDSC, "No DSC comments"
+	IDS_PDF, "Portable Document Format"
+	IDS_IGNOREDSC, "Ignoring DSC comments"
+	IDS_CTRLD, "Ctrl-D followed by "
+	IDS_PJL, "PJL followed by "
+END
+
+STRINGTABLE
+BEGIN
+	IDS_OUTPUTFILE, "Output Filename"
+	IDS_PRINTINGALL, "No DSC comments\nPrinting all pages"
+	IDS_PRINTFILE, "Print File"
+	IDS_SELECTPAGE, "Select Page"
+	IDS_SELECTPAGES, "Select Pages"
+	IDS_NOTOPEN, "No document open"
+	IDS_CANNOTRUN, "Can't run "
+	IDS_TOOLONG, "Command line too long: "
+	IDS_NOMORE, "No more pages"
+	IDS_GSCOMMAND, "Ghostscript command ?"
+	IDS_NOZOOM, "Must display page before zooming"
+	IDS_USERWIDTH, "Width in 1/72 inch units ?"
+	IDS_USERHEIGHT, "Height in 1/72 inch units ?"
+	IDS_BADEPS, "Problem making EPS file"
+	IDS_NOPREVIEW, "Not a DOS EPS file or\nNo binary preview"
+	IDS_NOTDFNAME, "Can't use same name as open document"
+	IDS_NOTEMP, "Couldn't open temporary file.\nDirectory may be Read Only.\nTEMP environment variable may not set."
+	IDS_CANCELDONE, "%d%% done"
+	IDS_BADCLI, "Bad command line option: "
+	IDS_DUPOPT, "Can only specify one of /F /P /S options.  Error at: %s"
+	IDS_TEXTFIND, "Find text ?"
+	IDS_TEXTNOTFIND, "Text not found"
+	IDS_PRINTPDFPS "Can't print PDF to a PostScript printer.  Use File | Extract"
+	IDS_NOPDFQUICKTEXT "Can't do quick text extract or find on PDF file.  Use Options | PStoText"
+END
+
+STRINGTABLE
+BEGIN
+	/* sound type types*/
+	IDS_SOUNDNAME, "Sound File"
+	IDS_SNDPAGE, "Output Page"
+	IDS_SNDNOPAGE, "No Page"
+	IDS_SNDNONUMBER, "No Numbering"
+	IDS_SNDNOTOPEN, "Not Open"
+	IDS_SNDERROR, "Error"
+	IDS_SNDTIMEOUT,	"Timeout"
+	IDS_SNDSTART, "Start"
+	IDS_SNDEXIT, "Exit"
+	IDS_SNDBUSY, "Busy"
+	IDS_NONE, "<None>"
+	IDS_SPKR, "<Speaker Beep>"
+END
+
+STRINGTABLE
+BEGIN
+	/* help topics - these need to match keywords in gvcXX.doc */
+	IDS_TOPICROOT,  "Overview"
+	IDS_TOPICOPEN,  "Open"
+	IDS_TOPICPRINT, "Print"
+	IDS_TOPICPROP, "Properties"
+	IDS_TOPICEDITPROP, "Edit Properties"
+	IDS_TOPICCLIP, "Clipboard"
+	IDS_TOPICPREVIEW, "EPS Preview"
+	IDS_TOPICGSCMD, "Configure Ghostscript"
+	IDS_TOPICSOUND, "Sounds"
+	IDS_TOPICDSET, "Display Settings"
+	IDS_TOPICMEDIA, "Media"
+	IDS_TOPICPSTOEPS, "PS to EPS"
+	IDS_TOPICGOTO, "Page Selection"
+	IDS_TOPICINSTALL, "Installation"
+	IDS_TOPICTEXT, "Text Extract and Find"
+	IDS_TOPICKEYS, "Keys"
+	IDS_TOPICMESS, "Show Messages"
+	IDS_TOPICSPOOL, "Spooler"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_BBPROMPT,  "Click at left"
+	IDS_BBPROMPT1, "Click at bottom"
+	IDS_BBPROMPT2, "Click at right"
+	IDS_BBPROMPT3, "Click at top"
+	IDS_EPSONEPAGE, "An EPS file must be a single page document. \nSee help on 'PS to EPS'"
+	IDS_EPSQPAGES, "Is this a single page document ?"
+	IDS_EPSNOBBOX, "Could not obtain Bounding Box"
+	IDS_EPSUSERINVALID, "Preview file is not TIFF or Windows Metafile"
+	IDS_EPSUSERTITLE, "Open Preview File"
+	IDS_EPS_OFF_PAGE, "EPS Bounding Box is entirely off the page.  Suggest you use 'Options | EPSF Clip'"
+	IDS_MUSTUSEPORTRAIT, "You must use Portrait orientation."
+END
+
+STRINGTABLE
+BEGIN
+	/* wait messages */
+	IDS_WAIT, "Wait"
+	IDS_WAITREAD,  "Reading..."
+	IDS_WAITWRITE,  "Writing..."
+	IDS_WAITDRAW, "Drawing..."
+	IDS_WAITDRAW_PC, "Drawing %d%%"
+	IDS_WAITGSOPEN, "Opening Ghostscript..."
+	IDS_WAITGSCLOSE,  "Closing Ghostscript..."
+	IDS_WAITPRINT,  "Printing..."
+	IDS_WAITSEARCH,  "Searching..."
+	IDS_WAITTEXT, "Extracting Text %d%%"
+END
+
+STRINGTABLE
+BEGIN
+	/* debug messages */
+	IDS_DEBUG_DFISLOCKED, "dfreopen: file is locked"
+	IDS_DEBUG_DFISOPEN, "dfreopen: file is already open"
+	IDS_DEBUG_DFISMISSING, "dfreopen: file is missing"
+	IDS_DEBUG_DFCHANGED, "dfreopen: file has changed"
+	IDS_DEBUG_DFISCLOSED, "dfclose: file is already closed"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_PROCESS_GSLOAD_FAIL, "Can't load Ghostscript DLL"
+	IDS_PROCESS_INIT_FAIL, "gs_process: gsdll.init failed"
+	IDS_PROCESS_VIEWER_FAIL, "gs_process: '(viewer.ps) run' failed"
+	IDS_PROCESS_EXECUTE_FAIL, "gs_process: gsdll.execute_cont failed"
+END
+
+STRINGTABLE
+BEGIN
+	/* PDF messages */
+	IDS_PDFNOPAGE, "Unknown number of pages in PDF file\nYou must display the file first" 
+	IDS_PDFEXTRACTALL, "Unknown number of pages in PDF file\nExtracting or printing all pages"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_LARGEMEDIA, "Warning: media size is wider than 2 metres or higher than 2 metres.  Please check 'Media | User Defined'"
+	IDS_NOTIMPLEMENTED, "Not implemented"
+	IDS_NOLINKTARGET, "Unknown target for link"
+	IDS_PARSEERROR, "Error parsing command line"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_BETAEXPIRED, "This BETA test copy of GSview has expired.  See http://www.cs.wisc.edu/~ghost/ for details about how to obtain the current version of GSview"
+	IDS_BETAWARN, AABETAWARN
+	IDS_UPDATEPRINTER, "Update GSview printer list, overwriting any existing entries?" 
+	IDS_NOPRINTERINI, "Can't open printer.ini"
+	IDS_NOINI, "Can't open INI file"
+	IDS_NEEDTEMP, "You must set the environment variable TEMP to a valid writeable directory.  Without this, GSview and Aladdin Ghostscript will not be able to print"
+	IDS_VERSIONCHANGED, "The installed version of GSview has changed.  Proceed with configuration of GSview?"
+	IDS_CONFIGURECANCELLED, "GSview has not been configured correctly.  Please read the Installation help and then correctly set \042Options | Configure Ghostscript\042"
+	IDS_GSNOTINSTALLED, "You have not installed Ghostscript.  Please read the GSview README.TXT file."
+	IDS_GSLIBNOTINSTALLED, "You have not installed the Ghostscript library files.  Please read the GSview README.TXT file."
+	IDS_CONFIGURECOMPLETE, "Configuration complete"
+	IDS_PSTOTEXTFILEMISSING, "pstotext text extraction file is missing"
+	IDS_PROGRAMOBJECTFAILED, "Couldn't create desktop program object"
+	IDS_ASSOCPS, "Create file association between GSview and PostScript (.ps and .eps) files?"
+	IDS_ASSOCPDF, "Create file association between GSview and Portable Document Format (.pdf) files?"
+	IDS_REGERROR, "Error updating registry"
+	IDS_NOPROGMAN, "Couldn't open DDE connection to Program Manager"
+	IDS_CREATEGROUP, "Create Program Manager Group for GSview?"
+	IDS_SETUPOK, "Installation successful.\012A GSview program object has been created on the desktop" 
+	IDS_SETUPABORT, "Installation aborted\012%s"
+	IDS_WRONGEMX, "You have emx %s.\rYou need emx %s or later.\rPM GSview will not run correctly."
+	IDS_GSVIEWVERSION, GSVIEW_VERSION
+END
+
+

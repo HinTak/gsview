@@ -84,11 +84,15 @@ HINSTANCE hWinDll;
 int WINAPI (far *DllProcessZipFiles)(DCL far *);
 WINAPI (far *GetDllVersion)(DWORD far *);
 
+typedef int _export (far *THUNKDLLPRNT) (FILE *, unsigned int, char *);
+THUNKDLLPRNT lpfnDoPrint;
+
 extern char szAppName[];
 
 void
 do_sound(void)
 {
+/* needs to be thunked like do_print if anything added here */
 /*
     MessageBeep(-1);
 */
@@ -96,8 +100,15 @@ do_sound(void)
 }
 
 int
+#ifndef __WIN32__
+_far _export
+#endif
 do_print(FILE *file, unsigned int size, char *buffer)
 {
+    /* DS is current set to the DLL.
+     * Call this via a thunk to temporarily set DS back to 
+     * that of the caller.
+     */
 MSG msg;
     gs_addmess_count(buffer, size);
     gs_addmess_update(hwndmess);
@@ -110,27 +121,32 @@ MSG msg;
     return size;
 }
 
+
 int
 free_unzip(void)
 {
-	 if (hWinDll)
+    if (hWinDll)
 	FreeLibrary(hWinDll);
-	 hWinDll = NULL;
+    hWinDll = NULL;
     DllProcessZipFiles = NULL;
-	 GetDllVersion = NULL;
-	 if (hUMB) {
+    GetDllVersion = NULL;
+    if (hUMB) {
 	GlobalUnlock(hUMB);
-		  GlobalFree(hUMB);
-	 }
-	 hUMB = NULL;
-	 lpumb = NULL;
-	 if (hDCL) {
+	GlobalFree(hUMB);
+    }
+    hUMB = NULL;
+    lpumb = NULL;
+#ifndef __WIN32__
+    if (lpfnDoPrint)
+	FreeProcInstance((FARPROC)lpfnDoPrint);
+#endif
+    if (hDCL) {
 	GlobalUnlock(hDCL);
 	GlobalFree(hDCL);
-	 }
-	 hDCL = NULL;
-	 lpDCL = NULL;
-	 return 0;
+    }
+    hDCL = NULL;
+    lpDCL = NULL;
+    return 0;
 }
 
 
@@ -161,8 +177,13 @@ DWORD dwVersion;  /* These variables are all used for version checking */
 	return -1;
 	 }
 
-	 lpDCL->print = do_print;
-	 lpDCL->sound = do_sound;
+#ifdef __WIN32__
+	 lpfnDoPrint = do_print;
+#else
+	 lpfnDoPrint = (DLLPRNT)MakeProcInstance((FARPROC)do_print, hInstance);
+#endif
+	 lpDCL->print = (DLLPRNT)lpfnDoPrint;
+	 lpDCL->sound = (DLLSND)do_sound;
 	 lpDCL->Stdout = stdout;
 	 lpDCL->lpUMB = lpumb;
 	 lpDCL->hInst = hInstance;
@@ -214,7 +235,7 @@ DWORD dwVersion;  /* These variables are all used for version checking */
 int
 unzip(char *zipname)
 {
-char *p;
+LPSTR p;
 	 lpDCL->Overwrite = TRUE;  /* overwrite existing files */
 	 lpDCL->ncflag = FALSE;	/* don't write to stdout */
 	 lpDCL->ntflag = FALSE;	/* don't test zip file */
@@ -225,9 +246,9 @@ char *p;
 	 lpDCL->noflag = FALSE;      /* */
 	 lpDCL->naflag = FALSE;      /* do ASCII-EBCDIC and/or end of line translation */
 
-	 strcpy(lpumb->szFileName, zipname);
-	 strcpy(lpumb->szDirName, zipname);
-	 p = strrchr(lpumb->szDirName, '\\');
+	 lstrcpy(lpumb->szFileName, zipname);
+	 lstrcpy(lpumb->szDirName, zipname);
+	 p = _fstrrchr(lpumb->szDirName, '\\');
 	 if (p)
 	*p = '\0';
 

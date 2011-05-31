@@ -19,7 +19,6 @@
 /* Clipboard module for Windows GSview */
 #include "gvwin.h"
 
-long hugewrite(HFILE hf, const void _huge *hpvBuffer, long cbBuffer);  /* in gvweps.c */
 void paste_to_file(void);
 void clip_convert(void);
 void clip_add_palette(void);
@@ -63,12 +62,12 @@ HFILE hfile;
 	bmfh.bfOffBits = sizeof(BITMAPFILEHEADER) + pbmih->biSize + palsize;
 	bmfh.bfSize = bmfh.bfOffBits + bitmap_size;
 
-	if ( get_filename(output, TRUE, FILTER_BMP, NULL, IDS_TOPICCLIP)
+	if ( get_filename(output, TRUE, FILTER_BMP, 0, IDS_TOPICCLIP)
 	    && ((hfile = _lcreat(output, 0)) != HFILE_ERROR) ) {
-		hugewrite(hfile, &bmfh, sizeof(BITMAPFILEHEADER));
-		hugewrite(hfile, pbmih, pbmih->biSize + palsize);
+		_hwrite(hfile, (const void GVHUGE *)&bmfh, sizeof(BITMAPFILEHEADER));
+		_hwrite(hfile, (const void GVHUGE *)pbmih, pbmih->biSize + palsize);
 		lpBits =  ((BYTE _huge *)pbmih) + pbmih->biSize + palsize;
-		hugewrite(hfile, lpBits, bitmap_size);
+		_hwrite(hfile, (const void GVHUGE *)lpBits, bitmap_size);
 		_lclose(hfile);
 	}
 	GlobalUnlock(hglobal);
@@ -189,7 +188,7 @@ HBITMAP hbitmap;
 	hdc = GetDC(hwndimg);
 	hpalette = GetClipboardData(CF_PALETTE);
 	if (hpalette) {
-	    SelectPalette(hdc,hpalette,NULL);
+	    SelectPalette(hdc,hpalette,FALSE);
 	    RealizePalette(hdc);
 	}
 	hbitmap = CreateDIBitmap(hdc, pbmih, CBM_INIT,
@@ -332,3 +331,4 @@ HMETAFILE hmf;
 	return;
 }
 #endif
+

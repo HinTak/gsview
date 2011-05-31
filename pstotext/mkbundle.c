@@ -1,5 +1,5 @@
 /* mkbundle.c */
-/* Created by Russell Lang, 1996-07-29 */
+/* Created by Russell Lang, 1996-10-11 */
 
 #include <stdio.h>
 #include <string.h>
@@ -7,7 +7,7 @@
 int 
 usage(void)
 {
-    fprintf(stderr, "Usage: mkbundle psfile hdrfile resource_id\n");
+    fprintf(stderr, "Usage: mkbundle psfile hdrfile\n");
     return 1;
 }
 
@@ -17,7 +17,7 @@ main(int argc, char *argv[])
 FILE *psfile, *hdrfile;
 char inbuf[256], outbuf[256];
 char *s, *d;
-    if (argc!=4)
+    if (argc!=3)
 	return usage();
     if ( (psfile = fopen(argv[1], "r")) == (FILE *)NULL )
 	return usage();
@@ -27,15 +27,9 @@ char *s, *d;
     }
     strcpy(inbuf, argv[1]);
     strtok(inbuf, ".");
-    fputs("\n", hdrfile);
-#ifdef __EMX__
-    fputs("RCDATA ", hdrfile);
-    fputs(argv[3], hdrfile);
-    fputs("\nBEGIN\n", hdrfile);
-#else
-    fputs(argv[3], hdrfile);
-    fputs(" RCDATA\nBEGIN\n", hdrfile);
-#endif
+    fputs("char *", hdrfile);
+    fputs(inbuf, hdrfile);
+    fputs("[] = {\n", hdrfile);
     while ( fgets(inbuf, sizeof(inbuf)-1, psfile) ) {
 	d = outbuf;
 	for (s=inbuf; *s; s++) {
@@ -59,9 +53,9 @@ char *s, *d;
 	*d = '\0';
 	fputs("  \042", hdrfile);
 	fputs(outbuf, hdrfile);
-	fputs("\042\n", hdrfile);
+	fputs("\042,\n", hdrfile);
     }
-    fputs("  \042\\0\\0\042\nEND\n\n", hdrfile);
+    fputs("  0\n};\n\n", hdrfile);
     fclose(psfile);
     fclose(hdrfile);
     return 0;

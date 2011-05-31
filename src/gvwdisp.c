@@ -89,22 +89,26 @@ char command[MAXSTR*2];
 void
 stop_pgm(PROG* prog)
 {
-int i = 0;
 	if (!prog->valid) {
 	    cleanup_pgm(prog);
 	    return;
 	}
+#ifdef __WIN32__
 /* should really stop program by sending it a WM_CLOSE */
 /* figuring out which window is messy */
-	TerminateProcess(prog->hinst, 1);
-	while (prog->valid && (i < 100)) {
-	    /* wait for termination message to cause cleanup_pgm() to be called */
-	    Sleep(100);
-	    peek_message();
-	    i++;
+	{
+	    int i = 0;
+	    TerminateProcess(prog->hinst, 1);
+	    while (prog->valid && (i < 100)) {
+		/* wait for termination message to cause cleanup_pgm() to be called */
+		Sleep(100);
+		peek_message();
+		i++;
+	    }
+	    if (i >= 100)
+		gserror(0, "can't stop program", MB_ICONHAND, SOUND_ERROR);
 	}
-	if (i >= 100)
-	    gserror(0, "can't stop program", MB_ICONHAND, SOUND_ERROR);
+#endif
 /* cleanup should already have occurred */
 	cleanup_pgm(prog);
 }

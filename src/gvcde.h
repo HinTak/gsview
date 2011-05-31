@@ -1,0 +1,245 @@
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+
+  This file is part of GSview.
+
+  This program is distributed with NO WARRANTY OF ANY KIND.  No author
+  or distributor accepts any responsibility for the consequences of using it,
+  or for whether it serves any particular purpose or works at all, unless he
+  or she says so in writing.  Refer to the GSview Free Public Licence
+  (the "Licence") for full details.
+
+  Every copy of GSview must include a copy of the Licence, normally in a
+  plain ASCII text file named LICENCE.  The Licence grants you the right
+  to copy, modify and redistribute GSview, but only under certain conditions
+  described in the Licence.  Among other things, the Licence requires that
+  the copyright notice and this notice be preserved on all copies.
+*/
+
+/* gvcde.h */
+/* Common German language defines */
+
+#define GSVIEW_BASEDIR "gsview"
+
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1996 Russell Lang."
+#define GSVIEW_COPYRIGHT2 "Alle Rechte vorbehalten."
+#define GSVIEW_COPYRIGHT3 "Siehe Datei LICENCE für mehr Details."
+
+#define GS_COPYRIGHT1 "Copyright (C) 1994-1996 Aladdin Enterprises,"
+#define GS_COPYRIGHT2 "Menlo Park, California, U.S.A.  Alle Rechte vorbehalten."
+#define GS_COPYRIGHT3 "Siehe Datei PUBLIC für mehr Details."
+
+/* Buttons */
+#ifdef _Windows
+#define AAOK "&Ok"
+#define AACANCEL "&Abbruch"
+#define AADEFAULTS "&Defaults"
+#define AAEDIT "&Bearbeiten"
+#define AAHELP "&Hilfe"
+#define AANEW "&Neu"
+#define AATEST "&Test"
+#define AAYES "&Ja"
+#define AANO "&Nein"
+#else
+#define AAOK "~Ok"
+#define AACANCEL "~Abbruch"
+#define AADEFAULTS "~Defaults"
+#define AAEDIT "~Bearbeiten"
+#define AAHELP "~Hilfe"
+#define AANEW "~Neu"
+#define AATEST "~Test"
+#define AAYES "~Ja"
+#define AANO "~Nein"
+#endif
+
+/* About dialog box */
+#define AAABOUTWIN "Über GSview für Windows"
+#define AAABOUTPM "Über PM GSview"
+#define AAABOUTGSV16SPL "Über GSV16SPL"
+#define AAABOUTGSVIEWPRINT "Über  GSview Print"
+#define AACOPY1 "Version:"
+#define AACOPY2 "Bedienung von Ghostscript über graphische Oberfläche"
+#define AACOPY3 "Partielles Copyright (C) 1994, Timothy O. Theisen.  Alle Rechte vorbehalten."
+#define AACOPY4 "Dieses Programm wird ohne jede Gewährleistung vertrieben."
+#define AACOPY5 "Keiner der Autoren oder Distributoren ist verantwortlich"
+#define AACOPY6 "für die Folgen des Gebrauchs, weder für die Fehlerfreiheit einer"
+#define AACOPY7 "einzelnen Funktion, noch für die des gesamten Programms.  Nähere"
+#define AACOPY8 "Details finden sich in der GSview Free Public Licence (der 'Lizenz')."
+#define AACOPY9 "Jede Kopie von GSview muß eine Kopie der Lizenz in Form einer ASCII"
+#define AACOPY10 "Datei namens 'LICENCE' enthalten.  Diese Lizenz gibt Ihnen das Recht"
+#define AACOPY11 "GSview zu kopieren, zu ändern und zu verbreiten, jedoch nur unter"
+#define AACOPY12 "den Bedingungen, die in der Lizenz beschrieben sind.  Unter anderem"
+#define AACOPY13 "fordert die Lizenz, daß das Copyright und dieser Hinweis in allen"
+#define AACOPY14 "Kopien enthalten ist."
+#define AACOPY15 "pstotxt3.dll, Copyright (C) 1995-1996 Digital Equipment Corporation,"
+#define AACOPY16 "pstotxt2.dll, Copyright (C) 1995-1996 Digital Equipment Corporation,"
+#define AACOPY17 "pstotxt1.dll, Copyright (C) 1995-1996 Digital Equipment Corporation,"
+#define AACOPY18 "hat eine separate Lizenz.  Siehe Datei pstotext.txt."
+#define AACOPY19 "Autor: Russell Lang  (rjl@aladdin.com)"
+#define AACOPY20 "Eine Ghostscript DLL Schnittstelle."
+#define AACOPY21 "Dies Programm ist Teil von GSview."
+#define AACOPY22 "GSview Win32s/Win16 Druck-Manager"
+
+#define AAINPUT "Eingabe"
+
+/* Info dialog box */
+#define AAINFO  "Info"
+#define AAFILEC "Datei:"
+#define AATYPEC "Typ:"
+#define AATITLEC "Titel:"
+#define AADATEC "Datum:"
+#define AABOUNDINGBOXC "BoundingBox:"
+#define AAORIENTATIONC "Ausrichtung:"
+#define AADEFAULTMEDIAC "Papierformat:"
+#define AAPAGEORDERC "Seitenordnung:"
+#define AAPAGESC "Seiten:"
+#define AAPAGEC "Seite:"
+#define AABITMAPC "Bitmap:"
+
+/* Sounds dialog box */
+#define AASOUNDS "Klänge"
+#define AAEVENTC "Ereignis:"
+#define AASOUNDC "Klang:"
+
+/* Select port, printer, page dialog boxes */
+#define AASELECTPORT "Auswahl Druckeranschluß"
+#define AASELECTPRINTER "Auswahl Drucker"
+#define AAPRINTING "Drucke"
+#define AASELECTPAGE "Auswahl Seite"
+#define AASELECTPAGES "Auswahl Seiten"
+
+/* Printer Setup dialog box */
+#define AAPRINTERSETUP "Drucker Einstellung"
+#define AADEVICEC "Gerät:"
+#define AARESOLUTIONC "Auflösung:"
+#define AAQUEUEC "Drucker:"
+#define AAPRINTTOFILE "Druck in Datei"
+#define AAPSPRINTER "PostScript Drucker"
+
+/* PDF2PS dialog box */
+#define AAPDFTOPS	"PDF zu PostScript"
+#define AABINARYOK	"Binary"
+#define AAPSLEVEL1	"PostScript Level 1"
+#define AANOPROCSET	"Kein Prolog"
+
+/* PS2EPS dialog box */
+#define AAPSTOEPS "PS zu EPS"
+#define	AAPSTOEPSREAD  "Haben Sie die Hilfe `PS zu EPS` gelesen ?"
+#define AAPSTOEPSAUTO "Automatische Berechnung der Bounding Box"
+
+#ifdef _Windows
+#define AAAPROPERTIES "&Einstellung"
+#define AAALLPAGES "&Alle Seiten"
+#define AAODDPAGES "&Ungerade"
+#define AAEVENPAGES "&Gerade"
+#define AAALL "&Alle"
+#define AAODD "&Ungerade"
+#define AAEVEN "&Gerade"
+#else
+#define AAAPROPERTIES "~Einstellung"
+#define AAALLPAGES "~Alle Seiten"
+#define AAODDPAGES "~Ungerade"
+#define AAEVENPAGES "~Gerade"
+#define AAALL "~Alle"
+#define AAODD "~Ungerade"
+#define AAEVEN "~Gerade"
+#endif
+
+/* Properties dialog box */
+#define AAPROPERTIES "Einstellung"
+#define AAPROPERTYC "Einstellung:"
+#define AAVALUEC "Wert:"
+#define AAPAGEOFFSETPT "Seiten Offset (pts)"
+#define AAXC "X:"
+#define AAYC "Y:"
+
+/* Edit Properties dialog box */
+#define AAEDITPROPERTIES "Einstellung bearbeiten"
+#define AAPROPERTYTYPEC "Einstellungstyp:"
+#define AANUMBER "Nummer"
+#define AASTRING "Text"
+#define AANAMEC "Name: z.B.  BitsPerPixel"
+#define AAVALUESC "Werte:  z.B.  1,3,8,16,24"
+#define AADELETE "Löschen"
+
+#define AABOUNDINGBOX "BoundingBox"
+
+/* Configure Ghostscript dialog box */
+#define AACONFIGUREGS "Konfiguriere Ghostscript"
+#define AAGHOSTSCRIPTDLLC "Ghostscript DLL:"
+#define AAGHOSTSCRIPTINCC "Ghostscript Suchpfad:"
+#define AAGHOSTSCRIPTOTHERC "Ghostscript Optionen:"
+
+#define AAGSMESSWIN "GSview für Windows - Ghostscript Meldungen"
+#define AAGSMESSPM "PM GSview - Ghostscript Meldungen"
+#define AACOPY "Kopiere"
+
+/* Display Settings dialog box */
+#define AADISPLAYSETTINGS "Anzeige Einstellungen"
+#define AARESOLUTION "Auflösung"
+#define AAZOOMRESOLUTION "Zoom Auflösung"
+#define AADEPTH "Farbtiefe"
+#define AATEXTALPHA "Text Alpha"
+#define AAGRAPHICSALPHA "Graphik Alpha"
+#define AADRAWMETHOD "Zeichen Methode"
+#define AADPI "dpi"
+#define AABPP "bits/pixel"
+#define AABITS "bits"
+
+/* Installation program */
+#define AAINSTALL1 "GSview Installation"
+#define AAINSTALLINTRO1 "GSview Installation - Einführung"
+#define AAINSTALLINTRO2 "Installationsprogramm für:"
+#define AAINSTALLINTRO3 "Bevor Sie fortfahren, prüfen Sie, ob die 3 Disketten (siehe README.TXT) vorliegen."
+#define AAINSTALLCOPYRIGHT1 "GSview Installation - Copyright"
+#define AAINSTALLCOPYRIGHT2 "GSview und Aladdin Ghostscript sind separate Programme."
+#define AAINSTALLCOPYRIGHT3 "Sie gehören verschiedenen Eigentümern."
+#define AAINSTALLDIR1 "GSview Installation - Verzeichnis"
+#define AAINSTALLDIR2 "Das Basisverzeichnis für GSview und Ghostscript ist:"
+#define AAINSTALLDIR3 "innerhalb des Basisverzeichnis wird GSview in folgendes Unterverzeichnis installiert:"
+#define AAINSTALLDIR4 "Ghostscript wird in folgendem Unterverzeichnis installiert:"
+#define AAINSTALLDIR5 "Sie können das Basisverzeichnis ändern."
+#define AAINSTALLMKDIR1 "GSview Installation - Lege Verzeichnis an"
+#define AAINSTALLMKDIR2 "Das Verzeichnis"
+#define AAINSTALLMKDIR3 "existiert nicht.  Soll es angelegt werden?"
+#define AAINSTALLMISSING1 "GSview Installation - Fehlende ZIP Datei"
+#define AAINSTALLMISSING2 "Kann ZIP Datei nicht finden. Bitte die Diskette mit folgender Datei einlegen."
+#define AAINSTALLCONFIG1 "GSview Installation - Konfiguration"
+#define AAINSTALLCONFIG2 "Autoexec.bat nicht verändern"
+#define AAINSTALLCONFIG3 "Folgende Zeile wird an die autoexec.bat angefügt\r     SET TEMP=C:\\\rIhre alte autoexec.bat wird umbenannt in autoexec.gs"
+#define AAINSTALLUNZIP1 "GSview Installation - Entpacken"
+#define AAINSTALLEA1 "Aktualisiere erweiterte Attribute"
+#define AADIRNOTEXIST "Verzeichnis '%s' existiert nicht. Soll es angelegt werden?"
+#define AAMKDIRFAIL "Verzeichnis kann nicht angelegt werden"
+#define AABETAWARN "Dies ist eine BETA Test Version von GSview. Sie wird deaktiviert am %04d-%02d-%02d."
+#define AAINSTALLOKWIN "Installation erfolgreich.\015A Gruppe \042GS Tools\042 im Programm-Manager wurde angelegt."
+#define AAINSTALLOKPM "Installation erfolgreich.\012A GSview Programobjekt wurde auf dem Desktop angelegt"
+#define AAINSTALLABORT "Installation abgebrochen\012%s"
+#define AASKIPGSINSTALL "Ghostscript %s scheint schon installiert zu sein. Installation von Ghostscript überspringen?"
+
+/* Menu items for gvXgs.rc */
+#define AAGSVIEWPRINT "GSview Druck"
+#define AAGSVIEWPRINTUSAGE "Aufruf: %s [/d] dllpfad optionsdatei eingabedatei\noptionsdatei und eingabedatei werden am ende gelöscht\nEs ist beabsichtigt gvpgs mit temporären Dateien aufzurufen\n"
+#ifdef _Windows
+#define AAMFILE "&Datei"
+#define AAMSAVEAS "Speichen &Unter..."
+#define AAMEXIT "E&nde"
+#define AAMEDIT "&Bearbeiten"
+#define AAMCOPY "Kopieren\tCtrl+K"
+#define AAMHELP "&Hilfe"
+#define AAMABOUT "&Über..."
+#else
+#define AAMFILE "~Datei"
+#define AAMSAVEAS "Speichern ~Unter..."
+#define AAMEXIT "E~nde"
+#define AAMEDIT "~Bearbeiten"
+#define AAMCOPY "Kopieren\tCtrl+K"
+#define AAMHELP "~Hilfe"
+#define AAMABOUT "~Über..."
+#endif
+
+
+/* Language changing */
+#define AASELECTLANGUAGE "Select Language"
+#define AAENGLISH "English"
+#define AADEUTSCH "Deutsch"
+

@@ -19,52 +19,59 @@
 
 #include <os2.h>
 #include "gvcrc.h"
+#include "gvclang.h"
 
 ICON ID_GSVIEW "binary/gvpm1.ico"
 
 DLGTEMPLATE IDD_ABOUT 
 BEGIN
-	DIALOG "About GVPGS", IDD_ABOUT, 8, -46, 328, 154, FS_DLGBORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_SAVEBITS, FCF_SYSMENU | FCF_TITLEBAR
+	DIALOG AAABOUTGSVIEWPRINT, IDD_ABOUT, 8, -46, 328, 154, FS_DLGBORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_SAVEBITS, FCF_SYSMENU | FCF_TITLEBAR
 	BEGIN
 		ICON ID_GSVIEW, ID_GSVIEW, 8, 132, 20, 16, WS_GROUP
-		DEFPUSHBUTTON "OK", DID_OK, 276, 134, 40, 14
+		DEFPUSHBUTTON AAOK, DID_OK, 276, 134, 40, 14
 		LTEXT "GVPGS.EXE", -1, 32, 140, 64, 8
-		RTEXT "Version:", -1, 92, 140, 36, 8
+		RTEXT AACOPY1, -1, 92, 140, 36, 8
 		CONTROL "", ABOUT_VERSION, 130, 140, 128, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE
-		LTEXT "A Ghostscript DLL interface", -1, 32, 132, 160, 8
-		LTEXT "Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.", -1, 8, 120, 316, 8
-		LTEXT "This program is part of GSview.", -1, 8, 112, 316, 8
-		LTEXT "This program is distributed with NO WARRANTY OF ANY KIND.", -1, 8, 104, 316, 8
-		LTEXT "No author or distributor accepts any responsibility for the", -1, 8, 96, 316, 8
-		LTEXT "consequences of using it, or for whether it serves any particular", -1, 8, 88, 316, 8
-		LTEXT "purpose or works at all, unless he or she says so in writing.  Refer", -1, 8, 80, 316, 8
-		LTEXT "to the GSview Free Public Licence (the 'Licence') for full details.", -1, 8, 72, 316, 8
-		LTEXT "Every copy of GSview must include a copy of the Licence, normally", -1, 8, 60, 316, 8
-		LTEXT "in a plain ASCII text file named LICENCE.  The Licence grants you", -1, 8, 52, 316, 8
-		LTEXT "the right to copy, modify and redistribute GSview, but only under", -1, 8, 44, 316, 8
-		LTEXT "certain conditions described in the Licence.  Among other things,", -1, 8, 36, 316, 8
-		LTEXT "the Licence requires that the copyright notice and this notice be", -1, 8, 28, 316, 8
-		LTEXT "preserved on all copies.", -1, 8, 20, 316, 8
-		LTEXT "Author: Russell Lang  (rjl@aladdin.com)", -1, 8, 8, 224, 8
+		LTEXT AACOPY20, -1, 32, 132, 160, 8
+		LTEXT GSVIEW_COPYRIGHT1, -1, 8, 120, 148, 8
+		LTEXT GSVIEW_COPYRIGHT2, -1, 158, 120, 78, 8
+		LTEXT AACOPY21, -1, 8, 112, 316, 8
+		LTEXT AACOPY4, -1, 8, 104, 316, 8
+		LTEXT AACOPY5, -1, 8, 96, 316, 8
+		LTEXT AACOPY6, -1, 8, 88, 316, 8
+		LTEXT AACOPY7, -1, 8, 80, 316, 8
+		LTEXT AACOPY8, -1, 8, 72, 316, 8
+		LTEXT AACOPY9, -1, 8, 60, 316, 8
+		LTEXT AACOPY10, -1, 8, 52, 316, 8
+		LTEXT AACOPY11, -1, 8, 44, 316, 8
+		LTEXT AACOPY12, -1, 8, 36, 316, 8
+		LTEXT AACOPY13, -1, 8, 28, 316, 8
+		LTEXT AACOPY14, -1, 8, 20, 316, 8
+		LTEXT AACOPY19, -1, 8, 8, 224, 8
 	END
 END
 
 MENU ID_GSVIEW 
 BEGIN
-	SUBMENU "~File", IDM_FILEMENU
+	SUBMENU AAMFILE, IDM_FILEMENU
 	BEGIN
-		MENUITEM "Save ~As...", IDM_SAVEAS
-		MENUITEM "E~xit", IDM_EXIT
+		MENUITEM AAMSAVEAS, IDM_SAVEAS
+		MENUITEM AAMEXIT, IDM_EXIT
 	END
 
-	SUBMENU "~Edit", IDM_EDITMENU
+	SUBMENU AAMEDIT, IDM_EDITMENU
 	BEGIN
-		MENUITEM "~Copy", IDM_COPYCLIP
+		MENUITEM AAMCOPY, IDM_COPYCLIP
 	END
 
-	SUBMENU "~Help", IDM_HELPMENU
+	SUBMENU AAMHELP, IDM_HELPMENU
 	BEGIN
-		MENUITEM "~About...", IDM_ABOUT
+		MENUITEM AAMABOUT, IDM_ABOUT
 	END
+END
+
+STRINGTABLE
+BEGIN
+	ID_GSVIEW, AAGSVIEWPRINT
 END
 

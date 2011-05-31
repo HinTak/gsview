@@ -32,7 +32,7 @@ int status_height;
 HFONT hfont;
 
 
-#define TWLENGTH 4096
+#define TWLENGTH 16384
 #define TWSCROLL 1024
 char twbuf[TWLENGTH];
 int twend;
@@ -62,7 +62,7 @@ POINT pcpt;
 /* forward declarations */
 void show_about(void);
 int init_window(void);
-void gs_addmess(char *str);
+void gs_addmess(LPSTR str);
 int get_args(LPSTR lpszCmdLine, int *pargc, char **pargv[]);
 int parse_args(int argc, char *argv[]);
 void text_update(void);
@@ -97,9 +97,12 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 
     get_args(lpszCmdLine, &argc, &argv);
     if (parse_args(argc, argv)) {
+#ifdef __WIN32__
 	if (multithread)
 	    gstid = _beginthread(gs_thread, 16384, NULL);
-	else {
+	else 
+#endif
+        {
 	    /* process messages for window creation */
 	    while ((PeekMessage(&msg, (HWND)NULL, 0, 0, PM_REMOVE)) != 0) {
 		TranslateMessage(&msg);
@@ -269,7 +272,7 @@ HDC hdc;
 #ifdef __WIN32__
 		    strncpy(p, twbuf+start, end-start);
 #else
-		    lstrcpyn(p, twbuf+start, end-start);
+		    lstrcpyn(p, twbuf+(int)start, (int)(end-start));
 #endif
 		    GlobalUnlock(hglobal);
 		    OpenClipboard(hwnd_client);
@@ -292,13 +295,16 @@ HDC hdc;
 void
 text_update(void)
 {
+    DWORD linecount;
     SendMessage(hwnd_text, WM_SETREDRAW, FALSE, 0);
     SetWindowText(hwnd_text, twbuf);
 #ifdef __WIN32__
-    SendMessage(hwnd_text, EM_SETSEL, (WPARAM)twend, (LPARAM)twend);
-    SendMessage(hwnd_text, EM_SCROLLCARET, (WPARAM)0, (LPARAM)0);
+    /* EM_SETSEL, followed by EM_SCROLLCARET doesn't work */
+    linecount = SendMessage(hwnd_text, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
+    SendMessage(hwnd_text, EM_LINESCROLL, (WPARAM)0, (LPARAM)linecount-17);
 #else
-    SendDlgItemMessage(hwnd_text, TEXTWIN_MLE, EM_SETSEL, (WPARAM)0, MAKELPARAM(strlen(twbuf), strlen(twbuf)));
+    linecount = SendMessage(hwnd_text, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
+    SendMessage(hwnd_text, EM_LINESCROLL, (WPARAM)0, MAKELPARAM(linecount-17, 0));
 #endif
     SendMessage(hwnd_text, WM_SETREDRAW, TRUE, 0);
     InvalidateRect(hwnd_text, (LPRECT)NULL, TRUE);
@@ -309,7 +315,7 @@ text_update(void)
 
 /* Add string for Ghostscript message window */
 void
-gs_addmess_count(char *str, int count)
+gs_addmess_count(LPSTR str, int count)
 {
 char *p;
 int i, lfcount;
@@ -342,9 +348,9 @@ int i, lfcount;
 }
 
 void
-gs_addmess(char *str)
+gs_addmess(LPSTR str)
 {
-    gs_addmess_count(str, strlen(str));
+    gs_addmess_count(str, lstrlen(str));
 }
 
 
@@ -396,7 +402,7 @@ int length;
 	    else
 		end++;
 	}
-	length = end-start;
+	length = (int)(end-start);
 	argv[argc] = malloc(length+1);
 	if (argv[argc] == NULL) {
 	    free(argv);
@@ -600,6 +606,11 @@ gs_clear_gsdll(void)
     gsdll.execute_cont = NULL;
     gsdll.execute_end = NULL;
     gsdll.exit = NULL;
+#ifndef __WIN32__
+    if (gsdll.callback)
+	FreeProcInstance((FARPROC)gsdll.callback);
+#endif
+    gsdll.callback = NULL;
 }
 
 /* free GS DLL */
@@ -634,8 +645,13 @@ char buf[MAXSTR];
 }
 
 /* callback routine for GS DLL */
-int 
+#ifdef __WIN32__
+int _export 
 gsdll_callback(int message, char *str, unsigned long count)
+#else
+int _far _export
+gsdll_callback(int message, char FAR *str, unsigned long count)
+#endif
 {
 char buf[MAXSTR];
     switch (message) {
@@ -646,8 +662,8 @@ char buf[MAXSTR];
 	    return 0;
 	case GSDLL_STDOUT:
 	    if (str != (char *)NULL)
-		gs_addmess_count(str, count);
-	    return count;
+		gs_addmess_count(str, (int)count);
+	    return (int)count;
 	case GSDLL_DEVICE:
 	case GSDLL_SYNC:
 	case GSDLL_PAGE:
@@ -700,7 +716,7 @@ char *gs_argv[3];
 	    }
 	    /* check DLL version */
 	    gsdll.revision(NULL, NULL, &revision, NULL);
-	    if (revision != GS_REVISION) {
+	    if ( (revision < GS_REVISION) || (revision > GS_REVISION_MAX) ) {
 		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld\n", revision, (long)GS_REVISION);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
@@ -748,13 +764,18 @@ char *gs_argv[3];
 	    gs_load_dll_cleanup();
 	    return FALSE;
 	}
+#ifdef __WIN32__
+	gsdll.callback = gsdll_callback;
+#else
+	gsdll.callback = (GSDLL_CALLBACK)MakeProcInstance((FARPROC)gsdll_callback, phInstance);
+#endif
 
 	gs_argv[0] = gsdllname;
 	gs_argv[1] = gsarg;
 	gs_argv[2] = NULL;
 	gs_argc = 2;
 
-	code = gsdll.init(gsdll_callback, hwnd_client, gs_argc, gs_argv);
+	code = gsdll.init(gsdll.callback, hwnd_client, gs_argc, gs_argv);
 	if (debug) {
 	    sprintf(buf,"gsdll_init returns %d\n", code);
 	    gs_addmess(buf);
@@ -784,7 +805,7 @@ int code;
 	code = gsdll.execute_cont(buf, len);
 	ldone += len;
 	if (pcdone != (ldone * 100 ) / lsize) {
-	    pcdone = (ldone * 100) / lsize;
+	    pcdone = (int)((ldone * 100) / lsize);
 	    PostMessage(hwnd_client, WM_PCUPDATE, (WPARAM)pcdone, 0);
 	}
 	if (code) {

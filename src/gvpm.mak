@@ -21,6 +21,7 @@
 # edit COMPBASE and EMXPATH as required.
 
 # set one of the following to non-zero
+# only USE_EMX currently works
 USE_EMX=1
 USE_BCC=0
 USE_IBM=0
@@ -29,6 +30,9 @@ USE_OMF=1
 
 # DEBUG=1 for debugging
 DEBUG=0
+
+# Language is English (en) or Deutsch (de)
+LANGUAGE=en
 
 !if $(USE_EMX)
 # EMX
@@ -42,7 +46,7 @@ OBJ=obj
 CDEBUG=-g
 LDEBUG=/DEBUG
 !endif
-FLAGS=-O -Zomf -Zmts $(CDEBUG)
+FLAGS=-O -Wall -Zomf -Zmts $(CDEBUG)
 !else
 OBJ=o
 !if $(DEBUG)
@@ -86,16 +90,18 @@ OBJS=gvpm.$(OBJ) gvpdlg.$(OBJ) gvpdisp.$(OBJ) gvpeps.$(OBJ) gvpinit.$(OBJ)\
    gvccmd.$(OBJ) gvcdisp.$(OBJ) gvceps.$(OBJ) gvcinit.$(OBJ) gvcbeta.$(OBJ)\
    gvcmisc.$(OBJ) gvcprf.$(OBJ) gvcprn.$(OBJ) gvctext.$(OBJ)\
    gvpdll.$(OBJ) gvcdll.$(OBJ)  gvcpdf.$(OBJ) ps.$(OBJ) 
-HDRS=gvpm.h ps.h gvcfn.h 
+HDRS=gvpm.h ps.h gvcfn.h gvcver.h
 
-all: gvpm.exe gvpm.hlp gvpm.inf gvpm.tex gvpgs.exe os2setup.exe
+all: gvpm.exe\
+ gvpmen.hlp gvpmen.dll\
+ gvpmde.hlp gvpmde.dll\
+ gvpgs.exe os2setup.exe
 
 .c.$(OBJ):
 	$(COMP) $(FLAGS) -DOS2 -c $*.c
 
 
-
-gvpm.$(OBJ): gvpm.c gvpm.ipf $(HDRS)
+gvpm.$(OBJ): gvpm.c $(HDRS)
 
 gvpdlg.$(OBJ): gvpdlg.c gvcrc.h $(HDRS)
 
@@ -133,6 +139,45 @@ gvcprf.$(OBJ): gvcprf.c $(HDRS)
 
 gvctext.$(OBJ): gvctext.c $(HDRS)
 
+ansi2oem.exe: ansi2oem.c
+	$(COMP) ansi2oem.c
+
+gvpmen.res: gvpmen.hlp gvcrc.h gvpm1.rc gvcen.rc gvpen.rc gvpm2.rc binary\gvpm1.ico ansi2oem.exe $(HDRS)
+	ansi2oem < gvcen.h > gvclang.h
+	ansi2oem < gvcen.rc > gvclang.rc
+	ansi2oem < gvpen.rc > gvplang.rc
+	copy gvpm1.rc+gvphlpen.rc+gvclang.rc+gvplang.rc+gvpm2.rc gvpmen.rc
+	rc -i $(COMPBASE)\include -r $*.rc
+	-del gvclang.rc
+	-del gvplang.rc
+	-del gvclang.h
+	ansi2oem < gvc$(LANGUAGE).h > gvclang.h
+
+gvpmen.dll: gvpmen.res gvpmen.def gvplang.c
+!if $(USE_EMX)
+	$(COMP) -Zdll -Zso -Zsys -Zomf -c gvplang.c
+	LINK386 /DEBUG $(COMPBASE)\lib\dll0.obj gvplang.obj, gvpmen.dll, ,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\os2.lib, gvpmen.def
+	rc gvpmen.res gvpmen.dll
+!endif
+
+gvpmde.res: gvpmde.hlp gvcrc.h gvpm1.rc gvcde.rc gvpde.rc gvpm2.rc binary\gvpm1.ico ansi2oem.exe $(HDRS)
+	ansi2oem < gvcde.h > gvclang.h
+	ansi2oem < gvcde.rc > gvclang.rc
+	ansi2oem < gvpde.rc > gvplang.rc
+	copy gvpm1.rc+gvphlpde.rc+gvclang.rc+gvplang.rc+gvpm2.rc gvpmde.rc
+	rc -i $(COMPBASE)\include -r $*.rc
+	-del gvclang.rc
+	-del gvplang.rc
+	-del gvclang.h
+	ansi2oem < gvc$(LANGUAGE).h > gvclang.h
+
+gvpmde.dll: gvpmde.res gvpmde.def gvplang.c
+!if $(USE_EMX)
+	$(COMP) -Zdll -Zso -Zsys -Zomf -c gvplang.c
+	LINK386 /DEBUG $(COMPBASE)\lib\dll0.obj gvplang.obj, gvpmde.dll, ,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\os2.lib, gvpmde.def
+	rc gvpmde.res gvpmde.dll
+!endif
+
 gvpm.res: gvpm.rc gvpm.h binary\gvpm1.ico
 	rc -i $(COMPBASE)\include -r $*.rc
 
@@ -157,10 +202,11 @@ gvpm.exe: $(OBJS) gvpm.res gvpm.def
 	RC gvpm.res gvpm.exe
 !endif
 
-os2setup.res: os2setup.rc setup.h
+os2setup.res: os2setup.rc setup.h gvc$(LANGUAGE).h ansi2oem.exe
+	ansi2oem < gvc$(LANGUAGE).h > gvclang.h
 	rc -i $(COMPBASE)\include -r $*.rc
 
-os2setup.exe: os2setup.c setup.h os2setup.res os2setup.def
+os2setup.exe: os2setup.c setup.h os2setup.res os2setup.def gvcrc.h gvcbeta.h
 !if $(USE_EMX)
 	$(COMP) -Zomf -Zsys -c -o os2prf.obj gvcprf.c
 	$(COMP) -Zomf -Zsys -c -o os2beta.obj gvcbeta.c
@@ -200,32 +246,43 @@ doc2html.exe: doc2html.c
 	$(COMP) $*.c
 !endif
 
-gvpm.doc: gvc.doc gvdoc.exe
-	gvdoc P gvc.doc gvpm.doc
+gvc.txt: ansi2oem.exe gvc$(LANGUAGE).txt
+	ansi2oem < gvc$(LANGUAGE).txt > gvc.txt
 
-gvpm.ipf: gvpm.doc doc2ipf.exe 
-	doc2ipf gvpm.doc gvpm.ipf gvphelp.h
+gvpmen.hlp: gvcen.txt  ansi2oem.exe gvdoc.exe doc2ipf.exe
+	ansi2oem < gvcen.txt > gvc.txt
+	gvdoc P gvc.txt gvpm.txt
+	doc2ipf gvpm.txt gvpmen.ipf gvphlpen.rc
+	ipfc gvpmen.ipf
+	rename gvpmen.hlp gvpmen.hlp
+	-del gvc.txt
+	-del gvpm.txt
 
-gvpm.hlp: gvpm.ipf
-	ipfc gvpm.ipf
-	rename gvpm.HLP gvpm.hlp
+gvpmde.hlp: gvcde.txt  ansi2oem.exe gvdoc.exe doc2ipf.exe
+	ansi2oem < gvcde.txt > gvc.txt
+	gvdoc P gvc.txt gvpm.txt
+	doc2ipf gvpm.txt gvpmde.ipf gvphlpde.rc
+	ipfc gvpmde.ipf
+	rename gvpmde.hlp gvpmde.hlp
+	-del gvc.txt
+	-del gvpm.txt
 
-gvpm.inf: gvpm.ipf
-	ipfc /INF gvpm.ipf
-	rename gvpm.INF gvpm.inf
+gvpmen.inf: gvpmen.hlp
+	ipfc /INF gvpmen.ipf
+	rename gvpmen.INF gvpmen.inf
 
 html: gvpm.htm gsview.htm
 
-gvpm.htm: doc2html.exe gvpm.doc
-	doc2html gvpm.doc GSview.htm
+gvpm.htm: doc2html.exe gvpm.txt
+	doc2html gvpm.txt GSview.htm
 	-del gvpm.htm
 	rename GSview.htm gvpm.htm
 
-gsview.doc: gvc.doc gvdoc.exe
-	gvdoc W gvc.doc gsview.doc
+gsview.txt: gvc.txt gvdoc.exe
+	gvdoc W gvc.txt gsview.txt
 
-gsview.htm: doc2html.exe gsview.doc
-	doc2html gsview.doc GSview.htm
+gsview.htm: doc2html.exe gsview.txt
+	doc2html gsview.txt GSview.htm
 
 gvpm.ps: gvpm.dvi
 	dvips gvpm
@@ -234,8 +291,8 @@ gvpm.dvi: gvpm.tex titlepag.tex
 	-latex gvpm
 	-latex gvpm
 
-gvpm.tex: gvpm.doc doc2tex.exe
-	doc2tex gvpm.doc gvpm.tex
+gvpm.tex: gvpm.txt doc2tex.exe
+	doc2tex gvpm.txt gvpm.tex
 
 doc2tex.exe: doc2tex.c
 !if $(USE_EMX)
@@ -247,7 +304,8 @@ doc2tex.exe: doc2tex.c
 !endif
 
 
-gvpgs.res: gvpgs.rc gvpgs.h gvcrc.h
+gvpgs.res: gvpgs.rc gvpgs.h gvcrc.h gvc$(LANGUAGE).h
+	ansi2oem < gvc$(LANGUAGE).h > gvclang.h
 	rc -i $(COMPBASE)\include -r $*.rc
 
 gvpgs.$(OBJ): gvpgs.c gvpgs.h gvcrc.h
@@ -269,15 +327,18 @@ gvpgs.exe: gvpgs.$(OBJ) gvpgs.res gvpgs.def
 !endif
 
 
-prezip: gvpm.exe gvpm.hlp gvpm.inf README.TXT FILE_ID.DIZ LICENCE
+prezip: gvpm.exe gvpmen.dll gvpmen.hlp gvpmde.dll gvpmde.hlp README.TXT FILE_ID.DIZ LICENCE
 	copy gvpm.exe ..
 !if $(USE_EMX) && !$(USE_OMF)
 	emxbind -s ../gvpm.exe
 !endif
 	-del ..\gvpm.eas
 	eautil ..\gvpm.exe ..\gvpm.eas /s
-	copy gvpm.hlp ..
-	copy gvpm.inf ..
+	copy gvpmen.hlp ..
+	copy gvpmde.hlp ..
+	copy gvpmen.dll ..
+	copy gvpmde.dll ..
+	copy binary\gvpm1.ico ..\gvpm.ico
 	copy gvpgs.exe ..
 	copy os2setup.exe ..
 	copy printer.ini ..\printer.ini
@@ -292,16 +353,21 @@ prezip: gvpm.exe gvpm.hlp gvpm.inf README.TXT FILE_ID.DIZ LICENCE
 
 zip: prezip
 	cd ..
-	zip -9 -@ epstool.zip < src\gvcliste.txt
-	zip -9 -@ pstotext.zip     < src\gvclistp.txt
-	zip -9 -@ src.zip     < src\gvclists.txt
-	cd ..
-	zip -9 -@ gsview\gsview.zip  < gsview\src\gvclist.txt
-	cd gsview
+	zip -9 -@ epstool.zip  < src\gvcliste.txt
+	zip -9 -@ pstotext.zip < src\gvclistp.txt
+	zip -9 -@ src.zip      < src\gvclists.txt
+	zip -9 -@ gsview.zip   < src\gvclist.txt
 	zip -9 gsviewXX.zip gsview.zip README.TXT FILE_ID.DIZ LICENCE os2setup.exe os2unzip.exe setup.exe wizunz32.dll
 	cd src
 
-clean:
+language:
+	-del gvclang.h
+	-del gvclang.rc
+	-del gvplang.rc
+	-del gvc.txt
+	-del *.res
+
+clean: language
 	-del gvpm.res
 	-del gvpm.$(OBJ)
 	-del gvpdisp.$(OBJ)
@@ -332,23 +398,36 @@ clean:
 	-del gvdoc.$(OBJ)
 	-del gvdoc.exe
 	-del gvpm.ipf
-	-del gvpm.doc
+	-del gvpm.txt
 	-del gvpm.aux
 	-del gvpm.dvi
 	-del gvpm.log
 	-del gvpm.toc
 	-del gvphelp.h
-	-del gsview.doc
+	-del gsview.txt
 	-del gvpgs.res
 	-del gvpgs.$(OBJ)
 	-del os2setup.obj
 	-del os2setup.res
 	-del os2beta.obj
 	-del os2prf.obj
+	-del gvplang.obj
+	-del gvpmen.map
+	-del gvpmde.map
+	-del gvpmen.ipf
+	-del gvpmde.ipf
+	-del gvpmen.rc
+	-del gvpmde.rc
+	-del gvphlpen.rc
+	-del gvphlpde.rc
+	-del ansi2oem.exe
 
 veryclean: clean
 	-del gvpm.exe
-	-del gvpm.hlp
+	-del gvpmen.dll
+	-del gvpmde.dll
+	-del gvpmen.hlp
+	-del gvpmde.hlp
 	-del gvpm.inf
 	-del gvpm.tex
 	-del gvpm.htm

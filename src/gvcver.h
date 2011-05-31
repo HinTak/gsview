@@ -23,44 +23,49 @@
  *   README.TXT
  *   FILE_ID.DIZ
  *   gvcnews.txt
- *   gvc.doc
+ *   gvcXX.txt
+ *   gvcXX.rc  (for Copyright dates)
  */
 
 
 /* GSview */
 
 #define GSVIEW_PRODUCT "GSview"
-#define GSVIEW_VERSION "2.0"
-#define GSVIEW_DATE    "1996-08-11"
-#define GSVIEW_BASEDIR "gsview"
+#define GSVIEW_VERSION "2.1"
+#define GSVIEW_DATE    "1996-11-04"
 #define GSVIEW_ZIP     "gsview.zip"
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1996 Russell Lang."
-#define GSVIEW_COPYRIGHT2 "All rights reserved."
-#define GSVIEW_COPYRIGHT3 "See the file LICENCE for more details."
 
-/* #define BETA	/* undefine this for a final release */
+/* undefine this for a final release */
+/* #define BETA	*/
 #define BETA_YEAR    1996
-#define BETA_MONTH   9
-#define BETA_DAY     1
+#define BETA_MONTH   11
+#define BETA_DAY     7
 
 
 /* Ghostscript */
 #define GS_PRODUCT  "Aladdin Ghostscript"
-#define GS_REVISION 401
-#define GS_VERSION  "4.01"
-#define GS_BASEDIR  "gs4.01"
-#define GS_INIZIP   "gs401ini.zip"
-#define GS_W32ZIP   "gs401w32.zip"
-#define GS_OS2ZIP   "gs401os2.zip"
-#define GS_FN1ZIP   "gs401fn1.zip"
+#define GS_REVISION 403
+#define GS_REVISION_MAX   499
+#define GS_VERSION  "4.03"
+#define GS_BASEDIR  "gs4.03"
+#define GS_INIZIP   "gs403ini.zip"
+#define GS_W32ZIP   "gs403w32.zip"
+#define GS_W16ZIP   "gs403win.zip"
+#define GS_OS2ZIP   "gs403os2.zip"
+#define GS_FN1ZIP   "gs403fn1.zip"
+#ifdef _Windows
 #ifdef __WIN32__
+#define GSVIEW_EXENAME "gsview32.exe"
+#define GS_EXENAME  "gswin32.exe"
 #define GS_DLLNAME  "gsdll32.dll"
+#else
+#define GSVIEW_EXENAME "gsview16.exe"
+#define GS_EXENAME  "gswin16.exe"
+#define GS_DLLNAME  "gsdll16.dll"
+#endif
 #else
 #define GS_DLLNAME  "gsdll2.dll"
 #endif
-#define GS_COPYRIGHT1 "Copyright (C) 1994-1996 Aladdin Enterprises,"
-#define GS_COPYRIGHT2 "Menlo Park, California, U.S.A.  All rights reserved."
-#define GS_COPYRIGHT3 "See the file PUBLIC for more details."
 
 /* General */
 
@@ -68,4 +73,3 @@
 #define INSTALL_DIR "\\gstools"
 
 
-

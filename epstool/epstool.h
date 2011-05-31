@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -41,28 +41,29 @@
 #define MAXSTR 256
 #define DIRSEP '\\'
 #define EOLSTR "\r\n"
-#define PACKED
 #include <io.h>
 #include <fcntl.h>
 #endif
 
 #ifdef __WIN32__
 #undef MSDOS
+#include <windows.h>
+#define SetWindowOrg(hdc, x, y) SetWindowOrgEx(hdc, x, y, (LPPOINT)NULL)
+#define	SetWindowExt(hdc, x, y) SetWindowExtEx(hdc, x, y, (LPSIZE)NULL)
 #define GSCOMMAND "gswin32c"
+#define GVFAR
+#define GVHUGE
 #define BYTE unsigned char
 #define WORD  unsigned short
 #define DWORD unsigned long
 #define UINT  unsigned int
 #define LONG  long
 #define BOOL  int
-#define GVFAR
-#define GVHUGE
 #define READBIN  "rb"
 #define WRITEBIN "wb"
 #define MAXSTR 256
 #define DIRSEP '\\'
 #define EOLSTR "\r\n"
-#define PACKED
 #include <alloc.h>
 #include <dir.h>
 #include <io.h>
@@ -71,20 +72,19 @@
 
 #ifdef MSDOS
 #define GSCOMMAND "gs386"
+#define GVFAR far
+#define GVHUGE huge
 #define BYTE unsigned char
 #define WORD  unsigned short
 #define DWORD unsigned long
 #define UINT  unsigned int
 #define LONG  long
 #define BOOL  int
-#define GVFAR far
-#define GVHUGE huge
 #define READBIN  "rb"
 #define WRITEBIN "wb"
 #define MAXSTR 126
 #define DIRSEP '\\'
 #define EOLSTR "\r\n"
-#define PACKED
 #include <alloc.h>
 #include <dir.h>
 #include <io.h>
@@ -93,20 +93,19 @@
 
 #if defined(UNIX) || defined(__UNIX) || defined(__unix)
 #define GSCOMMAND "gs"
+#define GVFAR 
+#define GVHUGE
 #define BYTE unsigned char
 #define WORD  unsigned short
 #define DWORD unsigned int
 #define UINT  unsigned int
 #define LONG  int
 #define BOOL  int
-#define GVFAR 
-#define GVHUGE
 #define READBIN  "r"
 #define WRITEBIN "w"
 #define MAXSTR 256
 #define DIRSEP '/'
 #define EOLSTR "\n"
-#define PACKED __attribute__ ((packed))
 #if defined(__NeXT__)
 extern char *getwd (char *pathname);
 #define gs_getcwd(s,n) getwd(s)
@@ -132,18 +131,11 @@ extern char *getwd (char *pathname);
 #define max(x,y)  ( (x) > (y) ? (x) : (y) )
 #endif
 
+extern BOOL debug;
 extern char oname[MAXSTR];
 extern char upname[MAXSTR];
 extern char szScratch[];
 extern char szAppName[];
-
-typedef struct tagPSBBOX {
-	int	llx;
-	int	lly;
-	int	urx;
-	int	ury;
-	int	valid;
-} PSBBOX;
 
 typedef struct document PSDOC;
 
@@ -171,16 +163,19 @@ void play_sound(int i);
 extern PSDOC *doc;
 extern PSFILE psfile;
 extern OPTION option;
-#define MB_ICONEXCLAMATION 1
+#ifndef MB_ICONEXCLAMATION
+#define MB_ICONEXCLAMATION  1
+#endif
 #define SOUND_ERROR 1
 #define IDM_EXTRACTPS  1
 #define IDM_EXTRACTPRE 2
-#define IDM_MAKEEPST   3
-#define IDM_MAKEEPST4  4
+#define IDM_MAKEEPST4  3
+#define IDM_MAKEEPST6U 4
+#define IDM_MAKEEPST6P 5
+#define IDM_MAKEEPSW   6
 #define IDS_TOPICEDIT 1
 #define COPY_BUF_SIZE 4096
 
 /* error messages */
 #define IDS_NOPREVIEW 1
 #define IDS_EPSUSERINVALID 2
-

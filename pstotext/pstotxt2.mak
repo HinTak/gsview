@@ -3,6 +3,7 @@
 
 # makefile created by
 # Russell Lang, 1996-07-29
+# updated 1996-10-11
 
 DRIVE=c:
 COMP=gcc
@@ -14,21 +15,21 @@ COMPDIR=$(COMPBASE)\bin
 INCDIR=$(EMXPATH)/include
 LIBDIR=$(EMXPATH)/lib
 
-all:	pstotxt2.dll
+all:	pstotxt2.dll pstotxt2.exe
 
 .c.obj:
 	$(COMP) $(FLAGS) -c $*.c
 
-ocr.h: ocr.ps mkbundle.exe
-	mkbundle $*.ps $*.h 1
+ocr.h: ocr.ps mkrch.exe
+	mkrch $*.ps $*.h 1
 
-rot270.h: rot270.ps mkbundle.exe
-	mkbundle $*.ps $*.h 2
+rot270.h: rot270.ps mkrch.exe
+	mkrch $*.ps $*.h 2
 
-rot90.h: rot90.ps mkbundle.exe
-	mkbundle $*.ps $*.h 3
+rot90.h: rot90.ps mkrch.exe
+	mkrch $*.ps $*.h 3
 
-mkbundle.exe: mkbundle.c
+mkrch.exe: mkrch.c
 	$(COMP) -o $*.exe $*.c
 
 pstotxt2.obj: ptotdll.c ptotdll.h
@@ -44,11 +45,19 @@ pstotxt2.dll: pstotxt2.obj pstotxt2.def pstotxt2.res
 	$(COMP) $(FLAGS) -o $*.dll $*.obj $*.def
 	rc $*.res $*.dll
 
-prezip: pstotxt2.dll pstotext.txt
+pstotxt2.exe: pstotxtd.c
+	$(COMP) -o pstotxtd.exe pstotxtd.c
+	-del pstotxt2.exe
+	rename pstotxtd.exe pstotxt2.exe
+
+prezip: all
 	copy pstotxt2.dll ..\pstotxt2.dll
+	copy pstotxt2.exe ..\pstotxt2.exe
 	copy pstotext.txt ..\pstotext.txt
 
 clean:
+	-del pstotxtd.exe
+	-del pstotxt2.exe
 	-del pstotxt2.dll
 	-del pstotxt2.res
 	-del pstotxt2.rc
@@ -56,4 +65,5 @@ clean:
 	-del ocr.h
 	-del rot270.h
 	-del rot90.h
-	-del mkbundle.exe
+	-del mkrch.exe
+

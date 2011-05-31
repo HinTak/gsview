@@ -43,6 +43,7 @@ gs_clear_gsdll(void)
     gsdll.exit = NULL;
     gsdll.get_bitmap = NULL;
     gsdll.lock_device = NULL;
+    gsdll.callback = NULL;
 }
 
 void
@@ -108,68 +109,69 @@ const char *dllname;
 	if (rc == 0) {
 	    gs_addmess("Loaded Ghostscript DLL\n");
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_REVISION", (PFN *)(&gsdll.revision)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_REVISION, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_REVISION, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    /* check DLL version */
 	    gsdll.revision(NULL, NULL, &revision, NULL);
-	    if (revision != GS_REVISION) {
+	    if ( (revision < GS_REVISION) || (revision > GS_REVISION_MAX) ) {
 		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld\n", revision, (long)GS_REVISION);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_INIT", (PFN *)(&gsdll.init)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_INIT, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_INIT, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_EXECUTE_BEGIN", (PFN *)(&gsdll.execute_begin)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_BEGIN, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_EXECUTE_BEGIN, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_EXECUTE_CONT", (PFN *)(&gsdll.execute_cont)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_CONT, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_EXECUTE_CONT, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_EXECUTE_END", (PFN *)(&gsdll.execute_end)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXECUTE_END, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_EXECUTE_END, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_EXIT", (PFN *)(&gsdll.exit)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_EXIT, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_EXIT, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_GET_BITMAP", (PFN *)(&gsdll.get_bitmap)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_GET_BITMAP, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_GET_BITMAP, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_LOCK_DEVICE", (PFN *)(&gsdll.lock_device)))!=0) {
-	        sprintf(buf, "Can't find GSDLL_LOCK_DEVICE, rc = %d\n", rc);
+	        sprintf(buf, "Can't find GSDLL_LOCK_DEVICE, rc = %ld\n", rc);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
 	}
 	else {
-	    sprintf(buf, "Can't load Ghostscript DLL %s \nDosLoadModule rc = %d\n", option.gsdll, rc);
+	    sprintf(buf, "Can't load Ghostscript DLL %s \nDosLoadModule rc = %ld\n", option.gsdll, rc);
 	    gs_addmess(buf);
 	    gs_load_dll_cleanup();
 	    return FALSE;
 	}
+	gsdll.callback = gsdll_callback;
 	return TRUE;
 }
 
@@ -187,7 +189,7 @@ APIRET rc;
 	display.epsf_clipped = FALSE;
 	rc = DosFreeModule(gsdll.hmodule);
 	if (debug) {
-	    sprintf(buf,"DosFreeModule returns %d\n", rc);
+	    sprintf(buf,"DosFreeModule returns %ld\n", rc);
 	    gs_addmess(buf);
 	}
 	sprintf(buf,"Unloaded GSDLL\n\n");
@@ -219,14 +221,13 @@ gsdll_callback(int message, char *str, unsigned long count)
 char buf[MAXSTR];
     switch (message) {
 	case GSDLL_STDIN:
-	    sprintf(buf,"Callback: STDIN %p %d - stdin not supported\n", str, count);
+	    sprintf(buf,"Callback: STDIN %p %ld - stdin not supported\n", str, count);
 	    gs_addmess(buf);
 	    return (int)0;
 	case GSDLL_STDOUT:
 	    if (callback_pstotext(str, count))
 		return (int)count;
-	    if (psfile.ispdf)
-		pdf_checktag(str, count);
+	    pdf_checktag(str, count);
 	    if (str != (char *)NULL)
 		gs_addmess_count(str, count);
 	    return count;
@@ -257,15 +258,19 @@ char buf[MAXSTR];
 	    break;
 	case GSDLL_SYNC:
 	    if (debug) {
-		sprintf(buf,"Callback: SYNC %p\n", str);
+		sprintf(buf,"Callback: SYNC %p%s\n", str, ignore_sync ? " ignored" : "");
 		gs_addmess(buf);
 	    }
 	    if (gsdll.device != (unsigned char *)str)
 	        break;
+	    if (ignore_sync) {
+		/* ignore this sync, but not the next */
+		ignore_sync = FALSE;
+		break;
+	    }
 	    WinPostMsg(hwnd_frame, WM_GSSYNC, (MPARAM)0, (MPARAM)0);
 	    break;
 	case GSDLL_PAGE:
-	    {ULONG count;
 	    if (debug) {
 		sprintf(buf,"Callback: PAGE %p\n", str);
 		gs_addmess(buf);
@@ -312,7 +317,6 @@ char buf[MAXSTR];
 	    }
 	    gsdll.state = BUSY;
 	    post_img_message(WM_GSWAIT, IDS_WAITDRAW);
-	    }
 	    break;
 	case GSDLL_SIZE:
 /*
@@ -322,7 +326,7 @@ char buf[MAXSTR];
 */
 	    if (debug) {
 		sprintf(buf,"Callback: SIZE %p width=%d height=%d\n", str,
-		    (count & 0xffff), ((count>>16) & 0xffff) );
+		    (int)(count & 0xffff), (int)((count>>16) & 0xffff) );
 		gs_addmess(buf);
 	    }
 	    break;
@@ -413,23 +417,29 @@ APIRET rc;
 	gs_addmess("Can't load ");
         gs_addmess(dllname);
         gs_addmess("\n");
-	gs_addmess("Please select Options | Quick Text\n");
+	gs_addmess("Please select Options | PStoText | Disable\n");
 	return 1;
     }
     if ((rc = DosQueryProcAddr(pstotextModule, 0, "pstotextInit", (PFN *)(&pstotextInit))) !=0) {
-	sprintf(buf, "Can't find pstotextInit in %s, rc = %d\n", rc, dllname);
+	sprintf(buf, "Can't find pstotextInit in %s, rc = %ld\n", dllname, rc);
         gs_addmess(buf);
 	DosFreeModule(pstotextModule);
 	return 1;
     }
     if ((rc = DosQueryProcAddr(pstotextModule, 0, "pstotextFilter", (PFN *)(&pstotextFilter))) !=0) {
-	sprintf(buf, "Can't find PSTOTEXTFILTER in %s, rc = %d\n", rc, dllname);
+	sprintf(buf, "Can't find pstotextFilter in %s, rc = %ld\n", dllname, rc);
         gs_addmess(buf);
 	DosFreeModule(pstotextModule);
 	return 1;
     }
     if ((rc = DosQueryProcAddr(pstotextModule, 0, "pstotextExit", (PFN *)(&pstotextExit))) !=0) {
-	sprintf(buf, "Can't find PSTOTEXTEXIT in %s, rc = %d\n", rc, dllname);
+	sprintf(buf, "Can't find pstotextExit in %s, rc = %ld\n", dllname, rc);
+        gs_addmess(buf);
+	DosFreeModule(pstotextModule);
+	return 1;
+    }
+    if ((rc = DosQueryProcAddr(pstotextModule, 0, "pstotextSetCork", (PFN *)(&pstotextSetCork))) !=0) {
+	sprintf(buf, "Can't find pstotextSetCork in %s, rc = %ld\n", dllname, rc);
         gs_addmess(buf);
 	DosFreeModule(pstotextModule);
 	return 1;
@@ -480,4 +490,3 @@ int code = -1;
 	return code;
 }
 
-

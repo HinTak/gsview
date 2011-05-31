@@ -1,10 +1,14 @@
 # Copyright (C) 1995, Digital Equipment Corporation.
 # All rights reserved.
 # See the file pstotext.txt for a full description.
-# Last modified on Thu Aug  1 15:26:37 PDT 1996 by mcjones
+# Last modified on Fri Oct 11 15:28:59 PDT 1996 by mcjones
 
-# For debugging, use cc -g.
-CC=cc -g
+# pstotext now requires an ANSI-compatible C compiler, such as gcc.
+# If you absolutely must use a pre-ANSI compiler, you can try
+# commenting out the includes of ptotdll.h in ptotdll.c and main.c.
+# PMcJ 6 Sep 96
+
+CC=gcc
 
 BUNDLE = ocr.h rot270.h rot90.h
 

@@ -55,7 +55,7 @@ gsview_command(int command)
 		    memset((char *)tpsfile, 0, sizeof(PSFILE));
 		    pending.psfile = tpsfile;
 		    pending.now = TRUE;
-		    if (psfile.doc==(PSDOC *)NULL)
+		    if (psfile.name[0] && psfile.doc==(PSDOC *)NULL)
 			pending.abort = TRUE;
 		}
 		else {
@@ -194,7 +194,7 @@ gsview_command(int command)
 		if (!dfreopen())
 		    return 0;
 		if (psfile.name[0] != '\0')
-		    gsview_print(FALSE);
+		    gsview_print();
 		dfclose();
 		return 0;
 /*
@@ -271,6 +271,10 @@ gsview_command(int command)
 	case IDM_UNITINCH:
 		gsview_unit(command);
 		return 0;
+	case IDM_LANGEN:
+	case IDM_LANGDE:
+		gsview_language(command);
+		return 0;
 	case IDM_SAFER:
 		option.safer = !option.safer;
 		check_menu_item(IDM_OPTIONMENU, IDM_SAFER, option.safer);
@@ -293,9 +297,12 @@ gsview_command(int command)
 		option.quick_open = !option.quick_open;
 		check_menu_item(IDM_OPTIONMENU, IDM_QUICK_OPEN, option.quick_open);
 		return 0;
-	case IDM_QUICK_TEXT:
-		option.quick_text = !option.quick_text;
-		check_menu_item(IDM_OPTIONMENU, IDM_QUICK_TEXT, option.quick_text);
+	case IDM_PSTOTEXTDIS:
+	case IDM_PSTOTEXTNORM:
+	case IDM_PSTOTEXTCORK:
+		check_menu_item(IDM_PSTOTEXTMENU, option.pstotext + IDM_PSTOTEXTMENU + 1, FALSE);
+		option.pstotext = command - IDM_PSTOTEXTMENU - 1;
+		check_menu_item(IDM_PSTOTEXTMENU, option.pstotext + IDM_PSTOTEXTMENU + 1, TRUE);
 		return 0;
 	case IDM_AUTOREDISPLAY:
 		option.redisplay = !option.redisplay;
@@ -343,23 +350,48 @@ gsview_command(int command)
 		}
 		return 0;
 	case IDM_MAKEEPSI:
-		if (!dfreopen())
-		    return 0;
-		make_eps_interchange(FALSE);
-		dfclose();
+		if (option.orientation == IDM_PORTRAIT) {
+		    if (!dfreopen())
+			return 0;
+		    if (gsdll.lock_device && gsdll.device)
+			gsdll.lock_device(gsdll.device, 1);
+		    make_eps_interchange(FALSE);
+		    if (gsdll.lock_device && gsdll.device)
+			gsdll.lock_device(gsdll.device, 0);
+		    dfclose();
+	  	}
+		else
+		    gserror(IDS_MUSTUSEPORTRAIT, 0, MB_ICONEXCLAMATION, 0); 
 		return 0;
 	case IDM_MAKEEPST4:
-	case IDM_MAKEEPST:
-		if (!dfreopen())
-		    return 0;
-		make_eps_tiff(command, FALSE);
-		dfclose();
+	case IDM_MAKEEPST6U:
+	case IDM_MAKEEPST6P:
+		if (option.orientation == IDM_PORTRAIT) {
+		    if (!dfreopen())
+			return 0;
+		    if (gsdll.lock_device && gsdll.device)
+			gsdll.lock_device(gsdll.device, 1);
+		    make_eps_tiff(command, FALSE);
+		    if (gsdll.lock_device && gsdll.device)
+			gsdll.lock_device(gsdll.device, 0);
+		    dfclose();
+		}
+		else
+		    gserror(IDS_MUSTUSEPORTRAIT, 0, MB_ICONEXCLAMATION, 0); 
 		return 0;
 	case IDM_MAKEEPSW:
-		if (!dfreopen())
-		    return 0;
-		make_eps_metafile();
-		dfclose();
+		if (option.orientation == IDM_PORTRAIT) {
+		    if (!dfreopen())
+			return 0;
+		    if (gsdll.lock_device && gsdll.device)
+			gsdll.lock_device(gsdll.device, 1);
+		    make_eps_metafile(FALSE);
+		    if (gsdll.lock_device && gsdll.device)
+			gsdll.lock_device(gsdll.device, 0);
+		    dfclose();
+		}
+		else
+		    gserror(IDS_MUSTUSEPORTRAIT, 0, MB_ICONEXCLAMATION, 0); 
 		return 0;
 	case IDM_MAKEEPSU:
 		if (!dfreopen())
@@ -382,7 +414,7 @@ gsview_command(int command)
 		check_menu_item(IDM_OPTIONMENU, IDM_SAVESETTINGS, option.settings);
 		{ char buf[MAXSTR];
 		  PROFILE *prf = profile_open(szIniFile);
-		  sprintf(buf, "%d", option.settings);
+		  sprintf(buf, "%d", (int)option.settings);
 		  profile_write_string(prf, INISECTION, "SaveSettings", buf);
 		  profile_close(prf);
 		}
@@ -517,10 +549,10 @@ not_dsc()
 }
 
 void
-gserror(UINT id, char *str, UINT icon, int sound)
+gserror(UINT id, LPSTR str, UINT icon, int sound)
 {
 int i;
-char mess[300];
+char mess[MAXSTR+MAXSTR];
 	if (sound >= 0)
 	    play_sound(sound);
 	i = 0;
@@ -528,7 +560,11 @@ char mess[300];
 	    i = load_string(id, mess, sizeof(mess)-1);
 	mess[i] = '\0';
 	if (str)
+#if defined(_Windows) && !defined(__WIN32__)
+	    lstrcpyn(mess+i, str, sizeof(mess)-i-1);
+#else
 	    strncpy(mess+i, str, sizeof(mess)-i-1);
+#endif
 	message_box(mess, icon);
 }
 
@@ -543,7 +579,7 @@ pserror(char *str)
 int
 not_implemented()
 {
-	message_box("Not implemented",0);
+        gserror(IDS_NOTIMPLEMENTED, NULL, 0, 0);
 	return 0;
 }
 
@@ -576,9 +612,8 @@ char answer[MAXSTR];
 void
 gsview_check_usersize()
 {
-	if ( (option.user_width > 2880) || (option.user_height > 4100) ) {
-	    play_sound(SOUND_ERROR);
-	    message_box("Warning: media size is wider than 1 metre or higher than 1 metre.  Please check 'Media | User Defined'", 0);
+	if ( (option.user_width > 5669) || (option.user_height > 5669) ) {
+	    gserror(IDS_LARGEMEDIA, NULL, 0, SOUND_ERROR);
 	}
 }
 
@@ -591,4 +626,16 @@ gsview_unzoom(void)
 		gs_resize();
 	}
 }
+
+void
+gsview_language(int new_language)
+{
+	if (load_language(new_language)) {
+	    check_menu_item(IDM_LANGMENU, option.language, FALSE);
+	    option.language = new_language;
+	    check_menu_item(IDM_LANGMENU, option.language, TRUE);
+	    change_language();
+	}
+}
+
 

@@ -39,8 +39,6 @@ mkdirall(char *dirname)
 {
 char newdir[MAXSTR];
 char *p;
-int n;
-char *start;
     if (strlen(dirname) < 3)
 	return -1;
 
@@ -64,8 +62,8 @@ char *start;
     }
 
     while (1) {
-	strncpy(newdir, dirname, p-dirname);
-	newdir[p-dirname] = '\0';
+	strncpy(newdir, dirname, (int)(p-dirname));
+	newdir[(int)(p-dirname)] = '\0';
 	if (gs_chdir(newdir)) {
 	    if (mkdir(newdir
 #ifdef __EMX__
@@ -123,7 +121,6 @@ int count;
 int
 intro(void)
 {
-int flag;
     if (batch)
 	return 0;
 
@@ -168,10 +165,14 @@ int first_try = TRUE;
 	   destdir[i] = '\0';
 	if (gs_chdir(destdir)) {
 	    char buf[MAXSTR];
-	    sprintf(buf, "Directory '%s' does not exist.  Create it?", destdir);
+	    char mess[MAXSTR];
+	    load_string(IDS_DIRNOTEXIST, mess, sizeof(mess)-1);
+	    sprintf(buf, mess, destdir);
 	    if (batch || (message_box(buf, MB_MOVEABLE | MB_YESNO | MB_ICONEXCLAMATION) == IDYES)) {
-		if (mkdirall(destdir))
-		    message_box("Couldn't make directory", MB_OK);
+		if (mkdirall(destdir)) {
+	    	    load_string(IDS_MKDIRFAIL, buf, sizeof(buf)-1);
+		    message_box(buf, MB_OK);
+		}
 		else
 		    valid = 1;
 	    }
@@ -188,4 +189,41 @@ int first_try = TRUE;
 }
 
 
+int
+already_installed(void)
+{
+char gsdir[MAXSTR];
+char buf[MAXSTR];
+FILE *f;
+    strcpy(gsdir, destdir);
+    if (strlen(gsdir) == 2)
+	strcat(gsdir, "\\");	/* is root directory */
+    if (strlen(gsdir) && (gsdir[strlen(gsdir)-1] != '\\'))
+	    strcat(gsdir, "\\");
+    strcat(gsdir, GS_BASEDIR);
+    strcat(gsdir, "\\");
+
+
+    /* check if Ghostscript has already been installed */
+    /* first look for the DLL */
+    strcpy(buf, gsdir);
+    strcat(buf, GS_DLLNAME);
+    if ( (f = fopen(buf, "rb")) == (FILE *)NULL ) {
+	return 0;
+    }
+    fclose(f);
+
+    /* next look for gs_init.ps */
+    strcpy(buf, gsdir);
+    strcat(buf, "gs_init.ps");
+    if ( (f = fopen(buf, "rb")) == (FILE *)NULL ) {
+	return 0;
+    }
+    fclose(f);
+
+    /* at this stage we don't look for fonts, but maybe we should */
+    
+    /* yes, it is already installed */
+    return 1;
+}
 

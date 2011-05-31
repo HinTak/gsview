@@ -106,11 +106,11 @@ draw_text(HWND hwnd, HDC hdc)
     }
     else {
 	lstrcpy(buf, "Playing Russian Roulette are we?");
-	TextOut(hdc, x, y - char_size.y, buf, lstrlen(buf));
+	TextOut(hdc, x, y - char_size.y - 2 , buf, lstrlen(buf));
 	lstrcpy(buf, "GSV16SPL is called automatically");
 	TextOut(hdc, x, y, buf, lstrlen(buf));
 	lstrcpy(buf, "from GSview or Ghostscript.");
-	TextOut(hdc, x, y + char_size.y, buf, lstrlen(buf));
+	TextOut(hdc, x, y + char_size.y + 2, buf, lstrlen(buf));
     }
 }
 
@@ -364,3 +364,4 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	return 0;
 }
 
+

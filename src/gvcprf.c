@@ -54,7 +54,6 @@ PROFILE *
 profile_cleanup(PROFILE *prf)
 {
 struct prfsection *ps, *ns;
-struct prfentry *pe, *ne;
 	if (prf == (PROFILE *)NULL)
 	    return NULL;
 	if (prf->file)

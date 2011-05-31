@@ -9,7 +9,7 @@
 %   reconstruction of the document's words and an approximation of the words'
 %   bounding rectangles.
 
-% Last modified on Thu Aug  1 11:34:26 PDT 1996 by mcjones
+% Last modified on Thu Oct 24 10:10:28 PDT 1996 by mcjones
 %      modified on Thu Jan 25 15:24:37 PST 1996 by deutsch
 %      modified on Wed May  3 15:41:30 PDT 1995 by birrell
 
@@ -126,9 +126,11 @@
 % { pop currentglobal /setglobal load true setglobal }
 % { { } }
 %ifelse
+revision 353 ge {
 NOBIND /DELAYBIND where { pop DELAYBIND or } if
  { systemdict begin /bind /.bind load def end }
 if
+} if
 
 30 dict begin			% following stuff is private
 
@@ -628,11 +630,13 @@ end				% close private dictionary
 % Bind the operators we just defined, and all the others if we didn't
 % do it before.  Also reenable 'bind' for future files.
 
+revision 353 ge {
 .bindoperators
 NOBIND currentdict systemdict ne and
  { systemdict begin .bindoperators end }
 if
 /DELAYBIND where { pop DELAYBIND { .bindnow } if } if
+} if
 
 systemdict readonly pop
 % Restore the current local/global VM mode.

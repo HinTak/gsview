@@ -1,18 +1,24 @@
 /*
- * doc2tex.c  -- program to convert Gnuplot .DOC format to LaTeX document
- * Also will work for VMS .HLP files. 
- * Modified by Russell Lang from hlp2ms.c by Thomas Williams 
- * Extended by David Kotz to support quotes ("), backquotes, tables.
+ * doc2tex.c -- program to convert GSview documentation to LaTeX document.
  *
- * usage:  doc2tex [file.doc [file.tex]]
+ * Derived from:
+ *    doc2tex.c  -- program to convert Gnuplot .DOC format to LaTeX document
+ *    Also will work for VMS .HLP files. 
+ *    Modified by Russell Lang from hlp2ms.c by Thomas Williams 
+ *    Extended by David Kotz to support quotes ("), backquotes, tables.
  *
- *   where file.doc is a Gnuplot .DOC file, and file.tex will be an
- *     article document suitable for printing with LaTeX.
+ *    usage:  doc2tex [file.doc [file.tex]]
  *
- * typical usage for GNUPLOT:
+ *      where file.doc is a Gnuplot .DOC file, and file.tex will be an
+ *        article document suitable for printing with LaTeX.
  *
- *   doc2tex gnuplot.doc gnuplot.tex 
- *   latex gnuplot.tex ; latex gnuplot.tex
+ *    typical usage for GNUPLOT:
+ *
+ *      doc2tex gnuplot.doc gnuplot.tex 
+ *      latex gnuplot.tex ; latex gnuplot.tex
+ *
+ * Modified by Russell Lang 1996-10-16
+ *   First line of file is now title.  Ignored by doc2tex.
  */
 
 #include <stdio.h>
@@ -70,6 +76,8 @@ convert(a,b)
 	FILE *a,*b;
 {
     static char line[MAX_LINE_LEN];
+
+    fgets(line,MAX_LINE_LEN,a); /* ignore title line */
 
     while (fgets(line,MAX_LINE_LEN,a)) {
 	   process_line(line, b);
@@ -251,3 +259,4 @@ FILE *b;
 {
 	(void) fputs("\\end{document}\n",b);
 }
+

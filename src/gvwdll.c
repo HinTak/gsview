@@ -20,11 +20,6 @@
 #include "gvwin.h"
 
 /* forward references */
-#ifdef __WIN32__
-int _export gsdll_callback(int message, char *str, unsigned long count);
-#else
-int _far _export gsdll_callback(int message, char FAR *str, unsigned long count);
-#endif
 int get_gs_input(char FAR *buf, int blen);
 
 FARPROC lpfnCallback;
@@ -45,6 +40,12 @@ gs_clear_gsdll(void)
     gsdll.copy_dib = NULL;
     gsdll.copy_palette = NULL;
     gsdll.draw = NULL;
+    gsdll.get_bitmap_row = NULL;
+#ifndef __WIN32__
+    if (gsdll.callback)
+	FreeProcInstance((FARPROC)gsdll.callback);
+#endif
+    gsdll.callback = NULL;
 }
 
 void
@@ -66,6 +67,7 @@ char fullname[1024];
 const char *shortname;
 char *p;
 const char *dllname;
+
 	if (gsdll.hmodule)
 	    return TRUE;
 	post_img_message(WM_GSWAIT, IDS_WAITGSOPEN);
@@ -116,7 +118,7 @@ const char *dllname;
 	    }
 	    /* check DLL version */
 	    gsdll.revision(NULL, NULL, &revision, NULL);
-	    if (revision != GS_REVISION) {
+	    if ( (revision < GS_REVISION) || (revision > GS_REVISION_MAX) ) {
 		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld\n", revision, (long)GS_REVISION);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
@@ -179,6 +181,13 @@ const char *dllname;
 		gs_load_dll_cleanup();
 		return FALSE;
 	    }
+	    gsdll.get_bitmap_row = (PFN_gsdll_get_bitmap_row) GetProcAddress(gsdll.hmodule, "gsdll_get_bitmap_row");
+	    if (gsdll.get_bitmap_row == NULL) {
+	        sprintf(buf, "Can't find gsdll_get_bitmap_row\n");
+		gs_addmess(buf);
+		gs_load_dll_cleanup();
+		return FALSE;
+	    }
 	    gsdll.exit = (PFN_gsdll_exit) GetProcAddress(gsdll.hmodule, "gsdll_exit");
 	    if (gsdll.exit == NULL) {
 	        sprintf(buf, "Can't find gsdll_exit\n");
@@ -192,6 +201,11 @@ const char *dllname;
 	    gs_load_dll_cleanup();
 	    return FALSE;
 	}
+#ifdef __WIN32__
+	gsdll.callback = gsdll_callback;
+#else
+	gsdll.callback = (GSDLL_CALLBACK)MakeProcInstance((FARPROC)gsdll_callback, phInstance);
+#endif
 
     return TRUE;
 }
@@ -233,8 +247,13 @@ gsdll_close()
 }
 
 /* callback routine for GS DLL */
-int 
+#ifdef __WIN32__
+int _export 
 gsdll_callback(int message, char *str, unsigned long count)
+#else
+int _far _export
+gsdll_callback(int message, char FAR *str, unsigned long count)
+#endif
 {
 char buf[MAXSTR];
     switch (message) {
@@ -245,8 +264,7 @@ char buf[MAXSTR];
 	case GSDLL_STDOUT:
 	    if (callback_pstotext(str, count))
 		return (int)count;
-	    if (psfile.ispdf)
-		pdf_checktag(str, count);
+	    pdf_checktag(str, (int)count);
 	    if (str != (char *)NULL)
 		gs_addmess_count(str, (int)count);
 	    return (int)count;
@@ -271,11 +289,16 @@ char buf[MAXSTR];
 	    break;
 	case GSDLL_SYNC:
 	    if (debug) {
-		sprintf(buf,"Callback: SYNC %p\n", str);
+		sprintf(buf,"Callback: SYNC %p%s\n", str, ignore_sync ? " ignored" : "");
 		gs_addmess(buf);
 	    }
 	    if (gsdll.device != (unsigned char *)str)
 	        break;
+	    if (ignore_sync) {
+		/* ignore this sync, but not the next */
+		ignore_sync = FALSE;
+		break;
+	    }
 	    PostMessage(hwndimg, WM_GSSYNC, (WPARAM)0, (LPARAM)0);
 	    break;
 	case GSDLL_PAGE:
@@ -331,8 +354,8 @@ char buf[MAXSTR];
 	    }
 	    break;
 	case GSDLL_SIZE:
-	    bitmap.width = (count & 0xffff);
-	    bitmap.height = ((count>>16) & 0xffff);
+	    bitmap.width = ((WORD)count & 0xffff);
+	    bitmap.height = ((WORD)((count)>>16) & 0xffff);
 	    bitmap.changed = TRUE;
 	    if (debug) {
 		sprintf(buf,"Callback: SIZE %p width=%d height=%d\n", str,
@@ -393,39 +416,49 @@ void
 begin_crit_section(void)
 {
     crit_count++;
+#ifdef __WIN32__
     if (multithread)
 	EnterCriticalSection(&crit_sec);
+#endif
 }
 
 void
 end_crit_section(void)
 {
     crit_count--;
+#ifdef __WIN32__
     if (multithread)
 	LeaveCriticalSection(&crit_sec);
+#endif
 }
 
 void
 wait_event(void)
 {
+#ifdef __WIN32__
     if (multithread) {
 	ResetEvent(display.event);
 	WaitForSingleObject(display.event, INFINITE);
     }
+#endif
 }
 
 void 
 request_mutex(void)
 {
+#ifdef __WIN32__
     if (multithread)
 	WaitForSingleObject(hmutex_ps, 120000);
+#endif
 }
 
 void 
 release_mutex(void)
 {
+#ifdef __WIN32__
     if (multithread)
 	ReleaseMutex(hmutex_ps);
+#endif
 }
 
 /* for pstotext */
@@ -436,13 +469,17 @@ load_pstotext(void)
 char dllname[MAXSTR];
     /* load pstotext DLL */
     strcpy(dllname, szExePath);
+#ifdef __WIN32__
     strcat(dllname, "pstotxt3.dll");
+#else
+    strcat(dllname, "pstotxt1.dll");
+#endif
     pstotextModule = LoadLibrary(dllname);
     if (pstotextModule < (HINSTANCE)HINSTANCE_ERROR) {
 	gs_addmess("Can't load ");
         gs_addmess(dllname);
         gs_addmess("\n");
-	gs_addmess("Please select Options | Quick Text\n");
+	gs_addmess("Please select Options | PStoText | Disable\n");
 	return 1;
     }
     pstotextInit = (PFN_pstotextInit) GetProcAddress(pstotextModule, "pstotextInit");
@@ -464,6 +501,14 @@ char dllname[MAXSTR];
     pstotextExit = (PFN_pstotextExit) GetProcAddress(pstotextModule, "pstotextExit");
     if (pstotextExit == (PFN_pstotextExit)NULL) {
 	gs_addmess("Can't find pstotextExit() in ");
+	gs_addmess(dllname);
+        gs_addmess("\n");
+	FreeLibrary(pstotextModule);
+	return 1;
+    }
+    pstotextSetCork = (PFN_pstotextSetCork) GetProcAddress(pstotextModule, "pstotextSetCork");
+    if (pstotextSetCork == (PFN_pstotextSetCork)NULL) {
+	gs_addmess("Can't find pstotextSetCork() in ");
 	gs_addmess(dllname);
         gs_addmess("\n");
 	FreeLibrary(pstotextModule);
@@ -500,10 +545,9 @@ int code = -1;
 	hglobal = LoadResource(hmodule, 
 	    FindResource(hmodule, (LPSTR)resource, RT_RCDATA));
 	if ( (prolog = (LPSTR)LockResource(hglobal)) != (LPSTR)NULL) {
-	    code = gs_execute(prolog, strlen(prolog));
+	    code = gs_execute(prolog, lstrlen(prolog));
 	    FreeResource(hglobal);
 	}
 	return code;
 }
 
-

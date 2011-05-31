@@ -1304,7 +1304,7 @@ readline(line, size, fp, enddoseps, position, line_len, line_count)
 	if (*position >= enddoseps)
 	    return NULL;    /* don't read any more, we have reached end of dos eps section */
 	if (size > enddoseps - *position + 1)
-	    size = enddoseps - *position + 1;
+	    size = (int)(enddoseps - *position + 1);
     }
     cp = fgets(line, size, fp);
     *line_count += 1;
@@ -1517,7 +1517,7 @@ pscopyuntil(from, to, begin, end, comment)
     char line[PSLINELENGTH];	/* 255 characters + 1 newline + 1 NULL */
     char text[PSLINELENGTH];	/* Temporary storage for text */
     unsigned int num;
-    int comment_length;
+    int comment_length = 0;
     int i;
     char buf[BUFSIZ];
     char *cp;
@@ -1665,7 +1665,7 @@ psfgets(s, n, stream)
     char *p;
     p = s;
     while ( (--n > 0)  && ((ch = fgetc(stream)) != EOF) ) {
-	*p++ = ch;
+	*p++ = (char)ch;
 	if (ch == '\n')
 	    break;
 	if (ch == '\r') {
@@ -1675,7 +1675,7 @@ psfgets(s, n, stream)
 	        if (ch == EOF)
 		    break;
 	        if (ch == '\n')
-	            *p++ = ch;
+	            *p++ = (char)ch;
 		else
 		    ungetc(ch, stream);
 		break;
@@ -1687,4 +1687,3 @@ psfgets(s, n, stream)
     *p = '\0';
     return (ferror(stream)) ? NULL : s;
 }
-

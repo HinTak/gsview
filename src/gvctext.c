@@ -53,7 +53,7 @@ int instring;
 	    if (sscanf(linebuf+14, "%ld", &count) != 1)
 		count = 0;
 	    while (count) {
-		read = fread(buf, 1, min(count, sizeof(buf)), inf);
+		read = fread(buf, 1, (int)min(count, sizeof(buf)), inf);
 		count -= read;
 		if (read == 0)
 		    count = 0;
@@ -76,7 +76,7 @@ int instring;
 	    }
 	    else {
 		while (count) {
-		    read = fread(buf, 1, min(count, sizeof(buf)), inf);
+		    read = fread(buf, 1, (int)min(count, sizeof(buf)), inf);
 		    count -= read;
 		    if (read == 0)
 			count = 0;
@@ -201,6 +201,12 @@ void
 gsview_text_extract()
 {
     int thispage = psfile.pagenum;
+    if (psfile.ispdf && (option.pstotext == 0)) {
+	char buf[MAXSTR];
+	load_string(IDS_NOPDFQUICKTEXT, buf, sizeof(buf)-1);
+	message_box(buf, 0);
+	return;
+    }
     if (psfile.name[0] == '\0') {
 	gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
 	return;
@@ -216,7 +222,7 @@ gsview_text_extract()
 	if (!get_page(&thispage, TRUE, FALSE))
 	    return;
 
-    if (option.quick_text) {
+    if (option.pstotext == 0) {
 	if (!dfreopen())
 	    return;
 	gsview_text_extract_quick();
@@ -325,53 +331,59 @@ gsview_text_find()
 char prompt[MAXSTR];		/* input dialog box prompt and message box string */
 char answer[MAXSTR];		/* input dialog box answer string */
 int thispage = psfile.pagenum;
-	/* can relax some of these restrictions if don't display */
-	if (not_dsc())
-	    return;
-	if (order_is_special())
-	    return;
-	if (pstotextOutfile != (FILE *)NULL) {
-	    play_sound(SOUND_BUSY);
-	    return;	/* busy creating text index file */
-	}
-	if (psfile.doc->numpages == 0) {
-	    gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
-	    return;
-	}
-	load_string(IDS_TEXTFIND, prompt, sizeof(prompt));
-	strcpy(answer, szFindText);
-	load_string(IDS_TOPICTEXT, szHelpTopic, sizeof(szHelpTopic));
+    /* can relax some of these restrictions if don't display */
+    if (not_dsc())
+	return;
+    if (psfile.ispdf && (option.pstotext == 0)) {
+	char buf[MAXSTR];
+	load_string(IDS_NOPDFQUICKTEXT, buf, sizeof(buf)-1);
+	message_box(buf, 0);
+	return;
+    }
+    if (order_is_special())
+	return;
+    if (pstotextOutfile != (FILE *)NULL) {
+	play_sound(SOUND_BUSY);
+	return;	/* busy creating text index file */
+    }
+    if (psfile.doc->numpages == 0) {
+	gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
+	return;
+    }
+    load_string(IDS_TEXTFIND, prompt, sizeof(prompt));
+    strcpy(answer, szFindText);
+    load_string(IDS_TOPICTEXT, szHelpTopic, sizeof(szHelpTopic));
 
-	if (!get_string(prompt,answer))
+    if (!get_string(prompt,answer))
+	return;
+    strcpy(szFindText, answer);
+    if (!get_page(&thispage, TRUE, TRUE))	/* search all pages */
 	    return;
-	strcpy(szFindText, answer);
-	if (!get_page(&thispage, TRUE, TRUE))	/* search all pages */
-		return;
 
-	if (option.quick_text) {
-	    gsview_text_findnext_quick();
+    if (option.pstotext == 0) {
+	gsview_text_findnext_quick();
+    }
+    else {
+	psfile.text_offset = 0;
+	psfile.text_page = 0;
+	/* check if text_name exists, create if necessary */
+	if (psfile.text_name[0] == '\0') {
+	    pending.text = TRUE;
+	    pending.now = TRUE;
+	    /* set flag to come back here after text_name created */
+	    psfile.text_extract = FALSE;
+	    return;
 	}
 	else {
-	    psfile.text_offset = 0;
-	    psfile.text_page = 0;
-	    /* check if text_name exists, create if necessary */
-	    if (psfile.text_name[0] == '\0') {
-		pending.text = TRUE;
-		pending.now = TRUE;
-		/* set flag to come back here after text_name created */
-		psfile.text_extract = FALSE;
-		return;
-	    }
-	    else {
-		gsview_text_findnext_slow();
-	    }
+	    gsview_text_findnext_slow();
 	}
+    }
 }
 
 void
 gsview_text_findnext()
 {
-    if (option.quick_text)
+    if (option.pstotext == 0)
 	gsview_text_findnext_quick();
     else
 	gsview_text_findnext_slow();
@@ -382,34 +394,40 @@ gsview_text_findnext_quick()
 {
 int i;
 char *p;
-	if (not_dsc())
-	    return;
-	if (strlen(szFindText)==0) {
-	    gserror(IDS_TEXTNOTFIND, NULL, MB_ICONEXCLAMATION, 0);
-	    return;
-	}
-	dfreopen();
-	info_wait(IDS_WAITSEARCH);
-	for (i = 0; i < psfile.doc->numpages; i++) {
-	    if (psfile.page_list.select[map_page(i)])  {
-		psfile.page_list.select[map_page(i)] = FALSE;
-	        fseek(psfile.file, psfile.doc->pages[map_page(i)].begin, SEEK_SET);
-		p = text_find_section(psfile.file, psfile.doc->pages[map_page(i)].end, szFindText);
-		if (p) {	/* found it */
-		    info_wait(IDS_NOWAIT);
-		    free(p);
-		    dfclose();
-		    request_mutex();
-		    pending.pagenum = i+1;
-		    pending.now = TRUE;
-		    release_mutex();
-		    return;
-		}
+    if (not_dsc())
+	return;
+    if (psfile.ispdf && (option.pstotext == 0)) {
+	char buf[MAXSTR];
+	load_string(IDS_NOPDFQUICKTEXT, buf, sizeof(buf)-1);
+	message_box(buf, 0);
+	return;
+    }
+    if (strlen(szFindText)==0) {
+	gserror(IDS_TEXTNOTFIND, NULL, MB_ICONEXCLAMATION, 0);
+	return;
+    }
+    dfreopen();
+    info_wait(IDS_WAITSEARCH);
+    for (i = 0; i < psfile.doc->numpages; i++) {
+	if (psfile.page_list.select[map_page(i)])  {
+	    psfile.page_list.select[map_page(i)] = FALSE;
+	    fseek(psfile.file, psfile.doc->pages[map_page(i)].begin, SEEK_SET);
+	    p = text_find_section(psfile.file, psfile.doc->pages[map_page(i)].end, szFindText);
+	    if (p) {	/* found it */
+		info_wait(IDS_NOWAIT);
+		free(p);
+		dfclose();
+		request_mutex();
+		pending.pagenum = i+1;
+		pending.now = TRUE;
+		release_mutex();
+		return;
 	    }
 	}
-	dfclose();
-        info_wait(IDS_NOWAIT);
-	gserror(IDS_TEXTNOTFIND, NULL, MB_ICONEXCLAMATION, 0);
+    }
+    dfclose();
+    info_wait(IDS_NOWAIT);
+    gserror(IDS_TEXTNOTFIND, NULL, MB_ICONEXCLAMATION, 0);
 }
 
 
@@ -651,8 +669,8 @@ char find_text[MAXSTR];
 		&& (gsdll.state == PAGE)) {
 		/* on correct page */
 		display.show_find = TRUE;
-	        post_img_message(WM_GSSYNC, 0); /* redraw */
 		scroll_to_find();
+	        post_img_message(WM_GSSYNC, 0); /* redraw */
 	    }
 	    else {
 		/* move to correct page */

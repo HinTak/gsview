@@ -1,3 +1,4 @@
+ GSview Help
 1Overview
 ?Overview
  `GSview` is a graphical interface for Ghostscript under MS-Windows
@@ -6,7 +7,7 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 2.0 requires Ghostscript 4.01.
+ GSview 2.1 requires Ghostscript 4.03.
  GSview was inspired by Tim Theisen's X11 Ghostview program.
 2Installation
 ?Installation
@@ -17,10 +18,12 @@
 
  If you wish to install GSview manually, see the `Manual Installation`
  topic.
+
+ See also `Options` | `Language`.
 3Uninstalling GSview and Ghostscript
 ?Uninstalling GSview and Ghostscript
  To uninstall GSview, remove the files in the `gsview ` directory.
- To uninstall Ghostscript, remove the files in the `gs4.01` directory.
+ To uninstall Ghostscript, remove the files in the `gs4.03` directory.
 
  Also remove
 P
@@ -39,6 +42,8 @@ W
   psfile
   .eps
   .ps
+  pdffile  (if you associated PDF with GSview)
+  .pdf     (if you associated PDF with GSview)
 E
 3Manual Installation
 ?Manual Installation
@@ -61,10 +66,13 @@ E
 
  Next install
 P
- PM GSview by copying gvpm.exe, gvpgs.exe, gvpm.hlp and printer.ini
+ PM GSview by copying gvpm.exe, gvpgs.exe,
+ gvpmen.dll, gvpmde.dll, gvpmen.hlp, gvpmde.hlp
+ and printer.ini
 W
- GSview for Windows by copying gsview32.exe, gsv16spl.exe, gvwgs.exe,
- gsview.hlp and printer.ini
+ GSview for Windows by copying gsview32.exe, gsv16spl.exe, gvwgs32.exe,
+ gsvw32en.dll, gsvw32de.dll, gsviewen.hlp, gsviewde.hlp
+ and printer.ini
 E
  to the `c:\gstools\gsview` directory.
 
@@ -132,7 +140,7 @@ E
  after the version number has changed, GSview will configure
  the local computer.
 
- Using a UNC path with installing GSview probably will not work
+ Using a UNC path when installing GSview probably will not work
  from Windows 3.1, but does work from Windows 95.
 3Ghostscript Installation
 ?Ghostscript Installation
@@ -319,15 +327,11 @@ E
     /Courier-Oblique                /Courier-Italic         ;
  This tells Ghostscript that if Courier-Oblique is requested,
  Courier-Italic is to be used instead.
- The standard Fontmap file uses aliases to replace poor quality
- bitmap-derived fonts with good quality hinted outline fonts.
- Ghostscript has a bitmap derived version of the Helvetica font
- in the file phvr.gsf.  The Fontmap file could instruct Ghostscript
- to use this with the following line:
-    /Helvetica                      (phvr.gsf)      ;
- However, the NimbusSansL-Regular font looks like Helvetica and is
- a better quality font, so the default Fontmap file actually uses
-    /Helvetica                      /NimbusSansL-Regular    ;
+ The standard Fontmap file uses aliases to replace the standard
+ 35 fonts by a set of outline fonts with different names.
+ The NimbusSansL-Regular font looks like Helvetica,
+ so the default Fontmap file actually uses
+    /Helvetica                      /NimbusSansL-Regu    ;
     /NimbusSansL-Regular            (n019003l.gsf)  ;
 
  A description of the required formatting for each line is near
@@ -387,7 +391,7 @@ E
  Ghostscript now comes with Type 1 fonts of good quality.
 
  The computer hosting Ghostscript may have the same fonts in better
- quality versions, either as scalable fonts (e.g. Type 1 or TrueType)
+ quality versions, either as scaleable fonts (e.g. Type 1 or TrueType)
  or as bitmaps.
  To improve the display of documents, Ghostscript can use these
  `platform fonts` instead of using the low quality fonts.
@@ -452,24 +456,22 @@ E
  GSview can display and print PDF files, although there are a number
  of problems with the current method.
 
- Known problems with the current implemtentation are:
+ Known problems with the current implementation are:
 
  - GSview ignores the page size on the Media menu, and instead uses
  the /MediaBox from the PDF file.
 
- - Zoom doesn't work if the PDF file uses a non-zero /Rotate.
-
  - Doesn't sense if PDF file has been changed during display.
 
- - Extracting PDF pages doesn't actually extract pages from the PDF file.
- Instead it writes a short PostScript file containing commands to display
- the PDF pages.  This PostScript file can be used by Ghostscript to print
- the pages, but sending it to a PostScript printer will not work.
+ - Extracting PDF pages extracts PostScript rather than PDF.
+ See the Ghostscript documentation on pdf2ps.
 
  - GSview needs to `Open` a PDF file to count the pages.  If you
  `Select` the file, GSview will not be able to `Text Extract`,
  `Find`, `Goto Page` or any other operation that needs to know
  how many pages are in the document.
+
+ - pdfmark link support is crude.
 2Document Structuring Conventions
 ?Document Structuring Conventions
 ?DSC
@@ -511,7 +513,7 @@ E
  EPS files are commonly used for inclusion in other documents and
  for this reason require the bounding box comment:
    %%BoundingBox: llx lly urx ury
- where llx, lly, urx and ury are integers giving the x and y coordinates
+ where llx, lly, urx and ury are integers giving the x and y co-ordinates
  of the lower left and upper right corners of a bounding box which encloses
  all marks made on the page.
 
@@ -545,8 +547,8 @@ E
 
  When a file is open, GSview will display the document filename,
  the current page (if available) and while the cursor is over
- the image, the location of the cursor in coordinates specified
- by `Options` | `Units`.  The coordinate can be PostScript points
+ the image, the location of the cursor in co-ordinates specified
+ by `Options` | `Units`.  The co-ordinate can be PostScript points
  (1/72"), millimetres or inches.
  The cursor location is useful for calculating bounding boxes.
 
@@ -572,11 +574,19 @@ E
  See also `Print`.
 3PS to EPS
 ?PS to EPS
+?BoundingBox
  In general, it is not possible to convert a PostScript file to `EPS`.
  However, many single page PostScript files can be converted to `EPS`
  by changing the first line of the file to
   %!PS-Adobe-3.0 EPSF-3.0
  and then adding or fixing up the `%%BoundingBox` comment.
+
+ EPS files are commonly used for inclusion in other documents and
+ for this reason require the bounding box comment:
+   %%BoundingBox: llx lly urx ury
+ where llx, lly, urx and ury are integers giving the x and y co-ordinates
+ of the lower left and upper right corners of a bounding box which encloses
+ all marks made on the page.
 
  `When used incorrectly, the PS to EPS command can produce PostScript
  files with incorrect DSC comments.  Such a document will cause problems
@@ -613,8 +623,6 @@ E
  Remember to turn off `EPS Warn` afterwards.
 
  A document must be displayed before `PS to EPS` is used.
- The document must contain a `showpage`.
- This is required so that the bounding box can be measured.
 
  For documents without `DSC` comments, `PS to EPS` allows a bounding
  box to be specified, then writes out an `EPS` file consisting of
@@ -631,6 +639,11 @@ E
  `PS to EPS` does not clip the document to the `%%BoundingBox`.
  To do so would require changing the PostScript code itself.
  `PS to EPS` only changes the `DSC` comments.
+
+ If `Automatically calculate Bounding Box` is checked, GSview
+ will calculate the bounding box from the non white pixels.
+ If unchecked, you get to choose the bounding box by clicking at
+ the left, bottom, right and top.
 
  `PS to EPS` does not add a preview to a document.
  If you want a preview you add it with `Edit `| `Add EPS Preview` after
@@ -687,7 +700,7 @@ E
  A brief information area at the top of the window is used by
  GSview to display the document filename, the current page number
  and label (if available) and while the cursor is over the image, the
- location of the cursor in coordinates specified by `Options` | `Units`.
+ location of the cursor in co-ordinates specified by `Options` | `Units`.
  The cursor location is useful for calculating bounding boxes.
 
  The `Info` command on the `File `menu shows a dialog box with the
@@ -714,14 +727,14 @@ E
  `Date` is the time the document was created.
 
  `BoundingBox` specifies a box that encloses all the marks painted
- on the page.  The four integer values are the coordinates of the
+ on the page.  The four integer values are the co-ordinates of the
  lower left and upper right corners of the bounding box in default
- user coordinates (1/72 inch).
+ user co-ordinates (1/72 inch).
 
  `Orientation `is either `Portrait `or` Landscape`.
 
  `Default Media` gives the media name followed by the width and
- height of that media in default user coordinates (1/72 inch).
+ height of that media in default user co-ordinates (1/72 inch).
 
  `Page Order` is either `Ascending`, `Descending` or `Special`.
 
@@ -745,7 +758,7 @@ E
  The `All`, `Odd` and `Even` buttons provide quick selection of pages.
 
 W
- The `mswinpr2` printer driver uses the windows printer drivers
+ The `mswinpr2` printer driver uses the Windows printer drivers
  and should work with any printer with raster capabilities.
  Printer resolution cannot be selected from within GSview; use
  the Control Panel instead.  The Windows printer driver used must be
@@ -757,20 +770,34 @@ U
  be considered a last resort if no other Ghostscript printer
  driver is available.
 
+P
+ The `os2prn` printer driver uses the OS/2 printer drivers
+ and should work with any printer with raster capabilities.
+ Printer resolution cannot be selected from within GSview; use
+ the Printer Object instead.  The printer default settings
+ must match those expected by Ghostscript; printer page orientation
+ must be Portrait, printer page size must match the Ghostscript page
+ size.  Setting the property -dBitsPerPixel=1 should speed up
+ printing a little.
+
 E
  With all other printer drivers, Ghostscript sends the output direct
- to the printer, without passing through a Windows printer driver.
+ to the printer queue.
  If you have trouble printing you may have to `Print To File`
  and then `Print File` or use the DOS command `COPY /B FILENAME PRN`.
 
- The Win32 versions of GSview and Ghostscript can't send output
- directly to a printer port so an attempt is made to pass the output
- unchanged through a Windows printer driver.  This does not work
- with some Windows printer drivers.  Use 'Print To File' if you
- have problems.
-E
+ If `PostScript Printer` is checked, the selected pages will be
+ sent direct to the printer queue, without using Ghostscript.
+ This is similar to `File | Print File`, except that you can specify
+ which pages to print.
 
- This list of available devices and resolutions is stored in the
+W
+ Under Win32s, GSview and Ghostscript can't send output
+ directly to a printer queue, so an external 16-bit program
+ is used.
+
+E
+ The list of available devices and resolutions is stored in the
  [Devices] section of
 W
  gsview32.ini
@@ -778,19 +805,16 @@ P
  gvpm.ini.
 E
  The default list of devices and resolutions is taken from the
- standard distribution version of Ghostscript 3.33 and may not
+ standard distribution version of Ghostscript 4.03 and may not
  be complete.
 
  To print a document without displaying it, open the document
  using `Select File`.
 
- `Print To File` is similar to the `Print` command except that Ghostscript
- will write the output to a file instead of sending it to a printer.
-
  If you want to produce a bitmap, some useful drivers are
  `bmpmono`, `bmp16`, `bmp16m` and `bmp256`.
 
- `Print File` sends a file to a local port, bypassing the
+ `File | Print File` sends a file to a local port, bypassing the
 W
  Windows
 P
@@ -815,11 +839,12 @@ W
  Under Windows 3.1, a port name is used.  Output will be spooled for
  this port.
 
- Under Windows 3.1 / Win32s, a port name is used.  Output will be
- written directly to this port.  The spooler is not used.
+ Under Windows 3.1 / Win32s, a port name is used.  An external 16-bit
+ program is used to spool output for the port.
 
  Under Windows 95 or NT, a printer queue name is used.
- At present this must be a local queue.
+ At present this must be a local queue, or a network printer
+ for which a connection has been established.
 E
 
  See also `Print`
@@ -930,7 +955,7 @@ E
 ?Find Next
  In general, extracting text from a PostScript document is not a
  trivial operation.  Words may be broken.  Text may be encoded.
- Ligatures may be used (e.g replacing 'fi' with a single character).
+ Ligatures may be used (e.g. replacing 'fi' with a single character).
  There may be no relationship between the location of a word in
  the PostScript file and its location on the page.
  Success in extracting text from a PostScript document depends
@@ -940,10 +965,10 @@ E
 
  The quick method extracts all text from PostScript strings.
 
- The slow method uses pstotext and Ghostscript to more accurately
+ The second method uses pstotext and Ghostscript to more accurately
  extract text from a PostScript document.
 
- The method used is selected by `Options` | `Quick Text`.
+ The method used is selected by `Options` | `PStoText`.
  See the appropriate topic below:
 3Quick Text Extract and Find
 ?Quick Text Extract and Find
@@ -958,14 +983,14 @@ E
  Line breaks in this text file correspond to lines in the document.
  Spaces in the text file correspond to spaces within strings, or to
  separate strings.  A more effective method of extracting text is to
- use ps2ascii.ps supplied with Ghostscript, or to use the `pstotext`
- program listed on the Ghostscript `WWW` page.  `pstotext` can be
- used from GSview by unchecking `Options` | `Quick Text`.
+ use ps2ascii.ps supplied with Ghostscript, or to use the `PStoText`
+ program listed on the Ghostscript `WWW` page.  `PStoText` can be
+ used from GSview by using `Options` | `PStoText`.
 
  `Edit `| `Find` will search for text and display the first
  page that contains the text.  `Find` asks for a search text
  and a range of pages in which to search.
- The preceeding comments about extracting text from a PostScript
+ The preceding comments about extracting text from a PostScript
  document should be noted.  `Find` first extracts text from
  the document, then searches it ignoring all spaces in both the
  document and the search text.  Case is ignored when searching.
@@ -977,14 +1002,18 @@ E
  special page order.
 
  `Edit `| `Find Next` will continue the search from the next page.
-3Slow Text Extract and Find
-?Slow Text Extract and Find
+3PStoText Text Extract and Find
+?PStoText Text Extract and Find
  This method uses pstotext and Ghostscript to extract text from
  a PostScript document.  Before doing any text extraction or
  searching, the entire PostScript document will be processed by
  Ghostscript and pstotext to produce a text index file.
  This may take a long time.  Once this has finished, text extraction
  and searching should be quick.
+
+ pstotext uses the ISO-Latin1 character set.  See the pstotext
+ documentation for more details.
+  http://www.research.digital.com/SRC/virtualpaper/pstotext.html
 
  `Orientation` must be set to match the text direction of the
  document.
@@ -1011,6 +1040,16 @@ E
  special page order.
 
  `Edit `| `Find Next` will continue the search.
+
+ For most PostScript files you should used
+ `Options` | `PStoText` | `Normal`.
+
+ `Options` | `PStoText` | `Dvips Cork Encoding`
+ is only relevant for PostScript files produced by
+ dvips from TeX or LaTeX documents; it tells `pstotext` to use the
+ Cork encoding rather than the old TeX text encoding. Unfortunately
+ files produced by dvips don't distinguish which font encodings were
+ used.
 2Clipboard
 ?Clipboard
 ?Edit
@@ -1046,7 +1085,7 @@ E
  an index of the words in the document.  If any words are marked with
  the mouse, `Copy` will copy these words to the clipboard instead
  of copying a bitmap.  Text cannot be marked until either `Text Extract`
- or `Find` has been used with `Option` | `Quick Text` unchecked.
+ or `Find` has been used with `Option` | `PStoText` enabled.
 2EPS Preview
 ?EPS Preview
 ?Add EPS Preview
@@ -1055,54 +1094,47 @@ E
  `Add EPS Preview` takes a bitmap from the
  display and uses it to add a preview to an EPS file.
  `Add EPS Preview` can create a DOS EPS file with a
-W
- Windows Metafile or
-E
- TIFF preview, or an EPSI file with an Interchange preview.
+ Windows Metafile or TIFF preview, or an EPSI file with an Interchange preview.
  To use the `Add EPS Preview` command the following steps must be followed.
 
  1. Deselect `Options | Ignore DSC`
 
  2. Make sure the document has a correct bounding box.
+ `Option` | `Show Bounding Box` is useful for checking the
+ bounding box.
  A bounding box can be added or changed using `File` | `PS to EPS`.
 
  3. Select `Orientation` | `Portrait`.
 
- 4. Select `Options` | `EPS Clip`.
- This will cause Ghostscript to use a display window the size of the
- bounding box instead of the page size.
-
- 5. Select `Media `| `Display Settings` and set a suitable resolution
+ 4. Select `Media `| `Display Settings` and set a suitable resolution
  for the preview.  If the resolution is too high
  it will make the EPS file excessively large.
 
- 6. `Open` an EPS file that does not contain a preview.
+ 5. `Open` an EPS file that does not contain a preview.
 
- 7.
- Select `Edit `| `Add EPS Preview`, then the preview format,
+ 6.  Select `Edit `| `Add EPS Preview`, then the preview format,
  then the new EPS filename.  GSview will write a new file containing
  the original PostScript EPS file and a preview created from the
  display bitmap.
  The available preview formats are `Interchange`,
-W
- `TIFF 4`, `TIFF 5` and `Windows Metafile`.
-P
- `TIFF 4` and `TIFF 5`.
-E
+ `TIFF 4`, `TIFF 6 uncompressed`, `TIFF 6 packbits` and `Windows Metafile`.
  If adding an Interchange preview, the document must have an `%%EndComments`
  line, otherwise GSview may put the preview in the wrong place.
- A TIFF 5 preview is a Class B image with no compression as described
- in Appendix G of the TIFF 5.0 memorandum.  A TIFF 4 preview is almost
- identical to the TIFF 5 preview, but avoids using tags which are not
- described in the TIFF 4 specifiation.
+ An interchange preview is always monochrome.
+ A TIFF 4 preview is a Baseline Bilevel Image (1 bit/pixel) with
+ no compression as described in the TIFF 6.0 memorandum, but avoiding
+ tags which are not described in the TIFF 4 specification.
  WordPerfect 5.1 requires a TIFF 4 preview.
-W
- A Windows Metafile preview contains a bitmap.
-E
+ A TIFF 6 preview is a Baseline Bilevel Image,
+ or a Baseline Palette-colour Image (4 or 8 bits/pixel)
+ or a Baseline RGB Full Colour Image (24 bits/pixel)
+ according to the TIFF 6.0 specification.
+ TIFF 6 previews are either uncompressed or compressed with packbits.
+ A Windows Metafile preview contains an uncompressed bitmap.
 
- 8.
- Reset `Orientation` | `Portrait`, `Options` | `EPS Clip`
- and `Media `| `Display Settings` to their previous values.
+ 7.
+ Reset `Orientation` | `Portrait`, and
+ `Media `| `Display Settings` to their previous values.
 
  To extract the PostScript or Preview section from a DOS EPS
  file, use `File` | `Select File` followed by `Edit `| `Extract EPS`
@@ -1131,7 +1163,7 @@ E
 ?Ghostscript DLL
 ?Ghostscript Include Path
 ?Ghostscript Options
- `Ghostscipt DLL` tells GSview where to find Ghostscript.
+ `Ghostscript DLL` tells GSview where to find Ghostscript.
  The default is `c:\gstools\gsN.NN\gsdll2.dll` for OS/2, and
  `c:\gstools\gsN.NN\gsdll32.dll` for Win32.
 
@@ -1147,7 +1179,7 @@ W
 E
  Do NOT put a `-I` before the include path.
 
- It is usual to leave tlhe `Ghostscript Options` field empty.
+ It is usual to leave the `Ghostscript Options` field empty.
  If you wish to turn off the `Platform Fonts` feature under
  MS-Windows, put `-dNOPLATFONTS` in the `Ghostscript Options` field.
 
@@ -1194,6 +1226,30 @@ E
  on the status bar.  Available units are PostScript points (`pt` = 1/72"),
  millimetres (`mm`) and inches (`in`).
  The default is `pt`.
+3Language
+?Language
+?International
+ GSview is available in English and German.  To change the language
+ use `Options `| `Language`.
+3PStoText
+?PStoText
+ GSview has two methods of extracting and searching text.
+
+ The `Quick Text Extract and Find` method does a simple extraction
+ of PostScript strings.  This method is easily confused.
+ This is selected by the menu item `PStoText` | `Disabled`.
+
+ The `PStoText Text Extract and Find` method uses the external pstotext
+ tool and Ghostscript to extract words and their co-ordinates.
+ This method is more accurate, but there may be a long pause while
+ pstotext and Ghostscript do the initial processing.
+ After this, text extraction and searching should be quick.
+ There are two modes of operation.  `Normal` should be used
+ for most PostScript files.  `Dvips Cork Encoding` should be
+ used if you have a PostScript file produced by dvips
+ which uses Cork Encoding.
+
+ The default is `Normal`.
 3Save Settings
 ?Save Settings
 ?Save Settings Now
@@ -1230,9 +1286,8 @@ E
  This is the default.
 
  When `Save Last Directory` option is `unchecked`, the current
- directory when GSview is started will be the directory where
- GSview is located, or the working directory specified by
- the Program Manager.
+ directory when GSview is started will be the current directory
+ of the program that started GSview.
 3Button Bar
 ?Button Bar
 ?Magnify
@@ -1339,20 +1394,6 @@ E
  If `Quick Open` is `unchecked`, GSview will restart Ghostscript
  before each new document or whenever the page orientation,
  resolution or size is changed.
-3Quick Text
-?Quick Text
- GSview has two methods of extracting and searching text.
-
- The `Quick Text Extract and Find` method does a simple extraction
- of PostScript strings.  This method is easily confused.
-
- The `Slow Text Extract and Find` method uses the external pstotext
- tool and Ghostscript to extract words and their coordinates.
- This method is more accurate, but there may be a long pause while
- pstotext and Ghostscript do the initial processing.
- After this, text extraction and searching should be quick.
-
- The default for `Quick Text` is unchecked (slow).
 3Auto Redisplay
 ?Auto Redisplay
  When the `Auto Redisplay` option is `checked`, GSview will
@@ -1449,7 +1490,6 @@ E
 ?Zoom Resolution
 ?Depth
 ?Alpha
-?Anti-aliasing
 ?Anti-aliasing
 ?TextAlphaBits
 ?GraphicsAlphaBits
@@ -1567,7 +1607,7 @@ E
  `P`, `p`  Print all or some pages to a printer.  (`File` | `Print`)
 
  `F`, `f`  Print all or some pages to a File.  (`File` | `Print`) with
-   `Print to File` checked.
+ `Print to File` checked.
 
  `E`, `e`  Extract some pages to another File.  (`File` | `Extract`)
 
@@ -1619,7 +1659,7 @@ W
 ?Windows Explorer
 ?Registry
  If you used the GSview setup.exe program and answered `yes` to
- all the questions, the following configuration has already occured.
+ all the questions, the following configuration has already occurred.
  If you didn't update the registry during GSview installation,
  the following information explains how to do it manually.
 
@@ -1751,6 +1791,11 @@ E
 
  GSview can be used as a PostScript file viewer for several OS/2
  and MS-Windows Web browsers.  See the GSview home page for details.
+
+ Thomas Merz has written a Ghostscript manual, which is available
+ in `PDF` from the above WWW site.  This manual is an extract from a
+ book written by Thomas Merz titled `PostScript and Acrobat/PDF`,
+ available in English and German.
 2Copyright
 ?Copyright
  The `About` menu item shows the GSview copyright message
@@ -1805,9 +1850,9 @@ E
  From the GSview menu select `Options` | `Configure Ghostscript`
  and enter the correct `Ghostscript DLL` path. For example
 P
-  c:\gstools\gsN.NN\gsdll2.exe
+  c:\gstools\gsN.NN\gsdll2.dll
 W
-  c:\gstools\gsN.NN\gsdll32.exe
+  c:\gstools\gsN.NN\gsdll32.dll
 E
 
  This message also occurs if Ghostscript cannot find its
@@ -1880,7 +1925,7 @@ E
  `Problem:` GSview says "Page ordering is Special..."
 
  Your document used the DSC comment `%%PageOrder: Special` which means
- that pages can not be reliably reordered.  This may prevent GSview 
+ that pages can not be reliably reordered.  This may prevent GSview
  from displaying pages in any order other than the original order.
  If you continue and reorder the pages, PostScript errors may occur.
  The only way to fix this is to regenerate the PostScript without

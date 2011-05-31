@@ -35,7 +35,7 @@ PROFILE *prf;
 }
 
 int 
-profile_read_string(PROFILE *prf, char *section, char GVFAR *entry, char *def, char *buffer, int len)
+profile_read_string(PROFILE *prf, char *section, char *entry, char *def, char *buffer, int len)
 {
 	return GetPrivateProfileString(section, entry, def, buffer, len, prf->name);
 }
@@ -57,3 +57,4 @@ profile_close(PROFILE *prf)
 	return TRUE;
 }
 
+

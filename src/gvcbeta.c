@@ -58,10 +58,9 @@ beta_expired(void)
 int beta(void)
 {
   if (beta_expired()) {
-    message_box("This BETA test copy of GSview has expired.\n\
-See http://www.cs.wisc.edu/~ghost/ \
-for details about how to obtain the current \
-version of GSview", MB_OK | MB_ICONHAND);
+    char buf[MAXSTR];
+    load_string(IDS_BETAEXPIRED, buf, sizeof(buf)-1);
+    message_box(buf, MB_OK | MB_ICONHAND);
     return 1;
   }
   return 0;
@@ -70,9 +69,9 @@ version of GSview", MB_OK | MB_ICONHAND);
 int beta_warn(void)
 {
   char buf[256];
-  sprintf(buf, "This is a BETA test version of GSview.  \
-It will disable on %04d-%02d-%02d.", BETA_YEAR, BETA_MONTH, 
-BETA_DAY);
+  char mess[MAXSTR];
+  load_string(IDS_BETAWARN, mess, sizeof(mess)-1);
+  sprintf(buf, mess, BETA_YEAR, BETA_MONTH, BETA_DAY);
   if (message_box(buf, MB_OKCANCEL | MB_ICONEXCLAMATION) != IDOK)
       return 1;
   return beta();

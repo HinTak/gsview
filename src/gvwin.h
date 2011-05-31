@@ -47,7 +47,11 @@ extern HWND hwndspl;	/* window handle of gsv16spl.exe */
 #define MAXSTR 256	/* maximum file name length and general string length */
 #define DEVICENAME "mswindll"
 #define DEFAULT_GSCOMMAND "gswin32.exe"
+#ifdef __WIN32__
 #define INIFILE "gsview32.ini"
+#else
+#define INIFILE "gsview16.ini"
+#endif
 #define DEFAULT_RESOLUTION 96.0
 #define DEFAULT_ZOOMRES 300.0
 #define INISECTION "Options"
@@ -55,8 +59,13 @@ extern HWND hwndspl;	/* window handle of gsv16spl.exe */
 #define EOLSTR "\r\n"
 #define COPY_BUF_SIZE 4096
 /* don't have to worry about segments/selectors */
+#ifdef __WIN32__
+#define GVFAR
+#define GVHUGE
+#else
 #define GVFAR FAR
 #define GVHUGE _huge
+#endif
 
 #include "gvceps.h"
 
@@ -83,13 +92,19 @@ typedef struct tagBM {
 
 typedef struct document PSDOC;
 
-typedef struct tagPSBBOX {
-	int	llx;
-	int	lly;
-	int	urx;
-	int	ury;
-	int	valid;
-} PSBBOX;
+typedef struct tagPDFLINK {
+    PSBBOX bbox;
+    int page;
+    float border_xr;
+    float border_yr;
+    float border_width;
+    float colour_red;
+    float colour_green;
+    float colour_blue;
+    BOOL  colour_valid;
+    struct tagPDFLINK *next;
+    /* need to add View */
+} PDFLINK;
 
 typedef struct tagPAGELIST {
 	int current;	/* index of current selection */
@@ -150,11 +165,12 @@ typedef struct tagPENDING {
 	BOOL	redisplay;	/* redisplay after interpreter restarted */
 	BOOL	next;		/* move to next page */
 	BOOL	now;		/* We want to do something now */
-	/* if now set, at least one of the following four will be set */
+	/* if now set, at least one of the following five will be set */
 	int	pagenum;	/* page number to display */
 	PSFILE *psfile;		/* new document to display */
 	BOOL	resize;		/* size, resolution or orientation change */
 	BOOL	text;		/* extract text, don't display */
+	BOOL	pdf2ps;		/* extract PS from PDF, don't display */
 } PENDING;
 
 extern PENDING pending;
@@ -173,16 +189,18 @@ typedef struct tagGSDLL {
 	int		state;
 
 	/* pointers to DLL functions */
-	PFN_gsdll_revision	revision;
-	PFN_gsdll_init		init;
-	PFN_gsdll_exit		exit;
-	PFN_gsdll_execute_begin	execute_begin;
-	PFN_gsdll_execute_cont	execute_cont;
-	PFN_gsdll_execute_end	execute_end;
-	PFN_gsdll_lock_device	lock_device;
-	PFN_gsdll_copy_dib	copy_dib;
-	PFN_gsdll_copy_palette	copy_palette;
-	PFN_gsdll_draw		draw;
+	PFN_gsdll_revision	 revision;
+	PFN_gsdll_init		 init;
+	PFN_gsdll_exit		 exit;
+	PFN_gsdll_execute_begin	 execute_begin;
+	PFN_gsdll_execute_cont	 execute_cont;
+	PFN_gsdll_execute_end	 execute_end;
+	PFN_gsdll_lock_device	 lock_device;
+	PFN_gsdll_copy_dib	 copy_dib;
+	PFN_gsdll_copy_palette	 copy_palette;
+	PFN_gsdll_draw		 draw;
+	PFN_gsdll_get_bitmap_row get_bitmap_row;
+	GSDLL_CALLBACK		 callback;
 
 	/* pointer to os2dll or mswindll device */
 	unsigned char	*device;
@@ -195,6 +213,7 @@ typedef struct tagGSDLL {
 
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
+	int	language;
 	char	gsdll[MAXSTR];
 	char	gsinclude[MAXSTR];
 	char	gsother[MAXSTR];
@@ -204,8 +223,8 @@ typedef struct tagOPTIONS {
 	POINT	img_size;
 	BOOL	img_max;
 	int	unit;
+	int	pstotext;
 	BOOL	quick_open;
-	BOOL	quick_text;
 	BOOL	settings;
 	BOOL	button_show;
 	BOOL	fit_page;
@@ -232,6 +251,11 @@ typedef struct tagOPTIONS {
 	char	device_name[32];
 	char	device_resolution[32];
 	char	printer_port[32];
+	char	printer_queue[MAXSTR];
+	BOOL	print_to_file;
+	BOOL	psprinter;
+	int	pdf2ps;
+	BOOL	auto_bbox;
 } OPTIONS;
 
 typedef struct tagDISPLAY {
@@ -296,12 +320,14 @@ typedef int (GSDLLAPI *PFN_pstotextFilter)(void *instance, char *instr,
     char **pre, char **word, char **post,
     int *llx, int *lly, int *urx, int *ury);
 typedef int (GSDLLAPI *PFN_pstotextExit)(void *instance);
+typedef int (GSDLLAPI *PFN_pstotextSetCork)(void *instance, int value);
 extern HMODULE pstotextModule;
 extern FILE *pstotextOutfile;
 extern void *pstotextInstance;
 extern PFN_pstotextInit pstotextInit;
 extern PFN_pstotextFilter pstotextFilter;
 extern PFN_pstotextExit pstotextExit;
+extern PFN_pstotextSetCork pstotextSetCork;
 extern char pstotextLine[2048];
 extern int pstotextCount;
 
@@ -347,17 +373,22 @@ extern HWND hDlgModeless;		/* any modeless dialog box */
 extern HWND hwndtext;			/* gswin text window */
 extern HWND hwndimgchild;		/* gswin image child window */
 extern HINSTANCE phInstance;		/* instance of gsview */
+extern HINSTANCE hlanguage;		/* instance of language resources */
 extern BOOL is_win31;			/* To allow selective use of win 3.1 features */
 extern BOOL is_winnt;			/* To allow selective use of Windows NT features */
 extern BOOL is_win95;			/* To allow selective use of Windows 95 features */
 extern BOOL is_win32s;			/* To allow selective use of Win32s misfeatures */
 extern BOOL is_win4;			/* To allow selective use of Windows 4.0 features */
 extern BOOL multithread;		/* TRUE if running multithreaded */
+#ifdef __WIN32__
 extern CRITICAL_SECTION crit_sec;	/* for thread synchronization */
+#endif
 extern HANDLE hmutex_ps;		/* for protecting psfile and pending */
 extern HMENU hmenu;			/* main menu */
 extern HACCEL haccel;			/* menu accelerators */
 extern HCURSOR hcWait;
+extern HCURSOR hcCrossHair;
+extern HCURSOR hcHand;
 extern int bitmap_scrollx;	/* offset from bitmap to origin of child window */
 extern int bitmap_scrolly;
 extern HFONT info_font;
@@ -367,10 +398,13 @@ extern POINT info_page;		/* position of page information */
 extern RECT  info_rect;		/* position and size of brief info area */
 extern RECT  info_coord;		/* position and size of coordinate information */
 extern RECT  button_rect;		/* position and size of button area */
+extern int on_link;			/* TRUE if we were or are over link */
+extern int on_link_page;		/* page number of link target */
 extern OPENFILENAME ofn;
 extern WNDPROC lpfnButtonWndProc;
 extern int percent_done;		/* percentage of document processed */
 extern int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
+extern BOOL ignore_sync;		/* ignore next GSDLL_SYNC */
 
 extern PROG gsprog;
 extern BMAP bitmap;
@@ -390,8 +424,8 @@ extern PSBBOX bbox;
 #ifdef __WIN32__
 #define _huge
 #define MoveTo(hdc,x,y) MoveToEx((hdc),(x),(y),(LPPOINT)NULL)
-#define SetWindowOrg(hdc, x, y) SetWindowOrgEx(hdc, x, y, (LPPOINT)NULL);
-#define	SetWindowExt(hdc, x, y) SetWindowExtEx(hdc, x, y, (LPSIZE)NULL);
+#define SetWindowOrg(hdc, x, y) SetWindowOrgEx(hdc, x, y, (LPPOINT)NULL)
+#define	SetWindowExt(hdc, x, y) SetWindowExtEx(hdc, x, y, (LPSIZE)NULL)
 #define SetClassCursor(hwnd, hcursor) SetClassLong((hwnd), GCL_HCURSOR, (LONG)(hcursor))
 #define GetClassCursor(hwnd) ((HCURSOR)GetClassLong((hwnd), GCL_HCURSOR))
 #define GetNotification(wParam,lParam) (HIWORD(wParam))
@@ -431,7 +465,6 @@ BOOL CALLBACK _export PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lP
 /* in gvwprn.c */
 BOOL get_portname(char *portname, char *port);
 int gp_printfile(char *filename, char *port);
-void gsview_print(BOOL);
 extern char not_defined[];
 void start_gvwgs(void);
 

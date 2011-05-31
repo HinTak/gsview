@@ -35,6 +35,7 @@ int     WINAPI DeleteSpoolPage(HPJOB);
 
 char not_defined[] = "[Not defined]";
 char * get_ports(void);
+char * get_queues(void);
 #define PORT_BUF_SIZE 4096
 
 void
@@ -147,6 +148,7 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
     WORD notify_message;
     char *p;
     char *value;
+    static char notdef[128];
     static char device[MAXSTR];	/* contains printer device name */
     static struct prop_item_s* propitem;
     char section[MAXSTR];
@@ -154,6 +156,7 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
     switch (wmsg) {
 	case WM_INITDIALOG:
 	    lstrcpy(device, (LPSTR)lParam);	/* initialise device name */
+	    load_string(IDS_NOTDEFTAG, notdef, sizeof(notdef));
 	    propitem = get_properties(device);
 	    SendDlgItemMessage(hDlg, PROP_NAME, CB_RESETCONTENT, (WPARAM)0, (LPARAM)0);
 	    SendDlgItemMessage(hDlg, PROP_VALUE, CB_RESETCONTENT, (WPARAM)0, (LPARAM)0);
@@ -195,13 +198,13 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    }
 		    /* now look up entry in gsview.ini */
 		    /* and update PROP_VALUE list box */
+		    SendDlgItemMessage(hDlg, PROP_VALUE, CB_RESETCONTENT, 0, 0L);
+		    SendDlgItemMessage(hDlg, PROP_VALUE, CB_ADDSTRING, 0, 
+			(LPARAM)((LPSTR)notdef));
 		    strcpy(section, device);
 		    strcat(section, " values");
 		    GetPrivateProfileString(section, propitem[iprop].name, "", buf, sizeof(buf)-2, INIFILE);
 		    buf[strlen(buf)+1] = '\0';	/* put double NULL at end */
-		    SendDlgItemMessage(hDlg, PROP_VALUE, CB_RESETCONTENT, 0, 0L);
-		    SendDlgItemMessage(hDlg, PROP_VALUE, CB_ADDSTRING, 0, 
-			(LPARAM)((LPSTR)not_defined));
 		    p = buf;
 		    if (*p != '\0') {
 		      EnableWindow(GetDlgItem(hDlg, PROP_VALUE), TRUE);
@@ -214,8 +217,11 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			    (LPARAM)((LPSTR)value));
 		      }
 		    }
-		    SendDlgItemMessage(hDlg, PROP_VALUE, CB_SELECTSTRING, -1, (LPARAM)(LPSTR)propitem[iprop].value);
-		    SetDlgItemText(hDlg, PROP_VALUE, propitem[iprop].value);
+		    strcpy(buf, propitem[iprop].value);
+		    if (strcmp(buf, not_defined)==0)
+			strcpy(buf, notdef);
+		    SendDlgItemMessage(hDlg, PROP_VALUE, CB_SELECTSTRING, -1, (LPARAM)(LPSTR)buf);
+		    SetDlgItemText(hDlg, PROP_VALUE, buf);
 		    return FALSE;
 		case PROP_VALUE:
 		    if (notify_message == CBN_SELCHANGE) {
@@ -226,12 +232,16 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			if (ivalue == CB_ERR)
 			    return FALSE;
 			SendDlgItemMessage(hDlg, PROP_VALUE, CB_GETLBTEXT, ivalue, (LPARAM)(LPSTR)propitem[iprop].value);
+			if (strcmp(propitem[iprop].value, notdef)==0)
+			    strcpy(propitem[iprop].value, not_defined);
 		    }
 		    if (notify_message == CBN_EDITCHANGE) {
 			iprop = (int)SendDlgItemMessage(hDlg, PROP_NAME, CB_GETCURSEL, 0, 0L);
 			if (iprop == CB_ERR)
 			    return FALSE;
 			GetDlgItemText(hDlg, PROP_VALUE, (LPSTR)propitem[iprop].value, sizeof(propitem->value));
+			if (strcmp(propitem[iprop].value, notdef)==0)
+			    strcpy(propitem[iprop].value, not_defined);
 		    }
 		    return FALSE;
 		case PROP_EDIT:
@@ -241,11 +251,11 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    if (iprop != CB_ERR)
 			strcpy(editpropname, propitem[iprop].name);
 #ifdef __WIN32__
-		    DialogBoxParam( phInstance, "EditPropDlgBox", hDlg, EditPropDlgProc, (LPARAM)device);
+		    DialogBoxParam(hlanguage, "EditPropDlgBox", hDlg, EditPropDlgProc, (LPARAM)device);
 #else
 		    {DLGPROC lpProcProp;
 			lpProcProp = (DLGPROC)MakeProcInstance((FARPROC)EditPropDlgProc, phInstance);
-			DialogBoxParam( phInstance, "EditPropDlgBox", hDlg, lpProcProp, (LPARAM)device);
+			DialogBoxParam(hlanguage, "EditPropDlgBox", hDlg, lpProcProp, (LPARAM)device);
 			FreeProcInstance((FARPROC)lpProcProp);
 		    }
 #endif
@@ -261,11 +271,11 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    load_string(IDS_TOPICEDITPROP, szHelpTopic, sizeof(szHelpTopic));
 		    editpropname[0] = '\0';
 #ifdef __WIN32__
-		    DialogBoxParam( phInstance, "EditPropDlgBox", hDlg, EditPropDlgProc, (LPARAM)device);
+		    DialogBoxParam(hlanguage, "EditPropDlgBox", hDlg, EditPropDlgProc, (LPARAM)device);
 #else
 		    {DLGPROC lpProcProp;
 			lpProcProp = (DLGPROC)MakeProcInstance((FARPROC)EditPropDlgProc, phInstance);
-			DialogBoxParam( phInstance, "EditPropDlgBox", hDlg, lpProcProp, (LPARAM)device);
+			DialogBoxParam(hlanguage, "EditPropDlgBox", hDlg, lpProcProp, (LPARAM)device);
 			FreeProcInstance((FARPROC)lpProcProp);
 		    }
 #endif
@@ -302,7 +312,6 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 
 
 char *device_queue_list;
-int device_to_file;
 int device_queue_index;
 
 /* dialog box for selecting printer device and resolution */
@@ -345,8 +354,18 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		p = device_queue_list;
 		device_queue_index = 0;
 	        idevice = 0;
-		while (*p) {
-		    if ( strcmp(p, option.printer_port) == 0 )
+		if (strlen(p)==0) {
+		    /* no printers, so force Print to File */
+		    option.print_to_file = TRUE;
+		    option.psprinter = FALSE;
+		    SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_SETCHECK, 1, 0);
+		    EnableWindow(GetDlgItem(hDlg, SPOOL_TOFILE), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, SPOOL_PORT), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, SPOOL_PORTTEXT), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, DEVICE_PSPRINT), FALSE);
+		}
+		while (p && *p) {
+		    if ( strcmp(p, option.printer_queue) == 0 )
 		        device_queue_index = idevice;
 		    SendDlgItemMessage(hDlg, SPOOL_PORT, LB_ADDSTRING, 0, (LPARAM)p);
 		    p += lstrlen(p)+1;
@@ -357,6 +376,9 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		if ( (psfile.doc != (PSDOC *)NULL) && (psfile.doc->numpages != 0)) {
 		    psfile.page_list.current = psfile.pagenum-1;
 		    psfile.page_list.multiple = TRUE;
+		    for (i=0; i< psfile.doc->numpages; i++)
+			psfile.page_list.select[i] = FALSE;
+		    psfile.page_list.select[psfile.page_list.current] = TRUE;
 #ifdef __WIN32__
 		    PageDlgProc(hDlg, wmsg, wParam, lParam);
 #else
@@ -373,11 +395,23 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    EnableWindow(GetDlgItem(hDlg, PAGE_LISTTEXT), FALSE);
 		    EnableWindow(GetDlgItem(hDlg, PAGE_LIST), FALSE);
 		}
-		/* set Print to File check box */
-		if (device_to_file) {
-		    SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_SETCHECK, 1, 0);
-		    EnableWindow(GetDlgItem(hDlg, SPOOL_PORT), FALSE);
-		    EnableWindow(GetDlgItem(hDlg, SPOOL_PORTTEXT), FALSE);
+		/* set PostScript Printer check box */
+		if (option.psprinter) {
+		    SendDlgItemMessage(hDlg, DEVICE_PSPRINT, BM_SETCHECK, 1, 0);
+		    EnableWindow(GetDlgItem(hDlg, DEVICE_NAMETEXT), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, DEVICE_NAME), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, DEVICE_RES), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, SPOOL_TOFILE), FALSE);
+		}
+		else {
+		    /* set Print to File check box */
+		    if (option.print_to_file) {
+			SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_SETCHECK, 1, 0);
+			EnableWindow(GetDlgItem(hDlg, SPOOL_PORT), FALSE);
+			EnableWindow(GetDlgItem(hDlg, SPOOL_PORTTEXT), FALSE);
+		    }
 		}
 		return TRUE;
 	    case WM_COMMAND:
@@ -400,6 +434,28 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			    /* can't clear selection */
 			    EnableWindow(GetDlgItem(hDlg, SPOOL_PORT), (i ? FALSE : TRUE));
 			    EnableWindow(GetDlgItem(hDlg, SPOOL_PORTTEXT), (i ? FALSE : TRUE));
+			}
+			return FALSE;
+		    case DEVICE_PSPRINT:
+			if (notify_message == BN_CLICKED) {
+			    int enable;
+		    	    i = (int)SendDlgItemMessage(hDlg, DEVICE_PSPRINT, BM_GETCHECK, 0, 0);
+			    /* toggle state */
+			    i = (i == 0) ? 1 : 0;
+			    SendDlgItemMessage(hDlg, DEVICE_PSPRINT, BM_SETCHECK, i, 0);
+			    enable = !i;
+			    EnableWindow(GetDlgItem(hDlg, DEVICE_NAMETEXT), enable);
+			    EnableWindow(GetDlgItem(hDlg, DEVICE_NAME), enable);
+			    if (i) {
+				EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), FALSE);
+				EnableWindow(GetDlgItem(hDlg, DEVICE_RES), FALSE);
+			    }
+			    else
+				SendDlgNotification(hDlg, DEVICE_NAME, CBN_SELCHANGE);
+			    EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), enable);
+			    if (i && (int)SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_GETCHECK, 0, 0))
+				SendDlgNotification(hDlg, SPOOL_TOFILE, BN_CLICKED);
+			    EnableWindow(GetDlgItem(hDlg, SPOOL_TOFILE), enable);
 			}
 			return FALSE;
 		    case ID_HELP:
@@ -430,17 +486,10 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			    /* no resolutions can be set */
 			    EnableWindow(GetDlgItem(hDlg, DEVICE_RES), FALSE);
 			    EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), FALSE);
-			    EnableWindow(GetDlgItem(hDlg, SPOOL_TOFILE), FALSE);
-			    EnableWindow(GetDlgItem(hDlg, SPOOL_PORT), FALSE);
-			    EnableWindow(GetDlgItem(hDlg, SPOOL_PORTTEXT), FALSE);
 			}
 			else {
 			  EnableWindow(GetDlgItem(hDlg, DEVICE_RES), TRUE);
 			  EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), TRUE);
-			  EnableWindow(GetDlgItem(hDlg, SPOOL_TOFILE), TRUE);
-		    	  i = (int)SendDlgItemMessage(hDlg, SPOOL_TOFILE, BM_GETCHECK, 0, 0);
-			  EnableWindow(GetDlgItem(hDlg, SPOOL_PORT), (i ? FALSE : TRUE));
-			  EnableWindow(GetDlgItem(hDlg, SPOOL_PORTTEXT), (i ? FALSE : TRUE));
 			  while (*p!='\0') {
 			    res = p;
 			    while ((*p!='\0') && (*p!=','))
@@ -469,12 +518,12 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	    		    DLGPROC lpProcProp;
 #endif
 	    		    free((char *)proplist);
-			    LoadString(phInstance, IDS_TOPICPRINT, szHelpTopic, sizeof(szHelpTopic));
+			    load_string(IDS_TOPICPRINT, szHelpTopic, sizeof(szHelpTopic));
 #ifdef __WIN32__
-			    DialogBoxParam( phInstance, "PropDlgBox", hDlg, PropDlgProc, (LPARAM)entry);
+			    DialogBoxParam(hlanguage, "PropDlgBox", hDlg, PropDlgProc, (LPARAM)entry);
 #else
 			    lpProcProp = (DLGPROC)MakeProcInstance((FARPROC)PropDlgProc, phInstance);
-			    DialogBoxParam( phInstance, "PropDlgBox", hDlg, lpProcProp, (LPARAM)entry);
+			    DialogBoxParam(hlanguage, "PropDlgBox", hDlg, lpProcProp, (LPARAM)entry);
 			    FreeProcInstance((FARPROC)lpProcProp);
 #endif
 			}
@@ -494,14 +543,15 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			/* save device name and resolution */
 		        GetDlgItemText(hDlg, DEVICE_NAME, option.device_name, sizeof(option.device_name));
 		        GetDlgItemText(hDlg, DEVICE_RES, option.device_resolution, sizeof(option.device_resolution));
+		 	option.psprinter = (int)SendDlgItemMessage(hDlg, DEVICE_PSPRINT, BM_GETCHECK, 0, 0);
 			/* get Print to File status */
-		 	device_to_file = (int)SendDlgItemMessage(hDlg, 
+		 	option.print_to_file = (int)SendDlgItemMessage(hDlg, 
 			    SPOOL_TOFILE, BM_GETCHECK, 0, 0);
-			if (!device_to_file) {
+			if (!option.print_to_file) {
 			    /* save queue name */
 			    SendDlgItemMessage(hDlg, SPOOL_PORT, LB_GETTEXT, 
 				(int)SendDlgItemMessage(hDlg, SPOOL_PORT, LB_GETCURSEL, 0, 0L),
-				(LPARAM)(LPSTR)option.printer_port);
+				(LPARAM)(LPSTR)option.printer_queue);
 			}
 			/* get pages */
 			if ((psfile.doc != (PSDOC *)NULL) && (psfile.doc->numpages != 0))
@@ -529,24 +579,23 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 
 
 int
-get_device(int to_file)
+get_device(void)
 {
 int result;
 #ifndef __WIN32__
 DLGPROC lpProcDevice;
 #endif
 #define DEVICE_BUF_SIZE 4096
-    device_to_file = to_file;
-    device_queue_list = get_ports();
+    device_queue_list = get_queues();
     if (device_queue_list == (char *)NULL)
 	return FALSE;
 
     load_string(IDS_TOPICPRINT, szHelpTopic, sizeof(szHelpTopic));
 #ifdef __WIN32__
-    result = DialogBoxParam( phInstance, "DeviceDlgBox", hwndimg, DeviceDlgProc, (LPARAM)NULL);
+    result = DialogBoxParam(hlanguage, "DeviceDlgBox", hwndimg, DeviceDlgProc, (LPARAM)NULL);
 #else
     lpProcDevice = (DLGPROC)MakeProcInstance((FARPROC)DeviceDlgProc, phInstance);
-    result = DialogBoxParam( phInstance, "DeviceDlgBox", hwndimg, lpProcDevice, (LPARAM)NULL);
+    result = DialogBoxParam(hlanguage, "DeviceDlgBox", hwndimg, lpProcDevice, (LPARAM)NULL);
     FreeProcInstance((FARPROC)lpProcDevice);
 #endif
     free(device_queue_list);
@@ -580,6 +629,8 @@ CancelDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 /* Dialog box to select printer port */
+/* For Win32s this selects a port */
+/* For Win95 or WinNT, this selects a queue */
 BOOL CALLBACK _export
 SpoolDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -591,8 +642,8 @@ LPSTR entry;
 		SendDlgItemMessage(hDlg, SPOOL_PORT, LB_ADDSTRING, 0, (LPARAM)entry);
 		entry += lstrlen(entry)+1;
 	    }
-	    if ( (*option.printer_port=='\0') ||
-		(SendDlgItemMessage(hDlg, SPOOL_PORT, LB_SELECTSTRING, 0, (LPARAM)(LPSTR)option.printer_port)
+	    if ( (is_win32s ? (*option.printer_port=='\0') : (*option.printer_queue=='\0') ) ||
+		(SendDlgItemMessage(hDlg, SPOOL_PORT, LB_SELECTSTRING, 0, (LPARAM)(LPSTR)(is_win32s ? option.printer_port : option.printer_queue))
 		    == LB_ERR) )
 	        SendDlgItemMessage(hDlg, SPOOL_PORT, LB_SETCURSEL, 0, (LPARAM)0);
 	    return TRUE;
@@ -610,7 +661,7 @@ LPSTR entry;
 		case IDOK:
 		    SendDlgItemMessage(hDlg, SPOOL_PORT, LB_GETTEXT, 
 			(int)SendDlgItemMessage(hDlg, SPOOL_PORT, LB_GETCURSEL, 0, 0L),
-			(LPARAM)(LPSTR)option.printer_port);
+			(LPARAM)(LPSTR)(is_win32s ? option.printer_port : option.printer_queue));
 		    EndDialog(hDlg, 1+(int)SendDlgItemMessage(hDlg, SPOOL_PORT, LB_GETCURSEL, 0, 0L));
 		    return TRUE;
 		case IDCANCEL:
@@ -631,11 +682,26 @@ PRINTER_INFO_1 *prinfo;
 char *enumbuffer;
 char *buffer;
 char *p;
+    if (is_win32s) {
+	if ((buffer = malloc(PORT_BUF_SIZE)) == (char *)NULL)
+	    return NULL;
+	GetProfileString("Devices", NULL, "", buffer, PORT_BUF_SIZE);
+	return buffer;
+    }
+
     /* enumerate all available printers */
     EnumPrinters(PRINTER_ENUM_CONNECTIONS | PRINTER_ENUM_LOCAL, NULL, 1, NULL, 0, &needed, &count);
+    if (needed == 0) {
+	/* no printers */
+	enumbuffer = malloc(4);
+	if (enumbuffer == (char *)NULL)
+	    return NULL;
+	memset(enumbuffer, 0, 4);
+	return enumbuffer;	
+    }
     enumbuffer = malloc(needed);
     if (enumbuffer == (char *)NULL)
-	return FALSE;
+	return NULL;
     if (!EnumPrinters(PRINTER_ENUM_CONNECTIONS | PRINTER_ENUM_LOCAL, NULL, 1, (LPBYTE)enumbuffer, needed, &needed, &count)) {
 	char buf[256];
 	free(enumbuffer);
@@ -672,9 +738,18 @@ char *p;
 int i, iport;
 
     buffer = get_queues();
+    if (buffer == (char *)NULL) 
+	return FALSE;
     if ( (queue == (char *)NULL) || (strlen(queue)==0) ) {
 	/* select a queue */
-	iport = DialogBoxParam(phInstance, "QueueDlgBox", hwndimg, SpoolDlgProc, (LPARAM)buffer);
+#ifdef __WIN32__
+	iport = DialogBoxParam(hlanguage, "QueueDlgBox", hwndimg, SpoolDlgProc, (LPARAM)buffer);
+#else
+	DLGPROC lpfnSpoolProc;
+	lpfnSpoolProc = (DLGPROC)MakeProcInstance((FARPROC)SpoolDlgProc, phInstance);
+	iport = DialogBoxParam(hlanguage, "QueueDlgBox", hwndimg, lpfnSpoolProc, (LPARAM)buffer);
+	FreeProcInstance((FARPROC)lpfnSpoolProc);
+#endif
 	if (!iport) {
 	    free(buffer);
 	    return FALSE;
@@ -695,6 +770,16 @@ int i, iport;
     free(buffer);
     return TRUE;
 }
+#else
+char *
+get_queues(void)
+{
+char *buffer;
+    if ((buffer = malloc(PORT_BUF_SIZE)) == (char *)NULL)
+	return NULL;
+    GetProfileString("Devices", NULL, "", buffer, PORT_BUF_SIZE);
+    return buffer;
+}
 #endif
 
 
@@ -708,17 +793,28 @@ char *buffer;
 char *p;
 int i, iport;
 char filename[MAXSTR];
+char device[MAXSTR];
 #ifdef __WIN32__
 	if (is_win95 || is_winnt)
 	    return get_queuename(portname, port);
 #endif
 
+	if (port && strlen(port)) {
+	    /* check if it is a queue name */
+	    GetProfileString("Devices", port, "", device, sizeof(device));
+	    if (strlen(device)) {
+		/* map it to a port name */
+		strtok(device, ",");
+		port = strtok(NULL, ",");
+	    }
+	}
+
         buffer = get_ports();
 	if ( (port == (char *)NULL) || (strlen(port)==0) ) {
 	    if (buffer == (char *)NULL)
-		return NULL;
+		return FALSE;
 	    /* select a port */
-	    iport = DialogBoxParam(phInstance, "SpoolDlgBox", hwndimg, SpoolDlgProc, (LPARAM)buffer);
+	    iport = DialogBoxParam(hlanguage, "SpoolDlgBox", hwndimg, SpoolDlgProc, (LPARAM)buffer);
 	    if (!iport) {
 	        free(buffer);
 	        return FALSE;
@@ -847,9 +943,9 @@ MSG msg;
 	error = TRUE;
 
     lpfnCancelProc = (DLGPROC)MakeProcInstance((FARPROC)CancelDlgProc, phInstance);
-    hDlgModeless = CreateDialog(phInstance, "CancelDlgBox", hwndimg, lpfnCancelProc);
+    hDlgModeless = CreateDialog(hlanguage, "CancelDlgBox", hwndimg, lpfnCancelProc);
     ldone = 0;
-    LoadString(phInstance, IDS_CANCELDONE, fmt, sizeof(fmt));
+    load_string(IDS_CANCELDONE, fmt, sizeof(fmt));
 
     while (!error && hDlgModeless 
       && (count = fread(buffer, 1, PRINT_BUF_SIZE, f)) != 0 ) {
@@ -995,7 +1091,7 @@ LPBYTE data;
 	hmem = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, PRINT_BUF_SIZE+sizeof(WORD));
 	if (hmem == (HGLOBAL)NULL) {
 	    free(buffer);
-	    gserror(0, "Can't allocate global memory for gsv16spl", NULL, SOUND_ERROR);
+	    gserror(0, "Can't allocate global memory for gsv16spl", 0, SOUND_ERROR);
 	    return FALSE;
 	}
 
@@ -1036,7 +1132,7 @@ LPBYTE data;
 	    fclose(f);
 	    free(buffer);
 	    GlobalFree(hmem);
-	    gserror(0, "gsv16spl didn't give us a window handle", NULL, SOUND_ERROR);
+	    gserror(0, "gsv16spl didn't give us a window handle", 0, SOUND_ERROR);
 	    return FALSE;	/* gsv16spl didn't SendMessage to us */
 	}
 
@@ -1044,16 +1140,16 @@ LPBYTE data;
 	    fclose(f);
 	    free(buffer);
 	    GlobalFree(hmem);
-	    gserror(0, "gsv16spl couldn't start printer job", NULL, SOUND_ERROR);
+	    gserror(0, "gsv16spl couldn't start printer job", 0, SOUND_ERROR);
 	    return FALSE;
 	}
 
 
 #ifdef __WIN32__
-	hDlgModeless = CreateDialog(phInstance, "CancelDlgBox", hwndimg, CancelDlgProc);
+	hDlgModeless = CreateDialog(hlanguage, "CancelDlgBox", hwndimg, CancelDlgProc);
 #else
         lpfnCancelProc = (DLGPROC)MakeProcInstance((FARPROC)CancelDlgProc, phInstance);
-        hDlgModeless = CreateDialog(phInstance, "CancelDlgBox", hwndimg, lpfnCancelProc);
+        hDlgModeless = CreateDialog(hlanguage, "CancelDlgBox", hwndimg, lpfnCancelProc);
 #endif
 	ldone = 0;
 
@@ -1112,11 +1208,13 @@ start_gvwgs(void)
     char progname[MAXSTR];
     char command[MAXSTR+MAXSTR];
 
-    if (is_win32s)
-        sprintf(command,"%s %s %s %s", debug ? "/d" : "",
+#ifdef __WIN32__
+    if (!is_win32s)
+        sprintf(command,"%s \042%s\042 \042%s\042 \042%s\042", debug ? "/d" : "",
 	    option.gsdll, printer.optname, printer.psname);
     else
-        sprintf(command,"%s \042%s\042 \042%s\042 \042%s\042", debug ? "/d" : "",
+#endif
+        sprintf(command,"%s %s %s %s", debug ? "/d" : "",
 	    option.gsdll, printer.optname, printer.psname);
 
     if (strlen(command) > MAXSTR-1) {
@@ -1133,7 +1231,11 @@ start_gvwgs(void)
 
     info_wait(IDS_WAIT);
     strcpy(progname, szExePath);
-    strcat(progname, "gvwgs.exe");
+#ifdef __WIN32__
+    strcat(progname, "gvwgs32.exe");
+#else
+    strcat(progname, "gvwgs16.exe");
+#endif
     flag = exec_pgm(progname, command, &printer.prog);
     if (!flag || !printer.prog.valid) {
 	    cleanup_pgm(&printer.prog);
@@ -1155,25 +1257,24 @@ start_gvwgs(void)
 
 /* print a range of pages using a Ghostscript device */
 void
-gsview_print(BOOL to_file)
+gsview_print(void)
 {
-#ifndef __WIN32__
-	DLGPROC lpProcDevice;
-#endif
-
 	if (psfile.name[0] == '\0') {
 		gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
 		return;
 	}
 	
-	if (!get_device(to_file))
+	if (!get_device())
 	    return;
 
-	if (!gsview_cprint(device_to_file, printer.psname, printer.optname))
+	if (!gsview_cprint(printer.psname, printer.optname))
 	    return;
 
-	if (is_win32s) {
-	    /* Win32s can't load GS DLL twice */
+#ifdef __WIN32__
+	if (is_win32s) 
+#endif
+	{
+	    /* Win16 and Win32s can't load GS DLL twice */
 	    /* We must unload the current GS DLL */
 	    if (gsdll.valid)
 		pending.unload = TRUE;
@@ -1184,8 +1285,43 @@ gsview_print(BOOL to_file)
 	    return;
 	}
 
+#ifdef __WIN32__
         start_gvwgs();
 	return;
+#endif
+}
+
+/* Convert a range of pages from PDF to PS */
+void
+gsview_pdf2ps(char *output)
+{
+	if (psfile.name[0] == '\0') {
+		gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
+		return;
+	}
+	
+	if (!gsview_pdf2ps_common(printer.psname, printer.optname, output))
+	    return;
+
+#ifdef __WIN32__
+	if (is_win32s) 
+#endif
+	{
+	    /* Win16 and Win32s can't load GS DLL twice */
+	    /* We must unload the current GS DLL */
+	    if (gsdll.valid)
+		pending.unload = TRUE;
+	    /* printer_pending will cause start_gvwgs() to be run */
+	    /* from main message loop, after displaying GS DLL */
+	    /* has unloaded */
+	    win32s_printer_pending = TRUE;
+	    return;
+	}
+
+#ifdef __WIN32__
+        start_gvwgs();
+	return;
+#endif
 }
 
 

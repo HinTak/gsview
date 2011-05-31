@@ -20,7 +20,9 @@
 # Edit COMPBASE and WIN32 as required
 COMPBASE = c:\bc45
 # WIN32=1 for Win32 version (untested)
-WIN32=0
+WIN32=1
+# DEBUG=1 for debugging
+DEBUG=0
 
 # Shouldn't need editing below here
 COMPDIR = $(COMPBASE)\bin
@@ -32,12 +34,20 @@ CC = bcc32
 CCAUX = bcc
 MODEL=32
 CFLAGS=-v -w -DMSDOS -DEPSTOOL -I$(INCDIR) -I..\src
+!if $(DEBUG)
+DEBUGLNK=-v
+!endif
+STRIP=tdstrp32
 !else
 WINEXT=
 CC = bcc
 CCAUX = bcc
 MODEL=l
 CFLAGS=-v -m$(MODEL) -h -w -DMSDOS -DEPSTOOL -I$(INCDIR) -I..\src
+!if $(DEBUG)
+DEBUGLNK=/v
+!endif
+STRIP=tdstrip
 !endif
 OBJS=epstool.obj ps.obj gvceps.obj
 
@@ -49,7 +59,7 @@ all: epstool.exe
 	
 epstool.exe: $(OBJS)
 !if $(WIN32)
-	$(COMPDIR)\$(CC) $(OBJS)
+	$(COMPDIR)\$(CC) $(DEBUGLNK) $(OBJS)
 !else
 	$(COMPDIR)\tlink /Tde /c /m /s /v /l @&&!
 $(LIBDIR)\c0$(MODEL) +
@@ -66,11 +76,62 @@ epstool.obj: epstool.c epstool.h ../src/ps.h ../src/gvceps.c
 ps.obj: ../src/ps.c epstool.h ../src/ps.h ../src/gvceps.c
 	$(COMPDIR)\$(CC) -c $(CFLAGS) ../src/ps.c
 
-gvceps.obj: ../src/gvceps.c epstool.h ../src/ps.h ../src/gvceps.c
+gvceps.obj: ../src/gvceps.c epstool.h ../src/ps.h
 	$(COMPDIR)\$(CC) -c $(CFLAGS) ../src/gvceps.c
+
 
 clean:
 	-del epstool.obj
 	-del ps.obj
 	-del gvceps.obj
+
+EPSFILES1=\
+ epstool/epstool.c\
+ epstool/epstool.h\
+ epstool/epstool.def\
+ epstool/epstool.doc
+
+EPSFILES2=\
+ epstool/epstest.cmd\
+ epstool/makefile.os2\
+ epstool/makefile.tc\
+ epstool/makefile.unx
+
+SRCFILES1=\
+ src/LICENCE\
+ src/gvceps.c\
+ src/gvceps.h\
+ src/PUBLIC\
+ src/ps.c\
+ src/ps.h
+
+ZIPFILES=\
+ epstool.exe\
+ epstool.doc\
+ $(EPSFILES)\
+ $(SRCFILES1)
+
+zip: all
+	copy epstool.doc ..
+	copy epstool.exe ..
+	$(STRIP) ..\epstool.exe
+	cd ..
+	-del epstool.zip
+	echo epstool.exe > zipfiles.txt
+	echo epstool.doc >> zipfiles.txt
+	echo $(EPSFILES1) >> zipfiles.txt
+	echo $(EPSFILES2) >> zipfiles.txt
+	echo $(SRCFILES1) >> zipfiles.txt
+	zip -@ epstool < zipfiles.txt
+	del zipfiles.txt
+	cd epstool
+
+tar:	zip
+	unzip -o ..\epstool
+	copy src\* epstool
+	-del ..\epstool.tar
+	cd epstool
+	flip -u *
+	cd ..
+	tar -cvf ../epstool.tar epstool
 

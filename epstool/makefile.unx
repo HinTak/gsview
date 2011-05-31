@@ -17,12 +17,6 @@
 # makefile.unx
 # EPSTOOL
 
-
-# VERY IMPORTANT
-# The structures in gvceps.c and gvceps.h MUST BE BYTE ALIGNED
-# This needs to be forced using a compiler option, a #pragma
-# of by redefining PACKED in epstool.h
-
 RM=/bin/rm -f
 SHELL=/bin/sh
 
@@ -61,3 +55,4 @@ veryclean: clean
 install: epstool
 	cp epstool $(BINDIR)
 	chmod 755 $(BINDIR)/epstool
+

@@ -5,3 +5,5 @@ EXPORTS
 		pstotextInit	@1
 		pstotextFilter	@2
 		pstotextExit	@3
+		pstotextSetCork	@4
+

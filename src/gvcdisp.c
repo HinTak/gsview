@@ -91,11 +91,8 @@ int width, height;
 		real_orientation = IDM_LANDSCAPE;
 	}
 
-	real_orientation -= IDM_PORTRAIT;
 	if (psfile.ispdf)
-	    real_orientation += (pdf_orientation() - IDM_PORTRAIT);
-        real_orientation &= 3;  /* modulus 4 */
-	real_orientation += IDM_PORTRAIT;
+	    real_orientation = pdf_orientation();
 
 	switch (real_orientation) {
 	    case IDM_PORTRAIT:
@@ -137,6 +134,10 @@ int width, height;
 	    else if (option.orientation == IDM_SEASCAPE)
 		real_orientation = IDM_LANDSCAPE;
 	}
+
+	if (psfile.ispdf)
+	    real_orientation = pdf_orientation();
+
 	switch (real_orientation) {
 	    case IDM_PORTRAIT:
 		break;
@@ -154,6 +155,23 @@ int width, height;
 	    	break;
 	}
 	return;
+}
+
+/* calculate depth */
+int
+real_depth(int depth)
+{
+    if (depth == 0)
+        depth = display.planes * display.bitcount;
+    if (depth > 8)
+	depth = 24;
+    else if (depth >=8)
+	depth = 8;
+    else if (depth >=4)
+	depth = 4;
+    else 
+	depth = 1;
+    return depth;
 }
 
 /* get current media index to paper_size[], or -1 if no match */
@@ -638,4 +656,3 @@ psfile_free(PSFILE *psf)
         psf->text_name[0] = '\0';
     }
 }
-

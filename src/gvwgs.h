@@ -19,6 +19,7 @@
 
 #define STRICT
 #include <windows.h>
+#include <commdlg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,7 +29,7 @@
 #include "gvcrc.h"
 #include "gsdll.h"
 
-#define GVWGS_VERSION	"0.1"
+#define GVWGS_VERSION	"0.2"
 
 #ifndef DS_3DLOOK
 #define DS_3DLOOK 0x0004L	/* for Windows 95 look */
@@ -54,6 +55,7 @@ typedef struct tagGSDLL {
 	PFN_gsdll_execute_cont	execute_cont;
 	PFN_gsdll_execute_end	execute_end;
 	PFN_gsdll_lock_device	lock_device;
+	GSDLL_CALLBACK		callback;
 } GSDLL;
 
 

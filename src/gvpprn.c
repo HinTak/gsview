@@ -35,7 +35,7 @@ char *entry;
 	j = 0;
 	i = 0;
 	while (*entry) {
-	    if ( strcmp(entry, option.printer_port) == 0 )
+	    if ( strcmp(entry, option.printer_queue) == 0 )
 		j = i;
 	    entry += strlen(entry)+1; /* skip to queue comment */
 	    if (*entry) {
@@ -85,7 +85,6 @@ get_ports(char *buf, int len)
 /* We need to use queue_name, user needs to see queue_comment */
 
     SPLERR splerr;
-    USHORT jobCount ;
     ULONG  cbBuf ;
     ULONG  cTotal;
     ULONG  cReturned ;
@@ -95,6 +94,7 @@ get_ports(char *buf, int len)
     PSZ    pszComputerName ;
     PBYTE  pBuf ;
     PPRQINFO3 prq ;
+    PBYTE pdrivbuf;
     int used;
     char *p;
  
@@ -112,22 +112,31 @@ get_ports(char *buf, int len)
           splerr = SplEnumQueue(pszComputerName, ulLevel, pBuf, cbBuf,
                                   &cReturned, &cTotal,
                                   &cbNeeded, NULL);
-          if (splerr == NO_ERROR) {
+          if ( (splerr == NO_ERROR) &&
+             !DosAllocMem((PVOID)&pdrivbuf, 1024, PAG_READ|PAG_WRITE|PAG_COMMIT))
+	  {
              /* Set pointer to point to the beginning of the buffer.           */
              prq = (PPRQINFO3)pBuf;
- 
              /* cReturned has the count of the number of PRQINFO3 structures.  */
              for (i=0;i < cReturned ; i++) {
-		used += strlen(prq->pszName) + 1;
-		used += strlen(prq->pszComment) + 1;
-		if (used < len) {
-		    strcpy(p, prq->pszName);
-		    p += strlen(p)+1;
-		    strcpy(p, prq->pszComment);
-		    p += strlen(p)+1;
+		/* Don't list if connected to FILE */
+	        splerr = SplQueryDevice(pszComputerName, prq->pszPrinters, 3, 
+			pdrivbuf, 1024L, &cbNeeded);
+		if ((splerr != NO_ERROR) || 
+		    (strcmp("FILE", ((PPRDINFO3)pdrivbuf)->pszLogAddr) != 0))
+		{
+		    used += strlen(prq->pszName) + 1;
+		    used += strlen(prq->pszComment) + 1;
+		    if (used < len) {
+			strcpy(p, prq->pszName);
+			p += strlen(p)+1;
+			strcpy(p, prq->pszComment);
+			p += strlen(p)+1;
+		    }
 		}
                 prq++;
              }/*endfor cReturned */
+             DosFreeMem((PVOID)pdrivbuf) ;
           }
           DosFreeMem((PVOID)pBuf) ;
        }
@@ -168,7 +177,7 @@ int i, iport;
 	    if (*p) {
 		strcpy(portname, "\\\\spool\\");
 		strcat(portname, p);
-		strcpy(option.printer_port, p);
+		strcpy(option.printer_queue, p);
 	    }
 	    else
 	        port = NULL;	/* couldn't find it, so prompt for valid port */
@@ -176,7 +185,7 @@ int i, iport;
 	if (port == (char *)NULL) {
 	    /* select a port */
 	    load_string(IDS_TOPICSPOOL, szHelpTopic, sizeof(szHelpTopic));
-	    iport = WinDlgBox(HWND_DESKTOP, hwnd_frame, SpoolDlgProc, 0, IDD_SPOOL, buffer);
+	    iport = WinDlgBox(HWND_DESKTOP, hwnd_frame, SpoolDlgProc, hlanguage, IDD_SPOOL, buffer);
 	    if (!iport || iport == 65536) {
 		free(buffer);
 		return FALSE;
@@ -186,7 +195,7 @@ int i, iport;
 		p += strlen(p)+1;
 	    strcpy(portname, "\\\\spool\\");
 	    strcat(portname, p);
-	    strcpy(option.printer_port, p);
+	    strcpy(option.printer_queue, p);
 	}
 
 	if (strlen(portname) == 0)
@@ -202,7 +211,6 @@ int
 spl_find_queue(char *queue_name, char *driver_name)
 {
     SPLERR splerr;
-    USHORT jobCount;
     ULONG  cbBuf;
     ULONG  cTotal;
     ULONG  cReturned;
@@ -271,7 +279,6 @@ gp_printfile(char *filename, char *queue)
 HSPL hspl;
 PDEVOPENSTRUC pdata;
 PSZ  pszToken = "*";
-ULONG jobid;
 BOOL rc;
 char queue_name[256];
 char driver_name[256];
@@ -482,6 +489,7 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	int ivalue;
 	char *p;
 	char *value;
+	static char notdef[128];
 	static char device[MAXSTR];	/* contains printer device name */
 	static struct prop_item_s* propitem;
 	char section[MAXSTR];
@@ -489,6 +497,7 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     switch (msg) {
       case WM_INITDLG:
 	strcpy(device, mp2);	/* initialise device name */
+	load_string(IDS_NOTDEFTAG, notdef, sizeof(notdef));
 	propitem = get_properties(device);
 	if (propitem == (struct prop_item_s *)NULL) {
 	    WinDismissDlg(hwnd, FALSE);
@@ -553,7 +562,7 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    buf[strlen(buf)+1] = '\0';	/* put double NULL at end */
 	    WinSendMsg(WinWindowFromID(hwnd, PROP_VALUE), LM_DELETEALL, (MPARAM)0, (MPARAM)0);
 	    WinSendMsg( WinWindowFromID(hwnd, PROP_VALUE),
-	    	        LM_INSERTITEM, MPFROMLONG(LIT_END), MPFROMP(not_defined) );
+	    	        LM_INSERTITEM, MPFROMLONG(LIT_END), MPFROMP(notdef) );
 	    p = buf;
 	    if (*p != '\0') {
 	      WinEnableWindow(WinWindowFromID(hwnd, PROP_VALUE), TRUE);
@@ -566,12 +575,15 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    	        LM_INSERTITEM, MPFROMLONG(LIT_END), MPFROMP(value) );
 	      }
 	    }
+	    strcpy(buf, propitem[iprop].value);
+	    if (strcmp(buf, not_defined)==0)
+		strcpy(buf, notdef);
 	    iprop = (int)WinSendMsg( WinWindowFromID(hwnd, PROP_VALUE),
 	    	    LM_SEARCHSTRING, MPFROM2SHORT(LSS_CASESENSITIVE, LIT_FIRST),
-		    MPFROMP(propitem[iprop].value) );
+		    MPFROMP(buf) );
 	    if ((iprop == LIT_ERROR) || (iprop == LIT_NONE)) {
 		iprop = 0;
-	        WinSetWindowText( WinWindowFromID(hwnd, PROP_VALUE), propitem[iprop].value);
+	        WinSetWindowText( WinWindowFromID(hwnd, PROP_VALUE), buf);
 	    }
 	    else {
 		WinSendMsg( WinWindowFromID(hwnd, PROP_VALUE),
@@ -588,6 +600,8 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    WinSendMsg(WinWindowFromID(hwnd, PROP_VALUE), LM_QUERYITEMTEXT,  
 		MPFROM2SHORT(ivalue, sizeof(propitem->value)), 
 		MPFROMP(propitem[iprop].value));
+	    if (strcmp(propitem[iprop].value, notdef)==0)
+		strcpy(propitem[iprop].value, not_defined);
 	}
 	if (mp1 == MPFROM2SHORT(PROP_VALUE, CBN_EFCHANGE)) {
 	    iprop = (int)WinSendMsg(WinWindowFromID(hwnd, PROP_NAME), LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
@@ -595,6 +609,8 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	        return FALSE;
 	    WinQueryWindowText(WinWindowFromID(hwnd, PROP_VALUE), 
 			 sizeof(propitem->value), propitem[iprop].value);
+	    if (strcmp(propitem[iprop].value, notdef)==0)
+		strcpy(propitem[iprop].value, not_defined);
 	}
 	break;
     case WM_COMMAND:
@@ -605,7 +621,7 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		editpropname[0] = '\0';
 		if (iprop != LIT_NONE)
 		    strcpy(editpropname, propitem[iprop].name);
-		WinDlgBox(HWND_DESKTOP, hwnd, EditPropDlgProc, 0, IDD_EDITPROP, device);
+		WinDlgBox(HWND_DESKTOP, hwnd, EditPropDlgProc, hlanguage, IDD_EDITPROP, device);
 		free((char *)propitem);
 		WinSendMsg(hwnd, WM_INITDLG, MPFROMLONG(hwnd), MPFROMP(device));
 	        load_string(IDS_TOPICPROP, szHelpTopic, sizeof(szHelpTopic));
@@ -613,7 +629,7 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    case PROP_NEW:
 	        load_string(IDS_TOPICEDITPROP, szHelpTopic, sizeof(szHelpTopic));
 		editpropname[0] = '\0';
-		WinDlgBox(HWND_DESKTOP, hwnd, EditPropDlgProc, 0, IDD_EDITPROP, device);
+		WinDlgBox(HWND_DESKTOP, hwnd, EditPropDlgProc, hlanguage, IDD_EDITPROP, device);
 		free((char *)propitem);
 		WinSendMsg(hwnd, WM_INITDLG, MPFROMLONG(hwnd), MPFROMP(device));
 	        load_string(IDS_TOPICPROP, szHelpTopic, sizeof(szHelpTopic));
@@ -653,7 +669,6 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
 
 char *device_queue_list;
-int device_to_file;
 int device_queue_index;
 
 
@@ -663,7 +678,7 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
     char buf[128];
     int idevice;
-    int i, j;
+    int i;
     char *p;
     char *res;
     int numentry;
@@ -683,7 +698,8 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		    idevice = numentry;
 	        p += strlen(p) + 1;
 	    }
-	    free(res);
+	    if (res)
+	        free(res);
 	    WinSendMsg( WinWindowFromID(hwnd, DEVICE_NAME),
 	    	LM_SELECTITEM, MPFROMLONG(idevice), MPFROMLONG(TRUE) );
 	    /* force update of DEVICE_RES */
@@ -700,8 +716,19 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    p = device_queue_list;
 	    device_queue_index = 0;
 	    i = 0;
+	    if (strlen(p)==0) {
+		/* no printers, so force Print to File */
+		option.print_to_file = TRUE;
+		option.psprinter = FALSE;
+		WinSendMsg( WinWindowFromID(hwnd, SPOOL_TOFILE),
+		    BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
+		WinEnableWindow(WinWindowFromID(hwnd, SPOOL_TOFILE), FALSE);
+		WinEnableWindow(WinWindowFromID(hwnd, SPOOL_PORT), FALSE);
+		WinEnableWindow(WinWindowFromID(hwnd, SPOOL_PORTTEXT), FALSE);
+		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_PSPRINT), FALSE);
+	    }
 	    while (*p) {
-		if ( strcmp(p, option.printer_port) == 0 )
+		if ( strcmp(p, option.printer_queue) == 0 )
 		    device_queue_index = i;
 		p += strlen(p)+1; /* skip to queue comment */
 		if (*p) {
@@ -715,6 +742,9 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    if ( (psfile.doc != (PSDOC *)NULL) && (psfile.doc->numpages != 0)) {
 		psfile.page_list.current = psfile.pagenum-1;
 		psfile.page_list.multiple = TRUE;
+		for (i=0; i< psfile.doc->numpages; i++)
+		    psfile.page_list.select[i] = FALSE;
+		psfile.page_list.select[psfile.page_list.current] = TRUE;
 		PageDlgProc(hwnd, msg, mp1, mp2);
 	    }
 	    else {
@@ -726,15 +756,28 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	    	    LM_INSERTITEM, MPFROMLONG(LIT_END), MPFROMP("All") );
 		WinEnableWindow(WinWindowFromID(hwnd, PAGE_LIST), FALSE);
 	    }
-	    /* set Print to File check box */
-	    if (device_to_file) {
-	        WinSendMsg( WinWindowFromID(hwnd, SPOOL_TOFILE),
-	    	    BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
-		WinEnableWindow(WinWindowFromID(hwnd, SPOOL_PORT), FALSE);
+	    if (option.psprinter) {
+		WinSendMsg( WinWindowFromID(hwnd, DEVICE_PSPRINT),
+			BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
+		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_NAMETEXT), FALSE);
+		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_NAME), FALSE);
+		WinSendMsg(hwnd, WM_CONTROL, MPFROM2SHORT(DEVICE_NAME, CBN_LBSELECT),
+		    MPFROMLONG(WinWindowFromID(hwnd, DEVICE_NAME)));
+		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_PROP), FALSE);
+		WinEnableWindow(WinWindowFromID(hwnd, SPOOL_TOFILE), FALSE);
 	    }
 	    else {
-		WinSendMsg( WinWindowFromID(hwnd, SPOOL_PORT),
-		    LM_SELECTITEM, MPFROMLONG(device_queue_index), MPFROMLONG(TRUE) );
+		/* set Print to File check box */
+		if (option.print_to_file) {
+		    WinSendMsg( WinWindowFromID(hwnd, SPOOL_TOFILE),
+			BM_SETCHECK, MPFROMLONG(1), MPFROMLONG(0));
+		    WinEnableWindow(WinWindowFromID(hwnd, SPOOL_PORT), FALSE);
+		    WinEnableWindow(WinWindowFromID(hwnd, SPOOL_PORTTEXT), FALSE);
+		}
+		else {
+		    WinSendMsg( WinWindowFromID(hwnd, SPOOL_PORT),
+			LM_SELECTITEM, MPFROMLONG(device_queue_index), MPFROMLONG(TRUE) );
+		}
 	    }
 	    break;
     	case WM_CONTROL:
@@ -765,7 +808,7 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		buf[strlen(buf)+1] = '\0';	/* double NULL at end */
 		WinSendMsg(WinWindowFromID(hwnd, DEVICE_RES), LM_DELETEALL, (MPARAM)0, (MPARAM)0);
 		p = buf;
-		if (*p == '\0') {
+		if (p==(char *)NULL || *p == '\0') {
 		    /* no resolutions can be set */
 		    WinEnableWindow(WinWindowFromID(hwnd, DEVICE_RES), FALSE);
 		    WinEnableWindow(WinWindowFromID(hwnd, DEVICE_RESTEXT), FALSE);
@@ -773,7 +816,7 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		else {
 		  WinEnableWindow(WinWindowFromID(hwnd, DEVICE_RES), TRUE);
 		  WinEnableWindow(WinWindowFromID(hwnd, DEVICE_RESTEXT), TRUE);
-		  while (*p!='\0') {
+		  while (p && *p!='\0') {
 		    res = p;
 		    while ((*p!='\0') && (*p!=','))
 			p++;
@@ -810,13 +853,36 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			WinSendMsg( WinWindowFromID(hwnd, SPOOL_PORT),
 			    LM_SELECTITEM, MPFROMLONG(device_queue_index), 
 			    MPFROMLONG(i ? FALSE : TRUE));
+			WinEnableWindow(WinWindowFromID(hwnd, SPOOL_PORTTEXT), 
+			    (i ? FALSE : TRUE) );
 			WinEnableWindow(WinWindowFromID(hwnd, SPOOL_PORT), 
 			    (i ? FALSE : TRUE) );
 			
 		   }
-		   break;
-	    }
-	    break;
+		   else if (SHORT1FROMMP(mp1) == DEVICE_PSPRINT) {
+			i = (int)WinSendMsg( WinWindowFromID(hwnd, DEVICE_PSPRINT),
+	    	        BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+			/* toggle state */
+			i = (i == 0) ? 1 : 0;
+			WinSendMsg( WinWindowFromID(hwnd, DEVICE_PSPRINT),
+			    BM_SETCHECK, MPFROMLONG(i), MPFROMLONG(0));
+			i = !i;
+			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_NAMETEXT), i);
+			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_NAME), i);
+			if (i)
+			    WinSendMsg(hwnd, WM_CONTROL, MPFROM2SHORT(DEVICE_NAME, CBN_LBSELECT),
+				MPFROMLONG(WinWindowFromID(hwnd, DEVICE_NAME)));
+			else 
+			    WinEnableWindow(WinWindowFromID(hwnd, DEVICE_RESTEXT), i);
+			    WinEnableWindow(WinWindowFromID(hwnd, DEVICE_RES), i);
+			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_PROP), i);
+			if (!i && (int)WinSendMsg( WinWindowFromID(hwnd, SPOOL_TOFILE),
+	    	            BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0)) )
+			    WinSendMsg(hwnd, WM_CONTROL, MPFROM2SHORT(SPOOL_TOFILE, BN_CLICKED), MPFROMLONG(0));
+			WinEnableWindow(WinWindowFromID(hwnd, SPOOL_TOFILE), i);
+		    }
+		}
+		return FALSE;
 	case WM_COMMAND:
 	    switch(LOUSHORT(mp1)) {
 		case DID_OK:
@@ -825,17 +891,20 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			 sizeof(option.device_name), option.device_name);
 		    WinQueryWindowText(WinWindowFromID(hwnd, DEVICE_RES), 
 			sizeof(option.device_resolution), option.device_resolution);
-		    /* get Print to File state */
-	            device_to_file = (int)WinSendMsg( WinWindowFromID(hwnd, SPOOL_TOFILE),
+		    /* get PostScript Printer state */
+	            option.psprinter = (int)WinSendMsg( WinWindowFromID(hwnd, DEVICE_PSPRINT),
 	    	        BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
-		    if (!device_to_file) {
+		    /* get Print to File state */
+	            option.print_to_file = (int)WinSendMsg( WinWindowFromID(hwnd, SPOOL_TOFILE),
+	    	        BM_QUERYCHECK, MPFROMLONG(0), MPFROMLONG(0));
+		    if (!option.print_to_file) {
 			/* save queue name */
 			device_queue_index = 1+(int)WinSendMsg(WinWindowFromID(hwnd, SPOOL_PORT), 
 			    LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
 			p = device_queue_list;
 			for (i=2; i<device_queue_index+device_queue_index && strlen(p)!=0; i++)
 			    p += strlen(p)+1;
-			strcpy(option.printer_port, p);
+			strcpy(option.printer_queue, p);
 		    }
 		    /* save pages numbers */
 	    	    if ( (psfile.doc != (PSDOC *)NULL) && (psfile.doc->numpages != 0))
@@ -858,7 +927,7 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		    if ( (proplist = get_properties(entry)) != (struct prop_item_s *)NULL ) {
 	    		    free((char *)proplist);
 			    load_string(IDS_TOPICPROP, szHelpTopic, sizeof(szHelpTopic));
-	    		    WinDlgBox(HWND_DESKTOP, hwnd, PropDlgProc, 0, IDD_PROP, entry);
+	    		    WinDlgBox(HWND_DESKTOP, hwnd, PropDlgProc, hlanguage, IDD_PROP, entry);
 			    load_string(IDS_TOPICPRINT, szHelpTopic, sizeof(szHelpTopic));
 		    }
 		    else
@@ -871,15 +940,14 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 }
 
 int
-get_device(int to_file)
+get_device(void)
 {
 int result;
-    device_to_file = to_file;
     if ((device_queue_list= malloc(PRINT_BUF_SIZE)) == (char *)NULL)
 	return FALSE;
     get_ports(device_queue_list, PRINT_BUF_SIZE);
     load_string(IDS_TOPICPRINT, szHelpTopic, sizeof(szHelpTopic));
-    result = WinDlgBox(HWND_DESKTOP, hwnd_frame, DeviceDlgProc, 0, IDD_DEVICE, NULL);
+    result = WinDlgBox(HWND_DESKTOP, hwnd_frame, DeviceDlgProc, hlanguage, IDD_DEVICE, NULL);
     free(device_queue_list);
     if (result != DID_OK)
 	return FALSE;
@@ -888,7 +956,7 @@ int result;
 
 /* print a range of pages using a Ghostscript device */
 void
-gsview_print(BOOL to_file)
+gsview_print(void)
 {
 	int flag;
 	char command[MAXSTR+MAXSTR];
@@ -899,10 +967,10 @@ gsview_print(BOOL to_file)
 		return;
 	}
 	
-	if (!get_device(to_file))
+	if (!get_device())
 	    return;
 
-	if (!gsview_cprint(device_to_file, printer.psname, printer.optname))
+	if (!gsview_cprint(printer.psname, printer.optname))
 	    return;
 
 	info_wait(IDS_WAITPRINT);
@@ -943,4 +1011,57 @@ gsview_print(BOOL to_file)
 	return;
 }
 
-
+/* should combine this with part of gsview_print */
+
+/* Convert a range of pages from PDF to PS */
+void
+gsview_pdf2ps(char *output)
+{
+	int flag;
+	char progname[MAXSTR];
+	char command[MAXSTR+MAXSTR];
+
+	if (psfile.name[0] == '\0') {
+		gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
+		return;
+	}
+	
+	if (!gsview_pdf2ps_common(printer.psname, printer.optname, output))
+	    return;
+
+	strcpy(progname, "gvpgs.exe");
+
+	sprintf(command,"%s \042%s\042 \042%s\042 \042%s\042", debug ? "/d" : "", 
+	   option.gsdll, printer.optname, printer.psname);
+
+	if (strlen(command) > MAXSTR-1) {
+		/* command line too long */
+		gserror(IDS_TOOLONG, command, MB_ICONHAND, SOUND_ERROR);
+	        if (!debug)
+		    unlink(printer.psname);
+	        printer.psname[0] = '\0';
+		if (!debug)
+		    unlink(printer.optname);
+		printer.optname[0] = '\0';
+		return;
+	}
+
+	flag = exec_pgm(progname, command, &printer.prog);
+	if (!flag || !printer.prog.valid) {
+	        cleanup_pgm(&printer.prog);
+		gserror(IDS_CANNOTRUN, command, MB_ICONHAND, SOUND_ERROR);
+		if (!debug)
+		    unlink(printer.psname);
+		printer.psname[0] = '\0';
+	        if (!debug)
+		    unlink(printer.optname);
+	        printer.optname[0] = '\0';
+		info_wait(IDS_NOWAIT);
+		return;
+	}
+
+	info_wait(IDS_NOWAIT);
+	
+	return;
+}
+

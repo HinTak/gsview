@@ -16,259 +16,339 @@
 */
 
 /* gvwin2.rc */
-/* Language independent resources for GSVIEW.EXE a graphical interface 
-   for MS-Windows Ghostscript */
+/* Resources for GSVWXX.DLL, which contains the language dependent */
+/* resources for MS-Windows Ghostscript */
 
-#ifndef GSVIEW_VERSION
-#include "gvcrc.h"
+#include <windows.h>
+#ifndef _Windows
+#define _Windows
 #endif
+#include "gvcrc.h"
+
+#ifndef DS_3DLOOK
+#define DS_3DLOOK 0x0004L	/* for Windows 95 look */
+#endif
+
+#include "gvclang.h"
+#include "gvclang.rc"
+#include "gvwlang.rc"
 
 /* Don't rearrange the order of the following icons or their values */
 /* Registry setup depends on their order */
 ID_GSVIEW ICON "binary/gvwin1.ico"
-ID_GSVIEW2 ICON "binary/gvwin2.ico"
-ID_GSVIEW3 ICON "binary/gvwin3.ico"
-ID_GSVIEW_DOC ICON "binary/gvwdoc.ico"
 
-IDP_CROSSHAIR CURSOR "binary/gvwcross.cur"
+AboutDlgBox DIALOG 16, 16, 256, 180
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION AAABOUTWIN
+FONT 8, "Helv"
+{
+ DEFPUSHBUTTON AAOK, IDOK, 206, 5, 44, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+#ifdef __WIN32__
+ LTEXT "GSVIEW32.EXE", -1, 32, 8, 64, 8
+#else
+ LTEXT "GSVIEW16.EXE", -1, 32, 8, 64, 8
+#endif
+ RTEXT AACOPY1, -1, 86, 8, 32, 8
+ LTEXT GSVIEW_VERSION, -1, 120, 8, 38, 8
+ LTEXT GSVIEW_DATE, -1, 158, 8, 44, 8
+ LTEXT AACOPY2, -1, 32, 16, 128, 8
+ LTEXT GSVIEW_COPYRIGHT1, -1, 8, 28, 142, 8
+ LTEXT GSVIEW_COPYRIGHT2, -1, 158, 28, 78, 8
+ LTEXT AACOPY3, -1, 8, 36, 240, 8
+ LTEXT AACOPY4, -1, 7, 48, 240, 8
+ LTEXT AACOPY5, -1, 7, 56, 240, 8
+ LTEXT AACOPY6, -1, 7, 64, 240, 8
+ LTEXT AACOPY7, -1, 7, 72, 240, 8
+ LTEXT AACOPY8, -1, 7, 80, 240, 8
+ LTEXT AACOPY9, -1, 7, 92, 240, 8
+ LTEXT AACOPY10, -1, 7, 100, 240, 8
+ LTEXT AACOPY11, -1, 7, 108, 240, 8
+ LTEXT AACOPY12, -1, 7, 116, 240, 8
+ LTEXT AACOPY13, -1, 7, 124, 240, 8
+ LTEXT AACOPY14, -1, 7, 132, 240, 8
+#ifdef __WIN32__
+ LTEXT AACOPY15, -1, 8, 144, 240, 8
+#else
+ LTEXT AACOPY17, -1, 8, 144, 240, 8
+#endif
+ LTEXT AACOPY18, -1, 8, 152, 240, 8
+ LTEXT AACOPY19, -1, 8, 164, 240, 8
+ ICON ID_GSVIEW, ABOUT_ICON, 8, 8, 18, 20
+}
 
-/* button table */
-/* Each button is specified by a menu item identifier */
-/* The button contents is given by a BITMAP with the same identifier */
-/* or a STRINGTABLE entry with the same identifier, or an ICON with */
-/* the same identifier */
-/* The table ends with a NULL */
-IDR_BUTTON RCDATA
+InputDlgBox DIALOG 48, 32, 192, 56
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION AAINPUT
+Font 8, "Helv"
 BEGIN
-	IDM_OPEN,
-	IDM_PRINT,
-	IDM_INFO,
-	IDM_HELPCONTENT,
-	IDM_GOTO,
-	IDM_NEXT,
-	IDM_PREV,
-	IDM_NEXTSKIP,
-	IDM_PREVSKIP,
-	IDM_MAGPLUS,
-	IDM_MAGMINUS,
-	IDM_TEXTFIND,
-	IDM_TEXTFINDNEXT,
-	0
+	LTEXT "", ID_PROMPT, 6, 6, 180, 10
+	CONTROL "", ID_ANSWER, "edit", ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD, 6, 18, 180, 12
+	CONTROL AAOK, IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 16, 36, 44, 14
+	CONTROL AACANCEL, IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 76, 36, 44, 14
+	CONTROL AAHELP, ID_HELP, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 136, 36, 44, 14
 END
 
-/* This section gives the default entries for the [Devices] section of */
-/* gsview.ini, used to specify available printer drivers. */
-/* Each line contains a device name and available resolutions, separated  */
-/* by commas.  Don't use spaces.  Each line must end with a '\0' */
-/* The last line of this section must be "\0" */
-/* Maximum line length is 128 */
-/* THIS INFORMATION HAS BEEN MOVED TO PRINTER.INI */
-IDR_DEVICES RCDATA
+InfoDlgBox DIALOG 20, 32, 240, 107
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION AAINFO
+Font 8, "Helv"
 BEGIN
-	"mswinpr2,\0"   /* can't set resolution in device dialog box */
-	"djet500,300x300,150x150,100x100,75x75\0"
-	"\0"
+	CONTROL AAOK, IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 136, 89, 44, 14
+	RTEXT AAFILEC, -1, 24, 8, 32, 8
+	LTEXT "", INFO_FILE, 60, 8, 172, 8
+	RTEXT AATYPEC, -1, 24, 16, 32, 8
+	LTEXT "", INFO_TYPE, 60, 16, 110, 8
+	RTEXT AATITLEC, -1, 24, 24, 32, 8
+	LTEXT "", INFO_TITLE, 60, 24, 110, 8
+	RTEXT AADATEC, -1, 24, 32, 32, 8
+	LTEXT "", INFO_DATE, 60, 32, 110, 8
+	RTEXT AABOUNDINGBOXC, -1, 8, 40, 48, 8
+	LTEXT "", INFO_BBOX, 60, 40, 80, 8
+	RTEXT AAORIENTATIONC, -1, 8, 48, 48, 8
+	LTEXT "", INFO_ORIENT, 60, 48, 60, 8
+	RTEXT AADEFAULTMEDIAC, -1, 8, 64, 48, 8
+	LTEXT "", INFO_DEFMEDIA, 60, 64, 60, 8
+	RTEXT AAPAGEORDERC, -1, 8, 56, 48, 8
+	LTEXT "", INFO_ORDER, 60, 56, 60, 8
+	RTEXT AAPAGESC, -1, 8, 72, 48, 8
+	LTEXT "", INFO_NUMPAGES, 60, 72, 60, 8
+	RTEXT AAPAGEC, -1, 8, 80, 48, 8
+	LTEXT "", INFO_PAGE, 60, 80, 60, 8
+	RTEXT AABITMAPC, -1, 8, 92, 48, 8, SS_RIGHT | WS_CHILD | WS_VISIBLE | WS_GROUP
+	LTEXT "", INFO_BITMAP, 60, 92, 60, 8
+	ICON ID_GSVIEW, INFO_ICON, 8, 8, 0, 0
 END
 
-/* header to warn of operators incompatible with EPS */
-IDR_EPSFWARN RCDATA
+
+
+SoundDlgBox DIALOG 16, 40, 254, 102
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION AASOUNDS
+Font 8, "Helv"
 BEGIN
-	"/eps_warn {(Warning: EPS file must not use ) print dup == flush systemdict exch get exec} def\015\012"
-	"/banddevice {/banddevice eps_warn} def\015\012"
-	"/clear {/clear eps_warn} def\015\012"
-	"/cleardictstack {/cleardictstack eps_warn} def\015\012"
-	"/copypage {/copypage eps_warn} def\015\012"
-	"/erasepage {/erasepage eps_warn} def\015\012"
-	"/exitserver {/exitserver eps_warn} def\015\012"  /* this won't work - exitserver is in serverdict */
-	"/serverdict {/serverdict eps_warn} def\015\012"  /* so use this to provide warnings instead */
-	"/framedevice {/framedevice eps_warn} def\015\012"
-	"/grestoreall {/grestoreall eps_warn} def\015\012"
-	"/initclip {/initclip eps_warn} def\015\012"
-	"/initgraphics {/initgraphics eps_warn} def\015\012"
-	"/initmatrix {/initmatrix eps_warn} def\015\012"
-	"/quit {/quit eps_warn} def\015\012"
-	"/renderbands {/renderbands eps_warn} def\015\012"
-	"/setglobal {/setglobal eps_warn} def\015\012"
-	"/setpagedevice {/setpagedevice eps_warn} def\015\012"
-	"/setpageparams {/setpageparams eps_warn} def\015\012"
-	"/setshared {/setshared eps_warn} def\015\012"
-	"/startjob {/startjob eps_warn} def\015\012"
-	"/letter {/letter eps_warn} def\015\012"
-	"/note {/note eps_warn} def\015\012"
-	"/legal {/legal eps_warn} def\015\012"
-	"/a3 {/a3 eps_warn} def\015\012"
-	"/a4 {/a4 eps_warn} def\015\012"
-	"/a5 {/a5 eps_warn} def\015\012"
-	"/eps_warntwo {(Warning: EPS file should be careful using ) print dup == flush systemdict exch get exec} def\015\012"
-	"/nulldevice {/nulldevice eps_warntwo} def\015\012"
-	"/setgstate {/setgstate eps_warntwo} def\015\012"
-	"/sethalftone {/sethalftone eps_warntwo} def\015\012"
-	"/setmatrix {/setmatrix eps_warntwo} def\015\012"
-	"/setscreen {/setscreen eps_warntwo} def\015\012"
-	"/settransfer {/settransfer eps_warntwo} def\015\012"
-	"/setcolortransfer {/setcolortransfer eps_warntwo} def\015\012"
-	"count /eps_count exch def\015\012"
-	"countdictstack /eps_countdictstack exch def\015\012"
-	"/gsview_eps_countcheck {count eps_count\015\012"
-	"  ne {(Warning: EPS file altered operand stack count\\n) print pstack flush} if\015\012"
-	"  countdictstack eps_countdictstack\015\012"
-	"  ne {(Warning: EPS file altered dictionary stack count\\n) print flush} if\015\012"
-	"} def\015\012"
-	"\0"
+	CONTROL AAOK, IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 200, 12, 44, 14
+	CONTROL AACANCEL, IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 200, 32, 44, 14
+	CONTROL AATEST, SOUND_TEST, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 200, 52, 44, 14
+	CONTROL AAHELP, ID_HELP, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 200, 72, 44, 14
+	LTEXT AAEVENTC, -1, 8, 4, 32, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CONTROL "", SOUND_EVENT, "LISTBOX", LBS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 16, 76, 72
+	LTEXT AASOUNDC, -1, 98, 4, 33, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CONTROL "", SOUND_FILE, "LISTBOX", LBS_STANDARD | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 98, 16, 88, 72
+	LTEXT "", SOUND_PATH, 98, 90, 70, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
 END
 
-/* ViewerPreProcess hook */
-/* This is installed with setpagedevice and used by setpagedevice */
-IDR_VIEWER RCDATA
+SpoolDlgBox DIALOG 32, 40, 124, 63
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION AASELECTPORT
+Font 8, "Helv"
 BEGIN
-"/ViewerPreProcess { systemdict begin\015\012"
-/* %  copy dictionary so we can change the entries */
-"  dup length dict copy  \015\012"
-/* % remove entries that will upset viewer */
-"  dup /HWResolution undef\015\012"
-"  dup /HWMargins undef\015\012"
-"  dup /Margins undef\015\012"
-"  dup /Orientation undef\015\012"
-"  dup /InputAttributes undef\015\012"
-"  dup /TextAlphaBits undef\015\012"
-"  dup /GraphicsAlphaBits undef\015\012"
-"  dup /PageSize undef\015\012"
-/* % Calculate width and height of imageable area */
-/* % Use ImagingBBox if set, otherwise use PageSize */
-"  GSview /ImagingBBox get null eq \015\012"
-"  { GSview dup /PageSize get\015\012"
-"    /Size exch put\015\012"
-"    GSview /PageOffset [0 0] put\015\012"
-"  }\015\012"
-"  { GSview dup /ImagingBBox get\015\012"
-"    [ exch\015\012"
-"    dup 0 get exch dup 2 get 3 -1 roll sub exch\015\012"
-"    dup 1 get exch 3 get exch sub \015\012"
-"    ]\015\012"
-"    /Size exch put\015\012"
-"    GSview /Orientation get\015\012"
-"    dup 0 eq\015\012"
-"    { % portrait\015\012"
-"      GSview dup /ImagingBBox get\015\012"
-"      [ exch dup 0 get neg exch 1 get neg ]\015\012"
-"      /PageOffset exch put\015\012"
-"    }\015\012"
-"    if\015\012"
-"    dup 1 eq\015\012"
-"    { % landscape\015\012"
-"      GSview dup /ImagingBBox get\015\012"
-"      [\015\012"
-"        exch dup 1 get neg exch 2 get\015\012"
-"	GSview /PageSize get\015\012"
-"        0 get\015\012"
-"	sub\015\012"
-"        exch neg exch neg\015\012"
-"      ]\015\012"
-"      /PageOffset exch put\015\012"
-"    }\015\012"
-"    if\015\012"
-"    dup 2 eq\015\012"
-"    { % upside-down\015\012"
-"      GSview dup /ImagingBBox get\015\012"
-"      [ exch dup 2 get exch 3 get\015\012"
-"	GSview /PageSize get\015\012"
-"        dup 0 get exch 1 get\015\012"
-"        exch 3 1 roll\015\012"
-"	 sub 3 1 roll\015\012"
-"        sub exch\015\012"
-"      ]\015\012"
-"      /PageOffset exch put\015\012"
-"    }\015\012"
-"    if\015\012"
-"    dup 3 eq\015\012"
-"    { % seascape\015\012"
-"      GSview dup /ImagingBBox get\015\012"
-"      [ exch dup 0 get exch 3 get\015\012"
-"	GSview /PageSize get\015\012"
-"        1 get sub\015\012"
-"	exch neg\015\012"
-"        exch neg exch neg\015\012"
-"      ]\015\012"
-"      /PageOffset exch put\015\012"
-"    }\015\012"
-"    if\015\012"
-"    pop\015\012"
-"  }\015\012"
-"  ifelse\015\012"
-/* % insert alpha values */
-"  dup /TextAlphaBits GSview /TextAlphaBits get put\015\012"
-"  dup /GraphicsAlphaBits GSview /GraphicsAlphaBits get put\015\012"
-/* % insert our page size */
-"  dup /PageSize GSview /Size get put\015\012"
-/* % insert display resolution */
-"  dup /HWResolution GSview /HWResolution get put\015\012"
-/* % insert offset */
-"  dup /PageOffset GSview /PageOffset get put\015\012"
-/* % Insert orientation */
-"  dup /Orientation GSview /Orientation get put\015\012"
-/* % Insert ImagingBBox - this speeds up rendering if ImagingBBox < PageSize */
-"  GSview /ImagingBBox get null eq \015\012"
-"  { % create an ImagingBBox from PageSize\015\012"
-"    dup /ImagingBBox [ 0 0\015\012"
-"    GSview /PageSize get\015\012"
-"    dup 0 get exch 1 get ]\015\012"
-"    put\015\012"
-"  }\015\012"
-"  { % use supplied ImagingBBox\015\012"
-"    dup /ImagingBBox GSview /ImagingBBox get put\015\012"
-"  }\015\012"
-"  ifelse\015\012"
-/* % Insert Policy = use page size in InputAttributes */
-"  dup /Policy << /PageSize 5 >> put\015\012"
-/* % Insert InputAttributes */
-/* % Use this to specify media size */
-"  dup /InputAttributes <<\015\012"
-"    0 << /PageSize [\015\012"
-"      GSview /Orientation get\015\012"
-"      dup 0 eq\015\012"
-"      exch 2 eq \015\012"
-"      or\015\012"
-"      { % portrait or upside down\015\012"
-"        GSview /Size get\015\012"
-"        dup 0 get exch 1 get\015\012"
-"      }\015\012"
-"      { % landscape or seascape\015\012"
-"        GSview /Size get\015\012"
-"        dup 1 get exch 0 get\015\012"
-"      }\015\012"
-"      ifelse\015\012"
-"    ]\015\012"
-"    >>\015\012"
-"  >> put\015\012"
-"  end % pop systemdict \015\012"
-"}\015\012"
+	CONTROL AAOK, IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 72, 14, 44, 14
+	CONTROL AACANCEL, IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 72, 36, 44, 14
+	CONTROL "", SPOOL_PORT, "LISTBOX", LBS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 8, 56, 50
 END
 
-gsview_bitmap BITMAP "binary/gvwmisc.bmp"
+QueueDlgBox DIALOG 32, 40, 214, 63
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION AASELECTPRINTER
+Font 8, "Helv"
+BEGIN
+	CONTROL AAOK, IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 160, 14, 44, 14
+	CONTROL AACANCEL, IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 160, 36, 44, 14
+	CONTROL "", SPOOL_PORT, "LISTBOX", LBS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 8, 140, 50
+END
 
-IDM_OPEN BITMAP "binary/gvwopen.bmp"
+CancelDlgBox DIALOG 32, 40, 120, 48
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | DS_3DLOOK
+Font 8, "Helv"
+BEGIN
+	CTEXT AAPRINTING, -1, 8, 4, 104, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CTEXT "", CANCEL_PCDONE, 8, 16, 104, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CONTROL AACANCEL, IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 36, 30, 44, 14
+END
 
-IDM_PRINT BITMAP "binary/gvwprint.bmp"
+PageDlgBox DIALOG 64, 32, 112, 142
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION AASELECTPAGE
+FONT 8, "Helv"
+{
+ LISTBOX PAGE_LIST, 8, 8, 44, 128, LBS_NOTIFY | LBS_MULTIPLESEL | LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ DEFPUSHBUTTON AAOK, IDOK, 60, 8, 44, 14, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AACANCEL, IDCANCEL, 60, 32, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AAALL, PAGE_ALL, 60, 64, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AAODD, PAGE_ODD, 60, 88, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AAEVEN, PAGE_EVEN, 60, 112, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+}
 
-IDM_INFO BITMAP "binary/gvwinfo.bmp"
+PageMultiDlgBox DIALOG 64, 32, 112, 142
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION AASELECTPAGES
+FONT 8, "Helv"
+{
+ LISTBOX PAGE_LIST, 8, 8, 44, 128, LBS_NOTIFY | LBS_MULTIPLESEL | LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ DEFPUSHBUTTON AAOK, IDOK, 60, 8, 44, 14, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AACANCEL, IDCANCEL, 60, 32, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AAALL, PAGE_ALL, 60, 64, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AAODD, PAGE_ODD, 60, 88, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AAEVEN, PAGE_EVEN, 60, 112, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+}
 
-IDM_HELPCONTENT BITMAP "binary/gvwhelp.bmp"
+DeviceDlgBox DIALOG 16, 40, 274, 161
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION AAPRINTERSETUP
+FONT 8, "Helv"
+{
+ DEFPUSHBUTTON AAOK, IDOK, 220, 8, 44, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ PUSHBUTTON AACANCEL, IDCANCEL, 220, 28, 44, 14, BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ PUSHBUTTON AAPROPERTIES, DEVICE_PROP, 220, 48, 44, 14, BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ PUSHBUTTON AAHELP, ID_HELP, 220, 68, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AAALLPAGES, PAGE_ALL, 220, 99, 44, 14, WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AAODDPAGES, PAGE_ODD, 220, 119, 44, 14, WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AAEVENPAGES, PAGE_EVEN, 220, 139, 44, 14, WS_GROUP | WS_TABSTOP
+ LTEXT AADEVICEC, DEVICE_NAMETEXT, 8, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ COMBOBOX DEVICE_NAME, 8, 16, 70, 70, CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ LTEXT AARESOLUTIONC, DEVICE_RESTEXT, 90, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ COMBOBOX DEVICE_RES, 90, 16, 64, 70, CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+ CHECKBOX AAPSPRINTER, DEVICE_PSPRINT, 9, 90, 92, 8
+ LTEXT AAQUEUEC, SPOOL_PORTTEXT, 8, 102, 48, 8
+ LISTBOX SPOOL_PORT, 8, 114, 145, 40, LBS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ CHECKBOX AAPRINTTOFILE, SPOOL_TOFILE, 91, 99, 60, 8
+ LTEXT AAPAGESC, PAGE_LISTTEXT, 168, 4, 48, 8
+ LISTBOX PAGE_LIST, 168, 16, 36, 136, LBS_NOTIFY | LBS_MULTIPLESEL | LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+}
 
-IDM_GOTO BITMAP "binary/gvwgoto.bmp"
+PropDlgBox DIALOG 16, 40, 216, 118
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION AAPROPERTIES
+FONT 8, "Helv"
+BEGIN
+ DEFPUSHBUTTON AAOK, IDOK, 164, 12, 44, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ PUSHBUTTON AACANCEL, IDCANCEL, 164, 32, 44, 14, BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ PUSHBUTTON AAHELP, ID_HELP, 164, 52, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AAEDIT, PROP_EDIT, 164, 72, 44, 14
+ PUSHBUTTON AANEW, PROP_NEW, 164, 92, 44, 14
+ LTEXT AAPROPERTYC, -1, 8, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ COMBOBOX PROP_NAME, 8, 16, 70, 70, CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ LTEXT AAVALUEC, -1, 90, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+ COMBOBOX PROP_VALUE, 90, 16, 64, 70, CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+ LTEXT AAPAGEOFFSETPT, -1, 8, 100, 56, 8
+ LTEXT AAXC, -1, 76, 100, 8, 8
+ EDITTEXT PROP_XOFFSET, 88, 98, 16, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ LTEXT AAYC, -1, 114, 100, 8, 8
+ EDITTEXT PROP_YOFFSET, 126, 98, 16, 12
+END
 
-IDM_NEXT BITMAP "binary/gvwnext.bmp"
+EditPropDlgBox DIALOG 6, 15, 194, 134
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION AAEDITPROPERTIES
+FONT 8, "Helv"
+{
+ GROUPBOX AAPROPERTYTYPEC, -1, 6, 7, 118, 24, BS_GROUPBOX | WS_GROUP
+ CONTROL AANUMBER, EDITPROP_NUMBER, "BUTTON", BS_AUTORADIOBUTTON | WS_TABSTOP, 12, 16, 44, 12
+ CONTROL AASTRING, EDITPROP_STRING, "BUTTON", BS_AUTORADIOBUTTON, 70, 16, 44, 12
+ LTEXT AANAMEC, -1, 8, 42, 103, 8, WS_GROUP
+ EDITTEXT EDITPROP_NAME, 8, 54, 176, 12, WS_BORDER | WS_TABSTOP
+ LTEXT AAVALUESC, -1, 8, 75, 149, 8
+ EDITTEXT EDITPROP_VALUE, 8, 87, 176, 12, ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP
+ DEFPUSHBUTTON AAOK, IDOK, 12, 109, 50, 14
+ PUSHBUTTON AACANCEL, IDCANCEL, 72, 109, 50, 14
+ PUSHBUTTON AAHELP, ID_HELP, 132, 109, 50, 14
+ PUSHBUTTON AADELETE, EDITPROP_DEL, 136, 14, 50, 14
+}
 
-IDM_PREV BITMAP "binary/gvwprev.bmp"
+BoundingBoxDlgBox DIALOG 12, 24, 120, 15
+STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_EX_TOPMOST | DS_3DLOOK
+CAPTION AABOUNDINGBOX
+Font 8, "Helv"
+BEGIN
+	CTEXT "", BB_PROMPT, 4, 4, 112, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
+END
 
-IDM_NEXTSKIP BITMAP "binary/gvwnexts.bmp"
+InstallDlgBox DIALOG 48, 32, 250, 100
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION AACONFIGUREGS
+FONT 8, "Helv"
+BEGIN
+ LTEXT AAGHOSTSCRIPTDLLC, -1, 6, 10, 180, 10
+ EDITTEXT INSTALL_DLL, 6, 20, 180, 12, ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD
+ LTEXT AAGHOSTSCRIPTINCC, -1, 6, 40, 180, 10
+ EDITTEXT INSTALL_INCLUDE, 6, 50, 180, 12, ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD
+ LTEXT AAGHOSTSCRIPTOTHERC, -1, 8, 70, 180, 10
+ EDITTEXT INSTALL_OTHER, 6, 80, 180, 12, ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD
+ DEFPUSHBUTTON AAOK, IDOK, 200, 10, 44, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ PUSHBUTTON AACANCEL, IDCANCEL, 200, 32, 44, 14, BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ PUSHBUTTON AADEFAULTS, ID_DEFAULT, 200, 54, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON AAHELP, ID_HELP, 200, 76, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+END
 
-IDM_PREVSKIP BITMAP "binary/gvwprevs.bmp"
+TextDlgBox DIALOG 24, 15, 308, 194
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION AAGSMESSWIN
+Font 8, "Helv"
+BEGIN
+ DEFPUSHBUTTON AAOK, IDOK, 8, 174, 50, 14
+ PUSHBUTTON AACOPY, TEXTWIN_COPY, 126, 174, 50, 14
+ PUSHBUTTON AAHELP, ID_HELP, 186, 174, 50, 14
+ EDITTEXT TEXTWIN_MLE, 8, 8, 290, 160, ES_MULTILINE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+END
 
-IDM_MAGPLUS BITMAP "binary/gvwmagp.bmp"
+DisplaySettingsDlgBox DIALOG 24, 15, 207, 111
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION AADISPLAYSETTINGS
+FONT 8, "Helv"
+{
+ DEFPUSHBUTTON AAOK, IDOK, 8, 90, 50, 14
+ PUSHBUTTON AACANCEL, IDCANCEL, 76, 90, 50, 14
+ PUSHBUTTON AAHELP, ID_HELP, 144, 90, 50, 14
+ LTEXT AARESOLUTION, -1, 8, 8, 60, 8
+ LTEXT AAZOOMRESOLUTION, -1, 8, 24, 60, 8
+ LTEXT AADEPTH, -1, 8, 40, 60, 8
+ LTEXT AATEXTALPHA, -1, 8, 56, 60, 8
+ LTEXT AAGRAPHICSALPHA, -1, 8, 72, 60, 8
+ EDITTEXT DSET_RES, 76, 6, 48, 12, WS_BORDER | WS_TABSTOP
+ EDITTEXT DSET_ZOOMRES, 76, 22, 48, 12, WS_BORDER | WS_TABSTOP
+ COMBOBOX DSET_DEPTH, 76, 38, 49, 60, CBS_DROPDOWNLIST | WS_TABSTOP
+ COMBOBOX DSET_TALPHA, 76, 54, 49, 40, CBS_DROPDOWNLIST | WS_TABSTOP
+ COMBOBOX DSET_GALPHA, 76, 70, 49, 40, CBS_DROPDOWNLIST | WS_TABSTOP
+ LTEXT AADPI, -1, 132, 8, 60, 8
+ LTEXT AADPI, -1, 132, 23, 60, 8
+ LTEXT AABPP, -1, 132, 40, 60, 8
+ LTEXT AABITS, -1, 132, 56, 60, 8
+ LTEXT AABITS, -1, 132, 72, 60, 8
+}
 
-IDM_MAGMINUS BITMAP "binary/gvwmagm.bmp"
 
-IDM_TEXTFIND BITMAP "binary/gvwfind.bmp"
+PDF2PSDlgBox DIALOG 6, 15, 175, 69
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION AAPDFTOPS
+FONT 8, "Helv"
+{
+ DEFPUSHBUTTON AAOK, IDOK, 114, 6, 50, 14
+ PUSHBUTTON AACANCEL, IDCANCEL, 114, 24, 50, 14
+ PUSHBUTTON AAHELP, ID_HELP, 114, 42, 50, 14
+ CHECKBOX AABINARYOK, PDF2PS_BINARYOK, 12, 9, 84, 10, BS_AUTOCHECKBOX | WS_TABSTOP
+ CHECKBOX AAPSLEVEL1, PDF2PS_LEVEL1, 12, 27, 84, 10, BS_AUTOCHECKBOX | WS_TABSTOP
+ CHECKBOX AANOPROCSET, PDF2PS_NOPROCSET, 12, 45, 84, 10, BS_AUTOCHECKBOX | WS_TABSTOP
+}
 
-IDM_TEXTFINDNEXT BITMAP "binary/gvwfindn.bmp"
+PSTOEPSDlgBox DIALOG 6, 15, 244, 64
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION AAPSTOEPS
+FONT 8, "Helv"
+{
+ DEFPUSHBUTTON AAYES, IDYES, 184, 6, 50, 14
+ PUSHBUTTON AANO, IDNO, 184, 24, 50, 14
+ PUSHBUTTON AAHELP, ID_HELP, 184, 42, 50, 14
+ AUTOCHECKBOX AAPSTOEPSAUTO, PSTOEPS_AUTOBBOX, 14, 44, 148, 10
+ LTEXT AAPSTOEPSREAD, -1, 15, 9, 130, 8
+}
+
+LanguageDlgBox DIALOG 16, 16, 152, 39
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION AASELECTLANGUAGE
+FONT 8, "Helv"
+{
+ DEFPUSHBUTTON AAENGLISH, IDM_LANGEN, 16, 16, 44, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ DEFPUSHBUTTON AADEUTSCH, IDM_LANGDE, 88, 16, 44, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+}
+
 

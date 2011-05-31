@@ -32,12 +32,6 @@ release_bitmap()
 	/* no action for PM */
 }
 
-void 
-make_eps_metafile(void)
-{
-	not_implemented();
-}
-
 /* Write out a BMP file */
 void
 paste_to_file(void)
@@ -91,3 +85,4 @@ clip_convert()
 {
 	not_implemented();
 }
+
