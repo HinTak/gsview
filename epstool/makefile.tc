@@ -1,0 +1,68 @@
+# Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+#  
+# This file is part of GSview.
+#  
+# This program is distributed with NO WARRANTY OF ANY KIND.  No author
+# or distributor accepts any responsibility for the consequences of using it,
+# or for whether it serves any particular purpose or works at all, unless he
+# or she says so in writing.  Refer to the GSview Free Public Licence 
+# (the "Licence") for full details.
+#  
+# Every copy of GSview must include a copy of the Licence, normally in a 
+# plain ASCII text file named LICENCE.  The Licence grants you the right 
+# to copy, modify and redistribute GSview, but only under certain conditions 
+# described in the Licence.  Among other things, the Licence requires that 
+# the copyright notice and this notice be preserved on all copies.
+
+# makefile.tc
+# EPSTOOL
+
+# Edit COMPBASE and WIN32 as required
+#COMPBASE = d:\bc4
+COMPBASE = g:\utility\bc4
+# WIN32=1 for Win32s version
+WIN32=0
+
+# Shouldn't need editing below here
+COMPDIR = $(COMPBASE)\bin
+INCDIR = $(COMPBASE)\include
+LIBDIR = $(COMPBASE)\lib
+!if $(WIN32)
+WINEXT=32
+CC = bcc32
+CCAUX = bcc
+MODEL=32
+CFLAGS=-v -w -DMSDOS -DEPSTOOL -I$(INCDIR)
+!else
+WINEXT=
+CC = bcc
+CCAUX = bcc
+MODEL=l
+CFLAGS=-v -m$(MODEL) -h -w -DMSDOS -DEPSTOOL -I$(INCDIR)
+!endif
+OBJS=epstool.obj gvcdsc.obj gvceps.obj
+
+all: epstool.exe
+
+.c.obj:
+	$(COMPDIR)\$(CC) -c $(CFLAGS) {$< }
+
+	
+epstool.exe: $(OBJS)
+	$(COMPDIR)\tlink /Tde /c /m /s /v /l @&&!
+$(LIBDIR)\c0$(MODEL) +
+$(OBJS) +
+,epstool.exe,epstool, +
+$(LIBDIR)\math$(MODEL) +
+$(LIBDIR)\emu +
+$(LIBDIR)\c$(MODEL)
+!
+
+epstool.obj: epstool.c epstool.h ../src/gvcdsc.h ../src/gvceps.c
+
+gvcdsc.obj: ../src/gvcdsc.c epstool.h ../src/gvcdsc.h ../src/gvceps.c
+	$(COMPDIR)\$(CC) -c $(CFLAGS) {../src/$< }
+
+gvceps.obj: ../src/gvceps.c epstool.h ../src/gvcdsc.h ../src/gvceps.c
+	$(COMPDIR)\$(CC) -c $(CFLAGS) {../src/$< }
+

@@ -1,0 +1,76 @@
+/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+  
+  This file is part of GSview.
+  
+  This program is distributed with NO WARRANTY OF ANY KIND.  No author
+  or distributor accepts any responsibility for the consequences of using it,
+  or for whether it serves any particular purpose or works at all, unless he
+  or she says so in writing.  Refer to the GSview Free Public Licence 
+  (the "Licence") for full details.
+  
+  Every copy of GSview must include a copy of the Licence, normally in a 
+  plain ASCII text file named LICENCE.  The Licence grants you the right 
+  to copy, modify and redistribute GSview, but only under certain conditions 
+  described in the Licence.  Among other things, the Licence requires that 
+  the copyright notice and this notice be preserved on all copies.
+*/
+
+/* epstool.doc */
+
+1994-03-24
+
+epstool is not yet finished.
+
+The documentation below is not complete and may be incorrect.
+
+Works on little-endian machines (Intel).
+May work on big-endian (Sun, Motorola), but has not had much testing.
+  In particular, I haven't tested the TIFF output.
+
+Purpose: Add EPSI or DOS EPS previews.
+         Extract postscript from DOS EPS files.
+
+- To work under OS/2, Unix and possibly MS-DOS.
+- Uses Ghostscript to create preview bitmaps.
+- Scan bmp file to find bounding box.
+- Create TIFF or Interchange from part of BMP file.
+- output to stdout or file.
+- input must be from file.
+- Options:
+   input file,                 (on command line)
+	DONE
+   output file,                -o filename  or -ofilename
+	Half done.  Need to put stdout into binary mode.
+   page number,                -n pagenumber
+	DONE
+   resolution,                 -r dpi
+	DONE
+   calculate bounding box,     -b
+	no support at all
+   gs command,                 -gcommand or -g command
+	DONE
+- Operations:  
+   Add TIFF 4,                  -t4 or -t
+   Add TIFF 5,                  -t5
+   Add Interchange,             -i
+	Need to extract part of bitmap
+   Extract PostScript,          -p
+	DONE
+   Extract Preview,             -v
+	DONE
+
+On-line help says:
+Usage:  epstool [option] operation filename
+  Options:
+     -b             Calculate BoundingBox from image
+     -g command     Ghostscript command
+     -n number      Page number to extract
+     -o filename    Output filename
+     -r number      Preview resolution in dpi
+  Operations: (one only)
+     -i             Add Interchange preview (EPSI)
+     -t4            Add TIFF4 preview       (DOS EPS)
+     -t5            Add TIFF5 preview       (DOS EPS)
+     -p             Extract PostScript      (DOS EPS)
+     -v             Extract Preview         (DOS EPS)
+

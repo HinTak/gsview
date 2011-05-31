@@ -1,7 +1,0 @@
-[OPTIONS]
-TITLE=Ghostview Help
-[FILES]
-gsview.rtf
-[CONFIG]
-BrowseButtons()
-

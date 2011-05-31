@@ -1,0 +1,7 @@
+[OPTIONS]
+TITLE=GSview Help
+[FILES]
+gsview.rtf
+[CONFIG]
+BrowseButtons()
+

@@ -1,0 +1,140 @@
+1Overview
+?Overview
+ GSgrab is still under development.  Expect to find problems.
+
+ GSgrab is a utility to capture the output of the MS-Windows PostScript
+ printer driver and automatically print it using Ghostscript.
+
+ GSgrab will add `GSGRAB` to the the list of available printer
+ ports.  A PostScript printer driver connected to GSGRAB will
+ direct its output into the file GSGRAB in the Windows directory.
+
+ GSgrab periodically checks for the existence of the GSGRAB file.
+ If the file is accessible, GSgrab gives it to Ghostscript for Windows
+ for printing.
+ When Ghostscript for Windows has finished, GSgrab deletes the file
+ GSGRAB then restarts periodically checking for the existence
+ of the file.
+2Installation
+?Installation
+ This version of GSgrab works best with Ghostscript for Windows 3.0,
+ but will work with Ghostscript 2.6.1.
+
+ Install GSgrab by copying gsgrab.exe and gsgrab.hlp to your
+ Ghostscript directory.
+
+ From the Program Manager, create a program item for GSgrab.
+ Start GSgrab and the Installation help (which you are reading
+ now) and the GSgrab `Setup` dialog box will be displayed.
+
+ From the `Setup` dialog box, edit the `Ghostscript Command`
+ to enter the correct executable path and include path for Ghostscript.
+ For example
+   c:\gs\gswin.exe -Ic:\gs;c:\gs\fonts
+
+ It is essential that you get both the executable and the include path
+ correct otherwise GSgrab will either complain that it cannot run
+ gswin, or it will start and then immediately exit with an
+ error code.
+
+ Next set the correct `Printer`, `Resolution` and `Port`.
+ Then select `Ok`.
+
+ Now start up the `Control Panel`, then `Printers`, add
+ a PostScript printer (Apple Laserwriter II NT is suitable) and
+ then `Connect` it to `GSGRAB`.
+
+ GSgrab should now work.
+ Try it by printing to the PostScript printer which should
+ write to the file GSGRAB.  After a few seconds GSgrab will
+ start Ghostscript which will then write output to a real
+ printer port.
+ If all works properly, you may wish to put the GSgrab program
+ item into the Startup group.
+
+ To uninstall GSview, remove the files you installed above, then remove
+ c:\windows\gsgrab.ini from the appropriate windows directory.
+ Next edit win.ini, find the section [ports] and remove
+ the line `GSGRAB=`
+
+ If you have problems, try reading the help topic `Common Problems`.
+
+2Setup
+?Setup
+?Ghostscript Command
+?Printer
+?Resolution
+?Ports
+?Interval
+ Options that can be changed using GSgrab Setup are:
+
+ `Ghostscript Command`
+
+ This is typically "c:\gs\gswin.exe -Ic:\gs;c:\gs\fonts;c:\psfonts"
+ This must include the full path to gswin and the include path for gswin.
+
+ `Printer`
+
+ A name of a Ghostscript printer device.
+ A drop down combo box contains the names of printers in Ghostscript 3.0.
+
+ `Resolution`
+
+ Resolution of the Ghostscript printer device in dots per inch.
+ A drop down combo box contains the resolutions compatible
+ with known Ghostscript 3.0 printer devices.
+
+ `Port`
+
+ The printer port to be used by Ghostscript.
+
+ If using GSgrab with Ghostscript 2.6.1, you `must` set the printer
+ port to <Unknown>.  Ghostscript will ask you for a printer port.
+
+ `Interval`
+
+ The time interval at which GSgrab checks for the existence of
+ the GSGRAB file.
+
+2Copyright
+?Copyright
+ The `About` button shows the GSgrab copyright message
+ and GSgrab version number.
+
+  GSgrab.EXE - A Ghostscript printer interface
+
+ Copyright (C) 1994, Russell Lang.  All rights reserved.
+  
+ This program is distributed with NO WARRANTY OF ANY KIND.  No author
+ or distributor accepts any responsibility for the consequences of using it,
+ or for whether it serves any particular purpose or works at all, unless he
+ or she says so in writing.  Refer to the GSview Free Public Licence 
+ (the "Licence") for full details.
+  
+ Every copy of GSview must include a copy of the Licence, normally in a 
+ plain ASCII text file named LICENCE.  The Licence grants you the right 
+ to copy, modify and redistribute GSview, but only under certain conditions 
+ described in the Licence.  Among other things, the Licence requires that 
+ the copyright notice and this notice be preserved on all copies.
+
+     Author: Russell Lang
+   Internet: rjl@monu1.cc.monash.edu.au
+
+2Problems and Tasks
+?Problems and Tasks
+ I think GSGRAB is always written to c:\windows.  Need to check this.
+
+ 16bit Ghostscript for Windows is a large model program.  Only one
+ copy can be running at a time.  If a user tries to print while
+ Ghostscript is already running (e.g. for preview with GSview)
+ then an error message will result.
+
+ The user must wait until Ghostscript has finished before printing
+ another file to GSGRAB.  Not sure if Ghostscript accessing the
+ file will stop the Print Manager from overwriting the file.
+
+ Requires quit.ps to be on the Ghostscript include path.
+
+ Printer port selection will confuse Ghostscript 2.6.1.
+ Must use <Unknown>.
+

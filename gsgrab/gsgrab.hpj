@@ -1,0 +1,7 @@
+[OPTIONS]
+TITLE=GSgrab Help
+[FILES]
+gsgrab.rtf
+[CONFIG]
+BrowseButtons()
+

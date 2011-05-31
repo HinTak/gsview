@@ -1,0 +1,1321 @@
+1Overview
+?Overview
+W
+ `GSview for Windows` is a graphical interface for MS-Windows `Ghostscript`.
+P
+ `PM GSview` is a graphical interface for OS/2 `Ghostscript`.
+E
+ Ghostscript is an interpreter for the PostScript page description language
+ used by laser printers.
+ For documents following the Adobe PostScript Document Structuring
+ Conventions,
+ GSview allows selected pages to be viewed or printed.
+ GSview can be used with Ghostscript 3.0 or later.
+ GSview was inspired by Tim Theisen's X11 Ghostview program.
+2Installation
+?Installation
+ First you need to install Ghostscript 3.0.
+ This version of GSview will not work with earlier versions of Ghostscript.
+
+ Next install
+P
+ PM GSview by copying gvpm.exe and gvpm.hlp
+W
+ GSview for Windows by copying gsview.exe, gsview32.exe and gsview.hlp
+E
+ to your Ghostscript directory.
+
+ Start GSview then select `Options` | `Ghostscript Command`,
+ and enter the correct executable path and include path for Ghostscript.
+ For example
+P
+   c:\gs\gsos2.exe -Ic:\gs;c:\psfonts
+W
+   c:\gs\gswin.exe -Ic:\gs;c:\gs\fonts
+E
+
+ It is essential that you get both the executable and the include path
+ correct otherwise GSview will either complain that it cannot run
+P
+ gsos2,
+W
+ gswin,
+E
+ or it will start and then immediately exit with an
+ error code.
+
+ Set the environment variable TEMP to point to a directory for
+ temporary files.  For example:
+   SET TEMP=c:\temp
+ The directory must exist and must be writeable.
+
+ If you have some Type 1 fonts on your system, it may be possible to
+ tell Ghostscript to use them.  See `Fontmap.os2` and `Fontmap.atm`
+ supplied with Ghostscript for examples.
+
+ If you have problems, try reading the help topic `Common Problems`.
+
+ To uninstall GSview, remove the files you installed above, then remove
+P
+ c:\os2\gvpm.ini
+W
+ c:\windows\gsview.ini
+E
+ from the appropriate system directory.
+2Document Structuring Conventions
+?Document Structuring Conventions
+?DSC
+?Encapsulated PostScript
+?EPSF
+?EPS
+ Adobe has defined a set of extended comment conventions that provide
+ additional information about the page structure and resource
+ requirements of a PostScript file.
+ If a file contains these Document Structuring Convention (DSC) comments,
+ GSview can display pages in random order using `Goto Page` and display pages
+ in reverse order using `Previous Page`.  Selected pages can be extracted to
+ another file or printed.
+
+ If a file does not contain DSC comments, GSview can only
+ display the pages in the original order.
+
+ DSC conforming files start with the comment line:
+  %!PS-Adobe-3.0
+ where the number 3.0 may change and is the DSC version number.
+ Some programs write PostScript files with a control-D as the first
+ character of the file, followed by the comment line mentioned above.
+ GSview will correctly report that these files are not DSC conforming,
+ but will still display them with page selection features available.
+ Complain to the author of the program that produced the PostScript file.
+ To make the file DSC conforming, edit it to remove the control-D character.
+
+ DSC conforming files contain lines such as:
+  %%Pages: 24
+  %%Page: 1 1
+ These lines tell GSview how many pages a document contains and
+ where they start.  GSview uses this information to select
+ individual pages.
+
+ Encapsulated PostScript Files (EPSF) are single page documents
+ that contain a subset of the `DSC` comments and PostScript commands.
+ EPS files start with the comment line:
+  %!PS-Adobe-3.0 EPSF-3.0
+ EPS files are commonly used for inclusion in other documents and
+ for this reason require the bounding box comment:
+   %%BoundingBox: llx lly urx ury
+ where llx, lly, urx and ury are integers giving the x and y coordinates
+ of the lower left and upper right corners of a bounding box which encloses
+ all marks made on the page.
+
+ Some EPS files contain a preview of the PostScript document.
+ This preview can be a Windows Metafile, a TIFF file, or an Interchange
+ preview (EPSI format).
+ For the Windows Metafile or TIFF file preview, the EPS file under DOS
+ contains a binary header which specifies the location and lengths of
+ the preview and PostScript language sections of the EPS file.
+ For the Interchange format, the preview is contained in DSC comments
+ starting with
+  %%BeginPreview: width height depth lines
+ An EPS file with a preview can be created from an EPS file without a
+ preview using `Add EPS Preview`.
+2Opening a Document
+?File
+?Open
+?Select File
+?Close
+ The `Open` command on the `File` menu opens a file and displays
+ the first page.
+
+ If the file contains `DSC` comments, pages can be selected using
+ `Next Page`, `Previous Page` and `Goto Page`.
+
+ If the file does not contain `DSC` comments, `Previous Page` and `Goto Page`
+ will not work.  Another file should not be selected until a last page of
+ the file has been displayed.
+
+ When a file is open, GSview will display the document filename,
+ the current page (if available) and while the cursor is over
+ the image, the location of the cursor in coordinates specified
+ by `Options` | `Units`.  The coordinate can be PostScript points
+ (1/72"), millimetres or inches.
+ The cursor location is useful for calculating bounding boxes.
+
+ The `Select File` command is similar to `Open` but it does not display
+ the document.
+ This command is useful for opening a document prior to printing it.
+
+ The `Close` command closes the currently open document.
+ This should be used before the current file is changed by another
+ program.
+ If you do not do this and GSview detects that the file length or date
+ have changed, it will close Ghostscript and rescan the document.
+
+ See also `Print`.
+2Page Selection
+?Page Selection
+?Next Page
+?Previous Page
+?Redisplay
+?Goto Page
+ `Next Page` moves to the next page of a document.
+ This works even if the document does not contain `DSC` comments.
+
+ `Previous Page` moves to the previous page.
+
+ `Redisplay` redisplays the current page.
+
+ `Goto Page` shows a dialog box which allows selection of the next page
+ number to display.  The `Select Page` dialog box shows page labels
+ since these are likely to be more useful than a sequential page number.
+
+ The `Previous Page`, `Redisplay` and `Goto Page` commands work only if the
+ document contains `DSC` comments.
+2Zoom
+?Zoom
+ To enlarge a displayed feature, position the cross-hair mouse pointer
+ over the feature then press the right mouse button.
+ The window will swap from normal display resolution to zoom
+ resolution and the status line will have the word `Zoomed` appended to it.
+ The zoomed feature will be in the centre of the window.
+ To cancel `Zoom`, press the right mouse button again or select
+ any command that redraws the page (e.g. `Redisplay`, `Next Page`).
+ By default the zoom resolution is 300 dots per inch but this can
+ be changed with the `Media` | `Zoom Resolution` command.
+
+ `Zoom` will only work for `DSC` conforming documents.
+2Document Information
+?Info
+ A brief information area at the top of the window is used by
+ GSview to display the document filename, the current page number
+ and label (if available) and while the cursor is over the image, the
+ location of the cursor in coordinates specified by `Options` | `Units`.
+ The cursor location is useful for calculating bounding boxes.
+
+ The `Info` command on the `File `menu shows a dialog box with the
+ following information about the `DSC` comments in the current document.
+
+ `File `is the full pathname to the document.
+
+ `Type` is` DSC`,` EPS`, `No DSC comments` or 'Ignoring DSC Comments'.
+ `EPS` is an Encapsulated PostScript File - a single page document
+ that contains a subset of the `DSC` comments and PostScript commands.
+ `EPS `files are commonly used for inclusion in other documents.
+ `Ignoring DSC Comments` is displayed if `Options` | `Ignore DSC`
+ is selected.
+
+ `Title` is a text title that can be used when printing banner
+ pages and for routing or recognising documents.
+
+ `Date` is the time the document was created.
+
+ `BoundingBox` specifies a box that encloses all the marks painted
+ on the page.  The four integer values are the coordinates of the
+ lower left and upper right corners of the bounding box in default
+ user coordinates (1/72 inch).
+
+ `Orientation `is either `Portrait `or` Landscape`.
+
+ `Default Media` gives the media name followed by the width and
+ height of that media in default user coordinates (1/72 inch).
+
+ `Page Order` is either `Ascending`, `Descending` or `Special`
+
+ `Pages` is the total number of pages in the document.
+
+ `Page` gives the page label and page number.
+
+ `Bitmap `is the size of the display bitmap in pixels which may be
+ useful if you are copying the displayed image to the clipboard.
+2Printing
+?Print
+?Print To File
+?Print File
+?Extract
+ The `Print` command on the `File `menu allows printing of the document
+ using Ghostscript.
+ The Ghostscript printer driver and resolution are selected using the
+ `Select Device` dialog box.   Pages are selected using the `Select Pages`
+ dialog box.  The `All`, `Odd` and `Even` buttons provide quick selection
+ of pages.
+
+W
+ The `mswinprn` printer driver uses the windows printer drivers
+ and should work with any printer with raster capabilities.
+ Printer resolution cannot be selected from within GSview; use
+ the Control Panel instead.  This driver is very slow and should
+ be considered a last resort if no other Ghostscript printer
+ driver is available.
+
+ With all other printer drivers, Ghostscript sends the output direct
+ to the printer, without passing through a Windows printer driver.
+ If you have trouble printing you may have to `Print To File`
+ and then `Print File` or use the DOS command `COPY /B FILENAME PRN`.
+
+ The Win32s versions of GSview and Ghostscript can't send output
+ directly to a printer port so an attempt is made to pass the output
+ unchanged through a Windows printer driver.  This does not work
+ with some Windows printer drivers.  Use 'Print To File' if you
+ have problems.
+E
+
+ This list of available devices and resolutions is stored in the
+ [Devices] section of
+W
+ gsview.ini.
+P
+ gvpm.ini.
+E
+ The default list of devices and resolutions is taken from the
+ standard distribution version of Ghostscript 3.0 and may not
+ be complete.
+
+ To print a document without displaying it, open the document
+ using `Select File`.
+
+ `Print To File` is similar to the `Print` command except that Ghostscript
+ will write the output to a file instead of sending it to a printer.
+
+ If you want to produce a bitmap, some useful drivers are
+ `bmpmono`, `bmp16`, `bmp16m` and `bmp256`.
+
+ `Print File` sends a file to a local port, bypassing the
+W
+ Windows
+P
+ Presentation Manager
+E
+ printer drivers.
+ This is useful for sending a document to a PostScript printer,
+ or for sending an output file produced by Ghostscript to a printer.
+
+ `Extract` allows a range of pages to be copied from the current
+ document to a new document.  For example, ten pages can be extracted
+ from the middle of the current document and written to another file,
+ which will later be sent to a printer.
+3Properties
+?Properties
+ Some printer drivers allow extra properties to be specified.
+ If two sections are added to the
+W
+ gsview.ini
+P
+ gvpm.ini
+E
+ file for these printer
+ drivers, GSview will enable the `Properties` button which will
+ display the `Edit Properties` dialog box.
+ The following example shows how to add property information
+ for the cdjcolor driver.
+ First add a section which gives the current values.
+ This section, after the first character is removed, gives the options
+ that will appear in the `Property` list box.
+ The first character is `s` for string or `d` for number.
+  [cdjcolor]
+  dBitsPerPixel=24
+  dDepletion=1
+  dShingling=2
+  dBlackCorrect=4
+
+ Next add a section which gives the values to display in the
+ `Value` list box.
+  [cdjcolor values]
+  dBitsPerPixel=1,3,8,16,24
+  dDepletion=1,2,3
+  dShingling=0,1,2
+  dBlackCorrect=0,1,2,3,4,5,6,7,8,9
+ GSview will also add the value `[Not defined]` to the listbox.
+
+ When you press the `OK` button in the `Edit Properties` dialog
+ box, the current settings are written to the
+W
+ gsview.ini
+P
+ gvpm.ini
+E
+ file.
+
+ When GSview prints a file, it will give Ghostscript the contents
+ of the [cdjcolor] section of
+W
+ gsview.ini
+P
+ gvpm.ini
+E
+ as follows:
+  -dBitsPerPixel=24 -dDepletion=1 -dShingling=2 -dBlackCorrect=3
+ If the value of a property is `[Not defined]`, that property will
+ not be sent to Ghostscript.
+
+ Some entries for the cdj family of drivers are supplied in the
+ property.ini file that comes with GSview.
+3PS to EPS
+?PS to EPS
+ In general, it is not possible to convert a PostScript file to `EPS`.
+ However, many single page PostScript files can be converted to `EPS`
+ by changing the first line of the file to
+  %!PS-Adobe-3.0 EPSF-3.0
+ and then adding or fixing up the `%%BoundingBox` comment.
+
+ `When used incorrectly, the PS to EPS command can produce PostScript
+ files with incorrect DSC comments.  Such a document will cause problems
+ when you try to include it inside another document.`
+
+ To convert a PostScript file to `EPS`, the original file `must` be
+ a `single page` document.  If the document contains `DSC` comments
+ and is multi page, extract the desired page with `File` | `Extract`.
+ If the document does not contain `DSC` comments, you will need to
+ edit the file by hand to extract the desired page.
+
+ `EPS` documents `must not` use any of the following operators:
+  banddevice   clear         cleardictstack  copypage
+  erasepage    exitserver    framedevice     grestoreall
+  initclip     initgraphics  initmatrix      quit
+  renderbands  setglobal     setpagedevice   setpageparams
+  setshared    startjob      letter          note
+  legal        a3            a4              a5
+
+ The following operators should be used with care:
+  nulldevice   setgstate     sethalftone    setmatrix
+  setscreen    settransfer   setcolortransfer
+
+ It is `your` responsibility to make sure that the above requirements
+ are met.
+
+ To test if a document contains any of the above operators, select
+ `Options` | `EPS Warn` and then `Open` the desired document.
+ After the page has been displayed, look in the Ghostscript text window.
+ If any of the above operators have been used you should see lines like:
+  Warning: EPS files must not use ...
+ If you find these warnings then do `not` use `PS to EPS`.
+ Remember to turn off `EPS Warn` afterwards.
+
+ A document must be displayed before `PS to EPS` is used.
+ The document must contain a `showpage`.
+ This is required so that the bounding box can be measured.
+
+ For documents without `DSC` comments, `PS to EPS` allows a bounding
+ box to be specified, then writes out an `EPS` file consisting of
+ an `EPS` wrapper around the original document.
+
+ For documents with `DSC` comments, `PS to EPS` will change the
+ first line of the file to
+  %!PS-Adobe-3.0 EPSF-3.0
+ then allows the `%%BoundingBox` comment to be changed or added.
+
+ For `EPS` documents, `PS to EPS` allows the `%%BoundingBox` comment to
+ be changed.
+
+ `PS to EPS` does not clip the document to the `%%BoundingBox`.
+ To do so would require changing the PostScript code itself.
+ `PS to EPS` only changes the `DSC` comments.
+
+ `PS to EPS` does not add a preview to a document.
+ If you want a preview you add it with `Edit` | `Add EPS Preview` after
+ first creating an `EPS` file with a correct `%%BoundingBox`.
+
+ See also `Add EPS Preview`, `Extract`, `EPS Warn`.
+2Text Extract and Find
+?Text Extract and Find
+?Text
+?Text Extract
+?Search
+?Find
+?Find Next
+ In general, extracting text from a PostScript document is not a
+ trivial operation.  Words may be broken.  Text may be encoded.
+ Ligatures may be used (e.g replacing 'fi' with a single character).
+ There may be no relationship between the location of a word in
+ the PostScript file and its location on the page.
+
+ However, it is common for PostScript documents to contain text in the
+ same order as it appears on the page, and for it to be given in
+ PostScript strings, surrounded by parentheses.  Complete lines
+ may be given in one string, or one word per string.  For this sort
+ of document, extracting text can be done with reasonable success.
+
+ `Edit` | `Text Extract` will extract text contained in strings from
+ specified pages and write it to a text file.
+ Line breaks in this text file correspond to lines in the document.
+ Spaces in the text file correspond to spaces within strings, or to
+ separate strings.  A more effective method of extracting text is to
+ use ps2ascii.ps supplied with Ghostscript.
+
+ `Edit` | `Find` will search for text and display the first
+ page that contains the text.  `Find` asks for a search text
+ and a range of pages in which to search.
+ The preceeding comments about extracting text from a PostScript
+ document should be noted.  `Find` first extracts text from
+ the document, then searches it ignoring all spaces in both the
+ document and the search text.  Case is ignored when searching.
+ Consequently the search text `these` would match both `These`
+ and `The serial`.  No information is given about where the word
+ is located on a given page because this information is not
+ available without a complete PostScript interpreter.
+
+ `Edit` | `Find Next` will continue the search from the next page.
+2Clipboard
+?Clipboard
+?Edit
+?Copy
+?Paste To
+?Convert Bitmap
+?Bitmap
+?Add EPS Preview
+?Extract EPS
+ The GSview window can be copied to the Clipboard as a bitmap
+ by selecting `Copy` from the `Edit` menu.
+W
+ The bitmap may be a Device Independent Bitmap or it may be a Device
+ Dependent Bitmap, depending on how Ghostscript was compiled.
+ The default for Ghostscript 3.0 is a Device Independent Bitmap
+ (BMP format).
+E
+
+ An alternative way to get a bitmap output from Ghostscript is
+ to use one of the BMP drivers.  See `Print`.
+
+W
+ `Paste To` copies a Device Independent Bitmap from the Clipboard
+ (if available) to a BMP file.
+
+ `Convert Bitmap` converts between a Device Independent Bitmap and
+ a Device Dependent Bitmap.
+ If the clipboard contains a Device Independent Bitmap (BMP format),
+ this is converted to a Device Dependent Bitmap and added to the clipboard.
+ If the clipboard does not contain a colour palette, one is created
+ from the Device Independent Bitmap and added to the clipboard.
+ This option is present because some applications (notably Windows
+ Paintbrush) won't recognise a Device Independent Bitmap in the clipboard.
+P
+ `Paste To` copies the currently displayed image (if available)
+ to a BMP file.
+E
+
+ `Add EPS Preview` takes a bitmap from the
+W
+ clipboard
+P
+ display
+E
+ and uses it to add a preview to an EPS file.
+ `Add EPS Preview` can create a DOS EPS file with a
+W
+ Windows Metafile or
+E
+ TIFF preview, or an EPSI file with an Interchange preview.
+ To use the `Add EPS Preview` command the following steps must be followed.
+
+ 1. Make sure the document has a correct bounding box.
+ A bounding box can be added or changed using `File` | `PS to EPS`.
+
+ 2. Select `Orientation` | `Portrait`.
+
+ 3. Select `Options` | `EPS Clip`.
+ This will cause Ghostscript to use a display window the size of the
+ bounding box instead of the page size.
+
+ 4. Select `Media` | `Resolution` and set a suitable resolution
+ for the preview.  If the resolution is too high
+W
+ the bitmap may not fit in the clipboard, or will
+P
+ it
+E
+ make the EPS file excessively large.
+
+ 5. `Open` an EPS file that does not contain a preview.
+
+W
+ 6. Select `Edit` | `Copy`.  This tells Ghostscript to copy the
+ display bitmap to the Clipboard.  This allows GSview to access
+ the bitmap in the next step.
+
+ 7.
+P
+ 6.
+E
+ Select `Edit` | `Add EPS Preview`, then the preview format,
+ then the new EPS filename.  GSview will write a new file containing
+ the original PostScript EPS file and a preview created from the
+W
+ bitmap in the clipboard.
+P
+ display bitmap.
+E
+ The available preview formats are `Interchange`,
+W
+ `TIFF 4`, `TIFF 5` and `Windows Metafile`.
+P
+ `TIFF 4` and `TIFF 5`.
+E
+ If adding an Interchange preview, the document must have an `%%EndComments`
+ line, otherwise GSview may put the preview in the wrong place.
+ A TIFF 5 preview is a Class B image with no compression as described
+ in Appendix G of the TIFF 5.0 memorandum.  A TIFF 4 preview is almost
+ identical to the TIFF 5 preview, but avoids using tags which are not
+ described in the TIFF 4 specifiation.
+ WordPerfect 5.1 requires a TIFF 4 preview.
+
+W
+ 8.
+P
+ 7.
+E
+ Reset `Orientation` | `Portrait`, `Options` | `EPS Clip`
+ and `Media` | `Resolution` to their previous values.
+
+ To extract the PostScript or Preview section from a DOS EPS
+ file, use `File` | `Select File` followed by `Edit` | `Extract EPS`
+ then `PostScript` or `Preview`.
+
+ See also `PS to EPS`.
+2Options
+?Options
+ The `Options` menu has the following selections:
+3Ghostscript Command
+?Ghostscript Command
+ The `Ghostscript Command` option allows selection of the command
+ to use when executing Ghostscript.
+ A default will be constructed using the GSview path and
+ will look like:
+W
+  gswin -Ic:\gs;c:\gs\fonts
+P
+  gsos2.exe -Ic:\gs;c:\gs\fonts;c:\psfonts
+E
+ GSview will first attempt to find Ghostscript in the GSview
+ directory and then will try the PATH.
+ If GSview still cannot find Ghostscript, use this option to
+ set the full pathname to Ghostscript.
+ If you wish to specify that Ghostscript should look for its
+ initialisation files in a different place, modify the -I option.
+W
+ Try to keep the command length short, otherwise GSview will
+ have trouble printing files with Ghostscript.
+E
+ Only the Ghostscript EXE and include path may be specified -
+ other items will confuse GSview.
+3Sounds
+?Sounds
+ The `Sounds` option assigns sounds to various events.
+ For each event the sound can be set to `None`, a `Speaker Beep` or
+ a `Wave` file.
+
+ You must have a sound driver loaded before using Wave files.
+ Wave file sounds are not available under MS-Windows 3.0.
+
+ The events are:
+
+ `Output Page`: the PostScript showpage operator was executed.
+
+ `No Page`: an invalid page was selected.
+ For example, pressing `Prev` while on the first page of a document
+ with `DSC` comments.
+
+ `No Number`: a command required page numbering and the document did
+ not have page numbering.
+ For example, pressing `Goto Page` when viewing a document without
+ `DSC` comments.
+
+ `Not Open`:  a command required a document to be open and this was
+ not the case.
+ For example, pressing `Goto Page` when no document is open.
+
+ `Error`: many types of errors.
+
+ `Timeout`: no response from Ghostscript within a timeout period.
+ For example, display snowflak.ps on a PC with a 286-12 CPU.
+
+ `Start`: GSview opened.
+
+ `Exit`: GSview closed.
+
+ The defaults are for `No Page` and `Error` to be a `Speaker Beep`
+ and all other events to be `None`.
+3Units
+?Units
+ The `Units` option sets the units used to display the cursor location
+ on the status bar.  Available units are PostScript points (`pt` = 1/72"),
+ millimetres (`mm`) and inches (`in`).
+ The default is `pt`.
+3Save Settings
+?Save Settings
+?Settings
+?INI file
+?Save Settings on Exit
+ The `Save Settings` option saves the GSview window position,
+ window size, last used printer, last directory,
+ `Sounds`, `Units`, `Save Last Directory`,
+ `User Defined`, `Ghostscript Command`, `Button Bar`,
+P
+ `Fit Window To Page`,
+E
+ `Quick Open`, `Auto Redisplay`, `EPS Clip`, `EPS Warn`, `Ignore DSC`,
+ `Depth`, `Orientation`, `Media`, `Resolution` and `Zoom Resolution`
+ options to the initialisation file
+W
+ gsview.ini in the Windows system directory.
+P
+ gvpm.ini in the OS/2 system directory.
+E
+ GSview reads this file during startup.
+
+ When the `Save Settings on Exit` option is checked, GSview will
+ automatically save the above settings when you quit GSview.
+3Safer
+?Safer
+ When the `Safer` option is `checked`, GSview will give Ghostscript
+ the `-dSAFER` flag, which disables the deletefile and renamefile operators,
+ and the ability to open files in any mode other than read-only.
+ This is the default.
+
+ When the `Safer` option is `unchecked` Ghostscript can change
+ files.
+3Save Last Directory
+?Save Last Directory
+ When the `Save Last Directory` option is `checked`, GSview will
+ save the current directory when you quit GSview.  When GSview
+ is started next, this will be made the current directory.
+ This is the default.
+
+ When `Save Last Directory` option is `unchecked`, the current
+ directory when GSview is started will be the directory where
+ GSview is located, or the working directory specified by
+ the Program Manager.
+3Button Bar
+?Button Bar
+?Magnify
+ When the `Button Bar` option is `checked`, GSview will display
+ a Button Bar down the left side of the window.  This is the default.
+ The Button Bar contains the following items in order from top to
+ bottom:
+
+ `File` | `Open`
+
+ `File` | `Print`
+
+ `File` | `Info`
+
+ `Help` | `Contents`
+
+ `File` | `Goto Page`
+
+ `File` | `Next Page`
+
+ `File` | `Previous Page`
+
+ `Go forward 5 pages`
+
+ `Go back 5 pages`
+
+ `Increase resolution by 1.2`
+
+ `Decrease resolution by 1/1.2`
+
+ `Edit` | `Find`
+
+ `Edit` | `Find Next`
+
+ If using the increase/decrease resolution buttons, `Auto Redisplay`
+ should be set.  Instead of using these buttons, it is also possible
+ to use the `Media` | `Resolution` command.
+ When the `Button Bar` option is `unchecked`, GSview will not
+ display the Button Bar.
+P
+3Fit Window To Page
+?Fit Window To Page
+ When the `Fit Window To Page` option is `checked`, GSview will
+ shrink the window size so that it is no larger than the page
+ being displayed.  This is the default.
+
+ If `Fit Window To Page` is `unchecked`, GSview will not resize the
+ window and areas outside the page will be drawn in light grey.
+ This is useful if you do not wish the window to shrink when looking
+ at pages at low resolution.
+E
+3Quick Open
+?Quick Open
+ When the `Quick Open` option is `checked`, GSview will not reload
+ Ghostscript before every document, making opening of documents quicker.
+
+ GSview tries to preserve the Ghostscript state between documents,
+ but a document may still leave the Ghostscript interpreter in an unusual
+ state or cause an error.  If an error occurs, Ghostscript will close.
+ Error messages are displayed in the Ghostscript window.
+ Select `Redisplay` to reopen the document.
+
+ If `Quick Open` is `unchecked`, GSview will close Ghostscript and
+ restart it before each new document or whenever the page orientation,
+ resolution or size is changed.
+3Auto Redisplay
+?Auto Redisplay
+ When the `Auto Redisplay` option is `checked`, GSview will
+ redisplay `DSC` documents when the `Orientation`, `Resolution`,
+ `Depth` or `Media` are changed.
+ This is the default.
+
+ If `Auto Redisplay` is `unchecked`, the `File` | `Redisplay` command
+ must be used to redisplay a document after changing the
+ `Orientation`, `Resolution`, `Depth` or `Media`.
+3EPS Clip
+?EPS Clip
+ When the `EPS Clip` option is `checked`, GSview will clip the
+ display bitmap to the bounding box of an EPS file instead of using the
+ page size specified on the `Media` menu.  This is useful when
+ adding a bitmap preview to an EPS file.
+
+ If `EPS Clip` is `unchecked`, GSview will use the page size
+ specified on the `Media` menu for EPS files.  This is the default.
+
+ `EPS Clip` does not alter the original document, it only affects
+ how much of the document is displayed by GSview.
+
+ See also `Clipboard` | `Add EPS Preview`
+3EPS Warn
+?EPS Warn
+ When the `EPS Warn` option is `checked`, GSview will write a
+ prolog to Ghostscript when each file is opened.  This prolog will
+ produce warning messages in the Ghostscript text window if any
+ PostScript operators that should not be used in `EPS` files
+ are used.  An example warning message is:
+  Warning: EPS files must not use /initgraphics
+ `EPS Warn` is not infallible.  It is possible to access restricted
+ operators without `EPS Warn` producing a warning.
+
+ The default for `EPS Warn` is `unchecked`.
+
+ See also `PS to EPS`.
+3Ignore DSC
+?Ignore DSC
+ Some documents incorrectly claim to conform to the Adobe Document
+ Structuring Conventions.  Attempting to display one of these bogus
+ documents will probably leave GSview horribly confused and unable
+ to display the document.  If `Ignore DSC` is `checked`, GSview
+ will treat the document as if it does not contain DSC comments
+ and will only display the pages in the original order.
+
+ The default for `Ignore DSC` is `unchecked`.
+2Page Orientation
+?Orientation
+?Portrait
+?Landscape
+?Upside-down
+?Seascape
+?Swap Landscape
+ The `Portrait`, `Landscape`, `Upside-down` and `Seascape`
+ (reverse Landscape) commands on the `Orientation `Menu select
+ the page orientation used by the display.
+ `Landscape` implies a clockwise rotation of the paper by 90 degrees.
+ `Seascape` implies an anti-clockwise rotation of the paper by 90 degrees.
+ These orientation options only affect the display and do not affect
+ the print commands.
+ If a `DSC` page orientation comment is found, the orientation will be
+ selected automatically.
+
+ When the `Swap Landscape` option is `checked`, GSview swaps the
+ meaning of Landscape and Seascape.
+ Most of the Landscape documents that I have encountered require a 90
+ clockwise rotation of the paper to view.
+ However, there is no standard and some documents need to be rotated
+ the other way.
+ The `Swap Landscape` button allows GSview to automatically rotate the
+ document the right way in response to the `%%Orientation` comment in the
+ PostScript file.
+
+ See also `Page Size and Display Resolution`.
+2Page Size and Display Resolution
+?Page Size and Display Resolution
+?Resolution
+?Zoom Resolution
+?Depth
+?Page Size
+?Media
+?User Defined
+ The `Resolution` command on the `Media` menu selects the display
+ resolution in dots per inch.
+ The default for a VGA display is 96 dots per inch.
+
+ For DSC conforming files, pressing the right mouse button will
+ zoom into the page at what is usually printer resolution.
+ Pressing the right mouse button a second time will zoom back out to
+ normal display resolution.
+ The `Zoom Resolution` command on the `Media` menu sets the zoom
+ resolution in dots per inch.
+
+ The `Depth` sub menu on the `Media` menu selects the display
+ depth in bits per pixels.
+
+ The `Media` menu also allows selection of page size.
+ Available page sizes are:
+  Letter          8.5 x 11   inch
+  Tabloid        11   x 17   inch
+  Ledger         17   x 11   inch
+  Legal           8.5 x 14   inch
+  Statement       5.5 x  8.5 inch
+  Executive       7.5 x 10   inch
+  A3              297 x 420  mm
+  A4              210 x 297  mm
+  A5              148 x 210  mm
+  B4              257 x 364  mm
+  B5              182 x 257  mm
+  Folio           8.5 x 13   inch
+  Quarto          8.5 x 10.8 inch
+  10x14          10   x 14   inch
+
+ A user defined size can be specified in PostScript points (1/72 inch)
+ with the `User Defined` command.  A size of 480x360 points at 96 dpi
+ will give an image size of 640x480 pixels.
+
+ If a `DSC` media comment is found, the page type will be selected
+ automatically.  If the media specification is not one of the above
+ page types, the `User Defined` size will be set.
+2Keys
+?Keys
+ Following are the key assignments for GSview.
+
+ `O`, `o`  Open and display a file.  (`File` | `Open`)
+
+ `C`, `c`  Close file.  (`File` | `Close`)
+
+ `N`, `n`, `+`  Next Page.  (`File` | `Next Page`)
+
+ `V`, `v`, `-`  Previous Page.  (`File` | `Previous Page`)
+
+ `G`, `g`  Goto Page.  (`File` | `Goto Page`)
+
+ `I`, `i`  File information.  (`File` | `Info`)
+
+ `R`, `r`  Redisplay page.  (`File` | `Redisplay`)
+
+ `S`, `s`  Select file: open but don't display.  (`File` | `Select File`)
+
+ `P`, `p`  Print all or some pages to a printer.  (`File` | `Print`)
+
+ `F`, `f`  Print all or some pages to a File.  (`File` | `Print To File`)
+
+ `E`, `e`  Extract some pages to another File.  (`File` | `Extract`)
+
+ `F1`  Help.  (`Help` | `Contents`)
+
+ `Ctrl+C`, `Insert`  Copy displayed bitmap to clipboard.  (`Edit` | `Copy`)
+
+W
+ `Up`  Scroll up 16 pixels.
+
+ `Down`  Scroll down 16 pixels.
+
+ `Left`  Scroll left one screen.
+
+ `Right`  Scroll right one screen.
+P
+ `Arrow Keys`  Scroll by 16 pixels.
+
+ `Ctrl+Left`  Scroll left one screen.
+
+ `Ctrl+Right`  Scroll right one screen.
+E
+
+ `Page Up`  Scroll up one screen (window height).
+
+ `Page Down`  Scroll down one screen.
+
+ `Home`  Scroll to top of page.
+
+ `End`  Scroll to bottom of page.
+W
+2Running GSview from the File Manager
+?Registration Info Editor
+?File Manager
+ To run GSview when a PostScript file is double clicked in the
+ File Manager, the following sequence must be followed to teach
+ File Manager about PostScript files.
+
+ From the `Program Manager`, run the Registration Info Editor using
+ `File `| `Run...` then type `regedit`.
+ From the `Registration Info Editor` select `Edit `| `Add File Type...`
+ then enter the following fields:
+  Identifier = psfile
+  Filetype = PostScript
+  Action = Open
+  Command = gsview %1
+  Uses DDE = unchecked
+  Action = Print
+  Command = gsview /p %1
+  Uses DDE = unchecked
+ Then press `OK`.
+
+ From the `File Manager`, select `File `| `Associate` then
+ enter the following fields:
+  Files with Extension = ps
+  Associate With = PostScript (gsview)
+ Then press `OK`.
+
+ Put gsview.exe and gsview.hlp in a directory on your PATH.
+ That's it!  Now when you double click on a PostScript file,
+ the `File Manager` will run GSview.  When you drop a PostScript
+ file on the `Print Manager`, GSview will print the file.
+E
+2Command line options
+?Command line options
+ Usage:
+W
+  gsview [/D] filename
+  gsview [/D] /F filename
+  gsview [/D] /P filename
+  gsview [/D] /S[port] filename
+P
+  gvpm [/D] filename
+  gvpm [/D] /F filename
+  gvpm [/D] /P filename
+E
+
+ To start GSview and display filename.ps use:
+W
+  gsview filename.ps
+P
+  gvpm filename.ps
+E
+ To start GSview and print filename.ps using Ghostscript
+ (`File` | `Print`) use:
+W
+  gsview /P filename.ps
+P
+  gvpm /P filename.ps
+E
+ To start GSview and print filename.ps to a file using Ghostscript
+ (`File` | `Print To File`) use:
+W
+  gsview /F filename.ps
+P
+  gvpm /F filename.ps
+E
+W
+ To start GSview and spool filename.ps for printing directly to
+ a printer (`File` | `Print File`) use:
+  gsview /S filename.ps
+ To start GSview and spool filename.ps for printing directly to
+ printer port LPT3: use:
+  gsview /SLPT3: filename.ps
+E
+
+ To start GSview in debug mode use:
+W
+  gsview /D
+P
+  gvpm /D
+E
+ In debug mode GSview will `not` remove its temporary files.
+ This is to allow inspection of these files after GSview has finished.
+
+ GSview ignores the case of option:
+ /p is the same as /P.
+2Copyright
+?Copyright
+ The `About` menu item shows the GSview copyright message
+ and GSview version number.
+
+W
+  GSVIEW.EXE - A Ghostscript graphical interface
+P
+  GVPM.EXE - A Ghostscript graphical interface
+E
+  Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+
+ This file is part of GSview.
+
+ This program is distributed with NO WARRANTY OF ANY KIND.  No author
+ or distributor accepts any responsibility for the consequences of using it,
+ or for whether it serves any particular purpose or works at all, unless he
+ or she says so in writing.  Refer to the GSview Free Public Licence
+ (the "Licence") for full details.
+
+ Every copy of GSview must include a copy of the Licence, normally in a
+ plain ASCII text file named LICENCE.  The Licence grants you the right
+ to copy, modify and redistribute GSview, but only under certain conditions
+ described in the Licence.  Among other things, the Licence requires that
+ the copyright notice and this notice be preserved on all copies.
+
+     Author: Russell Lang
+   Internet: rjl@monu1.cc.monash.edu.au
+2Common Problems
+?Common Problems
+?Problems
+W
+ `Problem:` Can't run gswin...
+
+ GSview requires Ghostscript for Windows (gswin.exe).
+ This error message usually occurs if you don't have Ghostscript
+ for Windows, or if GSview can't find Ghostscript for Windows.
+
+ From the GSview menu select `Options` | `Ghostscript Command`
+ and enter the correct executable path and include path for Ghostscript.
+ For example:
+  c:\gs\gswin.exe -Ic:\gs
+
+ You must set the include path for Ghostscript using either the
+ `-I` command or the `GS_LIB` environment variable.
+
+ Make sure you don't already have Windows Ghostscript running.
+ Only one copy of Windows Ghostscript can be running at a time.
+ Only one copy of GSview can be running at a time.
+P
+ `Problem:` Can't run gsos2...
+
+ GSview requires OS/2 Ghostscript (gsos2.exe).
+ This error message occurs if you don't have OS/2 Ghostscript,
+ or if GSview can't find OS/2 Ghostscript.
+
+ From the GSview menu select `Options` | `Ghostscript Command`
+ and enter the correct executable path and include path for Ghostscript.
+ For example:
+  c:\gs\gsos2.exe -Ic:\gs;c:\gs\fonts;c:\psfonts
+
+ You must set the include path for Ghostscript using either the
+ `-I` command or the `GS_LIB` environment variable.
+E
+
+ `Problem:` Ghostscript starts and then immediately exits with error code 1.
+
+W
+ Read the error message in the Ghostscript window before pressing
+ OK in the message box.
+
+E
+ Ghostscript probably couldn't find its initialisation files.
+ Set the Ghostscript include path by adding `-Idirectory` to the
+ command in `Options` | `Ghostscript Command`, where `directory`
+ includes the name of the directory that contains the Ghostscript
+ initialisation files,
+ Alternatively, set the environment variable GS_LIB.
+
+ Read the file use.doc that comes with Ghostscript.
+
+W
+ Alternatively, you may be using an incompatible version of Ghostscript.
+ This version of GSview requires Ghostscript version `3.0` or later.
+ If you are using an incompatible version of Ghostscript, the
+ Ghostscript text window will show one of the following error messages
+  undefined in ear
+  undefined in XXclear
+ where `XX` are a pair of garbage characters.
+
+ `Problem:` Message Box says `Incompatible Windows Ghostscript`
+
+ You probably have an earlier version of Ghostscript.
+ Make sure you have Ghostscript version 3.0 or later.
+
+ `Problem:` GSview says 'Drawing...' or 'Printing...' and shows an
+ hourglass cursor.  When the cursor is moved off the GSview window
+ it changes to a normal arrow.
+
+ The above state is normal while GSview is waiting for Ghostscript
+ to do something.  It may be that the document is very complex and
+ Ghostscript is just taking a long time.  In this state it is safe to
+ resize or scroll the window, but do not select any menu commands.
+
+ If this is not the case then GSview probably got no response
+ from Ghostscript.
+ Open the Ghostscript text window and look at any error messages.
+ Close Ghostscript using the Ghostscript system menu.
+ If GSview is still waiting, press the GSview Open button
+ (even though the cursor is still an hourglass).
+ Press the 'Yes' button on the 'gsview is busy' message box.
+ GSview should then revert to the non-waiting mode.
+
+ `Problem:` Ghostscript displays a "Pipe error" message box.
+
+ GSview could not open a temporary file.  GSview requires a temporary
+ file for `piping` commands to Ghostscript.  This temporary file is
+ created in the directory given by the environment variable TEMP,
+ or if that is not set, in the current directory.
+ `Pipe error` will result when
+
+ 1. TEMP is not set and the current directory is read-only.
+ For example, the current directory is on a CD-ROM or a network.
+
+ Solution:  Set TEMP environment variable in AUTOEXEC.BAT.
+
+ 2. TEMP is set but does not point to a valid read-write directory.
+
+ Solution: Change TEMP to point to a directory that exists
+ and is read-write.
+
+ 3. Disk is full.
+E
+
+ `Problem:` GSview says that a multipage PostScript file produced
+ by MS-Windows contains 0 pages and will only show the first page.
+
+ This is because the document does not have correct DSC comments.
+ From the Control Panel, select `Printers`, `Options...`, then in the
+ `Print to` group box click on the `Printer` radio button.  You cannot
+ use the `Print To` `Encapsulated PostScript File` for printing
+ multipage files.  The correct method is to connect the printer
+ to `FILE:`.
+ In addition,
+ from the Control Panel select `Printers`, `Options...`, `Advanced` and
+ then check `Conform to Adobe Document Structuring Convention`.
+
+ The DSC comment `%%Pages: 0` means that the document does not produce
+ any pages.  That is, the PostScript `showpage` operator is not used.
+ If you find a PostScript document that has multiple pages and contains
+ the `%%Pages: 0` comment, change the first line from `%!PS-Adobe-` to `%!`.
+ GSview will then ignore the DSC comments and allow you to view all
+ pages, but only in the original order.  Complain to the author of the
+ program that produced that PostScript file.
+
+ `Problem:` PostScript files produced by MS-Windows start with a Control-D.
+
+ Since this occurs even when the PostScript printer
+ `Conform to Document Structuring Convention`
+ checkbox is checked, this must be considered a
+ bug in the MS-Windows PostScript printer driver.
+ The bug fix is documented in the MS-Windows PRINTERS.WRI file.
+ Edit the win.ini file and search for the PostScript printer section.
+ There may be more than one.  In each of these sections add
+ `CTRLD=0` as shown below.
+
+  [Apple LaserWriter II NT,FILE]
+  CTRLD=0
+
+ `Problem:` PostScript files produced by Word for Windows 6.0
+ cause a "Missing %%Pages comment" message box.
+
+ Congratulations.  You have just found a mistake in the DSC comments
+ when Word included an EPS file.  Word should have surrounded the
+ included EPS file with the lines
+  %%BeginDocument: filename.eps
+  %%EndDocument
+ Because Word didn't do this, GSview can't tell how many pages
+ are in the document and where they are located.
+
+ Please complain to Microsoft.  There is a problem in the EPSIMP.FLT
+ filter version 2.01 which Microsoft needs to fix.
+
+ In the interim, you have two solutions:
+
+ 1. Select `Options` | `Ignore DSC`
+
+ 2. Edit the PostScript file to correct the DSC comments.
+ Search the PostScript file for all lines containing
+   %MSEPS Preamble
+ From each of these lines, search forward for the start of the
+ included EPS file which should start with a line like
+  %%PS-Adobe-3.0 EPSF-3.0
+ Above these lines add the line
+  %%BeginDocument: AddedByHand
+
+ Then search for all lines containing
+  %MSEPS Trailer
+ Above these lines add the line
+  %%EndDocument
+
+ GSview should then be able to display the file correctly.
+
+ `Problem:` Ghostscript always outputs to a printer instead of the
+ GSview window.
+
+ You must not use the GS_DEVICE environment variable.
+W
+
+ `Problem:` Ghostscript displays a message box "pipe overflow".
+
+ The document may contain incorrect DSC comments.
+
+ You must wait until Ghostscript is not busy before attempting to
+ display another page.  Exit and then restart GSview.
+E
+2Internals
+?Internals
+W
+ The preferred method for driving Ghostscript would be to start it
+ as a child process and then to send it PostScript code through a pipe.
+ Windows 3.1 supports neither child processes nor pipes.
+
+ GSview interacts with Ghostscript by sending messages between
+ the GSview and Ghostscript windows.
+ GSview creates an imitation pipe to Ghostscript by writing
+ into a shareable global memory block and then passing the handle
+ to Ghostscript.
+
+ GSview starts Ghostscript for displaying using
+  gswin -dBitsPerPixel=x -dSAFER -rXDPIxYDPI -gWIDTHxHEIGHT -sGSVIEW=xxxx -
+ where xxxx is the handle to the GSview window.
+ Ghostscript then tells GSview the handle to the text window by sending
+ a message WM_USER with wParam HWND_TEXT=0 to the GSview window.
+ Instead of creating another window for the image, Ghostscript
+ creates a child window of the GSview window for displaying
+ the bitmap. Ghostscript tells GSview the handle to this child
+ image window by sending a message WM_USER with wParam
+ HWND_IMGCHILD=1.
+
+ Ghostscript also sends WM_USER messages to GSview with wParam
+ GSWIN_CLOSE=2 when it is exiting,
+ SYNC_OUTPUT=3 when the image needs to be redrawn (win_sync_output),
+ OUTPUT_PAGE=4 when a page is to be output (win_output_page),
+ SCROLL_POSITION=5 when the window is scrolled,
+ PIPE_DATA=6 for passing the handle to a global memory block (in
+ lParam) for the imitation pipe,
+ BEGIN=7 when "-1 false .outputpage" is executed and
+ END=8 when "-2 false .outputpage" is executed.
+
+ When Ghostscript sends the OUTPUT_PAGE command it waits until it
+ receives a NEXT_PAGE command from GSview.
+
+ GSview sends WM_USER messages to the Ghostscript Image window with
+ wParam NEXT_PAGE=10 when it is time to move to the next page and
+ COPY_CLIPBOARD=11 when the bitmap should be copied to the clipboard.
+ GSview sends WM_USER messages to the Ghostscript Text window with
+ wParam PIPE_REQUEST=12 when it wants more pipe data.
+
+ GSview uses temporary files of the name gsviewXX.XXX in the
+ directory given by the TEMP environment variable.
+ Keep TEMP short to avoid the gswin command line exceeding 128 characters.
+
+ GSview starts Ghostscript for printing using
+  gswin -sGSVIEW=xxxx @optfile
+ optfile contains
+  -dNOPAUSE
+  -dSAFER
+  -sDEVICE=devname
+  -rXDPIxYDPI
+  -gWIDTHxHEIGHT
+  -sOutputFile=outfilename
+  filename.ps
+  quit.ps
+
+P
+ GSview starts Ghostscript for displaying using
+  gsos2 -dBitsPerPixel=x -dSAFER -rXDPIxYDPI -gWIDTHxHEIGHT -sGSVIEW=xxxx -
+ where xxxx is a string used to access a named shareable memory block,
+ two semaphores and a queue.  These are listed in gdevpm.h.
+ The shareable memory block contains a bitmap in BMP format.
+ The SYNC semaphore is not used (it is used by gspmdrv.exe instead).
+ The NEXT semaphore is used when waiting at each showpage.
+ The MUTEX is used to sychronise access to the bitmap.
+ The QUEUE is used by Ghostscript to notify GSview about the
+ following significant events:  1. Starting to draw into bitmap,
+ 2. Synchronise (redraw) page, 3. showpage (redraw page),
+ 4. Ghostscript is closing, 5. Ghostscript fatal error,
+ 6. Palette in bitmap has changed,
+ 7. "-1 false .outputpage" is executed,
+ 8. "-2 false .outputpage" is executed.
+ PostScript code is piped to the Ghostscript stdin.
+ Ghostscript stdout goes to a window.
+
+ GSview uses temporary files of the name gvXXXXXX in the
+ directory given by the TEMP environment variable.
+
+ GSview starts Ghostscript for printing using
+  gsos2 @optfile
+ optfile contains
+  -dNOPAUSE
+  -dSAFER
+  -sDEVICE=devname
+  -rXDPIxYDPI
+  -gWIDTHxHEIGHT
+  -sOutputFile=outfilename
+  filename.ps
+  quit.ps
+
+E

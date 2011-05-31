@@ -1,0 +1,722 @@
+/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+  
+  This file is part of GSview.
+  
+  This program is distributed with NO WARRANTY OF ANY KIND.  No author
+  or distributor accepts any responsibility for the consequences of using it,
+  or for whether it serves any particular purpose or works at all, unless he
+  or she says so in writing.  Refer to the GSview Free Public Licence 
+  (the "Licence") for full details.
+  
+  Every copy of GSview must include a copy of the Licence, normally in a 
+  plain ASCII text file named LICENCE.  The Licence grants you the right 
+  to copy, modify and redistribute GSview, but only under certain conditions 
+  described in the Licence.  Among other things, the Licence requires that 
+  the copyright notice and this notice be preserved on all copies.
+*/
+
+/* gvpm.rc */
+/* Resources for PM GSview */
+
+#include <os2.h>
+#include "gvcrc.h"
+
+#ifndef ES_ANY	/* emx08g doesn't define this */
+#define ES_ANY 0x00000000L
+#endif
+
+POINTER ID_GSVIEW "binary/gvpm.ico"
+POINTER IDP_CROSSHAIR  "binary/gvpcross.ptr"
+
+DLGTEMPLATE IDD_ABOUT 
+BEGIN
+	DIALOG "About PM GSview", IDD_ABOUT, 24, 12, 328, 146, FS_DLGBORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_SAVEBITS, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		ICON ID_GSVIEW, ID_GSVIEW, 8, 124, 20, 16, WS_GROUP
+		DEFPUSHBUTTON "OK", DID_OK, 276, 126, 40, 14
+		LTEXT "GVPM.EXE", -1, 32, 132, 64, 8
+		RTEXT "Version:", -1, 92, 132, 36, 8
+		CONTROL "", ABOUT_VERSION, 130, 132, 128, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE
+		LTEXT "A Ghostscript graphical interface", -1, 32, 124, 160, 8
+		LTEXT "Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.", -1, 8, 112, 316, 8
+		LTEXT "This program is distributed with NO WARRANTY OF ANY KIND.", -1, 8, 104, 316, 8
+		LTEXT "No author or distributor accepts any responsibility for the", -1, 8, 96, 316, 8
+		LTEXT "consequences of using it, or for whether it serves any particular", -1, 8, 88, 316, 8
+		LTEXT "purpose or works at all, unless he or she says so in writing.  Refer", -1, 8, 80, 316, 8
+		LTEXT "to the GSview Free Public Licence (the 'Licence') for full details.", -1, 8, 72, 316, 8
+		LTEXT "Every copy of GSview must include a copy of the Licence, normally", -1, 8, 60, 316, 8
+		LTEXT "in a plain ASCII text file named LICENCE.  The Licence grants you", -1, 8, 52, 316, 8
+		LTEXT "the right to copy, modify and redistribute GSview, but only under", -1, 8, 44, 316, 8
+		LTEXT "certain conditions described in the Licence.  Among other things,", -1, 8, 36, 316, 8
+		LTEXT "the Licence requires that the copyright notice and this notice be", -1, 8, 28, 316, 8
+		LTEXT "preserved on all copies.", -1, 8, 20, 316, 8
+		LTEXT "Author: Russell Lang  (rjl@monu1.cc.monash.edu.au)", -1, 8, 8, 224, 8
+	END
+END
+
+MENU ID_GSVIEW 
+BEGIN
+	SUBMENU "~File", IDM_FILEMENU
+	BEGIN
+		MENUITEM "~Open...\tO", IDM_OPEN
+		MENUITEM "~Close\tC", IDM_CLOSE
+		MENUITEM "~Next Page\t+", IDM_NEXT
+		MENUITEM "Pre~vious Page\t-", IDM_PREV
+		MENUITEM "~Goto Page...\tG", IDM_GOTO
+		MENUITEM "~Redisplay\tR", IDM_REDISPLAY
+		MENUITEM "~Info...\tI", IDM_INFO
+		MENUITEM SEPARATOR
+		MENUITEM "~Select File...\tS", IDM_SELECT
+		MENUITEM "~Print...\tP", IDM_PRINT
+		MENUITEM "Print To ~File...\tF", IDM_PRINTTOFILE
+		MENUITEM "Print File...", IDM_SPOOL
+		MENUITEM "~Extract...\tE", IDM_EXTRACT
+		MENUITEM "PS to EPS", IDM_PSTOEPS 
+		MENUITEM SEPARATOR
+		MENUITEM "E~xit", IDM_EXIT
+	END
+
+	SUBMENU "~Edit", IDM_EDITMENU
+	BEGIN
+		MENUITEM "~Copy\tCtrl+C", IDM_COPYCLIP
+		MENUITEM SEPARATOR
+		MENUITEM "~Paste To...", IDM_PASTETO
+/*
+		MENUITEM "Convert Bitmap", IDM_CONVERT
+*/
+		MENUITEM SEPARATOR
+		SUBMENU "~Add EPS Preview", IDM_ADDEPSMENU
+		BEGIN
+			MENUITEM "~Interchange", IDM_MAKEEPSI
+			MENUITEM "TIFF 4", IDM_MAKEEPST4
+			MENUITEM "~TIFF 5", IDM_MAKEEPST
+/*
+			MENUITEM "~Windows Metafile", IDM_MAKEEPSW
+*/
+		END
+
+		SUBMENU "~Extract EPS", IDM_EXTEPSMENU
+		BEGIN
+			MENUITEM "~PostScript", IDM_EXTRACTPS
+			MENUITEM "Pre~view", IDM_EXTRACTPRE
+		END
+		MENUITEM SEPARATOR
+		MENUITEM "~Text Extract...", IDM_TEXTEXTRACT
+		MENUITEM "~Find...", IDM_TEXTFIND
+		MENUITEM "Find ~Next", IDM_TEXTFINDNEXT
+	END
+
+	SUBMENU "O~ptions", IDM_OPTIONMENU
+	BEGIN
+		MENUITEM "~Ghostscript Command...", IDM_GSCOMMAND
+		MENUITEM "Sounds...", IDM_SOUNDS
+		SUBMENU "~Units", IDM_UNITMENU
+		BEGIN
+			MENUITEM "~pt", IDM_UNITPT
+			MENUITEM "~mm", IDM_UNITMM
+			MENUITEM "~inch", IDM_UNITINCH
+		END
+		MENUITEM "~Save Settings", IDM_SETTINGS
+		MENUITEM SEPARATOR
+		MENUITEM "Save Settings on ~Exit", IDM_SAVESETTINGS
+		MENUITEM "Sa~fer", IDM_SAFER
+		MENUITEM "Save Last ~Directory", IDM_SAVEDIR
+		MENUITEM "~Button Bar", IDM_BUTTONSHOW
+		MENUITEM "~Fit Window to Page", IDM_FITPAGE
+		MENUITEM "~Quick Open", IDM_QUICK
+		MENUITEM "Auto ~Redisplay", IDM_AUTOREDISPLAY
+		MENUITEM "EPS ~Clip", IDM_EPSFCLIP
+		MENUITEM "EPS ~Warn", IDM_EPSFWARN
+		MENUITEM "~Ignore DSC", IDM_IGNOREDSC
+	END
+
+	SUBMENU "~Orientation", IDM_ORIENTMENU
+	BEGIN
+		MENUITEM "~Portrait", IDM_PORTRAIT
+		MENUITEM "~Landscape", IDM_LANDSCAPE
+		MENUITEM "~Upside-down", IDM_UPSIDEDOWN
+		MENUITEM "~Seascape", IDM_SEASCAPE
+		MENUITEM SEPARATOR
+		MENUITEM "S~wap Landscape", IDM_SWAPLANDSCAPE
+	END
+
+	SUBMENU "~Media", IDM_MEDIAMENU
+	BEGIN
+		MENUITEM "~Resolution...", IDM_RESOLUTION
+		MENUITEM "~Zoom Resolution...", IDM_ZOOMRES
+		SUBMENU "~Depth", IDM_DEPTHMENU
+		BEGIN
+		    MENUITEM "Default", IDM_DEPTHDEF
+		    MENUITEM "1 bit/pixel (Monochrome)",  IDM_DEPTH1
+		    MENUITEM "4 bit/pixel (VGA)",  IDM_DEPTH4
+		    MENUITEM "8 bit/pixel",  IDM_DEPTH8
+		    MENUITEM "16 bit/pixel", IDM_DEPTH16
+		    MENUITEM "24 bit/pixel", IDM_DEPTH24
+		END
+		MENUITEM SEPARATOR
+		MENUITEM "Letter", IDM_LETTER
+		MENUITEM "Tabloid", IDM_TABLOID
+		MENUITEM "Ledger", IDM_LEDGER
+		MENUITEM "Legal", IDM_LEGAL
+		MENUITEM "Statement", IDM_STATEMENT
+		MENUITEM "Executive", IDM_EXECUTIVE
+		MENUITEM "A3", IDM_A3
+		MENUITEM "A4", IDM_A4
+		MENUITEM "A5", IDM_A5
+		MENUITEM "B4", IDM_B4
+		MENUITEM "B5", IDM_B5
+		MENUITEM "Folio", IDM_FOLIO
+		MENUITEM "Quarto", IDM_QUARTO
+		MENUITEM "10x14", IDM_10X14
+		MENUITEM "User Defined...", IDM_USERSIZE
+	END
+
+	SUBMENU "~Help", IDM_HELPMENU
+	BEGIN
+		MENUITEM "~Contents", IDM_HELPCONTENT
+		MENUITEM "Help ~Index", IDM_HELPSEARCH
+		MENUITEM "~Keys Help", IDM_HELPKEYS
+		MENUITEM SEPARATOR
+		MENUITEM "~About...", IDM_ABOUT
+	END
+
+END
+
+ACCELTABLE ID_GSVIEW
+BEGIN
+	"O", IDM_OPEN
+	"O", IDM_OPEN, SHIFT
+	"o", IDM_OPEN
+	"o", IDM_OPEN, SHIFT
+	"C", IDM_CLOSE
+	"C", IDM_CLOSE, SHIFT
+	"c", IDM_CLOSE
+	"c", IDM_CLOSE, SHIFT
+	"N", IDM_NEXT
+	"N", IDM_NEXT, SHIFT
+	"n", IDM_NEXT
+	"n", IDM_NEXT, SHIFT
+	"+", IDM_NEXT
+	"V", IDM_PREV
+	"V", IDM_PREV, SHIFT
+	"v", IDM_PREV
+	"v", IDM_PREV, SHIFT
+	"-", IDM_PREV
+	"G", IDM_GOTO
+	"G", IDM_GOTO, SHIFT
+	"g", IDM_GOTO
+	"g", IDM_GOTO, SHIFT
+	"I", IDM_INFO
+	"I", IDM_INFO, SHIFT
+	"i", IDM_INFO
+	"i", IDM_INFO, SHIFT
+	"R", IDM_REDISPLAY
+	"R", IDM_REDISPLAY, SHIFT
+	"r", IDM_REDISPLAY
+	"r", IDM_REDISPLAY, SHIFT
+	"S", IDM_SELECT
+	"S", IDM_SELECT, SHIFT
+	"s", IDM_SELECT
+	"s", IDM_SELECT, SHIFT
+	"P", IDM_PRINT
+	"P", IDM_PRINT, SHIFT
+	"p", IDM_PRINT
+	"p", IDM_PRINT, SHIFT
+	"F", IDM_PRINTTOFILE
+	"F", IDM_PRINTTOFILE, SHIFT
+	"f", IDM_PRINTTOFILE
+	"f", IDM_PRINTTOFILE, SHIFT
+	"E", IDM_EXTRACT
+	"E", IDM_EXTRACT, SHIFT
+	"e", IDM_EXTRACT
+	"e", IDM_EXTRACT, SHIFT
+	VK_F1, IDM_HELPCONTENT, VIRTUALKEY
+	"C", IDM_COPYCLIP, CONTROL
+	VK_INSERT, IDM_COPYCLIP, VIRTUALKEY, CONTROL
+END
+
+STRINGTABLE
+BEGIN
+	/* general strings */
+	IDS_FILTER, "Default (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|Bitmap Files (*.bmp)|*.bmp|TIFF Files (*.tif)|*.tif|Metafiles (*.wmf)|*.wmf|"
+	IDS_TITLE, "PM GSview"
+	IDS_HELPFILE, "gvpm.hlp"
+	IDS_WRONGGS, "Incompatible PM Ghostscript Program"
+	IDS_BUSY, "GSview is busy.\rClear busy state?"
+	IDS_FILENOTFOUND, "File not found"
+	IDS_PRINTBUSY, "Ghostscript is still busy printing.\r Kill it now?"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_FILTER_PS	"*.ps"
+	IDS_FILTER_EPS	"*.eps"
+	IDS_FILTER_EPI	"*.epi"
+	IDS_FILTER_ALL	"*.*"
+	IDS_FILTER_BMP	"*.bmp"
+	IDS_FILTER_TIFF	"*.tif"
+	IDS_FILTER_WMF	"*.wmf"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_FILE, "File: "
+	IDS_NOFILE, "No File"
+	IDS_PAGE, "Page: "
+	IDS_NOPAGE, "No page numbering available"
+	IDS_LANDSCAPE, "Landscape"
+	IDS_PORTRAIT, "Portrait"
+	IDS_ASCEND, "Ascending"
+	IDS_DESCEND, "Descending"
+	IDS_SPECIAL, "Special"
+	IDS_EPSF, "EPS"
+	IDS_EPSI, "EPS with Interchange Preview"
+	IDS_EPST, "EPS with TIFF Preview"
+	IDS_EPSW, "EPS with Metafile Preview"
+	IDS_DSC, "DSC"
+	IDS_NOTDSC, "No DSC comments"
+	IDS_IGNOREDSC, "Ignoring DSC comments"
+	IDS_PAGEINFO, "Page: '%s'  %d of %d"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_OUTPUTFILE, "Output Filename"
+	IDS_PRINTINGALL, "No DSC comments \rPrinting all pages"
+	IDS_PRINTFILE, "Print File"
+	IDS_NOSPOOL, "Print Manager is disabled\rEnable it now ?"
+	IDS_SELECTPAGE, "Select Page"
+	IDS_SELECTPAGES, "Select Pages"
+	IDS_TIMEOUT, "Timeout waiting for Ghostscript"
+	IDS_NOTIMER, "No Timer available"
+	IDS_NOTOPEN, "No document open"
+	IDS_CANNOTRUN, "Can't run "
+	IDS_TOOLONG, "Command line too long: "
+	IDS_NOMORE, "No more pages"
+	IDS_GSCOMMAND, "Ghostscript command ?"
+	IDS_RES, "Display resolution (dpi) ?"
+	IDS_ZOOMRES, "Zoom resolution (dpi) ?"
+	IDS_NOZOOM, "Must display page before zooming"
+	IDS_USERWIDTH, "Width in 1/72 inch units ?"
+	IDS_USERHEIGHT, "Height in 1/72 inch units ?"
+	IDS_BADEPS, "Problem making EPS file"
+	IDS_NOPREVIEW, "Not a DOS EPS file or \rNo binary preview"
+	IDS_NOTDFNAME, "Can't use same name as open document"
+	IDS_PIPE_EOPEN, "Pipe error.  Couldn't open temporary file.\nDirectory may be Read Only.\nTEMP environment variable may not set."
+	IDS_PIPE_EMEM, "Pipe error. Couldn't allocate memory."
+	IDS_CANCELDONE, "%d%% done"
+	IDS_BADCLI, "Bad command line option: %s"
+	IDS_TEXTFIND, "Find text ?"
+	IDS_TEXTNOTFIND, "Text not found"
+END
+
+STRINGTABLE
+BEGIN
+	/* sound type types*/
+	IDS_SOUNDNAME, "Sound File"
+	IDS_SNDPAGE, "Output Page"
+	IDS_SNDNOPAGE, "No Page"
+	IDS_SNDNONUMBER, "No Numbering"
+	IDS_SNDNOTOPEN, "Not Open"
+	IDS_SNDERROR, "Error"
+	IDS_SNDTIMEOUT,	"Timeout"
+	IDS_SNDSTART, "Start"
+	IDS_SNDEXIT, "Exit"
+	IDS_SOUNDNOMM, "Can't load MMSYSTEM.DLL\rSounds will be unavailable"
+	IDS_NONE, "<None>"
+	IDS_SPKR, "<Speaker Beep>"
+END
+
+STRINGTABLE
+BEGIN
+	/* help topics - these need to match keywords in gsview.doc */
+	IDS_TOPICROOT,  "Overview"
+	IDS_TOPICOPEN,  "Opening a Document"
+	IDS_TOPICPRINT, "Printing"
+	IDS_TOPICEDIT, "Clipboard"
+	IDS_TOPICGSCMD, "Ghostscript Command"
+	IDS_TOPICSOUND, "Sounds"
+	IDS_TOPICMEDIA, "Page Size and Display Resolution"
+	IDS_TOPICPSTOEPS, "PS to EPS"
+	IDS_TOPICGOTO, "Page Selection"
+	IDS_TOPICINSTALL, "Installation"
+	IDS_TOPICTEXT, "Text Extract and Find"
+	IDS_TOPICKEYS, "Keys"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_BBPROMPT,  "Click at left"
+	IDS_BBPROMPT1, "Click at bottom"
+	IDS_BBPROMPT2, "Click at right"
+	IDS_BBPROMPT3, "Click at top"
+	IDS_EPSONEPAGE, "An EPS file must be a single page document.\rSee help on 'PS to EPS'"
+	IDS_EPSQPAGES, "Is this a single page document ?"
+	IDS_EPSNOBBOX, "Could not obtain Bounding Box"
+	IDS_EPSREAD, "Have you read help `PS to EPS` ?"
+END
+
+STRINGTABLE
+BEGIN
+	/* wait messages */
+	IDS_WAIT, "Wait"
+	IDS_WAITREAD, "Reading..."
+	IDS_WAITWRITE, "Writing..."
+	IDS_WAITDRAW, "Drawing..."
+	IDS_WAITGSOPEN, "Opening Ghostscript..."
+	IDS_WAITGSCLOSE, "Closing Ghostscript..."
+	IDS_WAITPRINT, "Printing..."
+	IDS_WAITSEARCH, "Searching..."
+END
+
+DLGTEMPLATE IDD_INPUT 
+BEGIN
+	DIALOG "Input", 100, 24, 46, 287, 58, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		CONTROL "", ID_ANSWER, 12, 28, 260, 10, WC_ENTRYFIELD, ES_LEFT | ES_AUTOSCROLL | ES_MARGIN | ES_ANY | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+		CONTROL "", ID_PROMPT, 12, 44, 260, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE
+		DEFPUSHBUTTON "OK", DID_OK, 32, 6, 51, 14
+		PUSHBUTTON "Cancel", DID_CANCEL, 116, 6, 51, 14
+		PUSHBUTTON "~Help", ID_HELP, 198, 6, 51, 14
+	END
+
+END
+
+
+DLGTEMPLATE IDD_INFO 
+BEGIN
+	DIALOG "Info", 100, 24, 48, 292, 116, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+    		ICON ID_GSVIEW, ID_GSVIEW, 8, 95, 30, 20, WS_GROUP
+		DEFPUSHBUTTON "OK", DID_OK, 20, 4, 51, 14
+		CONTROL "File:", -1, 44, 103, 28, 8, WC_STATIC, SS_TEXT | DT_RIGHT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "Type:", -1, 44, 95, 28, 8, WC_STATIC, SS_TEXT | DT_RIGHT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "Title:", -1, 44, 87, 28, 8, WC_STATIC, SS_TEXT | DT_RIGHT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "Date:", -1, 44, 79, 28, 8, WC_STATIC, SS_TEXT | DT_RIGHT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "BoundingBox:", -1, 8, 71, 64, 8, WC_STATIC, SS_TEXT | DT_RIGHT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "Orientation:", -1, 8, 63, 64, 8, WC_STATIC, SS_TEXT | DT_RIGHT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "Default Media:", -1, 8, 55, 64, 8, WC_STATIC, SS_TEXT | DT_RIGHT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "Page Order:", -1, 8, 47, 64, 8, WC_STATIC, SS_TEXT | DT_RIGHT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "Pages:", -1, 8, 39, 64, 8, WC_STATIC, SS_TEXT | DT_RIGHT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "Page:", -1, 8, 31, 64, 8, WC_STATIC, SS_TEXT | DT_RIGHT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "Bitmap:", -1, 8, 23, 64, 8, WC_STATIC, SS_TEXT | DT_RIGHT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", INFO_FILE,     76, 103, 200, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", INFO_TYPE,     76, 95, 200, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", INFO_TITLE,    76, 87, 200, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", INFO_DATE,     76, 79, 200, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", INFO_BBOX,     76, 71, 200, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", INFO_ORIENT,   76, 63, 200, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", INFO_DEFMEDIA, 76, 55, 200, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", INFO_ORDER,    76, 47, 200, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", INFO_NUMPAGES, 76, 39, 200, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", INFO_PAGE,     76, 31, 200, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", INFO_BITMAP,   76, 23, 200, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+	END
+
+END
+
+DLGTEMPLATE IDD_PAGE 
+BEGIN
+	DIALOG "Select Page", 100, 24, 24, 115, 135, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		CONTROL "", PAGE_LIST, 8, 6, 48, 120, WC_LISTBOX, WS_VISIBLE | WS_TABSTOP
+		DEFPUSHBUTTON "OK", DID_OK, 68, 112, 40, 14
+		PUSHBUTTON "Cancel", DID_CANCEL, 68, 92, 40, 14
+		PUSHBUTTON "~Help", ID_HELP, 68, 72, 40, 14
+		PUSHBUTTON "~All", PAGE_ALL, 68, 46, 40, 14
+		PUSHBUTTON "O~dd", PAGE_ODD, 68, 26, 40, 14
+		PUSHBUTTON "~Even", PAGE_EVEN, 68, 6, 40, 14
+	END
+
+END
+
+DLGTEMPLATE IDD_MULTIPAGE 
+BEGIN
+	DIALOG "Select Pages", 100, 24, 24, 115, 135, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		CONTROL "", PAGE_LIST, 8, 6, 48, 120, WC_LISTBOX, LS_MULTIPLESEL | LS_EXTENDEDSEL | WS_VISIBLE | WS_TABSTOP
+		DEFPUSHBUTTON "OK", DID_OK, 68, 112, 40, 14
+		PUSHBUTTON "Cancel", DID_CANCEL, 68, 92, 40, 14
+		PUSHBUTTON "~Help", ID_HELP, 68, 72, 40, 14
+		PUSHBUTTON "~All", PAGE_ALL, 68, 46, 40, 14
+		PUSHBUTTON "O~dd", PAGE_ODD, 68, 26, 40, 14
+		PUSHBUTTON "~Even", PAGE_EVEN, 68, 6, 40, 14
+	END
+
+END
+
+
+DLGTEMPLATE IDD_SPOOL 
+BEGIN
+	DIALOG "Select Printer Port", -1, 24, 94, 154, 62, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		DEFPUSHBUTTON "OK", DID_OK, 92, 36, 51, 14
+		PUSHBUTTON "Cancel", DID_CANCEL, 92, 12, 51, 14
+		CONTROL "", SPOOL_PORT, 8, 6, 72, 48, WC_LISTBOX, WS_VISIBLE | WS_GROUP | WS_TABSTOP
+	END
+
+END
+
+/* This section gives the default entries for the [Devices] section of */
+/* gsview.ini, used to specify available printer drivers. */
+/* Each line contains a device name and available resolutions, separated  */
+/* by commas.  Don't use spaces.  Each line must end with a '\0' */
+/* The last line of this section must be "\0" */
+/* Maximum line length is 128 */
+RCDATA IDR_DEVICES
+BEGIN
+/*	"mswinprn,\0"   /* can't set resolution in device dialog box */
+	"deskjet,300x300,150x150,100x100,75x75\0"
+	"djet500,300x300,150x150,100x100,75x75\0"
+	"laserjet,300x300,150x150,100x100,75x75\0"
+	"ljetplus,300x300,150x150,100x100,75x75\0"
+	"ljet2p,300x300,150x150,100x100,75x75\0"
+	"ljet3,300x300,150x150,100x100,75x75\0"
+	"ljet4,600x600,300x300,150x150,100x100,75x75\0"
+	"cdeskjet,300x300,150x150,100x100,75x75\0"
+	"cdjcolor,300x300,150x150,100x100,75x75\0"
+	"cdjmono,300x300,150x150,100x100,75x75\0"
+	"cdj550,300x300,150x150,100x100,75x75\0"
+	"paintjet,180x180,90x90\0"
+	"pjetxl,180x180,90x90\0"
+	"epson,360x180,240x180,180x180,120x180,60x180,180x60,120x60,60x60,240x72,120x72,60x72\0"
+	"eps9high,240x216,120x216,60x216\0"
+	"ibmpro,360x180,240x180,180x180,120x180,60x180,180x60,120x60,60x60,240x72,120x72,60x72\0"
+	"st800,360x360,360x180,180x180\0"
+	"bj10e,360x360,360x180,180x360,180x180\0"
+	"bj200,360x360,360x180,180x360,180x180\0"
+	"bmpmono,72,96,120\0"
+	"bmp16,72,96,120\0"
+	"bmp256,72,96,120\0"
+	"bmp16m,72,96,120\0"
+	"gifmono,72,96,120\0"
+	"gif8,72,96,120\0"
+	"pcxmono,72,96,120\0"
+	"pcx16,72,96,120\0"
+	"pcx256,72,96,120\0"
+	"pbm,72,96,120\0"
+	"pbmraw,72,96,120\0"
+	"pgm,72,96,120\0"
+	"pgmraw,72,96,120\0"
+	"ppm,72,96,120\0"
+	"ppmraw,72,96,120"
+	"tiffg3,204x196,204x98\0"
+	"\0"
+END
+
+/* header to control page orientation */
+RCDATA IDR_ORIENT
+BEGIN
+	"/gsview_orientation {\015\012"
+	" gsview_offset\015\012"
+	" gsave clippath pathbbox grestore\015\012"
+	" 4 dict begin\015\012"
+	" /ury exch def /urx exch def /lly exch def /llx exch def\015\012"
+	" gsview_landscape\015\012"
+	" {-90 rotate\015\012 llx ury add neg llx lly sub translate} if\015\012"
+	" gsview_upsidedown\015\012"
+	" {180 rotate\015\012 llx urx add neg lly ury add neg translate} if\015\012"
+	" gsview_seascape\015\012"
+	" {90 rotate\015\012 lly llx sub lly urx add neg translate} if\015\012"
+	" end\015\012} def\015\012"
+	"/showpage\015\012{\015\012"
+	" (showpage\\r\\n) print flush\015\012"
+	" 1 true .outputpage\015\012"
+	" erasepage initgraphics\015\012gsview_orientation\015\012} bind def\015\012"
+	"gsview_orientation\015\012"
+	"/gsview_cleanup {clear cleardictstack} def\015\012"
+	"/gsview_setpagesize {\015\012"
+	" gsview_landscape gsview_seascape or {exch} if\015\012"
+	" gsview_zoom {pop pop}\015\012"
+        "  {//statusdict begin .setpagesize end gsview_orientation} ifelse\015\012"
+        "} def\015\012"
+	"/letter {612 792 gsview_setpagesize} def\015\012"
+	"/note {540 720 gsview_setpagesize} def\015\012"
+	"/legal {612 1008 gsview_setpagesize} def\015\012"
+	"/a3 {842 1190 gsview_setpagesize} def\015\012"
+	"/a4 {595 842 gsview_setpagesize} def\015\012"
+	"/a5 {421 595 gsview_setpagesize} def\015\012"
+	"/a6 {297 421 gsview_setpagesize} def\015\012"
+	"/b4 {709 1002 gsview_setpagesize} def\015\012"
+	"/flsa {612 936 gsview_setpagesize} def\015\012"
+	"/flse {612 936 gsview_setpagesize} def\015\012"
+	"/halfletter {396 612 gsview_setpagesize} def\015\012"
+	"/11x17 {792 1224 gsview_setpagesize} def\015\012"
+	"/ledger {1224 792 gsview_setpagesize} def\015\012"
+	"\0"
+END
+
+/* header to warn of operators incompatible with EPS */
+RCDATA IDR_EPSFWARN
+BEGIN
+	"/eps_warn {(Warning: EPS file must not use ) print dup == flush systemdict exch get exec} def\015\012"
+	"/banddevice {/banddevice eps_warn} def\015\012"
+	"/clear {/clear eps_warn} def\015\012"
+	"/cleardictstack {/cleardictstack eps_warn} def\015\012"
+	"/copypage {/copypage eps_warn} def\015\012"
+	"/erasepage {/erasepage eps_warn} def\015\012"
+	"/exitserver {/exitserver eps_warn} def\015\012"  /* this won't work - exitserver is in serverdict */
+	"/serverdict {/serverdict eps_warn} def\015\012"  /* so use this to provide warnings instead */
+	"/framedevice {/framedevice eps_warn} def\015\012"
+	"/grestoreall {/grestoreall eps_warn} def\015\012"
+	"/initclip {/initclip eps_warn} def\015\012"
+	"/initgraphics {/initgraphics eps_warn} def\015\012"
+	"/initmatrix {/initmatrix eps_warn} def\015\012"
+	"/quit {/quit eps_warn} def\015\012"
+	"/renderbands {/renderbands eps_warn} def\015\012"
+	"/setglobal {/setglobal eps_warn} def\015\012"
+	"/setpagedevice {/setpagedevice eps_warn} def\015\012"
+	"/setpageparams {/setpageparams eps_warn} def\015\012"
+	"/setshared {/setshared eps_warn} def\015\012"
+	"/startjob {/startjob eps_warn} def\015\012"
+	"/letter {/letter eps_warn} def\015\012"
+	"/note {/note eps_warn} def\015\012"
+	"/legal {/legal eps_warn} def\015\012"
+	"/a3 {/a3 eps_warn} def\015\012"
+	"/a4 {/a4 eps_warn} def\015\012"
+	"/a5 {/a5 eps_warn} def\015\012"
+	"/eps_warntwo {(Warning: EPS file should be careful using ) print dup == flush systemdict exch get exec} def\015\012"
+	"/nulldevice {/nulldevice eps_warntwo} def\015\012"
+	"/setgstate {/setgstate eps_warntwo} def\015\012"
+	"/sethalftone {/sethalftone eps_warntwo} def\015\012"
+	"/setmatrix {/setmatrix eps_warntwo} def\015\012"
+	"/setscreen {/setscreen eps_warntwo} def\015\012"
+	"/settransfer {/settransfer eps_warntwo} def\015\012"
+	"/setcolortransfer {/setcolortransfer eps_warntwo} def\015\012"
+	"count /eps_count exch def\015\012"
+	"countdictstack /eps_countdictstack exch def\015\012"
+	"/eps_countcheck {count eps_count\015\012"
+	"  ne {(Warning: EPS file altered operand stack count\\n) print pstack flush} if\015\012"
+	"  countdictstack eps_countdictstack\015\012"
+	"  ne {(Warning: EPS file altered dictionary stack count\\n) print flush} if\015\012"
+	"} def\015\012"
+	"/gsview_cleanup {eps_countcheck //systemdict /clear get exec //systemdict /cleardictstack get exec} def\015\012"
+	"\0"
+END
+
+
+/* Each button is specified by a menu item identifier */
+/* The button contents is given by a BITMAP with the same identifier */
+/* or a STRINGTABLE entry with the same identifier */
+/* The table ends with a NULL */
+RCDATA IDR_BUTTON
+BEGIN
+	IDM_OPEN,
+	IDM_PRINT,
+	IDM_INFO,
+	IDM_HELPCONTENT,
+	IDM_GOTO,
+	IDM_NEXT,
+	IDM_PREV,
+	IDM_NEXTSKIP,
+	IDM_PREVSKIP,
+	IDM_MAGPLUS,
+	IDM_MAGMINUS,
+	IDM_TEXTFIND,
+	IDM_TEXTFINDNEXT,
+	0
+END
+
+STRINGTABLE
+BEGIN
+	IDM_OPEN, "Open..."
+	IDM_PRINT, "Print..."
+	IDM_INFO, "Info..."
+	IDM_HELPCONTENT, "Help"
+	IDM_GOTO, "Goto Page..."
+	IDM_NEXT, "Next Page"
+	IDM_PREV, "Previous Page"
+	IDM_NEXTSKIP, "Skip forwards 5 pages"
+	IDM_PREVSKIP, "Skip backwards 5 pages"
+	IDM_MAGPLUS, "Increase magnification"
+	IDM_MAGMINUS, "Decrease magnification"
+	IDM_TEXTFIND, "Find..."
+	IDM_TEXTFINDNEXT, "Find Next"
+END
+
+BITMAP IDM_OPEN  "binary/gvpopen.bmp"
+BITMAP IDM_PRINT "binary/gvpprint.bmp"
+BITMAP IDM_INFO  "binary/gvpinfo.bmp"
+BITMAP IDM_HELPCONTENT "binary/gvphelp.bmp"
+BITMAP IDM_GOTO  "binary/gvpgoto.bmp"
+BITMAP IDM_NEXT  "binary/gvpnext.bmp"
+BITMAP IDM_PREV  "binary/gvpprev.bmp"
+BITMAP IDM_NEXTSKIP  "binary/gvpnexts.bmp"
+BITMAP IDM_PREVSKIP  "binary/gvpprevs.bmp"
+BITMAP IDM_MAGPLUS   "binary/gvpmagp.bmp"
+BITMAP IDM_MAGMINUS  "binary/gvpmagm.bmp"
+BITMAP IDM_TEXTFIND  "binary/gvpfind.bmp"
+BITMAP IDM_TEXTFINDNEXT  "binary/gvpfindn.bmp"
+BITMAP IDM_MISC  "binary/gvpmisc.bmp"
+
+
+RCDATA IDR_PORTS
+BEGIN
+	"LPT1:=\0"
+	"LPT2:=\0"
+	"LPT3:=\0"
+	"COM1:=\0"
+	"COM2:=\0"
+	"COM3:=\0"
+	"COM4:=\0"
+	"FILE:=\0"
+	"\0"
+END
+
+DLGTEMPLATE IDD_DEVICE 
+BEGIN
+	DIALOG "Select Device", 100, 24, 48, 265, 81, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		DEFPUSHBUTTON "OK", DID_OK, 204, 64, 51, 14
+		PUSHBUTTON "Cancel", DID_CANCEL, 204, 44, 51, 14
+		PUSHBUTTON "~Help", ID_HELP, 204, 4, 51, 14
+		CONTROL "", DEVICE_NAME, 8, 5, 84, 59, WC_COMBOBOX, CBS_SIMPLE | ES_ANY | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+		CONTROL "Device:", -1, 8, 68, 45, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", DEVICE_RES, 108, 5, 84, 59, WC_COMBOBOX, CBS_SIMPLE | ES_ANY | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+		CONTROL "Resolution:", DEVICE_RESTEXT, 108, 68, 45, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		PUSHBUTTON "~Properties", DEVICE_PROP, 204, 24, 51, 14
+	END
+
+END
+
+DLGTEMPLATE IDD_PROP 
+BEGIN
+	DIALOG "Edit Properties", 100, 6, -10, 265, 81, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		DEFPUSHBUTTON "OK", DID_OK, 204, 64, 51, 14
+		PUSHBUTTON "Cancel", DID_CANCEL, 204, 44, 51, 14
+		PUSHBUTTON "~Help", ID_HELP, 204, 4, 51, 14
+		CONTROL "", PROP_NAME, 8, 5, 84, 59, WC_COMBOBOX, CBS_SIMPLE | ES_ANY | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+		CONTROL "Property:", -1, 8, 68, 45, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", PROP_VALUE, 108, 5, 84, 59, WC_COMBOBOX, CBS_SIMPLE | ES_ANY | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+		CONTROL "Value:", -1, 108, 68, 45, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+	END
+
+END
+
+DLGTEMPLATE IDD_BBOX 
+BEGIN
+	DIALOG "BoundingBox", 12, 24, 24, 120, 15, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		CONTROL "", BB_PROMPT, 4, 3, 112, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE
+	END
+
+END
+
+DLGTEMPLATE IDD_SOUND 
+BEGIN
+	DIALOG "Sounds", 100, 11, 59, 245, 97, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		DEFPUSHBUTTON "OK", DID_OK, 188, 79, 51, 14
+		PUSHBUTTON "Cancel", DID_CANCEL, 188, 61, 51, 14
+		PUSHBUTTON "Test", SOUND_TEST, 188, 43, 51, 14
+		PUSHBUTTON "Help", ID_HELP, 188, 25, 51, 14
+		CONTROL "Event::", -1, 8, 85, 45, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", SOUND_EVENT, 8, 15, 64, 64, WC_LISTBOX, WS_VISIBLE | WS_GROUP | WS_TABSTOP
+		CONTROL "", SOUND_FILE, 88, 15, 80, 64, WC_LISTBOX, WS_VISIBLE | WS_GROUP | WS_TABSTOP
+		CONTROL "Sound:", -1, 88, 85, 45, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", SOUND_PATH, 88, 4, 150, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE
+	END
+
+END
+

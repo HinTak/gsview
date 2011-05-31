@@ -1,0 +1,191 @@
+----------------------------
+Version 1.1 1994-08-03
+----------------------------
+All:
+ Change licence from GNU to GSview specific licence.  Commercial
+ distribution of this version now prohibited.
+ Added Zoom by right mouse button.
+ Added Keys Help topic.
+ Added pt, mm and inch units to cursor position on status line.
+ Cursor position is now w.r.t. lower left of page, not lower left
+ of bitmap (relevant when page rotated).
+ Force installation help to be displayed when user can't run ghostscript.
+ Handle files that claim DSC conformance, yet have lines > 254 characters
+ in %%BeginData section (MS-Windows PostScript driver yet again).
+PM: When restoring window location on startup, maximize window if 
+ needed, remembering restored position.
+ Added scrolling bug avoidance kludge for OS/2 2.11, 1bit/pixel bitmap 
+ with 1bit/pixel display.
+ When GSview started from the command line, ignore any non-existent
+ file given as an argument.  Putting GSview on the Desktop menu
+ causes d:\Desktop to be given as an argument to GSview.
+ Added Options | Fit Window to Page.
+ Added new messages GS_BEGIN and GS_END from gsos2.
+ These are caused by "-1 false .outputpage" and "-2 false .outputpage"
+ respectively.  These commands are placed before and after every page.
+ These are used by GSview to tell when gsos2 starts processing input
+ and when it finishes processing input.
+ This reduces the number of incorrect status messages that get briefly 
+ displayed.  Should also make it harder to advance to next page while
+ Ghostscript busy.
+Win: Draw cursor position on status line directly instead of using
+ paint message.  Looks better when cursor in motion.
+
+----------------------------
+Version 1.08 beta 1994-05-10
+----------------------------
+Win16:
+ Again loads files from the command line.
+
+Win32: 
+ Now loads files from the command line (far pointer in WM_COMMAND 
+ lParam was being truncated by Win32s.  Use handle instead).
+ Fixed EPS Add Preview | Windows Metafile (BC4 can't tell the
+ difference between hwrite and _hwrite!).
+
+PM:
+ buttons now in correct place when user tries to resize window
+ larger than bitmap.
+
+Wider distribution (ftp.cs.wisc.edu, ftp.cdrom.com).
+
+----------------------------
+Version 1.07 beta 1994-04-28
+----------------------------
+
+Fixed "gvpm [drive:][path]file" to stay in current directory and to
+  pass full pathname to Ghostscript.
+
+Made Auto Redisplay the default.
+
+Changed "Wait" message to be more descriptive.
+
+Fixed redisplay when displayed file is changed.
+
+Shortened gs printer command line by putting filename inside options file.
+
+Merged more of the Windows and PM print code together.
+
+Fixed Windows Select Device dialog box.
+
+Remember port for Open | Print File.
+
+Print all pages when document doesn't contain DSC page comments.
+
+PM Fixes:
+ Buttons now drawn correctly when window is maximized.
+ In input dialog box, select entry field during dialog box creation.
+ Fixed DOS EPS header created by EMX (needed pack(1))
+ Fixed Open | Print File.
+ Made PM filename box on status line wider.
+ Added button descriptions on status bar.
+
+----------------------------
+Version 1.06 beta 1994-03-03
+----------------------------
+
+Changed name back to GSview (original name used in pre 0.6 alpha) 
+to avoid confusion with Tim Theisen's X11 Ghostview.
+
+Ported to OS/2 Presentation Manager.  This involved a major reorganisation 
+to allow common code between MS-Windows and OS/2.
+MS-Windows version is expected to have more bugs than version 1.0.
+
+PM GSview supports all the relevant features from GSview for Windows
+except for "Edit | Add EPS Preview | Windows Metafile".
+
+Added Microsoft Win32s version.  
+16 bit GSview for Windows will work with 32 bit Ghostscript using
+Win32s and vice versa.
+GSview for Windows now requires Ghostscript 3.0.
+Not tested under Windows NT.
+
+Added Media | Depth option.  Needs Ghostscript version 3.0.
+
+Added Options | Ignore DSC.  Useful for documents that incorrectly
+claim to follow DSC.
+
+Rewrote DSC scanning code.  Now handles DOSEPS files without creating
+a temporary file.
+
+Added magnify buttons.
+
+Added text extract and search.
+
+----------------------------
+Version 1.0a  1993-11-10
+----------------------------
+
+Fixed EPSF Warn bug.
+
+Fixed INI file bug for Printer entry.
+
+----------------------------
+Version 1.0  1993-08-05
+----------------------------
+
+Saved media name in an array so it is available in write_profile().
+Previously, closing gsview from the system menu would cause 
+write_profile() to be called twice, the second time after the
+window and menu had been destroyed.  Consequently the media
+name could not be obtained from the non-existent menu.
+
+Added command line option /S[port] to spool file (File | Print File).
+This allows files dropped on the Print Manager to be sent
+direct to a PostScript printer.
+
+Changed default timeout to 5 minutes per page.  This timeout 
+only affects printing.  Timeout for displaying was dropped
+in version 0.8 beta (when pipe code was changed).
+Timeout for opening or closing Ghostscript is still 20 seconds.
+
+Added "Safer" option to select Ghostscript -dSAFER flag which
+disables the deletefile and renamefile operators, and the
+ability to open files in any mode other than read-only.
+The default is now "Safer".
+
+Added %%EndImage before %%EndPreview of EPSI preview.
+
+Changed default file extensions so that .ps indicates an ASCII
+postscript file and .eps indicates a DOS EPS file with a 
+binary header and preview.
+
+----------------------------
+Version 0.8 beta  1993-07-07
+----------------------------
+
+DSC file is now closed after each page is displayed.  
+The file is reopened just before the next page is displayed and 
+if the file length or date stamp have changed, gswin is killed 
+and the file rescanned.  Version 0.7 kept DSC files open which 
+caused problems if another program changed the file.
+
+Documented that gsview produces TIFF 5.0 Class B images.
+Added a menu option for creating a TIFF 4.0 preview for 
+Word Perfect 5.1 which requires a narrow minded interpretation
+of the TIFF 4.0 specification.
+
+Moved imitation pipe code to a separate module.
+Changed implementation of imitation pipe.  Instead of creating
+many temporary files, gsview now keeps a single read/write file open.
+When gsview writes to the imitation pipe the data is written to this file.  
+When the pipe is flushed gsview reads the file and passes it to gswin 
+in global memory blocks.  When gswin asks for data and there is no more 
+to give, gsview resets the file.
+
+If a file is specified on the gsview command line do not use the
+saved directory.  If a path to the file is given, use it as the 
+current directory, otherwise use the gsview working directory.
+
+To stop documents that change the paper size from interfering with
+gsview's orientation commands, gsview now adds paper size commands 
+(e.g. letter, a4) to the userdict to replace those in the systemdict.
+
+Generate error if user attempts to overwrite open document file.
+
+----------------------------
+Version 0.7 beta  1993-05-10
+----------------------------
+
+First general release of Ghostview for Windows.
+

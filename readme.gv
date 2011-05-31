@@ -1,0 +1,151 @@
+===============================================================
+README.GV         1994-08-03
+===============================================================
+PM GSview and GSview for Windows. Needs Ghostscript 3.0.
+
+========
+Overview
+========
+PM GSview is a graphical interface for OS/2 Ghostscript.
+GSview for Windows is a graphical interface for MS-Windows Ghostscript.
+Ghostscript is an interpreter for the PostScript page description language 
+used by laser printers.
+For documents following the Adobe PostScript Document Structuring 
+Conventions, GSview allows selected pages to be viewed or printed.
+Ghostscript 3.0 or later is required.  
+
+Features include:
+ - view pages in arbitrary order (Next, Previous, Goto).
+ - selectable display resolution.
+ - page size is automatically selected from DSC comments.
+ - page size can be selected using the menu.
+ - orientation is automatically selected from DSC comments.
+ - orientation can be selected using the menu (Portrait, Landscape).
+ - print selected pages using Ghostscript.
+ - extract selected pages to another file.
+ - copy display bitmap to clipboard.
+ - save clipboard bitmap as BMP file.
+ - add bitmap preview to EPS file (Interchange, TIFF or Windows Metafile)
+ - graphically select bounding box for EPS file.
+ - extract bitmap preview or postscript from DOS EPS file.
+ - on-line help.
+ - free (GSview Free Public Licence).
+New features in version 1.1:
+ - Works with Ghostscript 3.0 (Level 2 PostScript)
+ - PM GSview (OS/2).
+ - GSview for Windows Win32s.
+ - change display depth (bits/pixel).
+ - added option to ignore DSC comments.
+ - zoom with right mouse button.
+ - buttons to change resolution by 1.2 or 1/1.2.
+ - cursor position displayed in pt, mm or inch.
+ - extract text from postscript.
+ - find text
+
+PM GSview and GSview for Windows were written by 
+Russell Lang <rjl@monu1.cc.monash.edu.au>
+
+===========
+Compilation
+===========
+To compile PM GSview you need IBM NMAKE.EXE and EMX/GCC 0.8h
+with emxfix05.
+To create the PM GSview online help you need the IBM toolkit.
+Copy gvpm.mak to Makefile and edit COMPBASE and EMXPATH as required.
+Type 'nmake'
+
+To compile GSview for Windows you need Borland C++ 3.1 or 4.0.
+To compile GSview for Windows Win32s you need Borland C++ 4.0.
+Copy gvwin.mak to Makefile then edit COMPBASE and WIN32 as required.
+Type 'make'.
+
+=====
+Setup
+=====
+Copy gvpm.exe, gvpm.hlp, gsview.exe, gsview32.exe and gsview.hlp to the 
+Ghostscript directory.  
+Start GSview then select "Options | Ghostscript Command",
+and enter the correct executable path and include path for Ghostscript.
+For example "c:\gs\gsos2.exe -Ic:\gs;c:\psfonts"
+
+PM GSview will run under OS/2 2.1 and may run under OS/2 2.0.
+PM GSview has been compiled with EMX/GCC 0.8h and requires
+the emx 0.8h DLL's.  These are available from
+  ftp.cdrom.com:pub/os2/2_x/unix/emx08h/emxrt.zip
+
+GSview will run under Windows 3.1.
+GSview will probably run under Windows 3.0, but you need a special
+version of commdlg.dll, shell.dll and winhelp.exe.  This version has never 
+been tested with Windows 3.0.  If it works at all consider yourself lucky.
+
+See the on-line help for more details.
+The 'Common Problems' topic is worth reading if GSview won't work.
+
+====
+Bugs
+====
+This is PM GSview and GSview for Windows 1.1.
+Send bug reports to Russell Lang <rjl@monu1.cc.monash.edu.au>.
+When reporting bugs, please include the version number and date of 
+GSview (from the Help | About box), the version number of Ghostscript, 
+and the exact wording of any error messages.
+If you get a SYS3175 or GPF, please send the address of the GPF - I can 
+use this to help locate the bug.
+Don't expect a fast response - the work I'm paid to do has a higher
+priority.
+
+=======
+Updates
+=======
+The latest version of PM GSview and GSview for Windows should 
+be available from
+  ftp.cs.wisc.edu:pub/ghost/rjl/gsview*.zip
+or by mail (see next section).
+
+==================================
+Copyright, Licensing and Donations
+==================================
+GSview is copyright by Russell Lang.
+GSview is distributed with the GSview Free Public Licence.
+This licence is contained in the file LICENCE.
+The GSview Free Public Licence does not require any payment to the author;
+however the author would welcome any donations to cover costs and time
+involved in developing and maintaining GSview.  These may be sent to
+    Russell Lang
+    12 Princetown Road
+    MOUNT WAVERLEY  VIC  3149
+    AUSTRALIA
+Donations are preferred in Australian dollars because it costs AUS$5
+to bank an overseas currency cheque.
+If the donation is over AUS$40 or US$40 then the author will mail 
+the next update to you on a 3.5" HD disk (it won't fit on my 5.25" DD).
+Updates are not likely to be frequent.
+Please accompany donations with the following information:
+    Your name.
+    Your postal address.
+    Your email address (if you have one).
+    Version number of GSview.
+    Where you obtained or heard about GSview.
+    Version number of Ghostscript.
+    Donation amount and currency.
+
+GSview uses Ghostscript to display the contents of the PostScript
+files.  Ghostscript is a separate program from GSview; it is
+written and owned by Aladdin Enterprises, not by Russell Lang.
+
+Aladdin Ghostscript comes with a licence that is more restrictive than 
+the GNU Licence; in particular, it restricts the distribution of
+Aladdin Ghostscript in commercial contexts.  Please see the file PUBLIC
+that accompanies Aladdin Ghostscript for more details.
+
+================
+Acknowledgements
+================
+Tim Theisen, who wrote Ghostview for X11 which provided the inspiration
+for PM GSview and GSview for Windows.
+
+L. Peter Deutsch, for writing Ghostscript and for making changes to 
+Ghostscript to support GSview for Windows.
+
+
+==============================================================

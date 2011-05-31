@@ -1,0 +1,107 @@
+# Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+#  
+# This file is part of GSview.
+#  
+# This program is distributed with NO WARRANTY OF ANY KIND.  No author
+# or distributor accepts any responsibility for the consequences of using it,
+# or for whether it serves any particular purpose or works at all, unless he
+# or she says so in writing.  Refer to the GSview Free Public Licence 
+# (the "Licence") for full details.
+#  
+# Every copy of GSview must include a copy of the Licence, normally in a 
+# plain ASCII text file named LICENCE.  The Licence grants you the right 
+# to copy, modify and redistribute GSview, but only under certain conditions 
+# described in the Licence.  Among other things, the Licence requires that 
+# the copyright notice and this notice be preserved on all copies.
+
+# makefile.os2
+# EPSTOOL
+# requires emx 0.8h
+#
+# edit COMPBASE and EMXPATH as required.
+
+# set USE_EMX=0 for BCC
+# set USE_EMX=1 for EMX/GCC
+USE_EMX=1
+# USE_OMF=1 for EMX/GCC with LINK386
+USE_OMF=0
+
+!if $(USE_EMX)
+# EMX
+DRIVE=d:
+COMP=gcc
+COMPBASE=$(DRIVE)\emx
+EMXPATH=$(DRIVE)/emx
+!if $(USE_OMF)
+FLAGS=-Zomf -g -I. -I../src
+OBJ=obj
+!else
+FLAGS=-g -I. -I../src
+OBJ=o
+!endif
+!else
+# BCC flags
+COMP=bcc
+COMPBASE=d:\bcos2
+EMXPATH=d:/bcos2
+FLAGS=-v -I$(INCDIR) -I../src -sm
+OBJ=obj
+!endif
+
+# ICC flags
+#COMP=icc
+#COMPBASE=c:\ibmc
+#EMXPATH=c:/ibmc
+#FLAGS=/Gm /Ti /Sm /Ic:\toolkt20\c\os2h;c:\ibmc\include -DNO_MMOS2
+#OBJ=obj
+
+COMPDIR=$(COMPBASE)\bin
+INCDIR=$(EMXPATH)/include
+LIBDIR=$(EMXPATH)/lib
+
+
+OBJS=epstool.$(OBJ) gvceps.$(OBJ) gvcdsc.$(OBJ)
+
+all: epstool.exe
+
+.c.$(OBJ):
+	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c $*.c
+
+
+epstool.$(OBJ): epstool.c epstool.h ../src/gvcdsc.h
+
+gvcdsc.$(OBJ): ../src/gvcdsc.c epstool.h ../src/gvcdsc.h
+	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.c
+
+gvceps.$(OBJ): ../src/gvceps.c epstool.h ../src/gvcdsc.h
+	$(COMP) $(FLAGS) -DOS2 -DEPSTOOL -c -o $*.$(OBJ) ../src/$*.c
+
+epstool.exe: $(OBJS) epstool.def
+!if $(USE_EMX)
+!if $(USE_OMF)
+	$(COMP) $(FLAGS) -o epstool $(OBJS) epstool.def
+!else
+	$(COMP) $(FLAGS) -o epstool $(OBJS)
+	emxbind $(COMPDIR)\emxl.exe epstool epstool.exe
+	del $*
+!endif
+!else
+	$(COMP) $(FLAGS) -eepstool.exe $(OBJS)
+!endif
+
+clean:
+	-del epstool.$(OBJ)
+	-del gvceps.$(OBJ)
+	-del gvcdsc.$(OBJ)
+
+veryclean: clean
+	-del epstool.exe
+
+ZIPFILES = epstool.c epstool.h epstool.def epstool.doc epstool.exe\
+ makefile.os2 makefile.tc makefile.unx
+
+zip:
+	zip ..\epstool $(ZIPFILES)
+
+
+
