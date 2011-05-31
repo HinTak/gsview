@@ -16,7 +16,7 @@ MODEL=m
 CFLAGS=-v -m$(MODEL) -W -2 -h -w -H=gsview.sym -I$(INCDIR)
 OBJS=gsview.obj dialog.obj display.obj pipe.obj print.obj clip.obj init.obj ps.obj
 
-all: gsview$(LANG).exe gsview$(LANG).hlp
+all: gsview$(LANG).exe gsview$(LANG).hlp doc2tex.exe
 
 .c.obj:
 	$(COMPDIR)\bcc -c $(CFLAGS) {$< }
@@ -92,7 +92,6 @@ clean:
 	del doc2rtf.obj
 	del doc2rtf.exe
 	del doc2tex.obj
-	del doc2tex.exe
 	del gsview.aux
 	del gsview.dvi
 	del gsview.log
@@ -102,3 +101,4 @@ clean:
 veryclean: clean
 	del gsview$(LANG).exe
 	del gsview$(LANG).hlp
+	del doc2tex.exe

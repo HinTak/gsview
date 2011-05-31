@@ -45,8 +45,6 @@ int
 get_papersizes_index()
 {
 int i;
-char medianame[20];
-	GetMenuString(hmenu, media, medianame, sizeof(medianame), MF_BYCOMMAND);
 	for (i=0; papersizes[i].name != (char *)NULL; i++) {
 	    if (!stricmp(papersizes[i].name, medianame))
 		return i;
@@ -160,6 +158,7 @@ gsview_media(int new_media)
 	CheckMenuItem(hmenu, media, MF_BYCOMMAND | MF_UNCHECKED);
 	media = new_media;
 	CheckMenuItem(hmenu, media, MF_BYCOMMAND | MF_CHECKED);
+	GetMenuString(hmenu, media, medianame, sizeof(medianame), MF_BYCOMMAND);
 	gswin_resize();
 	return;
 }
@@ -176,9 +175,9 @@ char command[256];
 
 	pipeinit();		/* so we wait for first request */
 	gswin_size();
-	sprintf(command,"%s -r%gx%g -g%ux%u -sGSVIEW=%u -",
-		szGSwin, xdpi, ydpi, bitmap_width, bitmap_height,
-		(unsigned int)hwndimg);
+	sprintf(command,"%s %s -r%gx%g -g%ux%u -sGSVIEW=%u -",
+		szGSwin, safer ? "-dSAFER" : "", xdpi, ydpi, 
+                bitmap_width, bitmap_height, (unsigned int)hwndimg);
 	if (strlen(command) > 126) {
 		info_wait(FALSE);
 		gserror(IDS_TOOLONG, command, MB_ICONSTOP, SOUND_ERROR);
@@ -351,6 +350,7 @@ gsview_openfile(char *filename)
 {
 int i;
 	pagenum = 1;
+	page_extra = 0;
 	if (dsc_scan(filename)) {
 	    /* found DSC comments */
 	    if (doc->orientation == PORTRAIT)
@@ -358,10 +358,10 @@ int i;
 	    if (doc->orientation == LANDSCAPE)
 		gsview_orientation(IDM_LANDSCAPE);
 	    if (doc->default_page_media) {
-		char medianame[20];
+		char thismedia[20];
 		for (i=IDM_LETTER; i<IDM_USERSIZE; i++) {
-		    GetMenuString(hmenu, i, medianame, sizeof(medianame), MF_BYCOMMAND);
-		    if (!stricmp(medianame, doc->default_page_media->name)) {
+		    GetMenuString(hmenu, i, thismedia, sizeof(thismedia), MF_BYCOMMAND);
+		    if (!stricmp(thismedia, doc->default_page_media->name)) {
 		        gsview_media(i);
 		        break;
 		    }
@@ -391,6 +391,8 @@ gsview_selectfile(char *filename)
 {
 	if (gswin_hinst != (HINSTANCE)NULL)
 	    gsview_endfile();
+	while (*filename && *filename==' ')
+	     filename++;
 	gsview_openfile(filename);
 	info_wait(FALSE);
 }
@@ -419,7 +421,7 @@ char *p;
 	    gswin_resize();
 
 	if (!gswin_open()) {
-	    MessageBox(hwndimg, "panic gsview_displayfile", szAppName, MB_OK);
+	    return;
 	}
 
 	fix_orientation(cfile);
@@ -659,34 +661,21 @@ dsc_dopage(void)
 	pipeflush();
 }
 
-/* go forward skip pages */
+/* skip pages */
 void
-dsc_next(int skip)
+dsc_skip(int skip)
 {
-	if (pagenum == doc->numpages || doc->numpages == 0) {
+	if ( (skip == 0)
+	  || ((skip > 0) && (pagenum == doc->numpages))
+	  || ((skip < 0) && (pagenum == 1))
+	  || (doc->numpages == 0) ) {
 	    play_sound(SOUND_NOPAGE);
 	    info_wait(FALSE);
 	    return;
 	}
 	pagenum += skip;
-	if (pagenum > doc->numpages)
+	if (pagenum > (int)doc->numpages)
 	     pagenum = doc->numpages;
-	info_wait(TRUE);
-	if (page_ready)
-	    next_page();
-	if (gswin_open())
-	    dsc_dopage();
-}
-
-/* go back skip pages */
-void
-dsc_prev(int skip)
-{
-	if (pagenum == 1 || doc->numpages == 0) {
-		play_sound(SOUND_NOPAGE);
-		return;
-	}
-	pagenum -= skip;
 	if (pagenum < 1)
 	    pagenum = 1;
 	info_wait(TRUE);

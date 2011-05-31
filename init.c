@@ -75,7 +75,13 @@ WORD version = LOWORD(GetVersion());
 char *p;
 char workdir[MAXSTR];
 char filedir[MAXSTR];
+int length = 64;
 
+	while (length && !SetMessageQueue(length))
+	    length--;	/* reduce size and try again */
+	if (length == 0)
+	    exit(0);	/* panic */
+	
 	if ((LOBYTE(version)<<8) + HIBYTE(version) >= 0x30a)
 	    is_win31 = TRUE;
 
@@ -109,16 +115,20 @@ char filedir[MAXSTR];
 	img_origin.x = img_origin.y = CW_USEDEFAULT;
 	img_size.x = img_size.y = CW_USEDEFAULT;
 	xdpi = ydpi = DEFAULT_RESOLUTION;
-	settings = TRUE;
 	button_show = TRUE;
-	quick = TRUE;
-	timeout = DEFAULT_TIMEOUT;
-	save_dir = TRUE;
-	media = IDM_LETTER;
 	epsf_clip = FALSE;
+	epsf_warn = FALSE;
+	media = IDM_LETTER;
+	quick = TRUE;
+        redisplay = FALSE;
+	safer = TRUE;
+	save_dir = TRUE;
+	settings = TRUE;
+	timeout = DEFAULT_TIMEOUT;
 	orientation = IDM_PORTRAIT;
 	swap_landscape = FALSE;
 	hmenu = LoadMenu(phInstance, "gsview_menu");
+	GetMenuString(hmenu, media, medianame, sizeof(medianame), MF_BYCOMMAND);
 	haccel = LoadAccelerators(phInstance, "gsview_accel");
 	getcwd(workdir, sizeof(workdir));
 	/* read entries from gsview.ini */
@@ -272,6 +282,8 @@ POINT button_size, button_shift;
 		CheckMenuItem(hmenu, IDM_BUTTONSHOW, MF_BYCOMMAND | MF_CHECKED);
 	if (quick) 
 		CheckMenuItem(hmenu, IDM_QUICK, MF_BYCOMMAND | MF_CHECKED);
+	if (safer) 
+		CheckMenuItem(hmenu, IDM_SAFER, MF_BYCOMMAND | MF_CHECKED);
 	if (redisplay) 
 		CheckMenuItem(hmenu, IDM_AUTOREDISPLAY, MF_BYCOMMAND | MF_CHECKED);
 	if (settings)
@@ -378,14 +390,15 @@ LPSTR section = INISECTION;
 	}
 	GetPrivateProfileString(section, "Media", "", profile, sizeof(profile), file);
 	if (strlen(profile)!=0) {
-		char medianame[20];
+		char thismedia[20];
 		for (i=IDM_LETTER; i<IDM_USERSIZE; i++) {
-		    GetMenuString(hmenu, i, medianame, sizeof(medianame), MF_BYCOMMAND);
-		    if (!stricmp(medianame, profile)) {
+		    GetMenuString(hmenu, i, thismedia, sizeof(thismedia), MF_BYCOMMAND);
+		    if (!stricmp(thismedia, profile)) {
 		        break;
 		    }
 		}
 		media = i;
+		strncpy(medianame,thismedia,sizeof(medianame));
         }
 	GetPrivateProfileString(section, "UserSize", "", profile, sizeof(profile), file);
 	if (sscanf(profile,"%d %d", &user_width, &user_height) != 2) {
@@ -408,6 +421,9 @@ LPSTR section = INISECTION;
 	GetPrivateProfileString(section, "QuickOpen", "", profile, sizeof(profile), file);
 	if (sscanf(profile,"%d", &i) == 1)
 		quick = i;
+	GetPrivateProfileString(section, "Safer", "", profile, sizeof(profile), file);
+	if (sscanf(profile,"%d", &i) == 1)
+		safer = i;
 	GetPrivateProfileString(section, "AutoRedisplay", "", profile, sizeof(profile), file);
 	if (sscanf(profile,"%d", &i) == 1)
 		redisplay = i;
@@ -461,7 +477,7 @@ int i;
 	if (media == IDM_USERSIZE)
 	    strcpy(profile, "User Defined");
 	else
-	    GetMenuString(hmenu, media, profile, sizeof(profile), MF_BYCOMMAND);
+	    strcpy(profile, medianame);
 	WritePrivateProfileString(section, "Media", profile, file);
 	sprintf(profile, "%u %u", user_width, user_height);
 	WritePrivateProfileString(section, "UserSize", profile, file);
@@ -475,6 +491,8 @@ int i;
 	WritePrivateProfileString(section, "SwapLandscape", profile, file);
 	sprintf(profile, "%d", quick);
 	WritePrivateProfileString(section, "QuickOpen", profile, file);
+	sprintf(profile, "%d", safer);
+	WritePrivateProfileString(section, "Safer", profile, file);
 	sprintf(profile, "%d", redisplay);
 	WritePrivateProfileString(section, "AutoRedisplay", profile, file);
 	sprintf(profile, "%d", timeout);

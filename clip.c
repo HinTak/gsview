@@ -466,7 +466,7 @@ UINT filter;
 	        filter = FILTER_TIFF;
 	}
 	else
-	    filter = FILTER_EPS;
+	    filter = FILTER_PS;
 	if (!getfilename(outname, SAVE, filter, NULL, IDS_TOPICEDIT)) {
 	    fclose(epsfile);
 	    return;
@@ -1164,7 +1164,7 @@ write_interchange(FILE *f, HGLOBAL hglobal)
 		fputs("\r\n",f);
 	}
 
-	fputs("%%EndPreview\r\n",f);
+	fputs("%%EndImage\r\n%%EndPreview\r\n",f);
 	free(preview);
 	GlobalUnlock(hglobal);
 }
@@ -1342,7 +1342,7 @@ long here;
 	}
 
 	output[0] = '\0';
-	if (!getfilename(output, SAVE, FILTER_EPS, NULL, IDS_TOPICPSTOEPS))
+	if (!getfilename(output, SAVE, FILTER_PS, NULL, IDS_TOPICPSTOEPS))
 	    return;
 
 	if ((f = fopen(output, "wb")) == (FILE *)NULL) {

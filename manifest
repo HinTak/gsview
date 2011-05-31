@@ -19,6 +19,7 @@ doc2rtf.c
 gsview.doc
 gsview.hpj
 doc2tex.c
+doc2tex.exe
 titlepag.tex
 gsview.mak
 gsview.rc

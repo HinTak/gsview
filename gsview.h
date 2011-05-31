@@ -20,7 +20,7 @@
  * Internet: rjl@monu1.cc.monash.edu.au
  */
 
-#define GSVIEW_VERSION "0.8 beta 1993-07-07"
+#define GSVIEW_VERSION "1.0  1993-08-05"
 
 #define ID_ANSWER	51
 #define ID_PROMPT	52
@@ -43,6 +43,7 @@
 #define IDM_PSTOEPS	115
 #define IDM_EXIT	116
 #define IDM_DROP	117
+#define IDM_SKIP	118
 
 #define IDM_COPYCLIP	151
 #define IDM_PASTETO	152
@@ -58,12 +59,13 @@
 #define IDM_SOUNDS	  176
 #define IDM_SETTINGS	  177
 #define IDM_SAVESETTINGS  178
-#define IDM_SAVEDIR	  179
-#define IDM_BUTTONSHOW	  180
-#define IDM_QUICK	  181
-#define IDM_AUTOREDISPLAY 182
-#define IDM_EPSFCLIP	  183
-#define IDM_EPSFWARN	  184
+#define IDM_SAFER         179  
+#define IDM_SAVEDIR	  180
+#define IDM_BUTTONSHOW	  181
+#define IDM_QUICK	  182
+#define IDM_AUTOREDISPLAY 183
+#define IDM_EPSFCLIP	  184
+#define IDM_EPSFWARN	  185
 
 #define IDM_PORTRAIT	201
 #define IDM_LANDSCAPE   202
@@ -193,6 +195,7 @@
 #define IDS_NOTDFNAME   649
 #define IDS_PIPEERR	650
 #define IDS_CANCELDONE	651
+#define IDS_BADCLI      652
 
 #define IDS_SOUNDNAME	670
 #define IDS_SNDPAGE	671
@@ -294,13 +297,14 @@ extern char pfname[MAXSTR];		/* name of temp file for printing options */
 extern BOOL is_ctrld;			/* TRUE if DSC except for ctrl+D at start of file */
 extern int preview;			/* preview type IDS_EPSF, IDS_EPSI, etc. */
 extern BOOL page_ready;			/* true when gswin has sent an OUTPUT_PAGE and is waiting for NEXT_PAGE */
+extern BOOL page_extra;			/* extra pages to display */
 extern BOOL at_prompt;			/* true if at prompt */
 extern BOOL saved;			/* true if interpreter state currently saved in /gssave */
 extern int bitmap_scrollx;		/* offset from bitmap to origin of child window */
 extern int bitmap_scrolly;
 extern OPENFILENAME ofn;
 extern char szOFilename[MAXSTR];	/* filename for OFN */
-#define DEFAULT_TIMEOUT 120		/* 120 seconds */
+#define DEFAULT_TIMEOUT 300		/* 300 seconds = 5 minutes per page */
 #define CLOSE_TIMEOUT    20
 extern BOOL bTimeout;			/* true if timeout occured */
 extern WNDPROC lpfnButtonWndProc;	/* default button WndProc */
@@ -324,7 +328,9 @@ extern POINT img_size;
 extern BOOL quick;
 extern BOOL settings;
 extern BOOL button_show;
+extern BOOL safer;
 extern int media;
+extern char medianame[32];
 extern int user_width, user_height;
 extern BOOL epsf_clip;
 extern BOOL epsf_warn;
@@ -395,8 +401,7 @@ BOOL dsc_scan(char *fname);
 void dsc_getpages(FILE *f, int first, int last);
 void dsc_header(FILE *f);
 void dsc_dopage(void);
-void dsc_next(int);
-void dsc_prev(int);
+void dsc_skip(int);
 int map_page(int page);
 
 /* in dialog.c */
@@ -425,8 +430,7 @@ BOOL is_pipe_done(void);	/* true if pipe has just been reset */
 BOOL CALLBACK _export DeviceDlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK _export CancelDlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK _export SpoolDlgProc(HWND, UINT, WPARAM, LPARAM);
-void gsview_spool(void);
-int gp_printfile(char *filename);
+void gsview_spool(char *, char *);
 void pscopydoc(FILE *fp);
 char *get_devices(void);
 void print_cleanup(void);
@@ -449,7 +453,7 @@ void make_eps_interchange(void);
 void ps_to_eps(void);
 
 #ifdef WIN32
-/* Windows NT has never been tried, but there macros fix up the */
+/* Windows NT has never been tried, but these macros fix up the */
  * known differences from Windows 3.1 */
 /* imitation pipes will need to be rewritten to use real pipes */
 #define MoveTo(hdc,x,y) MoveToEx((hdc),(x),(y),(LPPOINT)NULL)

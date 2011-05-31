@@ -25,6 +25,7 @@ Features include:
  - graphically select bounding box for EPS file.
  - extract bitmap preview or postscript from DOS EPS file.
  - on-line help.
+ - free (GNU General Public Licence).
 
 Ghostview for Windows was written by Russell Lang
 <rjl@monu1.cc.monash.edu.au>
@@ -50,13 +51,13 @@ shell.dll and winhelp.exe from Windows 3.1.  Very little testing has
 been done with Windows 3.0.  If it works at all consider yourself lucky.
 
 See the on-line help for more details.
+The 'Common Problems' topic is worth reading if Ghostview for
+Windows won't work.
 
 ====
 Bugs
 ====
-This is Ghostview for Windows 0.8 BETA.
-There are likely to be bugs because some major changes have been made
-to file accessing since 0.7 BETA.
+This is Ghostview for Windows 1.0.
 Send bug reports to rjl@monu1.cc.monash.edu.au.
 When reporting bugs, please include the version number and date of 
 Ghostview for Windows (from the Help | About box), the version number
@@ -65,6 +66,12 @@ If you get a GPF, please send the address of the GPF - I can use
 this to help locate the bug.
 Don't expect a fast response - the work I'm paid to do has a higher
 priority.
+
+=======
+Updates
+=======
+The latest version of Ghostview for Windows should be available from
+ftp.cs.wisc.edu:pub/ghost/gsview*.zip
 
 ================
 Acknowledgements

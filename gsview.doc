@@ -444,6 +444,15 @@
 
  When the `Save Settings on Exit` option is checked, Ghostview will
  automatically save the above settings when you quit Ghostview.
+3Safer
+?Safer
+ When the `Safer` option is `checked`, Ghostview will give Ghostscript 
+ the `-dSAFER` flag, which disables the deletefile and renamefile operators,
+ and the ability to open files in any mode other than read-only.  
+ This is the default.
+
+ When the `Safer` option is `unchecked` Ghostscript can change
+ files.
 3Save Last Directory
 ?Save Last Directory
  When the `Save Last Directory` option is `checked`, Ghostview will
@@ -619,6 +628,36 @@
  That's it!  Now when you double click on a PostScript file,
  the `File Manager` will run Ghostview.  When you drop a PostScript
  file on the `Print Manager`, Ghostview will print the file.
+2Command line options
+?Command line options
+ Usage:
+  gsview [/D] filename
+  gsview [/D] /F filename
+  gsview [/D] /P filename
+  gsview [/D] /S[port] filename
+
+ To start Ghostview and display filename.ps use:
+  gsview filename.ps
+ To start Ghostview and print filename.ps using Ghostscript 
+ (`File` | `Print`) use:
+  gsview /P filename.ps
+ To start Ghostview and print filename.ps to a file using Ghostscript
+ (`File` | `Print To File`) use:
+  gsview /F filename.ps
+ To start Ghostview and spool filename.ps for printing directly to 
+ a printer (`File` | `Print File`) use:
+  gsview /S filename.ps
+ To start Ghostview and spool filename.ps for printing directly to
+ printer port LPT3: use:
+  gsview /SLPT3: filename.ps
+
+ To start Ghostview in debug mode use:
+  gsview /D
+ In debug mode Ghostview will `not` remove its temporary files.
+ This is to allow inspection of these files after Ghostview has finished.
+
+ Ghostview for Windows ignores the case of option:
+ /p is the same as /P.
 2Copyright
 ?Copyright
  The `About` menu item shows the Ghostview copyright message
@@ -787,17 +826,6 @@
   -rXDPIxYDPI
   -gWIDTHxHEIGHT
   -sOutputFile=filename
-
- To start Ghostview and display filename.ps use:
-  gsview filename.ps
- To start Ghostview and print filename.ps using Ghostscript use:
-  gsview /P filename.ps
- To start Ghostview and print filename.ps to a file using Ghostscript use:
-  gsview /F filename.ps
- To start Ghostview in debug mode use:
-  gsview /D
- In debug mode Ghostview will `not` remove its temporary files.
- This is to allow inspection of these files after Ghostview has finished.
 
  The ability to select individual pages for an Adobe Document
  Structuring Conventions conforming document is due to the inclusion of

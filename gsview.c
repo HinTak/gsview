@@ -60,10 +60,12 @@ BOOL quick;			/* use quick opening (don't reload gswin) */
 BOOL settings;			/* save settings on exit */
 BOOL button_show;		/* show buttons bar */
 int media;			/* IDM_LETTER etc. */
+char medianame[32];		/* name of media */
 int user_width, user_height;	/* User Defined media size */
 BOOL epsf_clip;			/* make bitmap size of epsf bounding box */
 BOOL epsf_warn;			/* write warning messages if operators incompatible with EPS are used */
 BOOL redisplay;			/* redisplay on resize */
+BOOL safer;			/* use -dSAFER option */
 int orientation;		/* IDM_PORTRAIT, IDM_LANDSCAPE etc. */
 BOOL swap_landscape;		/* swap IDM_LANDSCAPE & IDM_SEASCAPE */
 float xdpi, ydpi;		/* resolution of gswin bitmap */
@@ -105,6 +107,7 @@ BOOL page_ready = FALSE;	/* true when gswin has sent an OUTPUT_PAGE and is waiti
 BOOL saved = FALSE;		/* true if interpreter state currently saved in /gssave */
 BOOL epsf_clipped;		/* clipping this page? */
 int page_skip = 5;		/* number of pages to skip in IDM_NEXTSKIP or IDM_PREVSKIP */
+int page_extra;			/* extra pages to skip */
 BOOL debug = FALSE;		/* /D command line option used */
 HINSTANCE hlib_mmsystem;	/* DLL containing sndPlaySound function */
 FPSPS lpfnSndPlaySound;		/* pointer to sndPlaySound function if loaded */
@@ -170,7 +173,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	gsview_close();
  	WinHelp(hwndimg,szHelpName,HELP_QUIT,(DWORD)NULL);
 	if (is_win31 && (hlib_mmsystem != (HINSTANCE)NULL))
-		FreeLibrary(hlib_mmsystem);
+	    FreeLibrary(hlib_mmsystem);
 	return 0;
 }
 
@@ -205,6 +208,7 @@ RECT rect;
 		hwndtext = (HWND)NULL;
 		bitmap_scrollx = bitmap_scrolly = 0;
 		page_ready = FALSE;
+		page_extra = 0;
 		saved = FALSE;
 		pipeclose();
 		clear_timer();
@@ -225,6 +229,9 @@ RECT rect;
 		}
 		page_ready = TRUE;
 		info_wait(FALSE);
+		if (page_extra) {
+		    PostMessage(hwndimg, WM_COMMAND, IDM_SKIP, (LPARAM)0);
+		}
 		break;
 	    case SYNC_OUTPUT:
 		/* time to redraw window */
@@ -350,19 +357,47 @@ RECT rect;
 		    hglobal = (HGLOBAL)LOWORD(GlobalHandle(SELECTOROF(lParam)));
 		    GlobalUnlock(hglobal);
 		    GlobalFree(hglobal);
-		    if (strnicmp(buf,"/P ",3)==0) {
-		        gsview_selectfile(buf+3);
-		        gsview_print(FALSE);
-		    }
-		    else if (strnicmp(buf,"/F ",3)==0) {
-		        gsview_selectfile(buf+3);
-		        gsview_print(TRUE);
+		    if ((buf[0] == '-') || (buf[0] == '/')) {
+			switch (toupper(buf[1])) {
+			    case 'P':
+		              gsview_selectfile(buf+2);
+		              gsview_print(FALSE);
+			      break;
+			    case 'F':
+		              gsview_selectfile(buf+2);
+		              gsview_print(TRUE);
+			      break;
+			    case 'S':
+			      if (buf[2] != ' ') {
+				char *fname;
+				/* skip over port name */
+				for (fname=buf+2; *fname && *fname!=' '; fname++)
+				  /* nothing */ ;
+			        /* skip blanks until file name */
+			        if (*fname) {
+			          *fname++ = '\0'; /* place null after port name */
+			          for (; *fname==' '; fname++)
+			            /* nothing */ ;
+			        }
+			        if (*fname) {
+			            /* found both filename and port */
+			            gsview_spool(fname, buf+2);
+			            break;
+			        }
+			      }
+		              gsview_spool(buf+2, (char *)NULL);
+			      break;
+			    default:
+			      gserror(IDS_BADCLI, buf, MB_ICONEXCLAMATION, SOUND_ERROR);
+			}
 		    }
 		    else
 		        gsview_displayfile(buf);
 		}
-		else
-		     gsview_command(LOWORD(wParam));
+		else {
+		    if (GetNotification(wParam,lParam) != BN_DOUBLECLICKED)
+		        gsview_command(LOWORD(wParam));
+		}
 		return 0;
 	case WM_KEYDOWN:
 	case WM_KEYUP:
@@ -810,14 +845,53 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	return 0;	/* obtaining Bounding Box so ignore commands */
     }
     if (waiting) {
-	/* if user impatient or gsview confused */
-	LoadString(phInstance, IDS_BUSY, prompt, sizeof(prompt));
-	if (MessageBox(hwndimg, prompt, szAppName, MB_YESNO | MB_ICONQUESTION) == IDYES) {
-	    play_sound(SOUND_ERROR);
-	    next_page();
-	    info_wait(FALSE);
+	switch (command) {
+#ifdef UNUSED
+/* This code is supposed to allow the page skip features to be 
+ * used while Ghostscript is rendering a page.  However, selecting
+ * one of the page skip commands more than 8 times causes gsview
+ * to hang.
+ * To avoid hanging, this code is disabled.
+ */
+	    case IDM_NEXT:
+		page_extra += 1;
+		return 0;
+	    case IDM_NEXTSKIP:
+		page_extra += page_skip;
+		return 0;
+	    case IDM_PREV:
+		if (doc != (struct document *)NULL)
+		    page_extra -= 1;
+		else
+		    gserror(0, (char *)0, 0, SOUND_ERROR);
+		return 0;
+	    case IDM_PREVSKIP:
+		if (doc != (struct document *)NULL)
+		    page_extra -= page_skip;
+		else
+		    gserror(0, (char *)0, 0, SOUND_ERROR);
+		return 0;
+#endif
+	    case IDM_INFO:
+	    case IDM_SAVEDIR:
+	    case IDM_SETTINGS:
+	    case IDM_SAVESETTINGS:
+	    case IDM_SOUNDS:
+	    case IDM_HELPCONTENT:
+	    case IDM_HELPSEARCH:
+	    case IDM_ABOUT:
+		/* these are safe to use when busy */
+		break;
+	    default:
+	        /* if user impatient or gsview confused */
+	        LoadString(phInstance, IDS_BUSY, prompt, sizeof(prompt));
+	        if (MessageBox(hwndimg, prompt, szAppName, MB_YESNO | MB_ICONQUESTION) == IDYES) {
+	            play_sound(SOUND_ERROR);
+	            next_page();
+	            info_wait(FALSE);
+	        }
+	        return 0;
 	}
-	return 0;
     }
     switch (command) {
 	case IDM_OPEN:
@@ -843,6 +917,33 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	    	}
 		info_wait(FALSE);
 		return 0;
+	case IDM_SKIP:
+		if (not_open())
+		    return 0;
+		if (page_extra == 0) {
+		    gserror(0, "panic", 0, SOUND_ERROR);
+		    return 0;
+		}
+		info_wait(TRUE);
+		if (doc==(struct document *)NULL) {
+		    if (!gswin_open())
+		        return 0;
+		    if (is_pipe_done()) {
+			play_sound(SOUND_NOPAGE);
+			info_wait(FALSE);
+		    }
+		    else {
+			next_page();
+			pagenum++;
+			page_extra--;
+		    }
+		    return 0;
+		}
+		dfreopen();
+		dsc_skip(page_extra);
+		page_extra = 0;
+		dfclose();
+		return 0;
 	case IDM_NEXT:
 		if (not_open())
 		    return 0;
@@ -861,14 +962,16 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		    return 0;
 		}
 		dfreopen();
-		dsc_next(1);
+		dsc_skip(1+page_extra);
+		page_extra = 0;
 		dfclose();
 		return 0;
 	case IDM_NEXTSKIP:
 		if (not_dsc())
 		    return 0;
 		dfreopen();
-		dsc_next(page_skip);
+		dsc_skip(page_skip+page_extra);
+		page_extra = 0;
 		dfclose();
 		return 0;
 	case IDM_REDISPLAY:
@@ -898,14 +1001,16 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		if (not_dsc())
 			return 0;
 		dfreopen();
-		dsc_prev(1);
+		dsc_skip(-1+page_extra);
+		page_extra = 0;
 		dfclose();
 		return 0;
 	case IDM_PREVSKIP:
 		if (not_dsc())
 			return 0;
 		dfreopen();
-		dsc_prev(page_skip);
+		dsc_skip(-page_skip+page_extra);
+		page_extra = 0;
 		dfclose();
 		return 0;
 	case IDM_GOTO:
@@ -964,7 +1069,7 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		dfclose();
 		return 0;
 	case IDM_SPOOL:
-		gsview_spool();
+		gsview_spool((char *)NULL, (char *)NULL);
 		return 0;
 	case IDM_EXTRACT:
 		if (dfname[0] == '\0')
@@ -995,6 +1100,11 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		    strcpy(szGSwin, answer);
 		if (szGSwin[0]=='\0')
 		    strcpy(szGSwin, DEFAULT_GSCOMMAND);
+		return 0;
+	case IDM_SAFER:
+		safer = !safer;
+		CheckMenuItem(hmenu, IDM_SAFER, MF_BYCOMMAND | 
+		    (safer ? MF_CHECKED : MF_UNCHECKED));
 		return 0;
 	case IDM_SAVEDIR:
 		save_dir = !save_dir;

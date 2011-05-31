@@ -56,6 +56,7 @@ BEGIN
 		MENUITEM "&Save Settings", IDM_SETTINGS
 		MENUITEM SEPARATOR
 		MENUITEM "Save Settings on &Exit", IDM_SAVESETTINGS
+		MENUITEM "Sa&fer", IDM_SAFER
 		MENUITEM "Save Last &Directory", IDM_SAVEDIR
 		MENUITEM "&Button Bar", IDM_BUTTONSHOW
 		MENUITEM "&Quick Open", IDM_QUICK
@@ -187,6 +188,7 @@ BEGIN
 	IDS_NOTDFNAME, "Can't use same name as open document"
 	IDS_PIPEERR, "Pipe error"
 	IDS_CANCELDONE, "%d%% done"
+	IDS_BADCLI, "Bad command line option: %s"
 END
 
 STRINGTABLE

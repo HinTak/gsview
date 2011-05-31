@@ -1,4 +1,34 @@
 ----------------------------
+Version 1.0  1993-08-05
+----------------------------
+
+Saved media name in an array so it is available in write_profile().
+Previously, closing gsview from the system menu would cause 
+write_profile() to be called twice, the second time after the
+window and menu had been destroyed.  Consequently the media
+name could not be obtained from the non-existent menu.
+
+Added command line option /S[port] to spool file (File | Print File).
+This allows files dropped on the Print Manager to be sent
+direct to a PostScript printer.
+
+Changed default timeout to 5 minutes per page.  This timeout 
+only affects printing.  Timeout for displaying was dropped
+in version 0.8 beta (when pipe code was changed).
+Timeout for opening or closing Ghostscript is still 20 seconds.
+
+Added "Safer" option to select Ghostscript -dSAFER flag which
+disables the deletefile and renamefile operators, and the
+ability to open files in any mode other than read-only.
+The default is now "Safer".
+
+Added %%EndImage before %%EndPreview of EPSI preview.
+
+Changed default file extensions so that .ps indicates an ASCII
+postscript file and .eps indicates a DOS EPS file with a 
+binary header and preview.
+
+----------------------------
 Version 0.8 beta  1993-07-07
 ----------------------------
 
@@ -28,6 +58,8 @@ current directory, otherwise use the gsview working directory.
 To stop documents that change the paper size from interfering with
 gsview's orientation commands, gsview now adds paper size commands 
 (e.g. letter, a4) to the userdict to replace those in the systemdict.
+
+Generate error if user attempts to overwrite open document file.
 
 ----------------------------
 Version 0.7 beta  1993-05-10

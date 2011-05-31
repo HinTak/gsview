@@ -39,6 +39,7 @@
 
 static char pcfname[MAXSTR];	/* name of temporary command file for printing */
 static char pfname[MAXSTR];	/* name of temporary file for printing options */
+int gp_printfile(char *filename, char *port);
 
 /* documented in Device Driver Adaptation Guide */
 /* Prototypes taken from print.h */
@@ -371,14 +372,15 @@ LPSTR entry;
 }
 
 /* Print File to port */
+/* port==NULL means prompt for port with dialog box */
 int
-gp_printfile(char *filename)
+gp_printfile(char *filename, char *port)
 {
 #define PRINT_BUF_SIZE 16384u
 char *buffer;
 char *portname;
 DLGPROC lpfnSpoolProc;
-int i, port;
+int i, iport;
 HPJOB hJob;
 WORD count;
 FILE *f;
@@ -390,21 +392,25 @@ char fmt[MAXSTR];
 char pcdone[10];
 MSG msg;
 
-	/* get list of ports */
 	if ((buffer = malloc(PRINT_BUF_SIZE)) == (char *)NULL)
 	    return FALSE;
-	GetProfileString("ports", NULL, "", buffer, PRINT_BUF_SIZE);
-	/* select a port */
-	lpfnSpoolProc = (DLGPROC)MakeProcInstance((FARPROC)SpoolDlgProc, phInstance);
-	port = DialogBoxParam(phInstance, "SpoolDlgBox", hwndtext, lpfnSpoolProc, (LPARAM)buffer);
-	FreeProcInstance((FARPROC)lpfnSpoolProc);
-	if (!port) {
-	    free(buffer);
-	    return FALSE;
+	if (port == (char *)NULL) {
+	    /* get list of ports */
+	    GetProfileString("ports", NULL, "", buffer, PRINT_BUF_SIZE);
+	    /* select a port */
+	    lpfnSpoolProc = (DLGPROC)MakeProcInstance((FARPROC)SpoolDlgProc, phInstance);
+	    iport = DialogBoxParam(phInstance, "SpoolDlgBox", hwndtext, lpfnSpoolProc, (LPARAM)buffer);
+	    FreeProcInstance((FARPROC)lpfnSpoolProc);
+	    if (!iport) {
+		free(buffer);
+		return FALSE;
+	    }
+	    portname = buffer;
+	    for (i=1; i<iport && strlen(portname)!=0; i++)
+		portname += lstrlen(portname)+1;
 	}
-	portname = buffer;
-	for (i=1; i<port && strlen(portname)!=0; i++)
-	    portname += lstrlen(portname)+1;
+	else
+	    portname = port;
 	
 	if ((f = fopen(filename, "rb")) == (FILE *)NULL) {
 	    free(buffer);
@@ -468,14 +474,21 @@ MSG msg;
 
 /* get a filename and spool it for printing */
 void
-gsview_spool()
+gsview_spool(char *fname, char *port)
 {
 	static char filename[MAXSTR];
 
-	if (!getfilename(filename, OPEN, FILTER_ALL, IDS_PRINTFILE, IDS_TOPICPRINT))
+	if (fname == (char *)NULL) {
+	    if (!getfilename(filename, OPEN, FILTER_ALL, IDS_PRINTFILE, IDS_TOPICPRINT))
 		return;
+	}
+	else {
+	    while (*fname && *fname==' ')
+	        fname++;
+	    strncpy(filename, fname, MAXSTR);
+	}
 
-	if (!gp_printfile(filename)) {
+	if (!gp_printfile(filename, port)) {
 		play_sound(SOUND_ERROR);
 		return;
 	}
@@ -628,6 +641,8 @@ gsview_print(BOOL to_file)
 		return;
 	}
 	fprintf(optfile, "-dNOPAUSE\n");
+	if (safer)
+	    fprintf(optfile, "-dSAFER\n");
 	fprintf(optfile, "-sDEVICE=%s\n",device_name);
 	fprintf(optfile, "-r%gx%g\n", (double)print_xdpi, (double)print_ydpi);
 	fprintf(optfile, "-g%ux%u\n",width,height);
