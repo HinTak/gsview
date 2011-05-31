@@ -1,13 +1,13 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
-  
+   
   This program is distributed with NO WARRANTY OF ANY KIND.  No author
   or distributor accepts any responsibility for the consequences of using it,
   or for whether it serves any particular purpose or works at all, unless he
-  or she says so in writing.  Refer to the GSview Free Public Licence 
-  (the "Licence") for full details.
-  
+  or she says so in writing.  Refer to the GSview Licence (the "Licence") 
+  for full details.
+   
   Every copy of GSview must include a copy of the Licence, normally in a 
   plain ASCII text file named LICENCE.  The Licence grants you the right 
   to copy, modify and redistribute GSview, but only under certain conditions 
@@ -74,30 +74,33 @@ ps_copy(FILE *outfile, GFile *infile, long begin, long end)
     free(buf);
 }
 
-/* Like fgets, but allows any combination of EOL characters */
-char * ps_fgets(char *s, int n, GFile *stream)
+/* Like fgets, but allows any combination of EOL characters
+ * and returns the count of bytes, not the string pointer
+ */
+int ps_fgets(char *s, int n, GFile *stream)
 {
     char ch;
     int not_eof = 0;
     char *p = s;
+    int count = 0;	/* bytes written to buffer */
     /* copy until first EOL character */
-    while ( n &&  ((not_eof = gfile_read(stream, &ch, 1)) != 0)
+    while ( (count < n) &&  ((not_eof = gfile_read(stream, &ch, 1)) != 0)
 	&& (ch != '\r') && (ch != '\n') ) {
 	*p++ = (char)ch;
-	n--;
+	count++;
     }
 
-    if (n && not_eof) {
+    if ((count < n) && not_eof) {
         /* check for extra EOL characters */
 	if (ch == '\r') {
 	    *p++ = (char)ch;
-	    n--;
+	    count++;
 	    /* check if MS-DOS \r\n is being used */
-	    if (n && ((not_eof = gfile_read(stream, &ch, 1)) != 0)) {
+	    if ((count < n) && ((not_eof = gfile_read(stream, &ch, 1)) != 0)) {
 		if (ch == '\n') {
 		    /* Yes, MS-DOS */
 		    *p++ = (char)ch;
-		    n--;
+		    count++;
 		}
 		else {
 		    /* No, Macintosh */
@@ -108,15 +111,15 @@ char * ps_fgets(char *s, int n, GFile *stream)
 	else {
 	    /* must have been '\n' */
 	    *p++ = (char)ch;
-	    n--;
+	    count++;
 	}
     }
-    if (n)
+    if (count < n)
 	*p = '\0';
 
     if ( (!not_eof) && (p == s) )
-	return NULL;
-    return s;
+	return 0;
+    return count;
 }
 
 
@@ -128,11 +131,13 @@ char * ps_fgets(char *s, int n, GFile *stream)
 BOOL ps_copy_find(FILE *outfile, GFile *infile, long end, 
 	char *s, int n, const char *comment)
 {
-    while ((gfile_get_position(infile) < end) && ps_fgets(s, n-1, infile)) {
+    int count;
+    while ((gfile_get_position(infile) < end) && 
+	((count = ps_fgets(s, n-1, infile))!=0)) {
 	s[n-1] = '\0';
 	if (strncmp(s, comment, strlen(comment)) == 0)
 	    return TRUE;
-	fputs(s, outfile);
+	fwrite(s, 1, count, outfile);
     }
     return FALSE;
 }
@@ -768,7 +773,7 @@ unsigned char *prgb;
 int clrtablesize;
 int i;
 	if (*pbitmap == 'P') {
-	    newpbm->biSize = sizeof(BITMAP2);	// WARNING - MAY NOT BE PACKED
+	    newpbm->biSize = sizeof(BITMAP2); /* WARNING - MAY NOT BE PACKED */
 	    newpbm->biWidth = ppbmap->width;
 	    newpbm->biHeight = ppbmap->height;
 	    newpbm->biPlanes = 1;

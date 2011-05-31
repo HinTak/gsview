@@ -1,13 +1,13 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
-  
+   
   This program is distributed with NO WARRANTY OF ANY KIND.  No author
   or distributor accepts any responsibility for the consequences of using it,
   or for whether it serves any particular purpose or works at all, unless he
-  or she says so in writing.  Refer to the GSview Free Public Licence 
-  (the "Licence") for full details.
-  
+  or she says so in writing.  Refer to the GSview Licence (the "Licence") 
+  for full details.
+   
   Every copy of GSview must include a copy of the Licence, normally in a 
   plain ASCII text file named LICENCE.  The Licence grants you the right 
   to copy, modify and redistribute GSview, but only under certain conditions 
@@ -347,7 +347,7 @@ psfile_extract(FILE *f, int copies)
      */
     position = gfile_seek(psfile.file, dsc->begincomments, gfile_begin);
     while ( position < dsc->endcomments ) {
-	if (ps_fgets(line, sizeof(line), psfile.file) == NULL)
+	if (ps_fgets(line, sizeof(line), psfile.file) == 0)
 	    return FALSE;
 	position = gfile_seek(psfile.file, 0, gfile_current);
 	end_header = (strncmp(line, "%%EndComments", 13) == 0);
@@ -406,7 +406,7 @@ psfile_extract(FILE *f, int copies)
 	    char buf[MAXSTR];
 	    /* modify ordinal of %%Page: comment */
 	    position = gfile_seek(psfile.file, dsc->page[i].begin, gfile_begin);
-	    if (ps_fgets(buf, sizeof(buf)-1, psfile.file) == NULL)
+	    if (ps_fgets(buf, sizeof(buf)-1, psfile.file) == 0)
 	        return FALSE;
 
 	    /* reached end of %%Page: line */
@@ -424,7 +424,7 @@ psfile_extract(FILE *f, int copies)
     /* copy trailer, removing %%Pages: and %%PageOrder: */
     position = gfile_seek(psfile.file, dsc->begintrailer, gfile_begin);
     while ( position < dsc->endtrailer ) {
-	if (ps_fgets(line, sizeof(line), psfile.file) == NULL)
+	if (ps_fgets(line, sizeof(line), psfile.file) == 0)
 	    return FALSE;
         position = gfile_seek(psfile.file, 0, gfile_current);
 	if (strncmp(line, "%%Pages:", 8) == 0) {
@@ -811,7 +811,7 @@ copy_for_printer(FILE *pcfile, BOOL convert)
 	    }
 	}
 	else  {
-	    if (psfile.dsc->epsf) {
+	    if (psfile.dsc->epsf && !psfile.dsc->dcs2) {
 		/* Copy EPSF file, making sure it fits on the page
 		 * and includes one and only one showpage
 		 */

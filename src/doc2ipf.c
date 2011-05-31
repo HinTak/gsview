@@ -122,7 +122,7 @@ BEGIN\n";
     while (fgets(line,MAX_LINE_LEN,a)) 
     {
     lineno++;
-    if (isdigit(line[0]))
+    if (isdigit((int)(line[0])))
     {
         if (list == NULL)    
             head = (list = (struct LIST *) malloc(sizeof(struct LIST)));
@@ -168,8 +168,6 @@ lookup(char *s)
 {
     char *c;
     char tokstr[MAX_LINE_LEN];
-    char *match; 
-    int l;
 
     strcpy(tokstr, s);
 
@@ -178,7 +176,7 @@ lookup(char *s)
     while (keylist != NULL)
     {
         c = keylist->string;
-        while (isspace(*c)) c++;
+        while (isspace((int)(*c))) c++;
         if (!strcmp(s, c)) return(keylist->line);
         keylist = keylist->next;
         }
@@ -212,7 +210,7 @@ lookup(char *s)
     while (list != NULL)
     {
         c = list->string;
-        while (isspace(*c)) c++;
+        while (isspace((int)(*c))) c++;
         if (!strcmp(s, c)) return(list->line);
         list = list->next;
         }
@@ -225,7 +223,6 @@ void
 refs(int l, FILE *f)
 {
     int curlevel;
-    char str[MAX_LINE_LEN];
     char *c;
     int inlist = FALSE;
 
@@ -250,7 +247,7 @@ refs(int l, FILE *f)
         if (list->level == curlevel+1)
         {
             c = list->string;
-	    while (isspace(*c)) c++;
+	    while (isspace((int)(*c))) c++;
 	    fprintf(f,":li.:link reftype=hd res=%d.%s:elink.\n", list->line, c);
             }
         list = list->next;
@@ -479,7 +476,7 @@ process_line(char *line, FILE *b)
                         if( j > tablecols ) tablecols = j ;
                         }
                     }
-                for( j; j<3; j++ ) tableins->col[j][0]='\0' ;        
+                for( ; j<3; j++ ) tableins->col[j][0]='\0' ;        
                 }
           break;            /* ignore */
        }
@@ -536,7 +533,7 @@ process_line(char *line, FILE *b)
           break;
        }
        default: {
-          if (isdigit(line[0])) { /* start of section */
+          if (isdigit((int)(line[0]))) { /* start of section */
 	          if (tabl)
 	              fprintf(bo,":ecgraphic.\n"); /* rjl */
                   if( intable ) {

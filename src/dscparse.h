@@ -1,13 +1,13 @@
-/* Copyright (C) 2000-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
-  
+   
   This program is distributed with NO WARRANTY OF ANY KIND.  No author
   or distributor accepts any responsibility for the consequences of using it,
   or for whether it serves any particular purpose or works at all, unless he
-  or she says so in writing.  Refer to the GSview Free Public Licence 
-  (the "Licence") for full details.
-  
+  or she says so in writing.  Refer to the GSview Licence (the "Licence") 
+  for full details.
+   
   Every copy of GSview must include a copy of the Licence, normally in a 
   plain ASCII text file named LICENCE.  The Licence grants you the right 
   to copy, modify and redistribute GSview, but only under certain conditions 
@@ -38,6 +38,9 @@ typedef unsigned int GSWORD;	/* must be at least 16 bits */
 
 #ifndef min
 # define min(a,b)  ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+# define max(a,b)  ((a) > (b) ? (a) : (b))
 #endif
 
 /* macros to allow conversion of function declarations to K&R */
@@ -109,6 +112,7 @@ typedef enum {
   CDSC_DOCUMENTSUPPLIEDFONTS = 220,	/* IGNORED %%DocumentSuppliedFonts: */
   CDSC_HIRESBOUNDINGBOX	     = 221,	/* %%HiResBoundingBox: */
   CDSC_CROPBOX	     	     = 222,	/* %%CropBox: */
+  CDSC_PLATEFILE     	     = 223,	/* %%PlateFile: (DCS 2.0) */
 
 /* Preview section */
   CDSC_BEGINPREVIEW	= 301,	/* %%BeginPreview */
@@ -273,6 +277,21 @@ struct CDSCSTRING_S {
     CDSCSTRING *next;
 };
 
+/* Desktop Color Separations - DCS 2.0 */
+typedef struct CDCS2_S CDCS2;
+struct CDCS2_S {
+    char *colorname;
+    char *filetype;	/* Usually EPS */
+    /* For multiple file DCS, location and filename will be set */
+    char *location;	/* Local or NULL */
+    char *filename;
+    /* For single file DCS, begin will be not equals to end */
+    unsigned long begin;
+    unsigned long end;
+    /* We maintain the separations as a linked list */
+    CDCS2 *next;
+};
+
 
 /* DSC error reporting */
 
@@ -371,6 +390,7 @@ struct CDSC_S {
     unsigned long file_length;	/* length of document */
 		/* If provided we try to recognise %%Trailer and %%EOF */
 		/* incorrectly embedded inside document. */
+		/* We will not parse DSC comments beyond this point. */
 		/* Can be left set to default value of 0 */
     int skip_document;		/* recursion level of %%BeginDocument: */
     int skip_bytes;		/* #bytes to ignore from BeginData: */
@@ -421,6 +441,7 @@ struct CDSC_S {
     /* Added 2001-10-01 */
     CDSCFBBOX *hires_bbox;	/* the hires document bounding box */
     CDSCFBBOX *crop_box;	/* the size of the trimmed page */
+    CDCS2 *dcs2;			/* Desktop Color Separations 2.0 */
 };
 
 

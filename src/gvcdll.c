@@ -1,13 +1,13 @@
-/*  Copyright (C) 1996-2001, Ghostgum Software Pty Ltd.  All rights reserved.
-
-  This file is part of GSview.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
+  This file is part of GSview.
+   
   This program is distributed with NO WARRANTY OF ANY KIND.  No author
   or distributor accepts any responsibility for the consequences of using it,
   or for whether it serves any particular purpose or works at all, unless he
-  or she says so in writing.  Refer to the GSview Free Public Licence 
-  (the "Licence") for full details.
-  
+  or she says so in writing.  Refer to the GSview Licence (the "Licence") 
+  for full details.
+   
   Every copy of GSview must include a copy of the Licence, normally in a 
   plain ASCII text file named LICENCE.  The Licence grants you the right 
   to copy, modify and redistribute GSview, but only under certain conditions 
@@ -62,6 +62,7 @@ gs_execute(const char *str, int len)
 	0, &exit_code);
     if (execute_code == e_NeedInput)
 	execute_code = 0;	/* normal return */
+#ifdef NOTUSED
     if (debug & DEBUG_GENERAL) {
 	char buf[MAXSTR];
 	gs_addmessf("\n----Begin %d bytes----\n", len);
@@ -72,7 +73,6 @@ gs_execute(const char *str, int len)
 	sprintf(buf, "gsdll.run_string_continue returns %d\n", execute_code);
 	gs_addmess(buf);
     }
-#ifdef NOTUSED
 #endif
     return execute_code;
 }
@@ -518,6 +518,15 @@ long dmode;
 	    /* which we try to avoid with the following */
 	    code = gs_printf(
 		"currentglobal true setglobal .locksafe setglobal\n");
+
+	    /* .locksafe disabled ViewerPreProcess */
+	    /* Put it back again */
+	    code = gs_printf(
+		"currentpagedevice /ViewerPreProcess known not { <<\n");
+	    if (!code)
+		code = send_prolog(IDR_VIEWER);
+	    if (!code)
+		code = gs_printf(">> setpagedevice } if\n");
         }
 	else  
 	    code = gs_printf(".locksafe\n");
@@ -756,7 +765,7 @@ GSDLL_INPUT *input = &view.input;
 	    }
 	    input->section[i].ptr = dsc->page[page].begin;
 	    input->section[i].end = dsc->page[page].end;
-	    if (dsc->epsf) {
+	    if (dsc->epsf && !dsc->dcs2) {
 		int j;
 		/* add everything except trailer */
 		input->section[i].ptr = dsc->page[0].begin;
@@ -1069,7 +1078,10 @@ int pcdone;
 		return code;
 	    }
 	    gsbytes_done += len;
-	    pcdone = (int)(gsbytes_done * 100 / gsbytes_size);
+	    if (gsbytes_size > 100)
+	        pcdone = (int)(gsbytes_done / (gsbytes_size / 100));
+	    else
+		pcdone = 0;
 	    if ((pcdone != percent_done) && !percent_pending) {
 		percent_done = pcdone;
 		percent_pending = TRUE;

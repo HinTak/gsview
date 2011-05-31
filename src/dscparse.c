@@ -1,13 +1,13 @@
-/* Copyright (C) 2000-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
-  
+   
   This program is distributed with NO WARRANTY OF ANY KIND.  No author
   or distributor accepts any responsibility for the consequences of using it,
   or for whether it serves any particular purpose or works at all, unless he
-  or she says so in writing.  Refer to the GSview Free Public Licence 
-  (the "Licence") for full details.
-  
+  or she says so in writing.  Refer to the GSview Licence (the "Licence") 
+  for full details.
+   
   Every copy of GSview must include a copy of the Licence, normally in a 
   plain ASCII text file named LICENCE.  The Licence grants you the right 
   to copy, modify and redistribute GSview, but only under certain conditions 
@@ -119,6 +119,8 @@ dsc_private int dsc_scan_page(P1(CDSC *dsc));
 dsc_private int dsc_scan_trailer(P1(CDSC *dsc));
 dsc_private int dsc_error(P4(CDSC *dsc, unsigned int explanation, 
     char *line, unsigned int line_len));
+dsc_private int dsc_dcs2_fixup(CDSC *dsc);
+dsc_private int dsc_parse_platefile(CDSC *dsc);
 
 /* DSC error reporting */
 dsc_private const int dsc_severity[] = {
@@ -314,6 +316,11 @@ dsc_scan_data(CDSC *dsc, const char *data, int length)
 	while ((code = dsc_read_line(dsc)) > 0) {
 	    if (dsc->id == CDSC_NOTDSC)
 		break;
+	    if (dsc->file_length && 
+		(dsc->data_offset + dsc->data_index > dsc->file_length)) {
+		/* have read past end of where we need to parse. */
+		return CDSC_OK;	/* ignore */
+	    }
 	    if (dsc->doseps_end && 
 		(dsc->data_offset + dsc->data_index > dsc->doseps_end)) {
 		/* have read past end of DOS EPS PostScript section */
@@ -515,6 +522,9 @@ dsc_fixup(CDSC *dsc)
 		return CDSC_NOTDSC;
 	}
     }
+
+    /* convert single file DSC 2.0 into multiple pages */
+    dsc_dcs2_fixup(dsc);
 
     if ((dsc->media_count == 1) && (dsc->page_media == NULL)) {
 	/* if one only media was specified, and default page media */
@@ -887,6 +897,18 @@ dsc_reset(CDSC *dsc)
     if (dsc->crop_box)
 	dsc_memfree(dsc, dsc->crop_box);
     dsc->crop_box = NULL;
+
+    if (dsc->dcs2) {
+	CDCS2 *this_dcs, *next_dcs;
+	this_dcs = dsc->dcs2;
+	while (this_dcs) {
+	    next_dcs = this_dcs->next;
+	    /* strings have already been freed */
+	    dsc_memfree(dsc, this_dcs);
+	    this_dcs = next_dcs;
+	}
+	dsc->dcs2 = NULL;
+    }
 }
 
 /* 
@@ -922,6 +944,16 @@ dsc_read_line(CDSC *dsc)
 	return dsc->line_length;
     }
 
+    if (dsc->file_length && 
+	(dsc->data_offset + dsc->data_index > dsc->file_length)) {
+	/* Have read past where we need to parse. */
+	/* Ignore all that remains. */
+	dsc->line = dsc->data + dsc->data_index;
+	dsc->line_length = dsc->data_length - dsc->data_index;
+	dsc->data_index = dsc->data_length;
+	return dsc->line_length;
+
+    }
     if (dsc->doseps_end && 
 	(dsc->data_offset + dsc->data_index > dsc->doseps_end)) {
 	/* Have read past end of DOS EPS PostScript section. */
@@ -1780,11 +1812,25 @@ dsc_scan_type(CDSC *dsc)
      *   non-DSC
      */
 
+
     /* First process any non PostScript headers */
     /* At this stage we do not have a complete line */
 
     if (length == 0)
 	return CDSC_NEEDMORE;
+
+    /* If we have already found a DOS EPS header, */
+    /* ignore all until the PostScript section */
+    if (dsc->skip_bytes) {
+	int cnt = min(dsc->skip_bytes,
+		     (int)(dsc->data_length - dsc->data_index));
+	dsc->skip_bytes -= cnt;
+	dsc->data_index += cnt;
+	length -= cnt;
+	line += cnt;
+	if (dsc->skip_bytes != 0)
+	    return CDSC_NEEDMORE;
+    }
 
     if (dsc->skip_pjl) {
 	/* skip until first PostScript comment */
@@ -1812,10 +1858,9 @@ dsc_scan_type(CDSC *dsc)
 		break;
 	    }
 	    else {
-		/* line++; */
+		line++;
 		dsc->data_index++;
-		/* length--; */
-		return CDSC_NEEDMORE;
+		length--;
 	    }
 	}
 	if (dsc->skip_pjl)
@@ -2202,6 +2247,11 @@ dsc_scan_comments(CDSC *dsc)
     else if (IS_DSC(line, "%%DocumentSuppliedFonts:")) {
 	dsc->id = CDSC_DOCUMENTSUPPLIEDFONTS;
 	/* ignore */
+    }
+    else if (IS_DSC(line, "%%PlateFile:")) {
+	dsc->id = CDSC_PLATEFILE;
+	if (dsc_parse_platefile(dsc) != CDSC_OK)
+	    dsc->id = CDSC_UNKNOWNDSC;
     }
     else if (dsc->line[0] == '%' && IS_WHITE_OR_EOL(dsc->line[1])) {
 	dsc->id = CDSC_OK;
@@ -3432,5 +3482,196 @@ dsc_error(CDSC *dsc, unsigned int explanation,
 
     /* treat DSC as being correct */
     return CDSC_RESPONSE_CANCEL;
+}
+
+
+/* Fixup if DCS 2.0 was used */
+dsc_private int
+dsc_dcs2_fixup(CDSC *dsc)
+{
+    /* If DCS 2.0 single file format found, expose the separations
+     * as multiple pages.  Treat the initial EPS file as a single
+     * page without comments, prolog or trailer.
+     */
+    if (dsc->dcs2) {
+	int code = CDSC_OK;
+	int page_number;
+	unsigned long *pbegin;
+	unsigned long *pend;
+ 	char one[] = "1";
+	CDCS2 *pdcs = dsc->dcs2;
+	/* Now treat the initial EPS file as a single page without
+	 * headers or trailer, so page extraction will fetch the
+	 * the correct separation. */
+	if (dsc->page_count == 0)
+	    code = dsc_add_page(dsc, 1, one);
+	if (code != CDSC_OK)
+	    return code; 
+	page_number = dsc->page_count - 1;
+	pbegin = &dsc->page[page_number].begin;
+	pend = &dsc->page[page_number].end;
+	if (*pbegin == *pend) {
+	    /* no page, so force it to conform to the following sections */
+	    *pbegin = 999999999;
+	    *pend = 0;
+	}
+
+	if (dsc->begincomments != dsc->endcomments) {
+	    *pbegin = min(dsc->begincomments, *pbegin);
+	    dsc->begincomments = 0;
+	    *pend = max(dsc->endcomments, *pend);
+	    dsc->endcomments = 0;
+	}
+
+	if (dsc->beginpreview != dsc->endpreview) {
+	    *pbegin = min(dsc->beginpreview, *pbegin);
+	    dsc->beginpreview = 0;
+	    *pend = max(dsc->endpreview, *pend);
+	    dsc->endpreview = 0;
+	}
+
+	if (dsc->begindefaults != dsc->enddefaults) {
+	    *pbegin = min(dsc->begindefaults, *pbegin);
+	    dsc->begindefaults = 0;
+	    *pend = max(dsc->enddefaults, *pend);
+	    dsc->enddefaults = 0;
+	}
+
+	if (dsc->beginprolog != dsc->endprolog) {
+	    *pbegin = min(dsc->beginprolog, *pbegin);
+	    dsc->beginprolog = 0;
+	    *pend = max(dsc->endprolog, *pend);
+	    dsc->endprolog = 0;
+	}
+
+	if (dsc->beginsetup != dsc->endsetup) {
+	    *pbegin = min(dsc->beginsetup, *pbegin);
+	    dsc->beginsetup = 0;
+	    *pend = max(dsc->endsetup, *pend);
+	    dsc->endsetup = 0;
+	}
+	
+	if (dsc->begintrailer != dsc->endtrailer) {
+	    *pbegin = min(dsc->begintrailer, *pbegin);
+	    dsc->begintrailer = 0;
+	    *pend = max(dsc->endtrailer, *pend);
+	    dsc->endtrailer = 0;
+	}
+
+	if (*pbegin == 999999999)
+	    *pbegin = *pend;
+	
+	while (pdcs) {
+    	    page_number = dsc->page_count;
+	    if (pdcs->begin != pdcs->end) {
+		code = dsc_add_page(dsc, page_number+1, pdcs->colorname);
+		if (code)
+		    return code;
+		dsc->page[page_number].begin = pdcs->begin;
+		dsc->page[page_number].end = pdcs->end;
+	    }
+	    pdcs = pdcs->next;
+	}
+    }
+    return 0;
+}
+
+
+dsc_private int
+dsc_parse_platefile(CDSC *dsc)
+{
+    unsigned int i, n;
+    CDCS2 dcs2;
+    CDCS2 *pdcs2;
+    char colorname[MAXSTR];
+    char filetype[MAXSTR];
+    char location[MAXSTR];
+    char filename[MAXSTR];
+    GSBOOL blank_line;
+    if (IS_DSC(dsc->line, "%%PlateFile:"))
+	n = 12;
+    else if (IS_DSC(dsc->line, "%%+"))
+	n = 3;
+    else
+	return CDSC_ERROR;	/* error */
+
+    memset(&dcs2, 0, sizeof(dcs2));
+    memset(&colorname, 0, sizeof(colorname));
+    memset(&filetype, 0, sizeof(filetype));
+    memset(&location, 0, sizeof(location));
+    memset(&filename, 0, sizeof(filename));
+
+    /* check for blank remainder of line */
+    blank_line = TRUE;
+    for (i=n; i<dsc->line_length; i++) {
+	if (!IS_WHITE_OR_EOL(dsc->line[i])) {
+	    blank_line = FALSE;
+	    break;
+	}
+    }
+
+    if (!blank_line) {
+	dsc_copy_string(colorname, sizeof(colorname),
+		dsc->line+n, dsc->line_length-n, &i);
+	n+=i;
+	if (i)
+	    dsc_copy_string(filetype, sizeof(filetype),
+		dsc->line+n, dsc->line_length-n, &i);
+	n+=i;
+	while (IS_WHITE_OR_EOL(dsc->line[n]))
+	    n++;
+	if (dsc->line[n] == '#') {
+	    /* single file DCS 2.0 */
+	    n++;
+	    if (i)
+		dcs2.begin= dsc_get_int(dsc->line+n, dsc->line_length-n, &i);
+	    n+=i;
+	    if (i)
+		dcs2.end= dcs2.begin + 
+		    dsc_get_int(dsc->line+n, dsc->line_length-n, &i);
+	    n+=i;
+	}
+	else {
+	    /* multiple file DCS 2.0 */
+	    if (i)
+		dsc_copy_string(location, sizeof(location),
+		    dsc->line+n, dsc->line_length-n, &i);
+	    n+=i;
+	    if (i)
+		dsc_copy_string(filename, sizeof(filename),
+		    dsc->line+n, dsc->line_length-n, &i);
+	    n+=i;
+	}
+	if (i==0)
+	    dsc_unknown(dsc); /* we didn't get all fields */
+	else {
+	    /* Allocate strings */
+	    if (strlen(colorname))
+		dcs2.colorname = dsc_alloc_string(dsc, colorname, strlen(colorname));
+	    if (strlen(filetype))
+		dcs2.filetype = dsc_alloc_string(dsc, filetype, strlen(filetype));
+	    if (strlen(location))
+		dcs2.location = dsc_alloc_string(dsc, location, strlen(location));
+	    if (strlen(filename))
+		dcs2.filename = dsc_alloc_string(dsc, filename, strlen(filename));
+	    /* Prevent parser from reading separations */
+	    dsc->file_length = min(dsc->file_length, dcs2.begin);
+	    /* Allocate it */
+	    pdcs2 = (CDCS2 *)dsc_memalloc(dsc, sizeof(CDCS2));
+	    if (pdcs2 == NULL)
+		return CDSC_ERROR;	/* out of memory */
+	    memcpy(pdcs2, &dcs2, sizeof(CDCS2));
+	    /* Then add to list of separations */
+	    if (dsc->dcs2 == NULL)
+		dsc->dcs2 = pdcs2;
+	    else {
+		CDCS2 *this_dcs2 = dsc->dcs2;
+		while (this_dcs2->next)
+		    this_dcs2 = this_dcs2->next;
+		this_dcs2->next = pdcs2;
+	    }
+	}
+    }
+    return CDSC_OK;
 }
 

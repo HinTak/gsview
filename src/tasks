@@ -84,3 +84,18 @@ Auto resize using %%PageMedia.  This should be added to gs_page_skip,
 and probably only operate if Auto Orientation is enabled.
 
 Redisplay after pstoedit.
+
+Linux: WM_GSTEXTINDEX.
+
+Hand tool for all platforms for pushing page around.
+
+Ghostscript include files use AFPL.  Need to have dual GNU/AFPL. 
+
+dscparse: add dsc_ref, dsc_unref, %%Copyright, %%Version, %%Extensions.
+
+Unix "PS to EPS" fails if bounding box is not automatically calculated.
+
+Change epstool to use bbox device for auto bbox.
+
+Dialog for User defined media should use same units as Options | Units.
+

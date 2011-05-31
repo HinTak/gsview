@@ -1,13 +1,13 @@
-/* Copyright (C) 1993-2001, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
-  
+   
   This program is distributed with NO WARRANTY OF ANY KIND.  No author
   or distributor accepts any responsibility for the consequences of using it,
   or for whether it serves any particular purpose or works at all, unless he
-  or she says so in writing.  Refer to the GSview Free Public Licence 
-  (the "Licence") for full details.
-  
+  or she says so in writing.  Refer to the GSview Licence (the "Licence") 
+  for full details.
+   
   Every copy of GSview must include a copy of the Licence, normally in a 
   plain ASCII text file named LICENCE.  The Licence grants you the right 
   to copy, modify and redistribute GSview, but only under certain conditions 
@@ -87,21 +87,8 @@ transform_cursorpos(float *x, float *y)
 	    *y = *y * 72/option.zoom_ydpi + display.zoom_yoffset;
 	  }
 	  else {
-	    int xoffset = 0;
-	    int yoffset = 0;
-	    int page = psfile.pagenum;
-	    if (display.epsf_clipped && (psfile.dsc != (CDSC *)NULL)) {
-		if (psfile.ispdf && (page > 0) && 
-		    (page <= (int)psfile.dsc->page_count) &&
-    		    (psfile.dsc->page[page-1].bbox)) {
-		    xoffset = psfile.dsc->page[page-1].bbox->llx;
-		    yoffset = psfile.dsc->page[page-1].bbox->lly;
-		}
-		else if (psfile.dsc->bbox!=NULL) {
-		    xoffset = psfile.dsc->bbox->llx;
-		    yoffset = psfile.dsc->bbox->lly;
-		}
-	    }
+            int xoffset = display.xoffset * 72.0 / display.xdpi;
+            int yoffset = display.yoffset * 72.0 / display.ydpi;
 	    *x = *x * 72.0/option.xdpi;
 	    *y = *y * 72.0/option.ydpi;
 	    transform_point(x,y);

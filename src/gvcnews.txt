@@ -1,4 +1,62 @@
 ----------------------
+Version 4.3 2002-04-30
+----------------------
+All:
+  Rearrange source code to put common, Windows, OS/2 and Unix
+  code in separate directories.  Move epstool into the src
+  directory.  Rearrange source distribution to be in a 
+  gsview-N.NN directory.
+
+  If using GS 7.04 and SAFER, replace ViewerPreProcess which
+  gets removed by .locksafe due to a bug in GS 7.04 only.
+
+  Zoom correctly for PDF files with non-zero llx/lly in mediabox.
+  This involved simplifying map_pt_to_pixel and transform_cursorpos
+  to use the display offset, instead of looking for the bounding box.
+
+  DSC parser would return incorrect section boundaries if
+  the PJL header was more than two lines long.
+
+  Handle DCS 2.0 files with the separations in a single file.
+  This makes a DCS 2.0 file look like a multipage file instead
+  of an EPS file with incorrect DSC comments.
+
+  Skip over the DOS EPS preview correctly, without attempting to
+  parse the binary preview for document headers.
+
+  Added epstool command 'k' to create a bitmap from the EPS file,
+  cropped to the bounding box.
+
+  Avoiding showing negative percentage complete numbers when
+  processing files bigger than 22Mbytes.
+
+  Dutch updates.  The help file is now 62% complete.
+
+Win:
+  Keyboard entry in the goto page dialog now works when the page ordinal 
+  does not match the label.  This wasn't working because it was searching 
+  for an exact match in the list box, when it needed to find the first item 
+  to start with the specified string.
+
+  Compiles with Visual Studio .NET.
+
+  Default install directory is now C:\Program Files\Ghostgum\
+
+  Update zlib32.dll to version 1.1.4.
+
+  Don't show "Download GS" dialog if "Easy Configure" is cancelled.
+
+OS/2:
+  Now opens files when current drive is root, and filename given
+  on command line without drive or directory.
+
+  Update zlib2.dll to version 1.1.4.
+
+X11:
+  Now imediately opens file on command line, instead of waiting until 
+  you used any menu command.
+
+----------------------
 Version 4.2 2002-02-07
 ----------------------
 All:

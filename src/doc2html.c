@@ -62,6 +62,7 @@ char *title_from_index(int id);
 void refs(int l, FILE *f);
 void convert(FILE *a,FILE *b);
 void process_line(char *line, FILE *b);
+void putquoted(char *s, FILE *f);
 
 int
 main(int argc,char *argv[])
@@ -158,8 +159,6 @@ lookup(char *s)
 {
 	char *c;
 	char tokstr[MAX_LINE_LEN];
-	char *match; 
-	int l;
 
 	strcpy(tokstr, s);
 
@@ -212,9 +211,10 @@ lookup(char *s)
 
 char *title_from_index(int id)
 {
-struct LIST *l = NULL;
+    struct LIST *l = NULL;
+    static char empty[] = "";
     if (id < 0)
-	return "";
+	return empty;
     l = head;
     while (l != NULL) {
 	if (id == l->line)
@@ -251,7 +251,6 @@ void
 refs(int l, FILE *f)
 {
     int curlevel;
-    char str[MAX_LINE_LEN];
     char *c;
     int inlist = FALSE;
 
@@ -307,7 +306,7 @@ refs(int l, FILE *f)
 		}
 	        fprintf(f,"\042>");
 		putquoted(c, f);
-	        fprintf(f,"</a><br>\n", c);
+	        fprintf(f,"</a><br>\n");
 	    }
 	}
         list = list->next;
@@ -353,11 +352,9 @@ process_line(char *line, FILE *b)
     static char line2[MAX_LINE_LEN * 5];
     static int last_line;
     char hyplink1[MAX_LINE_LEN] ;
-    char *pt, *tablerow ;
     int i;
     int j;
     static int startpage = 1;
-    char str[MAX_LINE_LEN];
     char topic[MAX_LINE_LEN];
     int k, l;
     static int tabl=0;
