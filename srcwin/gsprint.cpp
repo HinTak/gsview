@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2006, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -50,8 +50,8 @@ PROCESS_INFORMATION piProcInfo;
 #endif
 BOOL global_debug;
 
-#define COPYRIGHT TEXT("Copyright (C) 2003-2008, Ghostgum Software Pty Ltd.  All Rights Reserved.\n")
-#define VERSION TEXT("2005-03-01 gsprint 1.8\n")
+#define COPYRIGHT TEXT("Copyright (C) 2003-2006, Ghostgum Software Pty Ltd.  All Rights Reserved.\n")
+#define VERSION TEXT("2006-02-24 gsprint 1.9\n")
 
 #define MAXSTR 256
 
@@ -83,6 +83,7 @@ typedef struct tagGSPRINT_OPTION {
     int args_end;	// character index to end of args
     char gs[MAXSTR];	// Path and filename of command line Ghostscript
     char options[2048];	// options for gs
+    char filenames[2048]; // filenames for gs
 
     int from;		// 0 = first
     int to;		// 0 = last
@@ -149,6 +150,7 @@ Usage:  gsprint [options] filename\n\
  -printer \042name\042        Print to the specified printer\n\
  -port \042name\042           Print to the specified printer port\n\
  -ghostscript \042name\042    Path and filename of command line Ghostscript\n\
+ -option \042name\042    Option to pass to ghostscript\n\
  -config \042name\042         Read options from this file instead of gsprint.cfg\n\
  -odd                   Print only odd pages\n\
  -even                  Print only even pages\n\
@@ -282,6 +284,19 @@ void add_twoup(GSPRINT_OPTION *opt)
 	strcat(opt->options, p);
     else
 	fprintf(stdout, "Argument too long while adding twoup\n");
+}
+
+/* Determine if an argument needs to be quoted.
+ * Assume that all argument need to be quoted,
+ * except those that already contain a ".
+ */
+BOOL quote_it(const char *arg)
+{
+    const char *p;
+    for (p=arg; *p; p++)
+	if (*p == '\042')
+	    return FALSE;
+    return TRUE;
 }
 
 BOOL process_args(GSPRINT_OPTION *opt)
@@ -449,23 +464,74 @@ BOOL process_args(GSPRINT_OPTION *opt)
 	else if (strcmp(thisarg, "-noquery") == 0) {
 	    opt->query = FALSE;
 	}
-	else {
-	    // Something for Ghostscript
-	    if (strlen(thisarg) + 5 < 
-		sizeof(opt->options) - strlen(opt->options) ) {
-		strcat(opt->options, " ");
-		if ((thisarg[0] != '\042') && (thisarg[1] != '-')) {
-		    /* filename, not quoted */
-		    strcat(opt->options,"\042");
-		    strcat(opt->options, thisarg);
-		    strcat(opt->options,"\042");
+	else if (strcmp(thisarg, "-option") == 0) {
+	    if (*nextarg) {
+		if (strlen(thisarg) + 5 < 
+		    sizeof(opt->options) - strlen(opt->options)) {
+		    thisarg = nextarg;
+		    strcat(opt->options, " ");
+		    if (quote_it(thisarg)) {
+			/* option, not quoted */
+			strcat(opt->options,"\042");
+			strcat(opt->options, thisarg);
+			strcat(opt->options,"\042");
+		    }
+		    else 
+			strcat(opt->options, thisarg);
+
 		}
-		else 
-		    strcat(opt->options, thisarg);
+		else  {
+		    fprintf(stdout, "Argument of -option is too long\n");
+		    return FALSE;
+		}
 	    }
-	    else  {
-		fprintf(stdout, "Argument too long: \042%s\042\n", thisarg);
+	    else {
+		missing_arg(thisarg);
 		return FALSE;
+	    }
+	}
+	else {
+	    BOOL is_option = FALSE;
+	    // Something for Ghostscript
+	    if (thisarg[0] == '-')
+		is_option = TRUE;	/* Looks like an option */
+	    if ((thisarg[0] == '\042') && (thisarg[1] == '-'))
+		is_option = TRUE;	/* Looks like an option */
+	    if (opt->filenames[0])	/* But options after filenames */
+		is_option = FALSE;	/* must remain after the filename */
+	    if (is_option) {
+		if (strlen(thisarg) + 5 < 
+		    sizeof(opt->options) - strlen(opt->options) ) {
+		    strcat(opt->options, " ");
+		    if (quote_it(thisarg)) {
+			strcat(opt->options,"\042");
+			strcat(opt->options, thisarg);
+			strcat(opt->options,"\042");
+		    }
+		    else 
+			strcat(opt->options, thisarg);
+		}
+		else  {
+		    fprintf(stdout, "Argument too long: \042%s\042\n", thisarg);
+		    return FALSE;
+		}
+	    }
+	    else {
+		if (strlen(thisarg) + 5 < 
+		    sizeof(opt->filenames) - strlen(opt->filenames) ) {
+		    strcat(opt->filenames, " ");
+		    if (quote_it(thisarg)) {
+			strcat(opt->filenames,"\042");
+			strcat(opt->filenames, thisarg);
+			strcat(opt->filenames,"\042");
+		    }
+		    else 
+			strcat(opt->filenames, thisarg);
+		}
+		else  {
+		    fprintf(stdout, "Argument too long: \042%s\042\n", thisarg);
+		    return FALSE;
+		}
 	    }
 	    if ( ((thisarg[0] == '\042') && (thisarg[1] != '-'))
 		    || (thisarg[0] != '-') ) {
@@ -1025,9 +1091,15 @@ int main(int argc, char *argv[])
     }
 
     // copy all the command line arguments to a buffer
-    char command[4096];
+    char command[8192];
     int i;
-    strcpy(command, opt.gs);
+    if (quote_it(opt.gs)) {
+	strcpy(command, "\042");
+        strcat(command, opt.gs);
+        strcat(command, "\042");
+    }
+    else
+        strcpy(command, opt.gs);
     switch (opt.colour) {
 	case MONO:
 	    strcat(command, " -sDEVICE=bmpmono");
@@ -1044,6 +1116,8 @@ int main(int argc, char *argv[])
 	width, height, xdpi, ydpi);
     sprintf(command + strlen(command), " -sOutputFile=%%handle%%%08x", hPipeWr);
 
+    strcat(command, opt.options);
+
    { /* Set the margins so that PDFFitPAge and EPSFitPage work better.
       * This may cause problems here.  It would be better to place it
       * just before the filename, not before other the ghostscript
@@ -1059,7 +1133,7 @@ int main(int argc, char *argv[])
 	strcat(command, margin);
     }
 
-    strcat(command, opt.options);
+    strcat(command, opt.filenames);
 
     if (opt.twoup) 	// add an extra showpage to eject last odd page
 	strcat(command, " -c showpage -f");
@@ -1074,7 +1148,7 @@ int main(int argc, char *argv[])
     }
 
     if (opt.debug) {
-	fprintf(stdout, " Command: \042%s\042\n", command);
+	fprintf(stdout, " Command: %s\n", command);
     }
 
     // start the program

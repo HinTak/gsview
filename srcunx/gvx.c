@@ -835,6 +835,12 @@ key_scroll_vert(int key)
         set_scroll(-1, vadjust->value + delta);
 }
 
+gint 
+focus_in_event(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+    if (dfchanged() != 0)
+        gsview_wcmd(NULL, (gpointer)IDM_REDISPLAY);
+}
 
 gint 
 key_press_event(GtkWidget *widget, GdkEventKey *event)

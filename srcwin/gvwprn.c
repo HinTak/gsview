@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -1158,7 +1158,11 @@ start_gvwgs(void)
 #ifdef DECALPHA
     strcat(progname, "gvwgsda.exe");
 #else
+#ifdef _WIN64
+    strcat(progname, "gvwgs64.exe");
+#else
     strcat(progname, "gvwgs32.exe");
+#endif
 #endif
     flag = exec_pgm(progname, command, &printer.prog);
     if (!flag || !printer.prog.valid) {

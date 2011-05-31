@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,11 +20,11 @@
 
 #define AACATALA "Català"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2005 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2006 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Tots els drets reservats."
 #define GSVIEW_COPYRIGHT3 "Vegeu el fitxer LICENCE per a més detalls."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2005 artofcode LLC,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2006 artofcode LLC,"
 #define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Tots els drets reservats."
 #define GS_COPYRIGHT3 "Vegeu el fitxer PUBLIC per a més detalls."
 
@@ -296,7 +296,7 @@
 #define AAONLINEREG "Registre en línia"
 #define AAREG1 "Si us plau, introduïu el vostre nom i el número de registre"
 #define AAREG2 ""
-#define AANAG1 "El GSview és Copyright 2005 Ghostgum Software Pty Ltd."
+#define AANAG1 "El GSview és Copyright 2006 Ghostgum Software Pty Ltd."
 #define AANAG2 "Si us plau, registreu-vos per permetre el desenvolupament del GSview."
 #define AANAG3 ""
 #define AANAG4 "El GSview es pot registrar a"

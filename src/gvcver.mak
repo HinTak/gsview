@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -22,9 +22,9 @@
 LANGUAGE=en
 
 # GSview version
-GSVIEW_VERSION=47
-GSVIEW_DOT_VERSION=4.7
-GSVIEW_DATE=2005-03-26
+GSVIEW_VERSION=48
+GSVIEW_DOT_VERSION=4.8
+GSVIEW_DATE=2006-02-25
 
 
 $(OD)gsvver.h: $(ECHOGSV) $(SRC)gvcver.mak

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -20,11 +20,11 @@
 
 #define AANEDERLANDS "Nederlands"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2005 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2006 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Alle rechten voorbehouden"
 #define GSVIEW_COPYRIGHT3 "Zie het LICENCE bestand voor meer details."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2005 artofcode LLC,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2006 artofcode LLC,"
 #define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Alle rechten voorbehouden."
 #define GS_COPYRIGHT3 "Zie het bestand PUBLIC voor meer details"
 
@@ -294,7 +294,7 @@
 #define AAONLINEREG "Online Registreren"
 #define AAREG1 "Voer uw naam en registratienummmer in"
 #define AAREG2 ""
-#define AANAG1 "GSview is Copyright 2005 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview is Copyright 2006 Ghostgum Software Pty Ltd."
 #define AANAG2 "Ondersteun de ontwikkeling van GSview door het programma te registreren."
 #define AANAG3 ""
 #define AANAG4 "GSview kan online worden geregistreerd bij:"

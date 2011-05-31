@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -645,7 +645,7 @@ viewonlydist:
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .$(D)setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2005 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2006 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview$(D)LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT). > dialog.txt
 	echo GSview uses Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
@@ -711,7 +711,7 @@ distcopy:
 	$(CP) gsprint.htm dist$(D)gsview$(D)gsprint.htm
 	$(CP) $(BD)gsprint.exe dist$(D)gsview$(D)gsprint.exe
 	$(CP) epstool.htm dist$(D)gsview$(D)epstool.htm
-	-$(CP) gsview$(WINEXT)$(D)gsv16spl.exe dist$(D)gsview$(D)gsv16spl.exe
+#	-$(CP) gsview$(WINEXT)$(D)gsv16spl.exe dist$(D)gsview$(D)gsv16spl.exe
 	$(CP) gsview$(WINEXT)$(D)zlib$(WINEXT).dll dist$(D)gsview$(D)zlib$(WINEXT).dll
 	$(CP) gsview$(WINEXT)$(D)libbz2.dll dist$(D)gsview$(D)libbz2.dll
 	$(CP) pstotext$(D)pstotext.1 dist$(D)pstotext$(D)pstotext.1
@@ -758,7 +758,7 @@ gsv$(GSVIEW_VERSION)w$(WINEXT).exe: distcopy gsv$(GSVIEW_VERSION)w$(WINEXT).zip
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .$(D)setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2005 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2006 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview$(D)LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT). > dialog.txt
 	echo GSview uses Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt

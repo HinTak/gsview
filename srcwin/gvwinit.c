@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -763,6 +763,8 @@ int ndisp;
 	if (ndisp < 0) {
 	    option.img_origin.x = win_display[0].left;
 	    option.img_origin.y = win_display[0].top;
+	    option.img_size.x = CW_USEDEFAULT;
+	    option.img_size.y = CW_USEDEFAULT;
 	}
 
 	/* create parent window */
@@ -2269,8 +2271,11 @@ init_displays(void)
 		if ((dd.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) && 
 		    (EnumDisplaySettings(dd.DeviceName, 
 			ENUM_CURRENT_SETTINGS, &dm) == TRUE)) {
-		    EnumDisplaySettings(dd.DeviceName, 
-			ENUM_REGISTRY_SETTINGS, &dm);
+		    /*  Don't use this because it sometimes gives garbage
+		        on Windows 98/ME
+			EnumDisplaySettings(dd.DeviceName, 
+			    ENUM_REGISTRY_SETTINGS, &dm);
+		    */
 		    if (ndisp < sizeof(win_display)/sizeof(win_display[0])) {
 			win_display[ndisp].left = dm.dmPosition.x;
 			win_display[ndisp].top = dm.dmPosition.y;

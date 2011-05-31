@@ -1,8 +1,8 @@
 =================================================================
-Order for CD-ROM containing GSview and AFPL Ghostscript.
+Order for CD-ROM containing GSview and AFPL/GPL Ghostscript.
 =================================================================
 
-This offer is valid until 31 December 2005.
+This offer is valid until 31 December 2006.
 Please clearly fill in the details below (typewritten preferred), 
 making sure you include your postal code (if any) and your country.  
 All orders must be clearly signed.
@@ -28,7 +28,7 @@ Telephone number:  [                                            ]
 Internet email address:  [                                      ]
 
 Payment:
-    [ ] Cheque for USD50 or equivalent in your currency.
+    [ ] Cheque for USD60 or equivalent in your currency.
         (Currency MUST match the bank.  For example, USD on USA 
         bank, GBP on UK bank).
 
@@ -44,7 +44,7 @@ Payment:
  
   Expiry date:         [    /    ]      MM/YY
 
-  Name shown on card:  [                                        ]
+  Card holder name:    [                                        ]
   (BLOCK LETTERS)
 
 Signature:   [                                                  ]

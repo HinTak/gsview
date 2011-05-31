@@ -1,16 +1,16 @@
 #
-# Spec file for GSview 4.7
+# Spec file for GSview 4.8
 #
-# 4.7 release
-#  2005-03-25 Russell Lang <gsview@ghostgum.com.au>
+# 4.8 release
+#  2006-02-25 Russell Lang <gsview@ghostgum.com.au>
 #
 Summary: PostScript and PDF previewer
 Name: gsview
-Version: 4.7
+Version: 4.8
 Release: 1
 Copyright: Aladdin Free Public License, Ghostgum Software Pty Ltd
 Group: Applications/Graphics
-Source: ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/gsview-4.7.tar.gz
+Source: ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/gsview-4.8.tar.gz
 URL: http://www.cs.wisc.edu/~ghost/gsview/
 #Icon: gsview.gif
 #Distribution: Unknown
@@ -28,7 +28,7 @@ Ghostscript is an interpreter for the PostScript page
 description language used by laser printers.
 For documents following the Adobe PostScript Document Structuring 
 Conventions, GSview allows selected pages to be viewed or printed.
-GSview requires Ghostscript 7.04 - 9.19.
+GSview requires Ghostscript 7.04 - 9.99.
 
 %prep
 # remove old directory
@@ -85,6 +85,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sat Feb 25 2006 Russell Lang <gsview@ghostgum.com.au>
+- GSview 4.8 release
+  Minor bug fixes.
 * Fri Apr 25 2005 Russell Lang <gsview@ghostgum.com.au>
 - GSview 4.7 release
   Minor bug fixes.

@@ -385,6 +385,7 @@ void quit_gsview( GtkWidget *w, gpointer   data);
 gboolean gs_client_event(GtkWidget *widget, GdkEventClient *event, gpointer data);
 void gsview_wcmd( GtkWidget *w, gpointer data);
 gint key_press_event(GtkWidget *widget, GdkEventKey *event);
+gint focus_in_event(GtkWidget *widget, GdkEventKey *event, gpointer user_data);
 gint button_press_event(GtkWidget *widget, GdkEventButton *event);
 gint button_release_event(GtkWidget *widget, GdkEventButton *event);
 gint motion_notify_event(GtkWidget *widget, GdkEventMotion *event);

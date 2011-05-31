@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -34,7 +34,7 @@ VCVER=7
 !if "$(_NMAKE_VER)" == "7.10.3077"
 VCVER=71
 !endif
-!if "$(_NMAKE_VER)" == "8.00.40607.16"
+!if "$(_NMAKE_VER)" == "8.00.50727.42"
 VCVER=8
 !endif
 !endif
@@ -92,7 +92,7 @@ VIEWONLY=0
 
 # Define the location of the WinZip self-extracting-archive-maker.
 !ifndef WINZIPSE_XE
-WINZIPSE_XE="C:\Program Files\WinZip Self-Extractor\WZIPSE32.EXE"
+WINZIPSE_XE="$(PROGRAMFILES)\WinZip Self-Extractor\WZIPSE32.EXE"
 !endif
 
 BINDIR=.\bin
@@ -207,7 +207,9 @@ HC="$(DEVBASE)\Common7\Tools\hcw" /C /E
 RCOMP="$(DEVBASE)\Vc7\bin\rc" -D_MSC_VER $(CDEFS) $(RIFLAGS)
 !endif
 !if $(VCVER) == 8
-HC="$(DEVBASE)\VC\bin\hcw" /C /E
+# Help Compiler is no longer included in the SDK.
+# Search on the Internet for hcw403_setup.zip
+HC="$(PROGRAMFILES)\Help Workshop/hcw" /C /E
 RCOMP="$(DEVBASE)\VC\bin\rc" -D_MSC_VER $(CDEFS) $(RIFLAGS)
 !endif
 

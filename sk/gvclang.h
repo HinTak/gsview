@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,11 +20,11 @@
 
 #define AASLOVAK "Slovak"
 
-#define GSVIEW_COPYRIGHT1 "AutorskÈ pr·va (C) 1993-2005 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "AutorskÈ pr·va (C) 1993-2006 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Vöetky pr·va vyhradenÈ."
 #define GSVIEW_COPYRIGHT3 "Pozrite si s˙bor LICENCE pre viac inform·ciÌ."
 
-#define GS_COPYRIGHT1 "AutorskÈ pr·va (C) 1994-2005 artofcode LLC,"
+#define GS_COPYRIGHT1 "AutorskÈ pr·va (C) 1994-2006 artofcode LLC,"
 #define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Vöetky pr·va vyhradenÈ."
 #define GS_COPYRIGHT3 "Pozrite si s˙bor PUBLIC pre viac inform·ciÌ."
 
@@ -296,7 +296,7 @@
 #define AAONLINEREG "On-line registr·cia"
 #define AAREG1 "UrËte prosÌm Vaöe meno a ËÌslo pre registr·ciu"
 #define AAREG2 ""
-#define AANAG1 "GSview autorskÈ pr·va 2005 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview autorskÈ pr·va 2006 Ghostgum Software Pty Ltd."
 #define AANAG2 "Popdporte prosÌm v˝voj programu GSview jeho registr·ciou."
 #define AANAG3 ""
 #define AANAG4 "GSview mÙûete rigistrovaù aj on-line"

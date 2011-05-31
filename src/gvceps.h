@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -25,9 +25,10 @@
 /* RGB3 = Windows RGBTRIPLE and PM RGB */
 /* RGB4 = Windows RGBQUAD and PM RGB2 */
 
-#if defined(__EMX__) || defined(_MSC_VER)
-#pragma pack(1)		/* align structures to byte boundaries */
-#endif
+/* We used to pack structures to byte boundaries, but this is
+ * no longer required.  All EPS handling should be unaffected
+ * by alignment/packing and endian order.
+ */
 
 /* WARNING - these structures might not have byte packing. */
 /* When you read BMP files, do not use sizeof(structure). */

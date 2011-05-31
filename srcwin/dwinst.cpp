@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1999-2006, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -147,7 +147,12 @@ BOOL CInstall::Init(const char *szSourceDir, const char *szFileList)
 	p = m_szSourceDir + strlen(m_szSourceDir) - 1;
 	if (*p == '\\')
 		*p = '\0';
-	strcpy(m_szFileList, szFileList);
+	memset(m_szFileList, 0, sizeof(m_szFileList));
+	strcpy(m_szFileList, m_szSourceDir);
+	strncat(m_szFileList, "\\", 
+	  sizeof(m_szFileList) - strlen(m_szFileList) - 1);
+	strncat(m_szFileList, szFileList, 
+	  sizeof(m_szFileList) - strlen(m_szFileList) - strlen(szFileList) - 1);
 	
 	m_szRegistryNew[0] = m_szRegistryOld[0] = 
 		m_szShellNew[0] = m_szShellOld[0] = 

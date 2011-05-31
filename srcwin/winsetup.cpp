@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -227,8 +227,21 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	MSG msg;
 	g_hInstance = g_hLanguage = hInstance;
 
-	// get source directory
-	GetCurrentDirectory(sizeof(g_szSourceDir), g_szSourceDir);
+	/* Get source directory.
+	 * This used to be the current directory, but is now
+	 * the executable directory.
+	 * GetCurrentDirectory(sizeof(g_szSourceDir), g_szSourceDir);
+	 */
+	{   int i;
+	    GetModuleFileName(g_hInstance, g_szSourceDir, 
+		sizeof(g_szSourceDir));
+	    for (i=lstrlen(g_szSourceDir)-1; i>0; i--) {
+		if (g_szSourceDir[i] == '\\') {
+		    g_szSourceDir[i] = '\0';
+		    break;
+		}
+	    }
+	}
 
 	LoadString(g_hInstance, IDS_APPNAME, g_szAppName, sizeof(g_szAppName));
         if (!beta_warn()) {

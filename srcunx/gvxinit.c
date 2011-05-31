@@ -762,6 +762,12 @@ gsview_init(int argc, char *argv[])
 			GTK_SIGNAL_FUNC (key_press_event), 
 			NULL);
     gtk_widget_set_events(window, GDK_KEY_PRESS_MASK);
+
+    /* Redraw if window gains focus and document changed */
+    gtk_signal_connect (GTK_OBJECT (window), "focus_in_event", 
+			GTK_SIGNAL_FUNC (focus_in_event), 
+			NULL);
+    gtk_widget_set_events(window, GDK_KEY_PRESS_MASK | GDK_FOCUS_CHANGE_MASK);
    
 
     main_vbox = gtk_vbox_new (FALSE, 1);

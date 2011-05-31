@@ -1,4 +1,31 @@
 ---------------------------
+Version 4.8 2006-02-25
+---------------------------
+
+All:
+  Save As dialog now defaults to using the currently open filename.
+
+Win:
+  Added -option to gsprint so that options can be forced to be
+  before filenames.  Unknown options that are not filenames
+  are placed before the "-c << >> setpagedevice -f".
+
+  Fix multi display code to use the current settings,
+  not the registry settings which are sometimes corrupted
+  on Windows 98.
+  If the saved window location isn't on a current display,
+  reset the window origin.
+
+  Make installer read filelist.txt from the installer directory, 
+  to avoid being confused with one in the current directory.
+
+  Win64 version will now print and convert.  It was trying execute
+  the wrong file, and the right file had incorrect structure packing.
+
+X11:
+  Add redisplay if document changed and GSview window gains focus.
+
+---------------------------
 Version 4.7 2005-03-26
 ---------------------------
 Win:

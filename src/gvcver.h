@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -58,7 +58,7 @@
 #define GS_PRODUCT  "AFPL Ghostscript"
 #define GS_REVISION_MIN   704
 #define GS_REVISION	  704
-#define GS_REVISION_MAX   919
+#define GS_REVISION_MAX   999
 
 #ifdef _Windows
 #ifdef _WIN64

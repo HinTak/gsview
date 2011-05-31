@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,11 +20,11 @@
 
 #define AARUSSIAN "Russian"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2005 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2006 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Все права сохранены."
 #define GSVIEW_COPYRIGHT3 "Подробности см. файл LICENCE."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2005 artofcode LLC,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-2006 artofcode LLC,"
 #define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Все права сохранены."
 #define GS_COPYRIGHT3 "Подробности см. файл PUBLIC."
 
@@ -296,7 +296,7 @@
 #define AAONLINEREG "Регистрация по сети"
 #define AAREG1 "Пожалуйста, введите Ваше имя и регистрационный номер"
 #define AAREG2 ""
-#define AANAG1 "GSview is Copyright 2005 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview is Copyright 2006 Ghostgum Software Pty Ltd."
 #define AANAG2 "Пожалуйста, поддержите регистрацией разработку GSview."
 #define AANAG3 ""
 #define AANAG4 "GSview можно зарегистрировать в Интернет по адресу"

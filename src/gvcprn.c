@@ -150,11 +150,12 @@ UINT count;
 char *buffer;
 int filter;
 
-    output[0] = '\0';
+    memset(output, 0, sizeof(output));
     if (psfile.name[0] == '\0') {
 	    gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
 	    return;
     }
+    strncpy(output, psfile.name, sizeof(output)-1);
 
     filter = psfile.ispdf ? FILTER_PDF :
 	( psfile.dsc && psfile.dsc->epsf ? FILTER_EPS : FILTER_PS );
