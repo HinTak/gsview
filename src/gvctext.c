@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -23,6 +23,14 @@
 #else
 #include "gvpm.h"
 #endif
+
+
+/* forward declarations */
+void gsview_text_extract_slow(void);
+void gsview_text_extract_quick(void);
+void gsview_text_findnext_slow(void);
+void gsview_text_findnext_quick(void);
+
 
 /* extract text from next line of ps file */
 /* return count of characters written to dest */
@@ -136,68 +144,97 @@ char outline[PSLINELENGTH];
 }
 
 
+void
+gsview_text_extract_quick()
+{
+    FILE *f;
+    static char output[MAXSTR];
 
-/* extract text from a range of pages */
+    if (!get_filename(output, TRUE, FILTER_TXT, 0, IDS_TOPICTEXT))
+	    return;
+
+    if ((f = fopen(output, "w")) == (FILE *)NULL) {
+	    return;
+    }
+
+    info_wait(IDS_WAITWRITE);
+    if (psfile.doc == (PSDOC *)NULL) {
+	/* scan whole document */
+	unsigned long end;
+	if ( (psfile.file = fopen(psfile.name, "rb")) == (FILE *)NULL ) {
+	    fclose(f);
+	    return;
+	}
+	fseek(psfile.file, 0L, SEEK_END);
+	end = ftell(psfile.file);
+	fseek(psfile.file, 0L, SEEK_SET);
+	text_extract(f, psfile.file, end);
+	dfclose();
+    }
+    else {
+      if (psfile.doc->numpages != 0) {
+	int i;
+	for (i = 0; i < psfile.doc->numpages; i++) {
+	    if (psfile.page_list.select[map_page(i)])  {
+		fseek(psfile.file, psfile.doc->pages[map_page(i)].begin, SEEK_SET);
+		text_extract(f, psfile.file, psfile.doc->pages[map_page(i)].end);
+		fputc('\f', f);
+		fputc('\n', f);
+	    }
+	}
+      }
+      else {
+	fseek(psfile.file, psfile.doc->beginheader, SEEK_SET);
+	text_extract(f, psfile.file, psfile.doc->endtrailer);
+      }
+    }
+
+    fclose(f);
+
+    info_wait(IDS_NOWAIT);
+    return;
+}
+
+
+
 void
 gsview_text_extract()
 {
-	FILE *f;
-	static char output[MAXSTR];
-	int thispage = psfile.pagenum;
+    int thispage = psfile.pagenum;
+    if (psfile.name[0] == '\0') {
+	gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
+	return;
+    }
 
-	if (psfile.name[0] == '\0') {
-		gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
-		return;
-	}
+    if (pstotextOutfile != (FILE *)NULL) {
+	play_sound(SOUND_BUSY);
+	return;	/* busy creating text index file */
+    }
 
-	load_string(IDS_TOPICTEXT, szHelpTopic, sizeof(szHelpTopic));
-	if ((doc != (PSDOC *)NULL) && (doc->numpages != 0))
-	    if (!get_page(&thispage, TRUE))
-	        return;
+    load_string(IDS_TOPICTEXT, szHelpTopic, sizeof(szHelpTopic));
+    if ((psfile.doc != (PSDOC *)NULL) && (psfile.doc->numpages != 0))
+	if (!get_page(&thispage, TRUE, FALSE))
+	    return;
 
-	if (!get_filename(output, TRUE, FILTER_TXT, 0, IDS_TOPICTEXT))
-		return;
-
-	if ((f = fopen(output, "w")) == (FILE *)NULL) {
-		return;
-	}
-
-	info_wait(IDS_WAITWRITE);
-	if (doc == (PSDOC *)NULL) {
-	    /* scan whole document */
-	    unsigned long end;
-	    if ( (psfile.file = fopen(psfile.name, "rb")) == (FILE *)NULL ) {
-		fclose(f);
-		return;
-	    }
-	    fseek(psfile.file, 0L, SEEK_END);
-	    end = ftell(psfile.file);
-	    fseek(psfile.file, 0L, SEEK_SET);
-	    text_extract(f, psfile.file, end);
-	    dfclose();
+    if (option.quick_text) {
+	if (!dfreopen())
+	    return;
+	gsview_text_extract_quick();
+	dfclose();
+    }
+    else {
+	/* check if text_name exists, create if necessary */
+	if (psfile.text_name[0] == '\0') {
+	    pending.text = TRUE;
+	    pending.now = TRUE;
+	    /* set flag to come back here after text_name created */
+	    psfile.text_extract = TRUE;
+	    return;
 	}
 	else {
-	  if (doc->numpages != 0) {
-	    int i;
-	    for (i = 0; i < doc->numpages; i++) {
-		if (page_list.select[map_page(i)])  {
-	            fseek(psfile.file, doc->pages[map_page(i)].begin, SEEK_SET);
-	            text_extract(f, psfile.file, doc->pages[map_page(i)].end);
-		    fputc('\f', f);
-		    fputc('\n', f);
-		}
-	    }
-	  }
-	  else {
-	    fseek(psfile.file, doc->beginheader, SEEK_SET);
-	    text_extract(f, psfile.file, doc->endtrailer);
-	  }
+	    gsview_text_extract_slow();
 	}
-
-	fclose(f);
-
-	info_wait(IDS_NOWAIT);
-	return;
+    }
 }
 
 
@@ -288,25 +325,60 @@ gsview_text_find()
 char prompt[MAXSTR];		/* input dialog box prompt and message box string */
 char answer[MAXSTR];		/* input dialog box answer string */
 int thispage = psfile.pagenum;
+	/* can relax some of these restrictions if don't display */
 	if (not_dsc())
 	    return;
-	if (doc->numpages == 0) {
+	if (order_is_special())
+	    return;
+	if (pstotextOutfile != (FILE *)NULL) {
+	    play_sound(SOUND_BUSY);
+	    return;	/* busy creating text index file */
+	}
+	if (psfile.doc->numpages == 0) {
 	    gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
 	    return;
 	}
 	load_string(IDS_TEXTFIND, prompt, sizeof(prompt));
 	strcpy(answer, szFindText);
 	load_string(IDS_TOPICTEXT, szHelpTopic, sizeof(szHelpTopic));
+
 	if (!get_string(prompt,answer))
 	    return;
 	strcpy(szFindText, answer);
-	if (!get_page(&thispage, TRUE))
-	        return;
-	gsview_text_findnext();
+	if (!get_page(&thispage, TRUE, TRUE))	/* search all pages */
+		return;
+
+	if (option.quick_text) {
+	    gsview_text_findnext_quick();
+	}
+	else {
+	    psfile.text_offset = 0;
+	    psfile.text_page = 0;
+	    /* check if text_name exists, create if necessary */
+	    if (psfile.text_name[0] == '\0') {
+		pending.text = TRUE;
+		pending.now = TRUE;
+		/* set flag to come back here after text_name created */
+		psfile.text_extract = FALSE;
+		return;
+	    }
+	    else {
+		gsview_text_findnext_slow();
+	    }
+	}
 }
 
 void
 gsview_text_findnext()
+{
+    if (option.quick_text)
+	gsview_text_findnext_quick();
+    else
+	gsview_text_findnext_slow();
+}
+
+void
+gsview_text_findnext_quick()
 {
 int i;
 char *p;
@@ -318,18 +390,19 @@ char *p;
 	}
 	dfreopen();
 	info_wait(IDS_WAITSEARCH);
-	for (i = 0; i < doc->numpages; i++) {
-	    if (page_list.select[map_page(i)])  {
-		page_list.select[map_page(i)] = FALSE;
-	        fseek(psfile.file, doc->pages[map_page(i)].begin, SEEK_SET);
-		p = text_find_section(psfile.file, doc->pages[map_page(i)].end, szFindText);
+	for (i = 0; i < psfile.doc->numpages; i++) {
+	    if (psfile.page_list.select[map_page(i)])  {
+		psfile.page_list.select[map_page(i)] = FALSE;
+	        fseek(psfile.file, psfile.doc->pages[map_page(i)].begin, SEEK_SET);
+		p = text_find_section(psfile.file, psfile.doc->pages[map_page(i)].end, szFindText);
 		if (p) {	/* found it */
 		    info_wait(IDS_NOWAIT);
 		    free(p);
-		    psfile.pagenum = i+1;
-		    if (gs_open())
-	                dsc_dopage();
 		    dfclose();
+		    request_mutex();
+		    pending.pagenum = i+1;
+		    pending.now = TRUE;
+		    release_mutex();
 		    return;
 		}
 	    }
@@ -338,3 +411,400 @@ char *p;
         info_wait(IDS_NOWAIT);
 	gserror(IDS_TEXTNOTFIND, NULL, MB_ICONEXCLAMATION, 0);
 }
+
+
+/***************************************************/
+/* text extraction and searching based on pstotext */
+
+/* This code assumes that pstotext has produced an output file
+ * named psfile.text_name.
+ * This file contains one line per word in the following format
+ *   word llx lly urx ury
+ * A new line is identified by a blank line 
+ * A new page is identified by a formfeed/newline
+ *
+ */
+
+void
+text_extract_slow(FILE *outfile, FILE *infile, BOOL all)
+{
+    char line[2048];
+    int page = 0;
+    BOOL thispage;
+
+    /* pages are in correct order - no reversal needed */
+    thispage = (all || psfile.page_list.select[page]);
+    while (fgets(line, sizeof(line)-1, infile)) {
+	if (thispage) {
+	    if ( (*line == '\n') || (*line == '\f') )
+		fputs(line, outfile);
+	    else {
+		strtok(line, " ");
+		fputs(line, outfile);
+		fputc(' ', outfile);
+	    }
+	}
+	if (*line == '\f') {
+	    page++;
+	    thispage = (all || psfile.page_list.select[page]);
+	}
+    }
+}
+
+/* extract text from a range of pages */
+void
+gsview_text_extract_slow()
+{
+    FILE *f;
+    FILE *infile;
+    static char output[MAXSTR];
+
+    if (!get_filename(output, TRUE, FILTER_TXT, 0, IDS_TOPICTEXT))
+	return;
+
+    if ((f = fopen(output, "w")) == (FILE *)NULL)
+	return;
+
+    if (psfile.text_name[0] == '\0')
+	return;
+
+    if ((infile = fopen(psfile.text_name, "r")) == (FILE *)NULL) {
+	message_box("pstotext text extraction file is missing", 0);
+	return;
+    }
+
+    info_wait(IDS_WAITWRITE);
+
+    if (psfile.doc == (PSDOC *)NULL) {
+	text_extract_slow(f, infile, TRUE);	/* all pages */
+    }
+    else {
+	if (psfile.doc->numpages != 0) {
+	    text_extract_slow(f, infile, FALSE);	/* selected pages */
+	}
+	else {
+	    text_extract_slow(f, infile, TRUE);	/* all pages */
+	}
+    }
+
+    fclose(f);
+    fclose(infile);
+
+    info_wait(IDS_NOWAIT);
+    return;
+}
+
+
+/* compare string w with string s */
+/* case insensitive */
+/* w may contain wildcards * and ? in any position */
+/* return TRUE if match */
+BOOL
+wildmatch(char *w, char *s)
+{
+    while (*s && *w) {
+	if (*w == '*') {
+	    w++;		/* look at character after '*' */
+	    while (*w && (*w == '*'))
+		w++;		/* '**' is same as '*' */
+	    if (*w == '\0')
+		return TRUE;	/* matches all until end of word */
+	    while (*s) {
+		if (*w == '?') {
+		    break;	/* '*?' is same as '?' */
+		}
+		else if (tolower(*w) == tolower(*s))
+		    break;	/* break loop when match found */
+		s++;
+	    }
+	    if (*s == '\0')
+		break;		/* end of s without matching next in w */
+	}
+	else if (*w != '?') {  /* '?' always matches */
+	    if (tolower(*w) != tolower(*s))
+		return FALSE;	/* no match */
+	}
+	w++;
+	s++;
+    }
+
+    /* skip over trailing '*' */
+    while (*w && (*w == '*'))
+	w++;		/* '**' is same as '*' */
+
+    if ((*s == '\0') && (*w == '\0'))
+	return TRUE;		/* at end of both strings, so matched */
+    return FALSE;
+}
+
+#define MAX_FIND_WORD 10
+
+/* returns TRUE if match found */
+/* infile is text file from pstotext */
+/*   is assumed to have been positioned by fseek */
+/* str is string to match */
+/* all is TRUE if all pages to be searched */
+BOOL
+text_find_slow(FILE *infile, char *str, BOOL all)
+{
+char line[MAXSTR];
+char sbuf[MAXSTR];
+char *strword;
+BOOL thispage;
+char *words[MAX_FIND_WORD+1];
+int i;
+    /* break up search string into words */
+    strcpy(sbuf, str);
+    words[0] = strtok(sbuf, " ");
+    i = 1;
+    while ( ((words[i] = strtok(NULL, " ")) != NULL) && (i<MAX_FIND_WORD) )
+	i++;
+
+    /* point at first word */
+    i = 0;
+    strword = words[i];
+
+    thispage = (all || psfile.page_list.select[psfile.text_page]);
+    while (fgets(line, sizeof(line)-1, infile)) {
+	if (thispage && (*line != '\n') && (*line != '\f')) {
+	    strtok(line, " ");
+	    if (wildmatch(strword, line)) {
+		/* matched first word */
+		psfile.text_offset = ftell(infile); /* remember location */
+		/* remember bounding box of word */
+		sscanf(line+strlen(line)+1, "%d %d %d %d",
+		   &psfile.text_bbox.llx, &psfile.text_bbox.lly, 
+		   &psfile.text_bbox.urx, &psfile.text_bbox.ury);
+		/* now check remaining words */
+    		strword = words[++i];
+		while (strword) {
+		    if (!fgets(line, sizeof(line)-1, infile))
+			return FALSE;	/* match failed at EOF */
+		    if ((*line != '\n') && (*line != '\f')) {
+			strtok(line, " ");
+			if (!wildmatch(strword, line)) {
+			    /* partial match failed */
+			    /* restart search from next word */
+			    fseek(infile, psfile.text_offset, SEEK_SET);
+			    i = 0;
+			    strword = words[i];
+			    break;
+			}
+			strword = words[++i];
+		        /* extend bbox ?? */
+		    }
+		}
+		/* all words matched */
+		if (!strword)
+		    return TRUE;
+	    }
+	}
+	if (*line == '\f') {
+	    psfile.text_page++;
+	    thispage = (all || psfile.page_list.select[psfile.text_page]);
+	}
+    }
+    return FALSE;	/* reached EOF without match */
+}
+
+void
+gsview_text_findnext_slow()
+{
+FILE *infile;
+char find_text[MAXSTR];
+	if (not_dsc())
+	    return;
+	if (strlen(szFindText)==0) {
+	    gserror(IDS_TEXTNOTFIND, NULL, MB_ICONEXCLAMATION, 0);
+	    return;
+	}
+
+	if (psfile.text_name[0] == '\0') {
+	    gserror(IDS_TEXTNOTFIND, NULL, MB_ICONEXCLAMATION, 0);
+	    return;
+	}
+
+	if ((infile = fopen(psfile.text_name, "r")) == (FILE *)NULL) {
+	    message_box("pstotext text extraction file is missing", 0);
+	    return;
+	}
+	
+	/* add wildcard to begin and end */
+	if ((szFindText[0] == '*') || (szFindText[0] == '?'))
+	    strcpy(find_text, szFindText);
+	else {
+	    strcpy(find_text, "*");
+	    strcat(find_text, szFindText);
+	}
+	if ( (find_text[strlen(find_text)-1] != '*') &&
+	     (find_text[strlen(find_text)-1] != '?') )
+	    strcat(find_text, "*");
+
+	info_wait(IDS_WAITSEARCH);
+	fseek(infile, psfile.text_offset, SEEK_SET);
+	if (text_find_slow(infile, find_text, FALSE)) {
+	    /* found it */
+	    fclose(infile);
+	    info_wait(IDS_NOWAIT);
+	    /* signal that BBOX is valid and should be highlighted */
+	    if ((psfile.pagenum == psfile.text_page+1) 
+		&& (gsdll.state == PAGE)) {
+		/* on correct page */
+		display.show_find = TRUE;
+	        post_img_message(WM_GSSYNC, 0); /* redraw */
+		scroll_to_find();
+	    }
+	    else {
+		/* move to correct page */
+		request_mutex();
+		psfile.text_bbox.valid = TRUE;
+		pending.pagenum = psfile.text_page+1;
+		pending.now = TRUE;
+		release_mutex();
+		/* scroll_to_find occurs after page is displayed */
+	    }
+	    return;
+	}
+
+	fclose(infile);
+        info_wait(IDS_NOWAIT);
+	gserror(IDS_TEXTNOTFIND, NULL, MB_ICONEXCLAMATION, 0);
+}
+
+
+/* mouse text selection */
+
+
+#define TEXT_INDEX_CHUNK 1000
+TEXTINDEX *text_index;
+int text_index_count;	/* number of words in index */
+int text_index_size;	/* number of words storage allocated */
+char *text_words;
+int text_words_count;	/* location for next word */
+int text_words_size;	/* maximum character count per page */
+
+void
+free_text_index(void)
+{
+    if (text_index)
+	free(text_index);
+    text_index = NULL;
+    text_index_count = 0;
+    text_index_size = 0;
+    if (text_words)
+        free(text_words);
+    text_words = NULL;
+    text_words_count = 0;
+    text_words_size = 0;
+    return;
+}
+
+BOOL 
+make_text_index(void)
+{
+FILE *f;
+int thispage;
+int thisline;
+char buf[2048];
+TEXTINDEX *text;
+int page = psfile.pagenum;
+    if (psfile.text_name[0] == '\0') {
+	free_text_index();
+	return FALSE;
+    }
+    
+    text_words_size = TEXT_INDEX_CHUNK * 8;
+    text_words = malloc(text_words_size);
+    if (text_words == (char *)NULL) {
+	free_text_index();
+	return FALSE;
+    }
+    text_words_count = 0;
+
+    text_index_size = TEXT_INDEX_CHUNK;
+    text_index = (TEXTINDEX *)malloc(text_index_size * sizeof(TEXTINDEX));
+    if (text_index == (TEXTINDEX *)NULL) {
+	free_text_index();
+	return FALSE;
+    }
+    text_index_count = 0;
+
+    /* find page */
+    f = fopen(psfile.text_name, "r");
+    if (f == (FILE *)NULL) {
+	free_text_index();
+	return FALSE;
+    }
+    thispage = 1;
+    while ((thispage != page) && fgets(buf, sizeof(buf), f))
+	if (*buf == '\f') 
+	    thispage++;
+    if (thispage != page) {
+	free_text_index();
+	fclose(f);
+	return FALSE;
+    }
+    thisline = 0;
+    while ((thispage == page) && fgets(buf, sizeof(buf), f))  {
+	if (*buf == '\f') {
+	    thispage++;
+	}
+	else if (*buf == '\n') {
+	    thisline++;
+	}
+	else {
+	    if (text_index_count >= text_index_size) {
+		text_index_size += TEXT_INDEX_CHUNK;
+		text_index = realloc(text_index, text_index_size * sizeof(TEXTINDEX));
+		if (text_index == (TEXTINDEX *)NULL) {
+		    free_text_index();
+		    fclose(f);
+		    return FALSE;
+		}
+	    }
+	    text = &text_index[text_index_count];
+	    if (text_words_count + strlen(buf) + 1 > text_words_size) {
+		text_words_size += TEXT_INDEX_CHUNK * 8;
+		text_words = realloc(text_words, text_words_size);
+		if (text_words == (char *)NULL) {
+		    free_text_index();
+		    fclose(f);
+		    return FALSE;
+		}
+	    }
+	    text->word = text_words_count;
+	    sscanf(buf, "%s %d %d %d %d",
+		       text_words + text->word,
+		       &text->bbox.llx, &text->bbox.lly,
+		       &text->bbox.urx, &text->bbox.ury);
+	    text->line = thisline;
+	    text_words_count += strlen(text_words + text_words_count) + 1;
+	    text_index_count++;
+	}
+    }
+    fclose(f);
+    return TRUE;
+}
+
+/* return TRUE if x,y is in bbox */
+BOOL
+in_word(PSBBOX *bbox, int x, int y)
+{
+    return ( (bbox->llx <= x) && (x <= bbox->urx)
+	  && (bbox->lly <= y) && (y <= bbox->ury) );
+}
+
+/* search for word containing x,y */
+/* if found, return pointer */
+/* if no match, return NULL */
+int
+word_find(int x, int y)
+{
+int i;
+    for (i=0; i<text_index_count; i++)
+	if (in_word(&text_index[i].bbox, x, y))
+	    return i;
+    return -1;
+}
+
+

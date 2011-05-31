@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -48,6 +48,7 @@ char *now;
 char text[PSLINELENGTH];
 char *comment;
 long here;
+PSDOC *doc = psfile.doc;
 
 	load_string(IDS_EPSREAD, output, sizeof(output));
 	if (message_box(output, MB_YESNO | MB_ICONQUESTION)
@@ -57,7 +58,7 @@ long here;
 	    return;
 	}
 
-	if (!(display.page || display.sync)) {
+	if ((gsdll.state != PAGE) && (gsdll.state != IDLE)) {
 	    gserror(IDS_EPSNOBBOX, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    return;
 	}
@@ -79,7 +80,7 @@ long here;
 	}
 
 	output[0] = '\0';
-	if (!get_filename(output, TRUE, FILTER_PS, 0, IDS_TOPICPSTOEPS))
+	if (!get_filename(output, TRUE, FILTER_EPS, 0, IDS_TOPICPSTOEPS))
 	    return;
 
 	if ((f = fopen(output, "wb")) == (FILE *)NULL) {
@@ -190,6 +191,7 @@ char outname[MAXSTR];
 FILE *outfile;
 DWORD key;
 int filter;
+PSDOC *doc = psfile.doc;
 	if ((doc == (PSDOC *)NULL) || (doc->doseps == (DOSEPS *)NULL)) {
 	    gserror(IDS_NOPREVIEW, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    return;
@@ -232,7 +234,7 @@ int filter;
 	}
 	else
 	    filter = FILTER_PS;
-	if (!get_filename(outname, TRUE, filter, 0, IDS_TOPICEDIT)) {
+	if (!get_filename(outname, TRUE, filter, 0, IDS_TOPICPREVIEW)) {
 	    fclose(epsfile);
 	    return;
 	}
@@ -714,7 +716,7 @@ int width, height;	/* size of preview */
 	if (tiff4) {
 	    tiff_word(TIFF_SHORT, bo, f);
 	    tiff_long(1, bo, f);
-	    tiff_short((WORD)width, bo, f);
+	    tiff_short((short)width, bo, f);
 	}
 	else {
 	    tiff_word(TIFF_LONG, bo, f);
@@ -726,7 +728,7 @@ int width, height;	/* size of preview */
 	if (tiff4) {
 	    tiff_word(TIFF_SHORT, bo, f);
 	    tiff_long(1, bo, f);
-	    tiff_short((WORD)height, bo, f);
+	    tiff_short((short)height, bo, f);
 	}
 	else {
 	    tiff_word(TIFF_LONG, bo, f);
@@ -897,7 +899,7 @@ char tpsname[MAXSTR];
 		return 1;
 	    }
 	    copy_bbox_header(tpsfile); /* adjust %%BoundingBox: comment */
-	    pscopyuntil(psfile.file, tpsfile, doc->endheader, doc->endtrailer, NULL);
+	    pscopyuntil(psfile.file, tpsfile, psfile.doc->endheader, psfile.doc->endtrailer, NULL);
 	    fclose(tpsfile);
 	    if ( (tpsfile = fopen(tpsname, "rb")) == (FILE *)NULL) {
 		play_sound(SOUND_ERROR);
@@ -917,7 +919,7 @@ char tpsname[MAXSTR];
 #else
 	/* create EPS file */
 	epsname[0] = '\0';
-	if (!get_filename(epsname, TRUE, FILTER_EPS, 0, IDS_TOPICEDIT)) {
+	if (!get_filename(epsname, TRUE, FILTER_EPS, 0, IDS_TOPICPREVIEW)) {
 	    unlink(tiffname);
 	    return 1;
 	}
@@ -972,7 +974,7 @@ char tpsname[MAXSTR];
 		fwrite(buffer, 1, count, epsfile);
 	}
 	else {
-	    pscopyuntil(psfile.file, epsfile, doc->beginheader, doc->endtrailer, NULL);
+	    pscopyuntil(psfile.file, epsfile, psfile.doc->beginheader, psfile.doc->endtrailer, NULL);
 	}
 	
 	/* copy tiff file */
@@ -1027,7 +1029,7 @@ write_interchange(FILE *f, LPBITMAP2 pbm, BOOL calc_bbox)
 	    devbbox.urx = prebmap.width;
 	    devbbox.ury = prebmap.height;
 	    devbbox.llx = devbbox.lly = 0;
-	    pscopyuntil(psfile.file, f, doc->beginheader, doc->endheader, NULL);
+	    pscopyuntil(psfile.file, f, psfile.doc->beginheader, psfile.doc->endheader, NULL);
 	}
 
 	bwidth = (((devbbox.urx-devbbox.llx) + 7) & ~7) >> 3; /* byte width with 1 bit/pixel */
@@ -1069,8 +1071,8 @@ write_interchange(FILE *f, LPBITMAP2 pbm, BOOL calc_bbox)
 	fputs(EOLSTR, f);
 	free(preview);
 	pscopyuntil(psfile.file, f, 
-	    doc->endpreview ? doc->endpreview : doc->endheader, 
-	    doc->endtrailer, NULL);
+	    psfile.doc->endpreview ? psfile.doc->endpreview : psfile.doc->endheader, 
+	    psfile.doc->endtrailer, NULL);
 }
 
 /* make an EPSI file with an Interchange Preview */
@@ -1096,7 +1098,7 @@ LPBITMAP2 pbm;
 #else
 	/* create EPI file */
 	epiname[0] = '\0';
-	if (!get_filename(epiname, TRUE, FILTER_EPI, 0, IDS_TOPICEDIT)) {
+	if (!get_filename(epiname, TRUE, FILTER_EPI, 0, IDS_TOPICPREVIEW)) {
 	    play_sound(SOUND_ERROR);
 	    release_bitmap();
 	    return 1;
@@ -1236,9 +1238,10 @@ copy_bbox_header(FILE *f)
     char *comment;
     BOOL bbox_written = FALSE;
     long position;
+    PSDOC *doc = psfile.doc;
 
     fseek(psfile.file, doc->beginheader, SEEK_SET);
-      if (!( (doc->boundingbox[LLX]==0) &&  (doc->boundingbox[LLY]==0) 
+    if (!( (doc->boundingbox[LLX]==0) &&  (doc->boundingbox[LLY]==0) 
           && (doc->boundingbox[URX]==0) &&  (doc->boundingbox[URY]==0) )) {
       position = ftell(psfile.file);
       while ( (comment = pscopyuntil(psfile.file, f, position,
@@ -1261,6 +1264,7 @@ copy_bbox_header(FILE *f)
 	    bbox.llx, bbox.lly, bbox.urx, bbox.ury);
       position = ftell(psfile.file);
       comment = pscopyuntil(psfile.file, f, position, doc->endheader, NULL);
+      free(comment);
     }
 }
 
@@ -1294,7 +1298,8 @@ char id[4];
 #ifdef EPSTOOL
 	strcpy(preview_name, upname);
 #else
-	if (!get_filename(preview_name, FALSE, FILTER_ALL, IDS_EPSUSERTITLE, IDS_TOPICEDIT))
+	preview_name[0] = '\0';
+	if (!get_filename(preview_name, FALSE, FILTER_ALL, IDS_EPSUSERTITLE, IDS_TOPICPREVIEW))
 	    return 1; /* failure */
 #endif
 
@@ -1341,7 +1346,7 @@ char id[4];
 #else
 	/* create EPS file */
 	epsname[0] = '\0';
-	if (!get_filename(epsname, TRUE, FILTER_EPS, 0, IDS_TOPICEDIT)) {
+	if (!get_filename(epsname, TRUE, FILTER_EPS, 0, IDS_TOPICPREVIEW)) {
 	    fclose(preview_file);
 	    return 1;
 	}
@@ -1359,7 +1364,7 @@ char id[4];
 	eps_header.id[2] = 0xd3;
 	eps_header.id[3] = 0xc6;
 	eps_header.ps_begin = sizeof(eps_header);
-	eps_header.ps_length = doc->endtrailer - doc->beginheader;
+	eps_header.ps_length = psfile.doc->endtrailer - psfile.doc->beginheader;
 	if (type == WMF) {
 	    eps_header.mf_begin = eps_header.ps_begin + eps_header.ps_length;
 	    eps_header.mf_length = preview_length;
@@ -1383,7 +1388,7 @@ char id[4];
 	eps_header.tiff_length = reorder_dword(eps_header.tiff_length);
 	fwrite(&eps_header, sizeof(eps_header), 1, epsfile);
 	rewind(psfile.file);
-	pscopyuntil(psfile.file, epsfile, doc->beginheader, doc->endtrailer, NULL);
+	pscopyuntil(psfile.file, epsfile, psfile.doc->beginheader, psfile.doc->endtrailer, NULL);
 	
 	/* copy preview file */
 	buffer = malloc(COPY_BUF_SIZE);
@@ -1405,3 +1410,4 @@ char id[4];
 #undef WMF
 }
 
+

@@ -16,15 +16,17 @@
 
 # gvpm.mak
 # PM GSview 
-# requires emx 0.9b
+# requires emx 0.9b or later
 #
 # edit COMPBASE and EMXPATH as required.
 
-# set USE_EMX=0 for BCC
-# set USE_EMX=1 for EMX/GCC
+# set one of the following to non-zero
 USE_EMX=1
+USE_BCC=0
+USE_IBM=0
 # USE_OMF=1 for EMX/GCC with LINK386
 USE_OMF=1
+
 # DEBUG=1 for debugging
 DEBUG=0
 
@@ -34,18 +36,37 @@ DRIVE=c:
 COMP=gcc
 COMPBASE=$(DRIVE)\emx
 EMXPATH=$(DRIVE)/emx
-!if $(DEBUG)
-DEBUGFLAG=-g
-DEBUGLINK=/DEBUG
-!endif
 !if $(USE_OMF)
-FLAGS=-Zomf -Zmts -O $(DEBUGFLAG)
 OBJ=obj
-!else
-FLAGS=-Zmts -O $(DEBUGFLAG)
-OBJ=o
+!if $(DEBUG)
+CDEBUG=-g
+LDEBUG=/DEBUG
 !endif
+FLAGS=-O -Zomf -Zmts $(CDEBUG)
 !else
+OBJ=o
+!if $(DEBUG)
+CDEBUG=-g
+LDEBUG=-g
+!endif
+FLAGS=-O -Zmts $(CDEBUG)
+!endif
+!endif
+
+!if $(USE_IBM)
+# ICC flags
+COMP=icc
+COMPBASE=d:\ibmcpp
+EMXPATH=d:/ibmcpp
+!if $(DEBUG)
+CDEBUG=/Ti /Gm
+LDEBUG=/DEBUG
+!endif
+FLAGS=/Q $(CDEBUG) /Sm /Id:\toolkit\h;d:\ibmcpp\include -DNO_MMOS2
+OBJ=obj
+!endif
+
+!if $(USE_BCC)
 # BCC flags
 COMP=bcc
 COMPBASE=d:\bcos2
@@ -54,12 +75,6 @@ FLAGS=-v -I$(INCDIR) -sm
 OBJ=obj
 !endif
 
-# ICC flags
-#COMP=icc
-#COMPBASE=c:\ibmc
-#EMXPATH=c:/ibmc
-#FLAGS=/Gm /Ti /Sm /Ic:\toolkt20\c\os2h;c:\ibmc\include -DNO_MMOS2
-#OBJ=obj
 
 COMPDIR=$(COMPBASE)\bin
 INCDIR=$(EMXPATH)/include
@@ -68,61 +83,77 @@ LIBDIR=$(EMXPATH)/lib
 
 OBJS=gvpm.$(OBJ) gvpdlg.$(OBJ) gvpdisp.$(OBJ) gvpeps.$(OBJ) gvpinit.$(OBJ)\
    gvpmisc.$(OBJ) gvpprn.$(OBJ)\
-   gvccmd.$(OBJ) gvcdisp.$(OBJ) ps.$(OBJ) gvceps.$(OBJ) gvcmisc.$(OBJ)\
-   gvcprf.$(OBJ) gvcprn.$(OBJ) gvctext.$(OBJ)
+   gvccmd.$(OBJ) gvcdisp.$(OBJ) gvceps.$(OBJ) gvcinit.$(OBJ) gvcbeta.$(OBJ)\
+   gvcmisc.$(OBJ) gvcprf.$(OBJ) gvcprn.$(OBJ) gvctext.$(OBJ)\
+   gvpdll.$(OBJ) gvcdll.$(OBJ)  gvcpdf.$(OBJ) ps.$(OBJ) 
+HDRS=gvpm.h ps.h gvcfn.h 
 
-all: gvpm.exe gvpm.hlp gvpm.inf gvpm.tex os2setup.exe
+all: gvpm.exe gvpm.hlp gvpm.inf gvpm.tex gvpgs.exe os2setup.exe
 
 .c.$(OBJ):
 	$(COMP) $(FLAGS) -DOS2 -c $*.c
 
 
-gvpm.$(OBJ): gvpm.c gvpm.h ps.h gvpm.ipf
 
-gvpdlg.$(OBJ): gvpdlg.c gvpm.h ps.h gvcrc.h
+gvpm.$(OBJ): gvpm.c gvpm.ipf $(HDRS)
 
-gvpdisp.$(OBJ): gvpdisp.c gvpm.h ps.h
+gvpdlg.$(OBJ): gvpdlg.c gvcrc.h $(HDRS)
 
-gvpeps.$(OBJ): gvpeps.c gvpm.h gvceps.h ps.h
+gvpdll.$(OBJ): gvpdll.c gvcrc.h gsdll.h $(HDRS)
 
-gvpinit.$(OBJ): gvpinit.c gvpm.h ps.h
+gvpdisp.$(OBJ): gvpdisp.c  $(HDRS)
 
-gvpmisc.$(OBJ): gvpmisc.c gvpm.h ps.h
+gvpeps.$(OBJ): gvpeps.c gvceps.h $(HDRS)
 
-gvpprn.$(OBJ): gvpprn.c gvpm.h ps.h
+gvpinit.$(OBJ): gvpinit.c $(HDRS)
 
-gvccmd.$(OBJ): gvccmd.c gvpm.h ps.h gvcrc.h
+gvpmisc.$(OBJ): gvpmisc.c $(HDRS)
 
-gvcdisp.$(OBJ): gvcdisp.c gvpm.h ps.h
+gvpprn.$(OBJ): gvpprn.c $(HDRS)
 
-ps.$(OBJ): ps.c gvpm.h ps.h
+gvccmd.$(OBJ): gvccmd.c gvcrc.h $(HDRS)
 
-gvceps.$(OBJ): gvceps.c gvpm.h ps.h
+gvcdisp.$(OBJ): gvcdisp.c $(HDRS)
 
-gvcmisc.$(OBJ): gvcmisc.c gvpm.h ps.h gvcrc.h
+gvcdll.$(OBJ): gvcdll.c gvcrc.h gsdll.h $(HDRS)
 
-gvcprn.$(OBJ): gvcprn.c gvpm.h ps.h
+ps.$(OBJ): ps.c
 
-gvcprf.$(OBJ): gvcprf.c gvpm.h gvcprf.h
+gvcbeta.obj: gvcbeta.c gvcbeta.h $(HDRS)
 
-gvctext.$(OBJ): gvctext.c gvpm.h ps.h
+gvceps.$(OBJ): gvceps.c gvceps.h $(HDRS)
 
-gvpm.res: gvpm.rc gvpm.h binary\gvpm.ico
+gvcmisc.$(OBJ): gvcmisc.c gvcrc.h $(HDRS)
+
+gvcpdf.$(OBJ): gvcpdf.c $(HDRS)
+
+gvcprn.$(OBJ): gvcprn.c $(HDRS)
+
+gvcprf.$(OBJ): gvcprf.c $(HDRS)
+
+gvctext.$(OBJ): gvctext.c $(HDRS)
+
+gvpm.res: gvpm.rc gvpm.h binary\gvpm1.ico
 	rc -i $(COMPBASE)\include -r $*.rc
 
 gvpm.exe: $(OBJS) gvpm.res gvpm.def
 !if $(USE_EMX)
 !if $(USE_OMF)
-#	LINK386 $(DEBUGLINK) $(COMPBASE)\lib\crt0.obj $(OBJS), gvpm.exe, ,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\mt\c.lib $(COMPBASE)\lib\mt\c_app.lib $(COMPBASE)\lib\mt\emx.lib $(COMPBASE)\lib\emx2.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, gvpm.def
-	$(COMP) $(FLAGS) -o gvpm.exe $(OBJS) gvpm.def
+	$(COMP) $(FLAGS) -o gvpm $(OBJS) gvpm.def
 	rc gvpm.res gvpm.exe
 !else
 	$(COMP) $(FLAGS) -o gvpm $(OBJS)
 	emxbind -p -rgvpm.res -dgvpm.def $(COMPDIR)\emxl.exe gvpm gvpm.exe
 	del $*
 !endif
-!else
-	$(COMP) $(FLAGS) -egvpm.exe $(OBJS)
+!endif
+!if $(USE_IBM)
+#	$(COMP) $(FLAGS) /Fe gvpm.exe $(OBJS) gvpm.def
+	LINK386 /NOE /nologo $(LDEBUG) /noi /align:16 /exepack /base:65536 $(OBJS), gvpm.exe, , ,gvpm.def
+	RC gvpm.res gvpm.exe
+!endif
+!if $(USE_BCC)
+	$(COMP) $(FLAGS) -egvpm.exe $(OBJS) gvpm.def
 	RC gvpm.res gvpm.exe
 !endif
 
@@ -131,11 +162,13 @@ os2setup.res: os2setup.rc setup.h
 
 os2setup.exe: os2setup.c setup.h os2setup.res os2setup.def
 !if $(USE_EMX)
-	$(COMP) -Zomf -Zsys -c -o setupprf.obj gvcprf.c
-	$(COMP) -Zomf -Zsys $(DEBUGFLAG) $*.c setupprf.obj os2setup.def
+	$(COMP) -Zomf -Zsys -c -o os2prf.obj gvcprf.c
+	$(COMP) -Zomf -Zsys -c -o os2beta.obj gvcbeta.c
+	$(COMP) -Zomf -Zsys $(DEBUGFLAG) $*.c os2prf.obj os2beta.obj os2setup.def
 !else
-	$(COMP) -c /Foos2setup.obj gvcprf.c
-	$(COMP) $*.c setupprf.obj os2setup.def
+	$(COMP) -c /Foos2prf.obj gvcprf.c
+	$(COMP) -c /Foos2beta.obj gvcbeta.c
+	$(COMP) $*.c os2prf.obj os2beta.obj os2setup.def
 !endif
 	rc os2setup.res os2setup.exe
 	
@@ -214,48 +247,79 @@ doc2tex.exe: doc2tex.c
 !endif
 
 
-prezip: gvpm.exe gvpm.hlp gvpm.inf os2setup.exe README.GV FILE_ID.DIZ LICENCE
+gvpgs.res: gvpgs.rc gvpgs.h gvcrc.h
+	rc -i $(COMPBASE)\include -r $*.rc
+
+gvpgs.$(OBJ): gvpgs.c gvpgs.h gvcrc.h
+
+gvpgs.exe: gvpgs.$(OBJ) gvpgs.res gvpgs.def
+!if $(USE_EMX)
+!if $(USE_OMF)
+	$(COMP) $(FLAGS) -o gvpgs gvpgs.$(OBJ) gvpgs.def
+	rc gvpgs.res gvpgs.exe
+!else
+	$(COMP) $(FLAGS) -o gvpgs gvpgs.$(OBJ)
+	emxbind -p -rgvpgs.res -dgvpgs.def $(COMPDIR)\emxl.exe gvpgs gvpgs.exe
+	del $*
+!endif
+!endif
+!if $(USE_IBM)
+	LINK386 /NOE /nologo $(LDEBUG) /noi /align:16 /exepack /base:65536 gvpgs.obj, gvpgs.exe, , ,gvpgs.def
+	RC gvpgs.res gvpgs.exe
+!endif
+
+
+prezip: gvpm.exe gvpm.hlp gvpm.inf README.TXT FILE_ID.DIZ LICENCE
 	copy gvpm.exe ..
 !if $(USE_EMX) && !$(USE_OMF)
 	emxbind -s ../gvpm.exe
 !endif
+	-del ..\gvpm.eas
+	eautil ..\gvpm.exe ..\gvpm.eas /s
 	copy gvpm.hlp ..
 	copy gvpm.inf ..
-	copy README.GV ..\README.GV
+	copy gvpgs.exe ..
+	copy os2setup.exe ..
+	copy printer.ini ..\printer.ini
+	copy README.TXT ..\README.TXT
 	copy FILE_ID.DIZ ..\FILE_ID.DIZ
 	copy LICENCE ..\LICENCE
-	copy os2setup.exe ..
 	-del ..\epstool.zip
-	-del ..\gsgrab.zip
 	-del ..\gsview.zip
+	-del ..\pstotext.zip
 	-del ..\src.zip
-	-del ..\gsviewXX.zip
+	-del gsviewXX.zip
 
 zip: prezip
 	cd ..
-	zip -9 -@ epstool.zip < src\gvcliste.doc
-	zip -9 -@ gsgrab.zip  < src\gvclistg.doc
-	zip -9 -@ src.zip     < src\gvclists.doc
+	zip -9 -@ epstool.zip < src\gvcliste.txt
+	zip -9 -@ pstotext.zip     < src\gvclistp.txt
+	zip -9 -@ src.zip     < src\gvclists.txt
 	cd ..
-	zip -9 -@ gsview\gsview.zip  < gsview\src\gvclist.doc
+	zip -9 -@ gsview\gsview.zip  < gsview\src\gvclist.txt
 	cd gsview
-	zip -9 gsviewXX.zip gsview.zip README.GV FILE_ID.DIZ os2setup.exe os2unzip.exe winsetup.exe winunzip.exe 
+	zip -9 gsviewXX.zip gsview.zip README.TXT FILE_ID.DIZ LICENCE os2setup.exe os2unzip.exe setup.exe wizunz32.dll
 	cd src
 
 clean:
 	-del gvpm.res
 	-del gvpm.$(OBJ)
-	-del gvpdlg.$(OBJ)
 	-del gvpdisp.$(OBJ)
+	-del gvpdlg.$(OBJ)
+	-del gvpdll.$(OBJ)
 	-del gvpeps.$(OBJ)
 	-del gvpinit.$(OBJ)
 	-del gvpmisc.$(OBJ)
 	-del gvpprn.$(OBJ)
-	-del gvccmd.$(OBJ)
-	-del gvcdisp.$(OBJ)
 	-del ps.$(OBJ)
+	-del gvcbeta.$(OBJ)
+	-del gvccmd.$(OBJ)
+	-del gvcdll.$(OBJ)
+	-del gvcdisp.$(OBJ)
 	-del gvceps.$(OBJ)
+	-del gvcinit.$(OBJ)
 	-del gvcmisc.$(OBJ)
+	-del gvcpdf.$(OBJ)
 	-del gvcprf.$(OBJ)
 	-del gvcprn.$(OBJ)
 	-del gvctext.$(OBJ)
@@ -275,9 +339,12 @@ clean:
 	-del gvpm.toc
 	-del gvphelp.h
 	-del gsview.doc
-	-del setupprf.obj
+	-del gvpgs.res
+	-del gvpgs.$(OBJ)
 	-del os2setup.obj
 	-del os2setup.res
+	-del os2beta.obj
+	-del os2prf.obj
 
 veryclean: clean
 	-del gvpm.exe
@@ -286,4 +353,5 @@ veryclean: clean
 	-del gvpm.tex
 	-del gvpm.htm
 	-del gsview.htm
+	-del gvpgs.exe
 	-del os2setup.exe

@@ -18,12 +18,14 @@
 /* gvcrc.h */
 /* Common Resource header file */
 
-#define GSVIEW_VERSION "1996-01-10  1.4"
-#define EMX_NEEDED "0.9b"
+#include "gvcver.h"
 
 #define PACKED			/* packing set by other means */
 
 #define ID_GSVIEW 1
+#define ID_GSVIEW2 2
+#define ID_GSVIEW3 3
+#define ID_GSVIEW_DOC	4
 
 #define IDD_ABOUT 	50
 #define IDD_INPUT 	51
@@ -39,12 +41,14 @@
 #define IDM_EXTRACT	104
 #define IDM_PSTOEPS	105
 #define IDM_CLOSE	106
-#define IDM_INFO	107
+#define IDM_CLOSE_DONE	107
+#define IDM_INFO	108
 #define IDM_PRINT	110
 #define IDM_PRINTTOFILE 111
 #define IDM_SPOOL	112
-#define IDM_EXIT	113
-#define IDM_DROP	114
+#define IDM_GSMESS      113
+#define IDM_EXIT	114
+#define IDM_DROP	115
 
 #define IDM_EDITMENU	150
 #define IDM_COPYCLIP	151
@@ -59,9 +63,10 @@
 #define IDM_EXTEPSMENU	160
 #define IDM_EXTRACTPS	161
 #define IDM_EXTRACTPRE	162
-#define IDM_TEXTEXTRACT	163
-#define IDM_TEXTFIND	164
-#define IDM_TEXTFINDNEXT 165
+#define IDM_TEXTEXTRACT	     163
+#define IDM_TEXTEXTRACT_SLOW 164
+#define IDM_TEXTFIND	     165
+#define IDM_TEXTFINDNEXT     166
 
 #define IDM_OPTIONMENU	  174
 #define IDM_GSCOMMAND	  175
@@ -72,12 +77,13 @@
 #define IDM_SAVEDIR	  180
 #define IDM_BUTTONSHOW	  181
 #define IDM_FITPAGE	  182
-#define IDM_QUICK	  183
-#define IDM_AUTOREDISPLAY 184
-#define IDM_EPSFCLIP	  185
-#define IDM_EPSFWARN	  186
-#define IDM_IGNOREDSC	  187
-#define IDM_SHOWBBOX      188
+#define IDM_QUICK_OPEN	  183
+#define IDM_QUICK_TEXT	  184
+#define IDM_AUTOREDISPLAY 185
+#define IDM_EPSFCLIP	  186
+#define IDM_EPSFWARN	  187
+#define IDM_IGNOREDSC	  188
+#define IDM_SHOWBBOX      189
 
 #define IDM_UNITMENU	190
 #define IDM_UNITPT	191
@@ -89,19 +95,16 @@
 #define IDM_DRAWGPI	197
 #define IDM_DRAWWIN	198
 
-#define IDM_GSVERMENU	200
-#define IDM_GS261	201
-#define IDM_GS333	202
-#define IDM_GS351	203
-
-#define IDM_VIEWMENU    210
-#define IDM_NEXT	211
-#define IDM_NEXTSKIP	212
-#define IDM_PREV	213
-#define IDM_PREVSKIP	214
-#define IDM_GOTO	215
-#define IDM_REDISPLAY   216
-#define IDM_SKIP	217
+#define IDM_VIEWMENU    200
+#define IDM_NEXT	201
+#define IDM_NEXTHOME	202
+#define IDM_NEXTSKIP	203
+#define IDM_PREV	204
+#define IDM_PREVHOME	205
+#define IDM_PREVSKIP	206
+#define IDM_GOTO	207
+#define IDM_REDISPLAY   208
+#define IDM_SKIP	209
 
 #define IDM_ORIENTMENU	220
 #define IDM_PORTRAIT	221
@@ -110,21 +113,12 @@
 #define IDM_SEASCAPE	224
 #define IDM_SWAPLANDSCAPE 225
 
-#define IDM_MEDIAMENU	250
-#define IDM_RESOLUTION  251
-#define IDM_ZOOM	252
-#define IDM_ZOOMRES	253
-#define IDM_MAGPLUS	254
-#define IDM_MAGMINUS	255
+#define IDM_DISPLAYSETTINGS	250
+#define IDM_ZOOM	251
+#define IDM_MAGPLUS	252
+#define IDM_MAGMINUS	253
 
-#define IDM_DEPTHMENU	260
-#define IDM_DEPTHDEF	261
-#define IDM_DEPTH1	262
-#define IDM_DEPTH4	263
-#define IDM_DEPTH8	264
-#define IDM_DEPTH16	265
-#define IDM_DEPTH24	266
-
+#define IDM_MEDIAMENU	300
 #define IDM_LETTER	301
 #define IDM_LETTERSMALL	302
 #define IDM_TABLOID	303
@@ -175,69 +169,80 @@
 #define SOUND_PATH	503
 #define SOUND_TEST	504
 
-#define IDD_SPOOL	524
-#define SPOOL_PORT	525
-#define SPOOL_PORTTEXT	526
-#define SPOOL_TOFILE	527
+#define IDD_SPOOL	514
+#define SPOOL_PORT	515
+#define SPOOL_PORTTEXT	516
+#define SPOOL_TOFILE	517
 
-#define CANCEL_PCDONE	541
+#define CANCEL_PCDONE	521
 
-#define IDD_PAGE	550
-#define IDD_MULTIPAGE	551
-#define PAGE_LIST	552
-#define PAGE_LISTTEXT	553
-#define PAGE_ALL	554
-#define PAGE_ODD	555
-#define PAGE_EVEN	556
+#define IDD_PAGE	530
+#define IDD_MULTIPAGE	531
+#define PAGE_LIST	532
+#define PAGE_LISTTEXT	533
+#define PAGE_ALL	534
+#define PAGE_ODD	535
+#define PAGE_EVEN	536
 
-#define IDD_DEVICE	560
-#define DEVICE_NAME	561
-#define DEVICE_RES	562
-#define DEVICE_RESTEXT	563
-#define DEVICE_PROP	564
+#define IDD_DEVICE	540
+#define DEVICE_NAME	541
+#define DEVICE_RES	542
+#define DEVICE_RESTEXT	543
+#define DEVICE_PROP	544
 
-#define IDD_PROP	570
-#define PROP_NAME	571
-#define PROP_VALUE	572
-#define PROP_EDIT	573
-#define PROP_NEW	574
-#define PROP_XOFFSET	575
-#define PROP_YOFFSET	576
+#define IDD_PROP	550
+#define PROP_NAME	551
+#define PROP_VALUE	552
+#define PROP_EDIT	553
+#define PROP_NEW	554
+#define PROP_XOFFSET	555
+#define PROP_YOFFSET	556
 
-#define IDD_EDITPROP	580
-#define EDITPROP_STRING	581
-#define EDITPROP_NUMBER	582
-#define EDITPROP_NAME	583
-#define EDITPROP_VALUE	584
-#define NEWPROP_DEL	55
-#define EDITPROP_DEL	585
+#define IDD_EDITPROP	560
+#define EDITPROP_STRING	561
+#define EDITPROP_NUMBER	562
+#define EDITPROP_NAME	563
+#define EDITPROP_VALUE	564
+#define NEWPROP_DEL	565
+#define EDITPROP_DEL	566
 
-#define IDD_INSTALL	590
-#define INSTALL_EXE	591
-#define INSTALL_INCLUDE	592
-#define INSTALL_OTHER	593
+#define IDD_TEXTWIN	570
+#define TEXTWIN_MLE	571
+#define TEXTWIN_COPY	572
 
-#define IDD_BBOX	595
-#define BB_PROMPT	596
-#define BB_CLICK	597
+#define IDD_BBOX	575
+#define BB_PROMPT	576
+#define BB_CLICK	577
+
+#define IDD_INSTALL	580
+#define INSTALL_DLL	581
+#define INSTALL_INCLUDE	582
+#define INSTALL_OTHER	583
+
+#define IDD_DSET	590
+#define DSET_RES	591
+#define DSET_ZOOMRES	592
+#define DSET_DEPTH	593
+#define DSET_TALPHA	594
+#define DSET_GALPHA	595
+#define DSET_DRAWMETHOD	596
+
 
 /* file filters */
 #define FILTER_PSALL	0
 #define FILTER_PS	1
 #define FILTER_EPS	2
 #define FILTER_EPI	3
-#define FILTER_ALL	4
-#define FILTER_BMP	5
-#define FILTER_TIFF	6
-#define FILTER_WMF	7
-#define FILTER_TXT	8
+#define FILTER_PDF	4
+#define FILTER_ALL	5
+#define FILTER_BMP	6
+#define FILTER_TIFF	7
+#define FILTER_WMF	8
+#define FILTER_TXT	9
 
 /* string constants */
 #define IDS_FILTER	601
-#define IDS_TITLE	602
 #define IDS_HELPFILE	603
-#define IDS_WRONGGS	604
-#define IDS_BUSY	605
 #define IDS_FILENOTFOUND 606
 #define IDS_PRINTBUSY	607
 
@@ -245,81 +250,83 @@
 #define IDS_NOFILE	611
 #define IDS_PAGE	612
 #define IDS_NOPAGE	613
-#define IDS_LANDSCAPE	614
-#define IDS_PORTRAIT	615
-#define IDS_ASCEND	616
-#define IDS_DESCEND	617
-#define IDS_SPECIAL	618
-#define IDS_EPSF	619
-#define IDS_EPSI	620
-#define IDS_EPST	621
-#define IDS_EPSW	622
-#define IDS_DSC		623
-#define IDS_NOTDSC	624
-#define IDS_PDF         625
-#define IDS_IGNOREDSC   626
-#define IDS_PAGEINFO	627
+#define IDS_PAGESPECIAL	614
+#define IDS_LANDSCAPE	615
+#define IDS_PORTRAIT	616
+#define IDS_ASCEND	617
+#define IDS_DESCEND	618
+#define IDS_SPECIAL	619
+#define IDS_PAGEINFO	620
 
-#define IDS_OUTPUTFILE	630
-#define IDS_PRINTINGALL	631
-#define IDS_PRINTFILE	632
-#define IDS_NOSPOOL	633
-#define IDS_SELECTPAGE	634
-#define IDS_SELECTPAGES	635
-#define IDS_TIMEOUT	636
-#define IDS_NOTIMER	637
-#define IDS_NOTOPEN	638
-#define IDS_CANNOTRUN	639
-#define IDS_TOOLONG	640
-#define IDS_NOMORE	642
-#define IDS_GSCOMMAND	643
-#define IDS_RES		644
-#define IDS_ZOOMRES	645
-#define IDS_NOZOOM	646
-#define	IDS_USERWIDTH	647
-#define	IDS_USERHEIGHT	648
-#define IDS_BADEPS	649
-#define IDS_NOPREVIEW	650
-#define IDS_NOTDFNAME   651
-#define IDS_NOTEMP	652
-#define IDS_CANCELDONE	653
-#define IDS_BADCLI      654
-#define IDS_DUPOPT	655
-#define IDS_TEXTFIND	656
-#define IDS_TEXTNOTFIND	657
-#define IDS_PIPE_EOPEN	658
-#define IDS_PIPE_EMEM	659
+#define IDS_EPSF	625
+#define IDS_EPSI	626
+#define IDS_EPST	627
+#define IDS_EPSW	628
+#define IDS_DSC		629
+#define IDS_NOTDSC	630
+#define IDS_PDF         631
+#define IDS_IGNOREDSC   632
+#define IDS_CTRLD	633
+#define IDS_PJL		634
 
-#define IDS_SOUNDNAME	670
-#define IDS_SNDPAGE	671
-#define IDS_SNDNOPAGE	672
-#define IDS_SNDNONUMBER 673
-#define IDS_SNDNOTOPEN	674
-#define IDS_SNDERROR	675
-#define IDS_SNDTIMEOUT	676
-#define IDS_SNDSTART	677
-#define IDS_SNDEXIT	678
-#define IDS_SOUNDNOMM	679
-#define IDS_NONE	680
-#define IDS_SPKR	681
+#define IDS_OUTPUTFILE	640
+#define IDS_PRINTINGALL	641
+#define IDS_PRINTFILE	642
+#define IDS_PRINTAGAIN	643
+#define IDS_SELECTPAGE	645
+#define IDS_SELECTPAGES	646
+#define IDS_NOTOPEN	649
+#define IDS_CANNOTRUN	650
+#define IDS_TOOLONG	651
+#define IDS_NOMORE	652
+#define IDS_GSCOMMAND	653
+#define IDS_NOZOOM	656
+#define	IDS_USERWIDTH	657
+#define	IDS_USERHEIGHT	658
+#define IDS_BADEPS	659
+#define IDS_NOPREVIEW	660
+#define IDS_NOTDFNAME   661
+#define IDS_NOTEMP	662
+#define IDS_CANCELDONE	663
+#define IDS_BADCLI      664
+#define IDS_DUPOPT      665
+#define IDS_TEXTFIND	666
+#define IDS_TEXTNOTFIND	667
+
+
+#define IDS_SOUNDNAME	680
+#define IDS_SNDPAGE	681
+#define IDS_SNDNOPAGE	682
+#define IDS_SNDNONUMBER 683
+#define IDS_SNDNOTOPEN	684
+#define IDS_SNDERROR	685
+#define IDS_SNDTIMEOUT	686
+#define IDS_SNDSTART	687
+#define IDS_SNDEXIT	688
+#define IDS_SNDBUSY	689
+#define IDS_SOUNDNOMM	690
+#define IDS_NONE	691
+#define IDS_SPKR	692
 
 /* help topics */
 #define IDS_TOPICROOT	701
 #define IDS_TOPICOPEN	702
 #define IDS_TOPICPRINT	703
-#define IDS_TOPICPROP	704
+#define IDS_TOPICPROP   704
 #define IDS_TOPICEDITPROP 705
-#define IDS_TOPICEDIT	706
-#define IDS_TOPICGSCMD	707
-#define IDS_TOPICSOUND	708
-#define IDS_TOPICMEDIA  709
-#define IDS_TOPICPSTOEPS 710
-#define	IDS_TOPICGOTO    711
-#define IDS_TOPICINSTALL 712
-#define IDS_TOPICTEXT    713
-#define IDS_TOPICKEYS    714
-#define IDS_TOPICMESS    715
-#define IDS_TOPICSPOOL   716
+#define IDS_TOPICCLIP   706
+#define IDS_TOPICPREVIEW 707
+#define IDS_TOPICGSCMD	708
+#define IDS_TOPICSOUND	709
+#define IDS_TOPICDSET   710
+#define IDS_TOPICMEDIA  711
+#define IDS_TOPICPSTOEPS 712
+#define	IDS_TOPICGOTO    713
+#define IDS_TOPICINSTALL 714
+#define IDS_TOPICTEXT    715
+#define IDS_TOPICKEYS    716
+#define IDS_TOPICMESS    717
+#define IDS_TOPICSPOOL   718
 
 /* ps_to_eps */
 #define IDS_BBPROMPT	750
@@ -340,10 +347,29 @@
 #define IDS_WAITREAD	771
 #define IDS_WAITWRITE	772
 #define IDS_WAITDRAW	773
-#define IDS_WAITGSOPEN	774
-#define IDS_WAITGSCLOSE	775
-#define IDS_WAITPRINT	776
-#define IDS_WAITSEARCH	777
+#define IDS_WAITDRAW_PC	774
+#define IDS_WAITGSOPEN	775
+#define IDS_WAITGSCLOSE	776
+#define IDS_WAITPRINT	777
+#define IDS_WAITSEARCH	778
+#define IDS_WAITTEXT  	779
+
+/* debug messages */
+#define IDS_DEBUG_DFISLOCKED   780
+#define IDS_DEBUG_DFISOPEN     781
+#define IDS_DEBUG_DFISMISSING  782
+#define IDS_DEBUG_DFCHANGED    783
+#define IDS_DEBUG_DFISCLOSED   784
+
+/* process delayed messages */
+#define IDS_PROCESS_GSLOAD_FAIL  785
+#define IDS_PROCESS_INIT_FAIL    786
+#define IDS_PROCESS_VIEWER_FAIL  787
+#define IDS_PROCESS_EXECUTE_FAIL 788
+
+/* PDF messages */
+#define IDS_PDFNOPAGE		790
+#define IDS_PDFEXTRACTALL	791
 
 /* filter strings */
 #define IDS_FILTER_BASE	800
@@ -351,6 +377,7 @@
 #define IDS_FILTER_PS	IDS_FILTER_BASE+FILTER_PS
 #define IDS_FILTER_EPS	IDS_FILTER_BASE+FILTER_EPS
 #define IDS_FILTER_EPI	IDS_FILTER_BASE+FILTER_EPI
+#define IDS_FILTER_PDF	IDS_FILTER_BASE+FILTER_PDF
 #define IDS_FILTER_ALL	IDS_FILTER_BASE+FILTER_ALL
 #define IDS_FILTER_BMP	IDS_FILTER_BASE+FILTER_BMP
 #define IDS_FILTER_TIFF	IDS_FILTER_BASE+FILTER_TIFF
@@ -359,8 +386,7 @@
 
 
 /* RCDATA resources */
-#define IDR_ORIENT	900
-#define IDR_ORIENT3	901
+#define IDR_VIEWER	902
 #define IDR_EPSFWARN	903
 #define IDR_DEVICES	904
 #define IDR_PORTS	905
@@ -368,3 +394,24 @@
 
 /* cursors */
 #define IDP_CROSSHAIR  910
+
+/* window messages */
+
+#define WM_GSV16SPL    WM_USER+1	/* 16 bit spooler interface */
+#define WM_GSWAIT      WM_USER+2	/* info_wait from dll thread */
+#define WM_GSMESSBOX   WM_USER+3	/* delayed message box */
+#define WM_GSSHOWMESS  WM_USER+4	/* delayed show messages */
+#define WM_GSREDISPLAY WM_USER+5	/* document changed during display */
+#define WM_GSTITLE     WM_USER+6	/* change window title */
+#define WM_GSPERCENT   WM_USER+7	/* percent processed for status line */
+#define WM_GSTEXTINDEX WM_USER+8	/* load text index */
+
+/* messages for Ghostscript events */	/* needs gsdll.h */
+#define WM_GSDEVICE    WM_USER+10+GSDLL_DEVICE
+#define WM_GSSYNC      WM_USER+10+GSDLL_SYNC
+#define WM_GSPAGE      WM_USER+10+GSDLL_PAGE
+#define WM_GSSIZE      WM_USER+10+GSDLL_SIZE
+
+/* non standard scroll bar code */
+#define SB_FIND WM_USER
+

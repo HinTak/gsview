@@ -240,6 +240,7 @@ process_line(line, b)
 	static int startpage = 1;
 	char str[MAX_LINE_LEN];
 	char topic[MAX_LINE_LEN];
+	char *hex = "0123456789ABCDEF";
 	int k, l;
 	static int tabl=0;
 	static int para=0;
@@ -335,7 +336,15 @@ process_line(line, b)
 				}
 				break;
 			default:
-				line2[j] = line[i];
+				if (line[i] & 0x80) {
+				    /* extended characters so use hexadecimal */
+				    line2[j++] = (char)0x5e; /* \ */
+				    line2[j++] = (char)0x27; /* ' */
+				    line2[j++] = hex[(line[i]&0xf0)>>4];
+				    line2[j] = hex[(line[i]&0x0f)];
+				}
+				else 
+				    line2[j] = line[i];
 			}
 		i++;
 		j++;

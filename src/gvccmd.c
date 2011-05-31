@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -24,188 +24,223 @@
 #include "gvpm.h"
 #endif
 
-void gsview_depth(int new_depth);
-void gsview_gsversion(int new_version);
+void gsview_drawmethod(int new_drawmethod);
 BOOL gsview_usersize(void);
 void gsview_unzoom(void);
-void gsview_drawmethod(int new_drawmethod);
 
 /* gsview menu commands */
 int
 gsview_command(int command)
 {
-char prompt[MAXSTR];		/* input dialog box prompt and message box string */
-char answer[MAXSTR];		/* input dialog box answer string */
     switch (command) {
 	case IDM_OPEN:
-		dfreopen();
+		if (pending.psfile) {
+		    play_sound(SOUND_BUSY);
+		    return 0;
+		}
 		gsview_display();
-		dfclose();
 		return 0;
 	case IDM_CLOSE:
-		dfreopen();
-	    	if (gsprog.valid)
-		    gsview_endfile();
-		gsview_unzoom();
-		psfile.name[0] = '\0';
-		dfclose();
-		if (page_list.select)
-			free(page_list.select);
-		page_list.select = NULL;
-		if (doc)
-			psfree(doc);
-		doc = (PSDOC *)NULL;
+		/* doesn't unload DLL */
+		/* close file */
+	  	if (gsdll.valid && gsdll.state) {
+		    PSFILE *tpsfile;
+		    if (pending.psfile) {
+			play_sound(SOUND_BUSY);
+			return 0;
+		    }
+		    tpsfile = (PSFILE *)malloc(sizeof(PSFILE));
+		    if (tpsfile == NULL)
+			return 0;
+		    memset((char *)tpsfile, 0, sizeof(PSFILE));
+		    pending.psfile = tpsfile;
+		    pending.now = TRUE;
+		    if (psfile.doc==(PSDOC *)NULL)
+			pending.abort = TRUE;
+		}
+		else {
+		    /* DLL isn't loaded */
+		    if (psfile.file)
+			dfclose();	/* just to make sure */
+		    psfile_free(&psfile);
+		    post_img_message(WM_GSTITLE, 0);
+		    info_wait(IDS_NOWAIT);
+		}
 		return 0;
+	case IDM_CLOSE_DONE:
+		if (selectname[0] != '\0') {
+		    /* pending IDM_SELECT */
+		    PSFILE *tpsfile;
+		    tpsfile = gsview_openfile(selectname);
+		    if (tpsfile) {
+		        psfile = *tpsfile;
+		        free(tpsfile);
+		    }
+		    selectname[0] = '\0';
+		    post_img_message(WM_GSTITLE, 0);
+		    info_wait(IDS_NOWAIT);
+		}
+		return 0;
+	case IDM_NEXTHOME:
+#ifdef _Windows
+		PostMessage(hwndimgchild ,WM_VSCROLL,SB_TOP,0L);
+#else
+		WinPostMsg(hwnd_frame, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_TOP));
+#endif
+		/* fall thru */
 	case IDM_NEXT:
 		if (not_open())
 		    return 0;
-		if (doc==(PSDOC *)NULL) {
-		    if (!gs_open())
-		        return 0;
-		    if (is_pipe_done()) {
-			play_sound(SOUND_NOPAGE);
-		    }
-		    else {
-			psfile.pagenum++;
-			next_page();
-		    }
-		    return 0;
-		}
-		dfreopen();
-		gsview_unzoom();
-		dsc_skip(1+page_extra);
-		page_extra = 0;
-		dfclose();
+		gs_page_skip(1);
 		return 0;
 	case IDM_NEXTSKIP:
 		if (not_dsc())
 		    return 0;
-		dfreopen();
-		gsview_unzoom();
-		dsc_skip(page_skip+page_extra);
-		page_extra = 0;
-		dfclose();
+		if (order_is_special())
+		    return 0;
+		gs_page_skip(page_skip);
 		return 0;
 	case IDM_REDISPLAY:
 		if (not_open())
 		    return 0;
-		if (doc==(PSDOC *)NULL) {
+		if (psfile.doc==(PSDOC *)NULL) {
 		    /* don't know where we are so close and reopen */
-		    if (!is_pipe_done())
-			gs_close();
+		    if (gsdll.state != IDLE) {
+			if (!pending.psfile) {
+			    pending.psfile = (PSFILE *)malloc(sizeof(PSFILE));
+			    if (pending.psfile)
+			        *pending.psfile = psfile;
+			}
+			pending.psfile->pagenum = pending.pagenum = 1;
+			pending.abort = TRUE;
+			pending.now = TRUE;
+		    }
 		}
-		if (!gs_open())
-		    return 0;
-		if (!dfreopen()) {
-		    gserror(0, "Someone deleted the file!", MB_ICONEXCLAMATION, SOUND_ERROR);
-		    return 0;
-	 	}
+		else {
+		    pending.pagenum = -1;  /* default page number is current page */
+		    if (psfile.doc->pageorder == SPECIAL)
+		        pending.pagenum = 1;	/* restart */
+		}
 		gsview_unzoom();
-		if (display.page)
-		    next_page(); 
-		if ((doc==(PSDOC *)NULL) || (doc->pages==0)) {
-			gsview_displayfile(psfile.name);
-			dfclose();
-			return 0;
-		}
-		dsc_dopage();
-		dfclose();
+		pending.now = TRUE;
 		return 0;
+	case IDM_PREVHOME:
+#ifdef _Windows
+		PostMessage(hwndimgchild ,WM_VSCROLL,SB_TOP,0L);
+#else
+		WinPostMsg(hwnd_frame, WM_VSCROLL, MPFROMLONG(0), MPFROM2SHORT(0, SB_TOP));
+#endif
+		/* fall thru */
 	case IDM_PREV:
 		if (not_dsc())
 			return 0;
-		dfreopen();
-		gsview_unzoom();
-		dsc_skip(-1+page_extra);
-		page_extra = 0;
-		dfclose();
+		if (order_is_special())
+		    return 0;
+		gs_page_skip(-1);
 		return 0;
 	case IDM_PREVSKIP:
 		if (not_dsc())
 			return 0;
-		dfreopen();
-		gsview_unzoom();
-		dsc_skip(-page_skip+page_extra);
-		page_extra = 0;
-		dfclose();
+		if (order_is_special())
+		    return 0;
+		gs_page_skip(-page_skip);
 		return 0;
 	case IDM_GOTO:
 		if (not_dsc())
 			return 0;
-		dfreopen();
-		gsview_unzoom();
-		load_string(IDS_TOPICGOTO, szHelpTopic, sizeof(szHelpTopic));
-		if (doc->numpages == 0) {
+		if (order_is_special())
+		    return 0;
+		if (psfile.doc->numpages == 0) {
 		    gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
+		    return 0;
 		}
-		else if (get_page(&psfile.pagenum, FALSE)) {
-		    if (psfile.pagenum > doc->numpages) {
-			psfile.pagenum = doc->numpages;
-			play_sound(SOUND_NOPAGE);
-		    }
-		    else if (psfile.pagenum < 1) {
-			psfile.pagenum = 1;
-			play_sound(SOUND_NOPAGE);
-		    }
-		    else {
-			if (gs_open()) {
-			    if (display.page)
-			        next_page();
-			    dsc_dopage();
+		load_string(IDS_TOPICGOTO, szHelpTopic, sizeof(szHelpTopic));
+		{ int pagenum;
+		    pagenum = psfile.pagenum;
+		    if (get_page(&pagenum, FALSE, FALSE)) {
+			if (pagenum > psfile.doc->numpages) {
+			    pagenum = psfile.doc->numpages;
+			    play_sound(SOUND_NOPAGE);
+			}
+			else if (pagenum < 1) {
+			    pagenum = 1;
+			    play_sound(SOUND_NOPAGE);
+			}
+			else {
+			    gsview_unzoom();
+			    pending.pagenum = pagenum;
+			    pending.now = TRUE;
 			}
 		    }
 		}
-		dfclose();
 		return 0;
 	case IDM_INFO:
 		show_info();
 		return 0;
 	case IDM_SELECT:
+		if (pending.psfile) {
+		    play_sound(SOUND_BUSY);
+		    return 0;
+		}
 		gsview_select();
-		dfclose();
 		return 0;
 	case IDM_PRINT:
 		if (psfile.name[0] == '\0')
 		    gsview_select();
-		dfreopen();
+		if (gsdll.state == BUSY) {
+		    play_sound(SOUND_BUSY);
+		    return 0;
+		}
+		if (!dfreopen())
+		    return 0;
 		if (psfile.name[0] != '\0')
 		    gsview_print(FALSE);
 		dfclose();
 		return 0;
+/*
 	case IDM_PRINTTOFILE:
 		if (psfile.name[0] == '\0')
 			gsview_select();
-		dfreopen();
+		if (!dfreopen())
+		    return 0;
 		if (psfile.name[0] != '\0')
 		    gsview_print(TRUE);
 		dfclose();
 		return 0;
+*/
 	case IDM_SPOOL:
 		gsview_spool((char *)NULL, (char *)NULL);
 		return 0;
 	case IDM_SAVEAS:
+		if (gsdll.state == BUSY) {
+		    play_sound(SOUND_BUSY);
+		    return 0;
+		}
 		if (psfile.name[0] == '\0')
 		    gsview_select();
-		dfreopen();
 		if (psfile.name[0] != '\0')
 		    gsview_saveas();
-		dfclose();
 		return 0;
 	case IDM_EXTRACT:
+		if (gsdll.state == BUSY) {
+		    play_sound(SOUND_BUSY);
+		    return 0;
+		}
 		if (psfile.name[0] == '\0')
 		    gsview_select();
-		dfreopen();
+		if (order_is_special())
+		    return 0;
 		if (psfile.name[0] != '\0')
 		    gsview_extract();
-		dfclose();
 		return 0;
 	case IDM_TEXTEXTRACT:
 		if (psfile.name[0] == '\0')
 		    gsview_select();
-		dfreopen();
 		if (psfile.name[0] != '\0')
 		    gsview_text_extract();
-		dfclose();
+		return 0;
+	case IDM_TEXTEXTRACT_SLOW:
+	        gsview_text_extract_slow();
 		return 0;
 	case IDM_TEXTFIND:
 		gsview_text_find();
@@ -213,8 +248,11 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	case IDM_TEXTFINDNEXT:
 		gsview_text_findnext();
 		return 0;
+	case IDM_GSMESS:
+		gs_showmess();	/* show messages from Ghostscript */
+		return 0;
 	case IDM_EXIT:
-		post_close();
+		post_img_message(WM_CLOSE, 0);
 		return 0;
 	case IDM_COPYCLIP:
 		copy_clipboard();
@@ -226,26 +264,7 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		clip_convert();
 		return 0;
 	case IDM_GSCOMMAND:
-	        install_gsexe();
-#ifdef OLD
-		load_string(IDS_GSCOMMAND, prompt, sizeof(prompt));
-		strcpy(answer, option.gscommand);
-		load_string(IDS_TOPICGSCMD, szHelpTopic, sizeof(szHelpTopic));
-		if (get_string(prompt,answer))
-		    strcpy(option.gscommand, answer);
-		if (option.gscommand[0]=='\0')
-		    strcpy(option.gscommand, DEFAULT_GSCOMMAND);
-#endif
-		return 0;
-	case IDM_GS351:
-	case IDM_GS333:
-	case IDM_GS261:
-		gsview_gsversion(command);
-		return 0;
-	case IDM_DRAWDEF:
-	case IDM_DRAWGPI:
-	case IDM_DRAWWIN:
-		gsview_drawmethod(command);
+	        install_gsdll();
 		return 0;
 	case IDM_UNITPT:
 	case IDM_UNITMM:
@@ -270,9 +289,13 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		check_menu_item(IDM_OPTIONMENU, IDM_FITPAGE, option.fit_page);
 		/* should cause WM_SIZE message to be sent */
 		return 0;
-	case IDM_QUICK:
-		option.quick = !option.quick;
-		check_menu_item(IDM_OPTIONMENU, IDM_QUICK, option.quick);
+	case IDM_QUICK_OPEN:
+		option.quick_open = !option.quick_open;
+		check_menu_item(IDM_OPTIONMENU, IDM_QUICK_OPEN, option.quick_open);
+		return 0;
+	case IDM_QUICK_TEXT:
+		option.quick_text = !option.quick_text;
+		check_menu_item(IDM_OPTIONMENU, IDM_QUICK_TEXT, option.quick_text);
 		return 0;
 	case IDM_AUTOREDISPLAY:
 		option.redisplay = !option.redisplay;
@@ -301,7 +324,7 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		option.show_bbox = !option.show_bbox;
 		check_menu_item(IDM_OPTIONMENU, IDM_SHOWBBOX, option.show_bbox);
 #ifdef _Windows
-		PostMessage(hwndimg, WM_GSVIEW, SYNC_OUTPUT, 0L);
+		PostMessage(hwndimg, WM_GSSYNC, 0, 0L);
 #else
 		if (!WinInvalidateRect(hwnd_bmp, (PRECTL)NULL, TRUE))
 			error_message("error invalidating rect");
@@ -310,38 +333,44 @@ char answer[MAXSTR];		/* input dialog box answer string */
 #endif
 		return 0;
 	case IDM_PSTOEPS:
-		if (psfile.name[0] == '\0')
-		    gsview_display();
+		if (not_open())
+		    return 0;
 		if (psfile.name[0] != '\0') {
-		    dfreopen();
+		    if (!dfreopen())
+			return 0;
 		    ps_to_eps();
 		    dfclose();
 		}
 		return 0;
 	case IDM_MAKEEPSI:
-		dfreopen();
+		if (!dfreopen())
+		    return 0;
 		make_eps_interchange(FALSE);
 		dfclose();
 		return 0;
 	case IDM_MAKEEPST4:
 	case IDM_MAKEEPST:
-		dfreopen();
+		if (!dfreopen())
+		    return 0;
 		make_eps_tiff(command, FALSE);
 		dfclose();
 		return 0;
 	case IDM_MAKEEPSW:
-		dfreopen();
+		if (!dfreopen())
+		    return 0;
 		make_eps_metafile();
 		dfclose();
 		return 0;
 	case IDM_MAKEEPSU:
-		dfreopen();
+		if (!dfreopen())
+		    return 0;
 		make_eps_user();
 		dfclose();
 		return 0;
 	case IDM_EXTRACTPS:
 	case IDM_EXTRACTPRE:
-		dfreopen();
+		if (!dfreopen())
+		    return 0;
 		extract_doseps(command);
 		dfclose();
 		return 0;
@@ -351,9 +380,10 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	case IDM_SAVESETTINGS:
 		option.settings = !option.settings;
 		check_menu_item(IDM_OPTIONMENU, IDM_SAVESETTINGS, option.settings);
-		sprintf(prompt, "%d", option.settings);
-		{ PROFILE *prf = profile_open(szIniFile);
-		  profile_write_string(prf, INISECTION, "SaveSettings", prompt);
+		{ char buf[MAXSTR];
+		  PROFILE *prf = profile_open(szIniFile);
+		  sprintf(buf, "%d", option.settings);
+		  profile_write_string(prf, INISECTION, "SaveSettings", buf);
 		  profile_close(prf);
 		}
 		return 0;
@@ -365,82 +395,25 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	case IDM_UPSIDEDOWN:
 	case IDM_SEASCAPE:
 	case IDM_SWAPLANDSCAPE:
-		dfreopen();
 		gsview_orientation(command);
-		dfclose();
-		return 0;
-	case IDM_RESOLUTION:
-		load_string(IDS_RES, prompt, sizeof(prompt));
-		if (option.xdpi == option.ydpi)
-		    sprintf(answer,"%g", option.xdpi);
-		else 
-		    sprintf(answer,"%g %g", option.xdpi, option.ydpi);
-		load_string(IDS_TOPICMEDIA, szHelpTopic, sizeof(szHelpTopic));
-		if (get_string(prompt,answer)) {
-		    switch (sscanf(answer,"%f %f", &option.xdpi, &option.ydpi)) {
-		      case EOF:
-		      case 0:
-			return 0;
-		      case 1:
-			option.ydpi = option.xdpi;
-		      case 2:
-			if (option.xdpi==0.0)
-			    option.xdpi = DEFAULT_RESOLUTION;
-			if (option.ydpi==0.0)
-			    option.ydpi = DEFAULT_RESOLUTION;
-			dfreopen();
-			gs_resize();
-			gsview_unzoom();
-			dfclose();
-		    }
-		}
-		return 0;
-	case IDM_ZOOMRES:
-		load_string(IDS_ZOOMRES, prompt, sizeof(prompt));
-		if (option.zoom_xdpi == option.zoom_ydpi)
-		    sprintf(answer,"%g", option.zoom_xdpi);
-		else 
-		    sprintf(answer,"%g %g", option.zoom_xdpi, option.zoom_ydpi);
-		load_string(IDS_TOPICMEDIA, szHelpTopic, sizeof(szHelpTopic));
-		if (get_string(prompt,answer)) {
-		    switch (sscanf(answer,"%f %f", &option.zoom_xdpi, &option.zoom_ydpi)) {
-		      case EOF:
-		      case 0:
-			return 0;
-		      case 1:
-			option.zoom_ydpi = option.zoom_xdpi;
-		      case 2:
-			if (option.zoom_xdpi==0.0)
-			    option.zoom_xdpi = DEFAULT_RESOLUTION;
-			if (option.zoom_ydpi==0.0)
-			    option.zoom_ydpi = DEFAULT_RESOLUTION;
-			dfreopen();
-			gsview_unzoom();
-			dfclose();
-		    }
-		}
 		return 0;
 	case IDM_ZOOM:		/* called indirectly from Right Mouse Button */
 		if (not_dsc()) {
 		    zoom = FALSE;
 		    return 0;
 		}
-		if (!(display.page || display.sync)) {
+		if (order_is_special()) {
+		    zoom = !zoom;
+		    return 0;
+		}
+		if (! ((gsdll.state == PAGE) || (gsdll.state == IDLE)) ) {
 		    zoom = FALSE;
 	    	    gserror(IDS_NOZOOM, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    	    return 0;
 		}
-		dfreopen();
-		if (display.page)
-		    next_page(); 
 		gs_resize();
-		if ((doc==(PSDOC *)NULL) || (doc->pages==0)) {
-			gsview_displayfile(psfile.name);
-			dfclose();
-			return 0;
-		}
-		dsc_dopage();
-		dfclose();
+	        pending.pagenum = -1;  /* default page number is current page */
+		pending.now = TRUE;
 		return 0;
 	case IDM_MAGPLUS:
 		gs_magnify(1.2);
@@ -448,13 +421,8 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	case IDM_MAGMINUS:
 		gs_magnify(0.8333);
 		return 0;
-	case IDM_DEPTHDEF:
-	case IDM_DEPTH1:
-	case IDM_DEPTH4:
-	case IDM_DEPTH8:
-	case IDM_DEPTH16:
-	case IDM_DEPTH24:
-		gsview_depth(command);
+	case IDM_DISPLAYSETTINGS:
+		display_settings();
 		return 0;
 	case IDM_LETTER:
 	case IDM_LETTERSMALL:
@@ -476,9 +444,7 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		if (command == IDM_USERSIZE)
 		    if (!gsview_usersize())
 			return 0;
-		dfreopen();
 		gsview_media(command);
-		dfclose();
 		return 0;
 	case IDM_HELPCONTENT:
 #ifdef _Windows
@@ -515,13 +481,36 @@ not_open()
 	return TRUE;
 }
 
+/* if order is SPECIAL, display error message and return TRUE */
+BOOL
+order_is_special()
+{
+char buf[MAXSTR];
+	if (psfile.doc==(PSDOC *)NULL)
+	    return TRUE;
+	if (psfile.doc->pageorder != SPECIAL)
+	    return FALSE;
+	if (psfile.doc->numpages == 1)
+	    return FALSE;	/* can't reorder anyway */
+	if (psfile.ignore_special)
+	    return FALSE;
+        load_string(IDS_PAGESPECIAL, buf, sizeof(buf)-1);
+        if (message_box(buf, MB_OKCANCEL) == IDOK) {
+	    /* don't show this warning again for this file */
+	    psfile.ignore_special = TRUE;
+	    return FALSE;	/* User override */
+	}
+	return TRUE;		/* order is special */
+}
+
+
 /* if not DSC document or not open, display error message and return true */
 BOOL
 not_dsc()
 {
 	if (not_open())
 	    return TRUE;
-	if (doc!=(PSDOC *)NULL)
+	if (psfile.doc!=(PSDOC *)NULL)
 	    return FALSE;
 	gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
 	return TRUE;
@@ -532,7 +521,6 @@ gserror(UINT id, char *str, UINT icon, int sound)
 {
 int i;
 char mess[300];
-	info_wait(IDS_NOWAIT);
 	if (sound >= 0)
 	    play_sound(sound);
 	i = 0;
@@ -594,93 +582,13 @@ gsview_check_usersize()
 	}
 }
 
-int
-gsview_depth_to_menu(int depth)
-{
-	switch(depth) {
-	    case 1:
-		return IDM_DEPTH1;
-	    case 4:
-		return IDM_DEPTH4;
-	    case 8:
-		return IDM_DEPTH8;
-	    case 16:
-		return IDM_DEPTH16;
-	    case 24:
-		return IDM_DEPTH24;
-	}
-	return IDM_DEPTHDEF;
-}
-
-int imenu[] = {0, 1, 4, 8, 16, 24, 0};
-void
-gsview_depth(int new_depth)
-{
-int old_depth;
-BOOL redisplay = FALSE;
-	switch(option.depth) {
-	    case 1:
-		old_depth = IDM_DEPTH1;
-		break;
-	    case 4:
-		old_depth = IDM_DEPTH4;
-		break;
-	    case 8:
-		old_depth = IDM_DEPTH8;
-		break;
-	    case 16:
-		old_depth = IDM_DEPTH16;
-		break;
-	    case 24:
-		old_depth = IDM_DEPTH24;
-		break;
-	    default:
-		old_depth = IDM_DEPTHDEF;
-	}
-	if (new_depth == old_depth)
-		return;
-	check_menu_item(IDM_DEPTHMENU, old_depth, FALSE);
-	option.depth = imenu[new_depth - IDM_DEPTHDEF];
-	check_menu_item(IDM_DEPTHMENU, new_depth, TRUE);
-	if (gsprog.valid) {
-	    if (option.redisplay && display.page && (doc != (PSDOC *)NULL))
-	       redisplay = TRUE;
-	    /* can't change depth with a postscript command so must close gs */
-	    gs_close();
-	    if (redisplay)
-		display.do_display = TRUE;
-	}
-	return;
-}
-
 /* unzoom when redisplaying or changing page */ 
 void
 gsview_unzoom(void)
 {
 	if (zoom) {
-		gs_resize();
 		zoom = FALSE;
+		gs_resize();
 	}
 }
-
-/* allow GS 2.6.1 to be used with 16-bit GSview */
-void
-gsview_gsversion(int new_version)
-{
-	check_menu_item(IDM_GSVERMENU, option.gsversion, FALSE);
-	option.gsversion = new_version;
-	check_menu_item(IDM_GSVERMENU, option.gsversion, TRUE);
-	info_wait(IDS_NOWAIT);
-	return;
-}
-
-/* allow OS/2 to select the API for drawing the bitmap */
-void
-gsview_drawmethod(int new_drawmethod)
-{
-	check_menu_item(IDM_DRAWMENU, option.drawmethod, FALSE);
-	option.drawmethod = new_drawmethod;
-	check_menu_item(IDM_DRAWMENU, option.drawmethod, TRUE);
-	return;
-}
-
+

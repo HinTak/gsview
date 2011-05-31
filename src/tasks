@@ -1,0 +1,23 @@
+PM: Fix os2prn in Ghostscript.  Used to work, but doesn't in GS 4.01.
+
+PM: change os2setup to use unzip DLL
+
+Update interval
+
+Win32 accelerators (VK_F1, VK_BACK) while button has mouse capture.
+
+You can use spaces in the Ghostscript path, but I can't figure out
+how to create a Win95 shortcut to "-Ic:\gs tools"
+
+View bitmap files with viewjpg/viewbmp/viewpcx
+
+After printing, temporary file left behind.
+This is actually a problem with Ghostscript.
+File is left behind and confusing error message displayed
+if printing is cancelled.
+
+Modify mswinpr2 device in Ghostscript to 
+  Extract printer name from -sOutputFile="\\spool\queue_name".
+  Quit cleanly if cancel button pressed.
+  Force portrait orientation.
+

@@ -28,7 +28,7 @@ USE_OMF=0
 
 !if $(USE_EMX)
 # EMX
-DRIVE=d:
+DRIVE=c:
 COMP=gcc
 COMPBASE=$(DRIVE)\emx
 EMXPATH=$(DRIVE)/emx

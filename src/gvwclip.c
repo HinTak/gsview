@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -63,7 +63,7 @@ HFILE hfile;
 	bmfh.bfOffBits = sizeof(BITMAPFILEHEADER) + pbmih->biSize + palsize;
 	bmfh.bfSize = bmfh.bfOffBits + bitmap_size;
 
-	if ( get_filename(output, TRUE, FILTER_BMP, NULL, IDS_TOPICEDIT)
+	if ( get_filename(output, TRUE, FILTER_BMP, NULL, IDS_TOPICCLIP)
 	    && ((hfile = _lcreat(output, 0)) != HFILE_ERROR) ) {
 		hugewrite(hfile, &bmfh, sizeof(BITMAPFILEHEADER));
 		hugewrite(hfile, pbmih, pbmih->biSize + palsize);
@@ -127,7 +127,6 @@ RGBTRIPLE FAR *prgbtriple;
 		palsize = palcolors * sizeof(RGBTRIPLE); 
 	else
 		palsize = palcolors * sizeof(RGBQUAD);
-	hpalette = (HPALETTE)NULL;
 	if (palsize) {
 	    /* create palette to match DIB */
 	    logpalette = (LPLOGPALETTE) malloc( sizeof(LOGPALETTE) + 

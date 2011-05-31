@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "0.71 alpha 1995-11-23";
+char szVersion[] = "0.72 alpha 1996-07-29";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -472,7 +472,7 @@ FILE *
 gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 {	char *temp;
 	if ( (temp = getenv("TEMP")) == NULL )
-		_getcwd(fname, MAXSTR);
+		gs_getcwd(fname, MAXSTR);
 	else
 		strcpy(fname, temp);
 
@@ -494,7 +494,7 @@ gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 }
 
 char * 
-_getcwd(char *dirname, int size)
+gs_getcwd(char *dirname, int size)
 {
 #ifdef __EMX__
 	return _getcwd2(dirname, size);
@@ -660,3 +660,4 @@ psfile_extract_page(FILE *f, int page)
     }
 }
 
+

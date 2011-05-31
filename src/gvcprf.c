@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -31,6 +31,24 @@
 #include "gvpm.h"
 #endif
 
+/* free keys in the section, but not the section itself */
+void
+profile_free_section(struct prfsection *section)
+{
+struct prfentry *pe, *ne;
+	pe = section->entry;
+	while (pe) { /* free this entry */
+	    if (pe->name)
+		free(pe->name);
+	    if (pe->value)
+		free(pe->value);
+	    ne = pe->next;
+	    free(pe);
+	    pe = ne;
+	}
+	if (section->name)
+	    free(section->name);
+}
 
 PROFILE *
 profile_cleanup(PROFILE *prf)
@@ -43,18 +61,7 @@ struct prfentry *pe, *ne;
 	    fclose(prf->file);
 	ps = prf->section;
 	while (ps) {  /* free this section */
-	    pe = ps->entry;
-	    while (pe) { /* free this entry */
-		if (pe->name)
-		    free(pe->name);
-		if (pe->value)
-		    free(pe->value);
-		ne = pe->next;
-		free(pe);
-		pe = ne;
-	    }
-	    if (ps->name)
-	        free(ps->name);
+	    profile_free_section(ps);
 	    ns = ps->next;
 	    free(ps);
 	    ps = ns;
@@ -133,8 +140,11 @@ char *p;
 	            if ( (ne->name = (char *)malloc(strlen(line)+1)) == (char *)NULL )
 	                return profile_cleanup(prf);
 	            strcpy(ne->name, line);
+		    p = line + strlen(line) + 1;
+/*
 	            if ( (p = strtok(NULL, "=")) == (char *)NULL )
 	            	continue;
+*/
 	            if ( (ne->value = (char *)malloc(strlen(p)+1)) == (char *)NULL )
 	                return profile_cleanup(prf);
 	            strcpy(ne->value, p);
@@ -231,6 +241,19 @@ struct prfentry *pe, *ne;
 	    ps = ns;
 	    ns = ns->next;
 	}
+	if (entry == (char *)NULL) {
+	    /* delete section */
+	    if (ns == (struct prfsection *)NULL)
+		return TRUE;
+	    profile_free_section(ns);
+	    if (ps)
+		ps->next = ns->next;
+	    else
+		prf->section = ns->next;
+	    free(ns);
+	    prf->changed = TRUE;
+	    return TRUE;
+	}
 	if (ns == (struct prfsection *)NULL) {
 	    /* add section */
 	    if ( (ns = (struct prfsection *)malloc(sizeof(struct prfsection))) 
@@ -251,7 +274,6 @@ struct prfentry *pe, *ne;
         }
 	ne = ns->entry;
 	pe = NULL;
-	/* should add code to remove section here if entry==NULL */
 	while (ne) {
 	    if (ne->name && (strcmp(ne->name, entry) == 0))
 	    	break;

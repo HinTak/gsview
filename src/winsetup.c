@@ -18,6 +18,7 @@
 /* winsetup.c */
 /* MS-Windows installation program for GSview and Ghostscript */
 /* rjl 1996-01-02 */
+/* rjl 1996-06-21 */
 
 #define STRICT
 #include <windows.h>
@@ -33,16 +34,15 @@
 
 #define MAXSTR 256
 
+#include "gvcver.h"
+#include "gvcbeta.h"
 #include "setup.h"
-#include "gvcrc.h"
 
-#define BASEDIR "\\gs3.53"
-#define UNZIPEXE "winunzip.exe"
-#define GSVIEWZIP "gsview.zip"
-#define GSINIZIP  "gs353ini.zip"
-#define GSW32ZIP  "gs353w32.zip"
-#define GSWINZIP  "gs353win.zip"
-#define GSFNTZIP  "gs353fn1.zip"
+int unzip(char *zipname);
+int load_unzip(LPSTR lpszDllName, HINSTANCE hInstance, HWND hmain, HWND hlist);
+int free_unzip(void);
+HWND gs_showmess_modeless(void);
+void gs_addmess(char *str);
 
 BOOL CALLBACK _export GeneralDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK _export InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
@@ -54,19 +54,17 @@ char sourcedir[MAXSTR];
 char destdir[MAXSTR];
 char unzipname[MAXSTR];
 char winsetup[MAXSTR];
-char includepath[MAXSTR];
 HINSTANCE phInstance;
 char get_string_answer[MAXSTR];
 char szAppName[]="GSview Install";
-char szIniName16[]="gsview.ini";
-char szIniName32[]="gsview32.ini";
+char szIniName[]="gsview32.ini";
+char szUnzipDll[] = "wizunz32.dll";
 char error_message[MAXSTR];
 char no_error[] = "";
-int atm_present;
-int atm_fonts;
-char atm_dir[MAXSTR];
-int use_atm_fonts;
-int is_win32;
+int is_win32s;
+int is_win4;
+HWND hwndmess;
+int batch;
 
 #define DID_OK IDOK
 #define DID_CANCEL IDCANCEL
@@ -98,99 +96,24 @@ int message_box(char *str, int icon)
 
 /* change directory and drive */
 int
-_chdir2(char *dirname)
+gs_chdir(char *dirname)
 {
 #ifdef __WIN32__
-	SetCurrentDirectory(dirname);
+    return !SetCurrentDirectory(dirname);
 #else
-	if (isalpha(dirname[0]) && (dirname[1]==':'))
-		(void) setdisk(toupper(dirname[0])-'A');
-	if (!((strlen(dirname)==2) && isalpha(dirname[0]) && (dirname[1]==':')))
-		chdir(dirname);
+    if (isalpha(dirname[0]) && (dirname[1]==':'))
+	(void)setdisk(toupper(dirname[0])-'A');
+    if (!((strlen(dirname)==2) && isalpha(dirname[0]) && (dirname[1]==':')))
+	return chdir(dirname);
+    return -1;
 #endif
-	return 0;
 }
 
-int copyfile(char *dname, char *sname)
-{
-FILE *dfile, *sfile;
-char *buffer;
-int count;
-#define COPY_BUF_SIZE 16384
-    sfile = fopen(sname, "rb");
-    if (sfile == (FILE *)NULL) {
-	sprintf(error_message, "Can't open %s for reading", sname);
-	return 1;
-    }
-    dfile = fopen(dname, "wb");
-    if (dfile == (FILE *)NULL) {
-	sprintf(error_message, "Can't open %s for writing", dname);
-	fclose(sfile);
-	return 1;
-    }
-    if ( (buffer = malloc(COPY_BUF_SIZE)) == (char *)NULL ) {
-	fclose(sfile);
-	fclose(dfile);
-	sprintf(error_message, "Can't allocate memory for copy buffer");
-	return 1;
-    }
 
-    while ( (count = fread(buffer, 1, COPY_BUF_SIZE, sfile)) != 0 )
-	fwrite(buffer, 1, count, dfile);
 
-    free(buffer);
-    fclose(dfile);
-    fclose(sfile);
-    return 0;
-}
+/* INCLUDE COMMON CODE */
+#include "setup.c"
 
-int
-intro(void)
-{
-int flag;
-    /* Introduction */
-    if (dialog(IDD_INTRO, GeneralDlgProc) != DID_OK) {
-	strcpy(error_message, no_error);
-	return 1;
-    }
-
-    /* Copyright */
-    if (dialog(IDD_COPYRIGHT, GeneralDlgProc) != DID_OK) {
-	strcpy(error_message, no_error);
-	return 1;
-    }
-
-    return 0; /* success */
-}
-
-int
-getdest(void)
-{
-int valid;
-int i;
-    valid = 0;
-    while (!valid) {
-        /* Destination directory */
-        strcpy(get_string_answer, bootdrive);
-        strcat(get_string_answer,"\\"); 
-        if (dialog(IDD_DIR, InputDlgProc) != DID_OK) {
-	    strcpy(error_message, no_error);
-	    return 1;
-	}
-        strcpy(destdir, get_string_answer);
-        if (_chdir2(destdir))
-	    message_box("Directory does not exist.  Please enter a directory name that does exist.",
-		 MB_MOVEABLE | MB_OK);
-	else
-	    valid = 1;
-	_chdir2(workdir);
-    }
-    /* remove trailing \ from destination directory */
-    i = strlen(destdir) - 1;
-    if ( (i >= 0) && (destdir[i] == '\\') )
-	destdir[i] = '\0';
-    return 0;
-}
 
 
 
@@ -202,20 +125,15 @@ cleanup(void)
 
 
 int
-unzip(char *filename, char *destination)
+unzip_to_dir(char *filename, char *destination)
 {
     /* start unzip session */  
     char fullname[256];
     char arg[256];
     FILE *f;
     int file_exists = 0;
-    HMODULE hmodule;
-    MSG msg;
-#ifndef __WIN32__
-    DLGPROC lpUnzipDlgProc;
-#endif
-    int abort = 0;
-    HWND hDlgModeless;
+    char cwd[256];
+    int rc;
 
     /* prompt for disk to be installed */
     strcpy(fullname, sourcedir);
@@ -237,49 +155,62 @@ unzip(char *filename, char *destination)
 	}
     }
 
-    /* set up unzip arguments */
-    sprintf(arg, "%s -o %s -d %s%s", unzipname, fullname, destination,
-	(strlen(destination) == 2) ? "\\" : "");
+    getcwd(cwd, sizeof(cwd));
+    gs_chdir(destination);
+    gs_addmess("Unzipping ");
+    gs_addmess(fullname);
+    gs_addmess("\n");
+    rc = unzip(fullname);
+    gs_chdir(cwd);
 
-    hmodule = (HMODULE)WinExec(arg, SW_SHOWNOACTIVATE);
-
-    if (hmodule == (HMODULE)NULL) {
-	sprintf(error_message, "Can't run %s", arg);
-	return 1;
-    }
-
-
-#ifdef __WIN32__
-    hDlgModeless = CreateDialogParam(phInstance, MAKEINTRESOURCE(IDD_UNZIP), HWND_DESKTOP, ModelessDlgProc, (LPARAM)NULL);
-#else
-    lpUnzipDlgProc = (DLGPROC)MakeProcInstance((FARPROC)ModelessDlgProc, phInstance);
-    hDlgModeless = CreateDialogParam(phInstance, MAKEINTRESOURCE(IDD_UNZIP), HWND_DESKTOP, lpUnzipDlgProc, (LPARAM)NULL);
-#endif
-    while (IsWindow(hDlgModeless) && GetModuleUsage(hmodule)) {
-        while (PeekMessage(&msg, (HWND)NULL, 0, 0, PM_REMOVE)) {
-	    if ((hDlgModeless==0) || !IsDialogMessage(hDlgModeless, &msg)) {
-	        TranslateMessage(&msg);
-	        DispatchMessage(&msg);
-	    }
+    if (!rc) {
+        if (!IsWindow(hwndmess)) {
+	    strcpy(error_message, "Unzip cancelled");
+	    return -1;
 	}
     }
+    return rc;
+}
 
-    /* display cancel dialog */
-    if (!IsWindow(hDlgModeless))
-	abort = TRUE;
+/* This is only needed for GS 4.01 */
+#if (GS_REVISION == 401)
+/* replace Ghostscript gs_init.ps with one supplied by GSview */
+int
+patch_ghostscript(void)
+{
+char dest[MAXSTR];
+char src[MAXSTR];
+char line[MAXSTR];
+FILE *infile, *outfile;
+    /* first rename old gs_init.ps */
+    sprintf(dest, "%s\\%s\\gs_init.ps", destdir, GS_BASEDIR); 
+    sprintf(line, "%s\\%s\\gs_init.bak", destdir, GS_BASEDIR);
+    if ( (outfile = fopen(line, "r")) == (FILE *)NULL ) {
+	/* no need to make backup */
+	rename(dest, line);
+    }
     else
-	DestroyWindow(hDlgModeless);
+	fclose(outfile);
 
-#ifndef __WIN32__
-    FreeProcInstance((FARPROC)lpUnzipDlgProc);
-#endif
+    /* copy patched gs_init.ps to GS directory */
+    sprintf(src, "%s\\%s\\gs_init.ps", destdir, GSVIEW_BASEDIR); 
 
-    if (abort) {
-	strcpy(error_message, "Unzip cancelled");
+    if ( (infile = fopen(src, "r")) == (FILE *)NULL) {
+	sprintf(error_message, "Can't open %s for reading", src);
 	return 1;
     }
+    if ( (outfile = fopen(dest, "w")) == (FILE *)NULL)  {
+	sprintf(error_message, "Can't create %s for writing", dest);
+	return 1;
+    }
+    while (fgets(line, sizeof(line), infile))
+	fputs(line, outfile);
+    fclose(outfile);
+    fclose(infile);
     return 0;
 }
+#endif
+
 
 int
 update_config(void)
@@ -289,7 +220,7 @@ char inname[MAXSTR], outname[MAXSTR];
 char line[1024];
 char tempname[MAXSTR];
 char buf[MAXSTR];
-int replace = 0;
+int replace;
     
     if (getenv("TEMP"))
 	return 0;	/* assume TEMP is in autoexec.bat */
@@ -297,7 +228,10 @@ int replace = 0;
     strcpy(inname, bootdrive);
     strcat(inname, "\\autoexec.bat");
 
-    replace = (dialog(IDD_CONFIG, GeneralDlgProc) == DID_OK);
+    if (batch)
+	replace = TRUE;
+    else 
+        replace = (dialog(IDD_CONFIG, GeneralDlgProc) == DID_OK);
 
     strcpy(tempname, bootdrive);
     strcat(tempname, "\\GSXXXXXX");
@@ -328,7 +262,7 @@ int replace = 0;
     if ( (outfile = fopen(outname, "r")) != (FILE *)NULL)  {
 	fclose(outfile);
 	sprintf(buf, "File %s exists.  Overwrite?", outname);
-	if (message_box(buf, MB_YESNO) != MBID_YES) {
+	if (!batch && (message_box(buf, MB_YESNO) != MBID_YES)) {
 	    return 0;
 	}
 	unlink(outname);
@@ -350,102 +284,17 @@ int replace = 0;
 	    return 1;
 	}
 	sprintf(buf, "Changes were saved in %s", outname);
-	message_box(buf, MB_MOVEABLE | MB_OK);
+	if (!batch)
+	    message_box(buf, MB_MOVEABLE | MB_OK);
     }
 
     return 0;
 }
 
 int
-update_fontmap(void)
+update_ini(char *ininame)
 {
-char fontmap[MAXSTR];
-char fontmap_atm[MAXSTR];
-char fontmap_old[MAXSTR];
-char buf[MAXSTR];
-FILE *f, *infile;
-int backup = 1;
-    if (atm_present) {
-      if (dialog(IDD_ATM, GeneralDlgProc) != DID_OK)
-	return 0;
-    }
-    else
-	return 0;
-
-    use_atm_fonts = TRUE;
-
-    strcpy(fontmap, destdir);
-    strcat(fontmap, BASEDIR);
-    strcpy(fontmap_atm, fontmap);
-    strcpy(fontmap_old, fontmap);
-    strcat(fontmap, "\\Fontmap");
-    if (atm_fonts > 13)
-       strcat(fontmap_atm, "\\Fontmap.ATB");
-    else
-       strcat(fontmap_atm, "\\Fontmap.ATM");
-    strcat(fontmap_old, "\\Fontmap.old");
-    if ( (f = fopen(fontmap_old, "r")) != (FILE *)NULL)  {
-	fclose(f);
-	sprintf(buf, "File %s exists.  Overwrite?", fontmap_old);
-	if (message_box(buf, MB_MOVEABLE | MB_YESNO) != MBID_YES) {
-	    backup = 0;
-	}
-    }
-    if (backup) {
-	unlink(fontmap_old);
-        if (rename(fontmap, fontmap_old)) {
-	    sprintf(error_message, "Error renaming %s to %s", fontmap, fontmap_old);
-	    return 1;
-	}
-    }
-
-    infile = fopen(fontmap_atm, "r");
-    if (infile == (FILE *)NULL) {
-	sprintf(error_message, "Can't open %s for reading", fontmap_atm);
-	return 1;
-    }
-    f = fopen(fontmap, "w");
-    if (f == (FILE *)NULL) {
-	sprintf(error_message, "Can't create %s for writing", fontmap);
-	fclose(infile);
-	return 1;
-    }
-    while (fgets(buf, sizeof(buf), infile))
-	fputs(buf, f);
-    fclose(infile);
-    fclose(f);
-    return 0;
-}
-
-int
-update_ini(void)
-{
-char dest[MAXSTR];
-char buf[MAXSTR];
-
-    strcpy(dest, destdir);
-    strcat(dest, BASEDIR);
-    strcpy(buf, dest);
-    strcat(buf, "\\gswin.exe");
-    WritePrivateProfileString("Options", "GhostscriptExe", buf, szIniName16);
-    strcpy(buf, dest);
-    strcat(buf, "\\gswin32.exe");
-    WritePrivateProfileString("Options", "GhostscriptExe", buf, szIniName32);
-
-    strcpy(includepath, dest);
-    strcat(includepath, ";");
-    strcat(includepath, dest);
-    strcat(includepath, "\\fonts");
-    if (use_atm_fonts) {
-        strcat(includepath, ";");
-	strcat(includepath, atm_dir);
-    }
-    WritePrivateProfileString("Options", "GhostscriptInclude", includepath, szIniName16);
-    WritePrivateProfileString("Options", "GhostscriptInclude", includepath, szIniName32);
-    WritePrivateProfileString("Options", "GhostscriptVersion", "351", szIniName16);
-    WritePrivateProfileString("Options", "GhostscriptVersion", "351", szIniName32);
-    WritePrivateProfileString("Options", "Version", GSVIEW_VERSION, szIniName16);
-    WritePrivateProfileString("Options", "Version", GSVIEW_VERSION, szIniName32);
+    WritePrivateProfileString("Options", "Configured", "0", ininame);
     return 0;
 }
 
@@ -482,7 +331,7 @@ DWORD dwResult;
     hszSysTopic = DdeCreateStringHandle(idInst, "PROGMAN", CP_WINANSI);
     hConv = DdeConnect(idInst, hszServName, hszSysTopic, (PCONVCONTEXT)NULL);
     if (hConv == NULL) {
-	message_box("Couldn't open DDE connection to Program Manger\n", 0);
+	message_box("Couldn't open DDE connection to Program Manager\n", 0);
 	return 1;
     }
 
@@ -494,27 +343,47 @@ DWORD dwResult;
     DDEEXECUTE(setup);
     sprintf(setup, "[ReplaceItem(\042GSview\042)]");
     DDEEXECUTE(setup);
-    sprintf(setup, "[AddItem(\042%s\\gsview\\gsview.exe\042,\042GSview\042)]", destdir);
+    if (!is_win4)
+       sprintf(setup, "[AddItem(\042%s\\%s\\gsview32.exe\042,\042GSview\042, \042%s\\%s\\gsview32.ico\042)]", 
+	  destdir, GSVIEW_BASEDIR, destdir, GSVIEW_BASEDIR);
+    else
+       sprintf(setup, "[AddItem(\042%s\\%s\\gsview32.exe\042,\042GSview\042)]", 
+	  destdir, GSVIEW_BASEDIR);
     DDEEXECUTE(setup);
-    sprintf(setup, "[ReplaceItem(\042GSview 32\042)]");
-    DDEEXECUTE(setup);
-    sprintf(setup, "[AddItem(\042%s\\gsview\\gsview32.exe\042,\042GSview 32\042,\042%s\\gsview\\gsview.exe\042)]", destdir, destdir);
-    DDEEXECUTE(setup);
+
+/* Win3.1 documentation says you must put quotes around names */
+/* with embedded spaces. */
+/* In Win95, it appears you must put quotes around the EXE name */
+/* and options separately */
+
     sprintf(setup, "[ReplaceItem(\042GSview README\042)]");
     DDEEXECUTE(setup);
-    sprintf(setup, "[AddItem(\042notepad.exe %s\\gsview\\README.GV\042,\042GSview README\042)]", destdir, BASEDIR);
+    if (!is_win4)
+	sprintf(setup, "[AddItem(\042notepad.exe %s\\%s\\README.TXT\042,\042GSview README\042)]", 
+	    destdir, GSVIEW_BASEDIR);
+    else
+	sprintf(setup, "[AddItem(\042notepad.exe\042 \042%s\\%s\\README.TXT\042,\042GSview README\042,\042notepad.exe\042,1)]", 
+	    destdir, GSVIEW_BASEDIR);
     DDEEXECUTE(setup);
+
     sprintf(setup, "[ReplaceItem(\042Ghostscript\042)]");
     DDEEXECUTE(setup);
-    sprintf(setup, "[AddItem(\042%s%s\\gswin.exe -I%s\042,\042Ghostscript\042)]", destdir, BASEDIR, includepath);
+    if (!is_win4)
+        sprintf(setup, "[AddItem(\042%s\\%s\\gswin32.exe -I%s\\%s;%s\\%s\\fonts\042,\042Ghostscript\042, \042%s\\%s\\gstext.ico\042)]", 
+	    destdir, GS_BASEDIR, destdir, GS_BASEDIR, destdir, GS_BASEDIR,  destdir, GS_BASEDIR);
+    else
+        sprintf(setup, "[AddItem(\042%s\\%s\\gswin32.exe\042 \042-I%s\\%s;%s\\%s\\fonts\042,\042Ghostscript\042)]", 
+	    destdir, GS_BASEDIR, destdir, GS_BASEDIR, destdir, GS_BASEDIR);
     DDEEXECUTE(setup);
-    sprintf(setup, "[ReplaceItem(\042Ghostscript 32\042)]");
-    DDEEXECUTE(setup);
-    sprintf(setup, "[AddItem(\042%s%s\\gswin32.exe -I%s\042,\042Ghostscript 32\042,\042%s%s\\gswin.exe\042)]", destdir, BASEDIR, includepath, destdir, BASEDIR);
-    DDEEXECUTE(setup);
+
     sprintf(setup, "[ReplaceItem(\042Ghostscript README\042)]");
     DDEEXECUTE(setup);
-    sprintf(setup, "[AddItem(\042notepad.exe %s%s\\README.\042,\042Ghostscript README\042)]", destdir, BASEDIR);
+    if (!is_win4)
+        sprintf(setup, "[AddItem(\042notepad.exe %s\\%s\\README.\042,\042Ghostscript README\042)]", 
+	     destdir, GS_BASEDIR);
+    else
+        sprintf(setup, "[AddItem(\042notepad.exe\042 \042%s\\%s\\README.\042,\042Ghostscript README\042, \042notepad.exe\042,1)]", 
+	     destdir, GS_BASEDIR);
     DDEEXECUTE(setup);
 #undef DDEXECUTE
 
@@ -525,54 +394,22 @@ DWORD dwResult;
     return 0;
 }
 
-int
-update_registry(void)
-{
-HKEY hkey;
-char buf[MAXSTR];
-char *psname="psfile";
-char *psvalue="PostScript";
-LONG rc;
-
-    rc = RegSetValue(HKEY_CLASSES_ROOT, psname, REG_SZ, psvalue, strlen(psvalue));
-    if (rc == ERROR_SUCCESS)
-	rc = RegSetValue(HKEY_CLASSES_ROOT, ".ps", REG_SZ, psname, strlen(psname));
-    if (rc == ERROR_SUCCESS)
-	rc = RegSetValue(HKEY_CLASSES_ROOT, ".eps", REG_SZ, psname, strlen(psname));
-
-    if (rc == ERROR_SUCCESS)
-	rc = RegCreateKey(HKEY_CLASSES_ROOT, "psfile\\shell\\open", &hkey);
-    sprintf(buf, "%s\\gsview\\gsview%s.exe %%1", destdir, (is_win32 ? "32" : ""));
-    if (rc == ERROR_SUCCESS)
-	rc = RegSetValue(hkey, "command", REG_SZ, buf, strlen(buf));
-    RegCloseKey(hkey);
-
-    if (rc == ERROR_SUCCESS)
-	rc = RegCreateKey(HKEY_CLASSES_ROOT, "psfile\\shell\\print", &hkey);
-    sprintf(buf, "%s\\gsview\\gsview%s.exe /p %%1", destdir, (is_win32 ? "32" : ""));
-    if (rc == ERROR_SUCCESS)
-	rc = RegSetValue(hkey, "command", REG_SZ, buf, strlen(buf));
-    RegCloseKey(hkey);
-
-    if (rc != ERROR_SUCCESS) {
-	strcpy(error_message, "Error while updating registry");
-	return 1;
-    }
-    return 0;
-}
 
 int
 install(void)
 {
 char buf[MAXSTR];
-int rc;
+int rc = 0;
 char *p;
-HMODULE hmodule;
 DWORD version = GetVersion();
 
-    /* find out if we are running under Windows 95 or NT */
-    if ((LOBYTE(LOWORD(version))<<8) + HIBYTE(LOWORD(version)) > 0x30b)
-	is_win32 = TRUE;
+    /* find out if we are running under Win32s */
+    /* Win32s */
+    if ( ((HIWORD(version) & 0x8000)!=0) && ((HIWORD(version) & 0x4000)==0) )
+	    is_win32s = TRUE;
+    /* Windows 4.0 */
+    if (LOBYTE(LOWORD(version)) >= 4)
+	is_win4 = TRUE;
 
     /* get path to EXE */
     GetModuleFileName(phInstance, sourcedir, sizeof(sourcedir));
@@ -584,22 +421,8 @@ DWORD version = GetVersion();
 
     /* Inspect system, get boot drive */
     getcwd(workdir, sizeof(workdir));	/* remember the working directory */
-    strcpy(bootdrive, "C:");
+    strcpy(bootdrive, "c:");
 
-    /* check for active Adobe Type Manager */
-    GetPrivateProfileString("Setup", "PFB_Dir", "", atm_dir, sizeof(atm_dir), "atm.ini");
-    if (strlen(atm_dir) != 0) {
-	atm_present = TRUE;
-	atm_fonts = 13;    /* assume 13 base fonts */
-	GetPrivateProfileString("fonts", "AvantGarde", "", buf, sizeof(buf), "atm.ini");
-	if (strlen(buf) != 0)
-	    atm_fonts = 39;	   /* assume 39 fonts - same as LaserWriter Plus */
-	GetPrivateProfileString("fonts", "Tekton", "", buf, sizeof(buf), "atm.ini");
-	if (strlen(buf) != 0)
-	    atm_fonts = 65;	   /* assume Adobe Type Basics */
-    }
-
-    
     if (!rc)
         rc = intro();	/* display intro dialog boxes */
 
@@ -610,58 +433,72 @@ DWORD version = GetVersion();
     if (!rc) {
 	/* copy unzip program for faster loading */
 	strcpy(unzipname, destdir);
-	strcat(unzipname, "\\gsview");
+	strcat(unzipname, "\\");
+	strcat(unzipname, GSVIEW_BASEDIR);
 	mkdir(unzipname);
 	strcat(unzipname, "\\");
-	strcat(unzipname, UNZIPEXE);
+	strcat(unzipname, szUnzipDll);
 	strcpy(buf, sourcedir);
-	strcat(buf, UNZIPEXE);
+	strcat(buf, szUnzipDll);
 	rc = copyfile(unzipname, buf);
     }
 
+    if (rc)
+	return rc;
+
     /* unzip GSview and Ghostscript */
     if (!rc) {
-	rc = unzip(GSVIEWZIP, destdir);
-    }
-    if (!rc)
-	rc = unzip(GSINIZIP, destdir);
-    if (!rc)
-	rc = unzip(GSW32ZIP, destdir);
-    if (!rc)
-	rc = unzip(GSWINZIP, destdir);
-    if (!rc) {
+	hwndmess = gs_showmess_modeless();
+	load_unzip(unzipname, phInstance, hwndmess, (HWND)NULL);
 	strcpy(buf, destdir);
-	strcat(buf, BASEDIR);
-	rc = unzip(GSFNTZIP, buf);
+	if (strlen(buf) == 2)
+	    strcat(buf, "\\");	/* is root directory */
+	if (!rc)
+	    rc = unzip_to_dir(GSVIEW_ZIP, buf);
+	if (!rc)
+	    rc = unzip_to_dir(GS_INIZIP, buf);
+	if (!rc)
+	    rc = unzip_to_dir(GS_W32ZIP, buf);
+	if (!rc) {
+	    strcat(buf, "\\");
+	    strcat(buf, GS_BASEDIR);
+	    rc = unzip_to_dir(GS_FN1ZIP, buf);
+	}
+	gs_chdir(workdir);
+	if (rc) {
+	    MSG msg;
+	    /* wait for user to read error message */
+	    while (hwndmess && IsWindow(hwndmess) && 
+		GetMessage(&msg, (HWND)NULL, 0, 0)) {
+		    TranslateMessage(&msg);
+		    DispatchMessage(&msg);
+	    }
+	}
+	if (hwndmess && IsWindow(hwndmess))
+	    DestroyWindow(hwndmess);
+	free_unzip();
     }
 
-    /* remove unneeded unzip */
+    /* remove unneeded unzip DLL */
     unlink(unzipname);
 
-    if (!rc) {
-	rc = update_config();
-    }
-
-    if (!rc) {
-	rc = update_fontmap();
-    }
-
-    if (!rc) {
-	rc = update_ini();
-    }
-
-    if (!rc) {
-	rc = create_object();
-    }
+    if (!rc)
+	rc = patch_ghostscript();
 
     if (!rc)
-	rc = update_registry();
+	rc = update_config();
+
+    if (!rc)
+	rc = update_ini(szIniName);
+
+    if (!rc)
+	rc = create_object();
 
     if (!rc) {
 	sprintf(buf, "Installation successful.\r\
-A Program Manager group named \042GS Tools\042 has been created.\r\
-File Manager associations have been created for .ps and .eps files.");
-	message_box(buf, MB_MOVEABLE | MB_OK);
+A Program Manager group named \042GS Tools\042 has been created.");
+	if (!batch)
+	    message_box(buf, MB_MOVEABLE | MB_OK);
     }
     return rc;
 }
@@ -671,10 +508,31 @@ File Manager associations have been created for .ps and .eps files.");
 int PASCAL 
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmdShow)
 {
-    int rc = 0;
+    int rc;
     LPSTR p;
     /* copy the hInstance into a variable so it can be used */
     phInstance = hInstance;
+    if (lpszCmdLine[0] != '\0') {
+	LPSTR d, s;
+	d = destdir;
+	s = lpszCmdLine;
+	if (*s == '\042')
+	    s++; 		/* don't copy quotes */
+	while (*s) {
+	    if (*s == '\042')
+		s++; 	/* don't copy quotes */
+	    else
+		*d++ = *s++;
+	    if (d - destdir > sizeof(destdir) - 1) {
+	        *d = '\0';
+		break;
+	    }
+	}
+	batch = TRUE;
+    }
+
+    if (beta_warn())
+	return 1;
 
     rc = install();
 
@@ -764,3 +622,4 @@ ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return FALSE;
 }
 
+

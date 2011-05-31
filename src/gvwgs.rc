@@ -1,0 +1,58 @@
+/* gvwgs.c */
+#include "gvwgs.h"
+
+#ifndef DS_3DLOOK
+#define DS_3DLOOK 0x0004L	/* for Windows 95 look */
+#endif
+
+ID_GSVIEW ICON "binary/gvwgs.ico"
+
+AboutDlgBox DIALOG 20, 32, 256, 164
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION "About GSview for Windows"
+Font 8, "Helv"
+BEGIN
+	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 218, 5, 32, 14
+	LTEXT "GVWGS.EXE", -1, 32, 8, 64, 8
+	RTEXT "Version:", -1, 86, 8, 32, 8
+	LTEXT "", ABOUT_VERSION, 120, 8, 96, 8
+	LTEXT "A Ghostscript graphical interface", -1, 32, 16, 128, 8
+	LTEXT "Copyright (C) 1996, Russell Lang.  All rights reserved.", -1, 8, 28, 240, 8
+	LTEXT "This program is distributed with NO WARRANTY OF ANY KIND.", -1, 7, 48, 240, 8
+	LTEXT "No author or distributor accepts any responsibility for the", -1, 7, 56, 240, 8
+	LTEXT "consequences of using it, or for whether it serves any particular", -1, 7, 64, 240, 8
+	LTEXT "purpose or works at all, unless he or she says so in writing.  Refer", -1, 7, 72, 240, 8
+	LTEXT "to the GSview Free Public Licence (the 'Licence') for full details.", -1, 7, 80, 240, 8
+	LTEXT "Every copy of GSview must include a copy of the Licence, normally", -1, 7, 92, 240, 8
+	LTEXT "in a plain ASCII text file named LICENCE.  The Licence grants you", -1, 7, 100, 240, 8
+	LTEXT "the right to copy, modify and redistribute GSview, but only under", -1, 7, 108, 240, 8
+	LTEXT "certain conditions described in the Licence.  Among other things,", -1, 7, 116, 240, 8
+	LTEXT "the Licence requires that the copyright notice and this notice be", -1, 7, 124, 240, 8
+	LTEXT "preserved on all copies.", -1, 7, 132, 240, 8
+	LTEXT "Author: Russell Lang  (rjl@aladdin.com)", -1, 8, 146, 240, 8
+	ICON ID_GSVIEW, ABOUT_ICON, 8, 8, 0, 0
+END
+
+
+
+ID_GSVIEW MENU 
+{
+ POPUP "&File"
+ {
+  MENUITEM "Save &As...", IDM_SAVEAS
+  MENUITEM "E&xit", IDM_EXIT
+ }
+
+ POPUP "&Edit"
+ {
+  MENUITEM "&Copy\tCtrl+C", IDM_COPYCLIP
+ }
+
+ POPUP "&Help"
+ {
+  MENUITEM "&About...", IDM_ABOUT
+ }
+
+}
+
+

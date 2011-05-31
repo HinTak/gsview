@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,10 +18,6 @@
 /* gvpprn.c */
 /* Printer routines for PM GSview */
 #include "gvpm.h"
-
-#ifndef UNUSED
-void gs_prn_process(void);
-#endif
 
 char not_defined[] = "[Not defined]";
 
@@ -516,11 +512,7 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	WinSendMsg(hwnd, WM_CONTROL, MPFROM2SHORT(PROP_NAME, CBN_LBSELECT),
 	    	MPFROMLONG(WinWindowFromID(hwnd, PROP_NAME)));
 */
-	if (option.gsversion < IDM_GS351) {
-	      WinEnableWindow(WinWindowFromID(hwnd, PROP_XOFFSET), FALSE);
-	      WinEnableWindow(WinWindowFromID(hwnd, PROP_YOFFSET), FALSE);
-	}
-	else {
+	{
 	    PROFILE *prf;
 	    strcpy(section, device);
 	    strcat(section, " PageOffset");
@@ -659,6 +651,7 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 }
 
 
+
 char *device_queue_list;
 int device_to_file;
 int device_queue_index;
@@ -719,13 +712,13 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		i++;
 	    }
 	    /* fill in page list box */
-	    if ( (doc != (PSDOC *)NULL) && (doc->numpages != 0)) {
-		page_list.current = psfile.pagenum-1;
-		page_list.multiple = TRUE;
+	    if ( (psfile.doc != (PSDOC *)NULL) && (psfile.doc->numpages != 0)) {
+		psfile.page_list.current = psfile.pagenum-1;
+		psfile.page_list.multiple = TRUE;
 		PageDlgProc(hwnd, msg, mp1, mp2);
 	    }
 	    else {
-		page_list.multiple = FALSE;
+		psfile.page_list.multiple = FALSE;
 		WinEnableWindow(WinWindowFromID(hwnd, PAGE_ALL), FALSE);
 		WinEnableWindow(WinWindowFromID(hwnd, PAGE_ODD), FALSE);
 		WinEnableWindow(WinWindowFromID(hwnd, PAGE_EVEN), FALSE);
@@ -845,7 +838,7 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			strcpy(option.printer_port, p);
 		    }
 		    /* save pages numbers */
-	    	    if ( (doc != (PSDOC *)NULL) && (doc->numpages != 0))
+	    	    if ( (psfile.doc != (PSDOC *)NULL) && (psfile.doc->numpages != 0))
 		        PageDlgProc(hwnd, msg, mp1, mp2);
 		    WinDismissDlg(hwnd, DID_OK);
             	    return (MRESULT)TRUE;
@@ -899,6 +892,7 @@ gsview_print(BOOL to_file)
 {
 	int flag;
 	char command[MAXSTR+MAXSTR];
+	char progname[MAXSTR];
 	
 	if (psfile.name[0] == '\0') {
 		gserror(IDS_NOTOPEN, NULL, MB_ICONEXCLAMATION, SOUND_NOTOPEN);
@@ -913,7 +907,10 @@ gsview_print(BOOL to_file)
 
 	info_wait(IDS_WAITPRINT);
 
-	sprintf(command,"%s @%s", option.gsother, printer.optname);
+	strcpy(progname, "gvpgs.exe");
+
+	sprintf(command,"%s \042%s\042 \042%s\042 \042%s\042", debug ? "/d" : "", 
+	   option.gsdll, printer.optname, printer.psname);
 
 	if (strlen(command) > MAXSTR-1) {
 		/* command line too long */
@@ -927,7 +924,7 @@ gsview_print(BOOL to_file)
 		return;
 	}
 
-	flag = exec_pgm(option.gsexe, command, FALSE, &printer.prog);
+	flag = exec_pgm(progname, command, &printer.prog);
 	if (!flag || !printer.prog.valid) {
 	        cleanup_pgm(&printer.prog);
 		gserror(IDS_CANNOTRUN, command, MB_ICONHAND, SOUND_ERROR);
@@ -946,3 +943,4 @@ gsview_print(BOOL to_file)
 	return;
 }
 
+

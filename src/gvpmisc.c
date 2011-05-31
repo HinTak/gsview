@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -28,12 +28,6 @@ SetDlgItemText(HWND hwnd, int id, char *str)
 }
 
 void
-post_close(void)
-{
-	WinPostMsg(hwnd_bmp, WM_CLOSE, MPFROMLONG(0), MPFROMLONG(0));
-}
-
-void
 get_help()
 {
     WinPostMsg(hwnd_frame, WM_HELP,
@@ -46,6 +40,13 @@ message_box(char *str, int icon)
 {
   	return WinMessageBox(HWND_DESKTOP, hwnd_frame ? hwnd_frame : HWND_DESKTOP, 
 		str, szAppName, 0, icon | MB_MOVEABLE | MB_OK);
+}
+
+/* delayed message box, usually because we are on the other thread */
+int
+delayed_message_box(int id, int icon)
+{
+    WinPostMsg(hwnd_bmp, WM_GSMESSBOX, MPFROMLONG(id), MPFROMLONG(icon));
 }
 
 /* change menu item checkmark */
@@ -122,17 +123,16 @@ ULONG rc;
 }
 
 
-
 void
 info_wait(int id)
 {
 POINTL pt, pt_save;
 RECTL rect;
 	if (id)
-	    load_string(id, szWait, sizeof(szWait));  /* revert to generic text */
-	else
+    	    load_string(id, szWait, sizeof(szWait));
+	else 
 	    szWait[0] = '\0';
-
+	
 	if (hwnd_status) {
 	    WinInvalidateRect(hwnd_status, (PRECTL)NULL, TRUE);
   	    WinUpdateWindow(hwnd_status);
@@ -155,13 +155,22 @@ gs_chdir(char *dirname)
 		chdir(dirname);
 	return TRUE;
 #else
+#ifdef __IBMC__
+	if (isalpha(dirname[0]) && (dirname[1]==':'))
+	    if (_chdrive(toupper(dirname[0])-'A'+1))
+		return -1;
+	if (!((strlen(dirname)==2) && isalpha(dirname[0]) && (dirname[1]==':')))
+	    return _chdir(dirname);
+#else
 	if (isalpha(dirname[0]) && (dirname[1]==':'))
 	    if (_chdrive(dirname[0]))
 		return -1;
 	return _chdir2(dirname);
 #endif
+#endif
 }
 
+#ifndef __IBMC__
 char * 
 gs_getcwd(char *dirname, int size)
 {
@@ -171,26 +180,27 @@ gs_getcwd(char *dirname, int size)
 	return _getcwd2(dirname, size);
 #endif
 }
+#endif
 
 
-void
-send_prolog(FILE *f, int resource)
+int
+send_prolog(int resource)
 {  
 char *prolog, *p;
 APIRET rc;
+int code = -1;
 	rc = DosGetResource(0, RT_RCDATA, resource, (PPVOID)&prolog);
 	if (!rc && (prolog != (char *)NULL) ) {
+	    code = 0;
 	    p = prolog;
 	    while (*p) {
-	        while (*p) {
-		    if (debug_file != (FILE *)NULL)
-	                fputc(*p, debug_file);
-	            fputc(*p++, f);
-		}
-		p++;	/* skip end of string null */
+		if (!code)
+	            code = gs_execute(p, strlen(p));
+		p += strlen(p)+1;;
 	    }
 	    DosFreeResource(prolog);
 	}
+	return code;
 }
 
 char tempbuf[8192];
@@ -221,3 +231,4 @@ char name[MAXSTR];
    DosFreeResource(rcdata);
 }
 
+

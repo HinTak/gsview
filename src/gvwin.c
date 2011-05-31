@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,31 +20,29 @@
 /* by Russell Lang */
 #include "gvwin.h"
 
-char szAppName[MAXSTR];			/* application name - for title bar */
+char szAppName[MAXSTR] = GSVIEW_PRODUCT;  /* application name - for title bar */
 char szExePath[MAXSTR];
 char szIniFile[MAXSTR];
 char szWait[MAXSTR];
 char szFindText[MAXSTR];
 char previous_filename[MAXSTR];
+char selectname[MAXSTR];
 const char szClassName[] = "gsview_class";
+const char szImgClassName[] = "gsview_img_class";
 const char szScratch[] = "gsview";	/* temporary filename prefix */
-char szSpoolPrefix[] = "\\\\spool\\";
+char *szSpoolPrefix = "\\\\spool\\";
 
 HWND hwndimg;			/* gsview main window */
 HWND hDlgModeless;		/* any modeless dialog box */
-HWND hwndtext;			/* gswin text window */
 HWND hwndimgchild;		/* gswin image child window */
 HWND hwndspl;			/* window handle of gsv16spl.exe */
 HINSTANCE phInstance;		/* instance of gsview */
-int bitmap_scrollx=0;		/* offset from bitmap to origin of child window */
-int bitmap_scrolly=0;
 PSFILE psfile;		/* Postscript file structure */
-PROG gsprog;		/* Ghostscript program structure */
+PRINTER printer;	/* Ghostscript printer structure */
+BOOL win32s_printer_pending = FALSE;
+BMAP bitmap;		/* information about display bitmap */
 OPTIONS option;		/* GSview options (saved in INI file) */
 DISPLAY display;	/* Display parameters */
-PSDOC *doc;
-struct page_list_s page_list;	/*  page selection for print/extract */
-
 
 struct sound_s sound[NUMSOUND] = {
 	{"SoundOutputPage", IDS_SNDPAGE, ""},
@@ -52,15 +50,19 @@ struct sound_s sound[NUMSOUND] = {
 	{"SoundNoNumbering", IDS_SNDNONUMBER, ""},
 	{"SoundNotOpen", IDS_SNDNOTOPEN, ""},
 	{"SoundError", IDS_SNDERROR, BEEP},
-	{"SoundTimeout", IDS_SNDTIMEOUT, ""},
 	{"SoundStart", IDS_SNDSTART, ""},
 	{"SoundExit", IDS_SNDEXIT, ""},
+	{"SoundBusy", IDS_SNDBUSY, BEEP},
 };
 
 /* initialised in init.c */
-BOOL is_win31 = FALSE;		/* To allow selective use of win 3.1 features */
 BOOL is_winnt = FALSE;		/* To allow selective use of Windows NT features */
 BOOL is_win95 = FALSE;		/* To allow selective use of Windows 95 features */
+BOOL is_win32s = FALSE;		/* To allow selective use of Win32s misfeatures */
+BOOL is_win4;			/* To allow selective use of Windows 4.0 features */
+BOOL multithread = FALSE;
+CRITICAL_SECTION crit_sec;	/* for thread synchronization */
+HANDLE hmutex_ps;		/* for protecting psfile and pending */
 char szHelpName[MAXSTR];	/* buffer for building help filename */
 char szHelpTopic[MAXSTR];	/* topic for OFN_SHOWHELP */
 UINT help_message;		/* message sent by OFN_SHOWHELP */
@@ -76,21 +78,79 @@ RECT  info_coord;		/* position and size of coordinate information */
 RECT  button_rect;		/* position and size of button area */
 
 BOOL prev_in_child;		/* true if cursor previously in gswin child window */
-int page_extra;			/* extra pages to skip */
 int page_skip = 5;		/* number of pages to skip in IDM_NEXTSKIP or IDM_PREVSKIP */
-BOOL changed_version = FALSE;	/* to warn user to update Ghostscript Command */
 BOOL zoom = FALSE;		/* true if display zoomed */
 BOOL debug = FALSE;		/* /D command line option used */
 HINSTANCE hlib_mmsystem;	/* DLL containing sndPlaySound function */
 FPSPS lpfnSndPlaySound;		/* pointer to sndPlaySound function if loaded */
+BOOL quitnow = FALSE;		/* Used to cause exit from nested message loops */
 
-/* timer used for open, close, display & print timeouts */
-BOOL bTimeout;			/* true if timeout occured */
-BOOL bTimerSet;			/* true if TIMER running */
-#define ID_MYTIMER 1
-UINT timeout_count;
+int percent_done;		/* percentage of document processed */
+int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
 
-/* document manipulation */
+
+#if (WINVER < 0x0400)
+/* Windows 4.0 scroll bar extras */
+#define SIF_RANGE           0x01
+#define SIF_PAGE            0x02
+#define SIF_POS             0x04
+#define SIF_DISABLENOSCROLL 0x08
+#define SIF_TRACKPOS        0x10
+#define SIF_ALL             (SIF_RANGE | SIF_PAGE | SIF_POS | SIF_TRACKPOS)
+#define SBM_SETSCROLLINFO 0x00E9
+#define SBM_GETSCROLLINFO 0x00EA
+
+typedef struct tagSCROLLINFO {
+    UINT cbSize;
+    UINT fMask;
+    int nMin;
+    int nMax;
+    UINT nPage;
+    int nPos;
+    int nTrackPos;
+} SCROLLINFO;
+typedef SCROLLINFO FAR *LPSCROLLINFO;
+/*
+WINUSERAPI int WINAPI SetScrollInfo(HWND, int, LPSCROLLINFO, BOOL);
+WINUSERAPI int WINAPI GetScrollInfo(HWND, int, LPSCROLLINFO);
+*/
+#endif
+
+typedef int (WINAPI *PFN_SetScrollInfo)(HWND, int, LPSCROLLINFO, BOOL);
+PFN_SetScrollInfo pSetScrollInfo;
+HMODULE hmodule_user32;
+
+BOOL
+load_SetScrollInfo(void)
+{
+    /* Instead of linking to SetScrollInfo at load time,
+     * we instead do it at run time.
+     * This allows us to produce an EXE that will run under
+     * Windows 3.1 and Windows 4.0
+     */
+    if (!is_win4)
+	return FALSE;
+    hmodule_user32 = LoadLibrary("USER32.DLL");
+    if (hmodule_user32 < (HINSTANCE)HINSTANCE_ERROR) {
+	hmodule_user32 = (HINSTANCE)NULL;
+        return FALSE;
+    }
+    pSetScrollInfo = (PFN_SetScrollInfo) GetProcAddress(hmodule_user32, "SetScrollInfo");
+    if (!pSetScrollInfo)
+        return FALSE;
+    return TRUE;
+}
+
+void
+free_SetScrollInfo(void) 
+{
+    if (!hmodule_user32)
+	return;
+    pSetScrollInfo = (PFN_SetScrollInfo)NULL;
+    FreeLibrary(hmodule_user32);
+    hmodule_user32 = (HINSTANCE)NULL;
+}
+
 
 /* local functions */
 BOOL draw_button(DRAWITEMSTRUCT FAR *lpdis);
@@ -100,6 +160,17 @@ BOOL in_info_area(void);
 void info_paint(HWND, HDC);
 void cursorpos_paint(HDC hdc);
 void gsview_close(void);
+BOOL query_close(void);
+void update_scroll_bars(void);
+void gs_thread(void *arg);
+void map_pt_to_pixel(float *x, float *y);
+void enable_menu_item(int menuid, int itemid, BOOL enabled);
+void end_button_help(void);
+
+void highlight_words(HDC hdc, int first, int last);
+BOOL text_marking = FALSE;
+int text_mark_first = -1;
+int text_mark_last = -1;
 
 
 int PASCAL 
@@ -110,7 +181,6 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	/* copy the hInstance into a variable so it can be used */
 	phInstance = hInstance;
 
-	LoadString(hInstance, IDS_TITLE, szAppName, sizeof(szAppName));
 	if (hPrevInstance) {
 	    /* don't run more than one copy */
 	    /* because we can't run more than one Ghostscript */
@@ -120,23 +190,532 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	}
 
 	gsview_init1(lpszCmdLine);
+	load_SetScrollInfo();
 	ShowWindow(hwndimg, cmdShow);
+	info_wait(IDS_NOWAIT);
+	if (gsview_changed())
+	    PostQuitMessage(0);
+
+	if (multithread) {
+	    /* start thread for displaying */
+	    display.tid = _beginthread(gs_thread, 16384, NULL);
+	}
 	
-	while (GetMessage(&msg, (HWND)NULL, 0, 0)) {
+	while (!(!multithread && quitnow)
+		 && GetMessage(&msg, (HWND)NULL, 0, 0)) {
 	    if ((hDlgModeless == 0) || !IsDialogMessage(hDlgModeless, &msg)) {
 	        if (!TranslateAccelerator(hwndimg, haccel, &msg)) {
 		    TranslateMessage(&msg);
 		    DispatchMessage(&msg);
 	        }
 	    }
+	    if (multithread) {
+	        /* release other thread if needed */
+	        if (pending.unload || pending.now || pending.next || quitnow)
+		    SetEvent(display.event);
+	    }
+	    else {
+	        if (pending.now) {
+	            if (is_win95 || is_winnt)
+		        gs_process();	/* start Ghostscript */
+		    else {
+		        /* Win32s can't start gs_process while printing */
+			/* Check if gvwgs.exe is running */
+			HWND hwndprn = FindWindow(NULL, "GSview Print");
+			if (IsWindow(hwndprn)) {
+			    pending.now = FALSE;
+			    gserror(0, "Busy printing.  Win32s can't use Ghostscript for displaying while it is being used for printing. Try again when 'GSview Print' has finished.", MB_ICONEXCLAMATION, SOUND_ERROR);
+			}
+			if (pending.now)
+		            gs_process();	/* start Ghostscript */
+		    }
+		    update_scroll_bars();
+		}
+	    }
+	    if (is_win32s && win32s_printer_pending) {
+		/* Win32s can't load GS DLL twice */
+		/* so we must run it while display GS DLL is unloaded */
+		start_gvwgs();
+		win32s_printer_pending = FALSE;
+		/* We can't stop the user attempting to display while */
+		/* printing since we don't know when printer finished */
+		/* We'll see how much of a problem this causes */
+	    }
 	}
 
 	play_sound(SOUND_EXIT);
 	gsview_close();
+	DestroyWindow(hwndimg);
+	free_SetScrollInfo();
  	WinHelp(hwndimg,szHelpName,HELP_QUIT,(DWORD)NULL);
-	if (is_win31 && (hlib_mmsystem != (HINSTANCE)NULL))
+	if (hlib_mmsystem != (HINSTANCE)NULL)
 	    FreeLibrary(hlib_mmsystem);
 	return 0;
+}
+
+
+/* child image window */
+LRESULT CALLBACK _export
+WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{	
+	HDC hdc;
+	PAINTSTRUCT ps;
+	RECT rect;
+	int nVscrollInc, nHscrollInc;
+	static int cxAdjust, cyAdjust;
+	static int cxClient, cyClient;
+	static int nHscrollPos, nHscrollMax;
+	static int nVscrollPos, nVscrollMax;
+
+	switch(message) {
+		case WM_CREATE:
+			cxClient = cyClient = 0;
+			nHscrollPos = nHscrollMax = 0;
+			nVscrollPos = nVscrollMax = 0;
+			break;
+		case WM_SIZE:
+			if (wParam == SIZE_MINIMIZED)
+				return(0);
+			cyClient = HIWORD(lParam);
+			cxClient = LOWORD(lParam);
+
+			cyAdjust = min(bitmap.height, cyClient) - cyClient;
+			cyClient += cyAdjust;
+
+			nVscrollMax = max(0, bitmap.height - cyClient);
+			nVscrollPos = min(nVscrollPos, nVscrollMax);
+
+			if (!gsdll.device)
+			    nVscrollMax = nVscrollPos = 0;
+
+			if (is_win4 && pSetScrollInfo) {
+			    SCROLLINFO si;
+			    si.cbSize = sizeof(si);
+			    si.fMask = SIF_ALL;
+			    si.nMin = 0;
+			    /* Win32 docs say use nMax = nVscrollMax + (nPage-1) */
+			    /* Overview example says use nMax = nVscrollMax */
+			    if (nVscrollMax) {
+				si.nPage = cyClient;
+			        si.nMax = nVscrollMax + (cyClient - 1);
+			    }
+			    else {
+			        si.nMax = si.nPage = 0;
+			    }
+			    si.nPos = nVscrollPos;
+			    si.nTrackPos = 0;
+			    pSetScrollInfo(hwnd, SB_VERT, &si, TRUE);
+			}
+			else 
+			{
+			    SetScrollRange(hwnd, SB_VERT, 0, nVscrollMax, FALSE);
+			    SetScrollPos(hwnd, SB_VERT, nVscrollPos, TRUE);
+			}
+
+			cxAdjust = min(bitmap.width,  cxClient) - cxClient;
+			cxClient += cxAdjust;
+
+			nHscrollMax = max(0, bitmap.width - cxClient);
+			nHscrollPos = min(nHscrollPos, nHscrollMax);
+
+			if (!gsdll.device)
+			    nHscrollMax = nHscrollPos = 0;
+
+			if (is_win4 && pSetScrollInfo) {
+			    SCROLLINFO si;
+			    si.cbSize = sizeof(si);
+			    si.fMask = SIF_ALL;
+			    si.nMin = 0;
+			    if (nHscrollMax) {
+				si.nPage = cxClient;
+			        si.nMax = nHscrollMax + (cxClient - 1);
+			    }
+			    else {
+			        si.nMax = si.nPage = 0;
+			    }
+			    si.nPos = nHscrollPos;
+			    si.nTrackPos = 0;
+			    pSetScrollInfo(hwnd, SB_HORZ, &si, TRUE);
+			}
+			else 
+			{
+			    SetScrollRange(hwnd, SB_HORZ, 0, nHscrollMax, FALSE);
+			    SetScrollPos(hwnd, SB_HORZ, nHscrollPos, TRUE);
+			}
+
+			bitmap.scrollx = nHscrollPos;
+			bitmap.scrolly = nVscrollPos;
+
+			if ( option.fit_page && (wParam==SIZE_RESTORED) &&
+			    !IsZoomed(hwndimg) && 
+			    gsdll.device &&
+			    (cxAdjust!=0 || cyAdjust!=0) ) {
+			    GetWindowRect(GetParent(hwnd),&rect);
+			    MoveWindow(GetParent(hwnd),rect.left,rect.top,
+				rect.right-rect.left+cxAdjust,
+				rect.bottom-rect.top+cyAdjust, TRUE);
+			    cxAdjust = cyAdjust = 0;
+			}
+			return(0);
+		case WM_VSCROLL:
+			switch(LOWORD(wParam)) {
+			    case SB_TOP:
+				    nVscrollInc = -nVscrollPos;
+				    break;
+			    case SB_BOTTOM:
+				    nVscrollInc = nVscrollMax - nVscrollPos;
+				    break;
+			    case SB_LINEUP:
+				    nVscrollInc = -cyClient/16;
+				    break;
+			    case SB_LINEDOWN:
+				    nVscrollInc = cyClient/16;
+				    break;
+			    case SB_PAGEUP:
+				    nVscrollInc = min(-1,-cyClient);
+				    break;
+			    case SB_PAGEDOWN:
+				    nVscrollInc = max(1,cyClient);
+				    break;
+			    case SB_THUMBPOSITION:
+			    case SB_THUMBTRACK:
+#ifdef __WIN32__
+				    nVscrollInc = HIWORD(wParam) - nVscrollPos;
+#else
+				    nVscrollInc = LOWORD(lParam) - nVscrollPos;
+#endif
+				    break;
+			    case SB_FIND:
+				    /* non standard */
+#ifdef __WIN32__
+				    nVscrollInc = (short)HIWORD(wParam);
+#else
+				    nVscrollInc = (short)LOWORD(lParam);
+#endif
+				    break;
+			    default:
+				    nVscrollInc = 0;
+			}
+			if ((nVscrollInc = max(-nVscrollPos, 
+				min(nVscrollInc, nVscrollMax - nVscrollPos)))!=0) {
+				nVscrollPos += nVscrollInc;
+				ScrollWindow(hwnd,0,-nVscrollInc,NULL,NULL);
+				SetScrollPos(hwnd,SB_VERT,nVscrollPos,TRUE);
+				bitmap.scrollx = nHscrollPos;
+				bitmap.scrolly = nVscrollPos;
+				UpdateWindow(hwnd);
+			}
+
+
+			return(0);
+		case WM_HSCROLL:
+			switch(LOWORD(wParam)) {
+			    case SB_TOP:
+				    nHscrollInc = -nHscrollPos;
+				    break;
+			    case SB_BOTTOM:
+				    nHscrollInc = nHscrollMax - nHscrollPos;
+				    break;
+			    case SB_LINEUP:
+				    nHscrollInc = -cxClient/16;
+				    break;
+			    case SB_LINEDOWN:
+				    nHscrollInc = cyClient/16;
+				    break;
+			    case SB_PAGEUP:
+				    nHscrollInc = min(-1,-cxClient);
+				    break;
+			    case SB_PAGEDOWN:
+				    nHscrollInc = max(1,cxClient);
+				    break;
+			    case SB_THUMBPOSITION:
+			    case SB_THUMBTRACK:
+#ifdef __WIN32__
+				    nHscrollInc = HIWORD(wParam) - nHscrollPos;
+#else
+				    nHscrollInc = LOWORD(lParam) - nHscrollPos;
+#endif
+				    break;
+			    case SB_FIND:
+				    /* non standard */
+#ifdef __WIN32__
+				    nHscrollInc = (short)HIWORD(wParam);
+#else
+				    nHscrollInc = (short)LOWORD(lParam);
+#endif
+				    break;
+			    default:
+				    nHscrollInc = 0;
+			}
+
+			if ((nHscrollInc = max(-nHscrollPos, 
+				min(nHscrollInc, nHscrollMax - nHscrollPos)))!=0) {
+				nHscrollPos += nHscrollInc;
+				ScrollWindow(hwnd,-nHscrollInc,0,NULL,NULL);
+				SetScrollPos(hwnd,SB_HORZ,nHscrollPos,TRUE);
+				bitmap.scrollx = nHscrollPos;
+				bitmap.scrolly = nVscrollPos;
+				UpdateWindow(hwnd);
+			}
+
+			return(0);
+		case WM_KEYDOWN:
+			end_button_help();
+			switch(LOWORD(wParam)) {
+				case VK_HOME:
+					SendMessage(hwnd,WM_VSCROLL,SB_TOP,0L);
+					break;
+				case VK_END:
+					SendMessage(hwnd,WM_VSCROLL,SB_BOTTOM,0L);
+					break;
+				case VK_PRIOR:
+					SendMessage(hwnd,WM_VSCROLL,SB_PAGEUP,0L);
+					break;
+				case VK_NEXT:
+					SendMessage(hwnd,WM_VSCROLL,SB_PAGEDOWN,0L);
+					break;
+				case VK_UP:
+					SendMessage(hwnd,WM_VSCROLL,SB_LINEUP,0L);
+					break;
+				case VK_DOWN:
+					SendMessage(hwnd,WM_VSCROLL,SB_LINEDOWN,0L);
+					break;
+				case VK_LEFT:
+					SendMessage(hwnd,WM_HSCROLL,SB_PAGEUP,0L);
+					break;
+				case VK_RIGHT:
+					SendMessage(hwnd,WM_HSCROLL,SB_PAGEDOWN,0L);
+					break;
+			}
+			return(0);
+		case WM_KEYUP:
+			end_button_help();
+			break;
+		case WM_LBUTTONDOWN:
+			if (hDlgModeless && in_child_client_area())
+			    SendMessage(hDlgModeless, WM_COMMAND, BB_CLICK, lParam);
+			else {
+			    int iword ;
+			    float x, y;
+			    if (get_cursorpos(&x, &y)) {
+				HDC hdc = GetDC(hwnd);
+				if ( (iword = word_find((int)x, (int)y)) >= 0 ) {
+				    /* remove any current selection */
+				    highlight_words(hdc, text_mark_first, text_mark_last);
+				    /* mark new selection */
+				    text_mark_first = text_mark_last = iword;
+				    text_marking = TRUE;
+				    highlight_words(hdc, text_mark_first, text_mark_last);
+		    		    SetCapture(hwnd);
+				}
+				else {
+				    /* remove selection */
+				    highlight_words(hdc, text_mark_first, text_mark_last);
+				    text_mark_first = text_mark_last = -1;
+				    ReleaseCapture();
+				}
+				ReleaseDC(hwnd, hdc);
+			    }
+			}
+			break;
+		case WM_MOUSEMOVE:
+			if (text_marking) {
+			    int iword ;
+			    float x, y;
+			    while (!in_child_client_area()) {
+				RECT rect;
+				POINT pt;
+				GetCursorPos(&pt);
+				GetClientRect(hwnd, &rect);
+				ScreenToClient(hwnd, &pt);
+				if (pt.x > rect.right)
+				    SendMessage(hwnd, WM_HSCROLL,SB_LINEDOWN,0L);
+				if (pt.x < rect.left)
+				    SendMessage(hwnd, WM_HSCROLL,SB_LINEUP,0L);
+				if (pt.y > rect.bottom)
+				    SendMessage(hwnd, WM_VSCROLL,SB_LINEDOWN,0L);
+				if (pt.y < rect.top)
+				    SendMessage(hwnd, WM_VSCROLL,SB_LINEUP,0L);
+				Sleep(100);
+			    }
+			    if (get_cursorpos(&x, &y)) {
+				if ( (iword = word_find((int)x, (int)y)) >= 0 ) {
+				    if (iword != text_mark_last) {
+					HDC hdc = GetDC(hwndimgchild);
+					int first, last;
+					if ((text_mark_last-text_mark_first >= 0) != (iword-text_mark_first >= 0)) {
+					    /* changing direction */
+					    /* clear everything */
+					    highlight_words(hdc, text_mark_first, text_mark_last);
+					    /* reinstate first word */
+					    text_mark_last = text_mark_first;
+					    highlight_words(hdc, text_mark_first, text_mark_last);
+					}
+					if (iword != text_mark_last) {
+					  if (iword >= text_mark_first) {
+					    if (iword > text_mark_last)
+						first=text_mark_last+1, last=iword;
+					    else
+						first=iword+1, last=text_mark_last;
+					  }
+					  else {
+					    if (iword > text_mark_last)
+						first=text_mark_last, last=iword-1;
+					    else
+						first=iword, last=text_mark_last-1;
+					  }
+					  highlight_words(hdc, first, last);
+					  text_mark_last = iword;
+					}
+					ReleaseDC(hwndimgchild, hdc);
+				    }
+				}
+			    }
+			}
+			break;
+		case WM_LBUTTONUP:
+			ReleaseCapture();
+			text_marking = FALSE;
+			break;
+		case WM_PAINT:
+			if (quitnow) {
+			    hdc = BeginPaint(hwnd, &ps);
+			    rect = ps.rcPaint;
+			    FillRect(hdc, &rect, GetStockObject(LTGRAY_BRUSH));
+			    EndPaint(hwnd, &ps);
+			    return 0;
+			}
+			if (gsdll.lock_device && gsdll.device)
+			    gsdll.lock_device(gsdll.device, 1);
+			request_mutex();
+			{
+			int wx,wy;
+			RECT source, dest, fillrect;
+			PSDOC *doc = psfile.doc;
+			hdc = BeginPaint(hwnd, &ps);
+			rect = ps.rcPaint;
+			SetMapMode(hdc, MM_TEXT);
+			SetBkMode(hdc,OPAQUE);
+			if (gsdll.draw && gsdll.device && 
+				(bitmap.width > 1) && (bitmap.height > 1)) {
+			    dest.left = rect.left;	/* destination */
+			    dest.top = rect.top;
+			    wx = rect.right-rect.left; /* width */
+			    wy = rect.bottom-rect.top;
+			    source.left = rect.left;	/* source */
+			    source.top = rect.top;
+			    source.left += nHscrollPos; /* scrollbars */
+			    source.top  += nVscrollPos;	
+			    if (source.left+wx > bitmap.width)
+				    wx = bitmap.width - source.left;
+			    if (source.top+wy > bitmap.height)
+				    wy = bitmap.height - source.top;
+			    source.right  = source.left + wx;
+			    source.bottom = source.top + wy;
+			    dest.right  = dest.left + wx;
+			    dest.bottom = dest.top + wy;
+			    if (wx && wy)
+			        gsdll.draw(gsdll.device, hdc, &dest, &source);
+			    /* Fill areas around page */
+			    /* not sure if display.offset.y is from top or bottom */
+			    /* code here assumes top (opposite to OS/2) */
+			    if (rect.bottom > bitmap.height + display.offset.y) {	/* bottom centre */
+				fillrect.bottom = rect.bottom; 
+				fillrect.top = bitmap.height + display.offset.y;
+				fillrect.left = dest.left;
+				fillrect.right = dest.right;
+				FillRect(hdc, &fillrect, GetStockObject(LTGRAY_BRUSH));
+			    }
+			    if (rect.top < display.offset.y) { /* top centre */
+				fillrect.bottom = display.offset.y;
+				fillrect.top = rect.top;
+				fillrect.left = dest.left;
+				fillrect.right = dest.right;
+				FillRect(hdc, &fillrect, GetStockObject(LTGRAY_BRUSH));
+			    }
+			    if (rect.left < display.offset.x) { /* left */
+				fillrect.bottom = rect.bottom;
+				fillrect.top = rect.top;
+				fillrect.left = rect.left;
+				fillrect.right = display.offset.x;
+				FillRect(hdc, &fillrect, GetStockObject(LTGRAY_BRUSH));
+			    }
+			    if (rect.right > bitmap.width + display.offset.x) { /* right */
+				fillrect.bottom = rect.bottom;
+				fillrect.top = rect.top;
+				fillrect.left = bitmap.width + display.offset.x;
+				fillrect.right = rect.right;
+				FillRect(hdc, &fillrect, GetStockObject(LTGRAY_BRUSH));
+			    }
+			}
+			else {
+			    FillRect(hdc, &rect, GetStockObject(LTGRAY_BRUSH));
+			}
+			/* draw bounding box */
+			if (gsdll.device && (doc != (PSDOC *)NULL) && option.show_bbox) {
+			    float x, y;
+			    HPEN hpen, hpen_old;
+			    /* map bounding box to device coordinates */
+			    x = doc->boundingbox[LLX];
+			    y = doc->boundingbox[LLY];
+			    map_pt_to_pixel(&x, &y);
+			    rect.left   = (int)x;
+			    rect.bottom = (int)y;
+			    x = doc->boundingbox[URX];
+			    y = doc->boundingbox[URY];
+			    map_pt_to_pixel(&x, &y);
+			    rect.right  = (int)x;
+			    rect.top    = (int)y;
+
+			    hpen = CreatePen(PS_DOT, 1, RGB(0,0,0));
+			    hpen_old = SelectPen(hdc, hpen);
+			    SelectPen(hdc, hpen);
+			    SetROP2(hdc, R2_XORPEN);
+			    MoveTo(hdc, rect.left, rect.bottom);
+			    LineTo(hdc, rect.right, rect.bottom);
+			    LineTo(hdc, rect.right, rect.top);
+			    LineTo(hdc, rect.left, rect.top);
+			    LineTo(hdc, rect.left, rect.bottom);
+			    SelectPen(hdc, hpen_old);
+			    DeletePen(hpen);
+			}
+			/* highlight found search word */
+			if (gsdll.device && display.show_find) {
+			    float x, y;
+			    /* map bounding box to device coordinates */
+			    x = psfile.text_bbox.llx;
+			    y = psfile.text_bbox.lly;
+			    map_pt_to_pixel(&x, &y);
+			    rect.left   = (int)x;
+			    rect.bottom = (int)y;
+			    x = psfile.text_bbox.urx;
+			    y = psfile.text_bbox.ury;
+			    map_pt_to_pixel(&x, &y);
+			    rect.right  = (int)x;
+			    rect.top    = (int)y;
+			    if (rect.top > rect.bottom) {
+				int temp = rect.top;
+				rect.top = rect.bottom;
+				rect.bottom = temp;
+			    }
+
+			    /* invert text */
+			    InvertRect(hdc, &rect);
+
+			}
+
+			/* highlight marked words */
+			highlight_words(hdc, text_mark_first, text_mark_last);
+
+			EndPaint(hwnd, &ps);
+			release_mutex();
+			if (gsdll.lock_device && gsdll.device)
+			    gsdll.lock_device(gsdll.device, 0);
+			return 0;
+			}
+	}
+
+	return DefWindowProc((HWND)hwnd, (WORD)message, (WORD)wParam, (DWORD)lParam);
 }
 
 
@@ -146,413 +725,421 @@ WndImgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 RECT rect;
 
-    if (message == WM_GSVIEW) {
-	switch(wParam) {
-	    case HWND_TEXT:
-		/* lParam = handle to Ghostscript Borland EasyWin window */
-		hwndtext = (HWND)lParam;
-		break;
-	    case HWND_IMGCHILD:
-		/* lParam = handle to Ghostscript image child window */
-		hwndimgchild = (HWND)lParam;
-		if (hwndimgchild && IsWindow(hwndimgchild)) {
-		    SetClassCursor(hwndimgchild, LoadCursor((HINSTANCE)NULL, IDC_CROSS));
-		    GetClientRect(hwnd, &rect);
-		    SetWindowPos(hwndimgchild, (HWND)NULL, rect.left+img_offset.x, rect.top+img_offset.y,
-			rect.right-img_offset.x, rect.bottom-img_offset.y, 
-			SWP_NOZORDER | SWP_NOACTIVATE);
-		}
-		break;
-	    case GSWIN_CLOSE:
-		/* something is closing gswin */
-		gsprog.hinst = (HINSTANCE)NULL;
-		gsprog.valid = FALSE;
-		hwndimgchild = (HWND)NULL;
-		hwndtext = (HWND)NULL;
-		bitmap_scrollx = bitmap_scrolly = 0;
-		display.page = FALSE;
-		display.saved = FALSE;
-		page_extra = 0;
-		pipeclose();
-		clear_timer();
-		info_wait(IDS_NOWAIT);
-		break;
-	    case OUTPUT_PAGE:
-		/* showpage has just been called */
-		clear_timer();
-		play_sound(SOUND_PAGE);
-		if (IsIconic(hwndimg))    /* useless as an Icon so fix it */
-		    ShowWindow(hwndimg, SW_SHOWNORMAL);
-		if ( !IsIconic(hwndimg) ) {  /* redraw child window */
-		    if (hwndimgchild && IsWindow(hwndimgchild)) {
-			/* don't erase background - the bitmap will cover it anyway */
-			InvalidateRect(hwndimgchild, (LPRECT)NULL, FALSE);
-			UpdateWindow(hwndimgchild);
-		    }
-		}
-		display.page = TRUE;
-		info_wait(IDS_NOWAIT);
-		if (page_extra) {
-		    PostMessage(hwndimg, WM_COMMAND, IDM_SKIP, (LPARAM)0);
-		}
-		break;
-	    case SYNC_OUTPUT:
-		/* time to redraw window */
-		if ( !IsIconic(hwndimg) ) {  /* redraw child window */
-		    if (hwndimgchild && IsWindow(hwndimgchild)) {
-			/* don't erase background - the bitmap will cover it anyway */
-			InvalidateRect(hwndimgchild, (LPRECT)NULL, FALSE);
-			UpdateWindow(hwndimgchild);
-		    }
-		}
-		break;
-	    case SCROLL_POSITION:
-		/* User scrolled image window.  
-		 * lParam = offsets to top left of image window
-		 * we use these to display coordinates */
-		bitmap_scrollx = LOWORD(lParam);
-		bitmap_scrolly = HIWORD(lParam);
-		InvalidateRect(hwndimg, &info_coord, FALSE);
-		UpdateWindow(hwndimg);
-		break;
-	    case PIPE_REQUEST:
-		info_wait(IDS_WAITDRAW);
-		piperequest();
-		break;
-	    case BEGIN:
-	    case END:
-		/* do nothing at present */
-		/* we can figure out when we have reached EOF by inspecting */
-		/* the imitation pipe */
-		break;
-	    default:
-		gserror(0, "Unknown Message", MB_ICONEXCLAMATION, -1);
-	}
-	return 0;
-    }
-    else if (message == WM_GSV16SPL) {
-	hwndspl = (HWND)lParam;	   /* gsv16spl.c window handle */
-	return 0;
-    }
-    else if (message == help_message) {
+    if (message == help_message) {
 	WinHelp(hwndimg,szHelpName,HELP_KEY,(DWORD)szHelpTopic);
 	return 0;
     } else
     switch(message) {
+	case WM_GSV16SPL:
+	    hwndspl = (HWND)lParam;	   /* gsv16spl.c window handle */
+	    return 0;
+	case WM_GSDEVICE:
+	    /* hide window if closed */
+	    if (!gsdll.device)
+		ShowWindow(hwndimgchild, SW_HIDE);
+	    bitmap.changed = TRUE;
+	    return 0;
+	case WM_GSSYNC:
+	    if ( (!IsWindowVisible(hwndimgchild) || bitmap.changed) &&
+		(bitmap.width > 1) && (bitmap.height > 1)) {
+		ShowWindow(hwndimgchild, SW_SHOWNA);
+		update_scroll_bars();
+		bitmap.changed = FALSE;
+	    }
+	    if ( !IsIconic(hwndimg) ) {  /* redraw child window */
+		if (gsdll.device) {
+		    /* don't erase background - the bitmap will cover it anyway */
+		    InvalidateRect(hwndimgchild, (LPRECT)NULL, FALSE);
+		    UpdateWindow(hwndimgchild);
+		}
+	    }
+	    return 0;
+	case WM_GSPAGE:
+	    if ( (!IsWindowVisible(hwndimgchild) || bitmap.changed) &&
+		(bitmap.width > 1) && (bitmap.height > 1)) {
+		ShowWindow(hwndimgchild, SW_SHOWNA);
+		update_scroll_bars();
+		bitmap.changed = FALSE;
+	    }
+	    /* showpage has just been called */
+	    play_sound(SOUND_PAGE);
+	    if (IsIconic(hwndimg))    /* useless as an Icon so fix it */
+		ShowWindow(hwndimg, SW_SHOWNORMAL);
+	    if ( !IsIconic(hwndimg) ) {  /* redraw child window */
+		if (gsdll.device) {
+		    /* don't erase background - the bitmap will cover it anyway */
+		    InvalidateRect(hwndimgchild, (LPRECT)NULL, FALSE);
+		    UpdateWindow(hwndimgchild);
+		}
+		if (display.show_find)
+		    scroll_to_find();
+	    }
+	    return 0;
+	case WM_GSMESSBOX:
+	    /* delayed message box, usually from other thread */
+	    {char buf[MAXSTR];
+	    load_string((int)wParam, buf, sizeof(buf));
+	    message_box(buf, (int)lParam);
+	    }
+	    return 0;
+	case WM_GSSHOWMESS:
+	    /* delayed show message, usually from other thread */
+	    gs_showmess();
+	    return 0;
+	case WM_GSREDISPLAY:
+	    { PSFILE *tpsfile = gsview_openfile(psfile.name);
+	      if (tpsfile) {
+		tpsfile->pagenum = psfile.pagenum;
+		request_mutex();
+		pending.psfile = tpsfile;
+		pending.now = TRUE;
+		release_mutex();
+	      }
+	    }
+	    return 0;
+	case WM_GSTITLE:
+	    /* update title */
+	    request_mutex();
+	    if (psfile.name[0] != '\0') {
+		char buf[256];
+		GetFileTitle(psfile.name, buf, (WORD)(sizeof(buf)));
+		sprintf(buf+strlen(buf), " - %s", szAppName);
+		SetWindowText(hwnd, buf);
+	    }
+	    else
+		SetWindowText(hwnd, szAppName);
+	    release_mutex();
+	    return 0;
+	case WM_GSPERCENT:
+	    percent_pending = FALSE;
+	    InvalidateRect(hwndimg, (LPRECT)&info_rect, FALSE);
+	    UpdateWindow(hwndimg);
+	    return 0;
+	case WM_GSTEXTINDEX:
+	    make_text_index();
+	    text_marking = FALSE;
+	    text_mark_first = text_mark_last = -1;
+	    return 0;
+	case WM_GSWAIT:
+	    info_wait(wParam);
+	    return 0;
 	case WM_CREATE:
-		hwndimg = hwnd;
-		gsview_create();
-		/* Enable Drag Drop */
-		if (is_win31)
-			DragAcceptFiles(hwnd, TRUE);
-		break;
+	    hwndimg = hwnd;
+	    gsview_create();
+	    /* Enable Drag Drop */
+	    DragAcceptFiles(hwnd, TRUE);
+	    break;
+	case WM_CLOSE:
+	    quitnow = TRUE;		 	/* exit from nested message loops */
+	    pending.unload = TRUE;
+	    pending.abort = TRUE;
+	    if (multithread)
+		SetEvent(display.event);	/* unblock display thread */
+	    if (gsdll.state != UNLOADED)
+		return 0;			/* don't close yet */
+	    PostQuitMessage(0);
+	    break;
 	case WM_DESTROY:
-		/* disable Drag Drop */
-		if (is_win31)
-			DragAcceptFiles(hwnd, FALSE);
-		gsview_close();
-		PostQuitMessage(0);
-		break;
+	    /* tell GS DLL to unload */
+	    quitnow = TRUE;
+	    pending.unload = TRUE;
+
+	    /* disable Drag Drop */
+	    DragAcceptFiles(hwnd, FALSE);
+	    PostQuitMessage(0);			/* redundant */
+	    break;
+/*
 	case WM_ENDSESSION:
-		if (wParam)
-		    gsview_close();
-		return 0;
-	case WM_TIMER:
-		if (wParam == ID_MYTIMER) {
-		    timeout_count--;
-		    if (timeout_count <= 0) {
-			clear_timer();
-			bTimeout = TRUE;
-			gserror(IDS_TIMEOUT, NULL, MB_ICONINFORMATION, SOUND_TIMEOUT);
-			info_wait(IDS_NOWAIT);
-		    }
-		}
-		break;
+	    if (wParam)
+		gsview_close();
+	    return 0;
+*/
 	case WM_DROPFILES:
-		if (is_win31) {
-		    LPSTR szFile;
-	    	    HGLOBAL hglobal;
-		    int i, cFiles, length;
-		    HDROP hdrop = (HDROP)wParam;
+	    {
+		LPSTR szFile;
+		HGLOBAL hglobal;
+		int i, cFiles, length;
+		HDROP hdrop = (HDROP)wParam;
 #ifdef __WIN32__
-		    cFiles = DragQueryFile(hdrop, 0xffffffff, (LPSTR)NULL, 0);
+		cFiles = DragQueryFile(hdrop, 0xffffffff, (LPSTR)NULL, 0);
 #else
-		    cFiles = DragQueryFile(hdrop, 0xffff, (LPSTR)NULL, 0);
+		cFiles = DragQueryFile(hdrop, 0xffff, (LPSTR)NULL, 0);
 #endif
-		    for (i=0; i<cFiles; i++) {
-			length = DragQueryFile(hdrop, i, (LPSTR)NULL, 0);
-	    		hglobal = GlobalAlloc(GHND | GMEM_SHARE, length+1);
-			if (hglobal) {
-				szFile = GlobalLock(hglobal);
-				DragQueryFile(hdrop, i, szFile, MAXSTR);
-	        		GlobalUnlock(hglobal);
-				/* it doesn't work if we call gsview_display directly */
-				PostMessage(hwnd, WM_COMMAND, IDM_DROP, (LPARAM)hglobal);
-			}
+		for (i=0; i<cFiles; i++) {
+		    length = DragQueryFile(hdrop, i, (LPSTR)NULL, 0);
+		    hglobal = GlobalAlloc(GHND | GMEM_SHARE, length+1);
+		    if (hglobal) {
+			    szFile = GlobalLock(hglobal);
+			    DragQueryFile(hdrop, i, szFile, MAXSTR);
+			    GlobalUnlock(hglobal);
+			    /* it doesn't work if we call gsview_display directly */
+			    PostMessage(hwnd, WM_COMMAND, IDM_DROP, (LPARAM)hglobal);
 		    }
-		    DragFinish(hdrop);
 		}
-		break;
+		DragFinish(hdrop);
+	    }
+	    break;
 	case WM_INITMENU:
-		if (hmenu == (HMENU)wParam) {
-		    HMENU hmenuedit = GetSubMenu(hmenu,1);
-		    if (hwndimgchild  && IsWindow(hwndimgchild))
-			EnableMenuItem(hmenu, IDM_COPYCLIP, MF_ENABLED);
-		    else
-			EnableMenuItem(hmenu, IDM_COPYCLIP, MF_DISABLED | MF_GRAYED);
-		    if (OpenClipboard(hwnd)) {
-			if (IsClipboardFormatAvailable(CF_DIB))
-			    EnableMenuItem(hmenu, IDM_PASTETO, MF_ENABLED);
-			else
-			    EnableMenuItem(hmenu, IDM_PASTETO, MF_DISABLED | MF_GRAYED);
-			if (IsClipboardFormatAvailable(CF_DIB) || 
-			    IsClipboardFormatAvailable(CF_BITMAP)) 
-			    EnableMenuItem(hmenu, IDM_CONVERT, MF_ENABLED);
-			else
-			    EnableMenuItem(hmenu, IDM_CONVERT, MF_DISABLED | MF_GRAYED);
-			/* Make EPS sub menu */
-			if ((IsClipboardFormatAvailable(CF_DIB) ||
-			     IsClipboardFormatAvailable(CF_BITMAP)) 
-			    && (doc != (PSDOC *)NULL) && doc->epsf)
-			    EnableMenuItem(hmenuedit, 5, MF_BYPOSITION | MF_ENABLED);
-			else
-			    EnableMenuItem(hmenuedit, 5, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
-			/* Extract EPS sub menu */
-			if ( (psfile.preview == IDS_EPST) || (psfile.preview == IDS_EPSW) )
-			    EnableMenuItem(hmenuedit, 6, MF_BYPOSITION | MF_ENABLED);
-			else
-			    EnableMenuItem(hmenuedit, 6, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
-			CloseClipboard();
-		    }
-		    return 0;
+	    if (hmenu == (HMENU)wParam) {
+		HMENU hmenuedit = GetSubMenu(hmenu,1);
+		BOOL idle;
+		BOOL addeps;
+	        idle = (gsdll.state != BUSY);
+		enable_menu_item(IDM_EDITMENU, IDM_COPYCLIP, gsdll.device!=NULL);
+		if (OpenClipboard(hwnd)) {
+		    enable_menu_item(IDM_EDITMENU, IDM_PASTETO, IsClipboardFormatAvailable(CF_DIB));
+		    enable_menu_item(IDM_EDITMENU, IDM_CONVERT, 
+			IsClipboardFormatAvailable(CF_DIB) || 
+			IsClipboardFormatAvailable(CF_BITMAP));
+		    CloseClipboard();
 		}
-		break;
-	case WM_COMMAND:
-		if (LOWORD(wParam) == IDM_DROP) {
-		    LPSTR szFile;
-		    char cmd[MAXSTR];
-		    szFile = GlobalLock((HGLOBAL)lParam);
-		    if (szFile && (lstrlen(szFile) < sizeof(cmd)))
-			lstrcpy(cmd, szFile);
-		    else
-			cmd[0] = '\0';
-#ifdef NOTUSED
-#ifdef __WIN32__
-		    hglobal = GlobalHandle((LPCVOID)lParam);
-#else
-		    hglobal = (HGLOBAL)LOWORD(GlobalHandle(SELECTOROF(lParam)));
-#endif
-#endif
-		    GlobalUnlock((HGLOBAL)lParam);
-		    GlobalFree((HGLOBAL)lParam);
-		    if ((cmd[0] == '-') || (cmd[0] == '/')) {
-			switch (toupper(cmd[1])) {
-			    case 'P':
-		              gsview_selectfile(cmd+2);
-		              gsview_print(FALSE);
-			      break;
-			    case 'F':
-		              gsview_selectfile(cmd+2);
-		              gsview_print(TRUE);
-			      break;
-			    case 'S':
-			      if (cmd[2] != ' ') {
-				char *fname;
-				/* skip over port name */
-				for (fname=cmd+2; *fname && *fname!=' '; fname++)
-				  /* nothing */ ;
-			        /* skip blanks until file name */
-			        if (*fname) {
-			          *fname++ = '\0'; /* place null after port name */
-			          for (; *fname==' '; fname++)
-			            /* nothing */ ;
-			        }
-			        if (*fname) {
-			            /* found both filename and port */
-			            gsview_spool(fname, cmd+2);
-			            break;
-			        }
-			      }
-		              gsview_spool(cmd+2, (char *)NULL);
-			      break;
-			    default:
-			      gserror(IDS_BADCLI, cmd, MB_ICONEXCLAMATION, SOUND_ERROR);
-			}
-		    }
-		    else
-		        gsview_displayfile(cmd);
+
+		/* IDM_ADDEPSMENU */
+		addeps =  (psfile.doc != (PSDOC *)NULL) && psfile.doc->epsf && idle;
+		if (addeps) {
+		    EnableMenuItem(hmenuedit, 5, MF_BYPOSITION | MF_ENABLED);
 		}
 		else {
-		    if (GetNotification(wParam,lParam) != BN_DOUBLECLICKED) {
-			if (hDlgModeless) {
-			    play_sound(SOUND_ERROR);
-			    return 0;	/* obtaining Bounding Box so ignore commands */
-			}
-			if (szWait[0] != '\0') {
-			    switch(LOWORD(wParam)) {
-	    		        case IDM_INFO:
-	    		        case IDM_SAVEDIR:
-	    		        case IDM_SETTINGS:
-	    		        case IDM_SAVESETTINGS:
-	    		        case IDM_SOUNDS:
-	    		        case IDM_HELPCONTENT:
-	    		        case IDM_HELPSEARCH:
-	    		        case IDM_ABOUT:
-				case IDM_EXIT:
-				    /* these are safe to use when busy */
-				    break;
-			        default:
-			            play_sound(SOUND_ERROR);
-			            return 0;	/* Command not permitted now */
+		    EnableMenuItem(hmenuedit, 5, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
+		}
+		/* Extract EPS sub menu */
+		if ( (psfile.preview == IDS_EPST) || (psfile.preview == IDS_EPSW) && idle)
+		    EnableMenuItem(hmenuedit, 6, MF_BYPOSITION | MF_ENABLED);
+		else
+		    EnableMenuItem(hmenuedit, 6, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);
+		enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPSU, addeps);
+		addeps =  addeps && gsdll.device;
+		enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPSI, addeps);
+		enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPST4, addeps);
+		enable_menu_item(IDM_ADDEPSMENU, IDM_MAKEEPST, addeps);
+
+		enable_menu_item(IDM_EDITMENU, IDM_TEXTEXTRACT, idle);
+		enable_menu_item(IDM_EDITMENU, IDM_TEXTFIND, idle);
+		enable_menu_item(IDM_EDITMENU, IDM_TEXTFINDNEXT, idle);
+		return 0;
+	    }
+	    break;
+	case WM_COMMAND:
+	    request_mutex();
+	    if (LOWORD(wParam) == IDM_DROP) {
+		LPSTR szFile;
+		char cmd[MAXSTR];
+		szFile = GlobalLock((HGLOBAL)lParam);
+		if (szFile && (lstrlen(szFile) < sizeof(cmd)))
+		    lstrcpy(cmd, szFile);
+		else
+		    cmd[0] = '\0';
+		GlobalUnlock((HGLOBAL)lParam);
+		GlobalFree((HGLOBAL)lParam);
+		if ((cmd[0] == '-') || (cmd[0] == '/')) {
+		    switch (toupper(cmd[1])) {
+			case 'P':
+			  gsview_selectfile(cmd+2);
+			  if (!dfreopen())
+			      break;
+			  if (psfile.name[0] != '\0')
+			      gsview_print(FALSE);
+			  dfclose();
+			  break;
+			case 'F':
+			  gsview_selectfile(cmd+2);
+			  if (!dfreopen())
+			      break;
+			  if (psfile.name[0] != '\0')
+			      gsview_print(TRUE);
+			  dfclose();
+			  break;
+			case 'S':
+			  if (cmd[2] != ' ') {
+			    char *fname;
+			    /* skip over port name */
+			    for (fname=cmd+2; *fname && *fname!=' '; fname++)
+			      /* nothing */ ;
+			    /* skip blanks until file name */
+			    if (*fname) {
+			      *fname++ = '\0'; /* place null after port name */
+			      for (; *fname==' '; fname++)
+				/* nothing */ ;
 			    }
-			}
-		        gsview_command(LOWORD(wParam));
+			    if (*fname) {
+				/* found both filename and port */
+				gsview_spool(fname, cmd+2);
+				break;
+			    }
+			  }
+			  gsview_spool(cmd+2, (char *)NULL);
+			  break;
+			default:
+			  gserror(IDS_BADCLI, cmd, MB_ICONEXCLAMATION, SOUND_ERROR);
 		    }
 		}
-		/* if command resulted in an update to the display, do it */
-		if (display.do_endfile || display.do_resize || display.do_display) {
-		    if (!gs_open())
-			return FALSE;
-		    dfreopen();
-		    do_output();
-		    fflush(gsprog.input);
-		    dfclose();
-		    pipeflush();
-		    display.busy = FALSE;
-		    display.abort = FALSE;
-		    display.do_endfile = FALSE;
-		    display.do_resize = FALSE;
-		    display.do_display = FALSE;
+		else
+		    gsview_displayfile(cmd);
+	    }
+	    else {
+		if (GetNotification(wParam,lParam) != BN_DOUBLECLICKED) {
+		    if (hDlgModeless) {
+			play_sound(SOUND_ERROR);
+			release_mutex();
+			return 0;	/* obtaining Bounding Box so ignore commands */
+		    }
+#ifdef NOTUSED
+		    if (gsdll.state == BUSY) {
+			/* With DLL, more than the following will be safe */
+			switch(LOWORD(wParam)) {
+			    case IDM_INFO:
+			    case IDM_CLOSE_DONE:
+			    case IDM_SAVEDIR:
+			    case IDM_SETTINGS:
+			    case IDM_SAVESETTINGS:
+			    case IDM_SOUNDS:
+			    case IDM_HELPCONTENT:
+			    case IDM_HELPSEARCH:
+			    case IDM_ABOUT:
+			    case IDM_GSMESS:
+			    case IDM_EXIT:
+				/* these are safe to use when busy */
+				break;
+			    default:
+				play_sound(SOUND_ERROR);
+				release_mutex();
+				return 0;	/* Command not permitted now */
+			}
+		    }
+#endif
+		    gsview_command(LOWORD(wParam));
 		}
-		return 0;
+	    }
+	    release_mutex();
+	    return 0;
 	case WM_KEYDOWN:
 	case WM_KEYUP:
-		/* pass on key presses so that child window scroll bars work */
-		if (hwndimgchild && IsWindow(hwndimgchild)) {
-			SendMessage(hwndimgchild, message, wParam, lParam);
-			return 0;
-		}
-		break;
+	    end_button_help();
+	    /* pass on key presses so that child window scroll bars work */
+	    SendMessage(hwndimgchild, message, wParam, lParam);
+	    return 0;
 	case WM_SIZE:
-		/* make child window fill client area */
-		if (wParam != SIZE_MINIMIZED  && hwndimgchild !=(HWND)NULL && IsWindow(hwndimgchild))
-		    SetWindowPos(hwndimgchild, (HWND)NULL, img_offset.x, img_offset.y,
-			LOWORD(lParam)-img_offset.x, HIWORD(lParam)-img_offset.y, 
-			SWP_NOZORDER | SWP_NOACTIVATE);
-		/* save window size for INIFILE */
-		if (wParam == SIZE_RESTORED) {
-			GetWindowRect(hwnd,&rect);
-			option.img_size.x = rect.right-rect.left;
-			option.img_size.y = rect.bottom-rect.top;
-		}
-		return 0;
+	    /* make child window fill client area */
+	    if ((wParam != SIZE_MINIMIZED) && hwndimgchild !=(HWND)NULL)
+		SetWindowPos(hwndimgchild, (HWND)NULL, img_offset.x, img_offset.y,
+		    LOWORD(lParam)-img_offset.x, HIWORD(lParam)-img_offset.y, 
+		    SWP_NOZORDER | SWP_NOACTIVATE);
+	    /* save window size for INIFILE */
+	    if (wParam == SIZE_RESTORED) {
+		    GetWindowRect(hwnd,&rect);
+		    option.img_size.x = rect.right-rect.left;
+		    option.img_size.y = rect.bottom-rect.top;
+	    }
+	    return 0;
 	case WM_MOVE:
-		/* save window position for INIFILE */
-		if (!IsIconic(hwnd) && !IsZoomed(hwnd)) {
-			GetWindowRect(hwnd,&rect);
-			option.img_origin.x = rect.left;
-			option.img_origin.y = rect.top;
-		}
-		return 0;
+	    /* save window position for INIFILE */
+	    if (!IsIconic(hwnd) && !IsZoomed(hwnd)) {
+		    GetWindowRect(hwnd,&rect);
+		    option.img_origin.x = rect.left;
+		    option.img_origin.y = rect.top;
+	    }
+	    return 0;
 	case WM_SETCURSOR:
-		/* if waiting, display hourglass cursor over our window */
-		if (szWait[0] != '\0') {
-		    if (hwndimgchild && IsWindow(hwndimgchild)) {
-			if (in_child_client_area() || in_info_area() || (LOWORD(lParam)==HTMENU)) {
-			    SetCursor(hcWait);
-			    return TRUE;
-		        }
-		    }
-		    else {
-			    SetCursor(hcWait);
-			    return TRUE;
-		    }
+	    /* if waiting, display hourglass cursor over our window */
+	    if (szWait[0] != '\0') {
+		if (in_child_client_area()) {
+		    SetCursor(hcWait);
+		    return TRUE;
 		}
-		/* track cursor and display coordinates if in child window */
-		if (hwndimgchild && IsWindow(hwndimgchild)) {
-		    if (in_child_client_area() || prev_in_child) {
-			/* update coordinate info */
-			HFONT old_hfont;
-			HDC hdc = GetDC(hwnd);
-			if (info_font)
-			    old_hfont = SelectObject(hdc, info_font);
-			cursorpos_paint(hdc);
-			if (info_font)
-			    SelectObject(hdc, old_hfont);
-			ReleaseDC(hwnd, hdc);
-		    }
-		    prev_in_child = in_child_client_area();
+	    }
+	    /* track cursor and display coordinates if in child window */
+	    if (gsdll.device) {
+		if (in_child_client_area() || prev_in_child) {
+		    /* update coordinate info */
+		    HFONT old_hfont;
+		    HDC hdc = GetDC(hwnd);
+		    if (info_font)
+			old_hfont = SelectObject(hdc, info_font);
+		    cursorpos_paint(hdc);
+		    if (info_font)
+			SelectObject(hdc, old_hfont);
+		    ReleaseDC(hwnd, hdc);
 		}
-		break;
+		prev_in_child = in_child_client_area();
+	    }
+	    break;
 	case WM_PARENTNOTIFY:
-		if (hDlgModeless && (wParam == WM_LBUTTONDOWN))
-		    if (in_child_client_area())
-		        SendMessage(hDlgModeless, WM_COMMAND, BB_CLICK, lParam);
-		if (wParam == WM_RBUTTONDOWN) {
-		    float x, y;
-		    RECT rect;
-		    GetWindowRect(hwndimgchild,&rect);
-		    if (get_cursorpos(&x, &y)) {
-		        zoom = !zoom;
-		        display.zoom_xoffset = x;
-		        display.zoom_yoffset = y;
-			x = (bitmap_scrollx + (rect.right - rect.left)/2)*72.0/option.xdpi;
-			y = ((display.height-1) - (bitmap_scrolly + (rect.bottom - rect.top)/2))*72.0/option.ydpi;
-			transform_point(&x, &y);
-			x *= option.xdpi/72.0;
-			y *= option.ydpi/72.0;
-			display.zoom_xoffset -= (int)(x*72.0/option.zoom_xdpi);
-			display.zoom_yoffset -= (int)(y*72.0/option.zoom_ydpi);
-		    }
-		    else {
-		        zoom = FALSE;
-		    }
-		    PostMessage(hwndimg, WM_COMMAND, IDM_ZOOM, (LPARAM)0);
-		}
-		break;
-	case WM_ERASEBKGND:
-		/* when ghostscript window is valid */
-		/* don't bother erasing background */
-		if (hwndimgchild && IsWindow(hwndimgchild))
-		    return 1;	/* say we have erased it */
-		break;
-	case WM_PAINT:
-		{
-		HDC hdc;
-		PAINTSTRUCT ps;
-		RECT chrect;
-		hdc = BeginPaint(hwnd, &ps);
-		/* draw info area at top */
-		info_paint(hwnd, hdc);
-		/* draw button background */
-		if (button_rect.right) {
-		    GetClientRect(hwnd, &rect);
-		    rect.top = button_rect.top;
-		    rect.left = button_rect.left;
-		    rect.right = button_rect.right;
-		    FillRect(hdc, &rect, GetStockObject(LTGRAY_BRUSH));
-		    SelectPen(hdc, GetStockObject(BLACK_PEN));
-		    MoveTo(hdc, rect.right, rect.top);
-		    LineTo(hdc, rect.right, rect.bottom);
-		}
-		/* fill area outside Ghostscript image client */
-		if (!option.fit_page && hwndimgchild && IsWindow(hwndimgchild)) {
-		    GetClientRect(hwnd, &rect);
-		    GetWindowRect(hwndimgchild, &chrect);
-		    rect.top = info_rect.bottom+1;
-		    rect.left = img_offset.x + chrect.right - chrect.left;
-		    FillRect(hdc, &rect, GetStockObject(LTGRAY_BRUSH));
-		    rect.left = button_rect.right+1;
-		    rect.top = img_offset.y + chrect.bottom - chrect.top;
-		    FillRect(hdc, &rect, GetStockObject(LTGRAY_BRUSH));
-		}
-		EndPaint(hwnd, &ps);
-		}
+/*
+	    if (wParam == WM_LBUTTONDOWN) {
+		if (hDlgModeless && in_child_client_area())
+		    SendMessage(hDlgModeless, WM_COMMAND, BB_CLICK, lParam);
 		return 0;
+	    }
+*/
+	    if (wParam == WM_RBUTTONDOWN) {
+		float x, y;
+		RECT rect;
+		int zwidth, zheight;
+		if (hDlgModeless) {
+		    play_sound(SOUND_BUSY);
+		    break;
+		}
+		request_mutex();
+		GetWindowRect(hwndimgchild,&rect);
+		if (get_cursorpos(&x, &y)) {
+		    int scrollx, scrolly;
+		    zoom = !zoom;
+		    display.zoom_xoffset = x;
+		    display.zoom_yoffset = y;
+		    if (option.quick_open) {
+			scrollx = bitmap.scrollx;
+			scrolly = bitmap.scrolly;
+		    }
+		    else
+			scrollx = scrolly = 0;
+		    if (rect.right - rect.left > bitmap.width)
+		        zwidth = bitmap.width;
+		    else
+		        zwidth = rect.right - rect.left;
+		    if (rect.bottom - rect.top > bitmap.height)
+		        zheight = bitmap.height;
+		    else
+		        zheight = rect.bottom - rect.top;
+		    x = (scrollx + zwidth/2)*72.0/option.xdpi;
+		    y = ((bitmap.height-1) - (scrolly + zheight/2))*72.0/option.ydpi;
+		    transform_point(&x, &y);
+		    x *= option.xdpi/72.0;
+		    y *= option.ydpi/72.0;
+		    display.zoom_xoffset -= (int)(x*72.0/option.zoom_xdpi);
+		    display.zoom_yoffset -= (int)(y*72.0/option.zoom_ydpi);
+		}
+		else {
+		    zoom = FALSE;
+		}
+		release_mutex();
+		PostMessage(hwndimg, WM_COMMAND, IDM_ZOOM, (LPARAM)0);
+	    }
+	    break;
+	case WM_PAINT:
+	    {
+	    HDC hdc;
+	    PAINTSTRUCT ps;
+	    hdc = BeginPaint(hwnd, &ps);
+	    /* draw info area at top */
+	    info_paint(hwnd, hdc);
+	    /* draw button background */
+	    if (button_rect.right) {
+		GetClientRect(hwnd, &rect);
+		rect.top = button_rect.top;
+		rect.left = button_rect.left;
+		rect.right = button_rect.right;
+		FillRect(hdc, &rect, GetStockObject(LTGRAY_BRUSH));
+		SelectPen(hdc, GetStockObject(BLACK_PEN));
+		MoveTo(hdc, rect.right, rect.top);
+		LineTo(hdc, rect.right, rect.bottom);
+	    }
+	    EndPaint(hwnd, &ps);
+	    }
+	    return 0;
 	case WM_MEASUREITEM:
-		return 1;
+	    return 1;
 	case WM_DRAWITEM:
-		return draw_button((DRAWITEMSTRUCT FAR *)lParam);
+	    return draw_button((DRAWITEMSTRUCT FAR *)lParam);
     }
     return DefWindowProc(hwnd, message, wParam, lParam);
 }
@@ -570,93 +1157,93 @@ HBITMAP hbitmap_old, hbitmap;
 BITMAP bm;
 int i;
 char buf[20];
-	rect = lpdis->rcItem;
-	if (lpdis->CtlType != ODT_BUTTON)
-	    return FALSE;
-	switch (lpdis->itemAction) {
-	    case ODA_DRAWENTIRE:
-		if ((hbitmap = LoadBitmap(phInstance,MAKEINTRESOURCE(lpdis->CtlID)))
-		  != (HBITMAP)NULL) {
-		    HDC hdcsrc = CreateCompatibleDC(hdc);
-		    hbitmap_old = SelectObject(hdcsrc,hbitmap);
-		    GetObject(hbitmap, sizeof(BITMAP),&bm);
-		    if ( (rect.right-rect.left > bm.bmWidth) ||
-			 (rect.bottom-rect.top > bm.bmHeight) ) {
-		        hbrush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
-		        FillRect(hdc, &rect, hbrush);
-		        DeleteBrush(hbrush);
-		    }
-		    BitBlt(hdc, (rect.left+rect.right-bm.bmWidth)/2,
-		       (rect.top+rect.bottom-bm.bmHeight)/2,
-		       bm.bmWidth,bm.bmHeight,hdcsrc,0,0,SRCCOPY);
-		    SelectObject(hdcsrc,hbitmap_old);
-		    DeleteObject(hbitmap);
-		    DeleteDC(hdcsrc);
-		}
-		else {
+    rect = lpdis->rcItem;
+    if (lpdis->CtlType != ODT_BUTTON)
+	return FALSE;
+    switch (lpdis->itemAction) {
+	case ODA_DRAWENTIRE:
+	    if ((hbitmap = LoadBitmap(phInstance,MAKEINTRESOURCE(lpdis->CtlID)))
+	      != (HBITMAP)NULL) {
+		HDC hdcsrc = CreateCompatibleDC(hdc);
+		hbitmap_old = SelectObject(hdcsrc,hbitmap);
+		GetObject(hbitmap, sizeof(BITMAP),&bm);
+		if ( (rect.right-rect.left > bm.bmWidth) ||
+		     (rect.bottom-rect.top > bm.bmHeight) ) {
 		    hbrush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 		    FillRect(hdc, &rect, hbrush);
 		    DeleteBrush(hbrush);
-		    if ((i = LoadString(phInstance, lpdis->CtlID, buf, sizeof(buf)))
-		        != 0) {
+		}
+		BitBlt(hdc, (rect.left+rect.right-bm.bmWidth)/2,
+		   (rect.top+rect.bottom-bm.bmHeight)/2,
+		   bm.bmWidth,bm.bmHeight,hdcsrc,0,0,SRCCOPY);
+		SelectObject(hdcsrc,hbitmap_old);
+		DeleteObject(hbitmap);
+		DeleteDC(hdcsrc);
+	    }
+	    else {
+		hbrush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
+		FillRect(hdc, &rect, hbrush);
+		DeleteBrush(hbrush);
+		if ((i = LoadString(phInstance, lpdis->CtlID, buf, sizeof(buf)))
+		    != 0) {
 #ifdef __WIN32__
-			SIZE sz;
-			GetTextExtentPoint(hdc, buf, i, &sz);
-			SetBkMode(hdc, TRANSPARENT);
-			TextOut(hdc, (rect.left+rect.right-sz.cx)/2,
-			    (rect.top+rect.bottom-sz.cy)/2, buf, i);
+		    SIZE sz;
+		    GetTextExtentPoint(hdc, buf, i, &sz);
+		    SetBkMode(hdc, TRANSPARENT);
+		    TextOut(hdc, (rect.left+rect.right-sz.cx)/2,
+			(rect.top+rect.bottom-sz.cy)/2, buf, i);
 #else
-			DWORD dw = GetTextExtent(hdc, buf, i);
-			SetBkMode(hdc, TRANSPARENT);
-			TextOut(hdc, (rect.left+rect.right-LOWORD(dw))/2,
-			    (rect.top+rect.bottom-HIWORD(dw))/2, buf, i);
+		    DWORD dw = GetTextExtent(hdc, buf, i);
+		    SetBkMode(hdc, TRANSPARENT);
+		    TextOut(hdc, (rect.left+rect.right-LOWORD(dw))/2,
+			(rect.top+rect.bottom-HIWORD(dw))/2, buf, i);
 #endif
-		    }
-		    else if ( (hicon = LoadIcon(phInstance, MAKEINTRESOURCE(lpdis->CtlID)))
-		        != (HICON)NULL )  {
-		        DrawIcon(hdc, (rect.left+rect.right-32)/2, 
-		            (rect.top+rect.bottom-32)/2, hicon);
-		        DestroyIcon(hicon);
-		    }
 		}
-		hpen_old = SelectPen(hdc, GetStockObject(BLACK_PEN));
-		MoveTo(hdc, rect.left, rect.top);
-		LineTo(hdc, rect.right-1, rect.top);
-		LineTo(hdc, rect.right-1, rect.bottom-1);
-		LineTo(hdc, rect.left, rect.bottom-1);
-		LineTo(hdc, rect.left, rect.top-1);
-		SelectPen(hdc, hpen_old);
-		/* fall thru */
-	    case ODA_FOCUS:
-	    case ODA_SELECT:
-		if (lpdis->itemState & ODS_SELECTED) {
-		    hpen_highlight = CreatePen(PS_SOLID, 1, GetSysColor(COLOR_BTNSHADOW));
-		    hpen_shadow = CreatePen(PS_SOLID, 1, GetSysColor(COLOR_BTNFACE));
+		else if ( (hicon = LoadIcon(phInstance, MAKEINTRESOURCE(lpdis->CtlID)))
+		    != (HICON)NULL )  {
+		    DrawIcon(hdc, (rect.left+rect.right-32)/2, 
+			(rect.top+rect.bottom-32)/2, hicon);
+		    DestroyIcon(hicon);
 		}
-		else {
-		    hpen_highlight = CreatePen(PS_SOLID, 1, is_win31 ? GetSysColor(COLOR_BTNHIGHLIGHT) : RGB(255,255,255));
-		    hpen_shadow = CreatePen(PS_SOLID, 1, GetSysColor(COLOR_BTNSHADOW));
-		}
-		hpen_old = SelectPen(hdc, hpen_highlight);
-		MoveTo(hdc, rect.left+1, rect.bottom-3);
-		LineTo(hdc, rect.left+1, rect.top+1);
-		LineTo(hdc, rect.right-2, rect.top+1);
-		MoveTo(hdc, rect.right-3, rect.top+2);
-		LineTo(hdc, rect.left+2, rect.top+2);
-		LineTo(hdc, rect.left+2, rect.bottom-4);
-		SelectPen(hdc, hpen_shadow);
-		MoveTo(hdc, rect.left+1, rect.bottom-2);
-		LineTo(hdc, rect.right-2, rect.bottom-2);
-		LineTo(hdc, rect.right-2, rect.top+1);
-		MoveTo(hdc, rect.right-3, rect.top+2);
-		LineTo(hdc, rect.right-3, rect.bottom-3);
-		LineTo(hdc, rect.left+2, rect.bottom-3);
-		SelectPen(hdc, hpen_old);
-		DeleteObject(hpen_highlight);
-		DeleteObject(hpen_shadow);
-	        return TRUE;
-	}
-	return FALSE;
+	    }
+	    hpen_old = SelectPen(hdc, GetStockObject(BLACK_PEN));
+	    MoveTo(hdc, rect.left, rect.top);
+	    LineTo(hdc, rect.right-1, rect.top);
+	    LineTo(hdc, rect.right-1, rect.bottom-1);
+	    LineTo(hdc, rect.left, rect.bottom-1);
+	    LineTo(hdc, rect.left, rect.top-1);
+	    SelectPen(hdc, hpen_old);
+	    /* fall thru */
+	case ODA_FOCUS:
+	case ODA_SELECT:
+	    if (lpdis->itemState & ODS_SELECTED) {
+		hpen_highlight = CreatePen(PS_SOLID, 1, GetSysColor(COLOR_BTNSHADOW));
+		hpen_shadow = CreatePen(PS_SOLID, 1, GetSysColor(COLOR_BTNFACE));
+	    }
+	    else {
+		hpen_highlight = CreatePen(PS_SOLID, 1, GetSysColor(COLOR_BTNHIGHLIGHT));
+		hpen_shadow = CreatePen(PS_SOLID, 1, GetSysColor(COLOR_BTNSHADOW));
+	    }
+	    hpen_old = SelectPen(hdc, hpen_highlight);
+	    MoveTo(hdc, rect.left+1, rect.bottom-3);
+	    LineTo(hdc, rect.left+1, rect.top+1);
+	    LineTo(hdc, rect.right-2, rect.top+1);
+	    MoveTo(hdc, rect.right-3, rect.top+2);
+	    LineTo(hdc, rect.left+2, rect.top+2);
+	    LineTo(hdc, rect.left+2, rect.bottom-4);
+	    SelectPen(hdc, hpen_shadow);
+	    MoveTo(hdc, rect.left+1, rect.bottom-2);
+	    LineTo(hdc, rect.right-2, rect.bottom-2);
+	    LineTo(hdc, rect.right-2, rect.top+1);
+	    MoveTo(hdc, rect.right-3, rect.top+2);
+	    LineTo(hdc, rect.right-3, rect.bottom-3);
+	    LineTo(hdc, rect.left+2, rect.bottom-3);
+	    SelectPen(hdc, hpen_old);
+	    DeleteObject(hpen_highlight);
+	    DeleteObject(hpen_shadow);
+	    return TRUE;
+    }
+    return FALSE;
 }
 
 /* returns true if cursor in client area of Ghostscript image window */
@@ -666,13 +1253,13 @@ in_child_client_area()
 RECT rect;
 POINT pt;
 HWND hwnd;
-        GetCursorPos(&pt);
-	hwnd = WindowFromPoint(pt);
-	if ((hwnd != hwndimg) && !IsChild(hwndimg,hwnd))
-		return 0;
-        GetClientRect(hwndimgchild, &rect);
-        ScreenToClient(hwndimgchild, &pt);
-        return PtInRect(&rect, pt);
+    GetCursorPos(&pt);
+    hwnd = WindowFromPoint(pt);
+    if ((hwnd != hwndimg) && !IsChild(hwndimg,hwnd))
+	    return 0;
+    GetClientRect(hwndimgchild, &rect);
+    ScreenToClient(hwndimgchild, &pt);
+    return PtInRect(&rect, pt);
 }
 
 /* returns true if cursor in client area of GSview window */
@@ -682,13 +1269,13 @@ in_client_area()
 RECT rect;
 POINT pt;
 HWND hwnd;
-        GetCursorPos(&pt);
-	hwnd = WindowFromPoint(pt);
-	if ((hwnd != hwndimg) && !IsChild(hwndimg,hwnd))
-		return 0;
-        GetClientRect(hwndimg, &rect);
-        ScreenToClient(hwndimg, &pt);
-        return PtInRect(&rect, pt);
+    GetCursorPos(&pt);
+    hwnd = WindowFromPoint(pt);
+    if ((hwnd != hwndimg) && !IsChild(hwndimg,hwnd))
+	    return 0;
+    GetClientRect(hwndimg, &rect);
+    ScreenToClient(hwndimg, &pt);
+    return PtInRect(&rect, pt);
 }
 
 /* returns true if cursor in info area or button area of GSview windows */
@@ -698,19 +1285,47 @@ in_info_area()
 RECT rect;
 POINT pt;
 HWND hwnd;
-        GetCursorPos(&pt);
-	hwnd = WindowFromPoint(pt);
-	if ((hwnd != hwndimg) && !IsChild(hwndimg,hwnd))
-		return 0;
-        ScreenToClient(hwndimg, &pt);
+    GetCursorPos(&pt);
+    hwnd = WindowFromPoint(pt);
+    if ((hwnd != hwndimg) && !IsChild(hwndimg,hwnd))
+	    return 0;
+    ScreenToClient(hwndimg, &pt);
 
-        GetClientRect(hwndimg, &rect);
-	rect.bottom = img_offset.y;
-	if (PtInRect(&rect, pt))
-		return TRUE;
-        GetClientRect(hwndimg, &rect);
-	rect.right = img_offset.x;
-        return PtInRect(&rect, pt);
+    GetClientRect(hwndimg, &rect);
+    rect.bottom = img_offset.y;
+    if (PtInRect(&rect, pt))
+	    return TRUE;
+    GetClientRect(hwndimg, &rect);
+    rect.right = img_offset.x;
+    return PtInRect(&rect, pt);
+}
+
+
+/* map from a coordinate in points, to a coordinate in pixels */
+/* This is the opposite of the transform part of get_cursorpos */
+/* Used when showing bbox */
+void
+map_pt_to_pixel(float *x, float *y)
+{
+    if (zoom) {
+	/* WARNING - this doesn't cope with EPS Clip */
+	*x = (*x - display.zoom_xoffset) * option.zoom_xdpi / 72.0;
+	*y = (*y - display.zoom_yoffset) * option.zoom_ydpi / 72.0;
+	*x = (*x * 72.0 / option.xdpi);
+	*y = (*y * 72.0 / option.ydpi);
+	itransform_point(x, y);
+	*x = (*x * option.xdpi / 72.0) - bitmap.scrollx;
+	*y = -(*y * option.ydpi / 72.0) + (bitmap.height-1 - bitmap.scrolly);
+    }
+    else {
+	*x = *x - (display.epsf_clipped ? psfile.doc->boundingbox[LLX] : 0);
+	*y = *y - (display.epsf_clipped ? psfile.doc->boundingbox[LLY] : 0);
+	itransform_point(x, y);
+	*x = *x * option.xdpi/72.0
+	      - bitmap.scrollx;
+	*y = -(*y * option.ydpi/72.0)
+	      + (bitmap.height-1 - bitmap.scrolly);
+    }
 }
 
 BOOL
@@ -718,13 +1333,13 @@ get_cursorpos(float *x, float *y)
 {
 RECT rect;
 POINT pt;
-    if (hwndimgchild && IsWindow(hwndimgchild)) {
+    if (gsdll.device) {
 	GetClientRect(hwndimgchild, &rect);
 	GetCursorPos(&pt);
 	ScreenToClient(hwndimgchild, &pt);
 	if (PtInRect(&rect, pt)) {
-	    *x = bitmap_scrollx+pt.x;
-	    *y = display.height-1 - (bitmap_scrolly+pt.y);
+	    *x = bitmap.scrollx+pt.x;
+	    *y = bitmap.height-1 - (bitmap.scrolly+pt.y);
 	    transform_cursorpos(x, y);
 	    return TRUE;
 	}
@@ -737,24 +1352,26 @@ cursorpos_paint(HDC hdc)
 {
 float x, y;
 char buf[32];
-	SetBkMode(hdc, TRANSPARENT);
-        FillRect(hdc, &info_coord, GetStockObject(LTGRAY_BRUSH));
-	/* show coordinate */
-	if (get_cursorpos(&x, &y)) {
-	    switch(option.unit) {
-	       case IDM_UNITPT:   
-		  sprintf(buf,"%.0f, %.0fpt", x, y);
-		  break;
-	       case IDM_UNITMM:   
-		  sprintf(buf,"%.0f, %.0fmm", x/72*25.4, y/72*25.4);
-		  break;
-	       case IDM_UNITINCH:   
-		  sprintf(buf,"%.1f, %.1fin", x/72, y/72);
-		  break;
-	    }
-	    SetTextAlign(hdc, TA_RIGHT);
-	    TextOut(hdc, info_coord.right-1, info_coord.top, buf, strlen(buf));
+    request_mutex();
+    SetBkMode(hdc, TRANSPARENT);
+    FillRect(hdc, &info_coord, GetStockObject(LTGRAY_BRUSH));
+    /* show coordinate */
+    if (get_cursorpos(&x, &y)) {
+	switch(option.unit) {
+	   case IDM_UNITPT:   
+	      sprintf(buf,"%.0f, %.0fpt", x, y);
+	      break;
+	   case IDM_UNITMM:   
+	      sprintf(buf,"%.0f, %.0fmm", x/72*25.4, y/72*25.4);
+	      break;
+	   case IDM_UNITINCH:   
+	      sprintf(buf,"%.1f, %.1fin", x/72, y/72);
+	      break;
 	}
+	SetTextAlign(hdc, TA_RIGHT);
+	TextOut(hdc, info_coord.right-1, info_coord.top, buf, strlen(buf));
+    }
+    release_mutex();
 }
 
 /* paint brief info area */
@@ -766,144 +1383,187 @@ int i;
 char buf[MAXSTR];
 char fmt[MAXSTR];
 HFONT old_hfont;
-	SetBkMode(hdc, TRANSPARENT);
-	if (info_font)
-	    old_hfont = SelectObject(hdc, info_font);
-	if (info_rect.bottom) {
-	    GetClientRect(hwnd, &rect);
-	    rect.top = 0;
-	    rect.left = info_rect.left;
-	    rect.bottom = info_rect.bottom;
-	    FillRect(hdc, &rect, GetStockObject(LTGRAY_BRUSH));
+PSDOC *doc = psfile.doc;
+    request_mutex();
+    SetBkMode(hdc, TRANSPARENT);
+    if (info_font)
+	old_hfont = SelectObject(hdc, info_font);
+    if (info_rect.bottom) {
+	GetClientRect(hwnd, &rect);
+	rect.top = 0;
+	rect.left = info_rect.left;
+	rect.bottom = info_rect.bottom;
+	FillRect(hdc, &rect, GetStockObject(LTGRAY_BRUSH));
+	SelectPen(hdc, GetStockObject(BLACK_PEN));
+	MoveTo(hdc, rect.left, rect.bottom);
+	LineTo(hdc, rect.right, rect.bottom);
+	if (is_win95) {
+	    SelectPen(hdc, GetStockObject(WHITE_PEN));
+	    MoveTo(hdc, rect.left, rect.top+1);
+	    LineTo(hdc, rect.right, rect.top+1);
 	    SelectPen(hdc, GetStockObject(BLACK_PEN));
-	    MoveTo(hdc, rect.left, rect.bottom);
-	    LineTo(hdc, rect.right, rect.bottom);
-	    if (is_win95) {
-		SelectPen(hdc, GetStockObject(WHITE_PEN));
-		MoveTo(hdc, rect.left, rect.top+1);
-		LineTo(hdc, rect.right, rect.top+1);
-		SelectPen(hdc, GetStockObject(BLACK_PEN));
-		MoveTo(hdc, rect.left, rect.top);
-		LineTo(hdc, rect.right, rect.top);
-	    }
+	    MoveTo(hdc, rect.left, rect.top);
+	    LineTo(hdc, rect.right, rect.top);
 	}
-	/* write file information */
-	if (psfile.name[0] != '\0') {
-	    i = LoadString(phInstance, IDS_FILE, buf, sizeof(buf));
-	    GetFileTitle(psfile.name, buf+i, (WORD)(sizeof(buf)-i));
-	    TextOut(hdc, info_file.x, info_file.y, buf, strlen(buf));
-	    if (szWait[0] != '\0') {
-		TextOut(hdc, info_page.x, info_page.y, szWait, strlen(szWait));
-	    }
-	    else {
-	      if (doc!=(PSDOC *)NULL) {
-		int n = map_page(psfile.pagenum - 1);
-		i = LoadString(phInstance, IDS_PAGEINFO, fmt, sizeof(fmt));
-		if (doc->pages)
-		    sprintf(buf, fmt, doc->pages[n].label ? doc->pages[n].label : " ",psfile.pagenum,  doc->numpages);
-		else
-		    sprintf(buf, fmt, " " ,psfile.pagenum,  doc->numpages);
-		if (zoom)
-		    strcat(buf, "  Zoomed");
-		TextOut(hdc, info_page.x, info_page.y, buf, strlen(buf));
-	      }
-	      else {
-		if (is_pipe_done())
-		    i = LoadString(phInstance, IDS_NOMORE, buf, sizeof(buf));
-		else {
-		    i = LoadString(phInstance, IDS_PAGE, buf, sizeof(buf));
-		    sprintf(buf+i, "%d", psfile.pagenum);
-		}
-		TextOut(hdc, info_page.x, info_page.y, buf, strlen(buf));
-	      }
-	      /* show coordinate */
-	      cursorpos_paint(hdc);
-	    }
+    }
+    /* write file information */
+    if (psfile.name[0] != '\0') {
+	i = LoadString(phInstance, IDS_FILE, buf, sizeof(buf));
+	GetFileTitle(psfile.name, buf+i, (WORD)(sizeof(buf)-i));
+	TextOut(hdc, info_file.x, info_file.y, buf, strlen(buf));
+	if (szWait[0] != '\0') {
+	    sprintf(buf, szWait, percent_done);
+	    TextOut(hdc, info_page.x, info_page.y, buf, strlen(buf));
 	}
 	else {
-	    i = LoadString(phInstance, IDS_NOFILE, buf, sizeof(buf));
-	    TextOut(hdc, info_file.x, info_file.y, buf, strlen(buf));
-	    if (szWait[0] != '\0') {
-		TextOut(hdc, info_page.x, info_page.y, szWait, strlen(szWait));
+	  if (doc!=(PSDOC *)NULL) {
+	    int n = map_page(psfile.pagenum - 1);
+	    LoadString(phInstance, IDS_PAGEINFO, fmt, sizeof(fmt));
+	    if (doc->pages)
+		sprintf(buf, fmt, doc->pages[n].label ? doc->pages[n].label : " ",psfile.pagenum,  doc->numpages);
+	    else
+		sprintf(buf, fmt, " " ,psfile.pagenum,  doc->numpages);
+	    if (zoom)
+		strcat(buf, "  Zoomed");
+	    TextOut(hdc, info_page.x, info_page.y, buf, strlen(buf));
+	  }
+	  else {
+	    if (gsdll.state == IDLE)
+		LoadString(phInstance, IDS_NOMORE, buf, sizeof(buf));
+	    else {
+		 LoadString(phInstance, IDS_PAGE, buf, sizeof(buf));
+		sprintf(buf+i, "%d", psfile.pagenum);
 	    }
+	    TextOut(hdc, info_page.x, info_page.y, buf, strlen(buf));
+	  }
+	  /* show coordinate */
+	  cursorpos_paint(hdc);
 	}
-	if (info_font)
-	    SelectObject(hdc, old_hfont);
+    }
+    else {
+	LoadString(phInstance, IDS_NOFILE, buf, sizeof(buf));
+	TextOut(hdc, info_file.x, info_file.y, buf, strlen(buf));
+	if (szWait[0] != '\0') {
+	    sprintf(buf, szWait, percent_done);
+	    TextOut(hdc, info_page.x, info_page.y, buf, strlen(buf));
+	}
+    }
+    if (info_font)
+	SelectObject(hdc, old_hfont);
+    release_mutex();
 }
 
 
 HWND hbutton_info;
 
+void
+end_button_help(void)
+{
+    if (hbutton_info) {
+	ReleaseCapture();
+	hbutton_info = (HWND)NULL;
+	SetFocus(hwndimg);
+	InvalidateRect(hwndimg, &info_rect, FALSE);
+	UpdateWindow(hwndimg);
+    }
+}
+
 /* subclass button WndProc to give focus back to parent window */
 LRESULT CALLBACK _export
 MenuButtonProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch(message) {
-	    case WM_LBUTTONUP:
-		{
-		RECT rect;
+    switch(message) {
+	case WM_LBUTTONUP:
+	    {
+	    RECT rect;
+	    POINT pt;
+	    end_button_help();
+	    GetWindowRect(hwnd, &rect);
+	    GetCursorPos(&pt);
+	    SetFocus(GetParent(hwnd));
+	    if (PtInRect(&rect, pt))
+		SendMessage(GetParent(hwnd), WM_COMMAND, GetWindowID(hwnd), 0L);
+	    }
+	    break;
+	case WM_MOUSEMOVE:
+	    {
 		POINT pt;
-		GetWindowRect(hwnd, &rect);
+	        HDC hdc; 
+	        HFONT old_hfont;
+		RECT rect;
+		HWND hwnd_cursor;
+		char buf[MAXSTR];
+		if (GetActiveWindow() != hwndimg)
+		    break;  /* ignore if GSview not the top window */
 		GetCursorPos(&pt);
-		if (PtInRect(&rect, pt))
-			SendMessage(GetParent(hwnd), WM_COMMAND, GetWindowID(hwnd), 0L);
-		SetFocus(GetParent(hwnd));
+		hwnd_cursor = WindowFromPoint(pt);
+		if (hwnd != hwnd_cursor) {
+		    end_button_help();
 		}
-		break;
-#ifdef NOTUSED
-	case WM_SETCURSOR:
-		/* track cursor and display button info */
-		if (hwnd != hbutton_info) {
-		    char buf[MAXSTR];
+		else if (hbutton_info != hwnd) {
 		    hbutton_info = hwnd;
+		    SetCapture(hwnd);
+		    hdc = GetDC(hwndimg);
 		    load_string(GetWindowID(hwnd), buf, sizeof(buf));
-		    hdc = BeginPaint(hwnd, &ps);
 		    SetBkMode(hdc, TRANSPARENT);
-			if (info_rect.bottom) {
-			    GetClientRect(hwnd, &rect);
-			    rect.top = 0;
-			    rect.left = info_rect.left;
-			    rect.bottom = info_rect.bottom;
-			    FillRect(hdc, &rect, GetStockObject(LTGRAY_BRUSH));
-			    SelectPen(hdc, GetStockObject(BLACK_PEN));
-			    MoveTo(hdc, rect.left, rect.bottom);
-			    LineTo(hdc, rect.right, rect.bottom);
-			}
+		    if (info_rect.bottom) {
+			GetClientRect(hwnd, &rect);
+			rect.top = 2;
+			rect.left = info_rect.left;
+			rect.bottom = info_rect.bottom-1;
+			rect.right = info_rect.right;
+			FillRect(hdc, &rect, GetStockObject(LTGRAY_BRUSH));
+		    }
+		    if (info_font)
+			old_hfont = SelectObject(hdc, info_font);
 		    TextOut(hdc, info_file.x, info_file.y, buf, strlen(buf));
-		    EndPaint(hwnd, &ps);
+		    if (info_font)
+			SelectObject(hdc, old_hfont);
+		    ReleaseDC(hwndimg, hdc);
 		}
-		InvalidateRect(hwndimg, &info_rect, FALSE);
-		UpdateWindow(hwndimg);
-		break;
-#endif
-	}
-	return CallWindowProc(lpfnButtonWndProc, hwnd, message, wParam, lParam);
-}
-
-
-BOOL
-set_timer(UINT period)
-{
-	timeout_count = period;
-	bTimeout = FALSE;
-	if (SetTimer(hwndimg, ID_MYTIMER, 1000, NULL) != 0) {
-		bTimerSet = TRUE;
-		return TRUE;
-	}
-
-	bTimerSet = FALSE;
-	gserror(IDS_NOTIMER, NULL, MB_ICONINFORMATION, SOUND_TIMEOUT);
-	return FALSE;
+	    }
+	    break;
+    }
+    return CallWindowProc(lpfnButtonWndProc, hwnd, message, wParam, lParam);
 }
 
 void
-clear_timer()
+update_scroll_bars(void)
 {
-	if (bTimerSet)
-		KillTimer(hwndimg, ID_MYTIMER);
-	bTimerSet = FALSE;
-	bTimeout = FALSE;
-	EnableWindow(hwndimg, TRUE);
+    /* Cause update of scroll bars etc. */
+    RECT rect;
+    GetClientRect(hwndimgchild, &rect);
+    SendMessage(hwndimgchild, WM_SIZE, SIZE_RESTORED, MAKELONG(rect.right-rect.left, rect.bottom-rect.top));
+}
+
+/* Thread which loads Ghostscript DLL for display */
+#pragma argsused
+void 
+gs_thread(void *arg)
+{
+    while (!quitnow) {
+	if (!pending.now)
+	    wait_event();
+	if (!quitnow)
+	    gs_process();
+    }
+
+    /* signal that we have finished */
+    display.tid = 0;
+    post_img_message(WM_QUIT, 0);   /* shut down application */
+}
+
+
+/* Return TRUE if is OK to exit */
+BOOL
+query_close(void)
+{
+    /* tell GS DLL to unload */
+    quitnow = TRUE;
+    pending.unload = TRUE;
+    if (multithread)
+        SetEvent(display.event);	/* unblock display thread */
+    return TRUE;
 }
 
 
@@ -911,27 +1571,186 @@ clear_timer()
 void
 gsview_close()
 {
-	gs_close();
-	pipeclose();
-	print_cleanup();
-	if (page_list.select)
-		free(page_list.select);
-	page_list.select = NULL;
-	if (doc)
-		psfree(doc);
-	doc = (PSDOC *)NULL;
-	if (option.settings)
-		write_profile();
-	SetCursor(GetClassCursor((HWND)NULL));
-	if (info_font)
-		DeleteObject(info_font);
-	return;
+    psfile_free(&psfile);
+    if (option.settings)
+	write_profile(); 
+    SetCursor(GetClassCursor((HWND)NULL));
+    if (info_font)
+	DeleteObject(info_font);
+    if (multithread) {
+	CloseHandle(display.event);
+	CloseHandle(hmutex_ps);
+	DeleteCriticalSection(&crit_sec);
+    }
+    return;
 }
 
 
 void
 copy_clipboard()
 {
-	if (hwndimgchild && IsWindow(hwndimgchild))
-		SendMessage(hwndimgchild, WM_GSVIEW, COPY_CLIPBOARD, NULL);
+HGLOBAL hglobal;
+HPALETTE hpalette;
+    if ( text_index && (text_mark_first != -1) && (text_mark_last != -1)) {
+	/* copy text, not image */
+	int first, last, line;
+	int length;
+	int i;
+	LPSTR data;
+	first = text_mark_first;
+	last = text_mark_last;
+	if (first > last) {
+	    first = text_mark_last;
+	    last = text_mark_first;
+	}
+	line = text_index[first].line;
+	length = 1;
+	for (i=first; i<=last; i++) {
+	    if (text_index[i].line != line) {
+	        line = text_index[i].line;
+		length += 2;
+	    }
+	    length += strlen( text_words + text_index[i].word ) + 1;
+	}
+	if ((hglobal = GlobalAlloc(GHND | GMEM_SHARE, length)) == (HGLOBAL)NULL) {
+	    message_box("out of memory", 0);
+	    return;
+	}
+	if ((data = GlobalLock(hglobal)) == (LPSTR)NULL) {
+	    message_box("out of memory", 0);
+	    return;
+	}
+	line = text_index[first].line;
+	for (i=first; i<=last; i++) {
+	    if (text_index[i].line != line) {
+	        line = text_index[i].line;
+		strcpy(data, "\r\n");
+		data += strlen(data);
+	    }
+	    strcpy(data, text_words + text_index[i].word);
+	    strcat(data, " ");
+	    data += strlen(data);
+	}
+	GlobalUnlock(hglobal);
+	OpenClipboard(hwndimg);
+	EmptyClipboard();
+	SetClipboardData(CF_TEXT, hglobal);
+	CloseClipboard();
+	return;
+    }
+
+    if (gsdll.device) {
+	hglobal = (*gsdll.copy_dib)(gsdll.device);
+	hpalette = (*gsdll.copy_palette)(gsdll.device);
+	if (hglobal == (HGLOBAL)NULL) {
+	    MessageBox(hwndimg, "Not enough memory to Copy to Clipboard", 
+		szAppName, MB_OK | MB_ICONEXCLAMATION);
+	    return;
+	}
+	OpenClipboard(hwndimg);
+	EmptyClipboard();
+	SetClipboardData(CF_DIB, hglobal);
+	if (hpalette)
+	    SetClipboardData(CF_PALETTE, hpalette);
+	CloseClipboard();
+    }
 }
+
+
+#pragma argsused
+/* enable or disable a menu item */
+void
+enable_menu_item(int menuid, int itemid, BOOL enabled)
+{
+	if (enabled)
+	    EnableMenuItem(hmenu, itemid, MF_ENABLED);
+	else
+	    EnableMenuItem(hmenu, itemid, MF_DISABLED | MF_GRAYED);
+}
+
+/* if found word is not visible, scroll window to make it visible */
+void
+scroll_to_find(void)
+{
+    RECT rect, rect_client;
+    float x, y;
+
+    request_mutex();
+    /* first translate found box to window coordinates */
+    x = psfile.text_bbox.llx;
+    y = psfile.text_bbox.lly;
+    map_pt_to_pixel(&x, &y);
+    rect.left   = (int)x;
+    rect.bottom = (int)y;
+    x = psfile.text_bbox.urx;
+    y = psfile.text_bbox.ury;
+    map_pt_to_pixel(&x, &y);
+    rect.right  = (int)x;
+    rect.top    = (int)y;
+
+    GetClientRect(hwndimgchild, &rect_client);
+
+    /* scroll to bring the middle left to the centre of the window */
+    if ((rect.left < rect_client.left) || (rect.right > rect_client.right))
+	PostMessage(hwndimgchild, WM_HSCROLL, MAKELONG(SB_FIND, rect.left - ((rect_client.right-rect_client.left)/2)), 0);
+
+    if ((rect.top < rect_client.top) || (rect.bottom > rect_client.bottom))
+	PostMessage(hwndimgchild, WM_VSCROLL, MAKELONG(SB_FIND, (rect.bottom+rect.top - rect_client.bottom-rect_client.top)/2), 0);
+    release_mutex();
+}
+
+
+/* highlight words from first to last inclusive */
+/* first may be > last */
+/* word = -1 means nothing to mark */
+void
+highlight_words(HDC hdc, int first, int last)
+{
+    RECT rect;
+    float x, y;
+    TEXTINDEX *text;
+    int i;
+    if ((first == -1) || (last == -1))
+	return;
+
+
+    if ((first > text_index_count) || (last > text_index_count)) {
+	gs_addmess("\nhighlight_words called with invalid arguments\n");
+	return;
+    }
+    if (first > last) {
+        int temp = first;
+	first = last;
+	last = temp;
+    }
+
+    for (i = first; i<=last; i++) {
+	text = &text_index[i];
+	/* highlight found word */
+	/* map bounding box to device coordinates */
+	x = text->bbox.llx;
+	y = text->bbox.lly;
+	map_pt_to_pixel(&x, &y);
+	rect.left   = (int)x;
+	rect.bottom = (int)y;
+	x = text->bbox.urx;
+	y = text->bbox.ury;
+	map_pt_to_pixel(&x, &y);
+	rect.right  = (int)x;
+	rect.top    = (int)y;
+	if (rect.top > rect.bottom) {
+	    int temp = rect.top;
+	    rect.top = rect.bottom;
+	    rect.bottom = temp;
+	}
+	if (rect.left > rect.right) {
+	    int temp = rect.right;
+	    rect.right = rect.left;
+	    rect.left = temp;
+	}
+
+	/* invert text */
+	InvertRect(hdc, &rect);
+    }
+}
+

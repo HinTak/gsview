@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -22,19 +22,21 @@
 
 /* execute program */
 BOOL
-exec_pgm(char *name, char *arg, BOOL withpipe, PROG* prog)
+exec_pgm(char *name, char *arg, PROG* prog)
 {
 	STARTDATA sdata;
 	APIRET rc;
-	char buf[256];
-	CHAR progname[256];
+	char buf[MAXSTR];
+	CHAR progname[MAXSTR];
 	PROG pg;
 	int pipe_handle[2];
 	PTIB pptib;
 	PPIB pppib;
 
+/*
 	if (prog->valid)
 		stop_pgm(prog);
+*/
 	memset(&pg, 0, sizeof(PROG));
 
 	if (DosGetInfoBlocks(&pptib, &pppib)) {
@@ -47,46 +49,25 @@ exec_pgm(char *name, char *arg, BOOL withpipe, PROG* prog)
 	    strcpy(progname, szExePath);
 	strcat(progname, name);
 
-	if (withpipe) {
-	    /* redirect stdin of new program */
-#ifdef __BORLANDC__
-	    if (_pipe(pipe_handle, 4096, O_BINARY))
-#else
-	    if (pipe(pipe_handle))		/* create a pipe */
-#endif
- 	    {
-		error_message("exec_pgm: error opening pipe");
-		return FALSE;
-	    }
-	    if (dup2(pipe_handle[0], 0) < 0) {	/* duplicate read handle to stdin handle */
-		error_message("error duplicating pipe");
-		return FALSE;
-	    }
-	    close(pipe_handle[0]);			/* close surplus handle */
-	    pg.input = fdopen(pipe_handle[1], "w");	/* open a stream to the write handle */
-/*
-sprintf(buf,"exec_pgm: input stream = %p, handle = %d", pg.input, pipe_handle[1]);
-rmsg(buf);
-*/
-	    if (pg.input == (FILE *)NULL) {
-		error_message("exec_pgm: error opening write stream for pipe");
-		return FALSE;
-	    }
-	}
-	
+	memset(&sdata, 0, sizeof(sdata));
 	/* because new program is a different EXE type, 
 	 * we must use start session not DosExecPgm() */
 	sdata.Length = sizeof(sdata);
-	sdata.Related = SSF_RELATED_CHILD;	/* to be a child  */
+/*	sdata.Related = SSF_RELATED_CHILD;	/* to be a child  */
+	sdata.Related = SSF_RELATED_INDEPENDENT;
 	sdata.FgBg = SSF_FGBG_BACK;		/* start in background */
 	sdata.TraceOpt = 0;
 	sdata.PgmTitle = name;
 	sdata.PgmName = progname;
 	sdata.PgmInputs = arg;
+	sdata.TermQ = 0;
+/*
 	sdata.TermQ = gsview.term_queue_name;
+*/
 	sdata.Environment = pppib->pib_pchenv;	/* use Parent's environment */
-	/* with pipe needs to inherit redirected stdin */
-	sdata.InheritOpt = withpipe ? SSF_INHERTOPT_PARENT : 0;
+	sdata.InheritOpt =  0;
+	sdata.InheritOpt = SSF_INHERTOPT_PARENT;
+/*	sdata.InheritOpt = withpipe ? SSF_INHERTOPT_PARENT : 0; */
 	sdata.SessionType = SSF_TYPE_DEFAULT;		/* default is text */
 	sdata.IconFile = NULL;
 	sdata.PgmHandle = 0;
@@ -109,8 +90,6 @@ message_box(buf, 0);
 	    rc = DosStartSession(&sdata, &pg.session_id, &pg.process_id);
 	}
 	if (rc) {
-	    if (withpipe)
-	        fclose(pg.input);
 	    sprintf(buf,"\"%s %s\", rc = %d\n", sdata.PgmName, sdata.PgmInputs, rc);
 	    gserror(IDS_CANNOTRUN, buf, MB_ICONHAND, SOUND_ERROR);
 	    load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
@@ -134,7 +113,7 @@ int i = 0;
 	    return;
 	}
 	DosStopSession(STOP_SESSION_SPECIFIED, prog->session_id);
-	while (prog->valid && term_tid && (i < 100)) {
+	while (prog->valid && (i < 100)) {
 	    /* wait for termination queue message to cause cleanup_pgm() to be called */
   	    if (WinGetMsg(hab, &q_mess, 0L, 0, 0))
 	        WinDispatchMsg(hab, &q_mess);
@@ -152,214 +131,10 @@ void
 cleanup_pgm(PROG* prog)
 {
 	prog->valid = FALSE;
-	if (prog->input)
-	    fclose(prog->input);
-	prog->input = (FILE *)NULL;
 	prog->session_id = 0;
 	prog->process_id = (PID)0;
 }
 
-BOOL
-pdf_convert(char *name, char *arg, PROG* prog)
-{
-	STARTDATA sdata;
-	APIRET rc;
-	char buf[256];
-	CHAR progname[256];
-	int pipe_handle[2];
-	PTIB pptib;
-	PPIB pppib;
-
-	REQUESTDATA Request;
-	ULONG DataLength;
-	PVOID DataAddress;
-	BYTE ElemPriority;
-	char term_queue_name[MAXSTR];
-	HQUEUE term_queue;	/* termination queue for child sessions */
-
-	if (DosGetInfoBlocks(&pptib, &pppib)) {
-		error_message("\nexec_pgm: Couldn't get environment\n");
-		return FALSE;
-	}
-
-	/* create termination queue so we can wait for conversion to finish */
-	sprintf(term_queue_name, "\\QUEUES\\PDF_%s", gsview.id);
-	if ( (rc = DosCreateQueue(&term_queue, QUE_FIFO, term_queue_name)) != 0 ) {
-		sprintf(buf,"Failed to create: \"%s\", rc = %d\n", term_queue_name, rc);
-		error_message(buf);
-		return FALSE;
-	}
-
-	/* Look for program in same directory as this EXE */
-	progname[0] = '\0';
-	if (!strchr(name, '\\'))
-	    strcpy(progname, szExePath);
-	strcat(progname, name);
-	
-	/* because new program is a different EXE type, 
-	 * we must use start session not DosExecPgm() */
-	sdata.Length = sizeof(sdata);
-	sdata.Related = SSF_RELATED_CHILD;	/* to be a child  */
-	sdata.FgBg = SSF_FGBG_BACK;		/* start in background */
-	sdata.TraceOpt = 0;
-	sdata.PgmTitle = name;
-	sdata.PgmName = progname;
-	sdata.PgmInputs = arg;
-	sdata.TermQ = term_queue_name;
-	sdata.Environment = pppib->pib_pchenv;	/* use Parent's environment */
-	sdata.InheritOpt = 0;
-	sdata.SessionType = SSF_TYPE_DEFAULT;		/* default is text */
-	sdata.IconFile = NULL;
-	sdata.PgmHandle = 0;
-	sdata.PgmControl = 0;
-	sdata.InitXPos = 0;
-	sdata.InitYPos = 0;
-	sdata.InitXSize = 0;
-	sdata.InitYSize = 0;
-	sdata.ObjectBuffer = NULL;
-	sdata.ObjectBuffLen = 0;
-
-/*
-sprintf(buf,"pdf_convert: %s %s\n",sdata.PgmName, sdata.PgmInputs);
-message_box(buf, 0);
-*/
-	rc = DosStartSession(&sdata, &prog->session_id, &prog->process_id);
-	if (rc == ERROR_FILE_NOT_FOUND) {
-	    /* didn't find it in same directory as this EXE so try PATH */
-	    sdata.PgmName = name;
-	    rc = DosStartSession(&sdata, &prog->session_id, &prog->process_id);
-	}
-	if (rc) {
-	    DosCloseQueue(term_queue);
-	    sprintf(buf,"\"%s %s\", rc = %d\n", sdata.PgmName, sdata.PgmInputs, rc);
-	    gserror(IDS_CANNOTRUN, buf, MB_ICONHAND, SOUND_ERROR);
-	    load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
-	    get_help();
-	    return FALSE;
-	}
-
-	/* wait for PDF converter to finish */
-	DosReadQueue(term_queue, &Request, &DataLength, &DataAddress, 
-			0, DCWW_WAIT, &ElemPriority, (HEV)NULL);
-	if (DataAddress != NULL)
-	    DosFreeMem(DataAddress);
-
-	DosCloseQueue(term_queue);
-
-	cleanup_pgm(prog);
-	return TRUE;
-}
-
-
-BOOL
-gs_open()
-{
-char *args;
-BOOL flag;
-ULONG count;
-char progargs[256];
-FILE *optfile;
-int depth;
-	/* return if already open */
-	if (gsprog.valid)
-		return TRUE;
-
-	gs_size();
-	
-#ifdef OLD
-	sprintf(progargs,"%s -I\042%s\042 -dBitsPerPixel=%d %s -r%gx%g -g%ux%u -sGSVIEW=%s -",
-		option.gsother, option.gsinclude, 
-		(option.depth ? option.depth : display.bitcount*display.planes), 
-		option.safer ? "-dSAFER" : "",
-		option.xdpi, option.ydpi, 
-                display.width, display.height,
-		gsview.id);
-#else
-	/* new version uses temporary file to reduce command line length */
-	/* avoids setting FIXEDMEDIA and does sanity check on BitsPerPixel */
-
-	/* restrict depth to values supported by Ghostscript */
-	depth = display.planes * display.bitcount;
-	if (depth >= 24)
-	    depth = 24;
-	else if (depth >=15)
-	    depth = 16;
-	else if (depth >=8)
-	    depth = 8;
-	else if (depth >=4)
-	    depth = 4;
-	else 
-	    depth = 1;
-
-	if ((display.optname[0] != '\0') && !debug)
-	    unlink(display.optname);
-	display.optname[0] = '\0';
-	if ( (optfile = gp_open_scratch_file(szScratch, display.optname, "w")) == (FILE *)NULL) {
-	    play_sound(SOUND_ERROR);
-	    return FALSE;
-	}
-	fprintf(optfile, "-I%s\n", option.gsinclude);
-	if (option.safer)
-	    fprintf(optfile, "-dSAFER\n");
-	fprintf(optfile, "-dBitsPerPixel=%d\n", option.depth ? option.depth : depth);
-	fprintf(optfile, "-dDEVICEXRESOLUTION=%g\n", (double)option.xdpi);
-	fprintf(optfile, "-dDEVICEYRESOLUTION=%g\n", (double)option.ydpi);
-	fprintf(optfile, "-dDEVICEWIDTH=%u\n", display.width);
-	fprintf(optfile, "-dDEVICEHEIGHT=%u\n", display.height);
-	fclose(optfile);
-	sprintf(progargs,"%s @%s -sGSVIEW=%s -",
-		option.gsother, display.optname, gsview.id);
-#endif
-
-	display.saved = FALSE;
-	display.page = FALSE;
-	display.sync = FALSE;
-	zoom = FALSE;
-	display.do_endfile = FALSE;
-	display.do_resize = FALSE;
-	info_wait(IDS_WAITGSOPEN);
-	flag = exec_pgm(option.gsexe, progargs, TRUE, &gsprog);
-	if (!flag)
-	    display.do_display = FALSE;
-	return flag;
-}
-
-/* don't create any windows in this routine - can be called from display thread */
-/* close Ghostscript */
-BOOL
-gs_close()
-{
-	if (display.busy) {
-	    display.abort = TRUE;
-	    DosWaitEventSem(display.done, 60000);
-	}
-	stop_pgm(&gsprog);
-	display.saved = FALSE;
-	display.epsf_clipped = FALSE;
-	display.page = FALSE;
-	display.sync = FALSE;
-	/* mark bitmap as unused */
-	if (DosRequestMutexSem(gsview.bmp_mutex, 10000) == ERROR_TIMEOUT)
-	    message_box("gs_close: mutex timeout", 0);
-	DosEnterCritSec();
-	DosFreeMem((PVOID)bitmap.pbmi);
-	bitmap.valid = FALSE;
-	DosExitCritSec();
-	DosReleaseMutexSem(gsview.bmp_mutex);
-
-	if ((display.optname[0] != '\0') && !debug)
-	    unlink(display.optname);
-	display.optname[0] = '\0';
-	return TRUE;
-}
-
-/* send a NEXT_PAGE message to Ghostscript */
-void
-next_page()
-{
-	DosPostEventSem(gsview.next_event);
-	display.page = FALSE;
-}
 
 /* return TRUE if file length or modification time changed */
 BOOL
@@ -376,27 +151,12 @@ struct stat fstatus;
 }
 
 void
-psfile_savestat(void)
+psfile_savestat(PSFILE *psf)
 {
 struct stat fstatus;
-	fstat(fileno(psfile.file), &fstatus);
-	psfile.datetime = fstatus.st_mtime;
-	psfile.length = fstatus.st_size;
+	fstat(fileno(psf->file), &fstatus);
+	psf->datetime = fstatus.st_mtime;
+	psf->length = fstatus.st_size;
 }
 
-
-/* true if pipe has just been reset */
-BOOL is_pipe_done(void)
-{
-	if (display.end)
-	   return TRUE;
-/*
-	if (display.sync)
-	   return TRUE;
-*/
-	if (!gsprog.valid)
-	   return TRUE;
-	return FALSE;
-}
-
-
+

@@ -23,7 +23,14 @@
 #include "gvcrc.h"
 #endif
 
-ID_GSVIEW ICON "binary/gvwin.ico"
+/* Don't rearrange the order of the following icons or their values */
+/* Registry setup depends on their order */
+ID_GSVIEW ICON "binary/gvwin1.ico"
+ID_GSVIEW2 ICON "binary/gvwin2.ico"
+ID_GSVIEW3 ICON "binary/gvwin3.ico"
+ID_GSVIEW_DOC ICON "binary/gvwdoc.ico"
+
+IDP_CROSSHAIR CURSOR "binary/gvwcross.cur"
 
 /* button table */
 /* Each button is specified by a menu item identifier */
@@ -55,151 +62,11 @@ END
 /* by commas.  Don't use spaces.  Each line must end with a '\0' */
 /* The last line of this section must be "\0" */
 /* Maximum line length is 128 */
+/* THIS INFORMATION HAS BEEN MOVED TO PRINTER.INI */
 IDR_DEVICES RCDATA
 BEGIN
 	"mswinpr2,\0"   /* can't set resolution in device dialog box */
-	"mswinprn,\0"   /* can't set resolution in device dialog box */
-#if defined(__WIN32__)
-	"deskjet,300x300,150x150,100x100,75x75\0"
 	"djet500,300x300,150x150,100x100,75x75\0"
-	"laserjet,300x300,150x150,100x100,75x75\0"
-	"ljetplus,300x300,150x150,100x100,75x75\0"
-	"ljet2p,300x300,150x150,100x100,75x75\0"
-	"ljet3,300x300,150x150,100x100,75x75\0"
-	"ljet4,600x600,300x300,150x150,100x100,75x75\0"
-	"cdeskjet,300x300,150x150,100x100,75x75\0"
-	"cdjcolor,300x300,150x150,100x100,75x75\0"
-	"cdjmono,300x300,150x150,100x100,75x75\0"
-	"cdj550,300x300,150x150,100x100,75x75\0"
-	"pj,180x180,90x90\0" /* guess */
-	"pjxl,180x180,90x90\0" /* guess */
-	"pjxl300,300x300\0"
-	"djet500c,300x300,150x150,100x100,75x75\0"
-	"declj250,180x180\0"
-	"lj250,180x180,90x90\0" /* guess */
-	"jetp3852,84x84\0"
-	"r4081,300x300\0"
-	"t4693d2,100x100\0"
-	"t4693d4,100x100\0"
-	"t4693d8,100x100\0"
-	"tek4696,120x120\0"
-	"lbp8,300x300\0"
-	"epson,360x180,240x180,180x180,120x180,60x180,180x60,120x60,60x60,240x72,120x72,60x72\0"
-	"eps9mid,240x216,120x216,60x216\0"  /* guess */
-	"eps9high,240x216,120x216,60x216\0"
-	"epsonc,360x180,240x180,180x180,120x180,60x180,180x60,120x60,60x60,240x72,120x72,60x72\0"
-	"ibmpro,360x180,240x180,180x180,120x180,60x180,180x60,120x60,60x60,240x72,120x72,60x72\0"
-	"st800,360x360,360x180,180x180\0"
-	"stcolor,360x360,360x180,180x180\0"
-	"bj10e,360x360,360x180,180x360,180x180\0"
-	"bj200,360x360,360x180,180x360,180x180\0"
-	"m8510,160x144\0"
-	"neccp6,360x360,360x180,180x360,180x180\0" /* guess */
-	"dfaxhigh,204x196\0"
-	"dfaxlow,204x98\0"
-	"tiffg3,204x196,204x98\0"
-	"tiffg4,204x196,204x98\0"
-	"bmpmono,72,96,120\0"
-	"bmp16,72,96,120\0"
-	"bmp256,72,96,120\0"
-	"bmp16m,72,96,120\0"
-	"pcxmono,72,96,120\0"
-	"pcxgray,72,96,120\0"
-	"pcx16,72,96,120\0"
-	"pcx256,72,96,120\0"
-	"pcx24b,72,96,120\0"
-	"psmono,72,96\0"
-	"bit,72,96\0"
-	"bitrgb,72,96\0"
-	"bitcmyk,72,96\0"
-	"tiffcrle,204x196\0"
-	"tiffg3,204x196\0"
-	"tiffg32d,204x196\0"
-	"tiffg4,204x196\0"
-	"tifflzw,204x196\0"
-	"tiffpack,204x196\0"
-#else
-	"deskjet,300x300,150x150,100x100,75x75\0"
-	"djet500,300x300,150x150,100x100,75x75\0"
-	"laserjet,300x300,150x150,100x100,75x75\0"
-	"ljetplus,300x300,150x150,100x100,75x75\0"
-	"ljet2p,300x300,150x150,100x100,75x75\0"
-	"ljet3,300x300,150x150,100x100,75x75\0"
-	"ljet4,600x600,300x300,150x150,100x100,75x75\0"
-	"cdeskjet,300x300,150x150,100x100,75x75\0"
-	"cdjcolor,300x300,150x150,100x100,75x75\0"
-	"cdjmono,300x300,150x150,100x100,75x75\0"
-	"cdj550,300x300,150x150,100x100,75x75\0"
-	"pj,180x180,90x90\0"
-	"pjxl,180x180,90x90\0" /* guess */
-	"pjxl300,300x300\0"
-	"epson,360x180,240x180,180x180,120x180,60x180,180x60,120x60,60x60,240x72,120x72,60x72\0"
-	"eps9high,240x216,120x216,60x216\0"
-	"ibmpro,360x180,240x180,180x180,120x180,60x180,180x60,120x60,60x60,240x72,120x72,60x72\0"
-	"bj10e,360x360,360x180,180x360,180x180\0"
-	"bj200,360x360,360x180,180x360,180x180\0"
-	"bmpmono,72,96\0"
-	"bmp16,72,96\0"
-	"bmp256,72,96\0"
-	"bmp16m,72,96\0"
-#endif
-	"\0"
-END
-
-/* header to control page orientation */
-IDR_ORIENT RCDATA
-BEGIN
-	"/gsview_orientation {\r\n"
-	" gsview_offset\r\n"
-	" gsave clippath pathbbox grestore\r\n"
-	" 4 dict begin\r\n"
-	" /ury exch def /urx exch def /lly exch def /llx exch def\r\n"
-	" gsview_landscape\r\n"
-	" {-90 rotate\r\n llx ury add neg llx lly sub translate} if\r\n"
-	" gsview_upsidedown\r\n"
-	" {180 rotate\r\n llx urx add neg lly ury add neg translate} if\r\n"
-	" gsview_seascape\r\n"
-	" {90 rotate\r\n lly llx sub lly urx add neg translate} if\r\n"
-	" end\r\n} def\r\n"
-#if !defined(__WIN32__) && defined(GS261)
-	"/showpage\r\n{"
-	" (showpage\\r\\n) print flush\r\n"
-	" 1 true .outputpage erasepage initgraphics\r\n"
-	" gsview_orientation\r\n} bind def\r\n"
-#else
-	"/showpage\r\n{"
-	" (showpage\\r\\n) print flush\r\n"
-	" 0 .endpage {1 true .outputpage erasepage initgraphics}\r\n"
-	" if gsview_orientation .beginpage\r\n} bind def\r\n"
-#endif
-	"gsview_orientation\r\n"
-	"/gsview_cleanup {clear cleardictstack} def\r\n"
-	"/gsview_setpagesize {\r\n"
-	" gsview_landscape gsview_seascape or {exch} if\r\n"
-	" gsview_zoom {pop pop}\r\n"
-        "  {//statusdict begin .setpagesize end gsview_orientation} ifelse\r\n"
-        "} def\r\n"
-	"/letter {612 792 gsview_setpagesize} def\r\n"
-	"/note {540 720 gsview_setpagesize} def\r\n"
-	"/legal {612 1008 gsview_setpagesize} def\r\n"
-	"/a3 {842 1190 gsview_setpagesize} def\r\n"
-	"/a4 {595 842 gsview_setpagesize} def\r\n"
-	"/a5 {421 595 gsview_setpagesize} def\r\n"
-	"/a6 {297 421 gsview_setpagesize} def\r\n"
-	"/b4 {709 1002 gsview_setpagesize} def\r\n"
-	"/flsa {612 936 gsview_setpagesize} def\r\n"
-	"/flse {612 936 gsview_setpagesize} def\r\n"
-	"/halfletter {396 612 gsview_setpagesize} def\r\n"
-	"/11x17 {792 1224 gsview_setpagesize} def\r\n"
-	"/ledger {1224 792 gsview_setpagesize} def\r\n"
-	"\0"
-END
-
-/* header to control page orientation - extras for GS 3.x */
-IDR_ORIENT3 RCDATA
-BEGIN
-	"/setpagedevice\r\n"
-	"{dup length dict copy dup /HWResolution undef setpagedevice} bind odef\r\n"
 	"\0"
 END
 
@@ -242,13 +109,139 @@ BEGIN
 	"/setcolortransfer {/setcolortransfer eps_warntwo} def\015\012"
 	"count /eps_count exch def\015\012"
 	"countdictstack /eps_countdictstack exch def\015\012"
-	"/eps_countcheck {count eps_count\015\012"
+	"/gsview_eps_countcheck {count eps_count\015\012"
 	"  ne {(Warning: EPS file altered operand stack count\\n) print pstack flush} if\015\012"
 	"  countdictstack eps_countdictstack\015\012"
 	"  ne {(Warning: EPS file altered dictionary stack count\\n) print flush} if\015\012"
 	"} def\015\012"
-	"/gsview_cleanup {eps_countcheck //systemdict /clear get exec //systemdict /cleardictstack get exec} def\015\012"
 	"\0"
+END
+
+/* ViewerPreProcess hook */
+/* This is installed with setpagedevice and used by setpagedevice */
+IDR_VIEWER RCDATA
+BEGIN
+"/ViewerPreProcess { systemdict begin\015\012"
+/* %  copy dictionary so we can change the entries */
+"  dup length dict copy  \015\012"
+/* % remove entries that will upset viewer */
+"  dup /HWResolution undef\015\012"
+"  dup /HWMargins undef\015\012"
+"  dup /Margins undef\015\012"
+"  dup /Orientation undef\015\012"
+"  dup /InputAttributes undef\015\012"
+"  dup /TextAlphaBits undef\015\012"
+"  dup /GraphicsAlphaBits undef\015\012"
+"  dup /PageSize undef\015\012"
+/* % Calculate width and height of imageable area */
+/* % Use ImagingBBox if set, otherwise use PageSize */
+"  GSview /ImagingBBox get null eq \015\012"
+"  { GSview dup /PageSize get\015\012"
+"    /Size exch put\015\012"
+"    GSview /PageOffset [0 0] put\015\012"
+"  }\015\012"
+"  { GSview dup /ImagingBBox get\015\012"
+"    [ exch\015\012"
+"    dup 0 get exch dup 2 get 3 -1 roll sub exch\015\012"
+"    dup 1 get exch 3 get exch sub \015\012"
+"    ]\015\012"
+"    /Size exch put\015\012"
+"    GSview /Orientation get\015\012"
+"    dup 0 eq\015\012"
+"    { % portrait\015\012"
+"      GSview dup /ImagingBBox get\015\012"
+"      [ exch dup 0 get neg exch 1 get neg ]\015\012"
+"      /PageOffset exch put\015\012"
+"    }\015\012"
+"    if\015\012"
+"    dup 1 eq\015\012"
+"    { % landscape\015\012"
+"      GSview dup /ImagingBBox get\015\012"
+"      [\015\012"
+"        exch dup 1 get neg exch 2 get\015\012"
+"	GSview /PageSize get\015\012"
+"        0 get\015\012"
+"	sub\015\012"
+"        exch neg exch neg\015\012"
+"      ]\015\012"
+"      /PageOffset exch put\015\012"
+"    }\015\012"
+"    if\015\012"
+"    dup 2 eq\015\012"
+"    { % upside-down\015\012"
+"      GSview dup /ImagingBBox get\015\012"
+"      [ exch dup 2 get exch 3 get\015\012"
+"	GSview /PageSize get\015\012"
+"        dup 0 get exch 1 get\015\012"
+"        exch 3 1 roll\015\012"
+"	 sub 3 1 roll\015\012"
+"        sub exch\015\012"
+"      ]\015\012"
+"      /PageOffset exch put\015\012"
+"    }\015\012"
+"    if\015\012"
+"    dup 3 eq\015\012"
+"    { % seascape\015\012"
+"      GSview dup /ImagingBBox get\015\012"
+"      [ exch dup 0 get exch 3 get\015\012"
+"	GSview /PageSize get\015\012"
+"        1 get sub\015\012"
+"	exch neg\015\012"
+"        exch neg exch neg\015\012"
+"      ]\015\012"
+"      /PageOffset exch put\015\012"
+"    }\015\012"
+"    if\015\012"
+"    pop\015\012"
+"  }\015\012"
+"  ifelse\015\012"
+/* % insert alpha values */
+"  dup /TextAlphaBits GSview /TextAlphaBits get put\015\012"
+"  dup /GraphicsAlphaBits GSview /GraphicsAlphaBits get put\015\012"
+/* % insert our page size */
+"  dup /PageSize GSview /Size get put\015\012"
+/* % insert display resolution */
+"  dup /HWResolution GSview /HWResolution get put\015\012"
+/* % insert offset */
+"  dup /PageOffset GSview /PageOffset get put\015\012"
+/* % Insert orientation */
+"  dup /Orientation GSview /Orientation get put\015\012"
+/* % Insert ImagingBBox - this speeds up rendering if ImagingBBox < PageSize */
+"  GSview /ImagingBBox get null eq \015\012"
+"  { % create an ImagingBBox from PageSize\015\012"
+"    dup /ImagingBBox [ 0 0\015\012"
+"    GSview /PageSize get\015\012"
+"    dup 0 get exch 1 get ]\015\012"
+"    put\015\012"
+"  }\015\012"
+"  { % use supplied ImagingBBox\015\012"
+"    dup /ImagingBBox GSview /ImagingBBox get put\015\012"
+"  }\015\012"
+"  ifelse\015\012"
+/* % Insert Policy = use page size in InputAttributes */
+"  dup /Policy << /PageSize 5 >> put\015\012"
+/* % Insert InputAttributes */
+/* % Use this to specify media size */
+"  dup /InputAttributes <<\015\012"
+"    0 << /PageSize [\015\012"
+"      GSview /Orientation get\015\012"
+"      dup 0 eq\015\012"
+"      exch 2 eq \015\012"
+"      or\015\012"
+"      { % portrait or upside down\015\012"
+"        GSview /Size get\015\012"
+"        dup 0 get exch 1 get\015\012"
+"      }\015\012"
+"      { % landscape or seascape\015\012"
+"        GSview /Size get\015\012"
+"        dup 1 get exch 0 get\015\012"
+"      }\015\012"
+"      ifelse\015\012"
+"    ]\015\012"
+"    >>\015\012"
+"  >> put\015\012"
+"  end % pop systemdict \015\012"
+"}\015\012"
 END
 
 gsview_bitmap BITMAP "binary/gvwmisc.bmp"
@@ -278,3 +271,4 @@ IDM_MAGMINUS BITMAP "binary/gvwmagm.bmp"
 IDM_TEXTFIND BITMAP "binary/gvwfind.bmp"
 
 IDM_TEXTFINDNEXT BITMAP "binary/gvwfindn.bmp"
+

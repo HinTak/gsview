@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -24,46 +24,51 @@
 #include "gvpm.h"
 #endif
 
-/* display error message and post quit message */
+/* display error message and exit Ghostscript message */
 void 
 error_message(char *str)
 {
 	message_box(str, MB_ICONHAND);
-	post_close();
+	post_img_message(WM_CLOSE, 0);
 }
 
 void
 info_init(HWND hwnd)
 {
+    PSDOC *doc = psfile.doc;
     char buf[MAXSTR];
+    char *p;
     int n;
     if (psfile.name[0] != '\0') {
 	SetDlgItemText(hwnd, INFO_FILE, psfile.name);
 	if (doc) {
+	    p = buf;
+	    *p = '\0';
 	    if (psfile.ctrld)
-		load_string(IDS_NOTDSC, buf, sizeof(buf));
-	    else  {
-		if (psfile.ispdf) {
-		    load_string(IDS_PDF, buf, sizeof(buf));
-		}
-		else if (doc->epsf) {
-		    switch (psfile.preview) {
-			case IDS_EPSI:
-			  load_string(IDS_EPSI, buf, sizeof(buf));
-			  break;
-			case IDS_EPST:
-			  load_string(IDS_EPST, buf, sizeof(buf));
-			  break;
-			case IDS_EPSW:
-			  load_string(IDS_EPSW, buf, sizeof(buf));
-			  break;
-			default:
-			  load_string(IDS_EPSF, buf, sizeof(buf));
-		    }
-		}
-		else
-		    load_string(IDS_DSC, buf, sizeof(buf));
+		load_string(IDS_CTRLD, buf, sizeof(buf));
+	    if (psfile.pjl)
+		load_string(IDS_PJL, buf, sizeof(buf));
+	    p += strlen(p);
+	    if (psfile.ispdf) {
+		load_string(IDS_PDF, p, sizeof(buf)-strlen(buf));
 	    }
+	    else if (doc->epsf) {
+		switch (psfile.preview) {
+		    case IDS_EPSI:
+		      load_string(IDS_EPSI, p, sizeof(buf)-strlen(buf));
+		      break;
+		    case IDS_EPST:
+		      load_string(IDS_EPST, p, sizeof(buf)-strlen(buf));
+		      break;
+		    case IDS_EPSW:
+		      load_string(IDS_EPSW, p, sizeof(buf)-strlen(buf));
+		      break;
+		    default:
+		      load_string(IDS_EPSF, p, sizeof(buf)-strlen(buf));
+		}
+	    }
+	    else
+		load_string(IDS_DSC, p, sizeof(buf)-strlen(buf));
 	    SetDlgItemText(hwnd, INFO_TYPE, buf);
 	    SetDlgItemText(hwnd, INFO_TITLE, doc->title ? doc->title : "");
 	    SetDlgItemText(hwnd, INFO_DATE, doc->date ? doc->date : "");
@@ -121,7 +126,7 @@ info_init(HWND hwnd)
 	        load_string(IDS_NOTDSC, buf, sizeof(buf));
 	    SetDlgItemText(hwnd, INFO_TYPE, buf);
 	}
-	sprintf(buf, "%d x %d", display.width, display.height);
+	sprintf(buf, "%d x %d", bitmap.width, bitmap.height);
 	SetDlgItemText(hwnd, INFO_BITMAP, buf);
     }
     else {
@@ -132,17 +137,31 @@ info_init(HWND hwnd)
 
 /* read settings fron INI file */
 void
-read_profile()
+read_profile(char *ininame)
 {
 int i;
-char profile[128];
+char profile[MAXSTR];
 char *section = INISECTION;
 char *device_ptr;
 PROFILE *prf;
-	prf = profile_open(szIniFile);
+	prf = profile_open(ininame);
+	profile_read_string(prf, section, "Configured", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+	    option.configured = i;
+	else
+	    option.configured = FALSE;
 	profile_read_string(prf, section, "Version", "", profile, sizeof(profile));
 	if (strcmp(profile, GSVIEW_VERSION)!=0)
-	    changed_version = TRUE;
+	    option.configured = FALSE;
+	profile_read_string(prf, section, "GhostscriptDLL", "", profile, sizeof(profile));
+	if (profile[0] != '\0')	/* don't copy a default - assume already set */
+		strcpy(option.gsdll, profile);
+	profile_read_string(prf, section, "GhostscriptInclude", "", profile, sizeof(profile));
+	if (profile[0] != '\0')	/* don't copy a default - assume already set */
+		strcpy(option.gsinclude, profile);
+	profile_read_string(prf, section, "GhostscriptOther", "", profile, sizeof(profile));
+	if (profile[0] != '\0')	/* don't copy a default - assume already set */
+		strcpy(option.gsother, profile);
 	profile_read_string(prf, section, "Origin", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d %d", &option.img_origin.x, &option.img_origin.y) != 2) {
 		option.img_origin.x = option.img_origin.y = CW_USEDEFAULT;
@@ -176,6 +195,16 @@ PROFILE *prf;
 	profile_read_string(prf, section, "Depth", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
 		option.depth = i;
+	profile_read_string(prf, section, "TextAlphaBits", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+		option.alpha_text = i;
+        if (option.alpha_text <= 0)
+		option.alpha_text = 1;
+	profile_read_string(prf, section, "GraphicsAlphaBits", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+		option.alpha_graphics = i;
+        if (option.alpha_graphics <= 0)
+		option.alpha_graphics = 1;
 	profile_read_string(prf, section, "Media", "", profile, sizeof(profile));
 	if (strlen(profile)!=0) {
 		char thismedia[20];
@@ -225,7 +254,10 @@ PROFILE *prf;
 		option.unit = i+IDM_UNITPT;
 	profile_read_string(prf, section, "QuickOpen", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
-		option.quick = i;
+		option.quick_open = i;
+	profile_read_string(prf, section, "QuickText", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+		option.quick_text = i;
 	profile_read_string(prf, section, "Safer", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
 		option.safer = i;
@@ -241,29 +273,6 @@ PROFILE *prf;
 	    profile_read_string(prf, section, "LastDir", "", profile, sizeof(profile));
 	    if (gs_chdir(profile))
 	        gs_chdir(workdir);
-	}
-#ifdef OLD
-	profile_read_string(prf, section, "Ghostscript", "", profile, sizeof(profile));
-	if (profile[0] != '\0')	/* don't copy a default - assume already set */
-		strcpy(option.gscommand, profile);
-#endif
-	profile_read_string(prf, section, "GhostscriptEXE", "", profile, sizeof(profile));
-	if (profile[0] != '\0')	/* don't copy a default - assume already set */
-		strcpy(option.gsexe, profile);
-	profile_read_string(prf, section, "GhostscriptInclude", "", profile, sizeof(profile));
-	if (profile[0] != '\0')	/* don't copy a default - assume already set */
-		strcpy(option.gsinclude, profile);
-	profile_read_string(prf, section, "GhostscriptOther", "", profile, sizeof(profile));
-	if (profile[0] != '\0')	/* don't copy a default - assume already set */
-		strcpy(option.gsother, profile);
-	profile_read_string(prf, section, "GhostscriptVersion", "", profile, sizeof(profile));
-	if (sscanf(profile,"%d", &i) == 1) {
-	    if (i <= 261) 
-		option.gsversion = IDM_GS261;
-	    else if (i <= 333)
-		option.gsversion = IDM_GS333;
-	    else
-		option.gsversion = IDM_GS351;
 	}
 	profile_read_string(prf, section, "DrawMethod", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1) {
@@ -308,6 +317,11 @@ int i;
 PROFILE *prf;
 	prf = profile_open(szIniFile);
 	profile_write_string(prf, section, "Version", GSVIEW_VERSION);
+	sprintf(profile, "%d", option.configured);
+	profile_write_string(prf, section, "Configured", profile);
+	profile_write_string(prf, section, "GhostscriptDLL", option.gsdll);
+	profile_write_string(prf, section, "GhostscriptInclude", option.gsinclude);
+	profile_write_string(prf, section, "GhostscriptOther", option.gsother);
 	sprintf(profile, "%d %d", option.img_origin.x, option.img_origin.y);
 	profile_write_string(prf, section, "Origin", profile);
 	sprintf(profile, "%d %d", option.img_size.x, option.img_size.y);
@@ -326,6 +340,10 @@ PROFILE *prf;
 	profile_write_string(prf, section, "ZoomResolution", profile);
 	sprintf(profile, "%d", option.depth);
 	profile_write_string(prf, section, "Depth", profile);
+	sprintf(profile, "%d", option.alpha_text);
+	profile_write_string(prf, section, "TextAlphaBits", profile);
+	sprintf(profile, "%d", option.alpha_graphics);
+	profile_write_string(prf, section, "GraphicsAlphaBits", profile);
 	if (option.media == IDM_USERSIZE)
 	    strcpy(profile, "User Defined");
 	else
@@ -347,8 +365,10 @@ PROFILE *prf;
 	profile_write_string(prf, section, "SwapLandscape", profile);
 	sprintf(profile, "%d", option.unit - IDM_UNITPT);
 	profile_write_string(prf, section, "Unit", profile);
-	sprintf(profile, "%d", option.quick);
+	sprintf(profile, "%d", option.quick_open);
 	profile_write_string(prf, section, "QuickOpen", profile);
+	sprintf(profile, "%d", option.quick_text);
+	profile_write_string(prf, section, "QuickText", profile);
 	sprintf(profile, "%d", option.safer);
 	profile_write_string(prf, section, "Safer", profile);
 	sprintf(profile, "%d", option.redisplay);
@@ -359,25 +379,6 @@ PROFILE *prf;
 	    gs_getcwd(profile, sizeof(profile));
 	    profile_write_string(prf, section, "LastDir", profile);
 	}
-#ifdef OLD
-	profile_write_string(prf, section, "Ghostscript", option.gscommand);
-#endif
-	profile_write_string(prf, section, "GhostscriptEXE", option.gsexe);
-	profile_write_string(prf, section, "GhostscriptInclude", option.gsinclude);
-	profile_write_string(prf, section, "GhostscriptOther", option.gsother);
-	switch (option.gsversion) {
-	    case IDM_GS261:
-		i = 261;
-		break;
-	    case IDM_GS333:
-		i = 333;
-		break;
-	    case IDM_GS351:
-	    default:
-		i = 351;
-	}
-	sprintf(profile, "%d", i);
-	profile_write_string(prf, section, "GhostscriptVersion", profile);
 	sprintf(profile, "%d", (option.drawmethod - IDM_DRAWMENU));
 	profile_write_string(prf, section, "DrawMethod", profile);
 	if (option.device_name[0] != '\0') {
@@ -390,3 +391,4 @@ PROFILE *prf;
 	profile_close(prf);
 }
 
+

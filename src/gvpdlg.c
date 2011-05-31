@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -132,26 +132,6 @@ int i;
 	return FALSE;
 }
 
-#ifdef NOTUSED
-/* Get page number from dialog box and store in ppage */
-BOOL
-get_page(int *ppage, BOOL multiple)
-{
-	char answer[MAXSTR];
-	if (doc == (PSDOC *)NULL)
-		return FALSE;
-	if (doc->numpages == 0) {
-		gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
-		return FALSE;
-	}
-	load_string(IDS_TOPICOPEN, szHelpTopic, sizeof(szHelpTopic));
-	sprintf(answer,"%d", psfile.pagenum);
-	if (!get_string("Select Page",answer) || atoi(answer)==0)
-		return FALSE;
-	*ppage = atoi(answer);
-	return TRUE;
-}
-#endif
 
 /* information about document dialog box */
 MRESULT EXPENTRY 
@@ -244,17 +224,22 @@ int notify_message;
 	    load_string(IDS_SELECTPAGE, buf, sizeof(buf));
 	WinSetWindowText(hwnd, buf);
 */
-	for (i=0; i<doc->numpages; i++) {
+	for (i=0; i<psfile.doc->numpages; i++) {
 	    WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST),
 	    	LM_INSERTITEM, MPFROMLONG(LIT_END), 
-		MPFROMP(doc->pages[map_page(i)].label) );
+		MPFROMP(psfile.doc->pages[map_page(i)].label) );
+	}
+	for (i=0; i<psfile.doc->numpages; i++) {
+	    if (psfile.page_list.select[i])
+	        WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST), LM_SELECTITEM, 
+		    MPFROMLONG(i), MPFROMLONG(TRUE) );
 	}
 	WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST),
-	    	LM_SELECTITEM, MPFROMLONG(page_list.current), MPFROMLONG(TRUE) );
-	if (page_list.current > 5)
+	    	LM_SELECTITEM, MPFROMLONG(psfile.page_list.current), MPFROMLONG(TRUE) );
+	if (psfile.page_list.current > 5)
 	    WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST),
-		LM_SETTOPINDEX, MPFROMLONG(page_list.current - 5), (MPARAM)0 );
-	if (!page_list.multiple) {
+		LM_SETTOPINDEX, MPFROMLONG(psfile.page_list.current - 5), (MPARAM)0 );
+	if (!psfile.page_list.multiple) {
 		WinEnableWindow(WinWindowFromID(hwnd, PAGE_ALL), FALSE);
 		WinEnableWindow(WinWindowFromID(hwnd, PAGE_ODD), FALSE);
 		WinEnableWindow(WinWindowFromID(hwnd, PAGE_EVEN), FALSE);
@@ -273,18 +258,18 @@ int notify_message;
       switch(LOUSHORT(mp1)) {
         case DID_OK:
 	    i = (int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), LM_QUERYSELECTION, (MPARAM)0, (MPARAM)0);
-	    page_list.current = (i == LIT_NONE) ? -1 : i;
-	    for (i=0; i<doc->numpages; i++) {
-	        page_list.select[i] = 0;
+	    psfile.page_list.current = (i == LIT_NONE) ? -1 : i;
+	    for (i=0; i<psfile.doc->numpages; i++) {
+	        psfile.page_list.select[i] = 0;
 	    }
-	    if (page_list.multiple) {
+	    if (psfile.page_list.multiple) {
 	        i = LIT_FIRST;
 	        while ( (i = (int)WinSendMsg(WinWindowFromID(hwnd, PAGE_LIST), LM_QUERYSELECTION, (MPARAM)i, (MPARAM)0))
 		    != LIT_NONE )
-		    page_list.select[i] = TRUE;
+		    psfile.page_list.select[i] = TRUE;
 	    }
 	    else
-		page_list.select[page_list.current] = TRUE;
+		psfile.page_list.select[psfile.page_list.current] = TRUE;
             WinDismissDlg(hwnd, DID_OK);
             return (MRESULT)TRUE;
 	case PAGE_ALL:
@@ -315,27 +300,38 @@ int notify_message;
 }
 
 /* Get page number from dialog box and store in ppage */
+/* multiple is TRUE if multiple pages may be selected */
+/* allpages is TRUE if all pages should be initially selected */
 BOOL
-get_page(int *ppage, BOOL multiple)
+get_page(int *ppage, BOOL multiple, BOOL allpages)
 {
 int flag;
-	if (doc == (PSDOC *)NULL)
+int i;
+	if (psfile.doc == (PSDOC *)NULL)
 		return FALSE;
-	if (doc->numpages == 0) {
+	if (psfile.doc->numpages == 0) {
 		gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
 		return FALSE;
 	}
-	page_list.current = *ppage - 1;
-	page_list.multiple = multiple;
-	if (page_list.select == (BOOL *)NULL)
+	psfile.page_list.current = *ppage - 1;
+	psfile.page_list.multiple = multiple;
+	if (psfile.page_list.select == (BOOL *)NULL)
 		return FALSE;
-	memset(page_list.select, 0, doc->numpages * sizeof(BOOL) );
-	if (page_list.multiple)
+
+	memset(psfile.page_list.select, 0, psfile.doc->numpages * sizeof(BOOL) );
+	if (multiple && allpages) {
+	    for (i=0; i< psfile.doc->numpages; i++)
+		psfile.page_list.select[i] = TRUE;
+	}
+	else
+		psfile.page_list.select[psfile.page_list.current] = TRUE;
+
+	if (psfile.page_list.multiple)
 	    flag = WinDlgBox(HWND_DESKTOP, hwnd_frame, PageDlgProc, 0, IDD_MULTIPAGE, NULL);
 	else
 	    flag = WinDlgBox(HWND_DESKTOP, hwnd_frame, PageDlgProc, 0, IDD_PAGE, NULL);
-	if ((flag == DID_OK) && (page_list.current >= 0))
-		*ppage = page_list.current + 1;
+	if ((flag == DID_OK) && (psfile.page_list.current >= 0))
+		*ppage = psfile.page_list.current + 1;
 	return (flag == DID_OK);
 }
 
@@ -398,7 +394,7 @@ get_bbox(void)
 QMSG q_mess;		/* queue message */
 	bbox.valid = FALSE;
 	bbox.llx = bbox.lly = bbox.urx = bbox.ury = 0;
-	if (!display.page) {
+	if ((gsdll.state != PAGE) && (gsdll.state != IDLE)) {
 	    gserror(IDS_EPSNOBBOX, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    return FALSE;
 	}
@@ -801,15 +797,16 @@ ULONG drivenum, drivemap;
 	}
 }
 
+
 MRESULT EXPENTRY 
 InstallDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 {
     switch(mess) {
 	case WM_INITDLG:
-	    WinSendMsg( WinWindowFromID(hwnd, INSTALL_EXE),
+	    WinSendMsg( WinWindowFromID(hwnd, INSTALL_DLL),
 	    	EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
-	    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_EXE),
-	    	option.gsexe );
+	    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_DLL),
+	    	option.gsdll );
 	    WinSendMsg( WinWindowFromID(hwnd, INSTALL_INCLUDE),
 	    	EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
 	    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_INCLUDE),
@@ -823,17 +820,12 @@ InstallDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
         case WM_COMMAND:
             switch(SHORT1FROMMP(mp1)) {
 		case ID_DEFAULT:
-		    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_EXE),
-			install_default(INSTALL_EXE) );
-		    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_INCLUDE),
-			install_default(INSTALL_INCLUDE) );
-		    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_OTHER),
-			install_default(INSTALL_OTHER) );
+		    install_default(hwnd);
 		    return(FALSE);
                 case DID_OK:
                     WinEnableWindow(WinWindowFromID(hwnd, DID_OK), FALSE);
-                    WinQueryWindowText(WinWindowFromID(hwnd, INSTALL_EXE),
-                    	MAXSTR, option.gsexe);
+                    WinQueryWindowText(WinWindowFromID(hwnd, INSTALL_DLL),
+                    	MAXSTR, option.gsdll);
                     WinQueryWindowText(WinWindowFromID(hwnd, INSTALL_INCLUDE),
                     	MAXSTR, option.gsinclude);
                     WinQueryWindowText(WinWindowFromID(hwnd, INSTALL_OTHER),
@@ -850,14 +842,321 @@ InstallDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
 }
 
 BOOL
-install_gsexe(void)
+install_gsdll(void)
 {
 	load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
 	if (WinDlgBox(HWND_DESKTOP, hwnd_frame, InstallDlgProc, 0, IDD_INSTALL, NULL)
 	   == DID_OK) {
+		option.configured = TRUE;
 		return TRUE;
 	}
 	return FALSE;
 }
 
+char *depthlist[] =    {"Default", "1", "4", "8", "24"};
+int index_to_depth[] = { 0,         1,   4,   8,   24};
+int depth_to_index(int depth)
+{
+int i;
+    for (i=0; i<sizeof(index_to_depth)/sizeof(int); i++)
+	if (index_to_depth[i] == depth)
+	    return i;
+    return 0;
+}
 
+char *alphalist[] =    {"1", "2", "4"};
+int index_to_alpha[] = { 1,   2,   4};
+int alpha_to_index(int alpha)
+{
+int i;
+    for (i=0; i<sizeof(index_to_alpha)/sizeof(int); i++)
+	if (index_to_alpha[i] == alpha)
+	    return i;
+    return 0;
+}
+
+char *drawlist[] =    {"Default", "GpiDrawBits", "WinDrawBitmap"};
+int index_to_draw[] = { IDM_DRAWDEF,  IDM_DRAWGPI, IDM_DRAWWIN };
+int draw_to_index(int draw)
+{
+int i;
+    for (i=0; i<sizeof(index_to_draw)/sizeof(int); i++)
+	if (index_to_draw[i] == draw)
+	    return i;
+    return 0;
+}
+
+void
+enable_alpha(HWND hwnd)
+{
+    int i;
+    i = (int)WinSendMsg( WinWindowFromID(hwnd, DSET_DEPTH),
+	    	LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), MPFROMLONG(0) );
+    if (i == LIT_NONE)
+	return;
+    i = index_to_depth[i];
+    if (!i)
+	i = display.planes * display.bitcount;
+    i = (i >= 8);
+    WinEnableWindow(WinWindowFromID(hwnd, DSET_TALPHA), i);
+    WinEnableWindow(WinWindowFromID(hwnd, DSET_GALPHA), i);
+}
+
+
+MRESULT EXPENTRY 
+DisplaySettingsDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
+{
+    char buf[128];
+    int i;
+    switch(mess) {
+	case WM_INITDLG:
+	    WinSendMsg( WinWindowFromID(hwnd, DSET_RES),
+	    	EM_SETTEXTLIMIT, MPFROM2SHORT(sizeof(buf)-1, 0), MPFROMLONG(0) );
+	    if (option.xdpi == option.ydpi)
+		sprintf(buf,"%g", option.xdpi);
+	    else 
+		sprintf(buf,"%g %g", option.xdpi, option.ydpi);
+	    SetDlgItemText(hwnd, DSET_RES, buf);
+	    WinSendMsg( WinWindowFromID(hwnd, DSET_ZOOMRES),
+	    	EM_SETTEXTLIMIT, MPFROM2SHORT(sizeof(buf)-1, 0), MPFROMLONG(0) );
+	    if (option.zoom_xdpi == option.zoom_ydpi)
+		sprintf(buf,"%g", option.zoom_xdpi);
+	    else 
+		sprintf(buf,"%g %g", option.zoom_xdpi, option.zoom_ydpi);
+	    SetDlgItemText(hwnd, DSET_ZOOMRES, buf);
+	    WinSendMsg( WinWindowFromID(hwnd, DSET_DEPTH),
+	    	LM_DELETEALL, MPFROMLONG(0), MPFROMLONG(0) );
+	    for (i=0; i<sizeof(depthlist)/sizeof(char *); i++)
+	        WinSendMsg( WinWindowFromID(hwnd, DSET_DEPTH),
+	    	    LM_INSERTITEM, MPFROMSHORT(LIT_END), MPFROMP(depthlist[i]) );
+	    WinSendMsg( WinWindowFromID(hwnd, DSET_DEPTH),
+		LM_SELECTITEM, MPFROMSHORT(depth_to_index(option.depth)), MPFROMSHORT(TRUE));
+	    WinSendMsg( WinWindowFromID(hwnd, DSET_TALPHA),
+	    	LM_DELETEALL, MPFROMLONG(0), MPFROMLONG(0) );
+	    WinSendMsg( WinWindowFromID(hwnd, DSET_TALPHA),
+	    	LM_DELETEALL, MPFROMLONG(0), MPFROMLONG(0) );
+	    for (i=0; i<sizeof(alphalist)/sizeof(char *); i++) {
+	        WinSendMsg( WinWindowFromID(hwnd, DSET_TALPHA),
+	    	    LM_INSERTITEM, MPFROMSHORT(LIT_END), MPFROMP(alphalist[i]) );
+	        WinSendMsg( WinWindowFromID(hwnd, DSET_GALPHA),
+	    	    LM_INSERTITEM, MPFROMSHORT(LIT_END), MPFROMP(alphalist[i]) );
+	    }
+	    WinSendMsg( WinWindowFromID(hwnd, DSET_TALPHA),
+		LM_SELECTITEM, MPFROMSHORT(alpha_to_index(option.alpha_text)), MPFROMSHORT(TRUE));
+	    WinSendMsg( WinWindowFromID(hwnd, DSET_GALPHA),
+		LM_SELECTITEM, MPFROMSHORT(alpha_to_index(option.alpha_graphics)), MPFROMSHORT(TRUE));
+	    enable_alpha(hwnd);
+	    WinSendMsg( WinWindowFromID(hwnd, DSET_DRAWMETHOD),
+	    	LM_DELETEALL, MPFROMLONG(0), MPFROMLONG(0) );
+	    for (i=0; i<sizeof(drawlist)/sizeof(char *); i++)
+	        WinSendMsg( WinWindowFromID(hwnd, DSET_DRAWMETHOD),
+	    	    LM_INSERTITEM, MPFROMSHORT(LIT_END), MPFROMP(drawlist[i]) );
+	    WinSendMsg( WinWindowFromID(hwnd, DSET_DRAWMETHOD),
+		LM_SELECTITEM, MPFROMSHORT(draw_to_index(option.drawmethod)), MPFROMSHORT(TRUE));
+    	    break;
+	case WM_CONTROL:
+	    if (SHORT2FROMMP(mp1) == LN_SELECT)
+		enable_alpha(hwnd);
+	    break;
+        case WM_COMMAND:
+            switch(SHORT1FROMMP(mp1)) {
+                case DID_OK:
+		    {
+		    BOOL unzoom = FALSE;
+		    BOOL resize = FALSE;
+	            BOOL restart = FALSE;
+		    float x, y;
+                    WinQueryWindowText(WinWindowFromID(hwnd, DSET_RES),
+                    	sizeof(buf)-2, buf);
+		    switch (sscanf(buf,"%f %f", &x, &y)) {
+		      case EOF:
+		      case 0:
+			break;
+		      case 1:
+			y = x;
+		      case 2:
+			if (x==0.0)
+			    x= DEFAULT_RESOLUTION;
+			if (y==0.0)
+			    y= DEFAULT_RESOLUTION;
+			if ( (x != option.xdpi) || (y != option.ydpi) ) {
+			    option.xdpi = x;
+			    option.ydpi = y;
+			    resize = TRUE; 
+			    unzoom = TRUE;
+			}
+		    }
+                    WinQueryWindowText(WinWindowFromID(hwnd, DSET_ZOOMRES),
+                    	sizeof(buf)-2, buf);
+		    switch (sscanf(buf,"%f %f", &x, &y)) {
+		      case EOF:
+		      case 0:
+			break;
+		      case 1:
+			y = x;
+		      case 2:
+			if (x==0.0)
+			    x= DEFAULT_RESOLUTION;
+			if (y==0.0)
+			    y= DEFAULT_RESOLUTION;
+			if ( (x != option.zoom_xdpi) || (y != option.zoom_ydpi) ) {
+			    option.zoom_xdpi = x;
+			    option.zoom_ydpi = y;
+			    resize = TRUE; 
+			    unzoom = TRUE;
+			}
+		    }
+		    i = (int)WinSendMsg( WinWindowFromID(hwnd, DSET_DEPTH),
+			LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), MPFROMLONG(0) );
+		    i = index_to_depth[i];
+		    if (i != option.depth) {
+			option.depth = i;
+			restart = TRUE;
+			resize = TRUE; 
+			unzoom = TRUE;
+		    }
+		    i = (int)WinSendMsg( WinWindowFromID(hwnd, DSET_TALPHA),
+			LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), MPFROMLONG(0) );
+		    i = index_to_alpha[i];
+		    if (i != option.alpha_text) {
+			option.alpha_text = i;
+			restart = TRUE;
+			resize = TRUE; 
+			unzoom = TRUE;
+		    }
+		    i = (int)WinSendMsg( WinWindowFromID(hwnd, DSET_GALPHA),
+			LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), MPFROMLONG(0) );
+		    i = index_to_alpha[i];
+		    if (i != option.alpha_graphics) {
+			option.alpha_graphics = i;
+			/* restart = TRUE; */
+			resize = TRUE; 
+			unzoom = TRUE;
+		    }
+		    i = (int)WinSendMsg( WinWindowFromID(hwnd, DSET_DRAWMETHOD),
+			LM_QUERYSELECTION, MPFROMSHORT(LIT_FIRST), MPFROMLONG(0) );
+		    i = index_to_draw[i];
+		    if (i != option.drawmethod) {
+			option.drawmethod = i;
+			/* strictly all we need to do is redraw the screen */
+			/* but we force this making GS redraw */
+			resize = TRUE; 	
+		    }
+		    if (resize) {
+			if (unzoom)
+			    gsview_unzoom();
+			if (gsdll.state != UNLOADED) {
+/* gs_resize has this check
+			    if (option.redisplay && (gsdll.state == PAGE) && (psfile.doc != (PSDOC *)NULL))
+*/
+				gs_resize();
+			    /* for those that can't be changed with a */
+			    /* postscript command so must close gs */
+			    if (restart)
+				pending.restart = TRUE;
+			}
+		    }
+		    }
+                    WinDismissDlg(hwnd, DID_OK);
+                    break;
+		case ID_HELP:
+		    load_string(IDS_TOPICDSET, szHelpTopic, sizeof(szHelpTopic));
+		    get_help();
+		    return (MRESULT)TRUE;
+            }
+            break;
+    }
+    return WinDefDlgProc(hwnd, mess, mp1, mp2);
+}
+
+
+void
+display_settings(void)
+{
+	WinDlgBox(HWND_DESKTOP, hwnd_frame, DisplaySettingsDlgProc, 0, IDD_DSET, NULL);
+}
+
+
+/* Text Window for Ghostscript Messages */
+/* uses OS/2 MLE control */
+
+
+#define TWLENGTH 16384
+#define TWSCROLL 1024
+char twbuf[TWLENGTH];
+int twend;
+
+MRESULT EXPENTRY 
+TextDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
+{
+    switch(mess) {
+	case WM_INITDLG:
+	    {IPT ipt;
+	    WinSendMsg( WinWindowFromID(hwnd, TEXTWIN_MLE),
+	    	MLM_SETIMPORTEXPORT, (MPARAM)twbuf, (MPARAM)sizeof(twbuf));
+	    ipt = 0;
+	    WinSendMsg( WinWindowFromID(hwnd, TEXTWIN_MLE),
+	    	MLM_IMPORT, (MPARAM)&ipt, (MPARAM)strlen(twbuf));
+	    WinSendMsg( WinWindowFromID(hwnd, TEXTWIN_MLE),
+	    	MLM_SETSEL, (MPARAM)strlen(twbuf), (MPARAM)strlen(twbuf));
+	    }
+    	    break;
+        case WM_COMMAND:
+            switch(SHORT1FROMMP(mp1)) {
+                case DID_OK:
+                    WinEnableWindow(WinWindowFromID(hwnd, DID_OK), FALSE);
+                    WinDismissDlg(hwnd, DID_OK);
+                    break;
+		case ID_HELP:
+		    get_help();
+		    return (MRESULT)TRUE;
+		case TEXTWIN_COPY:
+		    {MRESULT mr; 
+	    	    mr = WinSendMsg( WinWindowFromID(hwnd, TEXTWIN_MLE),
+	    		MLM_QUERYSEL, (MPARAM)MLFQS_MINMAXSEL, (MPARAM)0);
+		    if (SHORT1FROMMP(mr) == SHORT2FROMMP(mr)) /* no selection so select all */
+	    		WinSendMsg( WinWindowFromID(hwnd, TEXTWIN_MLE),
+	    		    MLM_SETSEL, 0, (MPARAM)strlen(twbuf));
+	    	    WinSendMsg( WinWindowFromID(hwnd, TEXTWIN_MLE),
+	    		MLM_COPY, (MPARAM)0, (MPARAM)0);
+		    WinSendMsg( WinWindowFromID(hwnd, TEXTWIN_MLE),
+		        MLM_SETSEL, (MPARAM)strlen(twbuf), (MPARAM)strlen(twbuf));
+		    }
+		    return (MRESULT)TRUE;
+            }
+            break;
+    }
+    return WinDefDlgProc(hwnd, mess, mp1, mp2);
+}
+
+/* Show Ghostscript messages window */
+void
+gs_showmess(void)
+{
+        load_string(IDS_TOPICMESS, szHelpTopic, sizeof(szHelpTopic));
+	WinDlgBox(HWND_DESKTOP, hwnd_frame, TextDlgProc, 0, IDD_TEXTWIN, NULL);
+}
+
+/* Add string for Ghostscript message window */
+void
+gs_addmess_count(char *str, int count)
+{
+    if (count >= TWSCROLL)
+	return;		/* too large */
+    if (count + twend >= TWLENGTH-1) {
+	/* scroll buffer */
+	twend -= TWSCROLL;
+	memmove(twbuf, twbuf+TWSCROLL, twend);
+    }
+    memmove(twbuf+twend, str, count);
+    twend += count;
+    *(twbuf+twend) = '\0';
+}
+
+void
+gs_addmess(char *str)
+{
+    gs_addmess_count(str, strlen(str));
+}
+
+

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -30,6 +30,7 @@ LPCSTR old_lpstrFilter;
 char szFilter[256];		/* filter for OFN */
 int i;
 char cReplace;
+
 	if (help)
 	    LoadString(phInstance, help, szHelpTopic, sizeof(szHelpTopic));
 	old_lpstrTitle = ofn.lpstrTitle;
@@ -178,6 +179,20 @@ DLGPROC lpProcInput;
 }
 
 
+void
+wwait(void)
+{
+MSG msg;
+DWORD start = GetTickCount();
+DWORD end = start + 70;
+	while ( (GetTickCount() <= end) && (GetTickCount() >= start) ) {
+		while (PeekMessage(&msg, (HWND)NULL, 0, 0, PM_REMOVE)) {
+			 TranslateMessage(&msg);
+			 DispatchMessage(&msg);
+		}
+	}
+}
+
 /* copyright dialog box */
 BOOL CALLBACK _export
 AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -186,19 +201,46 @@ AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         case WM_INITDIALOG:
             SetDlgItemText(hDlg, ABOUT_VERSION, GSVIEW_VERSION);
             return( TRUE);
+	  case WM_LBUTTONDOWN:
+	    {
+	    HWND hwicon = GetDlgItem(hDlg, ABOUT_ICON);
+	    HICON hicon1 = LoadIcon(phInstance, MAKEINTRESOURCE(ID_GSVIEW));
+	    HICON hicon2 = LoadIcon(phInstance, MAKEINTRESOURCE(ID_GSVIEW2));
+	    HICON hicon3 = LoadIcon(phInstance, MAKEINTRESOURCE(ID_GSVIEW3));
+	    HDC hdc = GetDC(hwicon);
+	    RECT rect; POINT pt;
+		pt.x = LOWORD(lParam); pt.y = HIWORD(lParam);
+		ClientToScreen(hDlg, &pt);
+		GetWindowRect(hwicon, &rect);
+		if (PtInRect(&rect,pt)) {
+			DrawIcon(hdc, 0, 0, hicon2);
+			wwait();
+			DrawIcon(hdc, 0, 0, hicon3);
+			wwait();
+			wwait();
+			DrawIcon(hdc, 0, 0, hicon2);
+			wwait();
+			DrawIcon(hdc, 0, 0, hicon1);
+		}
+		DestroyIcon(hicon1);
+		DestroyIcon(hicon2);
+		DestroyIcon(hicon3);
+		ReleaseDC(hwicon, hdc);
+	    }
+	    return FALSE;
 	case WM_LBUTTONDBLCLK:
 	    {DWORD dwUnit = GetDialogBaseUnits();
 	    RECT rect; POINT pt;
 	    pt.x = LOWORD(lParam); pt.y = HIWORD(lParam);
 		/* this is for 8pt dialog fonts */
 		rect.left   =   8 * LOWORD(dwUnit) / 5;
-		rect.top    = 146 * HIWORD(dwUnit) / 10;
+		rect.top    = 166 * HIWORD(dwUnit) / 10;
 		rect.right  = 240 * LOWORD(dwUnit) / 5 + rect.left;
 		rect.bottom =  10 * HIWORD(dwUnit) / 10 + rect.top;
 #ifdef NOTUSED
 		/* this is for 10pt dialog fonts */
 		rect.left   =   8 * LOWORD(dwUnit) / 4;
-		rect.top    = 146 * HIWORD(dwUnit) / 8;
+		rect.top    = 166 * HIWORD(dwUnit) / 8;
 		rect.right  = 240 * LOWORD(dwUnit) / 4 + rect.left;
 		rect.bottom =   8 * HIWORD(dwUnit) / 8 + rect.top;
 #endif
@@ -246,6 +288,7 @@ show_about()
 #endif
 }
 
+#pragma argsused
 /* information about document dialog box */
 BOOL CALLBACK _export
 InfoDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -392,6 +435,7 @@ change_sounds(void)
 #endif
 }
 
+#pragma argsused
 BOOL CALLBACK _export
 SoundDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
@@ -497,17 +541,14 @@ SoundDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			ievent = (int)SendDlgItemMessage(hDlg, SOUND_EVENT, LB_GETCURSEL, 0, 0L);
 			if (strlen(dsound[ievent].file)==0)
 				return FALSE;
-			if (!is_win31 || (strcmp(dsound[ievent].file,BEEP)==0)) {
+			if (strcmp(dsound[ievent].file,BEEP)==0) {
 				MessageBeep(-1);
 				return FALSE;
 			}
-			if (is_win31) {
-				if (lpfnSndPlaySound != (FPSPS)NULL) 
-	    			    lpfnSndPlaySound(dsound[ievent].file, SND_SYNC);
-				else
-				    MessageBeep(-1);
-				return FALSE;
-			}
+			if (lpfnSndPlaySound != (FPSPS)NULL) 
+			    lpfnSndPlaySound(dsound[ievent].file, SND_SYNC);
+			else
+			    MessageBeep(-1);
 			return FALSE;
 		    case IDOK:
 			for (ievent=0; ievent<NUMSOUND; ievent++)
@@ -526,6 +567,7 @@ SoundDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 }
 
 
+#pragma argsused
 BOOL CALLBACK _export
 PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
@@ -533,24 +575,24 @@ PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	WORD notify_message;
 	switch (wmsg) {
 	    case WM_INITDIALOG:
-/*
-		char buf[40];
-		if (page_list.multiple)
-		    LoadString(phInstance, IDS_SELECTPAGES, buf, sizeof(buf));
-		else
-		    LoadString(phInstance, IDS_SELECTPAGE, buf, sizeof(buf));
-		SetWindowText(hDlg, buf);
-*/
-		for (i=0; i<doc->numpages; i++) {
+		for (i=0; i<psfile.doc->numpages; i++) {
 		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_ADDSTRING, 0, 
-			(LPARAM)((LPSTR)doc->pages[map_page(i)].label));
+			(LPARAM)((LPSTR)psfile.doc->pages[map_page(i)].label));
 		}
-		SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETSEL, TRUE, MAKELPARAM(page_list.current,0));
-		SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETCURSEL, page_list.current, 0L);
-		if (!page_list.multiple) {
-			EnableWindow(GetDlgItem(hDlg, PAGE_ALL), FALSE);
-			EnableWindow(GetDlgItem(hDlg, PAGE_ODD), FALSE);
-			EnableWindow(GetDlgItem(hDlg, PAGE_EVEN), FALSE);
+		if (psfile.page_list.multiple) {
+		    /* multiple selection list box */
+		    for (i=0; i<psfile.doc->numpages; i++)
+			if (psfile.page_list.select[i]) 
+			    SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETSEL, TRUE, MAKELPARAM(i,0));
+		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETSEL, TRUE, MAKELPARAM(psfile.page_list.current, 0));
+		}
+		else {
+		    /* single selection list box */
+		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETSEL, TRUE, MAKELPARAM(psfile.page_list.current, 0));
+		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_SETCURSEL, psfile.page_list.current, 0L);
+		    EnableWindow(GetDlgItem(hDlg, PAGE_ALL), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, PAGE_ODD), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, PAGE_EVEN), FALSE);
 		}
 		return TRUE;
 	    case WM_COMMAND:
@@ -562,7 +604,7 @@ PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			return FALSE;
 		    case PAGE_ALL:
 			SendDlgItemMessage(hDlg, PAGE_LIST, LB_SELITEMRANGE, TRUE, 
-				MAKELPARAM(0,doc->numpages-1));
+				MAKELPARAM(0,psfile.doc->numpages-1));
 			return FALSE;
 		    case PAGE_ODD:
 			for (i=(int)SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETCOUNT, 0, 0L)-1; i>=0; i--)
@@ -575,9 +617,9 @@ PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			return FALSE;
 		    case IDOK:
 			i = (int)SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETCURSEL, 0, 0L);
-			page_list.current = (i == LB_ERR) ? -1 : i;
-			for (i=0; i<doc->numpages; i++) {
-			  page_list.select[i] =
+			psfile.page_list.current = (i == LB_ERR) ? -1 : i;
+			for (i=0; i<psfile.doc->numpages; i++) {
+			  psfile.page_list.select[i] =
 			    (int)SendDlgItemMessage(hDlg, PAGE_LIST, LB_GETSEL, i, 0L);
 			}
 			EndDialog(hDlg, TRUE);
@@ -592,26 +634,37 @@ PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 }
 
 /* Get page number from dialog box and store in ppage */
+/* multiple is TRUE if multiple pages may be selected */
+/* allpages is TRUE if all pages should be initially selected */
 BOOL
-get_page(int *ppage, BOOL multiple)
+get_page(int *ppage, BOOL multiple, BOOL allpages)
 {
 #ifndef __WIN32__
 DLGPROC lpProcPage;
 #endif
 BOOL flag;
 LPSTR dlgname;
-	if (doc == (PSDOC *)NULL)
+int i;
+	if (psfile.doc == (PSDOC *)NULL)
 		return FALSE;
-	if (doc->numpages == 0) {
+	if (psfile.doc->numpages == 0) {
 		gserror(IDS_NOPAGE, NULL, MB_ICONEXCLAMATION, SOUND_NONUMBER);
 		return FALSE;
 	}
-	page_list.current = *ppage - 1;
-	page_list.multiple = multiple;
-	if (page_list.select == (BOOL *)NULL)
+	psfile.page_list.current = *ppage - 1;
+	psfile.page_list.multiple = multiple;
+	if (psfile.page_list.select == (BOOL *)NULL)
 		return FALSE;
-	memset(page_list.select, 0, doc->numpages * sizeof(BOOL) );
-	if (page_list.multiple)
+
+	memset(psfile.page_list.select, 0, psfile.doc->numpages * sizeof(BOOL) );
+	if (multiple && allpages) {
+	    for (i=0; i< psfile.doc->numpages; i++)
+		psfile.page_list.select[i] = TRUE;
+	}
+	else
+		psfile.page_list.select[psfile.page_list.current] = TRUE;
+
+	if (psfile.page_list.multiple)
 	    dlgname = "PageMultiDlgBox";
 	else
 	    dlgname = "PageDlgBox";
@@ -622,11 +675,13 @@ LPSTR dlgname;
 	flag = DialogBoxParam( phInstance, dlgname, hwndimg, lpProcPage, (LPARAM)NULL);
 	FreeProcInstance((FARPROC)lpProcPage);
 #endif
-	if (flag && (page_list.current >= 0))
-		*ppage = page_list.current + 1;
+	if (flag && (psfile.page_list.current >= 0))
+		*ppage = psfile.page_list.current + 1;
 	return flag;
 }
 
+
+#pragma argsused
 BOOL CALLBACK _export
 BoundingBoxDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -688,7 +743,7 @@ DLGPROC lpfnBoundingBoxProc;
 #endif
 	bbox.valid = FALSE;
 	bbox.llx = bbox.lly = bbox.urx = bbox.ury = 0;
-	if (!display.page) {
+	if ((gsdll.state != PAGE) && (gsdll.state != IDLE)) {
 	    gserror(IDS_EPSNOBBOX, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    return FALSE;
 	}
@@ -708,29 +763,28 @@ DLGPROC lpfnBoundingBoxProc;
 }
 
 
+#pragma argsused
 /* input string dialog box */
 BOOL CALLBACK _export
 InstallDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message) {
         case WM_INITDIALOG:
-	    SetDlgItemText(hDlg, INSTALL_EXE, option.gsexe);
+	    SetDlgItemText(hDlg, INSTALL_DLL, option.gsdll);
 	    SetDlgItemText(hDlg, INSTALL_INCLUDE, option.gsinclude);
 	    SetDlgItemText(hDlg, INSTALL_OTHER, option.gsother);
             return( TRUE);
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
 		case ID_DEFAULT:
-		    SetDlgItemText(hDlg, INSTALL_EXE, install_default(INSTALL_EXE));
-		    SetDlgItemText(hDlg, INSTALL_INCLUDE, install_default(INSTALL_INCLUDE));
-		    SetDlgItemText(hDlg, INSTALL_OTHER, install_default(INSTALL_OTHER));
+		    install_default(hDlg);
 		    return(FALSE);
 		case ID_HELP:
 		    SendMessage(hwndimg, help_message, 0, 0L);
 		    return(FALSE);
 		case IDOK:
 		    /* do sanity check on the following strings */
-		    GetDlgItemText(hDlg, INSTALL_EXE, option.gsexe, MAXSTR);
+		    GetDlgItemText(hDlg, INSTALL_DLL, option.gsdll, MAXSTR);
 		    GetDlgItemText(hDlg, INSTALL_INCLUDE, option.gsinclude, MAXSTR);
 		    GetDlgItemText(hDlg, INSTALL_OTHER, option.gsother, MAXSTR);
                     EndDialog(hDlg, TRUE);
@@ -747,7 +801,7 @@ InstallDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 BOOL
-install_gsexe(void)
+install_gsdll(void)
 {
 BOOL flag;
 #ifndef __WIN32__
@@ -760,7 +814,335 @@ DLGPROC lpProcInstall;
 	flag = DialogBoxParam( phInstance, "InstallDlgBox", hwndimg, lpProcInstall, (LPARAM)NULL);
 	FreeProcInstance((FARPROC)lpProcInstall);
 #endif
+	if (flag)
+	    option.configured = TRUE;
 	return flag;
 }
 
 
+char *depthlist[] =    {"Default", "1", "4", "8", "24"};
+int index_to_depth[] = { 0,         1,   4,   8,   24};
+int depth_to_index(int depth)
+{
+int i;
+    for (i=0; i<sizeof(index_to_depth)/sizeof(int); i++)
+	if (index_to_depth[i] == depth)
+	    return i;
+    return 0;
+}
+
+char *alphalist[] =    {"1", "2", "4"};
+int index_to_alpha[] = { 1,   2,   4};
+int alpha_to_index(int alpha)
+{
+int i;
+    for (i=0; i<sizeof(index_to_alpha)/sizeof(int); i++)
+	if (index_to_alpha[i] == alpha)
+	    return i;
+    return 0;
+}
+
+void
+enable_alpha(HWND hDlg)
+{
+    int i;
+    i = (int)SendDlgItemMessage(hDlg, DSET_DEPTH, CB_GETCURSEL, 0, 0L);
+    if (i == CB_ERR)
+	return;
+    i = index_to_depth[i];
+    if (!i)
+	i = display.planes * display.bitcount;
+    i = (i >= 8);
+    EnableWindow(GetDlgItem(hDlg, DSET_TALPHA), i);
+    EnableWindow(GetDlgItem(hDlg, DSET_GALPHA), i);
+}
+
+
+/* dialog box for display settings */
+#pragma argsused
+BOOL CALLBACK _export
+DisplaySettingsDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
+{
+    char buf[128];
+    int i;
+    WORD notify_message;
+
+    switch (wmsg) {
+	case WM_INITDIALOG:
+	    if (option.xdpi == option.ydpi)
+		sprintf(buf,"%g", option.xdpi);
+	    else 
+		sprintf(buf,"%g %g", option.xdpi, option.ydpi);
+	    SetDlgItemText(hDlg, DSET_RES, buf);
+	    if (option.zoom_xdpi == option.zoom_ydpi)
+		sprintf(buf,"%g", option.zoom_xdpi);
+	    else 
+		sprintf(buf,"%g %g", option.zoom_xdpi, option.zoom_ydpi);
+	    SetDlgItemText(hDlg, DSET_ZOOMRES, buf);
+	    SendDlgItemMessage(hDlg, DSET_DEPTH, CB_RESETCONTENT, (WPARAM)0, (LPARAM)0);
+	    for (i=0; i<sizeof(depthlist)/sizeof(char *); i++)
+	        SendDlgItemMessage(hDlg, DSET_DEPTH, CB_ADDSTRING, 0, 
+		    (LPARAM)((LPSTR)depthlist[i]));
+    	    SendDlgItemMessage(hDlg, DSET_DEPTH, CB_SETCURSEL, depth_to_index(option.depth), (LPARAM)0);
+	    SendDlgItemMessage(hDlg, DSET_TALPHA, CB_RESETCONTENT, (WPARAM)0, (LPARAM)0);
+	    SendDlgItemMessage(hDlg, DSET_GALPHA, CB_RESETCONTENT, (WPARAM)0, (LPARAM)0);
+	    for (i=0; i<sizeof(alphalist)/sizeof(char *); i++) {
+	        SendDlgItemMessage(hDlg, DSET_TALPHA, CB_ADDSTRING, 0, 
+		    (LPARAM)((LPSTR)alphalist[i]));
+	        SendDlgItemMessage(hDlg, DSET_GALPHA, CB_ADDSTRING, 0, 
+		    (LPARAM)((LPSTR)alphalist[i]));
+	    }
+	    enable_alpha(hDlg);
+    	    SendDlgItemMessage(hDlg, DSET_TALPHA, CB_SETCURSEL, alpha_to_index(option.alpha_text), (LPARAM)0);
+    	    SendDlgItemMessage(hDlg, DSET_GALPHA, CB_SETCURSEL, alpha_to_index(option.alpha_graphics), (LPARAM)0);
+	    return TRUE;
+	case WM_COMMAND:
+	    notify_message = GetNotification(wParam,lParam);
+	    switch (LOWORD(wParam)) {
+		case ID_HELP:
+		    load_string(IDS_TOPICDSET, szHelpTopic, sizeof(szHelpTopic));
+		    SendMessage(hwndimg, help_message, 0, 0L);
+		    return FALSE;
+		case DSET_DEPTH:
+		    if (notify_message == CBN_SELCHANGE)
+			enable_alpha(hDlg);
+		    return FALSE;
+		case IDOK:
+		    {
+		    BOOL unzoom = FALSE;
+		    BOOL resize = FALSE;
+	            BOOL restart = FALSE;
+		    float x, y;
+		    GetDlgItemText(hDlg, DSET_RES, buf, sizeof(buf)-2);
+		    switch (sscanf(buf,"%f %f", &x, &y)) {
+		      case EOF:
+		      case 0:
+			break;
+		      case 1:
+			y = x;
+		      case 2:
+			if (x==0.0)
+			    x= DEFAULT_RESOLUTION;
+			if (y==0.0)
+			    y= DEFAULT_RESOLUTION;
+			if ( (x != option.xdpi) || (y != option.ydpi) ) {
+			    option.xdpi = x;
+			    option.ydpi = y;
+			    resize = TRUE; 
+			    unzoom = TRUE;
+			}
+		    }
+		    GetDlgItemText(hDlg, DSET_ZOOMRES, buf, sizeof(buf)-2);
+		    switch (sscanf(buf,"%f %f", &x, &y)) {
+		      case EOF:
+		      case 0:
+			break;
+		      case 1:
+			y = x;
+		      case 2:
+			if (x==0.0)
+			    x= DEFAULT_RESOLUTION;
+			if (y==0.0)
+			    y= DEFAULT_RESOLUTION;
+			if ( (x != option.zoom_xdpi) || (y != option.zoom_ydpi) ) {
+			    option.zoom_xdpi = x;
+			    option.zoom_ydpi = y;
+			    resize = TRUE; 
+			    unzoom = TRUE;
+			}
+		    }
+    		    i = (int)SendDlgItemMessage(hDlg, DSET_DEPTH, CB_GETCURSEL, 0, 0L);
+		    i = index_to_depth[i];
+		    if (i != option.depth) {
+			option.depth = i;
+			restart = TRUE;
+			resize = TRUE; 
+			unzoom = TRUE;
+		    }
+    		    i = (int)SendDlgItemMessage(hDlg, DSET_TALPHA, CB_GETCURSEL, 0, 0L);
+		    i = index_to_alpha[i];
+		    if (i != option.alpha_text) {
+			option.alpha_text = i;
+			restart = TRUE;
+			resize = TRUE; 
+			unzoom = TRUE;
+		    }
+    		    i = (int)SendDlgItemMessage(hDlg, DSET_GALPHA, CB_GETCURSEL, 0, 0L);
+		    i = index_to_alpha[i];
+		    if (i != option.alpha_graphics) {
+			option.alpha_graphics = i;
+			/* restart = TRUE; */
+			resize = TRUE; 
+			unzoom = TRUE;
+		    }
+		    if (resize) {
+			if (unzoom)
+			    gsview_unzoom();
+			if (gsdll.state != UNLOADED) {
+/* gs_resize has this check 
+			    if (option.redisplay && (gsdll.state == PAGE) && (psfile.doc != (PSDOC *)NULL))
+*/
+				gs_resize();
+			    /* for those that can't be changed with a */
+			    /* postscript command so must close gs */
+			    if (restart)
+				pending.restart = TRUE;
+			}
+		    }
+		    EndDialog(hDlg, TRUE);
+		    }
+		    return TRUE;
+		case IDCANCEL:
+		    EndDialog(hDlg, FALSE);
+		    return TRUE;
+	    }
+	    break;
+    }
+    return FALSE;
+}
+
+void
+display_settings()
+{
+#ifdef __WIN32__
+	DialogBoxParam( phInstance, "DisplaySettingsDlgBox", hwndimg, DisplaySettingsDlgProc, (LPARAM)NULL);
+#else
+	DLGPROC lpProcDisplaySettings;
+	lpProcDisplaySettings = (DLGPROC)MakeProcInstance((FARPROC)DisplaySettingsDlgProc, phInstance);
+	DialogBoxParam( phInstance, "DisplaySettingsDlgBox", hwndimg, lpProcDisplaySettings, (LPARAM)NULL);
+	FreeProcInstance((FARPROC)lpProcDisplaySettings);
+#endif
+}
+
+
+/* Text Window for Ghostscript Messages */
+/* uses MS-Windows multiline edit field */
+
+
+#define TWLENGTH 65536
+#define TWSCROLL 1024
+char twbuf[TWLENGTH];
+int twend;
+
+
+#pragma argsused
+BOOL CALLBACK _export
+TextDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch(message) {
+        case WM_INITDIALOG:
+            SetDlgItemText(hDlg, TEXTWIN_MLE, twbuf);
+#ifdef __WIN32__
+	    {
+	    DWORD linecount;
+	    /* EM_SETSEL, followed by EM_SCROLLCARET doesn't work */
+	    linecount = SendDlgItemMessage(hDlg, TEXTWIN_MLE, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
+	    SendDlgItemMessage(hDlg, TEXTWIN_MLE, EM_LINESCROLL, (WPARAM)0, (LPARAM)linecount-18);
+	    }
+#else
+	    SendDlgItemMessage(hDlg, TEXTWIN_MLE, EM_SETSEL, (WPARAM)0, MAKELPARAM(strlen(twbuf), strlen(twbuf)));
+#endif
+            return(TRUE);
+        case WM_COMMAND:
+            switch(LOWORD(wParam)) {
+                case IDOK:
+                    EndDialog(hDlg, TRUE);
+                    return(TRUE);
+		case ID_HELP:
+		    PostMessage(hwndimg, help_message, 0, 0L);
+		    return(FALSE);
+		case TEXTWIN_COPY:
+		    {HGLOBAL hglobal;
+		    LPSTR p;
+		    DWORD result;
+		    int start, end;
+		    result = SendDlgItemMessage(hDlg, TEXTWIN_MLE, EM_GETSEL, (WPARAM)0, (LPARAM)0);
+		    start = LOWORD(result);
+		    end   = HIWORD(result);
+		    if (start == end) {
+			start = 0;
+			end = twend;
+		    }
+		    hglobal = GlobalAlloc(GHND | GMEM_SHARE, end-start+1);
+		    if (hglobal == (HGLOBAL)NULL) {
+			MessageBeep(-1);
+			return(FALSE);
+		    }
+		    p = GlobalLock(hglobal);
+		    if (p == (LPSTR)NULL) {
+			MessageBeep(-1);
+			return(FALSE);
+		    }
+#ifdef __WIN32__
+		    strncpy(p, twbuf+start, end-start);
+#else
+		    lstrcpyn(p, twbuf+start, end-start);
+#endif
+		    GlobalUnlock(hglobal);
+		    OpenClipboard(hwndimg);
+		    EmptyClipboard();
+		    SetClipboardData(CF_TEXT, hglobal);
+		    CloseClipboard();
+		    }
+                default:
+                    return(FALSE);
+            }
+        default:
+            return(FALSE);
+    }
+}
+
+/* display dialog box with multiline edit control */
+void 
+gs_showmess(void)
+{
+    load_string(IDS_TOPICMESS, szHelpTopic, sizeof(szHelpTopic));
+#ifdef __WIN32__
+    DialogBoxParam( phInstance, "TextDlgBox", hwndimg, TextDlgProc, (LPARAM)NULL);
+#else
+    DLGPROC lpProcText;
+    lpProcText = (DLGPROC)MakeProcInstance((FARPROC)TextDlgProc, phInstance);
+    DialogBoxParam( phInstance, "TextDlgBox", hwndimg, lpProcText, (LPARAM)NULL);
+    FreeProcInstance((FARPROC)lpProcText);
+#endif
+}
+
+
+/* Add string for Ghostscript message window */
+void
+gs_addmess_count(char *str, int count)
+{
+char *p;
+int i, lfcount;
+    /* we need to add \r after each \n, so count the \n's */
+    lfcount = 0;
+    p = str;
+    for (i=0; i<count; i++) {
+	if (*p == '\n')
+	    lfcount++;
+	p++;
+    }
+    if (count + lfcount >= TWSCROLL)
+	return;		/* too large */
+    if (count + lfcount + twend >= TWLENGTH-1) {
+	/* scroll buffer */
+	twend -= TWSCROLL;
+	memmove(twbuf, twbuf+TWSCROLL, twend);
+    }
+    p = twbuf+twend;
+    for (i=0; i<count; i++) {
+	if (*str == '\n') {
+	    *p++ = '\r';
+	}
+	*p++ = *str++;
+    }
+    twend += (count + lfcount);
+    *(twbuf+twend) = '\0';
+}
+
+void
+gs_addmess(char *str)
+{
+    gs_addmess_count(str, strlen(str));
+}
+

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -52,7 +52,7 @@ paste_to_file(void)
 	ULONG count;
 	char output[MAXSTR];
 	strcpy(output, "*.bmp");
-	if (!get_filename(output, TRUE, FILTER_BMP, 0, IDS_TOPICEDIT))
+	if (!get_filename(output, TRUE, FILTER_BMP, 0, IDS_TOPICCLIP))
 		return;
 
 	bmfh.usType = 0x4d42;	/* "BM" */

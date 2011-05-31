@@ -1,0 +1,15 @@
+pstotext/bundle.c
+pstotext/bundle.h
+pstotext/main.c
+pstotext/Makefile
+pstotext/mkbundle.c
+pstotext/ocr.ps
+pstotext/pstotxt2.def
+pstotext/pstotxt2.mak
+pstotext/pstotxt3.def
+pstotext/pstotxt3.mak
+pstotext/ptotdll.c
+pstotext/ptotdll.h
+pstotext/rot270.ps
+pstotext/rot90.ps
+pstotext/pstotext.txt

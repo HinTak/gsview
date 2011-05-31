@@ -18,8 +18,8 @@
 # EPSTOOL
 
 # Edit COMPBASE and WIN32 as required
-COMPBASE = d:\bc45
-# WIN32=1 for Win32 version (not supported yet)
+COMPBASE = c:\bc45
+# WIN32=1 for Win32 version (untested)
 WIN32=0
 
 # Shouldn't need editing below here
@@ -31,7 +31,7 @@ WINEXT=32
 CC = bcc32
 CCAUX = bcc
 MODEL=32
-CFLAGS=-v -w -DMSDOS -DEPSTOOL -I$(INCDIR)
+CFLAGS=-v -w -DMSDOS -DEPSTOOL -I$(INCDIR) -I..\src
 !else
 WINEXT=
 CC = bcc
@@ -48,6 +48,9 @@ all: epstool.exe
 
 	
 epstool.exe: $(OBJS)
+!if $(WIN32)
+	$(COMPDIR)\$(CC) $(OBJS)
+!else
 	$(COMPDIR)\tlink /Tde /c /m /s /v /l @&&!
 $(LIBDIR)\c0$(MODEL) +
 $(OBJS) +
@@ -56,6 +59,7 @@ $(LIBDIR)\math$(MODEL) +
 $(LIBDIR)\emu +
 $(LIBDIR)\c$(MODEL)
 !
+!endif
 
 epstool.obj: epstool.c epstool.h ../src/ps.h ../src/gvceps.c
 
@@ -69,3 +73,4 @@ clean:
 	-del epstool.obj
 	-del ps.obj
 	-del gvceps.obj
+

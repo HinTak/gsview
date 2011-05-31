@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -39,8 +39,12 @@ BEGIN
 		MENUITEM "&Info...\tI", IDM_INFO
 		MENUITEM SEPARATOR
 		MENUITEM "&Print...\tP", IDM_PRINT
+/*
 		MENUITEM "Print To &File...\tF", IDM_PRINTTOFILE
+*/
 		MENUITEM "Print File...", IDM_SPOOL
+		MENUITEM SEPARATOR
+		MENUITEM "Show Messages\tM", IDM_GSMESS 
 		MENUITEM SEPARATOR
 		MENUITEM "E&xit", IDM_EXIT
 	END
@@ -66,22 +70,12 @@ BEGIN
 		END
 		MENUITEM SEPARATOR
 		MENUITEM "&Text Extract...", IDM_TEXTEXTRACT
-		MENUITEM "&Find...", IDM_TEXTFIND
-		MENUITEM "Find &Next", IDM_TEXTFINDNEXT
+		MENUITEM "&Find...\tCtrl+F", IDM_TEXTFIND
+		MENUITEM "Find &Next\tF3", IDM_TEXTFINDNEXT
 	END
 	POPUP "O&ptions"
 	BEGIN
 		MENUITEM "Configure &Ghostscript...", IDM_GSCOMMAND
-		POPUP "Ghostscript &Version"
-		BEGIN
-			MENUITEM "Ghostscript &3.51 or later", IDM_GS351
-#if !defined(__WIN32__) && defined(GS261)
-			MENUITEM "Ghostscript 3.12 or 3.33", IDM_GS333
-			MENUITEM "Ghostscript &2.6.1", IDM_GS261
-#else
-			MENUITEM "Ghostscript 3.33", IDM_GS333
-#endif
-		END
 		MENUITEM "Sounds...", IDM_SOUNDS
 		POPUP "&Units"
 		BEGIN
@@ -95,12 +89,14 @@ BEGIN
 		MENUITEM "Sa&fer", IDM_SAFER
 		MENUITEM "Save Last &Directory", IDM_SAVEDIR
 		MENUITEM "&Button Bar", IDM_BUTTONSHOW
-		/* MENUITEM "&Fit Window to Page", IDM_FITPAGE */
-		MENUITEM "&Quick Open", IDM_QUICK
+		MENUITEM "&Fit Window to Page", IDM_FITPAGE
+		MENUITEM "&Quick Open", IDM_QUICK_OPEN
+		MENUITEM "Quick Text", IDM_QUICK_TEXT
 		MENUITEM "Auto &Redisplay", IDM_AUTOREDISPLAY
 		MENUITEM "EPS &Clip", IDM_EPSFCLIP
 		MENUITEM "EPS &Warn", IDM_EPSFWARN
 		MENUITEM "&Ignore DSC", IDM_IGNOREDSC
+		MENUITEM "Show Bounding Bo&x", IDM_SHOWBBOX
 	END
 	POPUP "&View"
 	BEGIN
@@ -108,6 +104,9 @@ BEGIN
 		MENUITEM "Pre&vious Page\t-", IDM_PREV
 		MENUITEM "&Goto Page...\tG", IDM_GOTO
 		MENUITEM "&Redisplay\tR", IDM_REDISPLAY
+		MENUITEM SEPARATOR
+		MENUITEM "Next Page and Home\tSpace", IDM_NEXTHOME
+		MENUITEM "Previous Page and Home\tBkSp", IDM_PREVHOME
 	END
 	POPUP "&Orientation"
 	BEGIN
@@ -120,17 +119,7 @@ BEGIN
 	END
 	POPUP "&Media"
 	BEGIN
-		MENUITEM "&Resolution...", IDM_RESOLUTION
-		MENUITEM "&Zoom Resolution...", IDM_ZOOMRES
-		POPUP "&Depth"
-		BEGIN
-			MENUITEM "Default", IDM_DEPTHDEF
-			MENUITEM "1 bit/pixel (Monochrome)", IDM_DEPTH1
-			MENUITEM "4 bit/pixel (VGA)", IDM_DEPTH4
-			MENUITEM "8 bit/pixel", IDM_DEPTH8
-			MENUITEM "16 bit/pixel", IDM_DEPTH16
-			MENUITEM "24 bit/pixel", IDM_DEPTH24
-		END
+		MENUITEM "&Display Settings...", IDM_DISPLAYSETTINGS
 		MENUITEM SEPARATOR
 		MENUITEM "Letter", IDM_LETTER
 		MENUITEM "Tabloid", IDM_TABLOID
@@ -167,9 +156,13 @@ BEGIN
 	"N", IDM_NEXT
 	"n", IDM_NEXT
 	"+", IDM_NEXT
+	" ", IDM_NEXTHOME
+	VK_SPACE, IDM_NEXTHOME, VIRTKEY
 	"V", IDM_PREV
 	"v", IDM_PREV
 	"-", IDM_PREV
+	VK_BACK, IDM_PREVHOME, VIRTKEY
+	VK_BACK, IDM_PREVHOME, VIRTKEY, SHIFT
 	"G", IDM_GOTO
 	"g", IDM_GOTO
 	"I", IDM_INFO
@@ -184,11 +177,38 @@ BEGIN
 	"p", IDM_PRINT
 	"F", IDM_PRINTTOFILE
 	"f", IDM_PRINTTOFILE
+	VK_F, IDM_TEXTFIND, VIRTKEY, CONTROL
+	VK_F3, IDM_TEXTFINDNEXT, VIRTKEY
 	"E", IDM_EXTRACT
 	"e", IDM_EXTRACT
+	"M", IDM_GSMESS
+	"m", IDM_GSMESS
+	"<", IDM_MAGMINUS
+	">", IDM_MAGPLUS
+	",", IDM_MAGMINUS
+	".", IDM_MAGPLUS
 	VK_F1, IDM_HELPCONTENT, VIRTKEY
 	"^C", IDM_COPYCLIP
 	VK_INSERT, IDM_COPYCLIP, VIRTKEY, CONTROL
+END
+
+
+/* button help */
+STRINGTABLE
+BEGIN
+	IDM_OPEN, "Open..."
+	IDM_PRINT, "Print..."
+	IDM_INFO, "Info..."
+	IDM_HELPCONTENT, "Help"
+	IDM_GOTO, "Goto Page..."
+	IDM_NEXT, "Next Page"
+	IDM_PREV, "Previous Page"
+	IDM_NEXTSKIP, "Skip forwards 5 pages"
+	IDM_PREVSKIP, "Skip backwards 5 pages"
+	IDM_MAGPLUS, "Increase Resolution"
+	IDM_MAGMINUS, "Decrease Resolution"
+	IDM_TEXTFIND, "Find..."
+	IDM_TEXTFINDNEXT, "Find Next"
 END
 
 
@@ -196,14 +216,7 @@ STRINGTABLE
 BEGIN
 	/* general strings */
 	IDS_FILTER, "Default (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|Bitmap Files (*.bmp)|*.bmp|TIFF Files (*.tif)|*.tif|Windows Metafiles (*.wmf)|*.wmf|Text (*.txt|*.txt|"
-#ifdef __WIN32__
-	IDS_TITLE, "GSview for Windows 32"
-#else
-	IDS_TITLE, "GSview for Windows"
-#endif
 	IDS_HELPFILE, "gsview.hlp"
-	IDS_WRONGGS, "Incompatible Windows Ghostscript Program"
-	IDS_BUSY, "GSview is busy.\nClear busy state?"
 END
 
 STRINGTABLE
@@ -212,6 +225,7 @@ BEGIN
 	IDS_NOFILE, "No File"
 	IDS_PAGE, "Page: "
 	IDS_NOPAGE, "No page numbering available"
+	IDS_PAGESPECIAL, "Page ordering is Special.  Pages can not be reliably reordered.  See help 'Common Problems'.  Continue?"
 	IDS_LANDSCAPE, "Landscape"
 	IDS_PORTRAIT, "Portrait"
 	IDS_ASCEND, "Ascending"
@@ -226,6 +240,8 @@ BEGIN
 	IDS_PDF, "Portable Document Format"
 	IDS_IGNOREDSC, "Ignoring DSC comments"
 	IDS_PAGEINFO, "Page: \"%s\"  %d of %d"
+	IDS_CTRLD, "Ctrl-D followed by "
+	IDS_PJL, "PJL followed by "
 END
 
 STRINGTABLE
@@ -233,28 +249,23 @@ BEGIN
 	IDS_OUTPUTFILE, "Output Filename"
 	IDS_PRINTINGALL, "No DSC comments\nPrinting all pages"
 	IDS_PRINTFILE, "Print File"
-	IDS_NOSPOOL, "Print Manager is disabled\nEnable it now ?"
 	IDS_SELECTPAGE, "Select Page"
 	IDS_SELECTPAGES, "Select Pages"
-	IDS_TIMEOUT, "Timeout waiting for Ghostscript"
-	IDS_NOTIMER, "No Timer available"
 	IDS_NOTOPEN, "No document open"
 	IDS_CANNOTRUN, "Can't run "
 	IDS_TOOLONG, "Command line too long: "
 	IDS_NOMORE, "No more pages"
 	IDS_GSCOMMAND, "Ghostscript command ?"
-	IDS_RES, "Display resolution (dpi) ?"
-	IDS_ZOOMRES, "Zoom resolution (dpi) ?"
 	IDS_NOZOOM, "Must display page before zooming"
 	IDS_USERWIDTH, "Width in 1/72 inch units ?"
 	IDS_USERHEIGHT, "Height in 1/72 inch units ?"
 	IDS_BADEPS, "Problem making EPS file"
 	IDS_NOPREVIEW, "Not a DOS EPS file or\nNo binary preview"
 	IDS_NOTDFNAME, "Can't use same name as open document"
-	IDS_PIPE_EOPEN, "Pipe error.  Couldn't open temporary file.\nDirectory may be Read Only.\nTEMP environment variable may not set."
-	IDS_PIPE_EMEM, "Pipe error. Couldn't allocate memory."
+	IDS_NOTEMP, "Couldn't open temporary file.\nDirectory may be Read Only.\nTEMP environment variable may not set."
 	IDS_CANCELDONE, "%d%% done"
 	IDS_BADCLI, "Bad command line option: %s"
+	IDS_DUPOPT, "Can only specify one of /F /P /S options.  Error at: %s"
 	IDS_TEXTFIND, "Find text ?"
 	IDS_TEXTNOTFIND, "Text not found"
 END
@@ -271,7 +282,8 @@ BEGIN
 	IDS_SNDTIMEOUT,	"Timeout"
 	IDS_SNDSTART, "Start"
 	IDS_SNDEXIT, "Exit"
-	IDS_SOUNDNOMM, "Can't load MMSYSTEM.DLL\nSounds will be unavailable"
+	IDS_SNDBUSY, "Busy"
+	IDS_SOUNDNOMM, "Can't load WINMM.DLL\nSounds will be unavailable"
 	IDS_NONE, "<None>"
 	IDS_SPKR, "<Speaker Beep>"
 END
@@ -284,9 +296,11 @@ BEGIN
 	IDS_TOPICPRINT, "Print"
 	IDS_TOPICPROP, "Properties"
 	IDS_TOPICEDITPROP, "Edit Properties"
-	IDS_TOPICEDIT, "Edit"
+	IDS_TOPICCLIP, "Clipboard"
+	IDS_TOPICPREVIEW, "EPS Preview"
 	IDS_TOPICGSCMD, "Ghostscript Command"
 	IDS_TOPICSOUND, "Sounds"
+	IDS_TOPICDSET, "Display Settings"
 	IDS_TOPICMEDIA, "Media"
 	IDS_TOPICPSTOEPS, "PS to EPS"
 	IDS_TOPICGOTO, "Page Selection"
@@ -303,7 +317,7 @@ BEGIN
 	IDS_BBPROMPT1, "Click at bottom"
 	IDS_BBPROMPT2, "Click at right"
 	IDS_BBPROMPT3, "Click at top"
-	IDS_EPSONEPAGE, "An EPS file must be a single page document.\nSee help on 'PS to EPS'"
+	IDS_EPSONEPAGE, "An EPS file must be a single page document. \nSee help on 'PS to EPS'"
 	IDS_EPSQPAGES, "Is this a single page document ?"
 	IDS_EPSNOBBOX, "Could not obtain Bounding Box"
 	IDS_EPSREAD, "Have you read help `PS to EPS` ?"
@@ -319,19 +333,47 @@ BEGIN
 	IDS_WAITREAD,  "Reading..."
 	IDS_WAITWRITE,  "Writing..."
 	IDS_WAITDRAW, "Drawing..."
+	IDS_WAITDRAW_PC, "Drawing %d%%"
 	IDS_WAITGSOPEN, "Opening Ghostscript..."
 	IDS_WAITGSCLOSE,  "Closing Ghostscript..."
 	IDS_WAITPRINT,  "Printing..."
 	IDS_WAITSEARCH,  "Searching..."
+	IDS_WAITTEXT, "Extracting Text %d%%"
+END
+
+STRINGTABLE
+BEGIN
+	/* debug messages */
+	IDS_DEBUG_DFISLOCKED, "dfreopen: file is locked"
+	IDS_DEBUG_DFISOPEN, "dfreopen: file is already open"
+	IDS_DEBUG_DFISMISSING, "dfreopen: file is missing"
+	IDS_DEBUG_DFCHANGED, "dfreopen: file has changed"
+	IDS_DEBUG_DFISCLOSED, "dfclose: file is already closed"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_PROCESS_GSLOAD_FAIL, "Can't load Ghostscript DLL"
+	IDS_PROCESS_INIT_FAIL, "gs_process: gsdll.init failed"
+	IDS_PROCESS_VIEWER_FAIL, "gs_process: '(viewer.ps) run' failed"
+	IDS_PROCESS_EXECUTE_FAIL, "gs_process: gsdll.execute_cont failed"
+END
+
+STRINGTABLE
+BEGIN
+	/* PDF messages */
+	IDS_PDFNOPAGE, "Unknown number of pages in PDF file\nYou must display the file first" 
+	IDS_PDFEXTRACTALL, "Unknown number of pages in PDF file\nExtracting or printing all pages"
 END
 
 STRINGTABLE
 BEGIN
 	/* filter strings */
-	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi)|*.ps;*.eps;*.epi|PS Files (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|"
+	IDS_FILTER_PSALL, "Default (*.ps;*.eps;*.epi;*.pdf)|*.ps;*.eps;*.epi;*.pdf|PS Files (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*|"
 	IDS_FILTER_PS, "Default (*.ps)|*.ps|EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|All Files (*.*)|*.*|"
 	IDS_FILTER_EPS, "EPS Files (*.eps)|*.eps|EPI Files (*.epi)|*.epi|PS Files (*.ps)|*.ps|All Files (*.*)|*.*|"
 	IDS_FILTER_EPI, "EPI Files (*.epi)|*.epi|EPS Files (*.eps)|*.eps|PS Files (*.ps)|*.ps|All Files (*.*)|*.*|"
+	IDS_FILTER_PDF, "PDF Files (*.pdf)|*.pdf|";
 	IDS_FILTER_ALL, "All Files (*.*)|*.*|"
 	IDS_FILTER_BMP, "Bitmap Files (*.bmp)|*.bmp|All Files (*.*)|*.*|"
 	IDS_FILTER_TIFF, "TIFF Files (*.tif)|*.tif|All Files (*.*)|*.*|"
@@ -339,36 +381,36 @@ BEGIN
 	IDS_FILTER_TXT, "Text Files (*.txt)|*.txt|All Files (*.*)|*.*|"
 END
 
-AboutDlgBox DIALOG 20, 32, 256, 164
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+AboutDlgBox DIALOG 16, 16, 256, 180
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About GSview for Windows"
-Font 8, "Helv"
-BEGIN
-	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 218, 5, 32, 14
-#ifdef __WIN32__
-	LTEXT "GSVIEW32.EXE", -1, 32, 8, 64, 8
-#else
-	LTEXT "GSVIEW.EXE", -1, 32, 8, 64, 8
-#endif
-	RTEXT "Version:", -1, 86, 8, 32, 8
-	LTEXT "", ABOUT_VERSION, 120, 8, 96, 8
-	LTEXT "A Ghostscript graphical interface", -1, 32, 16, 128, 8
-	LTEXT "Copyright (C) 1993-1996, Russell Lang.  All rights reserved.", -1, 8, 28, 240, 8
-	LTEXT "Portions Copyright (C) 1994, Timothy O. Theisen.  All rights reserved.", -1, 8, 36, 240, 8
-	LTEXT "This program is distributed with NO WARRANTY OF ANY KIND.", -1, 7, 48, 240, 8
-	LTEXT "No author or distributor accepts any responsibility for the", -1, 7, 56, 240, 8
-	LTEXT "consequences of using it, or for whether it serves any particular", -1, 7, 64, 240, 8
-	LTEXT "purpose or works at all, unless he or she says so in writing.  Refer", -1, 7, 72, 240, 8
-	LTEXT "to the GSview Free Public Licence (the 'Licence') for full details.", -1, 7, 84, 240, 8
-	LTEXT "Every copy of GSview must include a copy of the Licence, normally", -1, 7, 92, 240, 8
-	LTEXT "in a plain ASCII text file named LICENCE.  The Licence grants you", -1, 7, 100, 240, 8
-	LTEXT "the right to copy, modify and redistribute GSview, but only under", -1, 7, 108, 240, 8
-	LTEXT "certain conditions described in the Licence.  Among other things,", -1, 7, 116, 240, 8
-	LTEXT "the Licence requires that the copyright notice and this notice be", -1, 7, 124, 240, 8
-	LTEXT "preserved on all copies.", -1, 7, 132, 240, 8
-	LTEXT "Author: Russell Lang  (rjl@aladdin.com)", -1, 8, 146, 240, 8
-	ICON ID_GSVIEW, ABOUT_ICON, 8, 8, 0, 0
-END
+FONT 8, "Helv"
+{
+ DEFPUSHBUTTON "&Ok", IDOK, 218, 5, 32, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ LTEXT "GSVIEW32.EXE", -1, 32, 8, 64, 8
+ RTEXT "Version:", -1, 86, 8, 32, 8
+ LTEXT GSVIEW_VERSION, -1, 120, 8, 38, 8
+ LTEXT GSVIEW_DATE, -1, 160, 8, 52, 8
+ LTEXT "A Ghostscript graphical interface", -1, 32, 16, 128, 8
+ LTEXT GSVIEW_COPYRIGHT1, -1, 8, 28, 142, 8
+ LTEXT GSVIEW_COPYRIGHT2, -1, 158, 28, 78, 8
+ LTEXT "Portions Copyright (C) 1994, Timothy O. Theisen.  All rights reserved.", -1, 8, 36, 240, 8
+ LTEXT "This program is distributed with NO WARRANTY OF ANY KIND.", -1, 7, 48, 240, 8
+ LTEXT "No author or distributor accepts any responsibility for the", -1, 7, 56, 240, 8
+ LTEXT "consequences of using it, or for whether it serves any particular", -1, 7, 64, 240, 8
+ LTEXT "purpose or works at all, unless he or she says so in writing.  Refer", -1, 7, 72, 240, 8
+ LTEXT "to the GSview Free Public Licence (the 'Licence') for full details.", -1, 7, 80, 240, 8
+ LTEXT "Every copy of GSview must include a copy of the Licence, normally", -1, 7, 92, 240, 8
+ LTEXT "in a plain ASCII text file named LICENCE.  The Licence grants you", -1, 7, 100, 240, 8
+ LTEXT "the right to copy, modify and redistribute GSview, but only under", -1, 7, 108, 240, 8
+ LTEXT "certain conditions described in the Licence.  Among other things,", -1, 7, 116, 240, 8
+ LTEXT "the Licence requires that the copyright notice and this notice be", -1, 7, 124, 240, 8
+ LTEXT "preserved on all copies.", -1, 7, 132, 240, 8
+ LTEXT "pstotxt3.dll is Copyright (C) 1995-1996 Digital Equipment Corporation", -1, 8, 144, 240, 8
+ LTEXT "and has a different licence.  See pstotext.txt for details.", -1, 8, 152, 240, 8
+ LTEXT "Author: Russell Lang  (rjl@aladdin.com)", -1, 8, 164, 240, 8
+ ICON ID_GSVIEW, ABOUT_ICON, 8, 8, 18, 20
+}
 
 InputDlgBox DIALOG 48, 32, 192, 56
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
@@ -382,14 +424,14 @@ BEGIN
 	CONTROL "&Help", ID_HELP, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 143, 36, 32, 14
 END
 
-InfoDlgBox DIALOG 20, 32, 175, 107
+InfoDlgBox DIALOG 20, 32, 240, 107
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
 CAPTION "Info"
 Font 8, "Helv"
 BEGIN
 	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 136, 89, 32, 14
 	RTEXT "File:", -1, 24, 8, 32, 8
-	LTEXT "", INFO_FILE, 60, 8, 110, 8
+	LTEXT "", INFO_FILE, 60, 8, 172, 8
 	RTEXT "Type:", -1, 24, 16, 32, 8
 	LTEXT "", INFO_TYPE, 60, 16, 110, 8
 	RTEXT "Title:", -1, 24, 24, 32, 8
@@ -449,6 +491,7 @@ BEGIN
 	CONTROL "", SPOOL_PORT, "LISTBOX", LBS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 8, 140, 50
 END
 
+
 CancelDlgBox DIALOG 32, 40, 120, 48
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | DS_3DLOOK
 Font 8, "Helv"
@@ -458,60 +501,45 @@ BEGIN
 	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 44, 30, 32, 14
 END
 
-PageDlgBox DIALOG 64, 32, 80, 142
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+
+PageDlgBox DIALOG 64, 32, 100, 142
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Select Page"
-Font 8, "Helv"
-BEGIN
-	CONTROL "", PAGE_LIST, "LISTBOX", LBS_NOTIFY | LBS_MULTIPLESEL | LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 8, 28, 128
-	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 8, 32, 14
-	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 32, 32, 14
-	CONTROL "&All", PAGE_ALL, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 64, 32, 14
-	CONTROL "O&dd", PAGE_ODD, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 88, 32, 14
-	CONTROL "&Even", PAGE_EVEN, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 112, 32, 14
-END
+FONT 8, "Helv"
+{
+ LISTBOX PAGE_LIST, 8, 8, 40, 128, LBS_NOTIFY | LBS_MULTIPLESEL | LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 60, 8, 32, 14, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL, 60, 32, 32, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "&All", PAGE_ALL, 60, 64, 32, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "O&dd", PAGE_ODD, 60, 88, 32, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "&Even", PAGE_EVEN, 60, 112, 32, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+}
 
-PageMultiDlgBox DIALOG 64, 32, 80, 142
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+PageMultiDlgBox DIALOG 64, 32, 100, 142
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Select Pages"
-Font 8, "Helv"
-BEGIN
-	CONTROL "", PAGE_LIST, "LISTBOX", LBS_NOTIFY | LBS_MULTIPLESEL | LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 8, 28, 128
-	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 8, 32, 14
-	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 32, 32, 14
-	CONTROL "&All", PAGE_ALL, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 64, 32, 14
-	CONTROL "O&dd", PAGE_ODD, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 88, 32, 14
-	CONTROL "&Even", PAGE_EVEN, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 44, 112, 32, 14
-END
+FONT 8, "Helv"
+{
+ LISTBOX PAGE_LIST, 8, 8, 40, 128, LBS_NOTIFY | LBS_MULTIPLESEL | LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ DEFPUSHBUTTON "&Ok", IDOK, 60, 8, 32, 14, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "&Cancel", IDCANCEL, 60, 32, 32, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "&All", PAGE_ALL, 60, 64, 32, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "O&dd", PAGE_ODD, 60, 88, 32, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "&Even", PAGE_EVEN, 60, 112, 32, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+}
 
-#ifdef OLD
-DeviceDlgBox DIALOG 16, 40, 212, 94
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
-CAPTION "Select Device"
-Font 8, "Helv"
-BEGIN
-	CONTROL "&Ok", IDOK, "button", BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 12, 40, 14
-	CONTROL "&Cancel", IDCANCEL, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 32, 40, 14
-	CONTROL "&Properties", DEVICE_PROP, "button", BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD, 164, 52, 40, 14
-	CONTROL "&Help", ID_HELP, "button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 164, 72, 40, 14
-	LTEXT "Device:", -1, 8, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
-	CONTROL "", DEVICE_NAME, "COMBOBOX", CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 8, 16, 70, 70
-	LTEXT "Resolution:", DEVICE_RESTEXT, 90, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
-	CONTROL "", DEVICE_RES, "COMBOBOX", CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP, 90, 16, 64, 70
-END
-#else
-DeviceDlgBox DIALOG 16, 40, 270, 161
+DeviceDlgBox DIALOG 16, 40, 274, 161
 STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Printer Setup"
 FONT 8, "Helv"
-BEGIN
- DEFPUSHBUTTON "&Ok", IDOK, 216, 8, 44, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
- PUSHBUTTON "&Cancel", IDCANCEL, 216, 28, 44, 14, BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
- PUSHBUTTON "&Properties", DEVICE_PROP, 216, 48, 44, 14, BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
- PUSHBUTTON "&Help", ID_HELP, 216, 68, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
- PUSHBUTTON "&All Pages", PAGE_ALL, 216, 99, 44, 14, WS_GROUP | WS_TABSTOP
- PUSHBUTTON "O&dd Pages", PAGE_ODD, 216, 119, 44, 14, WS_GROUP | WS_TABSTOP
- PUSHBUTTON "&Even Pages", PAGE_EVEN, 216, 139, 44, 14, WS_GROUP | WS_TABSTOP
+{
+ DEFPUSHBUTTON "&Ok", IDOK, 220, 8, 44, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ PUSHBUTTON "&Cancel", IDCANCEL, 220, 28, 44, 14, BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ PUSHBUTTON "&Properties", DEVICE_PROP, 220, 48, 44, 14, BS_PUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
+ PUSHBUTTON "&Help", ID_HELP, 220, 68, 44, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "&All Pages", PAGE_ALL, 220, 99, 44, 14, WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "O&dd Pages", PAGE_ODD, 220, 119, 44, 14, WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "&Even Pages", PAGE_EVEN, 220, 139, 44, 14, WS_GROUP | WS_TABSTOP
  LTEXT "Device:", -1, 8, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
  COMBOBOX DEVICE_NAME, 8, 16, 70, 70, CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
  LTEXT "Resolution:", DEVICE_RESTEXT, 90, 4, 48, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
@@ -519,15 +547,13 @@ BEGIN
  LTEXT "Queue:", SPOOL_PORTTEXT, 8, 102, 48, 8
  LISTBOX SPOOL_PORT, 8, 114, 145, 40, LBS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
  LTEXT "Pages:", PAGE_LISTTEXT, 168, 4, 48, 8
- LISTBOX PAGE_LIST, 168, 17, 34, 139, LBS_NOTIFY | LBS_MULTIPLESEL | LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
+ LISTBOX PAGE_LIST, 168, 16, 40, 139, LBS_NOTIFY | LBS_MULTIPLESEL | LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_TABSTOP
  CHECKBOX "Print to File", SPOOL_TOFILE, 91, 99, 60, 8
-END
-#endif
-
+}
 
 PropDlgBox DIALOG 16, 40, 204, 118
 STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Edit Properties"
+CAPTION "Properties"
 FONT 8, "Helv"
 BEGIN
  DEFPUSHBUTTON "&Ok", IDOK, 164, 12, 32, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP | WS_CHILD
@@ -565,6 +591,7 @@ FONT 8, "Helv"
  PUSHBUTTON "Delete", EDITPROP_DEL, 151, 14, 32, 14
 }
 
+
 BoundingBoxDlgBox DIALOG 12, 24, 120, 15
 STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_EX_TOPMOST | DS_3DLOOK
 CAPTION "BoundingBox"
@@ -578,8 +605,8 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
 CAPTION "Configure Ghostscript"
 FONT 8, "Helv"
 BEGIN
- LTEXT "Ghostscript EXE:", -1, 6, 10, 180, 10
- EDITTEXT INSTALL_EXE, 6, 20, 180, 12, ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD
+ LTEXT "Ghostscript DLL:", -1, 6, 10, 180, 10
+ EDITTEXT INSTALL_DLL, 6, 20, 180, 12, ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD
  LTEXT "Ghostscript Include Path:", -1, 6, 40, 180, 10
  EDITTEXT INSTALL_INCLUDE, 6, 50, 180, 12, ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP | WS_CHILD
  LTEXT "Ghostscript Options:", -1, 8, 70, 180, 10
@@ -590,3 +617,42 @@ BEGIN
  PUSHBUTTON "&Help", ID_HELP, 200, 76, 32, 14, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
 END
 
+
+TextDlgBox DIALOG 24, 15, 308, 194
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION "GSview for Windows - Ghostscript Messages"
+Font 8, "Helv"
+BEGIN
+ DEFPUSHBUTTON "OK", IDOK, 8, 174, 50, 14
+ PUSHBUTTON "Copy", TEXTWIN_COPY, 126, 174, 50, 14
+ PUSHBUTTON "Help", ID_HELP, 186, 174, 50, 14
+ EDITTEXT TEXTWIN_MLE, 8, 8, 290, 160, ES_MULTILINE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+END
+
+
+DisplaySettingsDlgBox DIALOG 24, 15, 207, 111
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION "Display Settings"
+FONT 8, "MS Sans Serif"
+{
+ DEFPUSHBUTTON "OK", IDOK, 8, 90, 50, 14
+ PUSHBUTTON "Cancel", IDCANCEL, 76, 90, 50, 14
+ PUSHBUTTON "Help", ID_HELP, 144, 90, 50, 14
+ LTEXT "Resolution", -1, 8, 8, 60, 8
+ LTEXT "Zoom Resolution", -1, 8, 24, 60, 8
+ LTEXT "Depth", -1, 8, 40, 60, 8
+ LTEXT "Text Alpha", -1, 8, 56, 60, 8
+ LTEXT "Graphics Alpha", -1, 8, 72, 60, 8
+ EDITTEXT DSET_RES, 76, 6, 48, 12, WS_BORDER | WS_TABSTOP
+ EDITTEXT DSET_ZOOMRES, 76, 22, 48, 12, WS_BORDER | WS_TABSTOP
+ COMBOBOX DSET_DEPTH, 76, 38, 49, 60, CBS_DROPDOWNLIST | WS_TABSTOP
+ COMBOBOX DSET_TALPHA, 76, 54, 49, 40, CBS_DROPDOWNLIST | WS_TABSTOP
+ COMBOBOX DSET_GALPHA, 76, 70, 49, 40, CBS_DROPDOWNLIST | WS_TABSTOP
+ LTEXT "dpi", -1, 132, 8, 60, 8
+ LTEXT "dpi", -1, 132, 23, 60, 8
+ LTEXT "bits/pixel", -1, 132, 40, 60, 8
+ LTEXT "bits", -1, 132, 56, 60, 8
+ LTEXT "bits", -1, 132, 72, 60, 8
+}
+
+

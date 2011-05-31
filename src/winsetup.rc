@@ -18,56 +18,80 @@
 /* Resources for MS-Windows installation program */
 
 #include "windows.h"
+#include "gvcver.h"
 #include "setup.h"
 
 #ifndef DS_3DLOOK
 #define DS_3DLOOK 0x0004L	/* for Windows 95 look */
 #endif
 
+ID_GSVIEW ICON "binary/gvwin1.ico"
 
-IDD_INTRO DIALOG PRELOAD FIXED 18, 18, 160, 92
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+ID_GHOSTSCRIPT ICON "binary/gstext.ico"
+
+
+IDD_INTRO DIALOG PRELOAD FIXED DISCARDABLE 18, 18, 168, 92
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "GSview Install - Introduction"
-Font 8, "Helv"
-BEGIN
-	PUSHBUTTON "OK", IDOK, 8, 70, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-	PUSHBUTTON "Cancel", IDCANCEL, 56, 70, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-	LTEXT "Installation program for:\r    GSview 1.4\r    Aladdin Ghostscript 3.53", IDD_INTRO_T1, 8, 7, 123, 24, WS_CHILD | WS_VISIBLE | WS_GROUP
-	LTEXT "Before continuing installation, make sure you have the 4 disks listed in README.GV.", IDD_INTRO_T2, 9, 43, 144, 16, WS_CHILD | WS_VISIBLE | WS_GROUP
-END
+FONT 8, "Helv"
+{
+ PUSHBUTTON "OK", IDOK, 8, 70, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "Cancel", IDCANCEL, 56, 70, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ LTEXT "Installation program for:", IDD_INTRO_T1, 8, 6, 152, 8
+ LTEXT "Before continuing installation, make sure you have the 3 disks listed in README.TXT.", IDD_INTRO_T2, 8, 42, 152, 16
+ LTEXT GSVIEW_PRODUCT, -1, 16, 16, 32, 8
+ LTEXT GS_PRODUCT, -1, 16, 26, 72, 8
+ LTEXT GSVIEW_VERSION, -1, 48, 16, 60, 8
+ LTEXT GS_VERSION, -1, 88, 26, 60, 8
+}
 
-IDD_COPYRIGHT DIALOG PRELOAD FIXED 18, 18, 202, 134
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+IDD_COPYRIGHT DIALOG PRELOAD FIXED DISCARDABLE 18, 18, 228, 134
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "GSview Install - Copyright"
-Font 8, "Helv"
-BEGIN
-	PUSHBUTTON "OK", IDOK, 8, 112, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-	PUSHBUTTON "Cancel", IDCANCEL, 56, 112, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-	LTEXT "GSview and Aladdin Ghostscript are separate programs.  They are owned by separate entities.", IDD_COPYRIGHT_T1, 6, 6, 184, 18, WS_CHILD | WS_VISIBLE | WS_GROUP
-	LTEXT "GSview:\r    Copyright (C) 1993-1995 Russell Lang.\r    All rights reserved.\r    See the file LICENCE for more details.", IDD_COPYRIGHT_T2, 8, 30, 184, 32, WS_CHILD | WS_VISIBLE | WS_GROUP
-	LTEXT "Aladdin Ghostscript:\r    Copyright (C) 1994, 1995 Aladdin Enterprises,\r    Menlo Park, California, U.S.A.  All rights reserved.\r    See the file PUBLIC for more details.", IDD_COPYRIGHT_T3, 8, 70, 184, 32, WS_CHILD | WS_VISIBLE | WS_GROUP
-END
+FONT 8, "Helv"
+{
+ PUSHBUTTON "OK", IDOK, 8, 112, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "Cancel", IDCANCEL, 56, 112, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ LTEXT "GSview and Aladdin Ghostscript are separate programs.  They are owned by separate entities.", IDD_COPYRIGHT_T1, 6, 6, 184, 18, WS_CHILD | WS_VISIBLE | WS_GROUP
+ ICON ID_GSVIEW, ID_GSVIEW, 8, 32, 18, 20
+ LTEXT "GSview:", IDD_COPYRIGHT_T2, 40, 30, 176, 8
+ LTEXT GSVIEW_COPYRIGHT1, -1, 48, 40, 160, 8
+ LTEXT GSVIEW_COPYRIGHT2, -1, 48, 48, 160, 8
+ LTEXT GSVIEW_COPYRIGHT3, -1, 48, 56, 160, 8
+ ICON ID_GHOSTSCRIPT, ID_GHOSTSCRIPT, 8, 72, 18, 20
+ LTEXT "Aladdin Ghostscript:", IDD_COPYRIGHT_T3, 40, 70, 176, 8
+ LTEXT GS_COPYRIGHT1, -1, 48, 80, 160, 8
+ LTEXT GS_COPYRIGHT2, -1, 48, 88, 174, 8
+ LTEXT GS_COPYRIGHT3, -1, 48, 96, 160, 8
+}
 
-IDD_DIR DIALOG PRELOAD FIXED 18, 18, 180, 100
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+IDD_DIR DIALOG PRELOAD FIXED DISCARDABLE 18, 20, 219, 122
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "GSview Install - Directory"
-Font 8, "Helv"
-BEGIN
-	LTEXT "The base directory for GSview and Ghostscript is shown below.\rWithin the base directory, GSview will be installed into the subdirectory 'gsview' and Ghostscript will be installed into the subdirectory 'gs3.53'.\rChange the base directory if you wish.", IDD_DIR_TEXT, 6, 6, 168, 48, WS_CHILD | WS_VISIBLE | WS_GROUP
-	PUSHBUTTON "OK", IDOK, 9, 80, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-	PUSHBUTTON "Cancel", IDCANCEL, 57, 80, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-	EDITTEXT ID_ANSWER, 8, 60, 164, 12, ES_LEFT | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
-END
+FONT 8, "Helv"
+{
+ PUSHBUTTON "OK", IDOK, 7, 102, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ PUSHBUTTON "Cancel", IDCANCEL, 55, 102, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+ LTEXT "The base directory for GSview and Ghostscript is:", IDD_DIR_TEXT, 6, 6, 206, 8
+ EDITTEXT ID_ANSWER, 6, 18, 197, 12, ES_LEFT | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP
+ LTEXT "Within the base directory, GSview will be installed into the subdirectory:", -1, 6, 34, 206, 16
+ LTEXT GSVIEW_BASEDIR, -1, 16, 53, 60, 8
+ LTEXT "Ghostscript will be installed into the subdirectory:", IDC_LTEXT2, 6, 65, 206, 8
+ LTEXT GS_BASEDIR, -1, 16, 75, 60, 8
+ LTEXT "Change the base directory if you wish.", IDC_LTEXT1, 6, 89, 206, 8
+}
 
-
-IDD_UNZIP DIALOG PRELOAD FIXED 18, 18, 86, 44
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | DS_3DLOOK | WS_EX_TOPMOST
-CAPTION "GSview Install"
-Font 8, "Helv"
-BEGIN
-	LTEXT "Unzipping files", IDD_UNZIP_TEXT, 8, 8, 69, 8, WS_CHILD | WS_VISIBLE | WS_GROUP
-	PUSHBUTTON "Cancel", IDCANCEL, 8, 24, 32, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-END
+IDD_MKDIR DIALOG 7, 18, 149, 71
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "GSview Install - Make Directory"
+FONT 8, "Helv"
+{
+ DEFPUSHBUTTON "Yes", IDYES, 12, 52, 32, 14
+ PUSHBUTTON "Cancel", IDCANCEL, 72, 52, 32, 14
+ LTEXT "The directory", -1, 8, 8, 97, 8
+ LTEXT "XXXX", IDD_MKDIR_TEXT, 20, 20, 60, 8
+ LTEXT "does not exist.  Create it?", -1, 8, 32, 133, 8
+}
 
 IDD_FILE DIALOG PRELOAD FIXED 18, 18, 179, 60
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
@@ -91,15 +115,27 @@ BEGIN
 END
 
 
-IDD_ATM DIALOG PRELOAD FIXED 18, 18, 175, 101
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+IDD_ATM DIALOG PRELOAD FIXED DISCARDABLE 18, 18, 192, 101
+STYLE DS_MODALFRAME | 0x4L | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "GSview Install - Type 1 fonts"
 FONT 8, "Helv"
-BEGIN
+{
  DEFPUSHBUTTON "Yes", IDOK, 9, 80, 32, 14
  PUSHBUTTON "No", IDCANCEL, 57, 80, 32, 14
- LTEXT "Your system appears to have some Type 1 fonts (as part of Adobe Type Manager) of better quality than those distributed with Ghostscript.", -1, 6, 6, 152, 24
- LTEXT "Before using these fonts with Ghostscript, you MUST check if your font licence allows you to do so.", -1, 6, 34, 164, 16
- LTEXT "Do you want to configure Ghostscript to use these Type 1 fonts?", -1, 6, 54, 164, 16
-END
+ LTEXT "Your system appears to have some Type 1 fonts (as part of Adobe Type Manager) of better quality than those distributed with Ghostscript.", -1, 6, 6, 180, 24
+ LTEXT "Before using these fonts with Ghostscript, you MUST check if your font licence allows you to do so.", -1, 6, 34, 180, 16
+ LTEXT "Do you want to configure Ghostscript to use these Type 1 fonts?", -1, 6, 54, 180, 16
+}
 
+IDD_TEXTWIN DIALOG 6, 15, 308, 194
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_3DLOOK
+CAPTION "GSview Install - Unzipping"
+Font 8, "Helv"
+{
+ DEFPUSHBUTTON "Cancel", IDCANCEL, 8, 174, 50, 14
+ PUSHBUTTON "Copy", TEXTWIN_COPY, 126, 174, 50, 14
+ EDITTEXT TEXTWIN_MLE, 8, 8, 290, 160, ES_MULTILINE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+}
+
+
+

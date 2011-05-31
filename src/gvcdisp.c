@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -60,11 +60,11 @@ transform_cursorpos(float *x, float *y)
 	    *y = *y * 72/option.zoom_ydpi + display.zoom_yoffset;
 	  }
 	  else {
-	    *x = *x * 72.0/option.xdpi 
-		+ (display.epsf_clipped ? doc->boundingbox[LLX] : 0);
-	    *y = *y * 72.0/option.ydpi
-		+ (display.epsf_clipped ? doc->boundingbox[LLY] : 0);
+	    *x = *x * 72.0/option.xdpi;
+	    *y = *y * 72.0/option.ydpi;
 	    transform_point(x,y);
+	    *x = *x + (display.epsf_clipped ? psfile.doc->boundingbox[LLX] : 0);
+	    *y = *y + (display.epsf_clipped ? psfile.doc->boundingbox[LLY] : 0);
 	  }
 }
 
@@ -90,11 +90,18 @@ int width, height;
 	    else if (option.orientation == IDM_SEASCAPE)
 		real_orientation = IDM_LANDSCAPE;
 	}
+
+	real_orientation -= IDM_PORTRAIT;
+	if (psfile.ispdf)
+	    real_orientation += (pdf_orientation() - IDM_PORTRAIT);
+        real_orientation &= 3;  /* modulus 4 */
+	real_orientation += IDM_PORTRAIT;
+
 	switch (real_orientation) {
 	    case IDM_PORTRAIT:
 		break;
 	    case IDM_LANDSCAPE:
-	    	*x = height - oldy;
+	    	*x = width - oldy;	/* display.width = bitmap.height */
 	    	*y = oldx;
 	    	break;
 	    case IDM_UPSIDEDOWN:
@@ -103,7 +110,7 @@ int width, height;
 		break;
 	    case IDM_SEASCAPE:
 	    	*x = oldy;
-	    	*y = width - oldx;
+	    	*y = height - oldx;
 	    	break;
 	}
 	return;
@@ -134,7 +141,7 @@ int width, height;
 	    case IDM_PORTRAIT:
 		break;
 	    case IDM_LANDSCAPE:
-	    	*y = height - oldx;
+	    	*y = width - oldx;
 	    	*x = oldy;
 	    	break;
 	    case IDM_UPSIDEDOWN:
@@ -143,7 +150,7 @@ int width, height;
 		break;
 	    case IDM_SEASCAPE:
 	    	*y = oldx;
-	    	*x = width - oldy;
+	    	*x = height - oldy;
 	    	break;
 	}
 	return;
@@ -161,61 +168,30 @@ int i;
 	return -1;
 }
 
-/* calculate bitmap size for gs */
-void
-gs_size(void)
-{
-int i = get_paper_size_index();
-	if ( (option.xdpi == 0.0) || (option.ydpi == 0.0) )
-		option.xdpi = option.ydpi = DEFAULT_RESOLUTION;
-	display.epsf_clipped = FALSE;
-	switch (option.orientation) {
-	    case IDM_LANDSCAPE:
-	    case IDM_SEASCAPE:
-		if (i < 0) {
-		    display.width = option.user_height;
-		    display.height = option.user_width;
-		}
-		else {
-		    display.width = papersizes[i].height;
-		    display.height = papersizes[i].width;
-		}
-		break;
-	    default:
-		if ((doc != (PSDOC *)NULL) && doc->epsf
-		    && option.epsf_clip) {
-		    display.epsf_clipped = TRUE;
-		    display.width = doc->boundingbox[URX] - doc->boundingbox[LLX];
-		    display.height = doc->boundingbox[URY] - doc->boundingbox[LLY];
-		}
-		else if (i < 0) {
-		    display.width = option.user_width;
-		    display.height = option.user_height;
-		}
-		else {
-		    display.width = papersizes[i].width;
-		    display.height = papersizes[i].height;
-		}
-	}
-	display.width  = (unsigned int)(display.width  / 72.0 * option.xdpi);
-	display.height = (unsigned int)(display.height / 72.0 * option.ydpi);
-}
 
 /* change the size of the gs image if open */
 void
 gs_resize(void)
 {
-	gs_size();
-	if (!gsprog.valid)
-	    return;
-	if ( (psfile.file == (FILE *)NULL) && (doc != (PSDOC *)NULL) )
-	    dfreopen();
+	pending.resize = TRUE;
 
-	if (option.redisplay && display.page && (doc != (PSDOC *)NULL))
-	    display.do_display = TRUE;
+	if ( gsdll.hmodule &&  (psfile.doc==(PSDOC *)NULL) && (gsdll.state != IDLE) )
+	    /* don't know where we are so close and reopen */
+	    pending.abort = TRUE;
 
-	gsview_endfile();
-	display.do_resize = TRUE;
+	if (option.redisplay && (gsdll.state == PAGE)) {
+	    if (psfile.doc != (PSDOC *)NULL)
+	        pending.now = TRUE;
+	    else {
+		pending.abort = TRUE;	/* must restart from page 1 */
+		pending.now = TRUE;
+	    }
+	}
+	if (option.redisplay && (gsdll.state == IDLE)
+	   && (psfile.doc != (PSDOC *)NULL)) {
+	     /* zero page EPS file */
+	    pending.now = TRUE;
+	}
 }
 
 void
@@ -232,10 +208,8 @@ int xtemp, ytemp;
 	    option.xdpi = xtemp;
 	    option.ydpi = ytemp;
 	}
-	dfreopen();
-	gs_resize();
 	zoom = FALSE;
-	dfclose();
+	gs_resize();
 }
 
 void
@@ -257,8 +231,8 @@ gsview_orientation(int new_orientation)
 	    option.orientation = new_orientation;
 	    check_menu_item(IDM_ORIENTMENU, option.orientation, TRUE);
 	}
-	gs_resize();
         zoom = FALSE;
+	gs_resize();
 	return;
 }
 
@@ -282,70 +256,63 @@ gsview_unit(int new_unit)
 	check_menu_item(IDM_UNITMENU, option.unit, FALSE);
 	option.unit = new_unit;
 	check_menu_item(IDM_UNITMENU, option.unit, TRUE);
-	info_wait(IDS_NOWAIT);
 	return;
 }
 
+/* free a PSFILE and contents */
+/* Do NOT use this if you have just copied PSFILE to psfile */
 void
-gsview_endfile()
+e_free_psfile(PSFILE *ppsfile)
 {
-	if (!gsprog.valid)
-	    return;
-	if (!option.quick ||
-             ((doc == (PSDOC *)NULL) && !is_pipe_done())) {
-		gs_close();
-		return;
-	}
-
-	if (display.page)
-	    next_page();
-
-	display.do_endfile = TRUE;
-	psfile.previous_was_dsc = (doc != (PSDOC *)NULL) && doc->pages;
-	if (psfile.previous_was_dsc) {
-	    strcpy(psfile.previous_name, psfile.name);
-	    psfile.previous_begintrailer = doc->begintrailer;
-	    psfile.previous_endtrailer = doc->endtrailer;
-	}
-	else {
-	    psfile.previous_name[0] = '\0';
-	    psfile.previous_begintrailer = 0;
-	    psfile.previous_endtrailer = 0;
-	}
-
+    psfile_free(ppsfile);
+    free(ppsfile);
 }
 
+
 /* open a new document */
-void
+PSFILE *
 gsview_openfile(char *filename)
 {
 int i;
-	info_wait(IDS_WAITREAD);
-	psfile.pagenum = 1;
-	page_extra = 0;
-	if (dsc_scan(filename)) {
-	    /* found DSC comments */
-	    if (doc->orientation == PORTRAIT)
-		gsview_orientation(IDM_PORTRAIT);
-	    if (doc->orientation == LANDSCAPE)
-		gsview_orientation(IDM_LANDSCAPE);
-	    if (doc->default_page_media) {
-		char thismedia[20];
-		for (i=IDM_LETTER; i<IDM_USERSIZE; i++) {
-		    get_menu_string(IDM_MEDIAMENU, i, thismedia, sizeof(thismedia));
-		    if (!stricmp(thismedia, doc->default_page_media->name)) {
-		        gsview_media(i);
-		        break;
-		    }
-		}
-		if (i == IDM_USERSIZE) {
-		    gsview_media(IDM_USERSIZE);
-		    option.user_width  = doc->default_page_media->width;
-		    option.user_height = doc->default_page_media->height;
-		    gsview_check_usersize();
+PSFILE *tpsfile;
+    tpsfile = (PSFILE *)malloc(sizeof(PSFILE));
+    if (tpsfile == NULL)
+	return NULL;
+    memset((char *)tpsfile, 0, sizeof(PSFILE));
+
+    strcpy(tpsfile->name, filename);
+    tpsfile->pagenum = 1;
+    info_wait(IDS_WAITREAD);
+    if (dsc_scan(tpsfile)) {
+        PSDOC *doc = tpsfile->doc;
+	/* found DSC comments */
+	if (doc->orientation == PORTRAIT)
+	    gsview_orientation(IDM_PORTRAIT);
+	if (doc->orientation == LANDSCAPE)
+	    gsview_orientation(IDM_LANDSCAPE);
+	if (doc->default_page_media) {
+	    char thismedia[20];
+	    for (i=IDM_LETTER; i<IDM_USERSIZE; i++) {
+		get_menu_string(IDM_MEDIAMENU, i, thismedia, sizeof(thismedia));
+		if (!stricmp(thismedia, doc->default_page_media->name)) {
+		    gsview_media(i);
+		    break;
 		}
 	    }
+	    if (i == IDM_USERSIZE) {
+		gsview_media(IDM_USERSIZE);
+		option.user_width  = doc->default_page_media->width;
+		option.user_height = doc->default_page_media->height;
+		gsview_check_usersize();
+	    }
 	}
+    }
+    if (tpsfile->name[0] == '\0') {
+	e_free_psfile(tpsfile);
+	info_wait(IDS_NOWAIT);
+	return NULL;
+    }
+    return tpsfile;
 }
 
 
@@ -354,7 +321,7 @@ void
 gsview_select()
 {
 char buf[MAXSTR];
-	strcpy(buf, previous_filename);
+	strcpy(buf, psfile.name);
 	if (get_filename(buf, FALSE, FILTER_PSALL, 0, IDS_TOPICOPEN))
 		gsview_selectfile(buf);
 }
@@ -363,12 +330,24 @@ char buf[MAXSTR];
 void
 gsview_selectfile(char *filename)
 {
-	if (gsprog.valid)
-	    gsview_endfile();
 	while (*filename && *filename==' ')
 	     filename++;
-	gsview_openfile(filename);
-	strcpy(previous_filename, filename);
+
+	if (gsdll.valid && (gsdll.state!=UNLOADED)) {
+	    /* remember name for later */
+	    strncpy(selectname, filename, sizeof(selectname));
+	    /* close file and wait for notification */
+	    post_img_message(WM_COMMAND, IDM_CLOSE);
+	}
+	else {
+	    /* open it ourselves */
+	    PSFILE *tpsfile = gsview_openfile(filename);
+	    if (tpsfile) {
+		psfile = *tpsfile;
+		post_img_message(WM_GSTITLE, 0);
+		free(tpsfile);	/* Do NOT free doc and page_list.select */
+	    }
+	}
 	info_wait(IDS_NOWAIT);
 }
 
@@ -377,7 +356,7 @@ void
 gsview_display()
 {
 char buf[MAXSTR];
-	strcpy(buf, previous_filename);
+	strcpy(buf, psfile.name);
 	if (get_filename(buf, FALSE, FILTER_PSALL, 0, IDS_TOPICOPEN))
 		gsview_displayfile(buf);
 }
@@ -386,62 +365,22 @@ char buf[MAXSTR];
 void
 gsview_displayfile(char *filename)
 {
-	gsview_endfile();
-	gsview_openfile(filename);
-	strcpy(previous_filename, filename);
-	if (display.epsf_clipped || ((doc != (PSDOC *)NULL) 
-		&& doc->epsf && option.epsf_clip))
-	    gs_resize();
-	display.do_display = TRUE;
+PSFILE *tpsfile;
+	tpsfile = gsview_openfile(filename);
+	if (!tpsfile)
+	    return;
+	if (pending.psfile) {
+	    message_box("pending.psfile is already set", 0);
+	    e_free_psfile(tpsfile);
+	    return;
+	}
+	pending.psfile = tpsfile;
+	if ( gsdll.hmodule &&  (psfile.doc==(PSDOC *)NULL) && (gsdll.state != IDLE) )
+	    /* don't know where we are so close and reopen */
+	    pending.abort = TRUE;
+	pending.now = TRUE;
 }
 
-
-/* add Ghostscript code to change orientation */
-void
-fix_orientation(FILE *f)
-{
-int real_orientation;
-char buf[MAXSTR];
-	/* save interpreter state */
-	gs_puts("clear cleardictstack save /gsview_save exch def\r\n",f);
-	display.saved = TRUE;
-	/* provide zoom or epsf offset */
-        if (zoom) {
-	    sprintf(buf,"/gsview_offset {%d %d translate} def\r\n",
-	        -display.zoom_xoffset, -display.zoom_yoffset);
-	}
-	else if (display.epsf_clipped)
-	    sprintf(buf,"/gsview_offset {%d %d translate} def\r\n",
-	        -doc->boundingbox[LLX], -doc->boundingbox[LLY]);
-	else
-	    sprintf(buf,"/gsview_offset {} def\r\n");
-	gs_puts(buf, f);
-	real_orientation = option.orientation;
-	if (option.swap_landscape) {
-	    if (option.orientation == IDM_LANDSCAPE)
-		real_orientation = IDM_SEASCAPE;
-	    else if (option.orientation == IDM_SEASCAPE)
-		real_orientation = IDM_LANDSCAPE;
-	}
-	sprintf(buf,"/gsview_landscape  %s def\r\n",
-	    real_orientation == IDM_LANDSCAPE ? "true" : "false");
-	gs_puts(buf, f);
-	sprintf(buf,"/gsview_upsidedown %s def\r\n",
-	    real_orientation ==  IDM_UPSIDEDOWN ? "true" : "false");
-	gs_puts(buf, f);
-	sprintf(buf,"/gsview_seascape   %s def\r\n",
-	    real_orientation == IDM_SEASCAPE ? "true" : "false");
-	gs_puts(buf, f);
-	sprintf(buf,"/gsview_zoom %s def\r\n", zoom ? "true" : "false");
-	gs_puts(buf, f);
-	send_prolog(f, IDR_ORIENT);
-#if !defined(__WIN32__) && defined(GS261)
-	if (option.gsversion != IDM_GS261)
-#endif
-	    send_prolog(f, IDR_ORIENT3);
-	if (option.epsf_warn)
-	    send_prolog(f, IDR_EPSFWARN);
-}
 
 /* Create and open a scratch file with a given name prefix. */
 /* Write the actual file name at fname. */
@@ -464,48 +403,62 @@ gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 
 	strcat(fname, prefix);
 	strcat(fname, "XXXXXX");
+#ifdef __IBMC__
+	{ char *p;
+	_tempnam(NULL, fname);
+	strcpy(fname, p);
+	free(p);
+	}
+#else
 	mktemp(fname);
+#endif
 	return fopen(fname, mode);
 }
 
 /* reopen psfile */
-/* if psfile time/date or length has changed, kill gs and rescan the file */
+/* psfile will then be locked until closed */
+/* return TRUE if OK */
+/* if psfile time/date or length has changed, return FALSE */
+/* return FALSE if file can not be opened */
 BOOL
-dfreopen()
+dfreopen(void)
 {
 char *filename;
-	if (psfile.ispdf) 
-	    filename = psfile.pdftemp;
-	else
-	    filename = psfile.name;
-/*
-	if (doc == (PSDOC *)NULL)
-		return TRUE;
-*/
-	dfclose();
-	if (filename[0] == '\0')
-		return FALSE;
+	if (psfile.ispdf)
+	    return TRUE;	/* don't need to reopen */
+	begin_crit_section();
+	if (psfile.locked) {
+	    end_crit_section();	/* someone else has it */
+	    delayed_message_box(IDS_DEBUG_DFISLOCKED, 0);
+	    return FALSE;
+	}
+	psfile.locked = TRUE;	/* stop others using it */
+	end_crit_section();
+
+	filename = psfile.name;
+
+	if (psfile.file) {	/* should never happen */
+	    fclose(psfile.file);
+	    delayed_message_box(IDS_DEBUG_DFISOPEN, 0);
+	}
+
+	if (filename[0] == '\0') {
+	    psfile.locked = FALSE;
+	    delayed_message_box(IDS_NOTOPEN, 0);
+	    return FALSE;
+	}
 	if ( (psfile.file = fopen(filename, "rb")) == (FILE *)NULL ) {
 	    if (debug)
-		message_box("dfreopen: file missing",0);
+	        delayed_message_box(IDS_DEBUG_DFISMISSING, 0);
 	    filename[0] = '\0';
+	    psfile.locked = FALSE;
 	    return FALSE;
 	}
 	if (psfile_changed()) {  /* doesn't cope with pdf file changing */
+	    dfclose();
 	    if (debug)
-		message_box("dfreopen: file changed",0);
-	    /* file may have changed beyond recognition so we must kill gs */
-	    gs_close();
-	    if (dsc_scan(psfile.name))
-		if (psfile.ispdf) 
-		    filename = psfile.pdftemp;
-		else
-		    filename = psfile.name;
-		dfclose();
-	        if ( (psfile.file = fopen(filename, "rb")) == (FILE *)NULL ) {
-		        psfile.name[0] = '\0';
-		        return FALSE;
-	        }
+	        delayed_message_box(IDS_DEBUG_DFCHANGED, 0);
+	    return FALSE;
 	}
 	return TRUE;
 }
@@ -513,129 +466,95 @@ char *filename;
 void
 dfclose()
 {
+	if (debug) {
+	    if (psfile.file == (FILE *)NULL)
+		delayed_message_box(IDS_DEBUG_DFISCLOSED, 0);
+	}
 	if (psfile.file != (FILE *)NULL)
 		fclose(psfile.file);
 	psfile.file = (FILE *)NULL;
+	psfile.locked = FALSE;
 }
 
-/* take a PDF file, process it with gs to produce a DSC index file */
-/* then use the index file as a DSC document */
-BOOL
-dsc_pdf(void)
-{
-#ifdef OS2
-	int flag;
-	char command[MAXSTR+MAXSTR];
-	char progname[256];
-	char *args;
-	FILE *tempfile;
-	char temp[MAXSTR];
-	int i;
-	
-	gs_close();  /* kill GS to avoid termination queue problems */
-
-	/* change directory separators from \ to / */
-	strcpy(temp, psfile.name);
-	for (args=temp; *args; args++) {
-	    if (*args == '\\')
-		*args = '/';
-	}
-
-	/* get a temporary filename for pdf DSC index */
-	if ( (tempfile = gp_open_scratch_file(szScratch, psfile.pdftemp, "wb")) == (FILE *)NULL)
-	    return FALSE;
-	fclose(tempfile);
-	
-        if (option.gsversion == IDM_GS351)
-	    sprintf(command,"-I\042%s\042 %s -dNODISPLAY -sPDFname=\042%s\042 -sDSCname=\042%s\042 pdf2dsc.ps", 
-		option.gsinclude, option.gsother, temp, psfile.pdftemp);
-	else
-	    sprintf(command,"-I%s %s -dNODISPLAY -sPDFname=%s -sDSCname=%s pdf2dsc.ps", 
-		option.gsinclude, option.gsother, temp, psfile.pdftemp);
-
-	if (strlen(command) > MAXSTR-1) {
-		/* command line too long */
-		gserror(IDS_TOOLONG, command, MB_ICONHAND, SOUND_ERROR);
-		if (!debug)
-		    unlink(psfile.pdftemp);
-		psfile.pdftemp[0] = '\0';
-		return FALSE;
-	}
-
-	info_wait(IDS_WAIT);
-
-	flag = pdf_convert(option.gsexe, command, &pdfconv);
-	if (!flag) {
-		gserror(IDS_CANNOTRUN, command, MB_ICONHAND, SOUND_ERROR);
-		if (!debug)
-		    unlink(psfile.pdftemp);
-		psfile.pdftemp[0] = '\0';
-		info_wait(IDS_NOWAIT);
-		return FALSE;
-	}
-	/* open DSC index file */
-	if ( (psfile.file = fopen(psfile.pdftemp, "rb")) == (FILE *)NULL ) {
-		psfile.name[0] = '\0';
-		return FALSE;
-	}
-	psfile.ispdf = TRUE;
-	return TRUE;
-#else
-	message_box("Can't handle PDF files", 0);
-	return FALSE;
-#endif
-}
 
 /* scan file for PostScript Document Structuring Conventions */
 /* return TRUE if valid DSC comments found */
 BOOL
-dsc_scan(char *filename)
+dsc_scan(PSFILE *psf)
 {
 char line[MAXSTR];
-	dfclose();
-	if (psfile.ispdf && psfile.name[0] && psfile.pdftemp[0])
-	    unlink(psfile.pdftemp);  /* remove temporary DSC file */
-	strcpy(psfile.name, filename);
-	if ( (psfile.file = fopen(psfile.name, "rb")) == (FILE *)NULL ) {
-		psfile.name[0] = '\0';
-		return FALSE;
+PSDOC *doc;
+	if (psf->file) {
+	    message_box("dsc_scan: file is open but shouldn't be", 0);
+	    fclose(psf->file);
+	    psf->file = NULL;
 	}
-	/* check for PDF */
-	psfile.ispdf = FALSE;
-	fgets(line, sizeof(line)-1, psfile.file);
-        rewind(psfile.file);
-	if ( strncmp("%PDF-", line, 5) == 0 ) {
-	    dfclose();
-	    if (!dsc_pdf())
-		return FALSE;
-	}
-	/* save file */
-	psfile_savestat();
-	if (page_list.select)
-		free(page_list.select);
-	page_list.select = NULL;
-	if (doc)
-		psfree(doc);
-	psfile.preview = 0;
-	/* check for documents that start with Ctrl-D */
-	psfile.ctrld = (line[0] == '\004');
-	if (option.ignore_dsc)
-	    doc = (PSDOC *)NULL;
-	else 
-	    doc = psscan(psfile.file);
-	if (doc == (PSDOC *)NULL) {
-	    dfclose();
+
+	if (psf->locked) {
+	    char buf[MAXSTR];
+	    load_string(IDS_DEBUG_DFISLOCKED, buf, sizeof(buf));
+	    message_box(buf, 0);
 	    return FALSE;
 	}
-	if (doc->doseps) {
-	    if (doc->doseps->tiff_begin)
-		psfile.preview = IDS_EPST;
-	    if (doc->doseps->mf_begin)
-		psfile.preview = IDS_EPSW;
+	psf->locked = TRUE;	/* stop others using it */
+	if ( (psf->file = fopen(psf->name, "rb")) == (FILE *)NULL ) {
+	    char buf[MAXSTR+MAXSTR];
+	    sprintf(buf, "File '%s' does not exist", psf->name);
+	    message_box(buf, 0);
+	    psf->name[0] = '\0';
+	    psf->locked = FALSE;
+	    return FALSE;
 	}
-	if (!psfile.preview && (doc->beginpreview != doc->endpreview))
-	    psfile.preview = IDS_EPSI;
-	page_list.select = (BOOL *)malloc( doc->numpages * sizeof(BOOL) );
+
+	/* these shouldn't be needed */
+	if (psf->page_list.select)
+	    free(psf->page_list.select);
+	psf->page_list.select = NULL;
+	if (psf->doc)
+		psfree(psf->doc);
+	psf->preview = 0;
+	
+	/* check for PDF */
+	psf->ispdf = FALSE;
+	fgets(line, sizeof(line)-1, psf->file);
+        rewind(psf->file);
+	if ( strncmp("%PDF-", line, 5) == 0 ) {
+	    fclose(psf->file);
+	    psf->locked = FALSE;
+	    psf->file = NULL;
+	    psf->ispdf = TRUE;
+	    return FALSE;	/* we don't know how many pages yet */
+	}
+
+	/* save file */
+	psfile_savestat(psf);
+
+	/* check for documents that start with Ctrl-D */
+	psf->ctrld = (line[0] == '\004');
+	/* check for HP LaserJet prologue */
+	psf->pjl = FALSE;
+	if (strncmp("\033%-12345X", line, 9) == 0)
+	    psf->pjl = TRUE;
+	if (option.ignore_dsc)
+	    psf->doc = (PSDOC *)NULL;
+	else 
+	    psf->doc = psscan(psf->file);
+	fclose(psf->file);
+	psf->file = NULL;
+	psf->locked = FALSE;
+	/* check for DSC comments */
+	doc = psf->doc;
+	if (doc == (PSDOC *)NULL)
+	    return FALSE;
+	if (doc->doseps) {
+	    /* check what sort of preview is present */
+	    if (doc->doseps->tiff_begin)
+		psf->preview = IDS_EPST;
+	    if (doc->doseps->mf_begin)
+		psf->preview = IDS_EPSW;
+	}
+	if (!psf->preview && (doc->beginpreview != doc->endpreview))
+	    psf->preview = IDS_EPSI;
 	if (doc->numpages) {
 	    int i;
 	    char *label;
@@ -651,7 +570,9 @@ char line[MAXSTR];
 		    }
 		}
 	    }
-	    page_list.select = (BOOL *)malloc( doc->numpages * sizeof(BOOL) );
+	    psf->page_list.select = (BOOL *)malloc( doc->numpages * sizeof(BOOL) );
+	    if (psf->page_list.select)
+	        memset(psf->page_list.select, 0, doc->numpages * sizeof(BOOL));
 	}
 	if (doc->epsf) {
 	    /* warn if bounding box off the page */
@@ -665,14 +586,15 @@ char line[MAXSTR];
 	        width = papersizes[i].width;
 	        height = papersizes[i].height;
 	    }
-	    if (!option.epsf_clip &&
+	    if ( !option.epsf_clip &&
 	        ((doc->boundingbox[LLX] > width) || 
 		 (doc->boundingbox[LLY] > height) ||
 	         (doc->boundingbox[URX] < 0) || 
-		 (doc->boundingbox[URY] < 0))
-	       ) {
-		load_string(IDS_EPS_OFF_PAGE, line, sizeof(line));
-		message_box(line, 0);
+		 (doc->boundingbox[URY] < 0)) )
+	    {
+		char buf[MAXSTR];
+	        load_string(IDS_EPS_OFF_PAGE, buf, sizeof(buf));
+	        message_box(buf, 0);
 	    }
 	}
 	return TRUE;
@@ -680,245 +602,40 @@ char line[MAXSTR];
 
 
 
-/* Copy specified pages from psfile.file to file f */
-void
-dsc_getpages(FILE *f, int first, int last)
-{
-int i, page;
-char buf[MAXSTR];
-	for (i=first-1; i<last; i++) {
-	    page = map_page(i);
-	    if (doc->pages) {
-	        sprintf(buf,"(Page: %s %d\\n) print flush\r\n", doc->pages[page].label ? doc->pages[page].label : " ", page+1);
-		gs_puts(buf, f);
-    		if (debug)
-		    gs_puts("%GSview beginpage\r\n", gsprog.input);
-		gs_copy(psfile.file, f, doc->pages[page].begin, doc->pages[page].end);
-    		if (debug)
-		    gs_puts("%GSview endpage\r\n", gsprog.input);
-	    }
-	    else {
-	        sprintf(buf,"(Page: %d\\n) print flush\r\n",page); 
-		gs_puts(buf, f);
-    		if (debug)
-		    gs_puts("%GSview endsetup\r\n", gsprog.input);
-		gs_copy(psfile.file, f, doc->endsetup, doc->endtrailer);
-    		if (debug)
-		    gs_puts("\n%GSview endtrailer\r\n", gsprog.input);
-	    }
-	}
-}
-
-
-/* Copy dsc header to file f */
-void
-dsc_header(FILE *f)
-{
-char *p, *d;
-char buf[MAXSTR];
-	d = buf;
-	gs_puts("(Displaying ",f);
-	for (p=psfile.name; *p; p++) {
-	    if (*p != '\\')
-		*d++ = *p;
-	    else
-	        *d++ = '/';
-	}
-	*d = '\0';
-	gs_puts(buf, f);
-	gs_puts("\\n) print flush\r\n", f);
-	if (debug)
-	    gs_puts("%GSview beginheader\r\n", gsprog.input);
-	gs_copy(psfile.file, f, doc->beginheader, doc->endheader);
-	if (debug)
-	    gs_puts("%GSview endheader\r\n%GSview begindefaults\r\n", gsprog.input);
-	gs_copy(psfile.file, f, doc->begindefaults, doc->enddefaults);
-	if (debug)
-	    gs_puts("%GSview enddefaults\r\n%GSview beginprolog\r\n", gsprog.input);
-	gs_copy(psfile.file, f, doc->beginprolog, doc->endprolog);
-	if (debug)
-	    gs_puts("%GSview endprolog\r\n%GSview beginsetup\r\n", gsprog.input);
-	gs_copy(psfile.file, f, doc->beginsetup, doc->endsetup);
-	if (debug)
-	    gs_puts("%GSview endsetup\r\n", gsprog.input);
-}
-
-
-/* Send commands to gs to display page */
-void
-dsc_dopage(void)
-{
-	info_wait(IDS_WAITDRAW);
-	display.do_display = TRUE;
-}
-
-/* skip pages */
-void
-dsc_skip(int skip)
-{
-	if ( (skip == 0)
-	  || ((skip > 0) && (psfile.pagenum == doc->numpages))
-	  || ((skip < 0) && (psfile.pagenum == 1))
-	  || (doc->numpages == 0) ) {
-	    play_sound(SOUND_NOPAGE);
-	    info_wait(IDS_NOWAIT);
-	    return;
-	}
-	psfile.pagenum += skip;
-	if (psfile.pagenum > (int)doc->numpages)
-	     psfile.pagenum = doc->numpages;
-	if (psfile.pagenum < 1)
-	    psfile.pagenum = 1;
-	info_wait(IDS_WAIT);
-	if (display.page)
-	    next_page();
-	if (gs_open())
-	    dsc_dopage();
-}
-
 /* reverse zero based page number if needed */
 int
 map_page(int page)
 {
-    	if (doc->pageorder == DESCEND) 
-		return (doc->numpages - 1) - page;
-	return page;
+    if (psfile.doc != (PSDOC *)NULL)
+        if (psfile.doc->pageorder == DESCEND) 
+	    return (psfile.doc->numpages - 1) - page;
+    return page;
 }
 
-/* Send necessary output to display Ghostscript */
-/* This must not be called from thread 1 because it is lengthy */
-/* Functions called from here must NOT create windows since this */
-/* thread does not have an anchor block or message queue */
-/* returns TRUE if OK, FALSE if aborted */
-BOOL
-do_output()
+void
+psfile_free(PSFILE *psf)
 {
-    char *p, *d;
-    char debug_filename[MAXSTR];
-    char buf[256];
+    if (psf == (PSFILE *)NULL)
+	return;
 
-    if (debug_file != (FILE *)NULL)
-	fclose(debug_file);
-    if (debug)
-        debug_file = gp_open_scratch_file(szScratch, debug_filename, "wb");
+    psf->name[0] = '\0';
 
-    if (gsprog.valid && display.page)
-	next_page();
+    /* same as dfclose() */
+    if (psf->file != (FILE *)NULL)
+	fclose(psf->file);
+    psf->file = (FILE *)NULL;
+    psf->locked = FALSE;
 
-#if !defined(__WIN32__) && defined(GS261)
-    if (option.gsversion != IDM_GS261) {
-#endif
-	/* Cause a GS_BEGIN message to be sent to GSview */
-/*
-	gs_puts("(Begin\\n) print flush\r\n", gsprog.input);
-*/
-	gs_puts("-1 false .outputpage\r\n", gsprog.input);
-#if !defined(__WIN32__) && defined(GS261)
+    if (psf->page_list.select)
+	free(psf->page_list.select);
+    psf->page_list.select = NULL;
+    if (psf->doc)
+	psfree(psf->doc);
+    psf->doc = (PSDOC *)NULL;
+    if (psf->text_name) {
+	if (!debug)
+	    unlink(psf->text_name);
+        psf->text_name[0] = '\0';
     }
-#endif
-
-    if (display.do_endfile && gsprog.valid) {
-	if ((display.saved) && (psfile.previous_was_dsc)) {
-	    /* send trailer if needed */
-	    FILE *f;
-	    if ( (f = fopen(psfile.previous_name, "rb")) != (FILE *)NULL ) {
-    		if (debug)
-		    gs_puts("%GSview begintrailer\r\n", gsprog.input);
-	        gs_copy(f, gsprog.input, psfile.previous_begintrailer, psfile.previous_endtrailer);
-    		if (debug)
-		    gs_puts("%GSview endtrailer\r\n", gsprog.input);
-		fclose(f);
-	    }
-	}
-	if (display.saved) {
-	    /* restore interpreter state */
-	    gs_puts("gsview_cleanup\r\ngsview_save restore\r\n", gsprog.input);
-	}
-	else
-	    gs_puts("clear cleardictstack\r\n", gsprog.input);
-	gs_puts("erasepage\r\n", gsprog.input); /* needed for documents that don't use showpage */
-	display.saved = FALSE;
-    }
-
-    if (display.abort)
-	return FALSE;
-
-    if (display.do_resize && gsprog.valid) {
-	sprintf(buf, "mark /HWSize [%u %u]\r\n",display.width,display.height);
-	gs_puts(buf, gsprog.input);
-	if (zoom)
-            sprintf(buf,"/HWResolution [%g %g]\r\n",option.zoom_xdpi,option.zoom_ydpi);
-        else
-            sprintf(buf,"/HWResolution [%g %g]\r\n",option.xdpi,option.ydpi);
-	gs_puts(buf, gsprog.input);
-        sprintf(buf,"currentdevice putdeviceprops pop initgraphics erasepage\r\n");
-	gs_puts(buf, gsprog.input);
-    }
-
-    if (display.abort)
-	return FALSE;
-
-    if (display.do_display) {
-	if (doc != (PSDOC *)NULL) {
-	    /* found DSC comments */
-	    if (!display.saved) {
-	        fix_orientation(gsprog.input);
-	        dsc_header(gsprog.input);
-	    }
-            if (display.abort)
-	        return FALSE;
-	    dsc_getpages(gsprog.input,psfile.pagenum,psfile.pagenum);
-	}
-	else {
-	    if (!display.saved) {
-	        fix_orientation(gsprog.input);
-	    }
-	    /* non conformant file - send unmodified */
-	    gs_puts("(Displaying ",gsprog.input);
-	    d = buf;
-	    for (p=psfile.name; *p; p++) {
-		if (*p != '\\')
-			*d++ = *p;
-		else
-			*d++ = '/';
-	    }
-	    *d = '\0';
-	    gs_puts(buf, gsprog.input);
-	    gs_puts("\\n) print flush\r\n",gsprog.input);
-	    d = buf;
-	    *d++ = '(';
-	    for (p=psfile.name; *p; p++) {
-		if (*p != '\\')
-			*d++ = *p;
-		else
-			*d++ = '/';
-	    }
-	    *d = '\0';
-	    gs_puts(buf, gsprog.input);
-	    gs_puts(") run\r\n",gsprog.input);
-	}
-    }
-
-#if !defined(__WIN32__) && defined(GS261)
-    if (option.gsversion != IDM_GS261) {
-#endif
-	/* Cause a GS_END message to be sent to GSview */
-/*
-	gs_puts("(End\\n) print flush\r\n", gsprog.input);
-*/
-	gs_puts("-2 false .outputpage\r\n", gsprog.input);
-#if !defined(__WIN32__) && defined(GS261)
-    }
-#endif
-
-    if (gsprog.valid)
-        gs_puts("flushpage\r\n",gsprog.input);
-
-    dfclose();
-    if (debug_file)
-        fclose(debug_file);
-    debug_file = (FILE *)NULL;
-
-
-    return TRUE;	/* all done */
 }
+

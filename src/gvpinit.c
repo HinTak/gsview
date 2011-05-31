@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -23,7 +23,6 @@
 APIRET init1(void); 
 APIRET init2(void); 
 APIRET restore_window_position(SWP *pswp);
-void init_options(void);
 ULONG frame_flags = 
 	    FCF_TITLEBAR |	/* have a title bar */
             FCF_SIZEBORDER |	/* have a sizeable window */
@@ -64,6 +63,8 @@ gsview_init(int argc, char *argv[])
 	os_version = version[0]*10000 + version[1]*100 + version[2];
     }
 
+    multithread = TRUE;
+
     rc = init1();
     if (rc)
 	return rc;
@@ -73,21 +74,10 @@ gsview_init(int argc, char *argv[])
     if (rc)
 	return rc;
 
-    rc = DosCreateThread(&queue_tid, queue_thread, 0, 0, 8192);
-    if (rc) {
-        error_message("gsview_init: Failed to create queue thread");
-        return rc;
-    }
-
-    rc = DosCreateThread(&term_tid, term_thread, 0, 0, 8192);
-    if (rc) {
-        error_message("gsview_init: Failed to create termination queue thread");
-        return rc;
-    }
-    info_wait(IDS_WAIT);
+    load_string(IDS_WAIT, szWait, sizeof(szWait));
 
     init_options();
-    read_profile();
+    read_profile(szIniFile);
 
     if (!WinRegisterClass(	/* register this window class */
   	hab,			/* anchor block */
@@ -103,7 +93,7 @@ gsview_init(int argc, char *argv[])
 	0,			/* frame style is not WS_VISIBLE */
   	&frame_flags,		/* definitions */
   	(PSZ)class,		/* client class */
-  	(PSZ)"PM GSview",	/* title */
+  	(PSZ)szAppName,		/* title */
   	WS_VISIBLE,		/* client style */
   	0,			/* resource module */
   	ID_GSVIEW,		/* resource identifier */
@@ -206,30 +196,17 @@ gsview_init(int argc, char *argv[])
 
     init2();
 
+#ifdef __EMX__
     if (_emx_vcmp < 0x302e3868) {
-	char buf[256];
+	char buf[MAXSTR];
 	sprintf(buf, "You have emx %s.\rYou need emx %s or later.\rPM GSview will not run correctly.",
 	    _emx_vprt, EMX_NEEDED);
 	message_box(buf, MB_ICONEXCLAMATION);
     }
-    if (changed_version) {
-	message_box("The installed version of GSview has changed.  \
-Please read the Installation help and then correctly set\r\
-Options | Configure Ghostscript", MB_ICONEXCLAMATION);
-	load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
-	get_help();
-    }
+#endif
 
     if (argc == 1)
 	return rc;
-
-    if ( (strlen(argv[1]) >= 2)
-	 &&  ((argv[1][0] == '/') || (argv[1][0] == '-'))
-	 &&  ((argv[1][1] == 'D') || (argv[1][1] == 'd')) ) {
-	    debug = TRUE;
-	    argv++;
-	    argc--;
-    }
 
     if ( (cmdbase = malloc(MAXSTR)) == (char *)NULL )
 	return rc;
@@ -237,11 +214,44 @@ Options | Configure Ghostscript", MB_ICONEXCLAMATION);
     cmd = cmdbase;
     cmd[0] = '\0';
     for (argp = &argv[1]; argc > 1; argc--, argp++) {
-	if ( strlen(*argp) + strlen(cmd) > MAXSTR-1 )
-	    break;
-	strcat(cmd, *argp);
-	if (argc > 2)
+        if ( (strlen(*argp) >= 2)
+	     &&  (((*argp)[0] == '/') || ((*argp)[0] == '-'))
+	     &&  (((*argp)[1] == 'D') || ((*argp)[1] == 'd')) ) {
+	    /* debug option */
+	    debug = TRUE;
+	}
+	else if ( (strlen(*argp) >= 2)
+	     &&  (((*argp)[0] == '/') || ((*argp)[0] == '-'))
+	     &&  (((*argp)[1] == 'T') || ((*argp)[1] == 't')) ) {
+	    /* multithread option */
+	    if ((*argp)[2] == '\0')
+		multithread = !multithread;
+	    else if ((*argp)[2] == '0')
+		multithread = FALSE;
+	    else 
+		multithread = TRUE;
+	}
+	else {
+	    /* defer these options */
+	    if ( strlen(*argp) + strlen(cmd) > MAXSTR-1 )
+		break;
+	    strcat(cmd, *argp);
+	    if (argc > 2)
 	    strcat(cmd, " ");
+	}
+    }
+
+    if (!rc)
+       rc = DosCreateMutexSem(NULL, &hmutex_ps, 0, FALSE);
+    if (rc)
+	return rc;
+    gsview_initc(cmdbase);
+
+
+    if (strlen(cmd) == 0) {
+	/* no deferred options given */
+	free(cmdbase);
+	return rc;
     }
 
     if (strlen(cmd) > 2) {
@@ -249,9 +259,10 @@ Options | Configure Ghostscript", MB_ICONEXCLAMATION);
 	gs_chdir(workdir);
 	/* skip commands /F /P or /S */
 	if ((cmd[0] == '/') || (cmd[0] == '-')) {
-	    cmd += 2;
+	    while (*cmd && (*cmd != ' '))
+	        cmd++;	/* skip over option */
 	    while (*cmd && (*cmd == ' '))
-	        cmd++;
+	        cmd++;	/* skip over spaces */
 	}
 	/* build full path to file */
         if (cmd[0]=='\\') {
@@ -374,8 +385,8 @@ restore_window_position(SWP *pswp)
 
 APIRET init1() 
 {
-    char buf[256];
-    char name[256];
+    char buf[MAXSTR];
+    char name[MAXSTR];
     char *tail, *env;
     APIRET rc = 0;
 
@@ -387,8 +398,6 @@ APIRET init1()
 	error_message(buf);
 	return rc;
     }
-    gsview.pid = pppib->pib_ulpid;
-    sprintf(gsview.id, "GSVIEW_%u", gsview.pid);
 
     /* get path to EXE */
     if ( (rc = DosQueryModuleName(pppib->pib_hmte, sizeof(szExePath), szExePath)) != 0 ) {
@@ -400,7 +409,7 @@ APIRET init1()
 	tail++;
 	*tail = '\0';
     }
-    strcat(szHelpFile, szExePath);
+    strcpy(szHelpFile, szExePath);
     strcat(szHelpFile, HELPFILE);
 
     /* get path to INI directory */
@@ -428,43 +437,11 @@ APIRET init1()
     }
 
 
-    if (!rc) {
-	sprintf(name, NEXT_NAME, gsview.id);
-	rc = DosCreateEventSem(name, &gsview.next_event, 0, FALSE);
-  	if (rc) {
-		sprintf(buf, "Failed to create: next page event semaphore \"%s\" rc = %d", name, rc);
-		error_message(buf);
-	}
-    }
-    if (!rc) {
-	sprintf(name, MUTEX_NAME, gsview.id);
-	rc = DosCreateMutexSem(name, &gsview.bmp_mutex, 0, FALSE);
-  	if (rc) {
-		sprintf(buf, "Failed to create: bmp mutex semaphore \"%s\" rc = %d", name, rc);
-		error_message(buf);
-	}
-    }
-    if (!rc) {
-	sprintf(name, QUEUE_NAME, gsview.id);
-	if ( (rc = DosCreateQueue(&gsview.queue, QUE_FIFO, name)) != 0 ) {
-		sprintf(buf,"Failed to create: \"%s\", rc = %d\n", name, rc);
-		error_message(buf);
-	}
-
-    }
-    if (!rc) {
-	sprintf(gsview.term_queue_name, "\\QUEUES\\TERM_%s", gsview.id);
-	if ( (rc = DosCreateQueue(&gsview.term_queue, QUE_FIFO, gsview.term_queue_name)) != 0 ) {
-		sprintf(buf,"Failed to create: \"%s\", rc = %d\n", gsview.term_queue_name, rc);
-		error_message(buf);
-	}
-    }
-
     /* local stuff */
     if (!rc) {
-	rc = DosCreateEventSem(NULL, &display.done, 0, FALSE);
+	rc = DosCreateEventSem(NULL, &display.event, 0, FALSE);
   	if (rc)
-		error_message("Failed to create: display.done semaphore");
+		error_message("Failed to create display.event semaphore");
     }
 
     if (!rc) {
@@ -476,7 +453,7 @@ APIRET init1()
 	display.hasPalMan &= CAPS_PALETTE_MANAGER;
 	WinReleasePS(ps);
 /*
-	{ char buf[256];
+	{ char buf[MAXSTR];
 	sprintf(buf,"main: display planes = %d, bitcount = %d",display.planes,display.bitcount);
 	message_box(buf, 0);
 	}
@@ -489,108 +466,11 @@ APIRET init1()
 APIRET
 init2(void)
 {
-	int i;
-	char thismedia[20];
-	for (i=IDM_LETTER; i<IDM_USERSIZE; i++) {
-	    get_menu_string(IDM_MEDIAMENU, i, thismedia, sizeof(thismedia));
-	    if (!stricmp(thismedia, option.medianame)) {
-		break;
-	    }
-	}
-	option.media = i;
-	strncpy(option.medianame,thismedia,sizeof(option.medianame));
-	/* update menus */
-	if (option.quick) check_menu_item(IDM_OPTIONMENU, IDM_QUICK, TRUE);
-	if (option.settings) check_menu_item(IDM_OPTIONMENU, IDM_SAVESETTINGS, TRUE);
-	if (option.button_show) check_menu_item(IDM_OPTIONMENU, IDM_BUTTONSHOW, TRUE);
-	if (option.fit_page) check_menu_item(IDM_OPTIONMENU, IDM_FITPAGE, TRUE);
-	if (option.safer) check_menu_item(IDM_OPTIONMENU, IDM_SAFER, TRUE);
-	if (option.save_dir) check_menu_item(IDM_OPTIONMENU, IDM_SAVEDIR, TRUE);
-	if (option.redisplay) check_menu_item(IDM_OPTIONMENU, IDM_AUTOREDISPLAY, TRUE);
-	if (option.epsf_clip) check_menu_item(IDM_OPTIONMENU, IDM_EPSFCLIP, TRUE);
-	if (option.epsf_warn) check_menu_item(IDM_OPTIONMENU, IDM_EPSFWARN, TRUE);
-	if (option.ignore_dsc) check_menu_item(IDM_OPTIONMENU, IDM_IGNOREDSC, TRUE);
-	if (option.show_bbox) check_menu_item(IDM_OPTIONMENU, IDM_SHOWBBOX, TRUE);
-	check_menu_item(IDM_DRAWMENU, option.drawmethod, TRUE);
-	check_menu_item(IDM_UNITMENU, option.unit, TRUE);
-	check_menu_item(IDM_ORIENTMENU, option.orientation, TRUE);
-	check_menu_item(IDM_MEDIAMENU, option.media, TRUE);
-	check_menu_item(IDM_DEPTHMENU, gsview_depth_to_menu(option.depth), TRUE);
-	check_menu_item(IDM_GSVERMENU, option.gsversion, TRUE);
+	init_check_menu();
 	update_scroll_bars();
 	return 0;
 }
 
-char *
-install_default(int id)
-{
-int i;
-static char defstr[MAXSTR];
-    switch(id) {
-	case INSTALL_EXE:
-	    strcpy(defstr, szExePath);
-	    strcat(defstr, "GSOS2.EXE");
-	    break;
-	case INSTALL_INCLUDE:
-	    strcpy(defstr, szExePath);
-	    strcat(defstr, ";");
-	    strcat(defstr, szExePath);
-	    strcat(defstr, "fonts;");
-	    i = strlen(defstr);
-	    defstr[i++] = tolower(szIniFile[0]);
-	    defstr[i] = '\0';
-	    strcat(defstr, ":\\psfonts");
-	    break;
-	case INSTALL_OTHER:
-	    defstr[0] = '\0';
-	    break;
-	default:
-	    defstr[0] = '\0';
-	    break;
-    }
-    return defstr;
-}
-
-
-
-void
-init_options()
-{
-int i;
-	/* make an educated guess about gs command */
-	strcpy(option.gsexe, install_default(INSTALL_EXE));
-	strcpy(option.gsinclude, install_default(INSTALL_INCLUDE));
-	strcpy(option.gsother, install_default(INSTALL_OTHER));
-	option.img_origin.x = CW_USEDEFAULT;
-	option.img_origin.y = CW_USEDEFAULT;
-	option.img_size.x = CW_USEDEFAULT;
-	option.img_size.y = CW_USEDEFAULT;
-	option.img_max = FALSE;
-	option.gsversion = IDM_GS351;
-	option.drawmethod = IDM_DRAWDEF;
-	option.unit = IDM_UNITPT;
-	option.quick = TRUE;
-	option.settings = TRUE;
-	option.button_show = TRUE;
-	option.fit_page = TRUE;
-	option.safer = TRUE;
-	option.media = IDM_LETTER;
-	strcpy(option.medianame, "letter");
-	option.user_width = 610;
-	option.user_height = 792;
-	option.epsf_clip = FALSE;
-	option.epsf_warn = FALSE;
-	option.ignore_dsc = FALSE;
-	option.show_bbox = FALSE;
-	option.redisplay = TRUE;
-	option.orientation = IDM_PORTRAIT;
-	option.swap_landscape = FALSE;
-	option.xdpi = DEFAULT_RESOLUTION;
-	option.ydpi = DEFAULT_RESOLUTION;
-	option.save_dir = TRUE;
-	strcpy(option.device_name, "deskjet");
-	strcpy(option.device_resolution, "300");
-}
 
 void
 show_buttons(void)
@@ -598,3 +478,18 @@ show_buttons(void)
 	WinSendMsg(hwnd_frame, WM_UPDATEFRAME, (MPARAM)frame_flags, (MPARAM)0);
 }
 
+int
+gsview_create_objects(void)
+{
+char buf[MAXSTR];
+char setup[MAXSTR];
+APIRET rc;
+    strcpy(buf, szExePath);
+    strcat(buf, "\\gvpm.exe");
+    sprintf(setup, "EXENAME=%s;ASSOCFILTER=*.ps,*.eps,*.pdf", buf);
+    rc = !WinCreateObject("WPProgram", "GSview", setup, "<WP_DESKTOP>",
+	CO_REPLACEIFEXISTS);
+    if (rc)
+        message_box("Couldn't create desktop program object", 0);
+    return rc;
+}

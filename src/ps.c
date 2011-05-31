@@ -36,22 +36,18 @@
  * rjl 1995-04-01
  *   Commented out two lines to deal with documents that include
  *   code after %%EndSetup and before %%Page:     (Microsoft Windows)
+ * rjl 1996-08-08
+ *   Modified gettext() to skip over trailing ')' of (text)
+ *   Modified psscan() to skip over HP LaserJet PJL prologue
  */
 
 #include <stdio.h>
-
 #if defined(__TURBOC__) || defined(OS2)
-
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #define strcasecmp(s,t) stricmp(s,t)
 extern void pserror(char *str);
-
-#else
-
-#if defined(__STDC__)
-#include <stdlib.h>
-#include <string.h>
 #else
 #ifndef SEEK_SET
 #define SEEK_SET 0
@@ -59,13 +55,10 @@ extern void pserror(char *str);
 #ifndef BUFSIZ
 #define BUFSIZ 1024
 #endif
-#include <X11/Xos.h>		/* #includes the appropriate <string.h> */
-#endif
-#define pserror(str) fprintf(stderr,str)
-
-#endif
-
 #include <ctype.h>
+#include <X11/Xos.h>		/* #includes the appropriate <string.h> */
+#define pserror(str) fprintf(stderr,str)
+#endif
 #include "ps.h"
 
 #ifdef BSD4_2
@@ -289,6 +282,19 @@ psscan(file)
     if (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count) == NULL) {
 	pserror("Warning: empty file.\n");
 	return(NULL);
+    }
+
+    /* rjl: check for HP LaserJet prologue */
+    if (iscomment(line, "\033%-12345X")) {
+	/* found prolog, read until first DSC comment */
+        while (readline(line, sizeof line, file, enddoseps, &position, &line_len, &line_count)) {
+	    if (line[0] == '%')
+		break;
+	}
+        if (line[0] != '%') {
+	    pserror("Warning: error skipping PJL prologue.\n");
+	    return(NULL);
+	}
     }
 
     /* Header comments */
@@ -1248,6 +1254,8 @@ gettext(line, next_char)
 		*cp++ = *line++;
 	    }
 	}
+	if (*line == ')')	/* rjl 1996-08-05 */
+	    line++;		/* rjl 1996-08-05 */
     } else {
 	while (*line && !(*line == ' ' || *line == '\t' || *line == '\n'))
 	    *cp++ = *line++;
@@ -1679,3 +1687,4 @@ psfgets(s, n, stream)
     *p = '\0';
     return (ferror(stream)) ? NULL : s;
 }
+

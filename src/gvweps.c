@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -21,127 +21,63 @@
 #include "gvwin.h"
 
 
-HGLOBAL make_dib(void);  /* in gvwclip.c */
-
 static HGLOBAL get_bitmap_hglobal;
-static BOOL get_bitmap_made_dib = FALSE;
 
 LPBITMAP2
 get_bitmap()
 {
-	get_bitmap_hglobal = 0;
-	get_bitmap_made_dib = FALSE;
-	if (!OpenClipboard(hwndimg))
-	    return NULL;
-	if (IsClipboardFormatAvailable(CF_DIB))
-	    get_bitmap_hglobal = GetClipboardData(CF_DIB);
-	else if (IsClipboardFormatAvailable(CF_BITMAP)) {
-	    /* untested */
-	    get_bitmap_hglobal = make_dib(); /* convert to DIB format */
-	    if (get_bitmap_hglobal == (HGLOBAL)NULL) {
-	        CloseClipboard();
-		return NULL;
-	    }
-	    get_bitmap_made_dib = TRUE;
-	}
-	else {
-	    CloseClipboard();
-	    return NULL;
-	}
-	return (LPBITMAP2)GlobalLock(get_bitmap_hglobal);
+    get_bitmap_hglobal = (*gsdll.copy_dib)(gsdll.device);
+    if (get_bitmap_hglobal == (HGLOBAL)NULL) {
+	message_box("not enough memory to copy bitmap", 0);
+	return NULL;
+    }
+    return (LPBITMAP2)GlobalLock(get_bitmap_hglobal);
 }
 
 void
 release_bitmap()
 {
-	GlobalUnlock(get_bitmap_hglobal);
-	if (get_bitmap_made_dib)
+	if (get_bitmap_hglobal) {
+	    GlobalUnlock(get_bitmap_hglobal);
 	    GlobalFree(get_bitmap_hglobal);
-	CloseClipboard();
-}
-
-#ifdef __WIN32__
-long
-hugewrite(HFILE hf, const void _huge *hpvBuffer, long cbBuffer)
-{
-	    return _hwrite(hf, hpvBuffer, cbBuffer);
-}
-#else
-/* Write data to file - blocks > 64k permitted */
-long
-hugewrite(HFILE hf, const void _huge *hpvBuffer, long cbBuffer)
-{
-DWORD count;
-long written, done;
-char _huge *hp;
-	if (is_win31)
-	    return _hwrite(hf, hpvBuffer, cbBuffer);
-	done = 0;
-	hp = (char _huge *)hpvBuffer;
-	while (cbBuffer > 0) {
-	    count = min( min(32768UL, cbBuffer), (DWORD)(65536UL-OFFSETOF(hp)) );
-	    written = _lwrite(hf, hp, (UINT)count);
-	    if (written == (long)HFILE_ERROR)
-		return (long)HFILE_ERROR;
-	    done += written;
-	    cbBuffer -= written;
-	    hp += written;
+	    get_bitmap_hglobal = 0;
 	}
-	return done;
 }
-#endif
 
-/* convert a clipboard bitmap to a metafile picture */
+long
+hugewrite(HFILE hf, const void _huge *hpvBuffer, long cbBuffer)
+{
+	    return _hwrite(hf, hpvBuffer, cbBuffer);
+}
+
+/* convert the display bitmap to a metafile picture */
 HMETAFILE
 make_metafile(void)
 {
 HDC hdc;
 HMETAFILE hmf;
-HGLOBAL hglobal;
-	if (IsClipboardFormatAvailable(CF_DIB)) {
-	    LPBITMAPINFOHEADER pbmih;
-	    BYTE _huge *lpDibBits;
-	    hglobal = GetClipboardData(CF_DIB);
-	    pbmih = (LPBITMAPINFOHEADER)GlobalLock(hglobal);
-	    lpDibBits = ((BYTE _huge *)pbmih) + pbmih->biSize;
-	    if (pbmih->biSize == sizeof(BITMAPCOREHEADER))
-		lpDibBits += dib_pal_colors((LPBITMAP2)pbmih) * sizeof(RGBTRIPLE); 
-	    else
-		lpDibBits += dib_pal_colors((LPBITMAP2)pbmih) * sizeof(RGBQUAD); 
-	    /* now make a Metafile from it */
-	    hdc = CreateMetaFile(NULL);
-	    SetWindowOrg(hdc, 0, 0);
-	    SetWindowExt(hdc, (int)pbmih->biWidth, (int)pbmih->biHeight);
-	    StretchDIBits(hdc, 0, 0, (int)pbmih->biWidth, (int)pbmih->biHeight,
-	        0, 0, (int)pbmih->biWidth, (int)pbmih->biHeight,
-	        (void FAR *)lpDibBits, (LPBITMAPINFO)pbmih,
-	        DIB_RGB_COLORS, SRCCOPY);
-	    hmf = CloseMetaFile(hdc);
-	    GlobalUnlock(hglobal);
+LPBITMAP2 pbm;
+LPBITMAPINFOHEADER pbmih;
+BYTE _huge *lpDibBits;
+	if ( (pbm = get_bitmap()) == (LPBITMAP2)NULL) {
+	    return (HMETAFILE)0;
 	}
-	else if (IsClipboardFormatAvailable(CF_BITMAP)) {
-	    HBITMAP hbitmap, hbitmap_old;
-	    HDC hdc_bit;
-	    BITMAP bm;
-	    hbitmap = GetClipboardData(CF_BITMAP);
-	    hdc = GetDC((HWND)NULL);
-	    hdc_bit = CreateCompatibleDC(hdc);
-	    ReleaseDC((HWND)NULL,hdc);
-	    GetObject(hbitmap, sizeof(BITMAP), &bm);
-	    hdc = CreateMetaFile(NULL);
-	    SetWindowOrg(hdc, 0, 0);
-	    SetWindowExt(hdc, bm.bmWidth, bm.bmHeight);
-	    hbitmap_old = SelectBitmap(hdc_bit, hbitmap);
-	    StretchBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight,
-	    	hdc_bit, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
-	    SelectBitmap(hdc_bit, hbitmap_old);
-	    DeleteDC(hdc_bit);
-	    hmf = CloseMetaFile(hdc);
-	}
-	else {
-	    play_sound(SOUND_ERROR);
-	    hmf = NULL;
-	}
+	pbmih = (LPBITMAPINFOHEADER)pbm;
+	lpDibBits = ((BYTE _huge *)pbmih) + pbmih->biSize;
+	if (pbmih->biSize == sizeof(BITMAPCOREHEADER))
+	    lpDibBits += dib_pal_colors((LPBITMAP2)pbmih) * sizeof(RGBTRIPLE); 
+	else
+	    lpDibBits += dib_pal_colors((LPBITMAP2)pbmih) * sizeof(RGBQUAD); 
+	/* now make a Metafile from it */
+	hdc = CreateMetaFile(NULL);
+	SetWindowOrg(hdc, 0, 0);
+	SetWindowExt(hdc, (int)pbmih->biWidth, (int)pbmih->biHeight);
+	StretchDIBits(hdc, 0, 0, (int)pbmih->biWidth, (int)pbmih->biHeight,
+	    0, 0, (int)pbmih->biWidth, (int)pbmih->biHeight,
+	    (void FAR *)lpDibBits, (LPBITMAPINFO)pbmih,
+	    DIB_RGB_COLORS, SRCCOPY);
+	hmf = CloseMetaFile(hdc);
+	release_bitmap();
 	return hmf;
 }
 
@@ -164,18 +100,10 @@ LPCVOID lpmf;
 LPSTR lpmf;
 #endif
 
-	if (!OpenClipboard(hwndimg)) {
-	    play_sound(SOUND_ERROR);
-	    return;
-	}
-
 	if ( (hmf = make_metafile()) == (HMETAFILE)NULL ) {
 	    play_sound(SOUND_ERROR);
-	    CloseClipboard();
 	    return;
 	}
-
-	CloseClipboard();
 
 	/* get memory handle to metafile */
 #ifdef __WIN32__
@@ -198,7 +126,7 @@ LPSTR lpmf;
 
 	/* create EPS file */
 	epsname[0] = '\0';
-	if (!get_filename(epsname, TRUE, FILTER_EPS, 0, IDS_TOPICEDIT)) {
+	if (!get_filename(epsname, TRUE, FILTER_EPS, 0, IDS_TOPICPREVIEW)) {
 	    GlobalFree(hglobal);
 	    return;
 	}

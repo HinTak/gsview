@@ -46,8 +46,31 @@
 #include <fcntl.h>
 #endif
 
+#ifdef __WIN32__
+#undef MSDOS
+#define GSCOMMAND "gswin32c"
+#define BYTE unsigned char
+#define WORD  unsigned short
+#define DWORD unsigned long
+#define UINT  unsigned int
+#define LONG  long
+#define BOOL  int
+#define GVFAR
+#define GVHUGE
+#define READBIN  "rb"
+#define WRITEBIN "wb"
+#define MAXSTR 256
+#define DIRSEP '\\'
+#define EOLSTR "\r\n"
+#define PACKED
+#include <alloc.h>
+#include <dir.h>
+#include <io.h>
+#include <fcntl.h>
+#endif
+
 #ifdef MSDOS
-#define GSCOMMAND "gsos2"
+#define GSCOMMAND "gs386"
 #define BYTE unsigned char
 #define WORD  unsigned short
 #define DWORD unsigned long
@@ -86,9 +109,9 @@
 #define PACKED __attribute__ ((packed))
 #if defined(__NeXT__)
 extern char *getwd (char *pathname);
-#define getcwd(s,n) getwd(s)
+#define gs_getcwd(s,n) getwd(s)
 #endif
-/* char *getcwd(char *, int); */
+/* char *gs_getcwd(char *, int); */
 #define stricmp(s1, s2) strcasecmp(s1, s2)
 #ifndef SEEK_SET
 #define SEEK_SET 0
@@ -141,7 +164,7 @@ typedef struct tagOPTION {
 FILE * gp_open_scratch_file(const char *prefix, char *fname, const char *mode);
 void gserror(UINT id, char *str, UINT icon, int sound);
 void pserror(char *str);
-char * _getcwd(char *dirname, int size);
+char * gs_getcwd(char *dirname, int size);
 void play_sound(int i);
 
 /* temporary kludges */
@@ -160,3 +183,4 @@ extern OPTION option;
 /* error messages */
 #define IDS_NOPREVIEW 1
 #define IDS_EPSUSERINVALID 2
+

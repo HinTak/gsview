@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -31,44 +31,23 @@
 #include <dir.h>
 #include <io.h>
 #include <time.h>
+#include <process.h>
 #define NeedFunctionPrototypes 1
 #include "ps.h"
 #include "gvcrc.h"
+#include "gsdll.h"
 
 #ifndef RC_INVOKED
-
-/* messages used between gsview and gswin */
-#define WM_GSVIEW WM_USER+0
-/* from gswin to gsview */
-#define HWND_TEXT	0
-#define HWND_IMGCHILD	1
-#define GSWIN_CLOSE	2
-#define SYNC_OUTPUT	3
-#define OUTPUT_PAGE	4
-#define SCROLL_POSITION 5
-#define PIPE_REQUEST	6
-#define BEGIN		7
-#define END		8
-/* from gsview to gswin image window */
-#define NEXT_PAGE	10
-#define COPY_CLIPBOARD	11
-/* from gsview to gswin text window */
-#define PIPE_DATA	12
 
 /* for gsv16spl.exe 16-bit spooler interface for Win32s */
 #define WM_GSV16SPL WM_USER+1
 extern HWND hwndspl;	/* window handle of gsv16spl.exe */
 
 #define PROFILE_SIZE 2048
-#ifdef WIN32
 #define MAXSTR 256	/* maximum file name length and general string length */
+#define DEVICENAME "mswindll"
 #define DEFAULT_GSCOMMAND "gswin32.exe"
 #define INIFILE "gsview32.ini"
-#else
-#define MAXSTR 80	/* maximum file name length and general string length */
-#define DEFAULT_GSCOMMAND "gswin"
-#define INIFILE "gsview.ini"
-#endif
 #define DEFAULT_RESOLUTION 96.0
 #define DEFAULT_ZOOMRES 300.0
 #define INISECTION "Options"
@@ -80,14 +59,27 @@ extern HWND hwndspl;	/* window handle of gsv16spl.exe */
 #define GVHUGE _huge
 
 #include "gvceps.h"
-#include "gvcprf.h"
 
 /* program details */
 typedef struct tagPROG {
     BOOL	valid;
     HINSTANCE	hinst;
-    FILE	*input;		/* pipe to stdin */
 } PROG;
+
+typedef struct tagPRINTER {
+	PROG	prog;		/* Ghostscript program doing printing */
+	char	optname[MAXSTR];/* file storing command line options */
+	char	psname[MAXSTR]; /* file storing temporary postscript */
+} PRINTER;
+
+/* bitmap details */
+typedef struct tagBM {
+    int		width;
+    int		height;
+    int		scrollx;
+    int		scrolly;
+    BOOL	changed;	/* if width or height changed by GS */
+} BMAP;
 
 typedef struct document PSDOC;
 
@@ -99,13 +91,23 @@ typedef struct tagPSBBOX {
 	int	valid;
 } PSBBOX;
 
+typedef struct tagPAGELIST {
+	int current;	/* index of current selection */
+	BOOL multiple;	/* true if multiple selection allowed */
+	BOOL *select;	/* array of selection flags */
+} PAGELIST;
+
 typedef struct tagPSFILE {
-	BOOL	ignore_dsc;	/* true if DSC to be ignored */
-	PSDOC	*doc;		/* DSC structure.  NULL if not DSC */
-	int 	pagenum;	/* current page number */
 	char 	name[MAXSTR];	/* name of selected document file */
 	FILE 	*file;		/* selected file */
+	PSDOC	*doc;		/* DSC structure.  NULL if not DSC */
+	PAGELIST page_list;	/* selected page list */
+	BOOL	locked;		/* To prevent two threads using the file */
+	BOOL	ignore_dsc;	/* true if DSC to be ignored */
+	BOOL	ignore_special;	/* true if %%PageOrder: Special to be ignored */
+	int 	pagenum;	/* current page number */
 	BOOL	ctrld;		/* TRUE if file starts with ^D */
+	BOOL	pjl;		/* TRUE if file starts with HP LaserJet PJL prologue */
 	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
 #ifdef _Windows
 	struct	ftime datetime;	/* time/date of selected file */
@@ -113,27 +115,97 @@ typedef struct tagPSFILE {
 	time_t	datetime;	/* time/date of selected file */
 #endif
 	long	length;		/* length of selected file */
-	char	previous_name[MAXSTR];
-	BOOL	previous_was_dsc;
-	long	previous_begintrailer;
-	long	previous_endtrailer;
 	BOOL	ispdf;		/* true if PDF document */
-	char 	pdftemp[MAXSTR]; /* name of temporary DSC file */
+	char 	text_name[MAXSTR];  /* name of file containing extracted text */
+	unsigned long text_offset;  /* file offset after last text search match */
+	int	text_page;	    /* page of last text search match */
+	BOOL	text_extract;       /* TRUE=extracting, FALSE=searching */
+	PSBBOX	text_bbox;	    /* bbox of found word */
 } PSFILE;
+
+/* State of GS DLL */
+/* state transitions are between adjacent states only */
+/* except IDLE can be skipped between UNLOADED and BUSY */
+#define UNLOADED 0	/* DLL has not been loaded or has been unloaded */
+#define IDLE     1	/* No input is being sent to DLL */
+#define BUSY     2	/* Input is being sent to DLL */
+#define PAGE     3      /* Waiting at showpage */
+
+/* In the single threaded version, there are three places that
+ * process the message loop:
+ *  1. Main get message loop in UNLOADED state
+ *  2. Peek message loop in BUSY state
+ *  3. Get message loop in PAGE state
+ * We must avoid recursive calls from the last two message loop handlers.
+ * In the multithreaded version, the DLL is handled by a separate thread.
+ * User input that affects the GS DLL sets some pending variables, 
+ * which are processed later by the appropriate message loop or thread.
+ * Changes to the pending structure must be made inside a critical section.
+ */
+/* pending structure */
+typedef struct tagPENDING {
+	BOOL	unload;		/* We want to unload the DLL */
+	BOOL	abort;		/* ignore errors and restart the interpreter */
+	BOOL	restart;	/* restart interpreter */
+	BOOL	redisplay;	/* redisplay after interpreter restarted */
+	BOOL	next;		/* move to next page */
+	BOOL	now;		/* We want to do something now */
+	/* if now set, at least one of the following four will be set */
+	int	pagenum;	/* page number to display */
+	PSFILE *psfile;		/* new document to display */
+	BOOL	resize;		/* size, resolution or orientation change */
+	BOOL	text;		/* extract text, don't display */
+} PENDING;
+
+extern PENDING pending;
+
+
+typedef struct tagGSINPUT {
+    unsigned long ptr;
+    unsigned long end;
+    BOOL seek;
+} GSINPUT;
+
+/* main structure with info about the GS DLL */
+typedef struct tagGSDLL {
+	BOOL		valid;		/* true if loaded */
+	HINSTANCE	hmodule;	/* handle to module */
+	int		state;
+
+	/* pointers to DLL functions */
+	PFN_gsdll_revision	revision;
+	PFN_gsdll_init		init;
+	PFN_gsdll_exit		exit;
+	PFN_gsdll_execute_begin	execute_begin;
+	PFN_gsdll_execute_cont	execute_cont;
+	PFN_gsdll_execute_end	execute_end;
+	PFN_gsdll_lock_device	lock_device;
+	PFN_gsdll_copy_dib	copy_dib;
+	PFN_gsdll_copy_palette	copy_palette;
+	PFN_gsdll_draw		draw;
+
+	/* pointer to os2dll or mswindll device */
+	unsigned char	*device;
+
+	int	input_count;
+	int	input_index;
+	GSINPUT input[5];	/* header, defaults, prolog, setup, page */
+} GSDLL;
+
 
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
-	/* char	gscommand[MAXSTR]; */ /* no longer used */
-	char	gsexe[MAXSTR];
+	char	gsdll[MAXSTR];
 	char	gsinclude[MAXSTR];
 	char	gsother[MAXSTR];
-	int	gsversion;
-	int	drawmethod;
+	BOOL	configured;
+	int	drawmethod;	/* OS/2 only */
 	POINT	img_origin;
 	POINT	img_size;
 	BOOL	img_max;
 	int	unit;
-	BOOL	quick;
+	BOOL	quick_open;
+	BOOL	quick_text;
 	BOOL	settings;
 	BOOL	button_show;
 	BOOL	fit_page;
@@ -154,6 +226,8 @@ typedef struct tagOPTIONS {
 	float	zoom_xdpi;
 	float	zoom_ydpi;
 	int	depth;
+	int	alpha_text;
+	int	alpha_graphics;
 	BOOL	save_dir;
 	char	device_name[32];
 	char	device_resolution[32];
@@ -161,42 +235,87 @@ typedef struct tagOPTIONS {
 } OPTIONS;
 
 typedef struct tagDISPLAY {
-	char	optname[MAXSTR]; /* file storing command line options */
-	BOOL	abort;
-	BOOL	busy;
-	int	width;
+	int	width;		/* in pixels */
 	int	height;
 	int	planes;
 	int	bitcount;
-	BOOL	do_endfile;	
-	BOOL	do_resize;
-	BOOL	do_display;
+	BOOL	show_find;	/* highlight found text */
 	BOOL	epsf_clipped;	/* display is clipped to bbox */
 	int	zoom_xoffset;	/* in 1/72" */
 	int	zoom_yoffset;
+	POINT	offset;		/* offset of child window */
+	float	xdpi;
+	float	ydpi;
+	int	xoffset;	/* offset of page in pixels */
+	int	yoffset;
+	int	orientation;	/* 0, 90, 180 or 270 degrees */
+	BOOL	init;		/* viewer initialised */
 	BOOL	saved;		/* interpreter state saved */
-	BOOL	page;		/* GS_PAGE received */
-	BOOL	sync;		/* GS_SYNC received */
+	BOOL	need_header;
+	BOOL	need_trailer;
+	HANDLE	event;
+	unsigned long tid;
 } DISPLAY;
 
+struct prfentry {
+	char *name;
+	char *value;
+	struct prfentry *next;
+};
+
+struct prfsection {
+	char *name;
+	struct prfentry *entry;
+	struct prfsection *next;
+};
+
+struct prop_item_s {
+	char	name[MAXSTR];
+	char	value[MAXSTR];
+};
+
+typedef struct tagPROFILE {
+	char *name;
+	FILE *file;
+	BOOL changed;
+	struct prfsection *section;
+} PROFILE;
+
+typedef struct tagTEXTINDEX {
+    int word;	/* offset to word */
+    int line;	/* line number on page */
+    PSBBOX bbox;
+} TEXTINDEX;
+extern TEXTINDEX *text_index;
+extern int text_index_count;	/* number of words in index */
+extern char *text_words;	/* storage for words */
+
+/* for pstotext DLL */
+typedef int (GSDLLAPI *PFN_pstotextInit)(void **instance);
+typedef int (GSDLLAPI *PFN_pstotextFilter)(void *instance, char *instr, 
+    char **pre, char **word, char **post,
+    int *llx, int *lly, int *urx, int *ury);
+typedef int (GSDLLAPI *PFN_pstotextExit)(void *instance);
+extern HMODULE pstotextModule;
+extern FILE *pstotextOutfile;
+extern void *pstotextInstance;
+extern PFN_pstotextInit pstotextInit;
+extern PFN_pstotextFilter pstotextFilter;
+extern PFN_pstotextExit pstotextExit;
+extern char pstotextLine[2048];
+extern int pstotextCount;
 
 extern BOOL debug;			/* /D command line option used */
 extern FILE *debug_file;		/* for gs input logging */
-struct page_list_s {
-	int current;	/* index of current selection */
-	BOOL multiple;	/* true if multiple selection allowed */
-	BOOL *select;	/* array of selection flags */
-};
-extern struct page_list_s page_list;
 
 #define SOUND_PAGE 0
 #define SOUND_NOPAGE 1
 #define SOUND_NONUMBER 2
 #define SOUND_NOTOPEN 3
 #define SOUND_ERROR 4
-#define SOUND_TIMEOUT 5
-#define SOUND_START 6
-#define SOUND_EXIT 7
+#define SOUND_START 5
+#define SOUND_EXIT 6
+#define SOUND_BUSY 7
 #define NUMSOUND 8
 struct sound_s {
 	char *entry;		/* profile entry */
@@ -210,8 +329,9 @@ extern HINSTANCE hlib_mmsystem;	/* DLL containing sndPlaySound function */
 extern FPSPS lpfnSndPlaySound;	/* pointer to sndPlaySound function if loaded */
 
 extern const char szClassName[];
+extern const char szImgClassName[];
 extern const char szScratch[];  /* temporary filename prefix */
-extern char szSpoolPrefix[];	/* usually \\spool\ */
+extern char *szSpoolPrefix;	/* usually \\spool\ */
 extern char szAppName[MAXSTR];
 extern char szHelpTopic[MAXSTR];
 extern char szWait[MAXSTR];
@@ -220,6 +340,7 @@ extern char szIniFile[MAXSTR];
 extern char szFindText[MAXSTR];
 extern char szHelpName[MAXSTR];		/* buffer for building help filename */
 extern char previous_filename[MAXSTR];	/* to remember name between file dlg boxes */
+extern char selectname[MAXSTR];		/* for IDM_SELECT */
 extern UINT help_message;		/* message sent by OFN_SHOWHELP */
 extern HWND hwndimg;			/* gsview main window */
 extern HWND hDlgModeless;		/* any modeless dialog box */
@@ -229,6 +350,11 @@ extern HINSTANCE phInstance;		/* instance of gsview */
 extern BOOL is_win31;			/* To allow selective use of win 3.1 features */
 extern BOOL is_winnt;			/* To allow selective use of Windows NT features */
 extern BOOL is_win95;			/* To allow selective use of Windows 95 features */
+extern BOOL is_win32s;			/* To allow selective use of Win32s misfeatures */
+extern BOOL is_win4;			/* To allow selective use of Windows 4.0 features */
+extern BOOL multithread;		/* TRUE if running multithreaded */
+extern CRITICAL_SECTION crit_sec;	/* for thread synchronization */
+extern HANDLE hmutex_ps;		/* for protecting psfile and pending */
 extern HMENU hmenu;			/* main menu */
 extern HACCEL haccel;			/* menu accelerators */
 extern HCURSOR hcWait;
@@ -241,18 +367,19 @@ extern POINT info_page;		/* position of page information */
 extern RECT  info_rect;		/* position and size of brief info area */
 extern RECT  info_coord;		/* position and size of coordinate information */
 extern RECT  button_rect;		/* position and size of button area */
-#define CLOSE_TIMEOUT    20	/* 20 seconds */
 extern OPENFILENAME ofn;
-extern BOOL waiting;		/* true when 'wait' to be displayed in info area */
-extern BOOL bTimeout;		/* true if timeout occured */
 extern WNDPROC lpfnButtonWndProc;
+extern int percent_done;		/* percentage of document processed */
+extern int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
 
 extern PROG gsprog;
+extern BMAP bitmap;
 extern OPTIONS option;
-extern PSFILE psfile; 
+extern PSFILE psfile;
+extern PRINTER printer;
+extern BOOL win32s_printer_pending;
 extern DISPLAY display;
-extern PSDOC *doc;
-extern int page_extra;
+/* extern PSDOC *doc;	/* points to psfile->doc */
 extern int page_skip;
 extern BOOL changed_version;
 extern BOOL zoom;
@@ -278,142 +405,35 @@ extern PSBBOX bbox;
     SendMessage((hwnd), WM_COMMAND, id, MAKELPARAM(GetDlgItem((hwnd),(id)),(notice)))
 #endif
 
+#include "gvcfn.h"    /* common function prototypes */
+#include "gvcbeta.h"  /* common function prototypes */
+
 /* in gvwin.c */
 LRESULT CALLBACK _export MenuButtonProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK _export WndImgProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK _export WndImgChildProc(HWND, UINT, WPARAM, LPARAM);
 BOOL in_child_client_area(void);
-BOOL set_timer(UINT);
-void clear_timer(void);
-void copy_clipboard(void);
-BOOL get_cursorpos(float *x, float *y);
-
-/* in gvcmisc.c */
-void error_message(char *str);
-void info_init(HWND hwnd);
-void read_profile(void);
-void write_profile(void);
-
-/* in gvwmisc.c */
-/* BOOL SetDlgItemText(HWND hwnd, int id, char *str); */
-void post_close(void);
-void get_help(void);
-int message_box(char *str, int icon);
-void check_menu_item(int menuid, int itemid, BOOL checked);
-int get_menu_string(int menuid, int itemid, char *str, int len);
-int load_string(int id, char *str, int len);
-void play_sound(int i);
-void info_wait(int id);
-int gs_chdir(char *dirname);
-char * gs_getcwd(char *dirname, int size);
-void send_prolog(FILE *f, int resource);
-void profile_create_section(PROFILE *prf, char *section, int id);
-
-/* in gvcdisp.c */
-void transform_cursorpos(float *x, float *y);
-void transform_point(float *x, float *y);
-void iransform_point(float *x, float *y);
-int get_paper_size_index(void);
-void gs_size(void);
-void gs_resize(void);
-void gs_magnify(float scale);
-void gsview_orientation(int new_orientation);
-void gsview_media(int new_media);
-void gsview_unit(int new_unit);
-void gsview_endfile(void);
-void gsview_openfile(char *filename);
-void gsview_select(void);
-void gsview_selectfile(char *filename);
-void gsview_display(void);
-void gsview_displayfile(char *filename);
-void send_orientation_prolog(FILE *f);
-void send_epswarn_prolog(FILE *f);
-void fix_orientation(FILE *f);
-FILE * gp_open_scratch_file(const char *prefix, char *fname, const char *mode);
-BOOL dfreopen(void);
-void dfclose(void);
-BOOL dsc_scan(char *filename);
-void dsc_getpages(FILE *f, int first, int last);
-void dsc_header(FILE *f);
-void dsc_dopage(void);
-void dsc_skip(int skip);
-int map_page(int page);
-BOOL do_output(void);
-
-/* in gvwdisp.c */
-void do_message(void);
-BOOL exec_pgm(char *name, char *arg, char *id, PROG* prog);
-void stop_pgm(PROG* prog);
-void cleanup_pgm(PROG *prog);
-BOOL gs_open(void);
-BOOL gs_close(void);
-void next_page(void);
-BOOL psfile_changed(void);
-void psfile_savestat(void);
-BOOL is_pipe_done(void);	/* true if pipe has just been reset */
-
-/* in gvccmd.c */
-int gsview_command(int command);
-BOOL not_open(void);
-BOOL not_dsc(void);
-void gserror(UINT id, char *str, UINT icon, int sound);
-void pserror(char *str);
-int not_implemented(void);
-void gsview_check_usersize(void);
-int gsview_depth_to_menu(int depth);
-
-/* in gvwdlg.c */
-BOOL get_filename(char *filename, BOOL save, int filter, int title, int help);
-BOOL get_string(char *, char *);
-BOOL CALLBACK _export PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
-BOOL get_page(int *, BOOL);
-void show_info(void);
-void show_about(void);
-void change_sounds(void);
-BOOL install_gsexe(void);
-
-/* in gvwpipe.c */
-void pipeinit(void);	/* prepare pipe for opening */
-FILE *pipeopen(void);	/* open pipe for first time */
-void pipeclose(void);	/* finished with pipe, close & delete temp files */
-void pipereset(void);	/* pipe is empty, do cleanup */
-void piperequest(void);	/* request from gswin for pipe data */
-void pipeflush(void);	/* start sending data through pipe */
-BOOL is_pipe_done(void);	/* true if pipe has just been reset */
 
 /* in gvwinit.c */
 void gsview_init0(LPSTR lpszCmdLine);
 void gsview_init1(LPSTR lpszCmdLine);
 void gsview_create(void);
-void show_buttons(void);
-char * install_default(int id);
 
-/* in gvcprn.c */
-struct prop_item_s * get_properties(char *device);
-void gsview_spool(char *, char *);
-void psfile_extract(FILE *f);
-char *get_devices(void);
-void print_cleanup(void);
-void gsview_saveas(void);
-void gsview_extract(void);
-BOOL gsview_cprint(BOOL to_file, char *cfname, char *optfname);
+/* in gvwdisp.c */
+void do_message(void);
+BOOL exec_pgm(char *name, char *arg, PROG* prog);
+void stop_pgm(PROG* prog);
+void cleanup_pgm(PROG *prog);
+
+/* in gvwdlg.c */
+BOOL CALLBACK _export PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
 
 /* in gvwprn.c */
+BOOL get_portname(char *portname, char *port);
 int gp_printfile(char *filename, char *port);
 void gsview_print(BOOL);
 extern char not_defined[];
-
-/* in gvweps.c */
-void make_eps_metafile(void);
-void ps_to_eps(void); /* actually in gvceps.c */
-BOOL get_bbox(void);
-
-/* in gvwclip.c */
-void paste_to_file(void);
-void clip_convert(void);
-
-/* in gvctext.c */
-void gsview_text_extract(void);
-void gsview_text_find(void);
-void gsview_text_findnext(void);
+void start_gvwgs(void);
 
 #endif
+

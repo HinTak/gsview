@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -23,9 +23,9 @@
 /* SetDlgItemText is a Windows API */
 
 void
-post_close(void)
+post_img_message(int message, int param)
 {
-	PostMessage(hwndimg, WM_CLOSE, (WPARAM)0, (LPARAM)0);
+    PostMessage(hwndimg, message, (WPARAM)param, (LPARAM)0);
 }
 
 void
@@ -40,19 +40,26 @@ int message_box(char *str, int icon)
 	return MessageBox(hwndimg, str, szAppName, icon | MB_OK);
 }
 
+int
+delayed_message_box(int id, int icon)
+{
+    PostMessage(hwndimg, WM_GSMESSBOX, (WPARAM)id, (LPARAM)icon);
+    return 0;
+}
+
+#pragma argsused
 /* change menu item checkmark */
 void
 check_menu_item(int menuid, int itemid, BOOL checked)
 {
-	menuid = menuid;	/* shut up warning */
         CheckMenuItem(hmenu, itemid, MF_BYCOMMAND | (checked ? MF_CHECKED : MF_UNCHECKED));
 }
 
+#pragma argsused
 /* get text of menu item */
 int
 get_menu_string(int menuid, int itemid, char *str, int len)
 {
-	menuid = menuid;	/* shut up warning */
 	return GetMenuString(hmenu, itemid, str, len, MF_BYCOMMAND);
 }
 
@@ -67,17 +74,14 @@ play_sound(int num)
 {
 	if (strlen(sound[num].file)==0)
 		return;
-	if (!is_win31 || (strcmp(sound[num].file,BEEP)==0)) {
+	if (strcmp(sound[num].file,BEEP)==0) {
 		MessageBeep(-1);
 		return;
 	}
-	if (is_win31) {
-		if (lpfnSndPlaySound != (FPSPS)NULL) 
-   		    lpfnSndPlaySound(sound[num].file, SND_SYNC);
-		else
-		    MessageBeep(-1);
-		return;
-	}
+	if (lpfnSndPlaySound != (FPSPS)NULL) 
+	    lpfnSndPlaySound(sound[num].file, SND_SYNC);
+	else
+	    MessageBeep(-1);
 }
 
 
@@ -88,8 +92,8 @@ info_wait(int id)
 HWND hwnd;
 POINT pt;
 	if (id)
-	    load_string(id, szWait, sizeof(szWait));  /* revert to generic text */
-	else
+    	    load_string(id, szWait, sizeof(szWait));
+	else 
 	    szWait[0] = '\0';
 
 	InvalidateRect(hwndimg, (LPRECT)&info_rect, FALSE);
@@ -103,8 +107,8 @@ POINT pt;
 	}
 	else {
 	    /* set cursor to that of active window */
-	    hwnd = GetFocus();
-	    if ( (hwndimgchild && IsWindow(hwndimgchild))
+	    hwnd = GetActiveWindow();
+	    if ( (gsdll.device)
 	      && ((hwnd == hwndimg) || (hwnd == hwndimgchild)) ) {
 		if (in_child_client_area()) {
 			SetCursor(GetClassCursor(hwndimgchild));
@@ -120,14 +124,14 @@ int
 gs_chdir(char *dirname)
 {
 #ifdef __WIN32__
-	SetCurrentDirectory(dirname);
+	return !SetCurrentDirectory(dirname);
 #else
 	if (isalpha(dirname[0]) && (dirname[1]==':'))
 		(void) setdisk(toupper(dirname[0])-'A');
 	if (!((strlen(dirname)==2) && isalpha(dirname[0]) && (dirname[1]==':')))
-		chdir(dirname);
-#endif
+		return chdir(dirname);
 	return 0;
+#endif
 }
 
 char * 
@@ -142,21 +146,19 @@ gs_getcwd(char *dirname, int size)
 }
 
 
-void
-send_prolog(FILE *f, int resource)
+int
+send_prolog(int resource)
 {  
 HGLOBAL hglobal;
 LPSTR prolog;
+int code = -1;
 	hglobal = LoadResource(phInstance, 
 	    FindResource(phInstance, MAKEINTRESOURCE(resource), RT_RCDATA));
 	if ( (prolog = (LPSTR)LockResource(hglobal)) != (LPSTR)NULL) {
-	    while (*prolog) {
-		if (debug_file != (FILE *)NULL)
-	            fputc(*prolog, debug_file);
-	        fputc(*prolog++, f);
-	    }
+	    code = gs_execute(prolog, strlen(prolog));
 	    FreeResource(hglobal);
 	}
+	return code;
 }
 
 void
@@ -184,3 +186,4 @@ char val[256];
 	}
 	FreeResource(hglobal);
 }
+

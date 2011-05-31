@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+#  Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -15,130 +15,122 @@
 # the copyright notice and this notice be preserved on all copies.
 
 # Makefile for GSview for Windows - GSVIEW.EXE or GSVIEW32.EXE
-# using Borland C++ 3.1 or Borland C++ 4.5
+# using Borland C++ 4.5
 # 'make -fgvwin.mak'
 #
 
 # Edit COMPBASE and WIN32 as required
 COMPBASE = c:\bc45
-# WIN32=1 for Win32s version
-WIN32=0
 # DEBUG=1 for Debugging options
-DEBUG=0
+DEBUG=1
 
 # Shouldn't need editing below here
 COMPDIR = $(COMPBASE)\bin
 INCDIR = $(COMPBASE)\include
 LIBDIR = $(COMPBASE)\lib
-!if $(WIN32)
 WINEXT=32
 CCAUX = bcc
 MODEL=32
-CFLAGS=-v -W -w -H=gsview32.sym -I$(INCDIR)
+CFLAGS=-v -W -w -tWM -H=gsview32.sym -I$(INCDIR)
 CC = bcc32
 !if $(DEBUG)
 DEBUGLINK=-v
 !endif
-!else
-# uncomment following line if using GSview with gs 2.6.1
-OLD=-DGS261
-WINEXT=
-CCAUX = bcc
-MODEL=m
-CFLAGS=-v -m$(MODEL) -W -2 -h -w -H=gsview.sym -I$(INCDIR) $(OLD)
-DEBUGLINK=/v
-CC = bcc
-!endif
-OBJS=gvwin.obj gvwinit.obj gvwclip.obj gvwdisp.obj gvwdlg.obj\
-  gvweps.obj gvwmisc.obj gvwpipe.obj gvwprf.obj gvwprn.obj\
-  gvcmisc.obj gvcdisp.obj ps.obj gvccmd.obj gvcprn.obj\
-  gvceps.obj gvctext.obj
 
-all: gsview$(WINEXT).exe gsview.hlp gsv16spl.exe doc2tex.exe winsetup.exe
+OBJS=gvwin.obj gvwdll.obj gvwdisp.obj gvwdlg.obj\
+  gvwclip.obj gvweps.obj gvwmisc.obj gvwprf.obj gvwprn.obj\
+  gvcmisc.obj gvcdisp.obj ps.obj gvccmd.obj gvcprn.obj\
+  gvceps.obj gvcinit.obj gvctext.obj\
+  gvcdll.obj gvcpdf.obj gvwinit.obj gvcbeta.obj
+
+HDRS=gvwin.h ps.h gvcfn.h gvcver.h
+
+all: gsview$(WINEXT).exe gsview.hlp gvwgs.exe gsv16spl.exe doc2tex.exe winsetup.exe
 
 .c.obj:
 	$(COMPDIR)\$(CC) -c $(CFLAGS) {$< }
 
 	
+# change cw32mt to cw32 for single thread
 gsview32.exe: $(OBJS) gvwin32.res gvwin32.def
 	$(COMPDIR)\tlink32 -Tpe -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0w32 +
 $(OBJS) +
 ,gsview32.exe,gsview32, +
 $(LIBDIR)\import32 +
-$(LIBDIR)\cw32, +
+$(LIBDIR)\cw32mt, +
 gvwin32.def, +
 gvwin32.res
 !
 
-gsview.exe: $(OBJS) gvwin.res gvwin.def
-	$(COMPDIR)\tlink /Twe /c /m /s /l $(DEBUGLINK) @&&!
-$(LIBDIR)\c0w$(MODEL) +
-$(OBJS) +
-,gsview.exe,gsview, +
-$(LIBDIR)\import +
-$(LIBDIR)\mathw$(MODEL) +
-$(LIBDIR)\cw$(MODEL), +
-gvwin.def
-!
-	$(COMPDIR)\rlink -30 -t gvwin.res gsview.exe
-
 gvwin32.res: gvwin.rc gvwin2.rc gvcrc.h $(ICONS)
 	$(COMPDIR)\brcc32 -i$(INCDIR) -r -fogvwin32 gvwin
 
-gvwin.res: gvwin.rc gvwin2.rc gvcrc.h $(ICONS)
-	$(COMPDIR)\brcc -i$(INCDIR) $(OLD) -r gvwin
+gvwin.obj: gvwin.c $(HDRS)
 
+gvwclip.obj: gvwclip.c $(HDRS)
 
-gvwin.obj: gvwin.c gvwin.h ps.h
+gvwdisp.obj: gvwdisp.c $(HDRS)
 
-gvwclip.obj: gvwclip.c gvwin.h ps.h
+gvwdlg.obj: gvwdlg.c gvcrc.h $(HDRS)
 
-gvwdisp.obj: gvwdisp.c gvwin.h ps.h
+gvwdll.obj: gvwdll.c gvcrc.h gsdll.h $(HDRS)
 
-gvwdlg.obj: gvwdlg.c gvwin.h ps.h gvcrc.h
+gvweps.obj: gvweps.c gvceps.h $(HDRS)
 
-gvweps.obj: gvweps.c gvceps.h gvwin.h ps.h
+gvwinit.obj: gvwinit.c $(HDRS)
 
-gvwinit.obj: gvwinit.c gvwin.h ps.h
+gvwmisc.obj: gvwmisc.c $(HDRS)
 
-gvwmisc.obj: gvwmisc.c gvwin.h ps.h
+gvwprn.obj: gvwprn.c $(HDRS)
 
-gvwpipe.obj: gvwpipe.c gvwin.h ps.h
+gvccmd.obj: gvccmd.c gvcrc.h $(HDRS)
 
-gvwprf.obj: gvwin.h
+gvcdisp.obj: gvcdisp.c $(HDRS)
 
-gvwprn.obj: gvwprn.c gvwin.h ps.h
+gvcdll.obj: gvcdll.c gvcrc.h gsdll.h $(HDRS)
 
-gvccmd.obj: gvccmd.c gvwin.h ps.h gvcrc.h
+ps.obj: ps.c ps.h
 
-gvcdisp.obj: gvcdisp.c gvwin.h ps.h
+gvcbeta.obj: gvcbeta.c gvcbeta.h $(HDRS)
 
-ps.obj: ps.c gvwin.h ps.h
+gvceps.obj: gvceps.c gvceps.h $(HDRS)
 
-gvceps.obj: gvceps.c gvceps.h gvwin.h ps.h
+gvcinit.obj: gvcinit.c gvcrc.h $(HDRS)
 
-gvcmisc.obj: gvcmisc.c gvwin.h ps.h gvcrc.h
+gvcmisc.obj: gvcmisc.c gvcrc.h $(HDRS)
 
-gvcprn.obj: gvcprn.c gvwin.h ps.h
+gvcpdf.obj: gvcpdf.c gvcrc.h $(HDRS)
 
-gvctext.obj: gvctext.c gvwin.h ps.h
+gvcprn.obj: gvcprn.c $(HDRS)
+
+gvctext.obj: gvctext.c $(HDRS)
+
+winunzip.obj: winunzip.c wizdll.h
+	$(COMPDIR)\$(CC) -W -c -v -I$(INCDIR) $*.c
+
+gvwtxt.obj: gvwtxt.c $(HDRS)
+	$(COMPDIR)\$(CC) -W -c -v -I$(INCDIR) $*.c
 
 winsetup.res: winsetup.rc setup.h
-	$(COMPDIR)\brcc -i$(INCDIR) -r $*.rc
+	$(COMPDIR)\brcc32 -i$(INCDIR) -r $*.rc
 
-winsetup.exe: winsetup.c setup.h winsetup.res winsetup.def
-	$(COMPDIR)\$(CCAUX) -W -ms -c -v -I$(INCDIR) $*.c
-	$(COMPDIR)\tlink /Twe /c /m /s /l $(DEBUGLINK) @&&!
-$(LIBDIR)\c0ws +
-$*.obj +
-,$*.exe,$*, +
-$(LIBDIR)\import +
-$(LIBDIR)\mathws +
-$(LIBDIR)\cws, +
-$*.def
+winsetup.obj: winsetup.c setup.h setup.c
+	$(COMPDIR)\$(CC) -W -c -v -I$(INCDIR) winsetup.c
+
+winsetup.exe: winsetup.obj winsetup.res winsetup.def winunzip.obj gvwtxt.obj gvcbeta.obj
+	$(COMPDIR)\tlink32 -Tpe -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0w32 +
+winsetup.obj +
+winunzip.obj gvwtxt.obj gvcbeta.obj +
+,winsetup.exe,winsetup, +
+$(LIBDIR)\import32 +
+$(LIBDIR)\cw32, +
+winsetup.def,
+winsetup.res
 !
-	$(COMPDIR)\rlink -30 -t $*.res $*.exe
+# tlink32 is buggy and won't bind winsetup.res so try again...
+	$(COMPDIR)\brc32 winsetup.res winsetup.exe
 
 gvdoc.exe: gvdoc.c
 	$(COMPDIR)\$(CCAUX) -w-pro -I$(INCDIR) -L$(LIBDIR) gvdoc.c
@@ -169,7 +161,22 @@ gsview.hlp: doc2rtf.exe gsview.doc gsview.hpj
 gsview.htm: doc2html.exe gsview.doc
 	doc2html gsview.doc gsview.htm
 
-gsv16spl.exe: gsv16spl.c gsv16spl.rc
+gvwgs.res: gvwgs.rc gvwgs.h $(ICONS)
+	$(COMPDIR)\brcc32 -i$(INCDIR) -r gvwgs
+
+gvwgs.exe: gvwgs.c gvwgs.h gvwgs.res
+	$(COMPDIR)\bcc32 -c -v -tWM -WE -w -I$(INCDIR) gvwgs.c
+	$(COMPDIR)\tlink32 -Tpe -c -m -s $(DEBUGLINK) @&&!
+$(LIBDIR)\c0w32 +
+gvwgs.obj +
+,gvwgs.exe,gvwgs, +
+$(LIBDIR)\import32 +
+$(LIBDIR)\cw32mt, +
+gvwgs.def, +
+gvwgs.res
+!
+
+gsv16spl.exe: gsv16spl.c gsv16spl.rc gsv16spl.def
 	$(COMPDIR)\$(CCAUX) -W -ms -c -v -I$(INCDIR) $*.c
 	$(COMPDIR)\brcc -i$(INCDIR) -r $*.rc
 	$(COMPDIR)\tlink /Twe /c /m /s /l $(DEBUGLINK) @&&!
@@ -183,71 +190,80 @@ $*.def
 !
 	$(COMPDIR)\rlink -30 -t $*.res $*.exe
 
-
 strip: gsview$(WINEXT).exe
-!if $(WIN32)
 	$(COMPDIR)\tdstrp32 gsview32.exe
-!else
-	$(COMPDIR)\tdstrip gsview.exe
-!endif
 
 prezip:
 	copy gsview$(WINEXT).exe ..\gsview$(WINEXT).exe
-!if $(WIN32)
-	# do nothing, rely on  gsview32 being without symbol table
-	# $(COMPDIR)\tdstrp32 ..\gsview32.exe
-!else
-	$(COMPDIR)\tdstrip ..\gsview.exe
-!endif
+	copy binary\gvwin1.ico ..\gsview32.ico
+	# used to do nothing, rely on  gsview32 being without symbol table
+	$(COMPDIR)\tdstrp32 ..\gsview32.exe
 	copy gsview.hlp ..\gsview.hlp
 	copy gsv16spl.exe ..\gsv16spl.exe
-	copy winsetup.exe ..\winsetup.exe
-	copy README.GV ..\README.GV
+	copy gvwgs.exe ..\gvwgs.exe
+	copy printer.ini ..\printer.ini
+	copy winsetup.exe ..\setup.exe
+	$(COMPDIR)\tdstrp32 ..\setup.exe
+	# change OS/2 EXEs to lower case
+	cd ..
+	rename gvpm.exe gvpm.exe
+	rename gvpm.eas gvpm.eas
+	rename gvpgs.exe gvpgs.exe
+	rename os2setup.exe os2setup.exe
+	rename os2unzip.exe os2unzip.exe
+	rename gvpm.hlp gvpm.hlp
+	cd src
+	copy README.TXT ..\README.TXT
 	copy FILE_ID.DIZ ..\FILE_ID.DIZ
 	copy LICENCE ..\LICENCE
 	-del ..\epstool.zip
-	-del ..\gsgrab.zip
 	-del ..\gsview.zip
+	-del ..\pstotext.zip
 	-del ..\src.zip
 	-del ..\gsviewXX.zip
 
 zip: prezip
 	cd ..
-	copy src\gvcliste.doc gvcliste.doc
-	copy src\gvclistg.doc gvclistg.doc
-	copy src\gvclists.doc gvclists.doc
-	copy src\gvclist.doc gvclist.doc
-	zip -9 -@ epstool.zip < gvcliste.doc
-	zip -9 -@ gsgrab.zip  < gvclistg.doc
-	zip -9 -@ src.zip     < gvclists.doc
-	del gvcliste.doc
-	del gvclistg.doc
-	del gvclists.doc
+	copy src\gvcliste.txt gvcliste.txt
+	copy src\gvclistp.txt gvclistp.txt
+	copy src\gvclists.txt gvclists.txt
+	copy src\gvclist.txt gvclist.txt
+	zip -9 -@ epstool.zip < gvcliste.txt
+	zip -9 -@ pstotext.zip     < gvclistp.txt
+	zip -9 -@ src.zip     < gvclists.txt
+	del gvcliste.txt
+	del gvclistp.txt
+	del gvclists.txt
 	cd ..
-	zip -9 -@ gsview\gsview.zip  < gsview\gvclist.doc
+	zip -9 -@ gsview\gsview.zip  < gsview\gvclist.txt
 	cd gsview
-	del gvclist.doc
-	zip -9 gsviewXX.zip gsview.zip README.GV FILE_ID.DIZ os2setup.exe os2unzip.exe winsetup.exe winunzip.exe 
+	del gvclist.txt
+	zip -9 gsviewXX.zip gsview.zip README.TXT FILE_ID.DIZ LICENCE os2setup.exe os2unzip.exe setup.exe wizunz32.dll
 	cd src
+
 
 clean:
 	del gvwin.obj
 	del gvwclip.obj
 	del gvwdisp.obj
 	del gvwdlg.obj
+	del gvwdll.obj
 	del gvweps.obj
 	del gvwinit.obj
 	del gvwmisc.obj
-	del gvwpipe.obj
-	del gvwprn.obj
-	del gvcmisc.obj
-	del gvcdisp.obj
-	del ps.obj
-	del gvccmd.obj
-	del gvceps.obj
 	del gvwprf.obj
+	del gvwprn.obj
+	del gvcbeta.obj
+	del gvccmd.obj
+	del gvcdisp.obj
+	del gvceps.obj
+	del gvcinit.obj
+	del gvcmisc.obj
+	del gvcdll.obj
+	del gvcpdf.obj
 	del gvcprn.obj
 	del gvctext.obj
+	del ps.obj
 	del gsview.map
 	del gsview32.map
 	del gsview.sym
@@ -275,9 +291,17 @@ clean:
 	del winsetup.obj
 	del winsetup.res
 	del winsetup.map
+	del winunzip.obj
+	del gvwtxt.obj
+	del gvwgs.obj
+	del gvwgs.res
+	del gvwgs.map
 
 veryclean: clean
 	del gsview$(WINEXT).exe
 	del gsview.hlp
 	del gsview.htm
 	del gsv16spl.exe
+	del winsetup.exe
+	del gvwgs.exe
+

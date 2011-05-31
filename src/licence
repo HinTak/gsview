@@ -1,15 +1,16 @@
-                   GSVIEW FREE PUBLIC LICENCE
-                  (Version 3, 10th January 1996)
+                GSVIEW FREE PUBLIC LICENCE
+                (Version 3, 2nd August 1995)
 
-                Copyright (C) 1994, 1995, 1996  Aladdin Enterprises,
-                Menlo Park, California, U.S.A.  All rights reserved.
+		Copyright (C) 1994, 1995 Aladdin Enterprises,
+		Menlo Park, California, U.S.A.  All rights reserved.
 
-        NOTE: This license is not the same as any of the GNU Licenses
-        published by the Free Software Foundation.  Its terms are
-        substantially different from those of the GNU Licenses.
-        If you are familiar with the GNU Licenses, please read this
-        license with extra care.
-
+	NOTE: This licence is not the same as any of the GNU Licences
+	published by the Free Software Foundation.  Its terms are
+	substantially different from those of the GNU Licences.
+	If you are familiar with the GNU Licences, please read this
+	licence with extra care.
+	This licence is not identical to the ALADDIN GHOSTSCRIPT
+	FREE PUBLIC LICENSE.
 
 This Licence applies to the computer program known as "GSview."  
 The "Program", below, refers to such program, and a "work
@@ -19,9 +20,9 @@ The Program is a copyrighted work whose copyright is held by Russell
 Lang (the "Licensor").
 
 BY MODIFYING OR DISTRIBUTING THE PROGRAM (OR ANY WORK BASED ON THE
-PROGRAM), YOU INDICATE YOUR ACCEPTANCE OF THIS LICENSE TO DO SO, AND ALL
+PROGRAM), YOU INDICATE YOUR ACCEPTANCE OF THIS LICENCE TO DO SO, AND ALL
 ITS TERMS AND CONDITIONS FOR COPYING, DISTRIBUTING OR MODIFYING THE PROGRAM
-OR WORKS BASED ON IT.  NOTHING OTHER THAN THIS LICENSE GRANTS YOU
+OR WORKS BASED ON IT.  NOTHING OTHER THAN THIS LICENCE GRANTS YOU
 PERMISSION TO MODIFY OR DISTRIBUTE THE PROGRAM OR ITS DERIVATIVE WORKS.
 THESE ACTIONS ARE PROHIBITED BY LAW.  IF YOU DO NOT ACCEPT THESE TERMS AND
 CONDITIONS, DO NOT MODIFY OR DISTRIBUTE THE PROGRAM.
@@ -108,7 +109,14 @@ with the major components (compiler, kernel, and so on) of the operating
 system on which the executable runs, unless that component itself
 accompanies the executable code;
 
-	(v) You may not impose any further restrictions on the recipient's
+	(v) If you distribute any written or printed material at all with
+the Program or any work based on the Program, such material must include
+either a written copy of this Licence, or a prominent written indication
+that the Program or the work based on the Program is covered by this
+Licence and written instructions for printing and/or displaying the copy of
+the Licence on the distribution medium;
+
+	(vi) You may not impose any further restrictions on the recipient's
 exercise of the rights granted herein.
 
 If distribution of executable or object code is made by offering the
@@ -117,7 +125,7 @@ equivalent ability to copy the source code from the same place counts as
 distribution of the source code, even though third parties are not
 compelled to copy the source code along with the object code.
 
-3.  Reservation of Rights.
+3.	Reservation of Rights.
 
 No rights are granted to the Program except as expressly set forth herein.
 You may not copy, modify, sublicense, or distribute the Program except as
@@ -128,7 +136,7 @@ who have received copies, or rights, from you under this Licence will not
 have their licences terminated so long as such parties remain in full
 compliance.
 
-4.  Other Restrictions.
+4.	Other Restrictions.
 
 If the distribution and/or use of the Program is restricted in certain
 countries for any reason, Licensor may add an explicit geographical
@@ -137,7 +145,7 @@ permitted only in or among countries not thus excluded.  In such case,
 this Licence incorporates the limitation as if written in the body of this
 Licence.
 
-5.  Limitations.
+5.	Limitations.
 
 THE PROGRAM IS PROVIDED TO YOU "AS IS," WITHOUT WARRANTY.  THERE IS NO
 WARRANTY FOR THE PROGRAM, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT
@@ -157,7 +165,7 @@ PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
 EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGES.
 
-6.  General.  
+6.	General.  
 
 This Agreement is governed by the laws of the State of Victoria, 
 Australia, excluding choice of law rules.
