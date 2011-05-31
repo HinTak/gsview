@@ -121,10 +121,10 @@ public:
 
 	BOOL Read(GFile *pFile);	// read a bitmap from file
 //	BOOL Read(UINT resource);	// read a bitmap from resources
-	BOOL Read(LPCTSTR lpszFilename);
+	BOOL Read(LPCSTR lpszFilename);
 	BOOL ReadHeader(GFile *pFile);	// read bitmap header and palette
 
-	BOOL Write(LPCTSTR lpszFilename);
+	BOOL Write(LPCSTR lpszFilename);
 	BOOL Write(GFile *cf);
 	HGLOBAL MakeGlobalDIB(void);
 

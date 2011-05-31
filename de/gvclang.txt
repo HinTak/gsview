@@ -12,7 +12,7 @@
  entwickelten PostScript Document Structuring Conventions
  (DSC-Konventionen) entsprechen, auf dem Bildschirm dargestellt und auf
  einen Drucker ausgegeben werden.
- Die Version GSview 4.3 erfordert Ghostscript in der Version 7.04 - 8.09.
+ Die Version GSview 4.4 erfordert Ghostscript in der Version 7.04 - 8.99.
 2Installation
 ?Installation
  Zur Installation von GSview verwenden Sie
@@ -33,7 +33,7 @@ E
  Die Konfiguration findet beim ersten Start von GSview statt.
  Wenn Sie die Konfiguration später ändern wollen, verwenden Sie
 WP
- `Optionen` | `Leichte Konfiguration` oder
+ `Optionen` | `Einfache Konfiguration` oder
 E
  `Optionen` | `Fortgeschrittene Konfiguration`.
 
@@ -167,11 +167,11 @@ P
  ein Programmobjekt GSview auf der Arbeitsoberfläche erzeugt.
 
  Wenn Sie das Konfigurationsprogramm später noch einmal starten wollen,
- so wählen Sie `Optionen` | `Leichte Konfiguration`.
+ so wählen Sie `Optionen` | `Einfache Konfiguration`.
 W
  Starten Sie das Programm GSview und wählen Sie die passende Ghostscript-
  Version (i.allg. die neueste).  Für spätere Änderungen wählen Sie
- `Optionen` | `Leichte Konfiguration`.
+ `Optionen` | `Einfache Konfiguration`.
 E
 
  Für mehr Kontrolle über die Konfiguration siehe
@@ -179,7 +179,7 @@ E
 3Fortgeschrittene manuelle Installation
 ?Fortgeschrittene manuelle Installation
 WP
- Anstatt den Menüpunkt `Optionen` | `Leichte Konfiguration` zu wählen,
+ Anstatt den Menüpunkt `Optionen` | `Einfache Konfiguration` zu wählen,
  verwenden Sie `Optionen` | `Fortgeschrittene Konfiguration`.
 
  Geben Sie zuerst korrekte Werte in die drei Textfelder ein (s.
@@ -250,11 +250,11 @@ W
 
 WP
  Wenn Sie es verhindern wollen, daß das Installationsprogramm beim ersten Start
- von Gsview oder bei Updates von Gsview, dann sollten Sie eine INI Datei in das
- GSview Verzeichnis kopieren.
+ von Gsview oder bei Updates von Gsview `Einfache Konfiguration` anzeigt, dann 
+ sollten Sie eine INI Datei in das GSview Verzeichnis kopieren.
  `Bei zukünftigen Updates kann es jedoch erforderlich sein, diese Datei wieder
  zu entfernen.`
- Sie sollte nur jene Einträge enthalten, die in der Benutzerkonfiguration
+ Diese sollte nur jene Einträge enthalten, die in der Benutzerkonfiguration
  überschrieben werden sollen.
  Die vorgeschlagene Methode ist zuerst Gsview zu installieren und dann zu
  konfigurieren.
@@ -267,16 +267,16 @@ WP
  aus dem Systemverzeichnis oder dem
  Benutzerprofil-Verzeichnis in das GSview Verzeichnis und entfernen Sie alle
  Einträge bis auf:
-  [Options]
-  Version=4.3
-  GSversion=704
+  [GSview-4.4]
+  Version=4.4
+  GSversion=800
   Configured=1
 W
-  GhostscriptDLL=E:\gs\gs7.04\bin\gsdll32.dll
+  GhostscriptDLL=E:\gs\gs8.00\bin\gsdll32.dll
 P
-  GhostscriptDLL=E:\gs\gs7.04\bin\gsdll2.dll
+  GhostscriptDLL=E:\gs\gs8.00\bin\gsdll2.dll
 WP
-  GhostscriptInclude=E:\gs\gs7.04\lib;E:\gs\fonts
+  GhostscriptInclude=E:\gs\gs8.00\lib;E:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Wenn ein Benutzer GSview startet, dann wird normalerweise seine INI Datei benutzt.
  Startet GSview das erste Mal oder die Version von Gsview stimmt nicht mit der in
@@ -295,6 +295,10 @@ WP
  verändert. Wenn Sie dieses Verhalten ändern möchten, so wählen Sie
  `Optionen` | `Fortgeschrittene Konfiguration`.
 W
+
+ Wenn Sie unter Windows NT4/2000 installieren und "All Nutzer" wählen,
+ dann schreibt das Installationsprogramm die gsview32.ini in Ihr GSview-
+ Verzeichnis. Sie müssen vorher Ghostscript installiert haben.
 
  Wenn ein Benutzer das GSview-Deinstallationsprogramm aufruft, versucht dieses
  GSview und Ghostscript im Netzwerk zu löschen.  Stellen Sie deshalb sicher, daß
@@ -917,24 +921,24 @@ PX
 E
 3Einstellung
 ?Einstellung
- Im Dialogfeld `Druckereinstellungen` befindet sich die Schaltfläche
- `Einstellung`, mit der Sie für einige Druckertreiber spezielle
+ Im Dialogfeld `Druckereinstellung` befindet sich die Schaltfläche
+ `Einstellung`, mit der Sie für einige Gerätetreiber spezielle
  Einstellungen vornehmen und einen Seitenversatz bestimmen können.
 
- Für jeden Druckertyp kann ein Seitenversatz definiert werden.
+ Für jeden Gerätetyp kann ein Seitenversatz definiert werden.
  Dieser dient dazu, Abweichungen zwischen dem Original eines
- Ghostscript-Ausgabegerätes und einem anderen Drucker zu korrigieren.
- Durch Erhöhen des X-Wertes wird ein Bild z.B. weiter nach rechts
- verschoben. Durch Verringern des Y-Wertes wird ein Bild z.B. weiter
+ Ghostscript-Drucker und einem anderen Drucker zu korrigieren.
+ Durch Erhöhen des X-Wertes wird ein Bild nach rechts
+ verschoben. Durch Erhöhen des Y-Wertes wird ein Bild
  nach unten verschoben.
 
  Die Schaltfläche `Einstellung` wird im allgemeinen dafür verwendet,
- BitsperPixel für einen Farbdrucker festzulegen, andere Farben auszuwählen
- oder eine Korrektur der Zeichendichte vorzunehmen.
+ BitsperPixel für einen Farbdrucker festzulegen oder andere Farb- oder
+ Dichtekorrekturen vorzunehmen.
 
- Die `Einstellungen` müssen für jeden Drucker vorgenommen werden. Wenn Sie
- den Wert der `BitsPerPixel` bei einem Drucker ändern, bleiben die
- Einstellungen für andere Drucker von dieser Änderung unberührt.
+ Die Einstellungen müssen für jedes Gerät gesondert vorgenommen werden. 
+ Wenn Sie den Wert der `BitsPerPixel` für ein Gerät ändern, bleiben die
+ Einstellungen für andere Geräte von dieser Änderung unberührt.
 
  Wenn Sie im Dialogfeld `Einstellung` die Schaltfläche `OK` anklicken,
  werden die Einstellungen in die Datei
@@ -950,13 +954,13 @@ E
  In GSview finden Sie einige vordefinierte Einstellungen, die allerdings
  nicht immer mit den Einstellungen in Ghostscript übereinstimmen.
  Über die Schaltflächen `Bearbeiten `und `Neu` können Sie die Einstellungen
- für den jeweiligen Drucker neu definieren bzw. verändern.
+ für das jeweilige Gerät neu definieren bzw. verändern.
  Siehe hierzu auch das Hilfethema `Einstellung bearbeiten`.
 4Einstellung bearbeiten
 ?Einstellung bearbeiten
- Nicht jeder Drucker unterstützt die Verwendung dieser optionalen
- `Einstellung`. Um herauszufinden, welcher Drucker die Funktion
- `Einstellung` unterstützt und welche `Einstellung` von welchem Drucker
+ Nicht jedes Gerät unterstützt die Verwendung dieser optionalen
+ `Einstellung`. Um herauszufinden, welches Gerät die Funktion
+ `Einstellung` unterstützt und welche `Einstellung` von welchem Gerät
  erkannt wird, lesen Sie die Ghostscript-Datei "devices.txt" oder schauen
  Sie im Ghostscript Source Code nach.
 
@@ -985,7 +989,7 @@ E
  2. Möglichkeit:
  Editieren Sie die GSview INI-Datei.
 
- Für jeden Drucker muß die Datei
+ Für jedes Gerät muß die Datei
 W
  gsview32.ini
 P
@@ -1356,22 +1360,14 @@ WP
  Sie können eine Postscript oder PDF Datei in ein editierbares
  Vektorformat konvertieren, indem Sie das Programm `pstoedit`
  von Wolfgang Glunz benutzen.
- `pstoedit` unterliegt der GNU Public Licence.
- Binärdateien sind mit der Erlaubnis von Wolfgang Glunz in GSview
- enthalten. Eine Kommandozeilenversion `pstoedit.exe` und das Handbuch
- `pstoedit.htm` sind im Verzeichnis
-W
- pstoedit
-P
- pstoedt2
-E
- enthalten.
- Die Homepage von pstoedit ist
-  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/
- Wegen Updates von pstoedit sehen Sie auf der Homepage nach oder auf
+ `pstoedit` unterliegt der GNU Public Licence und ist nicht in GSview
+ enthalten.  Es muss gesondert von der pstoedit-Homepage
+  http://www.pstoedit.net/pstoedit 
+ oder von
   http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
+ geladen werden.
 
- `pstoedit` kann innerhalb von GSview aufgerufen werden, benutzen Sie
+ Um `pstoedit` innerhalb von GSview zu benutzen, verwenden Sie
  `Bearbeiten | Konvertierung in Vektor Format`.
  Es werden 3 Dialogboxen angezeigt.
 
@@ -1639,10 +1635,10 @@ E
 ?Optionen
  Das Menü `Optionen` enthält die folgenden Befehle:
 WP
-3Leichte Konfiguration
-?Leichte Konfiguration
+3Einfache Konfiguration
+?Einfache Konfiguration
 W
- Die leichte Konfiguration erlaubt die Auswahl der zu verwendenden
+ Die einfache Konfiguration erlaubt die Auswahl der zu verwendenden
  Ghostscript-Version. Es wird davon ausgegangen, dass Sie bereits
  Aladdin oder AFPL Ghostscript 5.50 oder neuer installiert haben.
  Haben Sie Ghostscript noch nicht installiert, lesen Sie in
@@ -1650,12 +1646,12 @@ W
  Für weitere Konfigurationseinstellungen von GSview, siehe
  `Fortgeschrittene Konfiguration`.
 
- Leichte Konfiguration stellt korrekte Pfade für Ghostscript ein und
+ Einfache Konfiguration stellt korrekte Pfade für Ghostscript ein und
  kopiert eine Druckerstandardeinstellungen in die INI-Datei.
 
  Die Registry oder das Start-Menu werden nicht geändert.
 P
- Die leichte Konfiguration startet einen Konfigurationswizard, um
+ Die einfache Konfiguration startet einen Konfigurationswizard, um
  die Ghostscript-Version und Datei-Assoziationen zu wählen.
 E
 3Fortgeschrittene Konfiguration
@@ -2153,19 +2149,23 @@ E
  bits/pixel eingetragen ist.
 P
 
- Für OS/2 wurde eine Vielzahl von Graphik-Treibern entwickelt,
- von denen die meisten einen nicht-funktionalen GpiDrawBits() API haben.
- Bei den meisten Bildschirmen wird die GpiDrawBits()-Methode eingesetzt,
- eine andere langsamere, aber sichere Methode liegt darin,
- ein WinDrawBitmap für VGA-Bildschirme zu verwenden (4bit/pixel).
+ Für OS/2 wurde eine Reihe von fehlerhaften Grafiktreibern entwickelt,
+ von denen die meisten ein nicht funktionierendes GpiDrawBits() API haben.
+ Die Standard-`Zeichenmethode` ist fr die meisten Bildschirme GpiDrawBits() und
+ eine andere langsamere Doppelpuffermethode unter Nutzung von
+ WinDrawBitmap für VGA (4bit/pixel)-Bildschirme.
 
  Wenn beim Erzeugen des Bitmaps Probleme auftreten (normalerweise beim
- Scrollen erkennbar) oder im Graphik-Treiber ein SYS3175 auftaucht (memory
- access violation), versuchen Sie, das Bitmap über die
- GpiDrawBits-Methode oder die WinDrawBitmap-Methode zu erzeugen.
+ Scrollen erkennbar) oder im Graphiktreiber ein SYS3175 auftaucht (memory
+ access violation), versuchen Sie, direkt die
+ GpiDrawBits-Methode oder die WinDrawBitmap-Methode vorzugeben.
 
  Bei fehlerhaften Graphiktreibern wenden Sie sich bitte an die
  Herstellerfirma.
+
+ Eine Alternative ist die Installation der Graphiktreiber von SDD
+ (Scitech Display Doctor).
+  http://www.scitechsoft.com/products/enterprise/sdd_home.html
 E
 3Zoomen
 ?Zoomen
@@ -2371,7 +2371,7 @@ W
  Einige Beispiele sind:
   gsview -s dateiname.ps
   gsview -sLPT3: dateiname.ps
-  gsview -s"HP DeskJet Portable" dateiname.ps
+  gsview "-sHP DeskJet Portable" dateiname.ps
 
  `-e` verwendet DDE um eine Datei in einem bestehenden GSview zu öffnen oder, 
  wenn GSview noch nicht lßuft, in in einem neuen Fenster:
@@ -2397,8 +2397,6 @@ W
   [GoBack()]
   [GotoPage(5)]
   [ShowWindow(nCmdShow)]
-  [Minimise()]
-  [Maximise()]
   [Command("command line")]
  Der [Command()]-Befehl versteht nur "dateiname" oder "/P dateiname".
 

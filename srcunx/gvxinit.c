@@ -66,16 +66,19 @@ typedef struct lang_s {
 } lang_t;
 
 /* The list of language DLLs available */
-const int nlang = 8;
-lang_t lang[8] = {
+const int nlang = 11;
+lang_t lang[11] = {
 {IDM_LANGEN, "en", "English", "English"},
+{IDM_LANGCT, "ct", "Catalan", "Catalan"},
 {IDM_LANGDE, "de", "Deutsch", "German"},
 {IDM_LANGFR, "fr", "Français", "French"},
 {IDM_LANGGR, "gr", "Ellenika", "Greek"},
 {IDM_LANGIT, "it", "Italian", "Italian"},
 {IDM_LANGES, "es", "Español", "Spanish"},
 {IDM_LANGNL, "nl", "Nederlands", "Dutch"},
-{IDM_LANGSE, "se", "Svenska", "Swedish"}
+{IDM_LANGRU, "ru", "Russian", "Russian"},
+{IDM_LANGSE, "se", "Svenska", "Swedish"},
+{IDM_LANGSK, "sk", "Slovak", "Slovak"}
 };
 
 int language_id(const char *str)
@@ -124,6 +127,10 @@ get_menu_string(int menuid, int itemid, char *str, int len)
     }
 
     switch (option.language) {
+	case IDM_LANGCT:
+	    menu_item = menu_ct;
+	    menu_len = menu_ct_len;
+	    break;
 	case IDM_LANGDE:
 	    menu_item = menu_de;
 	    menu_len = menu_de_len;
@@ -148,9 +155,18 @@ get_menu_string(int menuid, int itemid, char *str, int len)
 	    menu_item = menu_nl;
 	    menu_len = menu_nl_len;
 	    break;
+	case IDM_LANGRU:
+	    menu_item = menu_ru;
+	    menu_len = menu_ru_len;
+	    break;
 	case IDM_LANGSE:
 	    menu_item = menu_se;
 	    menu_len = menu_se_len;
+	    break;
+	case IDM_LANGSK:
+	    menu_item = menu_sk;
+	    menu_len = menu_sk_len;
+	    break;
 	case IDM_LANGEN:
 	default:
 	    menu_item = menu_en;
@@ -193,6 +209,10 @@ GtkWidget *find_menu_widget(int id)
 	return NULL;
     /* search through menu_items until we find the id */
     switch (option.language) {
+	case IDM_LANGCT:
+	    menu_item = menu_ct;
+	    menu_len = menu_ct_len;
+	    break;
 	case IDM_LANGDE:
 	    menu_item = menu_de;
 	    menu_len = menu_de_len;
@@ -217,9 +237,17 @@ GtkWidget *find_menu_widget(int id)
 	    menu_item = menu_nl;
 	    menu_len = menu_nl_len;
 	    break;
+	case IDM_LANGRU:
+	    menu_item = menu_ru;
+	    menu_len = menu_ru_len;
+	    break;
 	case IDM_LANGSE:
 	    menu_item = menu_se;
 	    menu_len = menu_se_len;
+	    break;
+	case IDM_LANGSK:
+	    menu_item = menu_sk;
+	    menu_len = menu_sk_len;
 	    break;
 	case IDM_LANGEN:
 	default:
@@ -339,6 +367,10 @@ void add_main_menu(GtkWidget *window)
     int menu_len;
 
     switch (option.language) {
+	case IDM_LANGCT:
+	    menu_item = menu_ct;
+	    menu_len = menu_ct_len;
+	    break;
 	case IDM_LANGDE:
 	    menu_item = menu_de;
 	    menu_len = menu_de_len;
@@ -363,9 +395,17 @@ void add_main_menu(GtkWidget *window)
 	    menu_item = menu_nl;
 	    menu_len = menu_nl_len;
 	    break;
+	case IDM_LANGRU:
+	    menu_item = menu_ru;
+	    menu_len = menu_ru_len;
+	    break;
 	case IDM_LANGSE:
 	    menu_item = menu_se;
 	    menu_len = menu_se_len;
+	    break;
+	case IDM_LANGSK:
+	    menu_item = menu_sk;
+	    menu_len = menu_sk_len;
 	    break;
 	case IDM_LANGEN:
 	default:
@@ -819,13 +859,16 @@ int config_wizard(BOOL bVerbose)
 int load_language(int language)
 {
     switch(language) {
+	case IDM_LANGCT:
 	case IDM_LANGDE:
 	case IDM_LANGFR:
 	case IDM_LANGGR:
 	case IDM_LANGES:
 	case IDM_LANGIT:
 	case IDM_LANGNL:
+	case IDM_LANGRU:
 	case IDM_LANGSE:
+	case IDM_LANGSK:
 	case IDM_LANGEN:
 	return TRUE;
     }
@@ -866,6 +909,11 @@ void change_language(void)
 
     strcpy(szHelpName, szDocPath);
     switch (option.language) {
+	case IDM_LANGCT:
+    	    strcat(szHelpName, "gvxct.htm");
+	    st = string_ct;
+	    stlen = string_ct_len;
+	    break;
 	case IDM_LANGDE:
     	    strcat(szHelpName, "gvxde.htm");
 	    st = string_de;
@@ -896,10 +944,20 @@ void change_language(void)
 	    st = string_nl;
 	    stlen = string_nl_len;
 	    break;
+	case IDM_LANGRU:
+    	    strcat(szHelpName, "gvxru.htm");
+	    st = string_ru;
+	    stlen = string_ru_len;
+	    break;
 	case IDM_LANGSE:
     	    strcat(szHelpName, "gvxse.htm");
 	    st = string_se;
 	    stlen = string_se_len;
+	    break;
+	case IDM_LANGSK:
+    	    strcat(szHelpName, "gvxsk.htm");
+	    st = string_sk;
+	    stlen = string_sk_len;
 	    break;
 	case IDM_LANGEN:
 	default:
@@ -936,6 +994,7 @@ int get_language(void)
 {
     GtkWidget *window;		/* main dialog window */
     GtkWidget *vbox;
+    GtkWidget *button_ct;
     GtkWidget *button_de;
     GtkWidget *button_en;
     GtkWidget *button_es;
@@ -943,7 +1002,9 @@ int get_language(void)
     GtkWidget *button_gr;
     GtkWidget *button_it;
     GtkWidget *button_nl;
+    GtkWidget *button_ru;
     GtkWidget *button_se;
+    GtkWidget *button_sk;
     int rc = 0;
 
     language_value = IDM_LANGEN;
@@ -965,6 +1026,12 @@ int get_language(void)
     gtk_signal_connect(GTK_OBJECT(button_en), "clicked",
 		  GTK_SIGNAL_FUNC(language_select), (gpointer)IDM_LANGEN);
     gtk_widget_show(button_en);
+
+    button_ct = gtk_button_new_with_label(get_string(IDS_AACATALAN));
+    gtk_box_pack_start(GTK_BOX(vbox), button_ct, TRUE, TRUE, 5);
+    gtk_signal_connect(GTK_OBJECT(button_ct), "clicked",
+		  GTK_SIGNAL_FUNC(language_select), (gpointer)IDM_LANGCT);
+    gtk_widget_show(button_ct);
 
     button_de = gtk_button_new_with_label(get_string(IDS_AADEUTSCH));
     gtk_box_pack_start(GTK_BOX(vbox), button_de, TRUE, TRUE, 5);
@@ -1002,11 +1069,23 @@ int get_language(void)
 		  GTK_SIGNAL_FUNC(language_select), (gpointer)IDM_LANGNL);
     gtk_widget_show(button_nl);
 
+    button_ru = gtk_button_new_with_label(get_string(IDS_AARUSSIAN));
+    gtk_box_pack_start(GTK_BOX(vbox), button_ru, TRUE, TRUE, 5);
+    gtk_signal_connect(GTK_OBJECT(button_ru), "clicked",
+		  GTK_SIGNAL_FUNC(language_select), (gpointer)IDM_LANGRU);
+    gtk_widget_show(button_ru);
+
     button_se = gtk_button_new_with_label(get_string(IDS_AASVENSKA));
     gtk_box_pack_start(GTK_BOX(vbox), button_se, TRUE, TRUE, 5);
     gtk_signal_connect(GTK_OBJECT(button_se), "clicked",
 		  GTK_SIGNAL_FUNC(language_select), (gpointer)IDM_LANGSE);
     gtk_widget_show(button_se);
+
+    button_sk = gtk_button_new_with_label(get_string(IDS_AASLOVAK));
+    gtk_box_pack_start(GTK_BOX(vbox), button_sk, TRUE, TRUE, 5);
+    gtk_signal_connect(GTK_OBJECT(button_sk), "clicked",
+		  GTK_SIGNAL_FUNC(language_select), (gpointer)IDM_LANGSK);
+    gtk_widget_show(button_sk);
 
     /* show dialog and wait for language or close */
     gtk_window_set_focus(GTK_WINDOW(window), button_en);
@@ -1038,19 +1117,24 @@ void check_language(void)
       || ((option.language == IDM_LANGIT) && check_locale("it"))
       || ((option.language == IDM_LANGNL) && check_locale("nl"))
       || ((option.language == IDM_LANGNL) && check_locale("se"))
+      || ((option.language == IDM_LANGSK) && check_locale("sk"))
+      || ((option.language == IDM_LANGRU) && check_locale("ru"))
 	)
     {
         /* GSview language doesn't match locale, prompt user */
 	int language = get_language();
 	switch (language) {
 	    case IDM_LANGEN:
+	    case IDM_LANGCT:
 	    case IDM_LANGDE:
 	    case IDM_LANGES:
 	    case IDM_LANGFR:
 	    case IDM_LANGGR:
 	    case IDM_LANGIT:
 	    case IDM_LANGNL:
+	    case IDM_LANGRU:
 	    case IDM_LANGSE:
+	    case IDM_LANGSK:
 		gsview_language(language);
 	}
     }

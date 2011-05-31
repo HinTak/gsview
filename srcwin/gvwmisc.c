@@ -37,7 +37,7 @@ get_help(void)
 /* display message */
 int message_box(LPCTSTR str, int icon)
 {
-    return MessageBox(hwndimg, str, szAppName, icon | MB_OK);
+    return MessageBoxL(hwndimg, str, szAppName, icon | MB_OK);
 }
 
 /* display message */
@@ -45,7 +45,7 @@ int message_box_a(LPCSTR str, int icon)
 {
     TCHAR wbuf[MAXSTR];
     convert_multibyte(wbuf, str, sizeof(wbuf)/sizeof(TCHAR)-1);
-    return MessageBox(hwndimg, wbuf, szAppName, icon | MB_OK);
+    return MessageBoxL(hwndimg, wbuf, szAppName, icon | MB_OK);
 }
 
 void

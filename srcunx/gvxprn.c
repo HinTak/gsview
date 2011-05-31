@@ -1187,7 +1187,7 @@ int print_dialog_box(BOOL convert)
 		psfile.page_list.select[(int)(l->data)] = TRUE;
 		l = g_list_next(l);
 	    }
-	    option.print_reverse = 
+	    psfile.page_list.reverse = option.print_reverse = 
 		gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button_reverse));
 	}
 	if (convert) {

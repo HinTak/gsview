@@ -4,6 +4,7 @@ pstotext\pstotxt3.dll
 pstotext\pstotxt3.exe
 gsview\gsview32.exe
 gsview\gsview32.ico
+gsview\gsviewct.hlp
 gsview\gsviewde.hlp
 gsview\gsviewen.hlp
 gsview\gsviewes.hlp
@@ -11,13 +12,18 @@ gsview\gsviewfr.hlp
 gsview\gsviewgr.hlp
 gsview\gsviewit.hlp
 gsview\gsviewnl.hlp
+gsview\gsviewru.hlp
+gsview\gsviewsk.hlp
 gsview\gsviewse.hlp
+gsview\gsvw32ct.dll
 gsview\gsvw32de.dll
 gsview\gsvw32es.dll
 gsview\gsvw32fr.dll
 gsview\gsvw32gr.dll
 gsview\gsvw32it.dll
 gsview\gsvw32nl.dll
+gsview\gsvw32ru.dll
+gsview\gsvw32sk.dll
 gsview\gsvw32se.dll
 gsview\gsv16spl.exe
 gsview\gvwgs32.exe

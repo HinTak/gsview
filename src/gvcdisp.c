@@ -77,23 +77,23 @@ transform_cursorpos(float *x, float *y)
 {
 	  if (zoom) {
             /* first figure out number of pixels to zoom origin point */
-	    *x = *x * 72.0/option.xdpi;
-	    *y = *y * 72.0/option.ydpi;
+	    *x = (float)(*x * 72.0/option.xdpi);
+	    *y = (float)(*y * 72.0/option.ydpi);
 	    transform_point(x,y);
-	    *x = *x * option.xdpi/72;
-	    *y = *y * option.ydpi/72;
+	    *x = (float)(*x * option.xdpi/72);
+	    *y = (float)(*y * option.ydpi/72);
 	    /* now convert to pts and offset it */
-	    *x = *x * 72/option.zoom_xdpi + display.zoom_xoffset;
-	    *y = *y * 72/option.zoom_ydpi + display.zoom_yoffset;
+	    *x = (float)(*x * 72/option.zoom_xdpi + display.zoom_xoffset);
+	    *y = (float)(*y * 72/option.zoom_ydpi + display.zoom_yoffset);
 	  }
 	  else {
-            int xoffset = display.xoffset * 72.0 / display.xdpi;
-            int yoffset = display.yoffset * 72.0 / display.ydpi;
-	    *x = *x * 72.0/option.xdpi;
-	    *y = *y * 72.0/option.ydpi;
+            int xoffset = (int)(display.xoffset * 72.0 / display.xdpi);
+            int yoffset = (int)(display.yoffset * 72.0 / display.ydpi);
+	    *x = (float)(*x * 72.0/option.xdpi);
+	    *y = (float)(*y * 72.0/option.ydpi);
 	    transform_point(x,y);
-	    *x = *x + xoffset;
-	    *y = *y + yoffset;
+	    *x = (float)(*x + xoffset);
+	    *y = (float)(*y + yoffset);
 	  }
 }
 
@@ -334,8 +334,8 @@ int xtemp, ytemp;
 	    option.ydpi++;
 	}
 	else {
-	    option.xdpi = xtemp;
-	    option.ydpi = ytemp;
+	    option.xdpi = (float)xtemp;
+	    option.ydpi = (float)ytemp;
 	}
 	zoom = FALSE;
 	gs_resize();
@@ -384,12 +384,20 @@ gsview_orientation(int new_orientation)
 void
 gsview_media(int new_media)
 {
+	char *d, *s;
 	if ( (new_media == option.media) && (new_media != IDM_USERSIZE) )
 		return;
 	check_menu_item(IDM_MEDIAMENU, option.media, FALSE);
 	option.media = new_media;
 	check_menu_item(IDM_MEDIAMENU, option.media, TRUE);
 	get_menu_string(IDM_MEDIAMENU, option.media, option.medianame, sizeof(option.medianame));
+	for (d=s=option.medianame; *s; s++) {
+	    /* Get rid of shortcut characters */
+	    *d = *s;
+	    if ((*s != '_') && (*s != '&') && (*s !='~'))
+		d++;
+	}
+	*d = '\0';
 	gs_resize();
         zoom = FALSE;
 	return;
@@ -582,7 +590,9 @@ PSFILE *tpsfile;
 FILE *
 gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 {	char *temp;
+#if defined(UNIX) || defined(OS2)
         int fd;
+#endif
 	if ( (temp = getenv("TEMP")) == NULL )
 #ifdef UNIX
 		strcpy(fname, "/tmp");
@@ -876,6 +886,7 @@ show_dsc_error(void *caller_data, CDSC *dsc, unsigned int explanation,
     char linefmt[MAXSTR];
     int i;
     char *p;
+    int count;
 
     if (explanation > dsc->max_error)
 	return CDSC_RESPONSE_OK;
@@ -938,7 +949,8 @@ show_dsc_error(void *caller_data, CDSC *dsc, unsigned int explanation,
 	title[0] = '\0';
 
     /* build up string  */
-    p = (char *)malloc(4096);
+#define MSGBUFLEN 4096
+    p = (char *)malloc(MSGBUFLEN);
     if (p == (char *)NULL)
 	return response;
 
@@ -947,8 +959,9 @@ show_dsc_error(void *caller_data, CDSC *dsc, unsigned int explanation,
         sprintf(p, linefmt, title, dsc->line_count);
 	strcat(p, "\n   ");
 	len = strlen(p);
-	strncpy(p+len, line, line_len);
-        p[len+line_len] = '\0';
+	count = min((int)line_len, MSGBUFLEN-len-2);
+	strncpy(p+len, line, count);
+        p[len+count] = '\0';
     }
     else {
 	strcpy(p, title);
@@ -1142,6 +1155,8 @@ CDSC *dsc = NULL;
 		    break;
 		}
 	    }
+	    free(d);
+	    d = NULL;
 	    if ((code == CDSC_ERROR) || (code == CDSC_NOTDSC)) {
 		dsc_free(psf->dsc);
 		psf->dsc = NULL;

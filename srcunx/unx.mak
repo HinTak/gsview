@@ -1,4 +1,4 @@
-#  Copyright (C) 2000-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 2000-2003, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -90,10 +90,10 @@ OBJ=.o
 EXE=
 CO=-c
 
-FE=-o
-FO=-o
-FEO=-o$(OD)
-FOO=-o$(OD)
+FE=-o $(NUL)
+FO=-o $(NUL)
+FEO=-o $(OD)
+FOO=-o $(OD)
 
 HDRSPLAT=$(SRCUNX)gvx.h $(SRCUNX)gvxres.h 
 
@@ -130,13 +130,16 @@ OBJPLAT1=$(OD)gvx$(OBJ) $(OD)gvxdlg$(OBJ) $(OD)gvxdisp$(OBJ) \
  $(OD)gvxprn$(OBJ) $(OD)gvxdll$(OBJ) $(OD)gvxreg$(OBJ) \
  $(OD)gvxres$(OBJ) $(OD)gvcfile$(OBJ) \
  $(OD)gvxl_en$(OBJ) \
+ $(OD)gvxl_ct$(OBJ) \
  $(OD)gvxl_de$(OBJ) \
  $(OD)gvxl_es$(OBJ) \
  $(OD)gvxl_fr$(OBJ) \
  $(OD)gvxl_gr$(OBJ) \
  $(OD)gvxl_it$(OBJ) \
  $(OD)gvxl_nl$(OBJ) \
- $(OD)gvxl_se$(OBJ)
+ $(OD)gvxl_ru$(OBJ) \
+ $(OD)gvxl_se$(OBJ) \
+ $(OD)gvxl_sk$(OBJ)
 
 OBJS=$(OBJCOM1) $(OBJCOM2) $(OBJPLAT1)
 
@@ -171,6 +174,7 @@ install: all
 	$(INSTALL) regorder.txt $(GSVIEW_DOCDIR)/regorder.txt
 	$(INSTALL) Readme.htm  $(GSVIEW_DOCDIR)/Readme.htm
 	$(INSTALL) LICENCE $(GSVIEW_DOCDIR)/LICENCE
+	$(INSTALL) $(BD)gvxct.htm  $(GSVIEW_DOCDIR)/gvxct.htm
 	$(INSTALL) $(BD)gvxde.htm  $(GSVIEW_DOCDIR)/gvxde.htm
 	$(INSTALL) $(BD)gvxen.htm  $(GSVIEW_DOCDIR)/gvxen.htm
 	$(INSTALL) $(BD)gvxes.htm  $(GSVIEW_DOCDIR)/gvxes.htm
@@ -178,7 +182,9 @@ install: all
 	$(INSTALL) $(BD)gvxgr.htm  $(GSVIEW_DOCDIR)/gvxgr.htm
 	$(INSTALL) $(BD)gvxit.htm  $(GSVIEW_DOCDIR)/gvxit.htm
 	$(INSTALL) $(BD)gvxnl.htm  $(GSVIEW_DOCDIR)/gvxnl.htm
+	$(INSTALL) $(BD)gvxru.htm  $(GSVIEW_DOCDIR)/gvxru.htm
 	$(INSTALL) $(BD)gvxse.htm  $(GSVIEW_DOCDIR)/gvxse.htm
+	$(INSTALL) $(BD)gvxsk.htm  $(GSVIEW_DOCDIR)/gvxsk.htm
 	$(INSTALL) epstool.htm $(GSVIEW_DOCDIR)/epstool.htm
 	-mkdir -p $(GSVIEW_ETCPATH)
 	chmod 755  $(GSVIEW_ETCPATH)
@@ -216,35 +222,104 @@ $(OD)gvxgsver$(OBJ): $(SRCUNX)gvxgsver.c $(HDRS) $(SRC)gvcrc.h
 $(OD)gvxinit$(OBJ): $(SRCUNX)gvxinit.c $(HDRS) $(SRC)gvcrc.h
 	$(COMP) $(FOO)gvxinit$(OBJ) $(CO) $(SRCUNX)gvxinit.c
 
-$(OD)gvxl_de$(OBJ): de/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc de/gvclang.h de/gvclang.rc  
-	$(COMP) $(FOO)gvxl_de$(OBJ) $(CO) de/gvxlang.c
+$(OD)gvxl_ct$(OBJ): ct/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc ct/gvclang.h ct/gvclang.rc  $(CODEPAGE)
+	$(CODEPAGE) 1252 1252 ct/gvxlang.c gvxlang.c
+	$(CODEPAGE) 1252 1252 ct/gvclang.h gvclang.h
+	$(CODEPAGE) 1252 1252 ct/gvclang.rc gvclang.rc
+	$(COMP) $(FOO)gvxl_ct$(OBJ) $(CO) gvxlang.c
+	-rm gvxlang.c
+	-rm gvclang.h
+	-rm gvclang.rc
 
-$(OD)gvxl_en$(OBJ): en/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc en/gvclang.h en/gvclang.rc  
-	$(COMP) $(FOO)gvxl_en$(OBJ) $(CO) en/gvxlang.c
+$(OD)gvxl_de$(OBJ): de/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc de/gvclang.h de/gvclang.rc  $(CODEPAGE)
+	$(CODEPAGE) 1252 1252 de/gvxlang.c gvxlang.c
+	$(CODEPAGE) 1252 1252 de/gvclang.h gvclang.h
+	$(CODEPAGE) 1252 1252 de/gvclang.rc gvclang.rc
+	$(COMP) $(FOO)gvxl_de$(OBJ) $(CO) gvxlang.c
+	-rm gvxlang.c
+	-rm gvclang.h
+	-rm gvclang.rc
 
-$(OD)gvxl_es$(OBJ): es/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc es/gvclang.h es/gvclang.rc  
-	$(COMP) $(FOO)gvxl_es$(OBJ) $(CO) es/gvxlang.c
+$(OD)gvxl_en$(OBJ): en/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc en/gvclang.h en/gvclang.rc  $(CODEPAGE)
+	$(CODEPAGE) 1252 1252 en/gvxlang.c gvxlang.c
+	$(CODEPAGE) 1252 1252 en/gvclang.h gvclang.h
+	$(CODEPAGE) 1252 1252 en/gvclang.rc gvclang.rc
+	$(COMP) $(FOO)gvxl_en$(OBJ) $(CO) gvxlang.c
+	-rm gvxlang.c
+	-rm gvclang.h
+	-rm gvclang.rc
 
-$(OD)gvxl_fr$(OBJ): fr/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc fr/gvclang.h fr/gvclang.rc  
-	$(COMP) $(FOO)gvxl_fr$(OBJ) $(CO) fr/gvxlang.c
+$(OD)gvxl_es$(OBJ): es/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc es/gvclang.h es/gvclang.rc  $(CODEPAGE)
+	$(CODEPAGE) 1252 1252 es/gvxlang.c gvxlang.c
+	$(CODEPAGE) 1252 1252 es/gvclang.h gvclang.h
+	$(CODEPAGE) 1252 1252 es/gvclang.rc gvclang.rc
+	$(COMP) $(FOO)gvxl_es$(OBJ) $(CO) gvxlang.c
+	-rm gvxlang.c
+	-rm gvclang.h
+	-rm gvclang.rc
+
+$(OD)gvxl_fr$(OBJ): fr/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc fr/gvclang.h fr/gvclang.rc  $(CODEPAGE)
+	$(CODEPAGE) 1252 1252 fr/gvxlang.c gvxlang.c
+	$(CODEPAGE) 1252 1252 fr/gvclang.h gvclang.h
+	$(CODEPAGE) 1252 1252 fr/gvclang.rc gvclang.rc
+	$(COMP) $(FOO)gvxl_fr$(OBJ) $(CO) gvxlang.c
+	-rm gvxlang.c
+	-rm gvclang.h
+	-rm gvclang.rc
 
 $(OD)gvxl_gr$(OBJ): gr/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc gr/gvclang.h gr/gvclang.rc $(CODEPAGE)
-	$(CODEPAGE) 1253_8859-7 gr/gvxlang.c gvxlang.c
-	$(CODEPAGE) 1253_8859-7 gr/gvclang.h gvclang.h
-	$(CODEPAGE) 1253_8859-7 gr/gvclang.rc gvclang.rc
+	$(CODEPAGE) 1253 8859-7 gr/gvxlang.c gvxlang.c
+	$(CODEPAGE) 1253 8859-7 gr/gvclang.h gvclang.h
+	$(CODEPAGE) 1253 8859-7 gr/gvclang.rc gvclang.rc
 	$(COMP) $(FOO)gvxl_gr$(OBJ) $(CO) gvxlang.c
 	-rm gvxlang.c
 	-rm gvclang.h
 	-rm gvclang.rc
 
-$(OD)gvxl_it$(OBJ): it/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc it/gvclang.h it/gvclang.rc  
-	$(COMP) $(FOO)gvxl_it$(OBJ) $(CO) it/gvxlang.c
+$(OD)gvxl_it$(OBJ): it/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc it/gvclang.h it/gvclang.rc  $(CODEPAGE)
+	$(CODEPAGE) 1252 1252 it/gvxlang.c gvxlang.c
+	$(CODEPAGE) 1252 1252 it/gvclang.h gvclang.h
+	$(CODEPAGE) 1252 1252 it/gvclang.rc gvclang.rc
+	$(COMP) $(FOO)gvxl_it$(OBJ) $(CO) gvxlang.c
+	-rm gvxlang.c
+	-rm gvclang.h
+	-rm gvclang.rc
 
-$(OD)gvxl_nl$(OBJ): nl/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc nl/gvclang.h nl/gvclang.rc  
-	$(COMP) $(FOO)gvxl_nl$(OBJ) $(CO) nl/gvxlang.c
+$(OD)gvxl_nl$(OBJ): nl/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc nl/gvclang.h nl/gvclang.rc  $(CODEPAGE)
+	$(CODEPAGE) 1252 1252 nl/gvxlang.c gvxlang.c
+	$(CODEPAGE) 1252 1252 nl/gvclang.h gvclang.h
+	$(CODEPAGE) 1252 1252 nl/gvclang.rc gvclang.rc
+	$(COMP) $(FOO)gvxl_nl$(OBJ) $(CO) gvxlang.c
+	-rm gvxlang.c
+	-rm gvclang.h
+	-rm gvclang.rc
 
-$(OD)gvxl_se$(OBJ): se/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc se/gvclang.h se/gvclang.rc  
-	$(COMP) $(FOO)gvxl_se$(OBJ) $(CO) se/gvxlang.c
+$(OD)gvxl_ru$(OBJ): ru/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc ru/gvclang.h ru/gvclang.rc $(CODEPAGE)
+	$(CODEPAGE) 1251 KOI8-R ru/gvxlang.c gvxlang.c
+	$(CODEPAGE) 1251 KOI8-R ru/gvclang.h gvclang.h
+	$(CODEPAGE) 1251 KOI8-R ru/gvclang.rc gvclang.rc
+	$(COMP) $(FOO)gvxl_ru$(OBJ) $(CO) gvxlang.c
+	-rm gvxlang.c
+	-rm gvclang.h
+	-rm gvclang.rc
+
+$(OD)gvxl_se$(OBJ): se/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc se/gvclang.h se/gvclang.rc  $(CODEPAGE)
+	$(CODEPAGE) 1252 1252 se/gvxlang.c gvxlang.c
+	$(CODEPAGE) 1252 1252 se/gvclang.h gvclang.h
+	$(CODEPAGE) 1252 1252 se/gvclang.rc gvclang.rc
+	$(COMP) $(FOO)gvxl_se$(OBJ) $(CO) gvxlang.c
+	-rm gvxlang.c
+	-rm gvclang.h
+	-rm gvclang.rc
+
+$(OD)gvxl_sk$(OBJ): sk/gvxlang.c $(HDRS) $(SRCUNX)gvxlang.h $(SRCUNX)gvxlangh.rc sk/gvclang.h sk/gvclang.rc  $(CODEPAGE)
+	$(CODEPAGE) 1250 1250 sk/gvxlang.c gvxlang.c
+	$(CODEPAGE) 1250 1250 sk/gvclang.h gvclang.h
+	$(CODEPAGE) 1250 1250 sk/gvclang.rc gvclang.rc
+	$(COMP) $(FOO)gvxl_sk$(OBJ) $(CO) gvxlang.c
+	-rm gvxlang.c
+	-rm gvclang.h
+	-rm gvclang.rc
 
 $(OD)gvxmeas$(OBJ): $(SRCUNX)gvxmeas.c $(HDRS)
 	$(COMP) $(FOO)gvxmeas$(OBJ) $(CO) $(SRCUNX)gvxmeas.c
@@ -263,11 +338,15 @@ $(OD)gvxres$(OBJ): $(SRCUNX)gvxres.c $(HDRS) $(SRCUNX)gvxlang.h
 
 
 
-html: $(BD)gvxde.htm $(BD)gvxen.htm $(BD)gvxes.htm $(BD)gvxfr.htm $(BD)gvxgr.htm $(BD)gvxit.htm $(BD)gvxnl.htm $(BD)gvxse.htm
+html: $(BD)gvxct.htm $(BD)gvxde.htm $(BD)gvxen.htm $(BD)gvxes.htm $(BD)gvxfr.htm $(BD)gvxgr.htm $(BD)gvxit.htm $(BD)gvxnl.htm $(BD)gvxru.htm $(BD)gvxse.htm $(BD)gvxsk.htm
 
 $(BD)gvxen.htm: $(DOC2HTML) $(GVDOC) en/gvclang.txt
 	$(GVDOC) X en/gvclang.txt $(OD)gvx.txt
 	$(DOC2HTML) $(OD)gvx.txt $(BD)gvxen.htm
+
+$(BD)gvxct.htm: $(DOC2HTML) $(GVDOC) ct/gvclang.txt
+	$(GVDOC) X ct/gvclang.txt $(OD)gvx.txt
+	$(DOC2HTML) $(OD)gvx.txt $(BD)gvxct.htm
 
 $(BD)gvxde.htm: $(DOC2HTML) $(GVDOC) de/gvclang.txt
 	$(GVDOC) X de/gvclang.txt $(OD)gvx.txt
@@ -283,8 +362,8 @@ $(BD)gvxfr.htm: $(DOC2HTML) $(GVDOC) fr/gvclang.txt
 
 $(BD)gvxgr.htm: $(DOC2HTML) $(GVDOC) gr/gvclang.txt
 	$(GVDOC) X gr/gvclang.txt $(OD)temp.txt
-	$(CODEPAGE) 1253_8859-7 $(OD)temp.txt $(OD)gvx.txt
-	$(DOC2HTML) $(OD)gvx.txt $(BD)gvxgr.htm
+	$(CODEPAGE) 1253 UTF-8 $(OD)temp.txt $(OD)gvx.txt
+	$(DOC2HTML) $(OD)gvx.txt $(BD)gvxgr.htm utf-8
 
 $(BD)gvxit.htm: $(DOC2HTML) $(GVDOC) it/gvclang.txt
 	$(GVDOC) X it/gvclang.txt $(OD)gvx.txt
@@ -294,15 +373,26 @@ $(BD)gvxnl.htm: $(DOC2HTML) $(GVDOC) nl/gvclang.txt
 	$(GVDOC) X nl/gvclang.txt $(OD)gvx.txt
 	$(DOC2HTML) $(OD)gvx.txt $(BD)gvxnl.htm
 
+$(BD)gvxru.htm: $(DOC2HTML) $(GVDOC) ru/gvclang.txt
+	$(GVDOC) X ru/gvclang.txt $(OD)temp.txt
+	$(CODEPAGE) 1251 UTF-8 $(OD)temp.txt $(OD)gvx.txt
+	$(DOC2HTML) $(OD)gvx.txt $(BD)gvxru.htm utf-8
+
 $(BD)gvxse.htm: $(DOC2HTML) $(GVDOC) se/gvclang.txt
 	$(GVDOC) X se/gvclang.txt $(OD)gvx.txt
 	$(DOC2HTML) $(OD)gvx.txt $(BD)gvxse.htm
+
+$(BD)gvxsk.htm: $(DOC2HTML) $(GVDOC) sk/gvclang.txt
+	$(GVDOC) X sk/gvclang.txt $(OD)temp.txt
+	$(CODEPAGE) 1250 UTF-8 $(OD)temp.txt $(OD)gvx.txt
+	$(DOC2HTML) $(OD)gvx.txt $(BD)gvxsk.htm utf-8
 
 
 clean: commonclean
 
 veryclean: clean
 	-$(RM) $(BD)gsview
+	-$(RM) $(BD)gvxct.htm
 	-$(RM) $(BD)gvxde.htm
 	-$(RM) $(BD)gvxen.htm
 	-$(RM) $(BD)gvxes.htm
@@ -310,6 +400,8 @@ veryclean: clean
 	-$(RM) $(BD)gvxgr.htm
 	-$(RM) $(BD)gvxit.htm
 	-$(RM) $(BD)gvxnl.htm
+	-$(RM) $(BD)gvxru.htm
 	-$(RM) $(BD)gvxse.htm
+	-$(RM) $(BD)gvxsk.htm
 	-$(RM) $(BD)epstool$(EXE)
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -192,8 +192,8 @@ d_calc_resize(int pagenum, float *pwidth, float *pheight, int *pxoffset, int *py
 	    gs_addmess("d_calc_resize: zoomed\n");
 	display.xdpi = option.zoom_xdpi;
 	display.ydpi = option.zoom_ydpi;
-	width = display.width * 72.0 / display.xdpi;
-	height = display.height * 72.0 / display.ydpi;
+	width = (float)(display.width * 72.0 / display.xdpi);
+	height = (float)(display.height * 72.0 / display.ydpi);
 	xoffset = display.zoom_xoffset;
 	yoffset = display.zoom_yoffset;
     }
@@ -214,34 +214,34 @@ d_calc_resize(int pagenum, float *pwidth, float *pheight, int *pxoffset, int *py
 	            mediabox = psfile.dsc->page[pagenum-1].media->mediabox;
 	    }
 	    if (bbox) {
-		width = bbox->urx - bbox->llx;
-		height = bbox->ury - bbox->lly;
+		width = (float)(bbox->urx - bbox->llx);
+		height = (float)(bbox->ury - bbox->lly);
 		xoffset = bbox->llx;
 		yoffset = bbox->lly;
 	    }
 	    else if (mediabox) {
-		width = mediabox->urx - mediabox->llx;
-		height = mediabox->ury - mediabox->lly;
+		width = (float)(mediabox->urx - mediabox->llx);
+		height = (float)(mediabox->ury - mediabox->lly);
 		xoffset = mediabox->llx;
 		yoffset = mediabox->lly;
 	    }
 	    else {
-		width = get_paper_width();
-		height = get_paper_height();
+		width = (float)get_paper_width();
+		height = (float)get_paper_height();
 		xoffset = 0;
 		yoffset = 0;
 	    }
 	}
 	else {
 	    if (dsc->bbox != (CDSCBBOX *)NULL) {
-		width = dsc->bbox->urx - dsc->bbox->llx;
-		height = dsc->bbox->ury - dsc->bbox->lly;
+		width = (float)(dsc->bbox->urx - dsc->bbox->llx);
+		height = (float)(dsc->bbox->ury - dsc->bbox->lly);
 		xoffset = dsc->bbox->llx;
 		yoffset = dsc->bbox->lly;
 	    }
 	    else {
-		width = get_paper_width();
-		height = get_paper_height();
+		width = (float)get_paper_width();
+		height = (float)get_paper_height();
 		xoffset = 0;
 		yoffset = 0;
 	    }
@@ -263,14 +263,14 @@ d_calc_resize(int pagenum, float *pwidth, float *pheight, int *pxoffset, int *py
 	    mediabox = psfile.dsc->page[pagenum-1].media->mediabox;
 
 	if (mediabox) {
-	    width = mediabox->urx - mediabox->llx;
-	    height = mediabox->ury - mediabox->lly;
+	    width = (float)(mediabox->urx - mediabox->llx);
+	    height = (float)(mediabox->ury - mediabox->lly);
 	    xoffset = mediabox->llx;
 	    yoffset = mediabox->lly;
 	}
 	else {
-	    width = get_paper_width();
-	    height = get_paper_height();
+	    width = (float)get_paper_width();
+	    height = (float)get_paper_height();
 	    xoffset = 0;
 	    yoffset = 0;
 	}
@@ -281,8 +281,8 @@ d_calc_resize(int pagenum, float *pwidth, float *pheight, int *pxoffset, int *py
 	    gs_addmess("d_resize: other\n");
 	xoffset = 0;
 	yoffset = 0;
-	width = get_paper_width();
-	height = get_paper_height();
+	width = (float)get_paper_width();
+	height = (float)get_paper_height();
     }
 
     *pwidth = width;
@@ -313,9 +313,18 @@ int	yoffset;	  /* page origin offset in 1/72" */
     display.xoffset = (unsigned int)(xoffset * display.xdpi / 72.0);
     display.yoffset = (unsigned int)(yoffset * display.ydpi / 72.0);
 
-
     /* set new size */
 
+    /* There is a local/global allocation problem in GS 7.04,
+     * 7.05, 8.00 which we try to avoid by always calling setuserparams, 
+     * .locksafe and setpagedevice with global objects.  
+     * The problem is that you can insert a local object with 
+     * setpagedevice, but if you later call currentpagedevice while 
+     * in global allocation, it will fail trying to put the local 
+     * object into a global dictionary.
+     */
+    if (!code) 	/* local/global bug in GS, see note above */
+	code = gs_printf("currentglobal true setglobal\n");
     if (!code)
 	code = gs_printf("GSview /HWResolution [%f %f] put\n", display.xdpi, display.ydpi);
     if (!code)   /* need to improve this for PDF - need page bbox */
@@ -335,6 +344,8 @@ int	yoffset;	  /* page origin offset in 1/72" */
 	code = gs_printf("GSview /TextAlphaBits %d put\n", real_depth(option.depth) >= 8 ? option.alpha_text : 1);
     if (!code)
 	code = gs_printf("GSview /GraphicsAlphaBits %d put\n", real_depth(option.depth) >= 8 ?  option.alpha_graphics : 1);
+    if (!code) 	/* local/global bug in GS, see note above */
+	code = gs_printf("setglobal\n");
 
     return code;
 }
@@ -371,10 +382,13 @@ int
 d_init1(void)
 {
     /* create GSview dictionary */
-    return gs_printf("/GSview 8 dict def GSview begin\n/PageSize [612 792] def\n\
+    /* local/global bug in GS, see note above */
+    return gs_printf("currentglobal true setglobal\n\
+/GSview 8 dict def GSview begin\n/PageSize [612 792] def\n\
 /ImagingBBox null def\n/Orientation 0 def\n/HWResolution [96.0 96.0] def\n\
 /Size PageSize def\n/PageOffset [0 0] def\n\
-/TextAlphaBits 1 def /GraphicsAlphaBits 1 def\nend\n");
+/TextAlphaBits 1 def /GraphicsAlphaBits 1 def\nend\n\
+setglobal\n");
 }
 
 #ifdef UNIX
@@ -414,11 +428,8 @@ int i;
 const char *p;
     /* Allow document files to be opened */
     if (option.safer && (gsdll.revision_number > GS_UNSAFE)) {
-	if (gsdll.revision_number == 704) {
-	    /* There is a local/global allocation problem in GS 7.04 */
-	    /* which we try to avoid with the following */
-	    code = gs_printf( "currentglobal true setglobal\n");
-	}
+ 	/* local/global bug in GS, see note above */
+	code = gs_printf( "currentglobal true setglobal\n");
 	if (!code)
 	    code = gs_printf("<<\n");
 	if (!code)
@@ -436,7 +447,7 @@ const char *p;
 	    code = gs_printf("  (%s)\n", filename);
 	}
 	if (!code && psfile.tname[0]) {
-	    for (p=psfile.name, i=0; *p && i < sizeof(filename)-2; i++) {
+	    for (p=psfile.tname, i=0; *p && i < sizeof(filename)-2; p++) {
 		if (*p == '\\') {
 		    filename[i++] = '\\';
 		    filename[i++] = '\\';
@@ -456,12 +467,8 @@ const char *p;
 	    code = gs_printf(" /PermitFileControl []\n");
 	if (!code)
 	    code = gs_printf(" >> setuserparams\n");
-	if (gsdll.revision_number == 704) {
-	    /* There is a local/global allocation problem in GS 7.04 */
-	    /* which we try to avoid with the following */
-	    if (!code)
-	        code = gs_printf( "setglobal\n");
-	}
+	if (!code) 	/* local/global bug in GS, see note above */
+	    code = gs_printf( "setglobal\n");
     }
     if (code)
 	gs_addmessf("Failed to setuserparams for SAFER\n");
@@ -502,6 +509,8 @@ long dmode;
 	    break;
     }
 
+    if (!code) 	/* local/global bug in GS, see note above */
+	code = gs_printf("currentglobal true setglobal\n");
     if (!code)
 	code = gs_printf("<< /OutputDevice /%s /DisplayFormat %ld /DisplayHandle %ld\n",
 	    DEVICENAME, dmode, &view);
@@ -511,6 +520,8 @@ long dmode;
         code = send_prolog(IDR_VIEWER);
     if (!code)
         code = gs_printf(">> setpagedevice\n");
+    if (!code) 	/* local/global bug in GS, see note above */
+	code = gs_printf("setglobal\n");
 
     if (!code && option.safer && (gsdll.revision_number > GS_UNSAFE)) {
 	if (gsdll.revision_number == 704) {
@@ -521,15 +532,27 @@ long dmode;
 
 	    /* .locksafe disabled ViewerPreProcess */
 	    /* Put it back again */
-	    code = gs_printf(
-		"currentpagedevice /ViewerPreProcess known not { <<\n");
+	    if (!code)
+		code = gs_printf("currentglobal true setglobal\n");
+	    if (!code)
+		code = gs_printf(
+		    "currentpagedevice /ViewerPreProcess known not { <<\n");
 	    if (!code)
 		code = send_prolog(IDR_VIEWER);
 	    if (!code)
 		code = gs_printf(">> setpagedevice } if\n");
+	    if (!code)
+		code = gs_printf("setglobal\n");
         }
-	else  
-	    code = gs_printf(".locksafe\n");
+	else  {
+	    /* code = gs_printf(".locksafe\n"); */
+	    /* local/global bug in GS, see note above */
+	    code = gs_printf(
+		"currentglobal true setglobal .locksafe setglobal\n");
+/* FIX: .locksafe in 7.06 pre-release is buggy and leaves items on the stack */
+	    if (!code)
+		code = gs_printf("clear\n");
+	}
     }
 
     if (code) {
@@ -585,7 +608,12 @@ d_pdf_page(int pagenum)
 		gs_addmess("d_resize failed\n");
 	}
 	if (!code) {
-	    code = gs_printf("<< >> //systemdict /setpagedevice get exec\n");
+	    /* local/global bug in GS, see note above */
+	    code = gs_printf("currentglobal true setglobal\n");
+	    if (!code)
+	        code = gs_printf("<< >> //systemdict /setpagedevice get exec\n");
+	    if (!code) 	/* local/global bug in GS, see note above */
+		code = gs_printf("setglobal\n");
 	    if (code)
 		gs_addmess("setpagedevice failed\n");
 	}
@@ -966,8 +994,12 @@ gs_process_prepare_input(PENDING *ppend)
 	    if (!code)
 		code = d_resize(psfile.pagenum);
 	    view.img->ignore_sync = TRUE;		/* ignore next sync */
+	    if (!code) 	/* local/global bug in GS, see note above */
+		code = gs_printf("currentglobal true setglobal\n");
 	    if (!code)
 		code = gs_printf("<< >> //systemdict /setpagedevice get exec\n");
+	    if (!code) 	/* local/global bug in GS, see note above */
+		code = gs_printf("setglobal\n");
 	}
     }
 

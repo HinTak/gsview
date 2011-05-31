@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -151,6 +151,7 @@ BEGIN
 #endif
 /* %  copy dictionary so we can change the entries */
 "  dup length dict copy  \015\012"
+"currentglobal true setglobal exch\015\012" /* KLUDGE to dodge GS bug */
 /* % remove entries that will upset viewer */
 "  dup /HWResolution undef\015\012"
 "  dup /HWMargins undef\015\012"
@@ -242,7 +243,8 @@ BEGIN
 /* % Insert ImagingBBox - this speeds up rendering if ImagingBBox < PageSize */
 "  GSview /ImagingBBox get null eq \015\012"
 "  { % create an ImagingBBox from PageSize\015\012"
-"    dup /ImagingBBox [ 0 0\015\012"
+"    dup /ImagingBBox\015\012"
+"    [ 0 0\015\012"
 "    GSview /PageSize get\015\012"
 "    dup 0 get exch 1 get ]\015\012"
 "    put\015\012"
@@ -255,7 +257,8 @@ BEGIN
 "  dup /Policies << /PageSize 5 >> put\015\012"
 /* % Insert InputAttributes */
 /* % Use this to specify media size */
-"  dup /InputAttributes <<\015\012"
+"  dup /InputAttributes\015\012"
+"  <<\015\012"
 "    0 << /PageSize [\015\012"
 "      GSview /Orientation get\015\012"
 "      dup 0 eq\015\012"
@@ -272,7 +275,9 @@ BEGIN
 "      ifelse\015\012"
 "    ]\015\012"
 "    >>\015\012"
-"  >> put\015\012"
+"  >>\015\012"
+"  put\015\012"
+"exch setglobal\015\012" /* KLUDGE to dodge GS bug */
 "  end % pop systemdict \015\012"
 #ifdef UNUSED
 "(exiting ViewerPreProcess\n) print\015\012"

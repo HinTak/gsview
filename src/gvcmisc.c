@@ -237,16 +237,20 @@ read_profile(const char *ininame)
 int i, j;
 char profile[MAXSTR];
 const char *section = INISECTION;
+char secver[MAXSTR];
 PROFILE *prf;
     if (debug & DEBUG_GENERAL)
 	gs_addmessf("Reading profile \042%s\042\n", ininame);
     prf = profile_open(ininame);
-    profile_read_string(prf, section, "Configured", "", profile, sizeof(profile));
+
+    /* GSview-N.N */
+    sprintf(secver, "GSview-%s", GSVIEW_DOT_VERSION);
+    profile_read_string(prf, secver, "Configured", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
 	option.configured = i;
     else
 	option.configured = FALSE;
-    profile_read_string(prf, section, "GSversion", "", profile, sizeof(profile));
+    profile_read_string(prf, secver, "GSversion", "", profile, sizeof(profile));
     if (sscanf(profile,"%d", &i) == 1)
 	option.gsversion = i;
     else
@@ -254,22 +258,23 @@ PROFILE *prf;
     if ( (option.gsversion < GS_REVISION_MIN) ||
 	 (option.gsversion > GS_REVISION_MAX) )
 	option.gsversion = GS_REVISION;
-    profile_read_string(prf, section, "Version", "", profile, sizeof(profile));
+    profile_read_string(prf, secver, "Version", "", profile, sizeof(profile));
     if (strcmp(profile, GSVIEW_DOT_VERSION)!=0)
 	option.configured = FALSE;
-    profile_read_string(prf, section, "GhostscriptDLL", "", profile, sizeof(profile));
+    profile_read_string(prf, secver, "GhostscriptDLL", "", profile, sizeof(profile));
     if (profile[0] != '\0')	/* don't copy a default - assume already set */
 	    strncpy(option.gsdll, profile, MAXSTR-1);
-    profile_read_string(prf, section, "GhostscriptEXE", "", profile, sizeof(profile));
+    profile_read_string(prf, secver, "GhostscriptEXE", "", profile, sizeof(profile));
     if (profile[0] != '\0')	/* don't copy a default - assume already set */
 	    strncpy(option.gsexe, profile, MAXSTR-1);
-    profile_read_string(prf, section, "GhostscriptInclude", "", profile, sizeof(profile));
+    profile_read_string(prf, secver, "GhostscriptInclude", "", profile, sizeof(profile));
     if (profile[0] != '\0')	/* don't copy a default - assume already set */
 	    strncpy(option.gsinclude, profile, MAXSTR-1);
-    profile_read_string(prf, section, "GhostscriptOther", "", profile, sizeof(profile));
+    profile_read_string(prf, secver, "GhostscriptOther", "", profile, sizeof(profile));
     if (profile[0] != '\0')	/* don't copy a default - assume already set */
 	    strncpy(option.gsother, profile, MAXSTR-1);
 
+    /* Options */
     profile_read_string(prf, section, "Language", "", profile, sizeof(profile));
     option.language = language_id(profile);
     if (option.language == 0)
@@ -495,6 +500,7 @@ char profile[MAXSTR];
 const char *section = INISECTION;
 int i;
 PROFILE *prf;
+char secver[MAXSTR];
 	if (debug & DEBUG_GENERAL)
 	    gs_addmessf("Writing profile \042%s\042\n", szIniFile);
 	prf = profile_open(szIniFile);
@@ -502,18 +508,22 @@ PROFILE *prf;
 	    message_box_a("profile_open() failed, no memory\n", 0);
 	    return;
 	}
-	profile_write_string(prf, section, "Version", GSVIEW_DOT_VERSION);
+
+        /* GSview-N.N */
+	sprintf(secver, "GSview-%s", GSVIEW_DOT_VERSION);
+	profile_write_string(prf, secver, "Version", GSVIEW_DOT_VERSION);
 	sprintf(profile, "%d", (int)option.gsversion);
-	profile_write_string(prf, section, "GSversion", profile);
+	profile_write_string(prf, secver, "GSversion", profile);
+	sprintf(profile, "%d", (int)option.configured);
+	profile_write_string(prf, secver, "Configured", profile);
+	profile_write_string(prf, secver, "GhostscriptDLL", option.gsdll);
+	profile_write_string(prf, secver, "GhostscriptEXE", option.gsexe);
+	profile_write_string(prf, secver, "GhostscriptInclude", option.gsinclude);
+	profile_write_string(prf, secver, "GhostscriptOther", option.gsother);
+	sprintf(profile, "%d %d", (int)option.img_origin.x, (int)option.img_origin.y);
+	/* Options */
 	profile_write_string(prf, section, "Language", 
 	    language_twocc(option.language));
-	sprintf(profile, "%d", (int)option.configured);
-	profile_write_string(prf, section, "Configured", profile);
-	profile_write_string(prf, section, "GhostscriptDLL", option.gsdll);
-	profile_write_string(prf, section, "GhostscriptEXE", option.gsexe);
-	profile_write_string(prf, section, "GhostscriptInclude", option.gsinclude);
-	profile_write_string(prf, section, "GhostscriptOther", option.gsother);
-	sprintf(profile, "%d %d", (int)option.img_origin.x, (int)option.img_origin.y);
 	profile_write_string(prf, section, "HelpCmd", option.helpcmd);
 	profile_write_string(prf, section, "Origin", profile);
 	sprintf(profile, "%d %d", (int)option.img_size.x, (int)option.img_size.y);
@@ -667,9 +677,9 @@ void * debug_malloc(size_t size)
 	    allocated_memory += size;
 	    pl++;
 	}
-#ifdef NOTUSED
-if (size == 8000)
+if (size == 4096)
 gs_addmess("\r\nstop here\r\n");
+#ifdef NOTUSED
 #endif
 	sprintf(buf, "malloc(%ld) 0x%x, allocated = %ld\r\n", 
 	    (long)size, (int)pl, allocated_memory);

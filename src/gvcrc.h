@@ -197,6 +197,9 @@
 #define IDM_LANGGR	356
 #define IDM_LANGNL	357
 #define IDM_LANGSE	358
+#define IDM_LANGSK	359
+#define IDM_LANGCT	360
+#define IDM_LANGRU	361
 
 #define IDM_LANGLAST    369
 

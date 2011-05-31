@@ -1031,8 +1031,8 @@ int method = option.print_method;
 	/* Use values obtained from device context */
     	width = print_gdi_width;
     	height = print_gdi_height;
-    	print_xdpi = print_gdi_xdpi;
-    	print_ydpi = print_gdi_ydpi;
+    	print_xdpi = (float)print_gdi_xdpi;
+    	print_ydpi = (float)print_gdi_ydpi;
     }
 
     /* create options file */
@@ -1048,7 +1048,10 @@ int method = option.print_method;
     if (option.gsinclude[0])
 	fprintf(optfile, "-I\042%s\042\n", option.gsinclude);
     fprintf(optfile, "-dNOPAUSE\n");
-    if (option.safer)
+    /* If using a PDF file, we set SAFER later after we have opened
+     * the PDF file.
+     */
+    if (option.safer && (!psfile.ispdf || (option.gsversion < 704)))
 	fprintf(optfile, "-dSAFER\n");
     if (strcmp(device, "uniprint") == 0) {
 	/* uniprint sets the device name and resolution in */

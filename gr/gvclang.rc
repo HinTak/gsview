@@ -27,20 +27,20 @@ STRINGTABLE
 BEGIN
 	/* these must be in ascending ID order */
 	GSVS(IDM_OPEN, "’νοιγμα...")                   
-	GSVS(IDM_MAGPLUS, "Αύξηση ανάλυσης")           
-	GSVS(IDM_HELPCONTENT, "Βοήθεια")               
-	GSVS(IDM_PRINT, "Εκτύπωση...")                 
-	GSVS(IDM_NEXT, "Επόμενη σελίδα")               
-	GSVS(IDM_TEXTFINDNEXT, "Εύρεση επόμενου")      
-	GSVS(IDM_TEXTFIND, "Εύρεση...")                
-	GSVS(IDM_MAGMINUS, "Μείωση ανάλυσης")          
-	GSVS(IDM_NEXTSKIP, "Μετάβαση 5 σελίδες εμπρός")
-	GSVS(IDM_PREVSKIP, "Μετάβαση 5 σελίδες πίσω")  
-	GSVS(IDM_GOFWD, "Μετάβαση εμπρός")             
-	GSVS(IDM_GOBACK, "Μετάβαση πίσω")              
-	GSVS(IDM_GOTO, "Μετάβαση στη σελίδα...")       
 	GSVS(IDM_INFO, "Πληροφορίες...")               
+	GSVS(IDM_PRINT, "Εκτύπωση...")                 
+	GSVS(IDM_TEXTFIND, "Εύρεση...")                
+	GSVS(IDM_TEXTFINDNEXT, "Εύρεση επόμενου")      
+	GSVS(IDM_NEXT, "Επόμενη σελίδα")               
+	GSVS(IDM_NEXTSKIP, "Μετάβαση 5 σελίδες εμπρός")
 	GSVS(IDM_PREV, "Προηγούμενη σελίδα")           
+	GSVS(IDM_PREVSKIP, "Μετάβαση 5 σελίδες πίσω")  
+	GSVS(IDM_GOTO, "Μετάβαση στη σελίδα...")       
+	GSVS(IDM_GOBACK, "Μετάβαση πίσω")              
+	GSVS(IDM_GOFWD, "Μετάβαση εμπρός")             
+	GSVS(IDM_MAGPLUS, "Αύξηση ανάλυσης")           
+	GSVS(IDM_MAGMINUS, "Μείωση ανάλυσης")          
+	GSVS(IDM_HELPCONTENT, "Βοήθεια")               
 END
 
 
@@ -90,8 +90,8 @@ BEGIN
 	GSVS(IDS_GSCOMMAND, "Εντολή Ghostscript;")
 */
 	GSVS(IDS_NOZOOM, "Για να μεγεθυνθεί θα πρέπει πρώτα να απεικονιστεί")
-	GSVS(IDS_USERWIDTH, "Πλάτος σε μονάδες του 1/72 της ίντσας:")
-	GSVS(IDS_USERHEIGHT, "Ύψος σε μονάδες του 1/72 της ίντσας:")
+	GSVS(IDS_USERWIDTH, "Πλάτος:")
+	GSVS(IDS_USERHEIGHT, "Ύψος:")
 	GSVS(IDS_BADEPS, "Πρόβλημα κατά τη δημιουργία του αρχείου EPS")
 	GSVS(IDS_NOPREVIEW, "Δεν είναι ένα αρχείο EPS για DOS ή\nΔεν υπάρχει δυαδική προεπισκόπηση")
 	GSVS(IDS_NOTDFNAME, "Αδύνατη η χρησιμοποίηση ονόματος το οποίο συμπίπτει με όνομα ανοιχτού αρχείου")

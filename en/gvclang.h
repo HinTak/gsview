@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,7 +20,7 @@
 
 #define AAENGLISH "English"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2002 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2003 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "All rights reserved."
 #define GSVIEW_COPYRIGHT3 "See the file LICENCE for more details."
 
@@ -296,7 +296,7 @@
 #define AAONLINEREG "Online Registration"
 #define AAREG1 "Please enter your name and registration number"
 #define AAREG2 ""
-#define AANAG1 "GSview is Copyright 2002 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview is Copyright 2003 Ghostgum Software Pty Ltd."
 #define AANAG2 "Please support the development of GSview by registering it."
 #define AANAG3 ""
 #define AANAG4 "GSview can be registered online at"
@@ -364,7 +364,7 @@
 #define AAUNINSTALLITEM "Uninstall GSview and AFPL Ghostscript"
 
 /* setup program */
-#define AAINSTALLSPACE "This installation will require 5 M bytes of hard disk space"
+#define AAINSTALLSPACE "This installation will require 7 M bytes of hard disk space"
 #define AAGSVIEWREQUIRES "GSview also requires"
 #define AAVIEWREADMEDETAILS "View the Readme file for details of how to obtain Ghostscript."
 #define AACOPYRIGHTNOTICE "Copyright Notice"

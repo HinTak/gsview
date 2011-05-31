@@ -24,6 +24,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <process.h>
+#include "gvcrc.h"
+
+#define GVWGS_VERSION  "0.3"
+
+#ifndef DS_3DLOOK
+#define DS_3DLOOK 0x0004L      /* for Windows 95 look */
+#endif
+
+#ifndef RC_INVOKED
+
 #include <dos.h>
 #ifdef _MSC_VER
 #define GSDLLEXPORT __declspec(dllimport)
@@ -37,15 +47,6 @@
 #define P6(t1,t2,t3,t4,t5,t6) t1,t2,t3,t4,t5,t6
 #include "errors.h"
 #include "iapi.h"
-#include "gvcrc.h"
-
-#define GVWGS_VERSION	"0.3"
-
-#ifndef DS_3DLOOK
-#define DS_3DLOOK 0x0004L	/* for Windows 95 look */
-#endif
-
-#ifndef RC_INVOKED
 
 #define WM_TEXTUPDATE	WM_USER+1
 #define WM_PCUPDATE	WM_USER+2

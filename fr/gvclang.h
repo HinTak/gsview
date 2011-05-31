@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,7 +20,7 @@
 
 #define AAFRANCAIS "Français"	/* Francais in code page 1252 */
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2002, Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2003, Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Tous droits réservés."
 #define GSVIEW_COPYRIGHT3 "Voir le fichier LICENCE pour plus d'informations."
 
@@ -297,7 +297,7 @@
 #define AAONLINEREG "Online Registration"
 #define AAREG1 "Please enter your name and registration number"
 #define AAREG2 ""
-#define AANAG1 "GSview is Copyright 2002 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview is Copyright 2003 Ghostgum Software Pty Ltd."
 #define AANAG2 "Please support the development of GSview"
 #define AANAG3 "by registering it."
 #define AANAG4 "GSview can be registered online at"

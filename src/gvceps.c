@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -288,7 +288,7 @@ CDSC *dsc = psfile.dsc;
 	    free(buffer);
 	    fclose(infile);
 
-	    fputs("%%EndDocument\r\n",f);
+	    fputs("\r\n%%EndDocument\r\n",f);
 	    fputs("%%Trailer\r\n",f);
 	    fclose(f);
 	    info_wait(IDS_NOWAIT);
@@ -1545,9 +1545,8 @@ char appname[MAXSTR];
 /* make a PC EPS file with a TIFF Preview */
 /* from a PS file and a bitmap */
 int
-make_eps_tiff(int type, BOOL calc_bbox)
+make_eps_tiff(int type, BOOL calc_bbox, const char *epsname)
 {
-char epsname[MAXSTR];
 unsigned char *pbitmap;
 char *buffer;
 unsigned int count;
@@ -1614,18 +1613,12 @@ int code;
 	}
 
 #ifdef EPSTOOL
-	strncpy(epsname, oname, MAXSTR-1);
 	if (*epsname!='\0')
 	    epsfile = fopen(epsname,"wb");
 	else
 	    epsfile = stdout;
 #else
 	/* create EPS file */
-	epsname[0] = '\0';
-	if (!get_filename(epsname, TRUE, FILTER_EPS, 0, IDS_TOPICPREVIEW)) {
-	    unlink(tiffname);
-	    return 1;
-	}
 	epsfile = fopen(epsname,"wb");
 #endif
 	if (epsfile == (FILE *)NULL) {
@@ -1643,6 +1636,17 @@ int code;
 	if (calc_bbox) {
 	    fseek(tpsfile, 0, SEEK_END);
 	    eps_header.ps_length = ftell(tpsfile);
+	}
+	else if (psfile.dsc->dcs2 && psfile.dsc->page_count) {
+	    /* add all pages */
+	    int i;
+ 	    unsigned long begin = psfile.dsc->page[0].begin;
+	    unsigned long end = begin;
+	    for (i=0; i<(int)psfile.dsc->page_count; i++) {
+		if (psfile.dsc->page[i].end > end)
+	            end = psfile.dsc->page[i].end;
+	    }
+	    eps_header.ps_length = end - begin;
 	}
 	else {
 	    /* don't use ftell(), because we may already have an eps preview */
@@ -1689,6 +1693,11 @@ int code;
 	    while ( (count = fread(buffer, 1, COPY_BUF_SIZE, tpsfile)) != 0 )
 		fwrite(buffer, 1, count, epsfile);
 	}
+	else if (psfile.dsc->dcs2 && psfile.dsc->page_count) {
+	    /* add all pages */
+	    ps_copy(epsfile, psfile.file, psfile.dsc->page[0].begin, 
+		eps_header.ps_length + psfile.dsc->page[0].begin);
+	}
 	else {
 	    CDSC *dsc = psfile.dsc;
 	    ps_copy(epsfile, psfile.file, dsc->begincomments, dsc->endcomments);
@@ -1702,8 +1711,10 @@ int code;
 	
 	/* copy tiff file */
 	rewind(tiff_file);
-        while ( (count = fread(buffer, 1, COPY_BUF_SIZE, tiff_file)) != 0 )
+        while ( (count = fread(buffer, 1, COPY_BUF_SIZE, tiff_file)) != 0 ) 
+	{
 	    fwrite(buffer, 1, count, epsfile);
+	}
 
 	free(buffer);
 	fclose(tiff_file);
@@ -1841,9 +1852,8 @@ write_interchange(FILE *f, unsigned char *pbitmap, BOOL calc_bbox)
 /* make an EPSI file with an Interchange Preview */
 /* from a PS file and a bitmap */
 int
-make_eps_interchange(BOOL calc_bbox)
+make_eps_interchange(BOOL calc_bbox, const char *epiname)
 {
-char epiname[MAXSTR];
 FILE *epifile;
 LPBITMAP2 pbm;
 int code;
@@ -1854,19 +1864,12 @@ int code;
 	}
 
 #ifdef EPSTOOL
-	strncpy(epiname, oname, MAXSTR-1);
 	if (*epiname!='\0')
 	    epifile = fopen(epiname,"wb");
 	else
 	    epifile = stdout;
 #else
 	/* create EPI file */
-	epiname[0] = '\0';
-	if (!get_filename(epiname, TRUE, FILTER_EPI, 0, IDS_TOPICPREVIEW)) {
-	    play_sound(SOUND_ERROR);
-	    release_bitmap();
-	    return 1;
-	}
 	epifile = fopen(epiname,"wb");
 #endif
 
@@ -2543,9 +2546,8 @@ unsigned long size;
 /* make a PC EPS file with a Windows Metafile Preview */
 /* from a PS file and a bitmap */
 int
-make_eps_metafile(BOOL calc_bbox)
+make_eps_metafile(BOOL calc_bbox, const char *outname)
 {
-char outname[MAXSTR];
 char *buffer;
 UINT count;
 FILE *outfile;
@@ -2610,18 +2612,12 @@ CDSC *dsc = psfile.dsc;
 
 #ifdef EPSTOOL
 	/* assume outname already exists */
-	strncpy(outname, oname, MAXSTR-1);
 	if (*outname!='\0')
 	    outfile = fopen(outname,"wb");
 	else
 	    outfile = stdout;
 #else
 	/* create EPS file */
-	outname[0] = '\0';
-	if (!get_filename(outname, TRUE, FILTER_EPS, 0, IDS_TOPICPREVIEW)) {
-	    release_bitmap();
-	    return 1;
-	}
         outfile = fopen(outname,"wb");
 #endif
 	if (outfile == (FILE *)NULL) {

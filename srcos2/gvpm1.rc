@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1998, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -107,6 +107,7 @@ BEGIN
 "/ViewerPreProcess { systemdict begin\015\012"
 /* %  copy dictionary so we can change the entries */
 "  dup length dict copy  \015\012"
+"currentglobal true setglobal exch\015\012" /* KLUDGE to dodge GS bug */
 /* % remove entries that will upset viewer */
 "  dup /HWResolution undef\015\012"
 "  dup /HWMargins undef\015\012"
@@ -229,6 +230,7 @@ BEGIN
 "    ]\015\012"
 "    >>\015\012"
 "  >> put\015\012"
+"exch setglobal\015\012" /* KLUDGE to dodge GS bug */
 "  end % pop systemdict \015\012"
 "}\015\012"
 "\0\0"

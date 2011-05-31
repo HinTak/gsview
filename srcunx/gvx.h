@@ -55,6 +55,7 @@ typedef gint32 LONG;
 typedef guint8 BYTE;
 typedef GtkWidget *HWND;
 #define stricmp strcasecmp
+#define strnicmp strncasecmp
 
 /* some of these should be private to gvx.cpp */
 extern GtkWidget *window;

@@ -54,7 +54,6 @@
 
 #ifndef RC_INVOKED
 
-
 #define P0() void
 #define P1(t1) t1
 #define P2(t1,t2) t1,t2
@@ -277,7 +276,9 @@ extern int bitmap_scrollx;	/* offset from bitmap to origin of child window */
 extern int bitmap_scrolly;
 extern HFONT info_font;
 extern HFONT hFontAnsi;			/* ANSI (Western European) font */
-extern HFONT hFontGreek;		/* Greek font */
+extern HFONT hFontGreek;		/* cp 1253 / Greek font */
+extern HFONT hFontEastEurope;		/* ISO-Latin2 / cp1250 font */
+extern HFONT hFontCyrillic;		/* ISO-Latin5 / cp1251 font */
 extern POINT img_offset;		/* offset to gswin child window */
 extern POINT info_file;		/* position of file information */
 extern POINT info_page;		/* position of page information */
@@ -335,6 +336,7 @@ int convert_multibyte(LPTSTR str, LPCSTR mbstr, int len);
 int convert_widechar(LPSTR mbstr, LPCTSTR str, int len);
 
 #ifdef UNICODE
+#define MessageBoxL MessageBoxW
 #define DialogBoxParamL DialogBoxParamW
 #define CreateDialogParamL CreateDialogParamW
 #define SendDlgItemMessageL SendDlgItemMessageW
@@ -345,6 +347,8 @@ int convert_widechar(LPSTR mbstr, LPCTSTR str, int len);
 /* Some redirection stuff to allow NT to display text that
  * doesn't match the system code page
  */
+int MessageBoxL(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType);
+BOOL GetOpenSaveFileNameL(LPOPENFILENAME pofn, BOOL save);
 BOOL DialogBoxParamL(HINSTANCE hInstance, LPCTSTR lpTemplateName,
     HWND hWndParent, DLGPROC lpDialogProc, LPARAM dwInitParam);
 HWND CreateDialogParamL(HINSTANCE hInstance, LPCTSTR lpTemplateName,

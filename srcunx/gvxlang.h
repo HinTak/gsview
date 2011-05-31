@@ -40,6 +40,12 @@ typedef struct {
    const gchar *item_type;
 } MENU_ENTRY;
 
+/* Catalan */
+extern STRING_ENTRY string_ct[];
+extern int string_ct_len;
+extern MENU_ENTRY menu_ct[];
+extern int menu_ct_len;
+
 /* German */
 extern STRING_ENTRY string_de[];
 extern int string_de_len;
@@ -82,11 +88,23 @@ extern int string_nl_len;
 extern MENU_ENTRY menu_nl[];
 extern int menu_nl_len;
 
+/* Russian */
+extern STRING_ENTRY string_ru[];
+extern int string_ru_len;
+extern MENU_ENTRY menu_ru[];
+extern int menu_ru_len;
+
 /* Swedish */
 extern STRING_ENTRY string_se[];
 extern int string_se_len;
 extern MENU_ENTRY menu_se[];
 extern int menu_se_len;
+
+/* Slovak */
+extern STRING_ENTRY string_sk[];
+extern int string_sk_len;
+extern MENU_ENTRY menu_sk[];
+extern int menu_sk_len;
 
 void check_string_order(STRING_ENTRY *st, int stlen);
 

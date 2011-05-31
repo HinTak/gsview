@@ -21,7 +21,7 @@
 #include "gvc.h"
 #include <math.h>
 
-float fthreshold = 1e-12;
+float fthreshold = (float)1e-12;
 
 #define radians(x) (2. * 3.14159265358979 * ((x)/ 360.))
 
@@ -34,10 +34,10 @@ matrix_rotate(const MATRIX *pm, float ang, MATRIX *pmr)
   double asin = sin(radians(ang)) ;
   double acos = cos(radians(ang)) ;
   mxx = pm->xx, mxy = pm->xy;
-  pmr->xx = acos * mxx + asin * pm->yx;
-  pmr->xy = acos * mxy + asin * pm->yy;
-  pmr->yx = acos * pm->yx - asin * mxx;
-  pmr->yy = acos * pm->yy - asin * mxy;
+  pmr->xx = (float)(acos * mxx + asin * pm->yx);
+  pmr->xy = (float)(acos * mxy + asin * pm->yy);
+  pmr->yx = (float)(acos * pm->yx - asin * mxx);
+  pmr->yy = (float)(acos * pm->yy - asin * mxy);
   if ( pmr != pm )
   {
     pmr->tx = pm->tx;
@@ -61,22 +61,22 @@ matrix_invert(const MATRIX *pm, MATRIX *pmr)
       if ( is_xxyy(pm) )
       {       if ( is_fzero(pm->xx) || is_fzero(pm->yy) )
                 return -1 ;
-              pmr->tx = - (pmr->xx = 1.0 / pm->xx) * pm->tx;
+              pmr->tx = (float)(- (pmr->xx = (float)(1.0 / pm->xx)) * pm->tx);
               pmr->xy = 0.0;
               pmr->yx = 0.0;
-              pmr->ty = - (pmr->yy = 1.0 / pm->yy) * pm->ty;
+              pmr->ty = (float)(- (pmr->yy = (float)(1.0 / pm->yy)) * pm->ty);
       }
       else
       {       double det = pm->xx * pm->yy - pm->xy * pm->yx;
               double mxx = pm->xx, mtx = pm->tx;
               if ( det == 0 )
                 return -1 ;
-              pmr->xx = pm->yy / det;
-              pmr->xy = - pm->xy / det;
-              pmr->yx = - pm->yx / det;
-              pmr->yy = mxx / det;    /* xx is already changed */
-              pmr->tx = - (mtx * pmr->xx + pm->ty * pmr->yx);
-              pmr->ty = - (mtx * pmr->xy + pm->ty * pmr->yy); /* tx ditto */
+              pmr->xx = (float)(pm->yy / det);
+              pmr->xy = (float)(- pm->xy / det);
+              pmr->yx = (float)(- pm->yx / det);
+              pmr->yy = (float)(mxx / det);    /* xx is already changed */
+              pmr->tx = (float)(- (mtx * pmr->xx + pm->ty * pmr->yx));
+              pmr->ty = (float)(- (mtx * pmr->xy + pm->ty * pmr->yy)); /* tx ditto */
       }
       return 0;
 }
@@ -119,13 +119,13 @@ void matrix_set_unit(MATRIX *matrix, int unit)
 	matrix->tx = 0 ;  matrix->ty = 0 ;
 	break ;
     case IDM_UNITMM:
-	matrix->xx = 1./72*25.4 ;  matrix->xy = 0 ;
-	matrix->yx = 0 ;  matrix->yy = 1./72*25.4 ;
+	matrix->xx = (float)(1./72*25.4) ;  matrix->xy = 0 ;
+	matrix->yx = 0 ;  matrix->yy = (float)(1./72*25.4) ;
 	matrix->tx = 0 ;  matrix->ty = 0 ;
 	break ;
     case IDM_UNITINCH:
-	matrix->xx = 1./72. ;  matrix->xy = 0 ;
-	matrix->yx = 0 ;  matrix->yy = 1./72. ;
+	matrix->xx = (float)(1./72.) ;  matrix->xy = 0 ;
+	matrix->yx = 0 ;  matrix->yy = (float)(1./72.) ;
 	matrix->tx = 0 ;  matrix->ty = 0 ;
 	break ;
   }

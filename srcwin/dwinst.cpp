@@ -22,6 +22,7 @@
 #include <objbase.h>
 #include <shlobj.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <io.h>
 #include <direct.h>
 

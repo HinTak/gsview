@@ -225,11 +225,11 @@ char buf[64];
         deltax = 0.0;
     if (fabs(deltay) < fthreshold)
         deltay = 0.0;
-    radius = sqrt(deltax*deltax + deltay*deltay);
+    radius = (float)sqrt(deltax*deltax + deltay*deltay);
     if ((deltax == 0.0) && (deltay == 0.0))
 	angle = 0.0;
     else
-	angle = degrees( atan2(deltay, deltax) );
+	angle = (float)degrees( atan2(deltay, deltax) );
 
     sprintf(buf, measure_fmt, thisx);
     SetDlgItemTextA(hwnd_measure, IDC_MEASURE_X, buf);

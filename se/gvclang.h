@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  Alla rättigheter reserverade.
+/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  Alla rättigheter reserverade.
 
   This file is part of GSview.
 
@@ -20,7 +20,7 @@
 
 #define AASVENSKA "Svenska"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2002 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2003 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Alla rättigheter reserverade."
 #define GSVIEW_COPYRIGHT3 "Se filen LICENCE för fler detaljer."
 
@@ -296,7 +296,7 @@
 #define AAONLINEREG "Online Registrering"
 #define AAREG1 "Var vänlig uppge ditt namn och registreringsnummer"
 #define AAREG2 ""
-#define AANAG1 "GSview är Copyright 2002 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview är Copyright 2003 Ghostgum Software Pty Ltd."
 #define AANAG2 "Var vänlig stöd utvecklingen av GSview genom att registrera den."
 #define AANAG3 ""
 #define AANAG4 "GSview kan registeras online hos"

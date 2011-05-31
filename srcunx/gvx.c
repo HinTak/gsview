@@ -774,8 +774,8 @@ key_press_event(GtkWidget *widget, GdkEventKey *event)
 	case GDK_F1:
 	    gsview_wcmd(NULL, (gpointer)IDM_HELPCONTENT);
 	    break;
-	default:
 	  /* ignore it 
+	default:
 	      g_print("Key press 0x%x 0x%x\n", event->keyval, event->state);
 	   */
     }
@@ -1850,6 +1850,19 @@ gs_thread(void *arg)
 int main( int argc, char *argv[] )
 {
     int rc;
+    /* This is gtk+-1.2 which doesn't support UTF-8 cleanly,
+     * so remove it if set in LANG environment variable.
+     * Our menus and strings are in a local codepage, not UTF-8.
+     */
+    char lang[MAXSTR];
+    char *p;
+    memset(lang, 0, sizeof(lang));
+    strncpy(lang, getenv("LANG"), sizeof(lang)-1);
+    p = strchr(lang, '.');
+    if (p && ((strcmp(p, ".UTF-8") == 0) || (strcmp(p, ".utf8") == 0))) {
+	*p = '\0';	/* remove UTF-8 */
+	setenv("LANG", lang, 1);
+    }
     pszLocale = gtk_set_locale();
     setlocale(LC_NUMERIC, "C");
     gtk_init (&argc, &argv);

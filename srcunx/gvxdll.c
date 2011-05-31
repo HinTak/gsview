@@ -97,33 +97,31 @@ peek_message(void)
 void
 image_lock(IMAGE *img)
 {
-    if (debug && img->lock_count)
-	gs_addmess("Image is locked\n");
-#ifdef MULTITHREAD
-    if (multithread) {
-	pthread_mutex_lock(&img->hmutex);
-    }
-#endif
     if (debug) {
 	if (img->lock_count)
 	    gs_addmess("Attempted to lock image twice\n");
 	img->lock_count++;
     }
+#ifdef MULTITHREAD
+    if (multithread) {
+	pthread_mutex_lock(&img->hmutex);
+    }
+#endif
 }
 
 void
 image_unlock(IMAGE *img)
 {
-#ifdef MULTITHREAD
-    if (multithread)
-	pthread_mutex_unlock(&img->hmutex);
-#endif
     if (debug) {
 	if (img->lock_count == 0)
 	    gs_addmess("Attempted to unlock unlocked image\n");
 	else 
 	    img->lock_count--;
     }
+#ifdef MULTITHREAD
+    if (multithread)
+	pthread_mutex_unlock(&img->hmutex);
+#endif
 }
 
 /* Poll the caller for cooperative multitasking. */

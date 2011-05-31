@@ -62,7 +62,7 @@ image_create_palette(IMAGE *img)
 	if (logpalette == (LPLOGPALETTE) NULL)
 	    return (HPALETTE)0;
 	logpalette->palVersion = 0x300;
-	logpalette->palNumEntries = img->bmih.biClrUsed;
+	logpalette->palNumEntries = (WORD)img->bmih.biClrUsed;
 	for (i = 0; i < nColors; i++) {
 	    logpalette->palPalEntry[i].peFlags = 0;
 	    image_color(img->format, i,
@@ -93,8 +93,6 @@ image_presize(IMAGE *img, int width, int height, int raster,
 int
 image_size(IMAGE *img)
 {
-    int i;
-    int nColors;
     int bytewidth;
 
     /* create a BMP header for the bitmap */
@@ -368,7 +366,7 @@ image_draw(IMAGE *img, HDC hdc, int dx, int dy, int wx, int wy,
     
     if (img->bmih.biClrUsed) {
 	/* palette colors */
-	for (i = 0; i < img->bmih.biClrUsed; i++)
+	for (i = 0; i < (int)img->bmih.biClrUsed; i++)
 	    bmi.pal_index[i] = i;
 	which_colors = DIB_PAL_COLORS;
     } 

@@ -317,11 +317,9 @@ void
 change_language(void)
 {
 TCHAR *p;
-MENUITEMINFO mii;
 HMENU hMenuOptions;
 HMENU hMenuLang;
 HMENU hMenuMedia;
-DWORD dwErr;
 int i;
 
     nCodePageSystem = GetACP();
@@ -333,6 +331,10 @@ int i;
 
     if (nCodePageLanguage == 1253)
        info_font = hFontGreek;
+    else if (nCodePageLanguage == 1250)
+       info_font = hFontEastEurope;
+    else if (nCodePageLanguage == 1251)
+       info_font = hFontCyrillic;
     else
        info_font = hFontAnsi;
 
@@ -358,7 +360,7 @@ int i;
 #endif
     for (i=0; i<sizeof(usermedia)/sizeof(USERMEDIA)-1; i++) {
 	if (usermedia[i].name[0])
-	    AppendMenu(hMenuMedia, MF_STRING, 
+	    AppendMenuA(hMenuMedia, MF_STRING, 
 		usermedia[i].id, (LPSTR)usermedia[i].name);
     }
 
@@ -515,7 +517,6 @@ gsview_init1(int argc, char *argv[])
 {
 WNDCLASS wndclass;
 DWORD version = GetVersion();
-char *p;
 int length = 64;
 int badarg;
 	getcwd(workdir, sizeof(workdir));
@@ -678,7 +679,10 @@ int badarg;
 	    }
 	}
 	if (szIniFile[0] == '\0') {
-	    GetWindowsDirectory(szIniFile, sizeof(szIniFile)-2-sizeof(INIFILE));
+	    TCHAR tbuf[MAXSTR];
+	    GetWindowsDirectory(tbuf, 
+		sizeof(tbuf)/sizeof(TCHAR)-2-sizeof(INIFILE));
+	    convert_widechar(szIniFile, tbuf, sizeof(szIniFile));
 	    strcat(szIniFile, "\\");
 	}
 	strcat(szIniFile, INIFILE);
@@ -877,6 +881,10 @@ calc_info_button_areas(int width, int height)
     hFontAnsi = CreateFontIndirect(&lf);
     lf.lfCharSet = GREEK_CHARSET;
     hFontGreek = CreateFontIndirect(&lf);
+    lf.lfCharSet = EASTEUROPE_CHARSET;
+    hFontEastEurope = CreateFontIndirect(&lf);
+    lf.lfCharSet = RUSSIAN_CHARSET;
+    hFontCyrillic = CreateFontIndirect(&lf);
     old_hfont = (HFONT)SelectObject(hdc, hFontAnsi);
     GetTextMetrics(hdc,(LPTEXTMETRIC)&tm);
     display.planes = GetDeviceCaps(hdc, PLANES);
@@ -888,13 +896,17 @@ calc_info_button_areas(int width, int height)
 
     if (nCodePageLanguage == 1253)
        info_font = hFontGreek;
+    else if (nCodePageLanguage == 1250)
+       info_font = hFontEastEurope;
+    else if (nCodePageLanguage == 1251)
+       info_font = hFontCyrillic;
     else
        info_font = hFontAnsi;
 
     button_size.x = 24;
     button_size.y = 24;
     info_rect.left = 0;
-    info_rect.right = info_rect.left + 86 * char_size.x;
+    info_rect.right = info_rect.left + 96 * char_size.x;
     info_rect.bottom = height;
     info_rect.top = info_rect.bottom - char_size.y - 4;
     // buttons at top
@@ -912,11 +924,11 @@ calc_info_button_areas(int width, int height)
 
     info_file.x = info_rect.left + 2;
     info_file.y = info_rect.top + 3;
-    info_coord.left = info_rect.left + 32 * char_size.x;
-    info_coord.right = info_rect.left + 52 * char_size.x;
+    info_coord.left = info_rect.left + 42 * char_size.x;
+    info_coord.right = info_rect.left + 62 * char_size.x;
     info_coord.top = info_rect.top + 3;
     info_coord.bottom = info_coord.top + char_size.y+2;
-    info_page.x = info_rect.left + 54 * char_size.x + 2;
+    info_page.x = info_rect.left + 64 * char_size.x + 2;
     info_page.y = info_rect.top + 3;
 }
 
@@ -927,7 +939,7 @@ gsview_create()
 int i;
 WNDCLASS wndclass;
 HGLOBAL hglobal;
-short FAR *pButtonID;
+short *pButtonID;
 HWND hbutton;
 WNDPROC	lpfnMenuButtonProc;
 RECT rect;
@@ -961,7 +973,7 @@ int x, y;
 	lpfnButtonWndProc = wndclass.lpfnWndProc;
 	
 	hglobal = LoadResource(phInstance, FindResource(phInstance, MAKEINTRESOURCE(IDR_BUTTON), RT_RCDATA));
-	if ( (pButtonID = (short FAR *)LockResource(hglobal)) == (short FAR *)NULL)
+	if ( (pButtonID = (short *)LockResource(hglobal)) == (short *)NULL)
 		return;
 	
 	x = button_rect.left;
@@ -978,7 +990,7 @@ int x, y;
 		    WS_CHILD | BS_OWNERDRAW | 
 		    (option.button_show ? WS_VISIBLE : 0),
 		    x, y, button_size.x, button_size.y,
-		    hwndimg, (HMENU)pButtonID[i],
+		    hwndimg, (HMENU)(int)pButtonID[i],
 		    phInstance, NULL);
 		SetWindowLong(hbutton, GWL_WNDPROC, (LONG)lpfnMenuButtonProc);
 		if (hbutton) {
@@ -2035,7 +2047,6 @@ CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		WIZPAGE *page;
 		TCHAR buf[MAXSTR];
 		TCHAR gsdir[MAXSTR];
-		TCHAR *p;
 		int i;
 		for (page=pages; page->id; page++) {
 		    page->hwnd = CreateDialogParamL(hlanguage, 

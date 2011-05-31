@@ -502,11 +502,11 @@ CDIB::GetRect(LPRECT prect)
 }
 
 BOOL 
-CDIB::Read(LPCTSTR lpszFileName)
+CDIB::Read(LPCSTR lpszFileName)
 {
     GFile *gf;
     if ( (gf = gfile_open(lpszFileName, gfile_modeRead | gfile_shareDenyWrite))
-	== NULL );
+	== NULL )
 	return FALSE;
     BOOL flag = Read(gf);
     gfile_close(gf);
@@ -857,7 +857,7 @@ BOOL CDIB::Write(GFile *gf) {
 }
 
 
-BOOL CDIB::Write(LPCTSTR lpszFileName)
+BOOL CDIB::Write(LPCSTR lpszFileName)
 {
     // not implemented
     GFile *gf;

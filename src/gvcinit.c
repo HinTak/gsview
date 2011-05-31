@@ -118,7 +118,7 @@ int parse_argv(GSVIEW_ARGS *args, int argc, char *argv[])
 			return --i;
 
 		    /* compare against known media */
-		    for (j=0; j<CDSC_KNOWN_MEDIA; j++) {
+		    for (j=0; dsc_known_media[j].name != (char *)NULL; j++) {
 			if (!stricmp(dsc_known_media[j].name, p)) {
 			    strncpy(args->media, p, sizeof(args->media)-1);
 			    break;

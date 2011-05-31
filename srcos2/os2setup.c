@@ -79,6 +79,9 @@ APIRET rc;
     strcpy(langdll, sourcedir);
     strcat(langdll, "setup2");
     switch (language) {
+	case IDM_LANGCT:
+	    strcat(langdll, "ct");
+	    break;
 	case IDM_LANGDE:
 	    strcat(langdll, "de");
 	    break;
@@ -97,8 +100,14 @@ APIRET rc;
 	case IDM_LANGNL:
 	    strcat(langdll, "nl");
 	    break;
+	case IDM_LANGRU:
+	    strcat(langdll, "ru");
+	    break;
 	case IDM_LANGSE:
 	    strcat(langdll, "se");
+	    break;
+	case IDM_LANGSK:
+	    strcat(langdll, "sk");
 	    break;
 	case IDM_LANGEN:
 	default:
@@ -127,13 +136,16 @@ LanguageDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
                     WinDismissDlg(hwnd, 0);
                     break;
 		case IDM_LANGEN:
+		case IDM_LANGCT:
 		case IDM_LANGDE:
 		case IDM_LANGES:
 		case IDM_LANGFR:
 		case IDM_LANGGR:
 		case IDM_LANGIT:
 		case IDM_LANGNL:
+		case IDM_LANGRU:
 		case IDM_LANGSE:
+		case IDM_LANGSK:
                     WinDismissDlg(hwnd, SHORT1FROMMP(mp1));
             }
             break;
@@ -167,13 +179,16 @@ ULONG pcbActual;
 	language = WinDlgBox(HWND_DESKTOP, HWND_DESKTOP, LanguageDlgProc, hlanguage, IDD_LANG, NULL);
 	switch (language) {
 	    case IDM_LANGEN:
+	    case IDM_LANGCT:
 	    case IDM_LANGDE:
 	    case IDM_LANGES:
 	    case IDM_LANGFR:
 	    case IDM_LANGGR:
 	    case IDM_LANGIT:
 	    case IDM_LANGNL:
+	    case IDM_LANGRU:
 	    case IDM_LANGSE:
+	    case IDM_LANGSK:
 		load_language(language);
 	}
     }
@@ -421,6 +436,7 @@ update_ini(char *ininame)
 {
 PROFILE *prf;
 char buf[16];
+char secver[64];
     prf = profile_open(ininame);
     if (prf == (PROFILE *)NULL) {
 	char mess[MAXSTR];
@@ -428,9 +444,10 @@ char buf[16];
 	sprintf(error_message, mess, ininame);
 	return 1;
     }
-    profile_write_string(prf, "Options", "Configured", "0");
+    sprintf(secver, "GSview-%s", GSVIEW_DOT_VERSION);
+    profile_write_string(prf, secver, "Configured", "0");
     sprintf(buf, "%3d", gsver);
-    profile_write_string(prf, "Options", "GSversion", buf);
+    profile_write_string(prf, secver, "GSversion", buf);
     profile_close(prf);
     return 0;
 }

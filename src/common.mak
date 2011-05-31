@@ -51,9 +51,10 @@ CLEAN3=$(OD)*$(EXE)
 
 # Documentation
 
-$(CODEPAGE): $(SRC)codepage.c
+$(CODEPAGE): $(SRC)codepage.c $(SRC)gvccp.c $(SRC)gvccp.h
 	$(CCAUX) $(FOO)codepage$(OBJ) $(CO) $(SRC)codepage.c
-	$(CCAUX) $(CLFLAG) $(FE)$(CODEPAGE) $(OD)codepage$(OBJ)
+	$(CCAUX) $(FOO)gvccp$(OBJ) $(CO) $(SRC)gvccp.c
+	$(CCAUX) $(CLFLAG) $(FE)$(CODEPAGE) $(OD)codepage$(OBJ) $(OD)gvccp$(OBJ)
 
 $(GVDOC): $(SRC)gvdoc.c
 	$(CCAUX) $(FOO)gvdoc$(OBJ) $(CO) $(SRC)gvdoc.c

@@ -6,11 +6,25 @@
 
 # makefile created by
 # Russell Lang, 1998-10-09
+# Updated for MSVC++ 7, 2003-03-09
 
 
 # Edit VCVER and DEVBASE as required
-VCVER=5
-DEVBASE = c:\devstudio
+!ifndef VCVER
+VCVER=7
+!endif
+
+!ifndef DEVBASE
+!if $(VCVER) <= 5
+DEVBASE=E:\Program Files\devstudio
+!endif
+!if $(VCVER) == 6
+DEVBASE=E:\Program Files\Microsoft Visual Studio
+!endif
+!if $(VCVER) == 7
+DEVBASE=E:\Program Files\Microsoft Visual Studio .NET
+!endif
+!endif
 
 # Debugging
 DEBUG=1
@@ -32,19 +46,21 @@ CFLAGS=/D__WIN32__
 
 !if $(VCVER) <= 5
 COMPBASE = $(DEVBASE)\vc
-!else
+RCOMP="$(DEVBASE)\sharedide\bin\rc" -D_MSC_VER $(CFLAGS)
+!endif
+!if $(VCVER) == 6
 COMPBASE = $(DEVBASE)\vc98
+RCOMP="$(DEVBASE)\common\msdev98\bin\rc" -D_MSC_VER $(CFLAGS)
+!endif
+!if $(VCVER) == 7
+COMPBASE = $(DEVBASE)\vc7
+RCOMP="$(DEVBASE)\Vc7\bin\rc" -D_MSC_VER $(CFLAGS)
 !endif
 COMPDIR = $(COMPBASE)\bin
 INCDIR = $(COMPBASE)\include
 LIBDIR = $(COMPBASE)\lib
-!if $(VCVER) <= 5
-RCOMP=$(DEVBASE)\sharedide\bin\rc -D_MSC_VER $(CFLAGS)
-!else
-RCOMP=$(DEVBASE)\common\msdev98\bin\rc -D_MSC_VER $(CFLAGS)
-!endif
 
-CC=$(COMPDIR)\cl -DNEED_PROTO $(CFLAGS) $(CDEBUG) /I$(INCDIR)
+CC="$(COMPDIR)\cl" -DNEED_PROTO $(CFLAGS) $(CDEBUG) "-I$(INCDIR)"
 CCAUX=$(CC)
 
 all:	$(DEST).dll $(DEST).exe
@@ -71,10 +87,10 @@ $(DEST).rc:  ocr.h rot270.h rot90.h
 	copy ocr.h+rot270.h+rot90.h $(DEST).rc
 
 $(DEST).res: pstotxt3.rc
-	$(RCOMP) -i$(INCDIR) -r $(DEST).rc
+	$(RCOMP) "-i$(INCDIR)" -r $(DEST).rc
 
 $(DEST).dll: $(DEST).obj $(DEST).res
-	$(COMPDIR)\link $(DEBUGLINK) /DLL /DEF:pstotxt3.def /OUT:$(DEST).dll $(DEST).obj $(DEST).res
+	"$(COMPDIR)\link" $(DEBUGLINK) /DLL /DEF:pstotxt3.def /OUT:$(DEST).dll $(DEST).obj $(DEST).res
 
 $(DEST).exe: pstotxtd.c
 	$(CC) /D_Windows /Fe$(DEST).exe pstotxtd.c /link $(DEBUGLINK)

@@ -90,8 +90,8 @@ BEGIN
 	GSVS(IDS_GSCOMMAND, "Ghostscript command ?")
 */
 	GSVS(IDS_NOZOOM, "Must display page before zooming")
-	GSVS(IDS_USERWIDTH, "Width in 1/72 inch units ?")
-	GSVS(IDS_USERHEIGHT, "Height in 1/72 inch units ?")
+	GSVS(IDS_USERWIDTH, "Width ?")
+	GSVS(IDS_USERHEIGHT, "Height ?")
 	GSVS(IDS_BADEPS, "Problem making EPS file")
 	GSVS(IDS_NOPREVIEW, "Not a DOS EPS file or\nNo binary preview")
 	GSVS(IDS_NOTDFNAME, "Can't use same name as open document")

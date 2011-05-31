@@ -1,4 +1,86 @@
 ----------------------
+Version 4.4 2003-04-04
+----------------------
+All:
+  Translation updates.  Russian help file now complete.
+
+  Avoid a crash when -mpapersize is unknown.
+  The only papersizes available to -mpapersize are those
+  defined in dscparse.h, not those defined by the GSview
+  INI file which has not yet been read when the command
+  line arguments are parsed.
+
+Win:
+  Added cygwin makefile.  gvwgs32, setup and uninstgs won't run
+  because --output-def produces corrupt executable.
+
+  Allow entry of long registration names.  If a registry error
+  of "access denied" when saving details, explain that Administrator
+  privileges are required.
+
+  Setup program now uses the localised path for "C:\Program Files".
+
+OS/2:
+  Add Catalan translation to distribution.
+
+----------------------------
+Version 4.32 beta 2003-03-08
+----------------------------
+All:
+  Added partial Russian translation from Oleg Bondar.
+
+X11:
+  Do not use UTF-8, which is not supported cleanly by gtk-+1.2 
+  and older X servers.  Instead leave menus and strings in the
+  local codepage.  If the LANG environment variable has .UTF-8
+  set, remove it.
+
+----------------------------
+Version 4.31 beta 2003-02-10
+----------------------------
+All:
+  Lines that were too long caused a crash when DSC Warnings set to All.
+
+  When displaying user defined paper size, use the current units.
+  Allow the unit type to be specified when entering the paper size.
+
+  Write the version specific configuration to [GSview-N.N] to 
+  allow multiple versions of GSview to co-exist.
+
+  Fix opening of gzip or bzip2 compressed PDF files.  
+  GSview wasn't passsing the correct temporary filename to
+  Ghostscript, so the security code was preventing it being
+  opened.
+
+  Prevent lockup when ghostscript writes a very long error
+  message without line breaks.
+
+  Added Slovak language translation (no help file yet) from
+  Juo Sitá.
+
+  When converting or printing a PDF file, open without -dSAFER,
+  then use .setsafe if needed.
+
+  Prevent overflow of buffer when getting PDF links from 
+  ghostscript.
+
+  Use global allocation mode when setting security or page
+  parameters, to avoid some local/global allocation problems
+  in GS 7.04, 7.05 and 8.00.
+
+Win:
+  When printing all pages, allow printing of more than 9999 pages.
+
+X11:
+  Add space after -o on compiler command line.
+
+  Now uses the "Reverse" check box when printing.
+  
+  Prevent lock up when adding a preview.
+
+  Convert all language resources to UTF-8, which is required on RH8.
+
+----------------------
 Version 4.3 2002-04-30
 ----------------------
 All:

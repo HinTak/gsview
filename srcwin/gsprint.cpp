@@ -574,7 +574,7 @@ BOOL get_devmode(GSPRINT_OPTION *opt, HANDLE *hdevmode, HANDLE *hdevnames)
     HANDLE hprinter;
 
     if (!OpenPrinter(device, &hprinter, NULL))
-	return NULL;
+	return FALSE;
     length = DocumentProperties(NULL, hprinter, device, NULL, NULL, 0);
 
     hglobal = GlobalAlloc(GMEM_MOVEABLE, length);
@@ -589,7 +589,7 @@ BOOL get_devmode(GSPRINT_OPTION *opt, HANDLE *hdevmode, HANDLE *hdevnames)
 	GlobalUnlock(hglobal);
 	GlobalFree(hglobal);
 	ClosePrinter(hprinter);
-	return NULL;
+	return FALSE;
     }
     DocumentProperties(NULL, hprinter, device, podevmode, NULL, DM_OUT_BUFFER);
 
@@ -715,7 +715,7 @@ HDC query_printer(GSPRINT_OPTION *opt)
 	return (HDC)NULL;
     pd.Flags |= PD_NOSELECTION;
     pd.nMinPage = 1;
-    pd.nMaxPage = -1;
+    pd.nMaxPage = (unsigned int)-1;
     if (opt->from != 0) {
 	pd.nFromPage = opt->from;
 	pd.nToPage = 999;

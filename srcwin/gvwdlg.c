@@ -77,10 +77,14 @@ TCHAR cReplace;
 	    ofn.nFilterIndex = 0;
 	}
 	/* call the common dialog box */
+#ifdef UNICODE
 	if (save)
 	    flag = GetSaveFileName(&ofn);
 	else
 	    flag = GetOpenFileName(&ofn);
+#else
+	flag = GetOpenSaveFileNameL(&ofn, save);
+#endif
 	if (flag)
 	    convert_widechar(filename, ofn.lpstrFile, MAXSTR-1);
 	ofn.lpstrTitle = old_lpstrTitle;
@@ -104,8 +108,8 @@ TCHAR cReplace;
 /* Input Dialog Box structures */
 LPCTSTR input_prop = TEXT("input_prop");
 struct input_param {
-	LPCTSTR prompt;		/* Unicode or Multibyte*/
-	LPSTR answer;		/* Always Multibyte */
+	LPCTSTR prompt;
+	TCHAR answer[MAXSTR];
 };
 
 
@@ -117,14 +121,14 @@ InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         case WM_INITDIALOG:
 	    {
 	      HLOCAL hlocal;
-	      LPSTR *panswer;
+	      LPTSTR *panswer;
 	      struct input_param *pparam = (struct input_param *)lParam;
 	      SetDlgItemText(hDlg, ID_PROMPT, pparam->prompt);
-	      SetDlgItemTextA(hDlg, ID_ANSWER, pparam->answer);
+	      SetDlgItemText(hDlg, ID_ANSWER, pparam->answer);
 	      /* save address of answer string in property list */
 	      hlocal = LocalAlloc(LHND, sizeof(pparam->answer));
-	      panswer = (LPSTR *)LocalLock(hlocal);
-	      if (panswer != (LPSTR *)NULL) {
+	      panswer = (LPTSTR *)LocalLock(hlocal);
+	      if (panswer != (LPTSTR *)NULL) {
 	        *panswer = pparam->answer;
 		LocalUnlock(hlocal);
 	        SetProp(hDlg, input_prop, (HANDLE)hlocal);
@@ -141,10 +145,10 @@ InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDOK:
 		    {
 		      HLOCAL hlocal = (HLOCAL)GetProp(hDlg, input_prop); 
-		      LPSTR *panswer;
-	              panswer = (LPSTR *)LocalLock(hlocal);
-	              if (panswer != (LPSTR *)NULL) {
-		        GetDlgItemTextA(hDlg, ID_ANSWER, *panswer, MAXSTR);
+		      LPTSTR *panswer;
+	              panswer = (LPTSTR *)LocalLock(hlocal);
+	              if (panswer != (LPTSTR *)NULL) {
+		        GetDlgItemText(hDlg, ID_ANSWER, *panswer, MAXSTR);
 			LocalUnlock(hlocal);
 		      }
 		      LocalFree(hlocal);
@@ -173,10 +177,13 @@ query_string(LPCTSTR prompt, char *answer)
 {
 struct input_param param;
 BOOL flag;
-	param.answer = answer;
+        convert_multibyte(param.answer, answer, 
+		sizeof(param.answer)/sizeof(TCHAR));
 	param.prompt = prompt;
 	flag = DialogBoxParamL(hlanguage, MAKEINTRESOURCE(IDD_INPUT), 
 	    hwndimg, InputDlgProc, (LPARAM)&param);
+	if (flag)
+	    convert_widechar(answer, param.answer, MAXSTR-1);
 	return flag;
 }
 
@@ -875,16 +882,16 @@ TCHAR buf[MAXSTR];
 		    }
 		    switch(bboxindex) {
 			case 0:
-			    bbox.llx = x;
+			    bbox.llx = (int)x;
 			    break;
 			case 1:
-			    bbox.lly = y;
+			    bbox.lly = (int)y;
 			    break;
 			case 2:
-			    bbox.urx = x;
+			    bbox.urx = (int)x;
 			    break;
 			case 3:
-			    bbox.ury = y;
+			    bbox.ury = (int)y;
 			    bbox.valid = TRUE;
 			    break;
 		    }

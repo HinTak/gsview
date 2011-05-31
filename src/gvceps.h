@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -167,10 +167,10 @@ void release_bitmap(void);
 /* in gvceps.c */
 unsigned long dib_bytewidth(unsigned char *pbitmap);
 unsigned int dib_pal_colors(unsigned char *pbitmap);
-int make_eps_tiff(int type, BOOL calc_bbox);
-int make_eps_interchange(BOOL calc_bbox);
+int make_eps_tiff(int type, BOOL calc_bbox, const char *epsname);
+int make_eps_interchange(BOOL calc_bbox, const char *epiname);
 int make_eps_user(void);
-int make_eps_metafile(BOOL calc_bbox);
+int make_eps_metafile(BOOL calc_bbox, const char *outname);
 void extract_doseps(int command);
 void copy_bbox_header(FILE *f);
 int scan_pbmplus(PREBMAP *ppbmap, unsigned char *pbitmap);

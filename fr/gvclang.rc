@@ -88,8 +88,8 @@ BEGIN
 	GSVS(IDS_GSCOMMAND, "Commande Ghostscript ?")
 */
 	GSVS(IDS_NOZOOM, "Affichage de la page nécessaire avant de zoomer")
-	GSVS(IDS_USERWIDTH, "Largeur en 1/72 de pouces ?")
-	GSVS(IDS_USERHEIGHT, "Hauteur en 1/72 de pouces ?")
+	GSVS(IDS_USERWIDTH, "Largeur ?")
+	GSVS(IDS_USERHEIGHT, "Hauteur ?")
 	GSVS(IDS_BADEPS, "Problème lors de la création du fichier EPS")
 	GSVS(IDS_NOPREVIEW, "Ce n'est pas un fichier DOS EPS ou\naucun aperçu binaire")
 	GSVS(IDS_NOTDFNAME, "Utilisation du même nom que le document ouvert impossible")

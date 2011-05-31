@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "2.2  2002-04-30";
+char szVersion[] = "2.3  2003-04-04";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -81,7 +81,7 @@ void copy_eps_bbox_header(FILE *f);
 BOOL find_gs(char *gspath, int len, int minver, BOOL bDLL);
 
 /* in dscutil.cpp */
-void dsc_display(P2(CDSC *dsc, void (*dfn)(P2(void *ptr, const char *str))));
+void dsc_display(CDSC *dsc, void (*dfn)(void *ptr, const char *str));
 
 /* KLUDGE functions */
 LPBITMAP2 get_bitmap(void)
@@ -110,8 +110,8 @@ void debug_print(void *caller_data, const char *str)
 
 
 int 
-show_dsc_error(P5(void *caller_data, CDSC *dsc, unsigned int explanation, 
-	const char *line, unsigned int line_len))
+show_dsc_error(void *caller_data, CDSC *dsc, unsigned int explanation, 
+	const char *line, unsigned int line_len)
 {
     int response = CDSC_RESPONSE_CANCEL;
     int severity;
@@ -516,15 +516,15 @@ int code = 0;
 		unlink(bmpname);
 	    /* now create new file with preview */
 	    if (op == INTERCHANGE)
-		code = make_eps_interchange(calc_bbox);
+		code = make_eps_interchange(calc_bbox, oname);
 	    else if (op == TIFF4)
-		code = make_eps_tiff(IDM_MAKEEPST4, calc_bbox);
+		code = make_eps_tiff(IDM_MAKEEPST4, calc_bbox, oname);
 	    else if (op == TIFF6U)
-		code = make_eps_tiff(IDM_MAKEEPST6U, calc_bbox);
+		code = make_eps_tiff(IDM_MAKEEPST6U, calc_bbox, oname);
 	    else if (op == TIFF6P)
-		code = make_eps_tiff(IDM_MAKEEPST6P, calc_bbox);
+		code = make_eps_tiff(IDM_MAKEEPST6P, calc_bbox, oname);
 	    else if (op == WMF)
-		code = make_eps_metafile(calc_bbox);
+		code = make_eps_metafile(calc_bbox, oname);
 	    else if (op == COPY)
 		code = make_eps_copy();
 	    else

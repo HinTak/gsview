@@ -82,7 +82,7 @@ FILE * outfile;
 
     if ( (argc > 4) || (argc == 1) ) {
         fprintf(stderr,"Usage: %s infile outfile [charset]\n", argv[0]);
-        fprintf(stderr,"charset is ISO-8859-1 for ISO-Latin1, ISO-8859-7 for Greek\n");
+        fprintf(stderr,"charset is ISO-8859-1 for ISO-Latin1, ISO-8859-7 for Greek, UTF-8 for Unicode\n");
         return(1);
     }
     if ( (infile = fopen(argv[1],"r")) == (FILE *)NULL) {

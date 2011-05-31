@@ -742,6 +742,14 @@ int count;
 			pdf_tag_line+tag_len - pdf_tag_line + 1);
 	    }
 	    tag_len = strlen(pdf_tag_line);
+
+	    if (!found_eol && (tag_len >= sizeof(pdf_tag_line)-1)) {
+		/* Very long line without an EOL.
+		 * This can't be a pdf tag, so just ignore it
+		 */
+		pdf_tag_line[0] = '\0';
+		tag_len = 0;
+	    }
 	} while (found_eol);
     }
 
@@ -831,6 +839,8 @@ pdfdict begin\r\n\
     if (copies > 1)
 	add_copies(f, copies);
     fprintf(f, "(%s) (r) file pdfopen begin\r\n", filename);
+    if (option.safer)
+	fprintf(f, "systemdict /.setsafe known { .setsafe } if\n");
     fputs("%%EndSetup\r\n", f);
 
     /* Send each page */

@@ -35,6 +35,9 @@
 #ifndef LPCTSTR
 #define LPCTSTR const char *
 #endif
+#ifndef LPCSTR
+#define LPCSTR const char *
+#endif
 #ifndef GENERIC_READ
 #define GENERIC_READ (0x80000000L)
 #endif
@@ -61,7 +64,7 @@ enum OpenFlags {gfile_modeRead = 0x0000, gfile_modeWrite = 0x0001,
 enum {gfile_begin, gfile_current, gfile_end};
 
 GFile *gfile_open_handle(int hFile);
-GFile *gfile_open(LPCTSTR lpszFileName, UINT nOpenFlags);
+GFile *gfile_open(LPCSTR lpszFileName, UINT nOpenFlags);
 void gfile_close(GFile *gf);
 UINT gfile_read(GFile *gf, void *lpBuf, UINT nCount);
 UINT gfile_write(GFile *gf, void *lpBuf, UINT nCount);

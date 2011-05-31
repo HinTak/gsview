@@ -95,7 +95,7 @@ void delayed_message_box(int id, int icon);
 void check_menu_item(int menuid, int itemid, BOOL checked);
 int get_menu_string(int menuid, int itemid, char *str, int len);
 int load_string(int id, LPTSTR str, int len);
-int load_resource(int resource, TCHAR *str, int len);
+int load_resource(int resource, char *str, int len);
 void play_system_sound(TCHAR *id);
 void play_sound(int i);
 void info_wait(int id);

@@ -138,7 +138,11 @@ ULONG cFilenames = 1;
 	/* Try opening DLL */
 	rc = DosLoadModule((PBYTE)buf, sizeof(buf), 
 	    (PCSZ)lang[nlang].dllname, &hmodule);
-	if (!rc) {
+	if (rc) {
+	    gs_addmessf("Failed loading %s, rc=%d\n", lang[nlang].dllname, rc);
+	    lang[nlang].id = 0;
+	}
+	else {
 	    char vbuf[MAXSTR];
 	    /* Make sure DLL version matches EXE */
 	    memset(vbuf, 0, sizeof(vbuf));
@@ -161,8 +165,10 @@ ULONG cFilenames = 1;
 	    DosFreeModule(hmodule);
 	}
 
-	if (lang[nlang].id != 0)
-	    nlang++;	/* found a valid language */
+	if (lang[nlang].id != 0) {
+	    /* found a valid language */
+	    nlang++;
+	}
 
 	cFilenames = 1;
 	rc = DosFindNext(hdir, &findbuf, sizeof(findbuf), &cFilenames);

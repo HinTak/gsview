@@ -55,6 +55,18 @@ extern "C" {
 #include "gvwgsver.h"
 int message_box(const char *str, int icon);
 int load_string(int id, char *str, int len);
+typedef HRESULT (WINAPI *PFN_SHGetFolderPath)(
+  HWND hwndOwner,
+  int nFolder,
+  HANDLE hToken,
+  DWORD dwFlags,
+  LPSTR pszPath);
+
+typedef BOOL (WINAPI *PFN_SHGetSpecialFolderPath)(
+  HWND hwndOwner,
+  LPTSTR lpszPath,
+  int nFolder,
+  BOOL fCreate);
 }
 #include "gvcrc.h"
 #include "winsetup.h"
@@ -666,9 +678,11 @@ BOOL
 update_ini(char *ininame)
 {
 char buf[16];
+char secver[64];
+    sprintf(secver, "GSview-%s", GSVIEW_DOT_VERSION);
     sprintf(buf, "%3d", GS_REVISION);
-    WritePrivateProfileString("Options", "Configured", "0", ininame);
-    WritePrivateProfileString("Options", "GSversion", buf, ininame);
+    WritePrivateProfileString(secver, "Configured", "0", ininame);
+    WritePrivateProfileString(secver, "GSversion", buf, ininame);
     return TRUE;
 }
 
@@ -1136,12 +1150,13 @@ install_prog()
 		    gs_addmess("Failed\n");
 		    return FALSE;
 		}
-		fprintf(f, "[Options]\n");
+
 		/* Skip over "GSview 3.6" to get to version number */
 		while (*p && *p != ' ')
 		    p++;
 		while (*p && *p == ' ')
 		    p++;
+		fprintf(f, "[GSview-%s]\n", p);
 		fprintf(f, "Version=%s\n", p);
 
 		fprintf(f, "GSversion=%d\n", gsver);
@@ -1281,6 +1296,77 @@ write_registration(unsigned int reg_receipt, unsigned int reg_number,
 	return FALSE;
     }
     return TRUE;
+}
+
+#ifndef CSIDL_PROGRAM_FILES
+#define CSIDL_PROGRAM_FILES 0x0026
+#endif
+#ifndef CSIDL_FLAG_CREATE
+#define CSIDL_FLAG_CREATE 0x8000
+#endif
+#ifndef SHGFP_TYPE_CURRENT
+#define SHGFP_TYPE_CURRENT 0
+#endif
+
+BOOL 
+GetProgramFiles(LPTSTR path) 
+{
+    PFN_SHGetSpecialFolderPath PSHGetSpecialFolderPath = NULL;
+    PFN_SHGetFolderPath PSHGetFolderPath = NULL;
+    HMODULE hModuleShell32 = NULL;
+    HMODULE hModuleShfolder = NULL;
+    BOOL fOk = FALSE;
+    hModuleShfolder = LoadLibrary("shfolder.dll");
+    hModuleShell32 = LoadLibrary("shell32.dll");
+
+    if (hModuleShfolder) {
+	PSHGetFolderPath = (PFN_SHGetFolderPath)
+	    GetProcAddress(hModuleShfolder, "SHGetFolderPathA");
+	if (PSHGetFolderPath) {
+	    fOk = (PSHGetFolderPath(HWND_DESKTOP, 
+		CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, 
+		NULL, SHGFP_TYPE_CURRENT, path) == S_OK);
+	}
+    }
+
+    if (!fOk && hModuleShell32) {
+	PSHGetFolderPath = (PFN_SHGetFolderPath)
+	    GetProcAddress(hModuleShell32, "SHGetFolderPathA");
+	if (PSHGetFolderPath) {
+	    fOk = (PSHGetFolderPath(HWND_DESKTOP, 
+		CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, 
+		NULL, SHGFP_TYPE_CURRENT, path) == S_OK);
+	}
+    }
+
+    if (!fOk && hModuleShell32) {
+	PSHGetSpecialFolderPath = (PFN_SHGetSpecialFolderPath)
+	    GetProcAddress(hModuleShell32, "SHGetSpecialFolderPathA");
+	if (PSHGetSpecialFolderPath) {
+	    fOk = PSHGetSpecialFolderPath(HWND_DESKTOP, path,
+		CSIDL_PROGRAM_FILES, TRUE);
+	}
+    }
+
+    if (!fOk) {
+	/* If all else fails (probably Win95), try the registry */
+	LONG rc;
+	HKEY hkey;
+	DWORD cbData;
+	DWORD keytype;
+	rc = RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
+	    "SOFTWARE\\Microsoft\\Windows\\CurrentVersion", 0, KEY_READ, &hkey);
+	if (rc == ERROR_SUCCESS) {
+	    cbData = MAX_PATH;
+	    keytype =  REG_SZ;
+	    if (rc == ERROR_SUCCESS)
+		rc = RegQueryValueEx(hkey, "ProgramFilesDir", 0, &keytype, 
+		    (LPBYTE)path, &cbData);
+	    RegCloseKey(hkey);
+	}
+	fOk = (rc == ERROR_SUCCESS);
+    }
+    return fOk;
 }
 
 
@@ -1425,8 +1511,12 @@ init()
     
     // Interactive setup
     check_language();
+    if (!GetProgramFiles(g_szTargetDir))
+	strcpy(g_szTargetDir, "C:\\Program Files");
+    strcat(g_szTargetDir, "\\");
     LoadString(g_hInstance, IDS_TARGET_DIR, 
-	    g_szTargetDir, sizeof(g_szTargetDir));
+	g_szTargetDir+strlen(g_szTargetDir), 
+	sizeof(g_szTargetDir)-strlen(g_szTargetDir));
     
     // main dialog box
     if (!create_dialog())
@@ -1450,6 +1540,9 @@ HINSTANCE hInstance;
     strcat(langdll, "\\setp32");
 #endif
     switch (language) {
+	case IDM_LANGCT:
+	    strcat(langdll, "ct");
+	    break;
 	case IDM_LANGDE:
 	    strcat(langdll, "de");
 	    break;
@@ -1468,8 +1561,14 @@ HINSTANCE hInstance;
 	case IDM_LANGNL:
 	    strcat(langdll, "nl");
 	    break;
+	case IDM_LANGRU:
+	    strcat(langdll, "ru");
+	    break;
 	case IDM_LANGSE:
 	    strcat(langdll, "se");
+	    break;
+	case IDM_LANGSK:
+	    strcat(langdll, "sk");
 	    break;
 	case IDM_LANGEN:
 	default:
@@ -1506,13 +1605,16 @@ LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                     EndDialog(hDlg, 0);
                     return(TRUE);
                 case IDM_LANGEN:
+                case IDM_LANGCT:
                 case IDM_LANGDE:
                 case IDM_LANGES:
                 case IDM_LANGFR:
                 case IDM_LANGGR:
                 case IDM_LANGIT:
                 case IDM_LANGNL:
+                case IDM_LANGRU:
                 case IDM_LANGSE:
+                case IDM_LANGSK:
                     EndDialog(hDlg, LOWORD(wParam));
                     return(TRUE);
                 default:
@@ -1540,13 +1642,16 @@ int language;
 	language = DialogBoxParam(g_hLanguage, MAKEINTRESOURCE(IDD_LANG), HWND_DESKTOP, LanguageDlgProc, (LPARAM)NULL);
 	switch (language) {
 	    case IDM_LANGEN:
+	    case IDM_LANGCT:
 	    case IDM_LANGDE:
 	    case IDM_LANGES:
 	    case IDM_LANGFR:
 	    case IDM_LANGGR:
 	    case IDM_LANGIT:
 	    case IDM_LANGNL:
+	    case IDM_LANGRU:
 	    case IDM_LANGSE:
+	    case IDM_LANGSK:
 		load_language(language);
 	}
     }
@@ -1784,12 +1889,12 @@ ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		    }
 		    hglobal = GlobalAlloc(GHND | GMEM_SHARE, end-start+1);
 		    if (hglobal == (HGLOBAL)NULL) {
-			MessageBeep(-1);
+			MessageBeep(~0);
 			return(FALSE);
 		    }
 		    p = (LPSTR)GlobalLock(hglobal);
 		    if (p == (LPSTR)NULL) {
-			MessageBeep(-1);
+			MessageBeep(~0);
 			return(FALSE);
 		    }
 		    lstrcpyn(p, twbuf+start, end-start);

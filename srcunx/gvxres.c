@@ -68,6 +68,10 @@ const char *get_string(int id)
     int stlen;
 
     switch (LANGUAGE) {
+	case IDM_LANGCT:
+	    st = string_ct;
+	    stlen = string_ct_len;
+	    break;
 	case IDM_LANGDE:
 	    st = string_de;
 	    stlen = string_de_len;
@@ -92,9 +96,17 @@ const char *get_string(int id)
 	    st = string_nl;
 	    stlen = string_nl_len;
 	    break;
+	case IDM_LANGRU:
+	    st = string_ru;
+	    stlen = string_ru_len;
+	    break;
 	case IDM_LANGSE:
 	    st = string_se;
 	    stlen = string_se_len;
+	    break;
+	case IDM_LANGSK:
+	    st = string_sk;
+	    stlen = string_sk_len;
 	    break;
 	case IDM_LANGEN:
 	default:

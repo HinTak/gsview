@@ -95,7 +95,9 @@ HCURSOR hcHand;
 POINT img_offset;		/* offset to gswin child window */
 HFONT info_font;		/* font for info line */
 HFONT hFontAnsi;		/* ANSI (Western European) font */
-HFONT hFontGreek;		/* Greek font */
+HFONT hFontGreek;		/* cp 1253 / Greek font */
+HFONT hFontEastEurope;		/* ISO-Latin2 / cp1250 font */
+HFONT hFontCyrillic;		/* Windows Cyrillic / cp1251 font */
 POINT info_file;		/* position of file information */
 POINT info_page;		/* position of page information */
 RECT  info_rect;		/* position and size of brief info area */
@@ -213,12 +215,6 @@ void highlight_links(HDC hdc);
 void info_link(void);
 int win_get_args(int *argc, char **argv, int maxarg, char *cmdline);
 
-#ifdef UNICODE
-extern "C" {
-PIMAGE_DOS_HEADER __ImageBase;
-}
-#endif
-
 #ifndef MEMORYFILE
 int PASCAL 
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmdShow)
@@ -236,10 +232,6 @@ int gsview_main(HINSTANCE hInstance, LPSTR lpszCmdLine)
 
     /* copy the hInstance into a variable so it can be used */
     phInstance = hInstance;
-#ifdef UNICODE
-    /* Patch for unicows.lib on VC++ 5 */
-    __ImageBase = (PIMAGE_DOS_HEADER)GetModuleHandle(NULL);
-#endif
 
     dde_initialise();
     cmdline = (char *)malloc(strlen(lpszCmdLine)+1);
@@ -1010,13 +1002,13 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			float x, y;
 			HPEN hpen, hpen_old;
 			/* map bounding box to device coordinates */
-			x = dsc->bbox->llx;
-			y = dsc->bbox->lly;
+			x = (float)dsc->bbox->llx;
+			y = (float)dsc->bbox->lly;
 			map_pt_to_pixel(&x, &y);
 			rect.left   = (int)x;
 			rect.bottom = (int)y;
-			x = dsc->bbox->urx;
-			y = dsc->bbox->ury;
+			x = (float)dsc->bbox->urx;
+			y = (float)dsc->bbox->ury;
 			map_pt_to_pixel(&x, &y);
 			rect.right  = (int)x;
 			rect.top    = (int)y;
@@ -1038,13 +1030,13 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    if (image.open && display.show_find) {
 			float x, y;
 			/* map bounding box to device coordinates */
-			x = psfile.text_bbox.llx;
-			y = psfile.text_bbox.lly;
+			x = (float)psfile.text_bbox.llx;
+			y = (float)psfile.text_bbox.lly;
 			map_pt_to_pixel(&x, &y);
 			rect.left   = (int)x;
 			rect.bottom = (int)y;
-			x = psfile.text_bbox.urx;
-			y = psfile.text_bbox.ury;
+			x = (float)psfile.text_bbox.urx;
+			y = (float)psfile.text_bbox.ury;
 			map_pt_to_pixel(&x, &y);
 			rect.right  = (int)x;
 			rect.top    = (int)y;
@@ -1155,14 +1147,14 @@ gs_addmessf("HtmlHelp: %s HH_DISPLAY_TOPIC %s\n", strh, strb);
 		scroll_increment = -scroll_increment;
 		if (scroll_increment > 0) {
 		    while (scroll_increment > 0) {
-			scale *= 1.20;
+			scale = (float)(scale * 1.20);
 			scroll_increment -= WHEEL_DELTA;
 		    }
 		    gs_magnify(scale);
 		}
 		else if (scroll_increment < 0) {
 		    while (scroll_increment < 0) {
-			scale /= 1.20;
+			scale = (float)(scale/1.20);
 			scroll_increment += WHEEL_DELTA;
 		    }
 		    gs_magnify(scale);
@@ -1663,8 +1655,8 @@ gs_addmessf("HtmlHelp: %s HH_DISPLAY_TOPIC %s\n", strh, strb);
 		if (get_cursorpos(&x, &y)) {
 		    int scrollx, scrolly;
 		    zoom = !zoom;
-		    display.zoom_xoffset = x;
-		    display.zoom_yoffset = y;
+		    display.zoom_xoffset = (int)x;
+		    display.zoom_yoffset = (int)y;
 		    scrollx = bitmap.scrollx;
 		    scrolly = bitmap.scrolly;
 		    if (rect.right - rect.left > image.width)
@@ -1675,11 +1667,12 @@ gs_addmessf("HtmlHelp: %s HH_DISPLAY_TOPIC %s\n", strh, strb);
 		        zheight = image.height;
 		    else
 		        zheight = rect.bottom - rect.top;
-		    x = (scrollx + zwidth/2)*72.0/option.xdpi;
-		    y = ((image.height-1) - (scrolly + zheight/2))*72.0/option.ydpi;
+		    x = (float)((scrollx + zwidth/2)*72.0/option.xdpi);
+		    y = (float)(((image.height-1) - 
+			(scrolly + zheight/2))*72.0/option.ydpi);
 		    transform_point(&x, &y);
-		    x *= option.xdpi/72.0;
-		    y *= option.ydpi/72.0;
+		    x = (float)(x * option.xdpi/72.0);
+		    y = (float)(y * option.ydpi/72.0);
 		    display.zoom_xoffset -= (int)(x*72.0/option.zoom_xdpi);
 		    display.zoom_yoffset -= (int)(y*72.0/option.zoom_ydpi);
 		}
@@ -1901,25 +1894,27 @@ map_pt_to_pixel(float *x, float *y)
 {
     if (zoom) {
 	/* WARNING - this doesn't cope with EPS Clip */
-	*x = (*x - display.zoom_xoffset) * option.zoom_xdpi / 72.0;
-	*y = (*y - display.zoom_yoffset) * option.zoom_ydpi / 72.0;
-	*x = (*x * 72.0 / option.xdpi);
-	*y = (*y * 72.0 / option.ydpi);
+	*x = (float)((*x - display.zoom_xoffset) * option.zoom_xdpi / 72.0);
+	*y = (float)((*y - display.zoom_yoffset) * option.zoom_ydpi / 72.0);
+	*x = (float)(*x * 72.0 / option.xdpi);
+	*y = (float)(*y * 72.0 / option.ydpi);
 	itransform_point(x, y);
-	*x = (*x * option.xdpi / 72.0) - bitmap.scrollx + display.offset.x;
-	*y = -(*y * option.ydpi / 72.0) + (image.height-1 - bitmap.scrolly) 
-		+ display.offset.y;
+	*x = (float)((*x * option.xdpi / 72.0) - 
+		bitmap.scrollx + display.offset.x);
+	*y = (float)(-(*y * option.ydpi / 72.0) 
+		+ (image.height-1 - bitmap.scrolly) 
+		+ display.offset.y);
     }
     else {
-	int xoffset = display.xoffset / display.xdpi * 72.0 + 0.5;
-	int yoffset = display.yoffset / display.ydpi * 72.0 + 0.5;
+	int xoffset = (int)(display.xoffset / display.xdpi * 72.0 + 0.5);
+	int yoffset = (int)(display.yoffset / display.ydpi * 72.0 + 0.5);
 	*x = *x - xoffset;
 	*y = *y - yoffset;
 	itransform_point(x, y);
-	*x = *x * option.xdpi/72.0
-	      - bitmap.scrollx + display.offset.x;
-	*y = -(*y * option.ydpi/72.0)
-	      + (image.height-1 - bitmap.scrolly) + display.offset.y;
+	*x = (float)(*x * option.xdpi/72.0
+	      - bitmap.scrollx + display.offset.x);
+	*y = (float)(-(*y * option.ydpi/72.0)
+	      + (image.height-1 - bitmap.scrolly) + display.offset.y);
     }
 }
 
@@ -1933,8 +1928,9 @@ POINT pt;
 	GetCursorPos(&pt);
 	ScreenToClient(hwnd_image, &pt);
 	if (PtInRect(&rect, pt)) {
-	    *x = bitmap.scrollx+pt.x - display.offset.x;
-	    *y = image.height-1 - (bitmap.scrolly+pt.y) + display.offset.y;
+	    *x = (float)(bitmap.scrollx+pt.x - display.offset.x);
+	    *y = (float)(image.height-1 - 	
+		(bitmap.scrolly+pt.y) + display.offset.y);
 	    transform_cursorpos(x, y);
 	    return TRUE;
 	}
@@ -2022,7 +2018,7 @@ COLORREF text_colour;
     if (psfile.name[0] != '\0') {
 	i = load_string(IDS_FILE, buf, sizeof(buf)/sizeof(TCHAR));
 	convert_multibyte(fname, psfile.name, sizeof(fname)/sizeof(TCHAR));
-	GetFileTitle(fname, buf+i, (WORD)(sizeof(buf)/sizeof(TCHAR)-i));
+	i = GetFileTitle(fname, buf+i, (WORD)(sizeof(buf)/sizeof(TCHAR)-i));
 	if (lstrlen(buf) > 36) {
 	    memmove(buf+3, buf+lstrlen(buf)+1-32, 32*sizeof(TCHAR));
 	    buf[0] = buf[1] = buf[2] = '.';
@@ -2222,6 +2218,8 @@ gsview_close()
 	DeleteObject(hFontAnsi);
     if (hFontGreek)
 	DeleteObject(hFontGreek);
+    if (hFontEastEurope)
+	DeleteObject(hFontEastEurope);
     if (hcCrossHair)
 	DestroyCursor(hcCrossHair);
     if (hcHand)
@@ -2348,13 +2346,13 @@ scroll_to_find(void)
     request_mutex();
     SendMessage(hwnd_image, WM_SETREDRAW, FALSE, 0);
     /* first translate found box to window coordinates */
-    x = psfile.text_bbox.llx;
-    y = psfile.text_bbox.lly;
+    x = (float)psfile.text_bbox.llx;
+    y = (float)psfile.text_bbox.lly;
     map_pt_to_pixel(&x, &y);
     rect.left   = (int)x;
     rect.bottom = (int)y;
-    x = psfile.text_bbox.urx;
-    y = psfile.text_bbox.ury;
+    x = (float)psfile.text_bbox.urx;
+    y = (float)psfile.text_bbox.ury;
     map_pt_to_pixel(&x, &y);
     rect.right  = (int)x;
     rect.top    = (int)y;
@@ -2401,13 +2399,13 @@ highlight_words(HDC hdc, int first, int last)
 	text = &text_index[i];
 	/* highlight found word */
 	/* map bounding box to device coordinates */
-	x = text->bbox.llx;
-	y = text->bbox.lly;
+	x = (float)text->bbox.llx;
+	y = (float)text->bbox.lly;
 	map_pt_to_pixel(&x, &y);
 	rect.left   = (int)x;
 	rect.bottom = (int)y;
-	x = text->bbox.urx;
-	y = text->bbox.ury;
+	x = (float)text->bbox.urx;
+	y = (float)text->bbox.ury;
 	map_pt_to_pixel(&x, &y);
 	rect.right  = (int)x;
 	rect.top    = (int)y;
@@ -2445,13 +2443,13 @@ int w2;
 	i++;
 	if (link.border_width) {
 	    /* map bounding box to device coordinates */
-	    x = link.bbox.llx;
-	    y = link.bbox.lly;
+	    x = (float)link.bbox.llx;
+	    y = (float)link.bbox.lly;
 	    map_pt_to_pixel(&x, &y);
 	    rect.left   = (int)x;
 	    rect.bottom = (int)y;
-	    x = link.bbox.urx;
-	    y = link.bbox.ury;
+	    x = (float)link.bbox.urx;
+	    y = (float)link.bbox.ury;
 	    map_pt_to_pixel(&x, &y);
 	    rect.right  = (int)x;
 	    rect.top    = (int)y;
@@ -2665,18 +2663,18 @@ float dpi, xdpi, ydpi, xdpi2, ydpi2;
 	/* substract height of status bar */
 	rect.bottom -= (info_rect.bottom - info_rect.top);
     }
-    xdpi = (rect.right - rect.left) * 72.0 / width;
-    ydpi = (rect.bottom - rect.top) * 72.0 / height;
+    xdpi = (float)((rect.right - rect.left) * 72.0 / width);
+    ydpi = (float)((rect.bottom - rect.top) * 72.0 / height);
     if (fullscreen) {
 	xdpi2 = xdpi;
 	ydpi2 = ydpi;
     }
     else {
 	/* These are the resolutions allowing for a scroll bar */
-	xdpi2 = (rect.right - rect.left - GetSystemMetrics(SM_CXVSCROLL)) 
-	    * 72.0 / width;
-	ydpi2 = (rect.bottom - rect.top - GetSystemMetrics(SM_CYHSCROLL)) 
-	    * 72.0 / height;
+	xdpi2 = (float)((rect.right - rect.left - 
+	    GetSystemMetrics(SM_CXVSCROLL)) * 72.0 / width);
+	ydpi2 = (float)((rect.bottom - rect.top - 
+	    GetSystemMetrics(SM_CYHSCROLL)) * 72.0 / height);
     }
 
     if (display.orientation & 1) {

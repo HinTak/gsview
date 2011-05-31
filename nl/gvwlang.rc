@@ -27,48 +27,48 @@ BEGIN
         POPUP "&Bestand"
         BEGIN
                 MENUITEM "&Openen..\tO", IDM_OPEN
-                MENUITEM "&Bestand selecteren...\tS", IDM_SELECT
-                MENUITEM "Opslaan &Als...\tA", IDM_SAVEAS
-                MENUITEM "&Sluiten\tC", IDM_CLOSE
+                MENUITEM "&Bestand selecteren...\tB", IDM_SELECT
+                MENUITEM "Ops&laan Als...\tA", IDM_SAVEAS
+                MENUITEM "&Sluiten\tS", IDM_CLOSE
                 MENUITEM "&Info...\tI", IDM_INFO
                 MENUITEM SEPARATOR
-                MENUITEM "Omzetten...\tF", IDM_CONVERTFILE
-                MENUITEM "&Uitpakken...\tE", IDM_EXTRACT
-                MENUITEM "PS naar EPS", IDM_PSTOEPS
+                MENUITEM "Om&zetten...\tz", IDM_CONVERTFILE
+                MENUITEM "E&xporteren...\tx", IDM_EXTRACT
+                MENUITEM "PS &naar EPS", IDM_PSTOEPS
                 MENUITEM SEPARATOR
-                MENUITEM "&Afdrukken...\tP", IDM_PRINT
-                MENUITEM "&Van de schijf afdrukken...", IDM_SPOOL
+                MENUITEM "Af&drukken...\td", IDM_PRINT
+                MENUITEM "Bestand afd&rukken...", IDM_SPOOL
                 MENUITEM SEPARATOR
-                MENUITEM "Berichten tonen\tM", IDM_GSMESS
+                MENUITEM "Berichten &tonen\tt", IDM_GSMESS
                 MENUITEM SEPARATOR
                 MENUITEM SEPARATOR
                 MENUITEM "&Einde", IDM_EXIT
         END
-        POPUP "B&ewerken"
+        POPUP "Be&werken"
         BEGIN
-                MENUITEM "&Kopi‰ren\tCtrl+C", IDM_COPYCLIP
+                MENUITEM "&Kopiëren\tCtrl+C", IDM_COPYCLIP
                 MENUITEM SEPARATOR
                 MENUITEM "&Plakken...", IDM_PASTETO
                 MENUITEM "&Bitmap omzetten", IDM_CONVERT
                 MENUITEM SEPARATOR
-                POPUP "&EPSvoorbeeld toevoegen"
+                POPUP "&EPS voorbeeld toevoegen"
                 BEGIN
-                    MENUITEM "Verw&isselbaar", IDM_MAKEEPSI
-                    MENUITEM "TIFF 4", IDM_MAKEEPST4
+                    MENUITEM "&Interchange", IDM_MAKEEPSI
+                    MENUITEM "TI&FF 4", IDM_MAKEEPST4
                     MENUITEM "&TIFF 6 niet gecompromeerd", IDM_MAKEEPST6U
                     MENUITEM "TIFF 6 &packbits", IDM_MAKEEPST6P
-                    MENUITEM "&Windows Meta Bestand", IDM_MAKEEPSW
-                    MENUITEM "&Voorbeeld ingesteld door de gebruiker", IDM_MAKEEPSU
+                    MENUITEM "&Windows Meta File", IDM_MAKEEPSW
+                    MENUITEM "&Voorbeeld door gebruiker geleverd", IDM_MAKEEPSU
                 END
-                POPUP "&EPS Uitpakken"
+                POPUP "EPS Afs&cheiden"
                 BEGIN
                     MENUITEM "&PostScript", IDM_EXTRACTPS
                     MENUITEM "&Voorbeeld", IDM_EXTRACTPRE
                 END
                 MENUITEM SEPARATOR
-                MENUITEM "Meeteenheid", IDM_MEASURE
-                MENUITEM "Omzetten naar vectorieel formaat...", IDM_PSTOEDIT
-                MENUITEM "&Tekst Uipakken...", IDM_TEXTEXTRACT
+                MENUITEM "&Meten", IDM_MEASURE
+                MENUITEM "&Omzetten naar vektorindeling...", IDM_PSTOEDIT
+                MENUITEM "&Tekst Exporteren...", IDM_TEXTEXTRACT
                 MENUITEM "&Zoeken...\tCtrl+F", IDM_TEXTFIND
                 MENUITEM "&Volgende Zoeken\tF3", IDM_TEXTFINDNEXT
         END
@@ -77,56 +77,56 @@ BEGIN
                 MENUITEM "Eenvoudige Configuratie...", IDM_CFG
                 MENUITEM "Aangepaste Configuratie...", IDM_GSCOMMAND
                 MENUITEM "Geluid...", IDM_SOUNDS
-                POPUP "Eenheidsmate&n"
+                POPUP "&Eenheid"
                 BEGIN
                         MENUITEM "&pt", IDM_UNITPT
                         MENUITEM "&mm", IDM_UNITMM
-                        MENUITEM "&duim", IDM_UNITINCH
+                        MENUITEM "&inch", IDM_UNITINCH
                         MENUITEM SEPARATOR
-                        MENUITEM "Beste &Resolutie", IDM_UNITFINE
+                        MENUITEM "&Fijne Resolutie", IDM_UNITFINE
                 END
                 POPUP "&Taal"
                 BEGIN
                         MENUITEM "&English", IDM_LANGEN
                         /* Remaining languages are added at run time */
                 END
-                POPUP "PStoText"
+                POPUP "PStoTe&xt"
                 BEGIN
-                        MENUITEM "Uitgeschakeld", IDM_PSTOTEXTDIS
-                        MENUITEM "Normaal", IDM_PSTOTEXTNORM
-                        MENUITEM "Dvips Cork Codering", IDM_PSTOTEXTCORK
+                        MENUITEM "&Uitgeschakeld", IDM_PSTOTEXTDIS
+                        MENUITEM "&Normaal", IDM_PSTOTEXTNORM
+                        MENUITEM "&Dvips Cork Codering", IDM_PSTOTEXTCORK
                 END
                 POPUP "DSC Waarschuwingen"
                 BEGIN
-                        MENUITEM "Uit", IDM_DSC_OFF
-                        MENUITEM "Fouten", IDM_DSC_ERROR
-                        MENUITEM "Waarschuwingen", IDM_DSC_WARN
-                        MENUITEM "Alle", IDM_DSC_INFO
+                        MENUITEM "&Uit", IDM_DSC_OFF
+                        MENUITEM "&Fouten", IDM_DSC_ERROR
+                        MENUITEM "&Waarschuwingen", IDM_DSC_WARN
+                        MENUITEM "&Alle", IDM_DSC_INFO
                 END
                 MENUITEM "Instellingen &Nu bewaren", IDM_SETTINGS
                 MENUITEM SEPARATOR
-                MENUITEM "Instell&ingen bewaren bij het afsluiten", IDM_SAVESETTINGS
+                MENUITEM "Instell&ingen bewaren bij afsluiten", IDM_SAVESETTINGS
                 MENUITEM "Be&standen Beveiligen", IDM_SAFER
-                MENUITEM "Jongste &Directory bewaren", IDM_SAVEDIR
+                MENUITEM "Laatste &Directory bewaren", IDM_SAVEDIR
                 MENUITEM "&Knoppenbalk", IDM_BUTTONSHOW
-                MENUITEM "&Venster aan de bladzijde aanpassen", IDM_FITPAGE
+                MENUITEM "&Venster aan pagina aanpassen", IDM_FITPAGE
                 MENUITEM "Automatisch Ve&rversen", IDM_AUTOREDISPLAY
-                MENUITEM "EPS &Knipsel", IDM_EPSFCLIP
+                MENUITEM "EPS K&nippen", IDM_EPSFCLIP
                 MENUITEM "EPS &Waarschuwing", IDM_EPSFWARN
                 MENUITEM "&DSC Overslaan", IDM_IGNOREDSC
-                MENUITEM "Kader &Tonen", IDM_SHOWBBOX
+                MENUITEM "Inbinden &Tonen", IDM_SHOWBBOX
         END
-        POPUP "&Bekijken"
+        POPUP "Be&kijken"
         BEGIN
-                MENUITEM "&Volgende Bladzijde\t+", IDM_NEXT
-                MENUITEM "Vorige Blad&zijde\t-", IDM_PREV
+                MENUITEM "&Volgende bladzijde\t+", IDM_NEXT
+                MENUITEM "Vorige blad&zijde\t-", IDM_PREV
                 MENUITEM "&Ga naar bladzijde...\tG", IDM_GOTO
-                MENUITEM "&Terug\tB", IDM_GOBACK
+                MENUITEM "&Terug\tT", IDM_GOBACK
                 MENUITEM "V&erder", IDM_GOFWD
-                MENUITEM "&Opnieuw Tonen\tR", IDM_REDISPLAY
+                MENUITEM "&Opnieuw Tonen\tO", IDM_REDISPLAY
                 MENUITEM SEPARATOR
-                MENUITEM "Volgende Bladzijde en Bovenaan\tSpace", IDM_NEXTHOME
-                MENUITEM "Vorige Bladzijde en Bovenaan\tBkSp", IDM_PREVHOME
+                MENUITEM "Volgende Pagina Bovenaan\tSpace", IDM_NEXTHOME
+                MENUITEM "Vorige Pagina Bovenaan\tBkSp", IDM_PREVHOME
                 MENUITEM SEPARATOR
                 MENUITEM "Volledig &Scherm\tF4", IDM_FULLSCREEN
                 MENUITEM "&In Venster Aanpassen\tF6", IDM_FITWIN
@@ -137,14 +137,14 @@ BEGIN
                 MENUITEM SEPARATOR
                 MENUITEM "&Staand", IDM_PORTRAIT
                 MENUITEM "&Liggend", IDM_LANDSCAPE
-                MENUITEM "&Onderste boven", IDM_UPSIDEDOWN
+                MENUITEM "&Ondersteboven", IDM_UPSIDEDOWN
                 MENUITEM "&90 graden naar rechts draaien", IDM_SEASCAPE
                 MENUITEM SEPARATOR
                 MENUITEM "L&iggende positie omdraaien", IDM_SWAPLANDSCAPE
         END
         POPUP "&Papierformaat"
         BEGIN
-                MENUITEM "&Instellingen tonen...", IDM_DISPLAYSETTINGS
+                MENUITEM "&Schermresolutie aanpassen", IDM_DISPLAYSETTINGS
                 MENUITEM SEPARATOR
                 MENUITEM "Omgekee&rd formaat", IDM_MEDIAROTATE
                 MENUITEM SEPARATOR
@@ -160,7 +160,7 @@ BEGIN
                 MENUITEM "Note", IDM_NOTE
                 MENUITEM "Door de gebruiker ingesteld...", IDM_USERSIZE
         END
-        POPUP "&Hulp"
+        POPUP "&Help"
         BEGIN
                 MENUITEM "&Inhoud", IDM_HELPCONTENT
                 MENUITEM "&Hulp zoeken over...", IDM_HELPSEARCH
@@ -233,7 +233,7 @@ BEGIN
         IDS_SLANGUAGE, "NLD,3"
         IDS_CODEPAGE, "1252"    /* ISO-Latin-1 */
         IDS_HELPFILE, WINHELPFILE
-        IDS_SOUNDNOMM, "WINMM.DLL niet beschikbaar\nGeen geluidjes mogelijk."
+        IDS_SOUNDNOMM, "WINMM.DLL niet beschikbaar\nGeen geluid mogelijk."
 END
 
 STRINGTABLE
@@ -251,7 +251,7 @@ BEGIN
         IDS_FILTER_ALL, "Alle Bestanden (*.*)|*.*|"
         IDS_FILTER_BMP, "Bitmap Bestanden (*.bmp)|*.bmp|Alle Bestanden (*.*)|*.*|"
         IDS_FILTER_TIFF, "TIFF Bestanden (*.tif)|*.tif|Alle Bestanden (*.*)|*.*|"
-        IDS_FILTER_WMF, "Windows Metaformaat bestanden (*.wmf)|*.wmf|Alle Bestanden (*.*)|*.*|"
+        IDS_FILTER_WMF, "Windows Meta File bestanden (*.wmf)|*.wmf|Alle Bestanden (*.*)|*.*|"
         IDS_FILTER_TXT, "Tekst Bestanden (*.txt)|*.txt|Alle Bestanden (*.*)|*.*|"
 END
 

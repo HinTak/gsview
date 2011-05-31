@@ -30,7 +30,7 @@
 
 int dsc_error_fn(void *caller_data, CDSC *dsc, unsigned int explanation, 
 	const char *line, unsigned int line_len);
-void dsc_display(CDSC *dsc, void (*dfn)(P2(void *ptr, const char *str)));
+void dsc_display(CDSC *dsc, void (*dfn)(void *ptr, const char *str));
 
 
 /* We always include the English version of this text in
@@ -228,7 +228,7 @@ dsc_error_fn(void *caller_data, CDSC *dsc, unsigned int explanation,
 }
 
 void 
-dsc_display(CDSC *dsc, void (*dfn)(P2(void *ptr, const char *str)))
+dsc_display(CDSC *dsc, void (*dfn)(void *ptr, const char *str))
 {
     unsigned int i;
     const char *p;

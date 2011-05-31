@@ -18,10 +18,10 @@ else
   TAG="#$2"
 fi 
 
-if netscape -remote openFile\($1$TAG\) ; then
+if mozilla -remote openFile\(file://$1$TAG\) ; then
     exit 0
 else
-    netscape $1$TAG
+    mozilla file://$1$TAG
 fi 
 exit 0
 

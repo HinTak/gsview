@@ -64,6 +64,8 @@ void registry_error(HKEY root, const TCHAR *name, const TCHAR *value,
 	gs_addmess("\r\n");
 	LocalFree(LocalHandle(lpMessageBuffer));
     }
+    if (rc == 5)
+	gs_addmess("You need administrator privileges to save registration details.\n");
     gs_showmess();
 }
 
@@ -320,12 +322,20 @@ NagDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 /* show registation nag screen */
 BOOL registration_nag(void)
 {
+    int code;
     nHelpTopic = IDS_TOPICREG;
-    if (DialogBoxParamL(hlanguage, MAKEINTRESOURCE(IDD_NAG), hwndimg, 
-	NagDlgProc, (LPARAM)NULL) == NAG_REGISTER) {
+    code = DialogBoxParamL(hlanguage, MAKEINTRESOURCE(IDD_NAG), hwndimg, 
+	NagDlgProc, (LPARAM)NULL);
+    if (code == NAG_REGISTER) {
 	if (DialogBoxParamL(hlanguage, MAKEINTRESOURCE(IDD_REG), hwndimg, 
 	    RegDlgProc, (LPARAM)NULL) == IDOK)
 	    return TRUE;
+    }
+    else if (code == -1) {
+	/* Somebody removed the nag dialog from the resources */
+	MessageBeep(-1);
+	Sleep(15000);
+	MessageBeep(-1);
     }
     return FALSE;
 }

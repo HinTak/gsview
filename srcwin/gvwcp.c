@@ -35,8 +35,71 @@
  */
 
 
+/* Use a Unicode message box if Windows NT and GSview language
+ * doesn't match system code page.
+ */
+int MessageBoxL(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
+{
+    if (is_winnt && (nCodePageLanguage != nCodePageSystem)) {
+	WCHAR wtext[MAXSTR+MAXSTR];
+	WCHAR wcaption[MAXSTR+MAXSTR];
+	MultiByteToWideChar(nCodePageLanguage, 0,
+	    lpText, strlen(lpText)+1,
+	    wtext, sizeof(wtext)/sizeof(WCHAR));
+	MultiByteToWideChar(nCodePageLanguage, 0,
+	    lpCaption, strlen(lpCaption)+1,
+	    wcaption, sizeof(wcaption)/sizeof(WCHAR));
+	return MessageBoxW(hWnd, wtext, wcaption, uType);
+    }
+    return MessageBox(hWnd, lpText, lpCaption, uType);
+}
+
+BOOL GetOpenSaveFileNameL(LPOPENFILENAME pofn, BOOL save)
+{
+    BOOL flag;
+    if (is_winnt && (nCodePageLanguage != nCodePageSystem)) {
+	OPENFILENAMEW wofn;
+	WCHAR wszFile[MAXSTR];
+	WCHAR wszTitle[MAXSTR];
+	WCHAR wszFilter[1024];		/* filter for OFN */
+	memcpy(&wofn, pofn, sizeof(wofn));
+	/* Convert lpstrTitle, lpstrFilter, lpstrFile */
+	if (pofn->lpstrTitle) {
+	    MultiByteToWideChar(nCodePageLanguage, 0,
+		pofn->lpstrTitle, strlen(pofn->lpstrTitle)+1,
+		wszTitle, sizeof(wszTitle)/sizeof(WCHAR));
+	    wofn.lpstrTitle = wszTitle;
+	}
+	if (pofn->lpstrFilter) {
+	    int len = 0;
+	    while (pofn->lpstrFilter[len])
+		len += strlen(pofn->lpstrFilter+len)+1;
+	    MultiByteToWideChar(nCodePageLanguage, 0,
+		pofn->lpstrFilter, len+1,
+		wszFilter, sizeof(wszFilter)/sizeof(WCHAR));
+	    wofn.lpstrFilter = wszFilter;
+	}
+	MultiByteToWideChar(nCodePageLanguage, 0,
+	    pofn->lpstrFile, strlen(pofn->lpstrFile)+1,
+	    wszFile, sizeof(wszFile)/sizeof(WCHAR));
+	wofn.lpstrFile = wszFile;
+	if (save)
+	    flag = GetSaveFileNameW(&wofn);
+	else
+	    flag = GetOpenFileNameW(&wofn);
+	WideCharToMultiByte(nCodePageLanguage, 0,
+		wofn.lpstrFile, wcslen(wofn.lpstrFile)+1,
+		pofn->lpstrFile, MAXSTR-1, NULL, NULL);
+	return flag;
+    }
+    if (save)
+	flag = GetSaveFileName(&ofn);
+    else
+	flag = GetOpenFileName(&ofn);
+    return flag;
+}
 /* Use Unicode dialog box if Windows NT and GSview language
- * doesn't match system code oage
+ * doesn't match system code page.
  */
 BOOL DialogBoxParamL(HINSTANCE hInstance, LPCTSTR lpTemplateName,
     HWND hWndParent, DLGPROC lpDialogProc, LPARAM dwInitParam)
@@ -116,7 +179,7 @@ BOOL GetDlgItemTextL(HWND hDlg, int nlDDlgItem, LPSTR lpString, int nMaxCount)
 BOOL LoadStringL(HINSTANCE hlanguage, UINT id, LPTSTR str, int len)
 {
     if (is_winnt && (nCodePageLanguage != nCodePageSystem)) {
-	WCHAR wcBuf[MAXSTR];
+	WCHAR wcBuf[MAXSTR*4];
  	int cchWideChar;
 	int cchMultiByte;
 	cchWideChar = LoadStringW(hlanguage, id, wcBuf, 
@@ -125,8 +188,9 @@ BOOL LoadStringL(HINSTANCE hlanguage, UINT id, LPTSTR str, int len)
 	    cchMultiByte = WideCharToMultiByte(nCodePageLanguage, 0,
 		wcBuf, cchWideChar+1, str, len, NULL, NULL);
 	}
-	if (cchMultiByte)
-	    return cchMultiByte;
+	if (cchMultiByte > 0)
+	    return cchMultiByte-1;
+	return 0;
     }
     return LoadStringA(hlanguage, id, str, len);
 }
@@ -165,7 +229,8 @@ SendDlgItemMessageLGetString(HWND hDlg, int id, UINT msg, WPARAM wParam,
     }
     return SendDlgItemMessageA(hDlg, id, msg, wParam, lParam);
 }
-#endif /* UNICODE */
+
+#endif /* !UNICODE */
 
 /* Convert a multibyte string str to a wide or multibyte string */
 int

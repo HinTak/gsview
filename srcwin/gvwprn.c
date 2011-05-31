@@ -1297,7 +1297,7 @@ get_page_range(HWND hwnd, int method)
     if ((psfile.dsc == (CDSC *)NULL) || psfile.dsc->page_count == 0 ) {
 	/* all pages */
 	psfile.print_from = 1;
-	psfile.print_to = 9999;
+	psfile.print_to = 999999;
     }
     else {
 	psfile.print_from = 1;
@@ -1400,19 +1400,21 @@ NewDeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	        PageMultiDlgProc(hDlg, wmsg, wParam, lParam);
 	  }
 	  else {
+	    TCHAR tbuf[MAXSTR];
+	    LPTSTR t;
 	    psfile.page_list.multiple = FALSE;
 	    EnableWindow(GetDlgItem(hDlg, PAGE_ALL), FALSE);
 	    EnableWindow(GetDlgItem(hDlg, PAGE_ODD), FALSE);
 	    EnableWindow(GetDlgItem(hDlg, PAGE_EVEN), FALSE);
 	    EnableWindow(GetDlgItem(hDlg, PAGE_REVERSE), FALSE);
-	    load_string(IDS_ALL, buf, sizeof(buf));
-	    for (p=buf, i=0; *p; p++) {
-		if (*p != '&')
-		    buf[i++] = *p;
+	    load_string(IDS_ALL, tbuf, sizeof(tbuf));
+	    for (t=tbuf, i=0; *t; t++) {
+		if (*t != '&')
+		    tbuf[i++] = *t;
 	    }
-	    buf[i] = '\0';
-	    SendDlgItemMessageL(hDlg, PAGE_LIST, LB_ADDSTRING, 0, 
-		(LPARAM)((LPSTR)buf));
+	    tbuf[i] = '\0';
+	    SendDlgItemMessage(hDlg, PAGE_LIST, LB_ADDSTRING, 0, 
+		(LPARAM)((LPTSTR)tbuf));
 	    EnableWindow(GetDlgItem(hDlg, PAGE_LISTTEXT), FALSE);
 	    EnableWindow(GetDlgItem(hDlg, PAGE_LIST), FALSE);
 	  }
@@ -1944,7 +1946,6 @@ BOOL get_devnames(LPSTR device, HANDLE *hdevnames)
     char *driver;
     char *output;
     int length, offset;
-    HANDLE hprinter;
     HANDLE hglobal;
     LPDEVNAMES lpdevnames;
 
@@ -2051,7 +2052,7 @@ BOOL open_printer(void)
 	print_devnames(gs_addmess, pd.hDevNames);
 
     psfile.print_from = 1;
-    psfile.print_to = 9999;
+    psfile.print_to = 999999;
     psfile.print_oddeven = ALL_PAGES;
     psfile.print_copies = 1;
     psfile.print_ignoredsc = FALSE;
@@ -2880,7 +2881,7 @@ BOOL query_printer(void)
     }
     else {
 	psfile.print_from = 1;
-	psfile.print_to = 9999;
+	psfile.print_to = 999999;
 	psfile.print_oddeven = ALL_PAGES;
         set_page_range();
     }

@@ -1,17 +1,17 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
-  
+/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
+
   This file is part of GSview.
-  
+
   This program is distributed with NO WARRANTY OF ANY KIND.  No author
   or distributor accepts any responsibility for the consequences of using it,
   or for whether it serves any particular purpose or works at all, unless he
-  or she says so in writing.  Refer to the GSview Free Public Licence 
+  or she says so in writing.  Refer to the GSview Free Public Licence
   (the "Licence") for full details.
-  
-  Every copy of GSview must include a copy of the Licence, normally in a 
-  plain ASCII text file named LICENCE.  The Licence grants you the right 
-  to copy, modify and redistribute GSview, but only under certain conditions 
-  described in the Licence.  Among other things, the Licence requires that 
+
+  Every copy of GSview must include a copy of the Licence, normally in a
+  plain ASCII text file named LICENCE.  The Licence grants you the right
+  to copy, modify and redistribute GSview, but only under certain conditions
+  described in the Licence.  Among other things, the Licence requires that
   the copyright notice and this notice be preserved on all copies.
 */
 
@@ -20,7 +20,7 @@
 
 #define AAGREEK "Ελληνικά"
 
-#define GSVIEW_COPYRIGHT1 "Πνευματικά δικαιώματα (C) 1993-2002 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Πνευματικά δικαιώματα (C) 1993-2003 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Με επιφύλαξη κάθε νόμιμου δικαιώματος."
 #define GSVIEW_COPYRIGHT3 "Για περισσότερες πληροφορίες ανατρέξτε στο αρχείο LICENCE."
 
@@ -89,11 +89,11 @@
 #define AACOPY7 "ή για τη λειτουργικότητά του, εκτός εάν αυτό αναφέρεται ρητά και γραπτώς."
 #define AACOPY8 "Για περισσότερες πληροφορίες ανατρέξτε στην άδεια χρήσης του προγράμματος."
 #define AACOPY9 "Σε κάθε αντίγραφο του GSview πρέπει να συμπεριλαμβάνεται ένα πιστό αντίγραφο"
-#define AACOPY10 "της άδειας, κανονικά, ένα αρχείο κειμένου ASCII με όνομα LICENCE. Η άδεια αυτή"
-#define AACOPY11 "σας δίνει το δικαίωμα να αντιγράψετε, να τροποποιήσετε ή να διανείμετε το"
-#define AACOPY12 "GSview αλλά μόνο κάτω από συγκεκριμένες συνθήκες και όπως αυτές περιγράφονται"
-#define AACOPY13 "στην άδεια. Εκτός των άλλων, η άδεια αυτή επιβάλλει την υποχρεωτική ύπαρξη της"
-#define AACOPY14 "δήλωσης για τα πνευματικά δικαιώματα καθώς και της συγκεκριμένης δήλωσης."
+#define AACOPY10 "της άδειας, κανονικά, ένα αρχείο κειμένου ASCII με το όνομα LICENCE. Η άδεια"
+#define AACOPY11 "αυτή σας δίνει το δικαίωμα να αντιγράψετε, να τροποποιήσετε ή να διανείμετε"
+#define AACOPY12 "το GSview αλλά πάντοτε σύμφωνα με τις συνθήκες οι οποίες περιγράφονται στο"
+#define AACOPY13 "κείμενο της άδειας. Η άδεια αυτή επιβάλλει να συμπεριλαμβάνονται, εκτός των"
+#define AACOPY14 "άλλων, η δήλωση για τα πνευματικά δικαιώματα καθώς και η παραπάνω δήλωση."
 #define AACOPY15 "pstotxt3.dll, Πνευματικά δικαιώματα (C) 1995-1998 Digital Equipment Corporation."
 #define AACOPY16 "pstotxt2.dll, Πνευματικά δικαιώματα (C) 1995-1998 Digital Equipment Corporation."
 #define AACOPY17 "pstotxt1.dll, Πνευματικά δικαιώματα (C) 1995-1998 Digital Equipment Corporation."
@@ -296,7 +296,7 @@
 #define AAONLINEREG "Ηλεκτρονική δήλωση"
 #define AAREG1 "Παρακαλώ πληκτρολογήστε το όνομά σας και τον αριθμό"
 #define AAREG2 "δήλωσης του προγράμματος."
-#define AANAG1 "GSview - Πνευματικά δικαιώματα 2002 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview - Πνευματικά δικαιώματα 2003 Ghostgum Software Pty Ltd."
 #define AANAG2 "Υποστηρίξτε τη συνέχιση της ανάπτυξης του προγράμματος"
 #define AANAG3 "GSview δηλώνοντας τη χρήση του."
 #define AANAG4 "Η δήλωση του GSview μπορεί να γίνει ηλεκτρονικά στη διεύθυνση"
@@ -320,7 +320,7 @@
 #define AAINSTALLDIR2 "Σε αυτόν τον κατάλογο, το πρόγραμμα GSview θα εγκατασταθεί στον υποκατάλογο:"
 #define AAINSTALLDIR3 "Το πρόγραμμα Ghostscript θα εγκατασταθεί στον υποκατάλογο:"
 #define AAINSTALLMKDIR1 "Ο κατάλογος που καθορίσατε δεν υπάρχει."
-#define AAINSTALLMKDIR2 "Ένας νέος κατάλογος θα δημιουργηθεί." 
+#define AAINSTALLMKDIR2 "Ένας νέος κατάλογος θα δημιουργηθεί."
 #define AAINSTALLMISSING1 "Εγκατάσταση GSview - Αδύνατος ο εντοπισμός του αρχείου ZIP"
 #define AAINSTALLMISSING2 "Αδύνατος ο εντοπισμός του αρχείου ZIP. Τοποθετήστε στη μονάδα τη δισκέτα με το ακόλουθο αρχείο:"
 #define AAINSTALLCONFIG1 "Τα προγράμματα GSview και Ghostscript χρησιμοποιούν τη μεταβλητή περιβάλλοντος TEMP για τον καθορισμό καταλόγου προσωρινών αρχείων."
@@ -394,9 +394,9 @@
  και των ρυθμίσεών τους στο αρχείο προετοιμασίας."
 #define AACFG31 "Ο προεπιλεγμένος κατάλογος τιμών και ρυθμίσεων έχει ληφθεί από την\
  τυπικά διανεμόμενη εκδοχή Ghostscript 5.50 και μπορεί να είναι ελλιπής."
-#define AACFG32 "Ενημέρωση καταλόγου εκτυπωτών GSview" 
+#define AACFG32 "Ενημέρωση καταλόγου εκτυπωτών GSview"
 #define AACFG33 "Ενημέρωση του καταλόγου εκτυπωτών GSview θα αντικαταστήσει\
- τις υπάρχουσες καταχωρήσεις." 
+ τις υπάρχουσες καταχωρήσεις."
 #define AACFG40 "Το πρόγραμμα GSview μπορεί να συσχετιστεί με τα αρχεία PostScript\
  (PS) και Portable Document Format (PDF)."
 #define AACFG43 "Με τον τρόπο αυτό, όταν κάνετε διπλό κλικ σε ένα αρχείο\

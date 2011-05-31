@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -109,13 +109,16 @@ OBJS=$(OBJCOM1) $(OBJCOM2) $(OBJPLAT1) $(OBJPLAT2)
 # OS/2 target
 
 all: $(BD)gvpm.exe $(BD)gvpmen.hlp \
+  $(BD)gvpmct.dll $(BD)gvpmct.hlp $(BD)setup2ct.dll \
   $(BD)gvpmde.dll $(BD)gvpmde.hlp $(BD)setup2de.dll \
   $(BD)gvpmes.dll $(BD)gvpmes.hlp $(BD)setup2es.dll \
   $(BD)gvpmfr.dll $(BD)gvpmfr.hlp $(BD)setup2fr.dll \
   $(BD)gvpmgr.dll $(BD)gvpmgr.hlp $(BD)setup2gr.dll \
   $(BD)gvpmit.dll $(BD)gvpmit.hlp $(BD)setup2it.dll \
   $(BD)gvpmnl.dll $(BD)gvpmnl.hlp $(BD)setup2nl.dll \
+  $(BD)gvpmru.dll $(BD)gvpmru.hlp $(BD)setup2ru.dll \
   $(BD)gvpmse.dll $(BD)gvpmse.hlp $(BD)setup2se.dll \
+  $(BD)gvpmsk.dll $(BD)gvpmsk.hlp $(BD)setup2sk.dll \
   $(BD)gvpgs.exe $(BD)os2setup.exe \
   $(BD)epstool$(EXE)
 
@@ -166,9 +169,9 @@ $(OD)gvpreg$(OBJ): $(SRCOS2)gvpreg.c $(HDRS)
 
 # OS/2 resources also include common resources so use gvpm1.rc not gvpm3.rc
 $(OD)gvpm.res: $(HDRS) $(SRCOS2)gvpm1.rc $(SRCOS2)gvpm3.rc binary\gvpm1.ico $(CODEPAGE) $(BD)gvpmen.hlp en\gvclang.h en\gvclang.rc en\gvplang.rc
-        $(CODEPAGE) 1252_850 en\gvclang.h $(OD)gvclang.h
-        $(CODEPAGE) 1252_850 en\gvclang.rc $(OD)gvclang.rc
-        $(CODEPAGE) 1252_850 en\gvplang.rc $(OD)gvplang.rc
+        $(CODEPAGE) 1252 850 en\gvclang.h $(OD)gvclang.h
+        $(CODEPAGE) 1252 850 en\gvclang.rc $(OD)gvclang.rc
+        $(CODEPAGE) 1252 850 en\gvplang.rc $(OD)gvplang.rc
         copy $(SRCOS2)gvpm1.rc+$(OD)gvplang.rc+$(OD)gvphlpen.rc+$(OD)gvclang.rc+$(SRCOS2)gvpm3.rc $(OD)gvpmen.rc
         rc -i $(COMPBASE)\include -i $(SRCDIR) -i $(OBJDIR) -r $(OD)gvpmen.rc $(OD)gvpm.res
 
@@ -181,7 +184,7 @@ $(BD)gvpgs.exe: $(SRCOS2)gvpgs.c $(SRCOS2)gvpgs.h $(OD)gvpgs.res
 	rc $(OD)gvpgs.res $(BD)gvpgs.exe
 
 $(BD)gvpmen.hlp: en\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
-	$(CODEPAGE) 1252_850 en\gvclang.txt $(OD)gvc.txt
+	$(CODEPAGE) 1252 850 en\gvclang.txt $(OD)gvc.txt
 	$(GVDOC) P $(OD)gvc.txt $(OD)gvpm.txt
 	$(DOC2IPF) $(OD)gvpm.txt $(OD)gvpmen.ipf $(OD)gvphlpen.rc
 	ipfc $(OD)gvpmen.ipf
@@ -189,19 +192,48 @@ $(BD)gvpmen.hlp: en\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
 
 
 ##########
+# Catalan
+
+$(BD)gvpmct.hlp: ct\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
+	$(CODEPAGE) 1252 850 ct\gvclang.txt $(OD)gvc.txt
+	$(GVDOC) P $(OD)gvc.txt $(OD)gvpm.txt
+	$(DOC2IPF) $(OD)gvpm.txt $(OD)gvpmct.ipf $(OD)gvphlpct.rc
+	ipfc $(OD)gvpmct.ipf
+	copy $(OD)gvpmct.hlp $(BD)gvpmct.hlp
+
+$(OD)gvpmct.res: $(HDRS) $(SRCOS2)gvpm2.rc $(SRCOS2)gvpm3.rc $(CODEPAGE) $(BD)gvpmct.hlp ct\gvclang.h ct\gvclang.rc ct\gvplang.rc
+        $(CODEPAGE) 1252 850 ct\gvclang.h $(OD)gvclang.h
+        $(CODEPAGE) 1252 850 ct\gvclang.rc $(OD)gvclang.rc
+        $(CODEPAGE) 1252 850 ct\gvplang.rc $(OD)gvplang.rc
+        copy $(SRCOS2)gvpm2.rc+$(OD)gvplang.rc+$(OD)gvphlpct.rc+$(OD)gvclang.rc+$(SRCOS2)gvpm3.rc $(OD)gvpmct.rc
+        rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -r $(OD)gvpmct.rc $(OD)gvpmct.res
+
+$(BD)gvpmct.dll: $(OD)gvpmct.res ct\gvplang.def $(LANGOBJ)
+	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj $(LANGOBJ), $(BD)gvpmct.dll, $(OD)gvpmct.map,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, ct\gvplang.def
+	rc $(OD)gvpmct.res $(BD)gvpmct.dll
+
+$(OD)setup2ct.res: $(SRCOS2)os2setup.rc $(SRCOS2)os2setup.h $(SRC)gvcrc.h $(SRC)gvcver.h ct\gvclang.h $(CODEPAGE)
+	$(CODEPAGE) 1252 850 ct\gvclang.h $(OD)gvclang.h
+	rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -i $(SRCOS2) -r $(SRCOS2)os2setup.rc $(OD)setup2ct.res
+
+$(BD)setup2ct.dll: $(OD)setup2ct.res ct\setup2.def $(LANGOBJ)
+	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj $(LANGOBJ), $(BD)setup2ct.dll, $(OD)setup2ct.map,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, ct\setup2.def
+	rc $(OD)setup2ct.res $(BD)setup2ct.dll
+
+##########
 # German
 
 $(BD)gvpmde.hlp: de\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
-	$(CODEPAGE) 1252_850 de\gvclang.txt $(OD)gvc.txt
+	$(CODEPAGE) 1252 850 de\gvclang.txt $(OD)gvc.txt
 	$(GVDOC) P $(OD)gvc.txt $(OD)gvpm.txt
 	$(DOC2IPF) $(OD)gvpm.txt $(OD)gvpmde.ipf $(OD)gvphlpde.rc
 	ipfc $(OD)gvpmde.ipf
 	copy $(OD)gvpmde.hlp $(BD)gvpmde.hlp
 
 $(OD)gvpmde.res: $(HDRS) $(SRCOS2)gvpm2.rc $(SRCOS2)gvpm3.rc $(CODEPAGE) $(BD)gvpmde.hlp de\gvclang.h de\gvclang.rc de\gvplang.rc
-        $(CODEPAGE) 1252_850 de\gvclang.h $(OD)gvclang.h
-        $(CODEPAGE) 1252_850 de\gvclang.rc $(OD)gvclang.rc
-        $(CODEPAGE) 1252_850 de\gvplang.rc $(OD)gvplang.rc
+        $(CODEPAGE) 1252 850 de\gvclang.h $(OD)gvclang.h
+        $(CODEPAGE) 1252 850 de\gvclang.rc $(OD)gvclang.rc
+        $(CODEPAGE) 1252 850 de\gvplang.rc $(OD)gvplang.rc
         copy $(SRCOS2)gvpm2.rc+$(OD)gvplang.rc+$(OD)gvphlpde.rc+$(OD)gvclang.rc+$(SRCOS2)gvpm3.rc $(OD)gvpmde.rc
         rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -r $(OD)gvpmde.rc $(OD)gvpmde.res
 
@@ -210,7 +242,7 @@ $(BD)gvpmde.dll: $(OD)gvpmde.res de\gvplang.def $(LANGOBJ)
 	rc $(OD)gvpmde.res $(BD)gvpmde.dll
 
 $(OD)setup2de.res: $(SRCOS2)os2setup.rc $(SRCOS2)os2setup.h $(SRC)gvcrc.h $(SRC)gvcver.h de\gvclang.h $(CODEPAGE)
-	$(CODEPAGE) 1252_850 de\gvclang.h $(OD)gvclang.h
+	$(CODEPAGE) 1252 850 de\gvclang.h $(OD)gvclang.h
 	rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -i $(SRCOS2) -r $(SRCOS2)os2setup.rc $(OD)setup2de.res
 
 $(BD)setup2de.dll: $(OD)setup2de.res de\setup2.def $(LANGOBJ)
@@ -221,16 +253,16 @@ $(BD)setup2de.dll: $(OD)setup2de.res de\setup2.def $(LANGOBJ)
 # Spanish
 
 $(BD)gvpmes.hlp: es\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
-	$(CODEPAGE) 1252_850 es\gvclang.txt $(OD)gvc.txt
+	$(CODEPAGE) 1252 850 es\gvclang.txt $(OD)gvc.txt
 	$(GVDOC) P $(OD)gvc.txt $(OD)gvpm.txt
 	$(DOC2IPF) $(OD)gvpm.txt $(OD)gvpmes.ipf $(OD)gvphlpes.rc
 	ipfc $(OD)gvpmes.ipf
 	copy $(OD)gvpmes.hlp $(BD)gvpmes.hlp
 
 $(OD)gvpmes.res: $(HDRS) $(SRCOS2)gvpm2.rc $(SRCOS2)gvpm3.rc $(CODEPAGE) $(BD)gvpmes.hlp es\gvclang.h es\gvclang.rc es\gvplang.rc
-        $(CODEPAGE) 1252_850 es\gvclang.h $(OD)gvclang.h
-        $(CODEPAGE) 1252_850 es\gvclang.rc $(OD)gvclang.rc
-        $(CODEPAGE) 1252_850 es\gvplang.rc $(OD)gvplang.rc
+        $(CODEPAGE) 1252 850 es\gvclang.h $(OD)gvclang.h
+        $(CODEPAGE) 1252 850 es\gvclang.rc $(OD)gvclang.rc
+        $(CODEPAGE) 1252 850 es\gvplang.rc $(OD)gvplang.rc
         copy $(SRCOS2)gvpm2.rc+$(OD)gvplang.rc+$(OD)gvphlpes.rc+$(OD)gvclang.rc+$(SRCOS2)gvpm3.rc $(OD)gvpmes.rc
         rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -r $(OD)gvpmes.rc $(OD)gvpmes.res
 
@@ -239,7 +271,7 @@ $(BD)gvpmes.dll: $(OD)gvpmes.res es\gvplang.def $(LANGOBJ)
 	rc $(OD)gvpmes.res $(BD)gvpmes.dll
 
 $(OD)setup2es.res: $(SRCOS2)os2setup.rc $(SRCOS2)os2setup.h $(SRC)gvcrc.h $(SRC)gvcver.h es\gvclang.h $(CODEPAGE)
-	$(CODEPAGE) 1252_850 es\gvclang.h $(OD)gvclang.h
+	$(CODEPAGE) 1252 850 es\gvclang.h $(OD)gvclang.h
 	rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -i $(SRCOS2) -r $(SRCOS2)os2setup.rc $(OD)setup2es.res
 
 $(BD)setup2es.dll: $(OD)setup2es.res es\setup2.def $(LANGOBJ)
@@ -250,16 +282,16 @@ $(BD)setup2es.dll: $(OD)setup2es.res es\setup2.def $(LANGOBJ)
 # French
 
 $(BD)gvpmfr.hlp: fr\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
-	$(CODEPAGE) 1252_850 fr\gvclang.txt $(OD)gvc.txt
+	$(CODEPAGE) 1252 850 fr\gvclang.txt $(OD)gvc.txt
 	$(GVDOC) P $(OD)gvc.txt $(OD)gvpm.txt
 	$(DOC2IPF) $(OD)gvpm.txt $(OD)gvpmfr.ipf $(OD)gvphlpfr.rc
 	ipfc $(OD)gvpmfr.ipf
 	copy $(OD)gvpmfr.hlp $(BD)gvpmfr.hlp
 
 $(OD)gvpmfr.res: $(HDRS) $(SRCOS2)gvpm2.rc $(SRCOS2)gvpm3.rc $(CODEPAGE) $(BD)gvpmfr.hlp fr\gvclang.h fr\gvclang.rc fr\gvplang.rc
-        $(CODEPAGE) 1252_850 fr\gvclang.h $(OD)gvclang.h
-        $(CODEPAGE) 1252_850 fr\gvclang.rc $(OD)gvclang.rc
-        $(CODEPAGE) 1252_850 fr\gvplang.rc $(OD)gvplang.rc
+        $(CODEPAGE) 1252 850 fr\gvclang.h $(OD)gvclang.h
+        $(CODEPAGE) 1252 850 fr\gvclang.rc $(OD)gvclang.rc
+        $(CODEPAGE) 1252 850 fr\gvplang.rc $(OD)gvplang.rc
         copy $(SRCOS2)gvpm2.rc+$(OD)gvplang.rc+$(OD)gvphlpfr.rc+$(OD)gvclang.rc+$(SRCOS2)gvpm3.rc $(OD)gvpmfr.rc
         rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -r $(OD)gvpmfr.rc $(OD)gvpmfr.res
 
@@ -268,7 +300,7 @@ $(BD)gvpmfr.dll: $(OD)gvpmfr.res fr\gvplang.def $(LANGOBJ)
 	rc $(OD)gvpmfr.res $(BD)gvpmfr.dll
 
 $(OD)setup2fr.res: $(SRCOS2)os2setup.rc $(SRCOS2)os2setup.h $(SRC)gvcrc.h $(SRC)gvcver.h fr\gvclang.h $(CODEPAGE)
-	$(CODEPAGE) 1252_850 fr\gvclang.h $(OD)gvclang.h
+	$(CODEPAGE) 1252 850 fr\gvclang.h $(OD)gvclang.h
 	rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -i $(SRCOS2) -r $(SRCOS2)os2setup.rc $(OD)setup2fr.res
 
 $(BD)setup2fr.dll: $(OD)setup2fr.res fr\setup2.def $(LANGOBJ)
@@ -279,16 +311,16 @@ $(BD)setup2fr.dll: $(OD)setup2fr.res fr\setup2.def $(LANGOBJ)
 # Greek
 
 $(BD)gvpmgr.hlp: gr\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
-	$(CODEPAGE) 1253_869 gr\gvclang.txt $(OD)gvc.txt
+	$(CODEPAGE) 1253 869 gr\gvclang.txt $(OD)gvc.txt
 	$(GVDOC) P $(OD)gvc.txt $(OD)gvpm.txt
 	$(DOC2IPF) $(OD)gvpm.txt $(OD)gvpmgr.ipf $(OD)gvphlpgr.rc
 	ipfc $(OD)gvpmgr.ipf
 	copy $(OD)gvpmgr.hlp $(BD)gvpmgr.hlp
 
 $(OD)gvpmgr.res: $(HDRS) $(SRCOS2)gvpm2.rc $(SRCOS2)gvpm3.rc $(CODEPAGE) $(BD)gvpmgr.hlp gr\gvclang.h gr\gvclang.rc gr\gvplang.rc
-        $(CODEPAGE) 1253_869 gr\gvclang.h $(OD)gvclang.h
-        $(CODEPAGE) 1253_869 gr\gvclang.rc $(OD)gvclang.rc
-        $(CODEPAGE) 1253_869 gr\gvplang.rc $(OD)gvplang.rc
+        $(CODEPAGE) 1253 869 gr\gvclang.h $(OD)gvclang.h
+        $(CODEPAGE) 1253 869 gr\gvclang.rc $(OD)gvclang.rc
+        $(CODEPAGE) 1253 869 gr\gvplang.rc $(OD)gvplang.rc
         copy $(SRCOS2)gvpm2.rc+$(OD)gvplang.rc+$(OD)gvphlpgr.rc+$(OD)gvclang.rc+$(SRCOS2)gvpm3.rc $(OD)gvpmgr.rc
         rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -r $(OD)gvpmgr.rc $(OD)gvpmgr.res
 
@@ -297,7 +329,7 @@ $(BD)gvpmgr.dll: $(OD)gvpmgr.res gr\gvplang.def $(LANGOBJ)
 	rc $(OD)gvpmgr.res $(BD)gvpmgr.dll
 
 $(OD)setup2gr.res: $(SRCOS2)os2setup.rc $(SRCOS2)os2setup.h $(SRC)gvcrc.h $(SRC)gvcver.h gr\gvclang.h $(CODEPAGE)
-	$(CODEPAGE) 1253_869 gr\gvclang.h $(OD)gvclang.h
+	$(CODEPAGE) 1253 869 gr\gvclang.h $(OD)gvclang.h
 	rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -i $(SRCOS2) -r $(SRCOS2)os2setup.rc $(OD)setup2gr.res
 
 $(BD)setup2gr.dll: $(OD)setup2gr.res gr\setup2.def $(LANGOBJ)
@@ -308,16 +340,16 @@ $(BD)setup2gr.dll: $(OD)setup2gr.res gr\setup2.def $(LANGOBJ)
 # Italian
 
 $(BD)gvpmit.hlp: it\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
-	$(CODEPAGE) 1252_850 it\gvclang.txt $(OD)gvc.txt
+	$(CODEPAGE) 1252 850 it\gvclang.txt $(OD)gvc.txt
 	$(GVDOC) P $(OD)gvc.txt $(OD)gvpm.txt
 	$(DOC2IPF) $(OD)gvpm.txt $(OD)gvpmit.ipf $(OD)gvphlpit.rc
 	ipfc $(OD)gvpmit.ipf
 	copy $(OD)gvpmit.hlp $(BD)gvpmit.hlp
 
 $(OD)gvpmit.res: $(HDRS) $(SRCOS2)gvpm2.rc $(SRCOS2)gvpm3.rc $(CODEPAGE) $(BD)gvpmit.hlp it\gvclang.h it\gvclang.rc it\gvplang.rc
-        $(CODEPAGE) 1252_850 it\gvclang.h $(OD)gvclang.h
-        $(CODEPAGE) 1252_850 it\gvclang.rc $(OD)gvclang.rc
-        $(CODEPAGE) 1252_850 it\gvplang.rc $(OD)gvplang.rc
+        $(CODEPAGE) 1252 850 it\gvclang.h $(OD)gvclang.h
+        $(CODEPAGE) 1252 850 it\gvclang.rc $(OD)gvclang.rc
+        $(CODEPAGE) 1252 850 it\gvplang.rc $(OD)gvplang.rc
         copy $(SRCOS2)gvpm2.rc+$(OD)gvplang.rc+$(OD)gvphlpit.rc+$(OD)gvclang.rc+$(SRCOS2)gvpm3.rc $(OD)gvpmit.rc
         rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -r $(OD)gvpmit.rc $(OD)gvpmit.res
 
@@ -326,7 +358,7 @@ $(BD)gvpmit.dll: $(OD)gvpmit.res it\gvplang.def $(LANGOBJ)
 	rc $(OD)gvpmit.res $(BD)gvpmit.dll
 
 $(OD)setup2it.res: $(SRCOS2)os2setup.rc $(SRCOS2)os2setup.h $(SRC)gvcrc.h $(SRC)gvcver.h it\gvclang.h $(CODEPAGE)
-	$(CODEPAGE) 1252_850 it\gvclang.h $(OD)gvclang.h
+	$(CODEPAGE) 1252 850 it\gvclang.h $(OD)gvclang.h
 	rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -i $(SRCOS2) -r $(SRCOS2)os2setup.rc $(OD)setup2it.res
 
 $(BD)setup2it.dll: $(OD)setup2it.res it\setup2.def $(LANGOBJ)
@@ -337,16 +369,16 @@ $(BD)setup2it.dll: $(OD)setup2it.res it\setup2.def $(LANGOBJ)
 # Dutch
 
 $(BD)gvpmnl.hlp: nl\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
-	$(CODEPAGE) 1252_850 nl\gvclang.txt $(OD)gvc.txt
+	$(CODEPAGE) 1252 850 nl\gvclang.txt $(OD)gvc.txt
 	$(GVDOC) P $(OD)gvc.txt $(OD)gvpm.txt
 	$(DOC2IPF) $(OD)gvpm.txt $(OD)gvpmnl.ipf $(OD)gvphlpnl.rc
 	ipfc $(OD)gvpmnl.ipf
 	copy $(OD)gvpmnl.hlp $(BD)gvpmnl.hlp
 
 $(OD)gvpmnl.res: $(HDRS) $(SRCOS2)gvpm2.rc $(SRCOS2)gvpm3.rc $(CODEPAGE) $(BD)gvpmnl.hlp nl\gvclang.h nl\gvclang.rc nl\gvplang.rc
-        $(CODEPAGE) 1252_850 nl\gvclang.h $(OD)gvclang.h
-        $(CODEPAGE) 1252_850 nl\gvclang.rc $(OD)gvclang.rc
-        $(CODEPAGE) 1252_850 nl\gvplang.rc $(OD)gvplang.rc
+        $(CODEPAGE) 1252 850 nl\gvclang.h $(OD)gvclang.h
+        $(CODEPAGE) 1252 850 nl\gvclang.rc $(OD)gvclang.rc
+        $(CODEPAGE) 1252 850 nl\gvplang.rc $(OD)gvplang.rc
         copy $(SRCOS2)gvpm2.rc+$(OD)gvplang.rc+$(OD)gvphlpnl.rc+$(OD)gvclang.rc+$(SRCOS2)gvpm3.rc $(OD)gvpmnl.rc
         rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -r $(OD)gvpmnl.rc $(OD)gvpmnl.res
 
@@ -355,7 +387,7 @@ $(BD)gvpmnl.dll: $(OD)gvpmnl.res nl\gvplang.def $(LANGOBJ)
 	rc $(OD)gvpmnl.res $(BD)gvpmnl.dll
 
 $(OD)setup2nl.res: $(SRCOS2)os2setup.rc $(SRCOS2)os2setup.h $(SRC)gvcrc.h $(SRC)gvcver.h nl\gvclang.h $(CODEPAGE)
-	$(CODEPAGE) 1252_850 nl\gvclang.h $(OD)gvclang.h
+	$(CODEPAGE) 1252 850 nl\gvclang.h $(OD)gvclang.h
 	rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -i $(SRCOS2) -r $(SRCOS2)os2setup.rc $(OD)setup2nl.res
 
 $(BD)setup2nl.dll: $(OD)setup2nl.res nl\setup2.def $(LANGOBJ)
@@ -363,20 +395,49 @@ $(BD)setup2nl.dll: $(OD)setup2nl.res nl\setup2.def $(LANGOBJ)
 	rc $(OD)setup2nl.res $(BD)setup2nl.dll
 
 ##########
+# Russian
+
+$(BD)gvpmru.hlp: ru\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
+	$(CODEPAGE) 1251 866 ru\gvclang.txt $(OD)gvc.txt
+	$(GVDOC) P $(OD)gvc.txt $(OD)gvpm.txt
+	$(DOC2IPF) $(OD)gvpm.txt $(OD)gvpmru.ipf $(OD)gvphlpru.rc
+	ipfc $(OD)gvpmru.ipf
+	copy $(OD)gvpmru.hlp $(BD)gvpmru.hlp
+
+$(OD)gvpmru.res: $(HDRS) $(SRCOS2)gvpm2.rc $(SRCOS2)gvpm3.rc $(CODEPAGE) $(BD)gvpmru.hlp ru\gvclang.h ru\gvclang.rc ru\gvplang.rc
+        $(CODEPAGE) 1251 866 ru\gvclang.h $(OD)gvclang.h
+        $(CODEPAGE) 1251 866 ru\gvclang.rc $(OD)gvclang.rc
+        $(CODEPAGE) 1251 866 ru\gvplang.rc $(OD)gvplang.rc
+        copy $(SRCOS2)gvpm2.rc+$(OD)gvplang.rc+$(OD)gvphlpru.rc+$(OD)gvclang.rc+$(SRCOS2)gvpm3.rc $(OD)gvpmru.rc
+        rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -r $(OD)gvpmru.rc $(OD)gvpmru.res
+
+$(BD)gvpmru.dll: $(OD)gvpmru.res ru\gvplang.def $(LANGOBJ)
+	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj $(LANGOBJ), $(BD)gvpmru.dll, $(OD)gvpmru.map,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, ru\gvplang.def
+	rc $(OD)gvpmru.res $(BD)gvpmru.dll
+
+$(OD)setup2ru.res: $(SRCOS2)os2setup.rc $(SRCOS2)os2setup.h $(SRC)gvcrc.h $(SRC)gvcver.h ru\gvclang.h $(CODEPAGE)
+	$(CODEPAGE) 1251 866 ru\gvclang.h $(OD)gvclang.h
+	rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -i $(SRCOS2) -r $(SRCOS2)os2setup.rc $(OD)setup2ru.res
+
+$(BD)setup2ru.dll: $(OD)setup2ru.res ru\setup2.def $(LANGOBJ)
+	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj $(LANGOBJ), $(BD)setup2ru.dll, $(OD)setup2ru.map,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, ru\setup2.def
+	rc $(OD)setup2ru.res $(BD)setup2ru.dll
+
+##########
 # Swedish
 
 
 $(BD)gvpmse.hlp: se\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
-	$(CODEPAGE) 1252_850 se\gvclang.txt $(OD)gvc.txt
+	$(CODEPAGE) 1252 850 se\gvclang.txt $(OD)gvc.txt
 	$(GVDOC) P $(OD)gvc.txt $(OD)gvpm.txt
 	$(DOC2IPF) $(OD)gvpm.txt $(OD)gvpmse.ipf $(OD)gvphlpse.rc
 	ipfc $(OD)gvpmse.ipf
 	copy $(OD)gvpmse.hlp $(BD)gvpmse.hlp
 
 $(OD)gvpmse.res: $(HDRS) $(SRCOS2)gvpm2.rc $(SRCOS2)gvpm3.rc $(CODEPAGE) $(BD)gvpmse.hlp se\gvclang.h se\gvclang.rc se\gvplang.rc
-        $(CODEPAGE) 1252_850 se\gvclang.h $(OD)gvclang.h
-        $(CODEPAGE) 1252_850 se\gvclang.rc $(OD)gvclang.rc
-        $(CODEPAGE) 1252_850 se\gvplang.rc $(OD)gvplang.rc
+        $(CODEPAGE) 1252 850 se\gvclang.h $(OD)gvclang.h
+        $(CODEPAGE) 1252 850 se\gvclang.rc $(OD)gvclang.rc
+        $(CODEPAGE) 1252 850 se\gvplang.rc $(OD)gvplang.rc
         copy $(SRCOS2)gvpm2.rc+$(OD)gvplang.rc+$(OD)gvphlpse.rc+$(OD)gvclang.rc+$(SRCOS2)gvpm3.rc $(OD)gvpmse.rc
         rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -r $(OD)gvpmse.rc $(OD)gvpmse.res
 
@@ -385,12 +446,42 @@ $(BD)gvpmse.dll: $(OD)gvpmse.res se\gvplang.def $(LANGOBJ)
 	rc $(OD)gvpmse.res $(BD)gvpmse.dll
 
 $(OD)setup2se.res: $(SRCOS2)os2setup.rc $(SRCOS2)os2setup.h $(SRC)gvcrc.h $(SRC)gvcver.h se\gvclang.h $(CODEPAGE)
-	$(CODEPAGE) 1252_850 se\gvclang.h $(OD)gvclang.h
+	$(CODEPAGE) 1252 850 se\gvclang.h $(OD)gvclang.h
 	rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -i $(SRCOS2) -r $(SRCOS2)os2setup.rc $(OD)setup2se.res
 
 $(BD)setup2se.dll: $(OD)setup2se.res se\setup2.def $(LANGOBJ)
 	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj $(LANGOBJ), $(BD)setup2se.dll, $(OD)setup2se.map,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, se\setup2.def
 	rc $(OD)setup2se.res $(BD)setup2se.dll
+
+##########
+# Slovak
+
+
+$(BD)gvpmsk.hlp: sk\gvclang.txt $(CODEPAGE) $(GVDOC) $(DOC2IPF)
+	$(CODEPAGE) 1250 852 sk\gvclang.txt $(OD)gvc.txt
+	$(GVDOC) P $(OD)gvc.txt $(OD)gvpm.txt
+	$(DOC2IPF) $(OD)gvpm.txt $(OD)gvpmsk.ipf $(OD)gvphlpsk.rc
+	ipfc $(OD)gvpmsk.ipf
+	copy $(OD)gvpmsk.hlp $(BD)gvpmsk.hlp
+
+$(OD)gvpmsk.res: $(HDRS) $(SRCOS2)gvpm2.rc $(SRCOS2)gvpm3.rc $(CODEPAGE) $(BD)gvpmsk.hlp sk\gvclang.h sk\gvclang.rc sk\gvplang.rc
+        $(CODEPAGE) 1250 852 sk\gvclang.h $(OD)gvclang.h
+        $(CODEPAGE) 1250 852 sk\gvclang.rc $(OD)gvclang.rc
+        $(CODEPAGE) 1250 852 sk\gvplang.rc $(OD)gvplang.rc
+        copy $(SRCOS2)gvpm2.rc+$(OD)gvplang.rc+$(OD)gvphlpsk.rc+$(OD)gvclang.rc+$(SRCOS2)gvpm3.rc $(OD)gvpmsk.rc
+        rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -r $(OD)gvpmsk.rc $(OD)gvpmsk.res
+
+$(BD)gvpmsk.dll: $(OD)gvpmsk.res sk\gvplang.def $(LANGOBJ)
+	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj $(LANGOBJ), $(BD)gvpmsk.dll, $(OD)gvpmsk.map,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, sk\gvplang.def
+	rc $(OD)gvpmsk.res $(BD)gvpmsk.dll
+
+$(OD)setup2sk.res: $(SRCOS2)os2setup.rc $(SRCOS2)os2setup.h $(SRC)gvcrc.h $(SRC)gvcver.h sk\gvclang.h $(CODEPAGE)
+	$(CODEPAGE) 1250 852 sk\gvclang.h $(OD)gvclang.h
+	rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -i $(SRCOS2) -r $(SRCOS2)os2setup.rc $(OD)setup2sk.res
+
+$(BD)setup2sk.dll: $(OD)setup2sk.res sk\setup2.def $(LANGOBJ)
+	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj $(LANGOBJ), $(BD)setup2sk.dll, $(OD)setup2sk.map,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, sk\setup2.def
+	rc $(OD)setup2sk.res $(BD)setup2sk.dll
 
 ##########
 # OS/2 setup
@@ -412,11 +503,11 @@ $(OD)setupc$(OBJ): $(SRCOS2)os2setup.h $(SRCOS2)setupc.h $(SRCOS2)setupc.c
 	$(COMP) $(SETUPFLAG) $(FOO)setupc$(OBJ) $(CO) $(SRCOS2)setupc.c
 
 $(OD)os2setup$(OBJ): $(SRCOS2)os2setup.c $(SRCOS2)os2setup.h $(SRC)gvcrc.h $(SRC)gvcbeta.h $(CODEPAGE)
-	$(CODEPAGE) 1252_850 $(LANGUAGE)\gvclang.h $(OD)gvclang.h
+	$(CODEPAGE) 1252 850 $(LANGUAGE)\gvclang.h $(OD)gvclang.h
 	$(COMP) $(SETUPFLAG) $(FOO)os2setup$(OBJ) $(CO) $(SRCOS2)os2setup.c
 
 $(OD)os2setup.res: $(SRCOS2)os2setup.rc $(SRCOS2)os2setup.h $(LANGUAGE)\gvclang.h $(CODEPAGE)
-	$(CODEPAGE) 1252_850 $(LANGUAGE)\gvclang.h $(OD)gvclang.h
+	$(CODEPAGE) 1252 850 $(LANGUAGE)\gvclang.h $(OD)gvclang.h
         rc -i $(COMPBASE)\include -i $(OBJDIR) -i $(SRCDIR) -i $(SRCOS2DIR) -r $(SRCOS2)os2setup.rc $(OD)os2setup.res
 
 $(BD)os2setup.exe: $(OD)os2setup.res $(SRCOS2)os2setup.def $(SETUPOBJS)
@@ -437,28 +528,32 @@ clean: commonclean
 	-$(RM) $(OD)*.rc
 	-$(RM) $(OD)*.hlp
 	-$(RM) $(OD)*.ipf
+	-$(RM) $(OD)*.map
 	-$(RM) $(OD)gvc.txt
 	-$(RM) $(OD)gvclang.h
 
 
 distclean:
-	-del /q $(BINDIR)\*.lib
-	-del /q $(BINDIR)\*.pdb
-	-del /q $(BINDIR)\*.ilk
-	-del /q $(BINDIR)\*.exp
+	-del /n $(BINDIR)\*.lib
+	-del /n $(BINDIR)\*.pdb
+	-del /n $(BINDIR)\*.ilk
+	-del /n $(BINDIR)\*.exp
 
 distcopy:
 	-mkdir dist
 	-mkdir dist\gsview2
 	copy gsview2\unzip2.dll dist\gsview2\unzip2.dll
 	copy $(BD)os2setup.exe dist\gsview2\os2setup.exe
+	copy $(BD)setup2ct.dll dist\gsview2\setup2ct.dll
 	copy $(BD)setup2de.dll dist\gsview2\setup2de.dll
 	copy $(BD)setup2es.dll dist\gsview2\setup2es.dll
 	copy $(BD)setup2fr.dll dist\gsview2\setup2fr.dll
 	copy $(BD)setup2gr.dll dist\gsview2\setup2gr.dll
 	copy $(BD)setup2it.dll dist\gsview2\setup2it.dll
 	copy $(BD)setup2nl.dll dist\gsview2\setup2nl.dll
+	copy $(BD)setup2ru.dll dist\gsview2\setup2ru.dll
 	copy $(BD)setup2se.dll dist\gsview2\setup2se.dll
+	copy $(BD)setup2sk.dll dist\gsview2\setup2sk.dll
 	copy FILE_ID.DIZ dist\gsview2\FILE_ID.DIZ
 	copy FILE_ID.DIZ dist\FILE_ID.DIZ
 	copy LICENCE dist\gsview2\LICENCE
@@ -475,20 +570,26 @@ distcopy:
 	copy $(BD)gvpm.exe dist\gvpm.exe
 	copy binary\gvpm1.ico dist\gvpm.ico
 	copy $(BD)gvpmen.hlp dist\gvpmen.hlp
+	copy $(BD)gvpmct.hlp dist\gvpmct.hlp
 	copy $(BD)gvpmde.hlp dist\gvpmde.hlp
 	copy $(BD)gvpmes.hlp dist\gvpmes.hlp
 	copy $(BD)gvpmfr.hlp dist\gvpmfr.hlp
 	copy $(BD)gvpmgr.hlp dist\gvpmgr.hlp
 	copy $(BD)gvpmit.hlp dist\gvpmit.hlp
 	copy $(BD)gvpmnl.hlp dist\gvpmnl.hlp
+	copy $(BD)gvpmru.hlp dist\gvpmru.hlp
 	copy $(BD)gvpmse.hlp dist\gvpmse.hlp
+	copy $(BD)gvpmsk.hlp dist\gvpmsk.hlp
+	copy $(BD)gvpmct.dll dist\gvpmct.dll
 	copy $(BD)gvpmde.dll dist\gvpmde.dll
 	copy $(BD)gvpmes.dll dist\gvpmes.dll
 	copy $(BD)gvpmfr.dll dist\gvpmfr.dll
 	copy $(BD)gvpmgr.dll dist\gvpmgr.dll
 	copy $(BD)gvpmit.dll dist\gvpmit.dll
 	copy $(BD)gvpmnl.dll dist\gvpmnl.dll
+	copy $(BD)gvpmru.dll dist\gvpmru.dll
 	copy $(BD)gvpmse.dll dist\gvpmse.dll
+	copy $(BD)gvpmsk.dll dist\gvpmsk.dll
 	copy $(BD)gvpgs.exe dist\gvpgs.exe
 	copy $(SRC)printer.ini dist\printer.ini
 	copy pstotext\pstotext.1 dist\pstotext.1
@@ -504,7 +605,7 @@ gsv$(GSVIEW_VERSION)os2.zip: distcopy
 	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> gsview2\README2.TXT
 	-del ..\gsv$(GSVIEW_VERSION)os2.zip
 	zip -9 ..\gsv$(GSVIEW_VERSION)os2.zip gsview2\os2.zip gsview2\os2setup.exe gsview2\unzip2.dll 
-	zip -9 ..\gsv$(GSVIEW_VERSION)os2.zip gsview2\setup2de.dll gsview2\setup2es.dll gsview2\setup2fr.dll gsview2\setup2gr.dll gsview2\setup2it.dll gsview2\setup2nl.dll gsview2\setup2se.dll
+	zip -9 ..\gsv$(GSVIEW_VERSION)os2.zip gsview2\setup2ct.dll gsview2\setup2de.dll gsview2\setup2es.dll gsview2\setup2fr.dll gsview2\setup2gr.dll gsview2\setup2it.dll gsview2\setup2nl.dll gsview2\setup2ru.dll gsview2\setup2se.dll gsview2\setup2sk.dll
 	zip -9 ..\gsv$(GSVIEW_VERSION)os2.zip gsview2\README2.TXT gsview2\Readme.htm gsview2\gsview.css gsview2\cdorder.txt gsview2\regorder.txt gsview2\FILE_ID.DIZ gsview2\LICENCE
 	cd ..
 

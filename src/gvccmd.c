@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -469,10 +469,14 @@ gsview_command(int command)
 	case IDM_MAKEEPSI:
 		if ( (option.orientation == IDM_PORTRAIT) ||
 		     (option.auto_orientation == TRUE) ) {
+		    char epsname[MAXSTR];
 		    if (dfreopen() != 0)
 			return 0;
+		    if (!get_filename(epsname, TRUE, FILTER_EPS, 0, 
+			    IDS_TOPICPREVIEW))
+			return 0;
 		    image_lock(view.img);
-		    make_eps_interchange(FALSE);
+		    make_eps_interchange(FALSE, epsname);
 		    image_unlock(view.img);
 		    dfclose();
 	  	}
@@ -484,10 +488,14 @@ gsview_command(int command)
 	case IDM_MAKEEPST6P:
 		if ( (option.orientation == IDM_PORTRAIT) ||
 		     (option.auto_orientation == TRUE) ) {
+		    char epsname[MAXSTR];
 		    if (dfreopen() != 0)
 			return 0;
+		    if (!get_filename(epsname, TRUE, FILTER_EPS, 0, 
+			    IDS_TOPICPREVIEW))
+			return 0;
 		    image_lock(view.img);
-		    make_eps_tiff(command, FALSE);
+		    make_eps_tiff(command, FALSE, epsname);
 		    image_unlock(view.img);
 		    dfclose();
 		}
@@ -497,10 +505,14 @@ gsview_command(int command)
 	case IDM_MAKEEPSW:
 		if ( (option.orientation == IDM_PORTRAIT) ||
 		     (option.auto_orientation == TRUE) ) {
+		    char epsname[MAXSTR];
 		    if (dfreopen() != 0)
 			return 0;
+		    if (!get_filename(epsname, TRUE, FILTER_EPS, 0, 
+			    IDS_TOPICPREVIEW))
+			return 0;
 		    image_lock(view.img);
-		    make_eps_metafile(FALSE);
+		    make_eps_metafile(FALSE, epsname);
 		    image_unlock(view.img);
 		    dfclose();
 		}
@@ -572,10 +584,10 @@ gsview_command(int command)
 		pending.now = TRUE;
 		return 0;
 	case IDM_MAGPLUS:
-		gs_magnify(1.2);
+		gs_magnify((float)1.2);
 		return 0;
 	case IDM_MAGMINUS:
-		gs_magnify(0.8333);
+		gs_magnify((float)0.8333);
 		return 0;
 	case IDM_FITWIN:
 		/* fit media to size of current window */
@@ -737,24 +749,101 @@ not_implemented()
     return 0;
 }
 
+static float get_points(const char *str)
+{
+    float val;
+    char ptbuf[32];
+    char inchbuf[32];
+    char mmbuf[32];
+    TCHAR tbuf[32];
+    const char *p = str;
+    int i;
+    ptbuf[0] = inchbuf[0] = mmbuf[0] = '\0';
+    load_string(IDS_UNITNAME + IDM_UNITPT - IDM_UNITPT, tbuf, sizeof(tbuf));
+    convert_widechar(ptbuf, tbuf, sizeof(ptbuf));
+    load_string(IDS_UNITNAME + IDM_UNITINCH - IDM_UNITPT, 
+	tbuf, sizeof(tbuf));
+    convert_widechar(inchbuf, tbuf, sizeof(inchbuf));
+    load_string(IDS_UNITNAME + IDM_UNITMM - IDM_UNITPT, tbuf, sizeof(tbuf));
+    convert_widechar(mmbuf, tbuf, sizeof(mmbuf));
+    while (*p && (*p == ' '))
+	p++;
+    val = (float)atof(p);
+    while (*p && (isdigit((int)(*p)) || (*p == '.')))
+	p++;
+    while (*p && (*p == ' '))
+	p++;
+    i = 0;;
+    while (p[i] && (isalpha((int)(p[i]))))
+	i++;
+    if (p[i])
+	i++;
+    if ((strnicmp(p, ptbuf, max(i, (int)strlen(ptbuf))) == 0) ||
+	     (strnicmp(p, "pt", 2) == 0)) {
+	/* do nothing */
+    }
+    else if ((strnicmp(p, inchbuf, max(i, (int)strlen(inchbuf))) == 0) || 
+	     (strnicmp(p, "in", 2) == 0))
+	val *= 72.0;
+    else if ((strnicmp(p, mmbuf, max(i, (int)strlen(mmbuf))) == 0) || 
+	     (strnicmp(p, "mm", 2) == 0))
+	val *= (float)(72.0 / 25.4);
+    else if (strnicmp(p, "cm", 2) == 0)
+	val *= (float)(72.0 / 2.54);
+    else if (strnicmp(p, "m", 1) == 0)
+	val *= (float)(72.0 / 0.0254);
+    else if (strnicmp(p, "ft", 2) == 0)
+	val *= (float)(72.0 * 12.0);
+    return val;
+}
+
+static void put_points(char *buf, int len, float n)
+{
+    TCHAR tbuf[32];
+    char ubuf[32];
+    float factor = 1.0;
+    if (len < 1)
+	return;
+    buf[0] = '\0';
+    ubuf[0] = '\0';
+    load_string(IDS_UNITNAME + option.unit - IDM_UNITPT, tbuf, sizeof(tbuf));
+    convert_widechar(ubuf, tbuf, sizeof(ubuf));
+    if (len < 32 + (int)strlen(ubuf))
+	return;
+    switch (option.unit) {
+	case IDM_UNITMM:
+	    factor = (float)(25.4 / 72.0);
+	    break;
+	case IDM_UNITINCH:
+	    factor = (float)(1.0 / 72.0);
+	    break;
+	case IDM_UNITPT:
+	default:
+	   factor = 1.0;
+    }
+    sprintf(buf, "%g %s", n*factor, ubuf);
+}
+
+
+
 /* get user defined size */
 BOOL
 gsview_usersize()
 {
-TCHAR prompt[MAXSTR];
-char answer[MAXSTR];
+    TCHAR prompt[MAXSTR];
+    char answer[MAXSTR];
     nHelpTopic = IDS_TOPICMEDIA;
     load_string(IDS_USERWIDTH, prompt, sizeof(prompt)/sizeof(TCHAR)-1);
-    sprintf(answer,"%d", option.user_width);
-    if (!query_string(prompt,answer) || atoi(answer)==0)
-	    return FALSE;
-    option.user_width = atoi(answer);
+    put_points(answer, sizeof(answer), (float)option.user_width);
+    if (!query_string(prompt,answer))
+	return FALSE;
+    option.user_width = (int)(get_points(answer) + 0.5);
     gsview_check_usersize();
     load_string(IDS_USERHEIGHT, prompt, sizeof(prompt)/sizeof(TCHAR)-1);
-    sprintf(answer,"%d", option.user_height);
-    if (!query_string(prompt,answer) || atoi(answer)==0)
-	    return FALSE;
-    option.user_height = atoi(answer);
+    put_points(answer, sizeof(answer), (float)option.user_height);
+    if (!query_string(prompt,answer))
+	return FALSE;
+    option.user_height = (int)(get_points(answer) + 0.5);
     if ((option.user_width==0) || (option.user_height == 0)) {
 	option.user_width = 640;
 	option.user_width = 480;

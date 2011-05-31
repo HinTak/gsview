@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -174,6 +174,7 @@ const char * epsfwarn_resource =
 const char * viewer_resource =
 "/ViewerPreProcess { systemdict begin\015\012"
 "  dup length dict copy  \015\012"
+"currentglobal true setglobal exch\015\012"
 "  dup /HWResolution undef\015\012"
 "  dup /HWMargins undef\015\012"
 "  dup /Margins undef\015\012"
@@ -284,6 +285,7 @@ const char * viewer_resource =
 "    >>\015\012"
 "  >> put\015\012"
 "  dup /Policies << /PageSize 1 >> put\015\012"
+"exch setglobal\015\012"
 "  end % pop systemdict \015\012"
 /*
 "(viewerpreprocess output: ) print dup { exch ==only ( ) print == } forall\015\012"

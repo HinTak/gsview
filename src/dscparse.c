@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2003, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -14,6 +14,8 @@
   described in the Licence.  Among other things, the Licence requires that 
   the copyright notice and this notice be preserved on all copies.
 */
+
+/* $Id: dscparse.c,v 1.20 2003/01/13 06:57:50 ghostgum Exp $ */
 
 /* dscparse.c - DSC parser  */
 
@@ -79,48 +81,53 @@
 #define CDSC_NEEDMORE 11
 
 /* local prototypes */
-dsc_private void * dsc_memalloc(P2(CDSC *dsc, size_t size));
-dsc_private void dsc_memfree(P2(CDSC*dsc, void *ptr));
-dsc_private CDSC * dsc_init2(P1(CDSC *dsc));
-dsc_private void dsc_reset(P1(CDSC *dsc));
-dsc_private void dsc_section_join(P3(unsigned long begin, unsigned long *pend, unsigned long **pplast));
-dsc_private int dsc_read_line(P1(CDSC *dsc));
-dsc_private int dsc_read_doseps(P1(CDSC *dsc));
-dsc_private char * dsc_alloc_string(P3(CDSC *dsc, const char *str, int len));
-dsc_private char * dsc_add_line(P3(CDSC *dsc, const char *line, unsigned int len));
-dsc_private char * dsc_copy_string(P5(char *str, unsigned int slen, 
-    char *line, unsigned int len, unsigned int *offset));
-dsc_private GSDWORD dsc_get_dword(P1(const unsigned char *buf));
-dsc_private GSWORD dsc_get_word(P1(const unsigned char *buf));
-dsc_private int dsc_get_int(P3(const char *line, unsigned int len, unsigned int *offset));
-dsc_private float dsc_get_real(P3(const char *line, unsigned int len, 
-    unsigned int *offset));
-dsc_private int dsc_stricmp(P2(const char *s, const char *t));
-dsc_private void dsc_unknown(P1(CDSC *dsc)); 
+dsc_private void * dsc_memalloc(CDSC *dsc, size_t size);
+dsc_private void dsc_memfree(CDSC*dsc, void *ptr);
+dsc_private CDSC * dsc_init2(CDSC *dsc);
+dsc_private void dsc_reset(CDSC *dsc);
+dsc_private void dsc_section_join(DSC_OFFSET begin, DSC_OFFSET *pend, DSC_OFFSET **pplast);
+dsc_private int dsc_read_line(CDSC *dsc);
+dsc_private int dsc_read_doseps(CDSC *dsc);
+dsc_private char * dsc_alloc_string(CDSC *dsc, const char *str, int len);
+dsc_private char * dsc_add_line(CDSC *dsc, const char *line, unsigned int len);
+dsc_private char * dsc_copy_string(char *str, unsigned int slen, 
+    char *line, unsigned int len, unsigned int *offset);
+dsc_private GSDWORD dsc_get_dword(const unsigned char *buf);
+dsc_private GSWORD dsc_get_word(const unsigned char *buf);
+dsc_private int dsc_get_int(const char *line, unsigned int len, unsigned int *offset);
+dsc_private float dsc_get_real(const char *line, unsigned int len, 
+    unsigned int *offset);
+dsc_private void dsc_unknown(CDSC *dsc); 
 dsc_private GSBOOL dsc_is_section(char *line);
-dsc_private int dsc_parse_pages(P1(CDSC *dsc));
-dsc_private int dsc_parse_bounding_box(P3(CDSC *dsc, CDSCBBOX** pbbox, int offset));
-dsc_private int dsc_parse_float_bounding_box(P3(CDSC *dsc, CDSCFBBOX** pfbbox, int offset));
-dsc_private int dsc_parse_orientation(P3(CDSC *dsc, unsigned int *porientation, 
-    int offset));
-dsc_private int dsc_parse_order(P1(CDSC *dsc));
-dsc_private int dsc_parse_media(P2(CDSC *dsc, const CDSCMEDIA **page_media));
-dsc_private int dsc_parse_document_media(P1(CDSC *dsc));
-dsc_private int dsc_parse_viewing_orientation(P2(CDSC *dsc, CDSCCTM **pctm));
-dsc_private int dsc_parse_page(P1(CDSC *dsc));
-dsc_private void dsc_save_line(P1(CDSC *dsc));
-dsc_private int dsc_scan_type(P1(CDSC *dsc));
-dsc_private int dsc_scan_comments(P1(CDSC *dsc));
-dsc_private int dsc_scan_preview(P1(CDSC *dsc));
-dsc_private int dsc_scan_defaults(P1(CDSC *dsc));
-dsc_private int dsc_scan_prolog(P1(CDSC *dsc));
-dsc_private int dsc_scan_setup(P1(CDSC *dsc));
-dsc_private int dsc_scan_page(P1(CDSC *dsc));
-dsc_private int dsc_scan_trailer(P1(CDSC *dsc));
-dsc_private int dsc_error(P4(CDSC *dsc, unsigned int explanation, 
-    char *line, unsigned int line_len));
+dsc_private int dsc_parse_pages(CDSC *dsc);
+dsc_private int dsc_parse_bounding_box(CDSC *dsc, CDSCBBOX** pbbox, int offset);
+dsc_private int dsc_parse_float_bounding_box(CDSC *dsc, CDSCFBBOX** pfbbox, int offset);
+dsc_private int dsc_parse_orientation(CDSC *dsc, unsigned int *porientation, 
+    int offset);
+dsc_private int dsc_parse_order(CDSC *dsc);
+dsc_private int dsc_parse_media(CDSC *dsc, const CDSCMEDIA **page_media);
+dsc_private int dsc_parse_document_media(CDSC *dsc);
+dsc_private int dsc_parse_viewing_orientation(CDSC *dsc, CDSCCTM **pctm);
+dsc_private int dsc_parse_page(CDSC *dsc);
+dsc_private void dsc_save_line(CDSC *dsc);
+dsc_private int dsc_scan_type(CDSC *dsc);
+dsc_private int dsc_scan_comments(CDSC *dsc);
+dsc_private int dsc_scan_preview(CDSC *dsc);
+dsc_private int dsc_scan_defaults(CDSC *dsc);
+dsc_private int dsc_scan_prolog(CDSC *dsc);
+dsc_private int dsc_scan_setup(CDSC *dsc);
+dsc_private int dsc_scan_page(CDSC *dsc);
+dsc_private int dsc_scan_trailer(CDSC *dsc);
+dsc_private int dsc_error(CDSC *dsc, unsigned int explanation, 
+    char *line, unsigned int line_len);
 dsc_private int dsc_dcs2_fixup(CDSC *dsc);
 dsc_private int dsc_parse_platefile(CDSC *dsc);
+dsc_private int dsc_parse_dcs1plate(CDSC *dsc);
+dsc_private CDSCCOLOUR * dsc_find_colour(CDSC *dsc, const char *colourname);
+dsc_private int dsc_parse_process_colours(CDSC *dsc);
+dsc_private int dsc_parse_custom_colours(CDSC *dsc);
+dsc_private int dsc_parse_cmyk_custom_colour(CDSC *dsc);
+dsc_private int dsc_parse_rgb_custom_colour(CDSC *dsc);
 
 /* DSC error reporting */
 dsc_private const int dsc_severity[] = {
@@ -204,6 +211,8 @@ dsc_init(void *caller_data)
 	return NULL;
     memset(dsc, 0, sizeof(CDSC));
     dsc->caller_data = caller_data;
+    dsc->ref_count = 0;
+    dsc_ref(dsc);
 
     return dsc_init2(dsc);
 }
@@ -225,6 +234,8 @@ dsc_init_with_alloc(
     dsc->memalloc = memalloc;
     dsc->memfree = memfree;
     dsc->mem_closure_data = closure_data;
+    dsc->ref_count = 0;
+    dsc_ref(dsc);
     
     return dsc_init2(dsc);
 }
@@ -242,11 +253,37 @@ dsc_free(CDSC *dsc)
 }
 
 
+CDSC *
+dsc_new(void *caller_data)
+{
+    return dsc_init(caller_data);
+}
+
+int
+dsc_ref(CDSC *dsc)
+{
+    return ++(dsc->ref_count);
+}
+
+int 
+dsc_unref(CDSC *dsc)
+{
+    if (dsc->ref_count <= 0)
+	return -1;
+    dsc->ref_count--;
+    if (dsc->ref_count == 0) {
+	dsc_free(dsc);
+	return 0;
+    }
+    return dsc->ref_count;
+}
+
+
 /* Tell DSC parser how long document will be, to allow ignoring
  * of early %%Trailer and %%EOF.  This is optional.
  */
 void 
-dsc_set_length(CDSC *dsc, unsigned long len)
+dsc_set_length(CDSC *dsc, DSC_OFFSET len)
 {
     dsc->file_length = len;
 }
@@ -403,7 +440,7 @@ dsc_fixup(CDSC *dsc)
 {
     unsigned int i;
     char buf[32];
-    unsigned long *last;
+    DSC_OFFSET *last;
 
     if (dsc->id == CDSC_NOTDSC)
 	return 0;
@@ -413,7 +450,8 @@ dsc_fixup(CDSC *dsc)
 
 
     /* Fix DSC error: EOF before end of %%BeginData */
-    if (dsc->eof && (dsc->skip_lines || dsc->skip_bytes)) {
+    if (dsc->eof && 
+	(dsc->skip_lines || dsc->skip_bytes || dsc->skip_document)) {
 	switch (dsc->scan_section) {
 	    case scan_comments:
 		dsc->endcomments = DSC_END(dsc);
@@ -551,7 +589,7 @@ dsc_fixup(CDSC *dsc)
     for (i=0; i<dsc->page_count; i++) {
 	if (strlen(dsc->page[i].label) == 0) {
 	    sprintf(buf, "%d", i+1);
-	    if ((dsc->page[i].label = dsc_alloc_string(dsc, buf, strlen(buf))) 
+	    if ((dsc->page[i].label = dsc_alloc_string(dsc, buf, (int)strlen(buf))) 
 		== (char *)NULL)
 		return CDSC_ERROR;	/* no memory */
 	}
@@ -565,8 +603,8 @@ dsc_fixup(CDSC *dsc)
  */
 void 
 dsc_set_error_function(CDSC *dsc, 
-	int (*fn)(P5(void *caller_data, CDSC *dsc, 
-	unsigned int explanation, const char *line, unsigned int line_len)))
+	int (*fn)(void *caller_data, CDSC *dsc, 
+	unsigned int explanation, const char *line, unsigned int line_len))
 {
     dsc->dsc_error_fn = fn;
 }
@@ -576,7 +614,7 @@ dsc_set_error_function(CDSC *dsc,
 /* This is optional */
 void 
 dsc_set_debug_function(CDSC *dsc, 
-	void (*debug_fn)(P2(void *caller_data, const char *str)))
+	void (*debug_fn)(void *caller_data, const char *str))
 {
     dsc->debug_print_fn = debug_fn;
 }
@@ -588,7 +626,7 @@ dsc_add_page(CDSC *dsc, int ordinal, char *label)
 {
     dsc->page[dsc->page_count].ordinal = ordinal;
     dsc->page[dsc->page_count].label = 
-	dsc_alloc_string(dsc, label, strlen(label)+1);
+	dsc_alloc_string(dsc, label, (int)strlen(label)+1);
     dsc->page[dsc->page_count].begin = 0;
     dsc->page[dsc->page_count].end = 0;
     dsc->page[dsc->page_count].orientation = CDSC_ORIENT_UNKNOWN;
@@ -649,7 +687,7 @@ dsc_add_media(CDSC *dsc, CDSCMEDIA *media)
 
     if (media->name) {
 	newmedia->name = dsc_alloc_string(dsc, media->name,
-	    strlen(media->name));
+	    (int)strlen(media->name));
 	if (newmedia->name == NULL)
 	    return CDSC_ERROR;	/* no memory */
     }
@@ -658,13 +696,13 @@ dsc_add_media(CDSC *dsc, CDSCMEDIA *media)
     newmedia->weight = media->weight;
     if (media->colour) {
 	newmedia->colour = dsc_alloc_string(dsc, media->colour, 
-	    strlen(media->colour));
+	    (int)strlen(media->colour));
         if (newmedia->colour == NULL)
 	    return CDSC_ERROR;	/* no memory */
     }
     if (media->type) {
 	newmedia->type = dsc_alloc_string(dsc, media->type, 
-	    strlen(media->type));
+	    (int)strlen(media->type));
 	if (newmedia->type == NULL)
 	    return CDSC_ERROR;	/* no memory */
     }
@@ -909,6 +947,17 @@ dsc_reset(CDSC *dsc)
 	}
 	dsc->dcs2 = NULL;
     }
+    if (dsc->colours) {
+	CDSCCOLOUR *this_colour, *next_colour;
+	this_colour = dsc->colours;
+	while (this_colour) {
+	    next_colour = this_colour->next;
+	    /* strings have already been freed */
+	    dsc_memfree(dsc, this_colour);
+	    this_colour = next_colour;
+	}
+	dsc->colours = NULL;
+    }
 }
 
 /* 
@@ -920,7 +969,7 @@ dsc_reset(CDSC *dsc)
 * pplast is a pointer to a pointer of the end of the previous section
 */
 dsc_private void 
-dsc_section_join(unsigned long begin, unsigned long *pend, unsigned long **pplast)
+dsc_section_join(DSC_OFFSET begin, DSC_OFFSET *pend, DSC_OFFSET **pplast)
 {
     if (begin)
 	**pplast = begin;
@@ -945,7 +994,7 @@ dsc_read_line(CDSC *dsc)
     }
 
     if (dsc->file_length && 
-	(dsc->data_offset + dsc->data_index > dsc->file_length)) {
+	(dsc->data_offset + dsc->data_index >= dsc->file_length)) {
 	/* Have read past where we need to parse. */
 	/* Ignore all that remains. */
 	dsc->line = dsc->data + dsc->data_index;
@@ -955,7 +1004,7 @@ dsc_read_line(CDSC *dsc)
 
     }
     if (dsc->doseps_end && 
-	(dsc->data_offset + dsc->data_index > dsc->doseps_end)) {
+	(dsc->data_offset + dsc->data_index >= dsc->doseps_end)) {
 	/* Have read past end of DOS EPS PostScript section. */
 	/* Ignore all that remains. */
 	dsc->line = dsc->data + dsc->data_index;
@@ -1024,7 +1073,7 @@ dsc_read_line(CDSC *dsc)
 		return 0;
 	    }
 	}
-	dsc->data_index += dsc->line_length = (p - dsc->line);
+	dsc->data_index += dsc->line_length = (int)(p - dsc->line);
     } while (dsc->skip_lines && dsc->line_length);
 
     if (dsc->line_length == 0)
@@ -1047,8 +1096,11 @@ dsc_read_line(CDSC *dsc)
 	    char begindata[MAXSTR+1];
 	    int cnt;
 	    const char *numberof, *bytesorlines;
-	    memcpy(begindata, dsc->line, dsc->line_length);
-	    begindata[dsc->line_length] = '\0';
+	    cnt = dsc->line_length;
+	    if (dsc->line_length > sizeof(begindata)-1)
+		cnt = sizeof(begindata)-1;
+	    memcpy(begindata, dsc->line, cnt);
+	    begindata[cnt] = '\0';
 	    numberof = strtok(begindata+12, " \r\n");
 	    strtok(NULL, " \r\n");	/* dump type */
 	    bytesorlines = strtok(NULL, " \r\n");
@@ -1093,7 +1145,8 @@ dsc_read_line(CDSC *dsc)
 	}
 	else if (COMPARE(dsc->line, "%%BeginBinary:")) {
 	    /* byte count doesn't includes \n or \r\n or \r of %%BeginBinary:*/
-	    unsigned long cnt = atoi(dsc->line + 14);
+	    int cnt = dsc_get_int(dsc->line + 14,
+		dsc->line_length - 14, NULL);
 	    if (dsc->skip_bytes == 0) {
 		/* we are not already skipping lines */
 		dsc->skip_bytes = cnt;
@@ -1137,6 +1190,7 @@ dsc_unknown(CDSC *dsc)
 	strncpy(line, dsc->line, length);
 	line[length] = '\0';
 	dsc_debug_print(dsc, line);
+	dsc_debug_print(dsc, "\n");
     }
 }
 
@@ -1198,7 +1252,18 @@ dsc_read_doseps(CDSC *dsc)
     dsc->doseps->tiff_begin = dsc_get_dword(line+20);
     dsc->doseps->tiff_length = dsc_get_dword(line+24);
     dsc->doseps->checksum = dsc_get_word(line+28);
-	
+
+    if (dsc->file_length && 
+	(dsc->doseps->ps_begin + dsc->doseps->ps_length > dsc->file_length)) {
+	/* Error in DOS EPS header.
+	 * Some files have been seen with a fixed large value as 
+	 * the length of the PostScript section.
+	 * Correct for these erroneous files.
+	 */
+	 dsc->doseps->ps_length = 
+	    (GSDWORD)(dsc->file_length - dsc->doseps->ps_begin);
+    }
+
     dsc->doseps_end = dsc->doseps->ps_begin + dsc->doseps->ps_length;
 
     /* move data_index backwards to byte after doseps header */
@@ -1812,7 +1877,6 @@ dsc_scan_type(CDSC *dsc)
      *   non-DSC
      */
 
-
     /* First process any non PostScript headers */
     /* At this stage we do not have a complete line */
 
@@ -2110,7 +2174,7 @@ dsc_scan_comments(CDSC *dsc)
 		}
 		else
 		    dsc->media[count]->name = 
-			dsc_alloc_string(dsc, p, strlen(p));
+			dsc_alloc_string(dsc, p, (int)strlen(p));
 		/* find in list of known media */
 		while (m && m->name) {
 		    if (dsc_stricmp(p, m->name)==0) {
@@ -2152,7 +2216,7 @@ dsc_scan_comments(CDSC *dsc)
 		}
 		else
 		    dsc->media[count]->type = 
-			dsc_alloc_string(dsc, p, strlen(p));
+			dsc_alloc_string(dsc, p, (int)strlen(p));
 	    }
 	    n+=i;
 	    count++;
@@ -2185,7 +2249,7 @@ dsc_scan_comments(CDSC *dsc)
 		}
 		else
 		    dsc->media[count]->colour = 
-			dsc_alloc_string(dsc, p, strlen(p));
+			dsc_alloc_string(dsc, p, (int)strlen(p));
 	    }
 	    n+=i;
 	    count++;
@@ -2251,6 +2315,34 @@ dsc_scan_comments(CDSC *dsc)
     else if (IS_DSC(line, "%%PlateFile:")) {
 	dsc->id = CDSC_PLATEFILE;
 	if (dsc_parse_platefile(dsc) != CDSC_OK)
+	    dsc->id = CDSC_UNKNOWNDSC;
+    }
+    else if (IS_DSC(line, "%%CyanPlate:") || 
+	IS_DSC(line, "%%MagentaPlate:") || 
+	IS_DSC(line, "%%YellowPlate:") ||
+	IS_DSC(line, "%%BlackPlate:")) {
+	dsc->id = CDSC_PLATEFILE;
+	if (dsc_parse_dcs1plate(dsc) != CDSC_OK)
+	    dsc->id = CDSC_UNKNOWNDSC;
+    }
+    else if (IS_DSC(line, "%%DocumentProcessColors:")) {
+	dsc->id = CDSC_DOCUMENTPROCESSCOLORS;
+	if (dsc_parse_process_colours(dsc) != CDSC_OK)
+	    dsc->id = CDSC_UNKNOWNDSC;
+    }
+    else if (IS_DSC(line, "%%DocumentCustomColors:")) {
+	dsc->id = CDSC_DOCUMENTCUSTOMCOLORS;
+	if (dsc_parse_custom_colours(dsc) != CDSC_OK)
+	    dsc->id = CDSC_UNKNOWNDSC;
+    }
+    else if (IS_DSC(line, "%%CMYKCustomColor:")) {
+	dsc->id = CDSC_CMYKCUSTOMCOLOR;
+	if (dsc_parse_cmyk_custom_colour(dsc) != CDSC_OK)
+	    dsc->id = CDSC_UNKNOWNDSC;
+    }
+    else if (IS_DSC(line, "%%RGBCustomColor:")) {
+	dsc->id = CDSC_RGBCUSTOMCOLOR;
+	if (dsc_parse_rgb_custom_colour(dsc) != CDSC_OK)
 	    dsc->id = CDSC_UNKNOWNDSC;
     }
     else if (dsc->line[0] == '%' && IS_WHITE_OR_EOL(dsc->line[1])) {
@@ -2415,7 +2507,7 @@ dsc_check_match_prompt(CDSC *dsc, const char *str, int count)
 	    buf[dsc->line_length] = '\0';
 	}
 	sprintf(buf+strlen(buf), "\n%%%%Begin%.40s: / %%%%End%.40s\n", str, str);
-	return dsc_error(dsc, CDSC_MESSAGE_BEGIN_END, buf, strlen(buf));
+	return dsc_error(dsc, CDSC_MESSAGE_BEGIN_END, buf, (int)strlen(buf));
     }
     return CDSC_RESPONSE_CANCEL;
 }
@@ -2712,7 +2804,7 @@ dsc_scan_page(CDSC *dsc)
 	     * Keep reading until reach %%Page or %%Trailer
 	     * and add it to previous section.
 	     */
-	    unsigned long *last;
+	    DSC_OFFSET *last;
 	    if (dsc->endsetup != 0)
 		last = &dsc->endsetup;
 	    else if (dsc->endprolog != 0)
@@ -2730,6 +2822,7 @@ dsc_scan_page(CDSC *dsc)
 		dsc->scan_section = scan_pre_trailer;
 		return CDSC_PROPAGATE;
 	    }
+	    *last = DSC_END(dsc);
 	    return CDSC_OK;
 	}
     }
@@ -2738,6 +2831,7 @@ dsc_scan_page(CDSC *dsc)
 	/* ignore */
     }
     else if (IS_DSC(line, "%%Page:")) {
+	int code;
 	dsc->id = CDSC_PAGE;
 	if (dsc->page_count) {
 	    dsc->page[dsc->page_count-1].end = DSC_START(dsc);
@@ -2745,10 +2839,10 @@ dsc_scan_page(CDSC *dsc)
 		return CDSC_NOTDSC;
 	}
 
-	if (dsc_parse_page(dsc) != 0)
-	    return CDSC_ERROR;
-
-	return CDSC_OK;
+	if ( (code = dsc_parse_page(dsc)) != CDSC_OK)
+	    return code;
+        if (dsc->page_count == 0)
+	    dsc->scan_section = scan_pre_pages;
     }
     else if (IS_DSC(line, "%%BeginPreview")) {
 	/* ignore because we have already processed this section */
@@ -2764,7 +2858,8 @@ dsc_scan_page(CDSC *dsc)
     }
     else if (dsc_is_section(line)) {
 	if (IS_DSC(line, "%%Trailer")) {
-	    dsc->page[dsc->page_count-1].end = DSC_START(dsc);
+	    if (dsc->page_count)
+		dsc->page[dsc->page_count-1].end = DSC_START(dsc);
 	    if (dsc->file_length) {
 		if ((!dsc->doseps && 
 			((DSC_END(dsc) + 32768) < dsc->file_length)) ||
@@ -2801,7 +2896,8 @@ dsc_scan_page(CDSC *dsc)
 	    }
 	}
 	else if (IS_DSC(line, "%%EOF")) {
-	    dsc->page[dsc->page_count-1].end = DSC_START(dsc);
+	    if (dsc->page_count)
+		dsc->page[dsc->page_count-1].end = DSC_START(dsc);
 	    if (dsc->file_length) {
 		if ((DSC_END(dsc)+100 < dsc->file_length) ||
 		    (dsc->doseps && (DSC_END(dsc) + 100 < dsc->doseps_end))) {
@@ -2853,7 +2949,8 @@ dsc_scan_page(CDSC *dsc)
     }
     else if (IS_DSC(line, "%%PageMedia:")) {
 	dsc->id = CDSC_PAGEMEDIA;
-	dsc_parse_media(dsc, &(dsc->page[dsc->page_count-1].media));
+	if (dsc->page_count)
+	    dsc_parse_media(dsc, &(dsc->page[dsc->page_count-1].media));
     }
     else if (IS_DSC(line, "%%PaperColor:")) {
 	dsc->id = CDSC_PAPERCOLOR;
@@ -2879,7 +2976,8 @@ dsc_scan_page(CDSC *dsc)
  	for (i=0; i<(int)dsc->media_count; i++) {
 	    if (dsc->media[i] && dsc->media[i]->name && 
 		(dsc_stricmp(buf, dsc->media[i]->name)==0)) {
-		dsc->page_media = dsc->media[i];
+		if (dsc->page_count)
+		    dsc->page[dsc->page_count-1].media = dsc->media[i];
 		found_media = TRUE;
 		break;
 	    }
@@ -2890,7 +2988,8 @@ dsc_scan_page(CDSC *dsc)
 	    const CDSCMEDIA *m = dsc_known_media;
 	    while (m->name) {
 		if (dsc_stricmp(buf, m->name)==0) {
-		    dsc->page[dsc->page_count-1].media = m;
+		    if (dsc->page_count)
+			dsc->page[dsc->page_count-1].media = m;
 		    break;
 		}
 		m++;
@@ -2900,27 +2999,36 @@ dsc_scan_page(CDSC *dsc)
 	}
     }
     else if (IS_DSC(line, "%%PageOrientation:")) {
-	dsc->id = CDSC_PAGEORIENTATION;
-	if (dsc_parse_orientation(dsc, 
+	if (dsc->page_count) {
+	    dsc->id = CDSC_PAGEORIENTATION;
+	    if (dsc_parse_orientation(dsc, 
 		&(dsc->page[dsc->page_count-1].orientation) ,18))
-	    return CDSC_NOTDSC;
+		return CDSC_NOTDSC;
+	}
     }
     else if (IS_DSC(line, "%%PageBoundingBox:")) {
-	dsc->id = CDSC_PAGEBOUNDINGBOX;
-	if (dsc_parse_bounding_box(dsc, &dsc->page[dsc->page_count-1].bbox, 18))
-	    return CDSC_NOTDSC;
+	if (dsc->page_count) {
+	    dsc->id = CDSC_PAGEBOUNDINGBOX;
+	    if (dsc_parse_bounding_box(dsc, 
+		&dsc->page[dsc->page_count-1].bbox, 18))
+		return CDSC_NOTDSC;
+	}
     }
     else if (IS_DSC(line, "%%ViewingOrientation:")) {
-	dsc->id = CDSC_VIEWINGORIENTATION;
-	if (dsc_parse_viewing_orientation(dsc, 
-	    &dsc->page[dsc->page_count-1].viewing_orientation))
-	    return CDSC_ERROR;
+	if (dsc->page_count) {
+	    dsc->id = CDSC_VIEWINGORIENTATION;
+	    if (dsc_parse_viewing_orientation(dsc, 
+		&dsc->page[dsc->page_count-1].viewing_orientation))
+		return CDSC_ERROR;
+	}
     }
     else if (IS_DSC(line, "%%PageCropBox:")) {
-	dsc->id = CDSC_PAGECROPBOX;
-	if (dsc_parse_float_bounding_box(dsc, 
-	    &(dsc->page[dsc->page_count-1].crop_box), 14))
-	    return CDSC_ERROR;
+	if (dsc->page_count) {
+	    dsc->id = CDSC_PAGECROPBOX;
+	    if (dsc_parse_float_bounding_box(dsc, 
+		&(dsc->page[dsc->page_count-1].crop_box), 14))
+		return CDSC_ERROR;
+	}
     }
     else if (IS_DSC(line, "%%BeginFont:")) {
 	dsc->id = CDSC_BEGINFONT;
@@ -2972,7 +3080,8 @@ dsc_scan_page(CDSC *dsc)
 	dsc_unknown(dsc);
     }
 
-    dsc->page[dsc->page_count-1].end = DSC_END(dsc);
+    if (dsc->page_count)
+	dsc->page[dsc->page_count-1].end = DSC_END(dsc);
     return CDSC_OK;
 }
 
@@ -3389,7 +3498,7 @@ dsc_get_real(const char *line, unsigned int len, unsigned int *offset)
     return (float)atof(newline);
 }
 
-dsc_private int
+int
 dsc_stricmp(const char *s, const char *t)
 {
     while (toupper(*s) == toupper(*t)) {
@@ -3417,7 +3526,23 @@ dsc_parse_page(CDSC *dsc)
     if (pl == NULL)
 	return CDSC_ERROR;
     p += i;
-    page_ordinal = atoi(p);
+    if (dsc->line_length - 7 - i == 0) {
+	/* Ordinal missing, or parentheses not matched in label */
+	/* Try to find ordinal at end of line */
+	while (i > 0) {
+	    if (!IS_WHITE_OR_EOL(p[-1])) 
+		break;
+	    p--;
+	    i--;
+	}
+	while (i > 0) {
+	    if (!isdigit(p[-1]))
+		break;
+	    p--;
+	    i--;
+	}
+    }
+    page_ordinal = dsc_get_int(p, dsc->line_length - 7 - i, NULL);
 
     if ( (page_ordinal == 0) || (strlen(page_label) == 0) ||
        (dsc->page_count && 
@@ -3489,6 +3614,7 @@ dsc_error(CDSC *dsc, unsigned int explanation,
 dsc_private int
 dsc_dcs2_fixup(CDSC *dsc)
 {
+    char composite[] = "Composite";
     /* If DCS 2.0 single file format found, expose the separations
      * as multiple pages.  Treat the initial EPS file as a single
      * page without comments, prolog or trailer.
@@ -3496,15 +3622,18 @@ dsc_dcs2_fixup(CDSC *dsc)
     if (dsc->dcs2) {
 	int code = CDSC_OK;
 	int page_number;
-	unsigned long *pbegin;
-	unsigned long *pend;
- 	char one[] = "1";
+	DSC_OFFSET *pbegin;
+	DSC_OFFSET *pend;
+        DSC_OFFSET end;
 	CDCS2 *pdcs = dsc->dcs2;
 	/* Now treat the initial EPS file as a single page without
 	 * headers or trailer, so page extraction will fetch the
 	 * the correct separation. */
 	if (dsc->page_count == 0)
-	    code = dsc_add_page(dsc, 1, one);
+	    code = dsc_add_page(dsc, 1, composite);
+	else if (dsc->page_count == 1)
+	    dsc->page[0].label = 
+		dsc_alloc_string(dsc, composite, (int)strlen(composite)+1);
 	if (code != CDSC_OK)
 	    return code; 
 	page_number = dsc->page_count - 1;
@@ -3560,18 +3689,42 @@ dsc_dcs2_fixup(CDSC *dsc)
 
 	if (*pbegin == 999999999)
 	    *pbegin = *pend;
+	end = 0;	/* end of composite is start of first separation */
 	
 	while (pdcs) {
     	    page_number = dsc->page_count;
-	    if (pdcs->begin != pdcs->end) {
-		code = dsc_add_page(dsc, page_number+1, pdcs->colorname);
+	    if ((pdcs->begin) && (pdcs->colourname != NULL)) {
+		/* Single file DCS 2.0 */
+		code = dsc_add_page(dsc, page_number+1, pdcs->colourname);
 		if (code)
 		    return code;
 		dsc->page[page_number].begin = pdcs->begin;
 		dsc->page[page_number].end = pdcs->end;
+		if (end != 0)
+		    end = min(end, pdcs->begin);
+		else
+		    end = pdcs->begin;		/* first separation  */
+	    }
+	    else {
+		/* Multiple file DCS 2.0 */
+		if ((pdcs->location != NULL) && 
+		    (pdcs->filetype != NULL) &&
+		    (pdcs->colourname != NULL) &&
+		    (dsc_stricmp(pdcs->location, "Local") == 0) &&
+		    ((dsc_stricmp(pdcs->filetype, "EPS") == 0) ||
+		     (dsc_stricmp(pdcs->filetype, "EPSF") == 0))) {
+		    code = dsc_add_page(dsc, page_number+1, pdcs->colourname);
+		    if (code)
+			return code;
+		    dsc->page[page_number].begin = 0;
+		    dsc->page[page_number].end = 0;
+		}
 	    }
 	    pdcs = pdcs->next;
 	}
+	/* end of composite is start of first separation */
+	if (end != 0)
+	    *pend = end;
     }
     return 0;
 }
@@ -3583,11 +3736,13 @@ dsc_parse_platefile(CDSC *dsc)
     unsigned int i, n;
     CDCS2 dcs2;
     CDCS2 *pdcs2;
-    char colorname[MAXSTR];
+    char colourname[MAXSTR];
     char filetype[MAXSTR];
     char location[MAXSTR];
-    char filename[MAXSTR];
+    char *filename = NULL;
+    int filename_length = 0;
     GSBOOL blank_line;
+    GSBOOL single = FALSE;
     if (IS_DSC(dsc->line, "%%PlateFile:"))
 	n = 12;
     else if (IS_DSC(dsc->line, "%%+"))
@@ -3596,7 +3751,7 @@ dsc_parse_platefile(CDSC *dsc)
 	return CDSC_ERROR;	/* error */
 
     memset(&dcs2, 0, sizeof(dcs2));
-    memset(&colorname, 0, sizeof(colorname));
+    memset(&colourname, 0, sizeof(colourname));
     memset(&filetype, 0, sizeof(filetype));
     memset(&location, 0, sizeof(location));
     memset(&filename, 0, sizeof(filename));
@@ -3611,7 +3766,7 @@ dsc_parse_platefile(CDSC *dsc)
     }
 
     if (!blank_line) {
-	dsc_copy_string(colorname, sizeof(colorname),
+	dsc_copy_string(colourname, sizeof(colourname),
 		dsc->line+n, dsc->line_length-n, &i);
 	n+=i;
 	if (i)
@@ -3622,6 +3777,7 @@ dsc_parse_platefile(CDSC *dsc)
 	    n++;
 	if (dsc->line[n] == '#') {
 	    /* single file DCS 2.0 */
+	    single = TRUE;
 	    n++;
 	    if (i)
 		dcs2.begin= dsc_get_int(dsc->line+n, dsc->line_length-n, &i);
@@ -3629,7 +3785,6 @@ dsc_parse_platefile(CDSC *dsc)
 	    if (i)
 		dcs2.end= dcs2.begin + 
 		    dsc_get_int(dsc->line+n, dsc->line_length-n, &i);
-	    n+=i;
 	}
 	else {
 	    /* multiple file DCS 2.0 */
@@ -3637,25 +3792,30 @@ dsc_parse_platefile(CDSC *dsc)
 		dsc_copy_string(location, sizeof(location),
 		    dsc->line+n, dsc->line_length-n, &i);
 	    n+=i;
-	    if (i)
-		dsc_copy_string(filename, sizeof(filename),
-		    dsc->line+n, dsc->line_length-n, &i);
-	    n+=i;
+	    if (i) {
+		filename = dsc->line+n;
+		filename_length = dsc->line_length-n;
+	    }
 	}
 	if (i==0)
 	    dsc_unknown(dsc); /* we didn't get all fields */
 	else {
 	    /* Allocate strings */
-	    if (strlen(colorname))
-		dcs2.colorname = dsc_alloc_string(dsc, colorname, strlen(colorname));
+	    if (strlen(colourname))
+		dcs2.colourname = dsc_alloc_string(dsc, 
+		    colourname, (int)strlen(colourname));
 	    if (strlen(filetype))
-		dcs2.filetype = dsc_alloc_string(dsc, filetype, strlen(filetype));
+		dcs2.filetype = dsc_alloc_string(dsc, 
+		    filetype, (int)strlen(filetype));
 	    if (strlen(location))
-		dcs2.location = dsc_alloc_string(dsc, location, strlen(location));
-	    if (strlen(filename))
-		dcs2.filename = dsc_alloc_string(dsc, filename, strlen(filename));
+		dcs2.location = dsc_alloc_string(dsc, 
+		    location, (int)strlen(location));
+	    if (filename)
+		dcs2.filename = dsc_add_line(dsc, filename, filename_length);
+
 	    /* Prevent parser from reading separations */
-	    dsc->file_length = min(dsc->file_length, dcs2.begin);
+	    if (single)
+	        dsc->file_length = min(dsc->file_length, dcs2.begin);
 	    /* Allocate it */
 	    pdcs2 = (CDCS2 *)dsc_memalloc(dsc, sizeof(CDCS2));
 	    if (pdcs2 == NULL)
@@ -3675,3 +3835,387 @@ dsc_parse_platefile(CDSC *dsc)
     return CDSC_OK;
 }
 
+/* Parse a DCS 1.0 plate comment, storing like a multi file DSC 2.0 */
+dsc_private int
+dsc_parse_dcs1plate(CDSC *dsc)
+{
+    unsigned int i, n = 0;
+    CDCS2 dcs2;
+    CDCS2 *pdcs2;
+    const char *colourname;
+    char filename[MAXSTR];
+    GSBOOL blank_line;
+    GSBOOL continued = FALSE;
+    char *line = dsc->line;
+
+    memset(&dcs2, 0, sizeof(dcs2));
+    memset(&filename, 0, sizeof(filename));
+
+    if (IS_DSC(line, "%%+")) {
+	n = 3;
+	line = dsc->last_line;
+	continued = TRUE;
+    }
+
+    if (IS_DSC(line, "%%CyanPlate:")) {
+	colourname = "Cyan";
+	if (!continued)
+	    n = 12;
+    }
+    else if (IS_DSC(line, "%%MagentaPlate:")) {
+	colourname = "Magenta";
+	if (!continued)
+	    n = 15;
+    }
+    else if (IS_DSC(line, "%%YellowPlate:")) {
+	colourname = "Yellow";
+	if (!continued)
+	    n = 14;
+    }
+    else if (IS_DSC(line, "%%BlackPlate:")) {
+	colourname = "Black";
+	if (!continued)
+	    n = 13;
+    }
+    else
+	return CDSC_ERROR;	/* error */
+
+    /* check for blank remainder of line */
+    blank_line = TRUE;
+    for (i=n; i<dsc->line_length; i++) {
+	if (!IS_WHITE_OR_EOL(dsc->line[i])) {
+	    blank_line = FALSE;
+	    break;
+	}
+    }
+
+    if (!blank_line) {
+	dsc_copy_string(filename, sizeof(filename),
+		    dsc->line+n, dsc->line_length-n, &i);
+	if (i==0)
+	    dsc_unknown(dsc); /* we didn't get all fields */
+	else {
+	    /* Allocate strings */
+	    dcs2.colourname = dsc_alloc_string(dsc, 
+		    colourname, (int)strlen(colourname));
+	    dcs2.filetype = dsc_alloc_string(dsc, "EPS", 3);
+	    dcs2.location = dsc_alloc_string(dsc, "Local", 5);
+	    if (strlen(filename))
+		dcs2.filename = dsc_alloc_string(dsc, 
+		    filename, (int)strlen(filename));
+	    /* Allocate it */
+	    pdcs2 = (CDCS2 *)dsc_memalloc(dsc, sizeof(CDCS2));
+	    if (pdcs2 == NULL)
+		return CDSC_ERROR;	/* out of memory */
+	    memcpy(pdcs2, &dcs2, sizeof(CDCS2));
+	    /* Then add to list of separations */
+	    if (dsc->dcs2 == NULL)
+		dsc->dcs2 = pdcs2;
+	    else {
+		CDCS2 *this_dcs2 = dsc->dcs2;
+		while (this_dcs2->next)
+		    this_dcs2 = this_dcs2->next;
+		this_dcs2->next = pdcs2;
+	    }
+	}
+    }
+    return CDSC_OK;
+}
+
+
+/* Find the filename which corresponds to this separation.
+ * Used with multiple file DCS 2.0.
+ * Returns NULL if there is no filename, or not DCS 2.0,
+ * or single file DCS 2.0.
+ * Caller will need to obtain the filesize from the file.
+ */
+const char *
+dsc_find_platefile(CDSC *dsc, int page)
+{
+    CDCS2 *pdcs = dsc->dcs2;
+    int i = 1;
+    while (pdcs) {
+	if (pdcs->begin != pdcs->end)
+	    return NULL;	/* Single file DCS 2.0 */
+	if (pdcs->location && pdcs->filetype && pdcs->colourname
+	    && (dsc_stricmp(pdcs->location, "Local") == 0)
+	    && ((dsc_stricmp(pdcs->filetype, "EPS") == 0) ||
+	        (dsc_stricmp(pdcs->filetype, "EPSF") == 0))) {
+	    if (i == page)
+		return pdcs->filename;
+	    i++;
+	}
+	pdcs = pdcs->next;
+    }
+    return NULL;
+}
+
+
+dsc_private CDSCCOLOUR *
+dsc_find_colour(CDSC *dsc, const char *colourname)
+{
+    CDSCCOLOUR *colour = dsc->colours;
+    while (colour) {
+	if (colour->name && (dsc_stricmp(colour->name, colourname)==0))
+	    return colour;
+	colour = colour->next;
+    }
+    return 0;
+}
+
+dsc_private int
+dsc_parse_process_colours(CDSC *dsc)
+{
+    unsigned int i, n;
+    CDSCCOLOUR *pcolour;
+    char colourname[MAXSTR];
+    GSBOOL blank_line;
+    if (IS_DSC(dsc->line, "%%DocumentProcessColors:"))
+	n = 24;
+    else if (IS_DSC(dsc->line, "%%+"))
+	n = 3;
+    else
+	return CDSC_ERROR;	/* error */
+
+    memset(&colourname, 0, sizeof(colourname));
+
+    /* check for blank remainder of line */
+    blank_line = TRUE;
+    for (i=n; i<dsc->line_length; i++) {
+	if (!IS_WHITE_OR_EOL(dsc->line[i])) {
+	    blank_line = FALSE;
+	    break;
+	}
+    }
+
+    if (!blank_line) {
+	do {
+	    dsc_copy_string(colourname, sizeof(colourname),
+		dsc->line+n, dsc->line_length-n, &i);
+	    n+=i;
+	    if (i && strlen(colourname)) {
+		if ((pcolour = dsc_find_colour(dsc, colourname)) == NULL) {
+		    pcolour = (CDSCCOLOUR *)malloc(sizeof(CDSCCOLOUR));
+		    if (pcolour == NULL)
+			return CDSC_ERROR;	/* out of memory */
+		    memset(pcolour, 0, sizeof(CDSCCOLOUR));
+		    pcolour->custom = CDSC_CUSTOM_COLOUR_UNKNOWN;
+		    pcolour->name = dsc_alloc_string(dsc, 
+			colourname, (int)strlen(colourname));
+		    if (dsc->colours == NULL)
+			dsc->colours = pcolour;
+		    else {
+			CDSCCOLOUR *this_colour = dsc->colours;
+			while (this_colour->next)
+			    this_colour = this_colour->next;
+			this_colour->next = pcolour;
+		    }
+		}
+	        pcolour->type = CDSC_COLOUR_PROCESS;
+	    }
+	} while (i != 0);
+    }
+    return CDSC_OK;
+}
+
+dsc_private int
+dsc_parse_custom_colours(CDSC *dsc)
+{
+    unsigned int i, n;
+    CDSCCOLOUR *pcolour;
+    char colourname[MAXSTR];
+    GSBOOL blank_line;
+    if (IS_DSC(dsc->line, "%%DocumentCustomColors:"))
+	n = 23;
+    else if (IS_DSC(dsc->line, "%%+"))
+	n = 3;
+    else
+	return CDSC_ERROR;	/* error */
+
+    memset(&colourname, 0, sizeof(colourname));
+
+    /* check for blank remainder of line */
+    blank_line = TRUE;
+    for (i=n; i<dsc->line_length; i++) {
+	if (!IS_WHITE_OR_EOL(dsc->line[i])) {
+	    blank_line = FALSE;
+	    break;
+	}
+    }
+
+    if (!blank_line) {
+	do {
+	    dsc_copy_string(colourname, sizeof(colourname),
+		dsc->line+n, dsc->line_length-n, &i);
+	    n+=i;
+	    if (i && strlen(colourname)) {
+		if ((pcolour = dsc_find_colour(dsc, colourname)) == NULL) {
+		    pcolour = (CDSCCOLOUR *)malloc(sizeof(CDSCCOLOUR));
+		    if (pcolour == NULL)
+			return CDSC_ERROR;	/* out of memory */
+		    memset(pcolour, 0, sizeof(CDSCCOLOUR));
+		    pcolour->name = dsc_alloc_string(dsc, 
+			colourname, (int)strlen(colourname));
+		    pcolour->custom = CDSC_CUSTOM_COLOUR_UNKNOWN;
+		    if (dsc->colours == NULL)
+			dsc->colours = pcolour;
+		    else {
+			CDSCCOLOUR *this_colour = dsc->colours;
+			while (this_colour->next)
+			    this_colour = this_colour->next;
+			this_colour->next = pcolour;
+		    }
+		}
+                pcolour->type = CDSC_COLOUR_CUSTOM;
+	    }
+	} while (i != 0);
+    }
+    return CDSC_OK;
+}
+
+
+dsc_private int
+dsc_parse_cmyk_custom_colour(CDSC *dsc)
+{
+    unsigned int i, n;
+    CDSCCOLOUR *pcolour;
+    char colourname[MAXSTR];
+    float cyan, magenta, yellow, black;
+    GSBOOL blank_line;
+    if (IS_DSC(dsc->line, "%%CMYKCustomColor:"))
+	n = 18;
+    else if (IS_DSC(dsc->line, "%%+"))
+	n = 3;
+    else
+	return CDSC_ERROR;	/* error */
+
+    memset(&colourname, 0, sizeof(colourname));
+
+    /* check for blank remainder of line */
+
+    do {
+	blank_line = TRUE;
+	for (i=n; i<dsc->line_length; i++) {
+	    if (!IS_WHITE_OR_EOL(dsc->line[i])) {
+		blank_line = FALSE;
+		break;
+	    }
+	}
+	if (blank_line)
+	    break;
+	else {
+	    cyan = magenta = yellow = black = 0.0;
+	    cyan = dsc_get_real(dsc->line+n, dsc->line_length-n, &i);
+	    n += i;
+	    if (i)
+		magenta = dsc_get_real(dsc->line+n, dsc->line_length-n, &i);
+	    n += i;
+	    if (i)
+		yellow = dsc_get_real(dsc->line+n, dsc->line_length-n, &i);
+	    n += i;
+	    if (i)
+		black = dsc_get_real(dsc->line+n, dsc->line_length-n, &i);
+	    n += i;
+	    if (i)
+		dsc_copy_string(colourname, sizeof(colourname),
+		    dsc->line+n, dsc->line_length-n, &i);
+	    n+=i;
+	    if (i && strlen(colourname)) {
+		if ((pcolour = dsc_find_colour(dsc, colourname)) == NULL) {
+		    pcolour = (CDSCCOLOUR *)malloc(sizeof(CDSCCOLOUR));
+		    if (pcolour == NULL)
+			return CDSC_ERROR;	/* out of memory */
+		    memset(pcolour, 0, sizeof(CDSCCOLOUR));
+		    pcolour->name = dsc_alloc_string(dsc, 
+			colourname, (int)strlen(colourname));
+	            pcolour->type = CDSC_COLOUR_UNKNOWN;
+		    if (dsc->colours == NULL)
+			dsc->colours = pcolour;
+		    else {
+			CDSCCOLOUR *this_colour = dsc->colours;
+			while (this_colour->next)
+			    this_colour = this_colour->next;
+			this_colour->next = pcolour;
+		    }
+		}
+		pcolour->custom = CDSC_CUSTOM_COLOUR_CMYK;
+		pcolour->cyan = cyan;
+		pcolour->magenta = magenta;
+		pcolour->yellow = yellow;
+		pcolour->black = black;
+	    }
+	}
+    } while (i != 0);
+    return CDSC_OK;
+}
+
+dsc_private int
+dsc_parse_rgb_custom_colour(CDSC *dsc)
+{
+    unsigned int i, n;
+    CDSCCOLOUR *pcolour;
+    char colourname[MAXSTR];
+    float red, green, blue;
+    GSBOOL blank_line;
+    if (IS_DSC(dsc->line, "%%RGBCustomColor:"))
+	n = 17;
+    else if (IS_DSC(dsc->line, "%%+"))
+	n = 3;
+    else
+	return CDSC_ERROR;	/* error */
+
+    memset(&colourname, 0, sizeof(colourname));
+
+    /* check for blank remainder of line */
+
+    do {
+	blank_line = TRUE;
+	for (i=n; i<dsc->line_length; i++) {
+	    if (!IS_WHITE_OR_EOL(dsc->line[i])) {
+		blank_line = FALSE;
+		break;
+	    }
+	}
+	if (blank_line)
+	    break;
+	else {
+	    red = green = blue = 0.0;
+	    red = dsc_get_real(dsc->line+n, dsc->line_length-n, &i);
+	    n += i;
+	    if (i)
+		green = dsc_get_real(dsc->line+n, dsc->line_length-n, &i);
+	    n += i;
+	    if (i)
+		blue = dsc_get_real(dsc->line+n, dsc->line_length-n, &i);
+	    n += i;
+	    if (i)
+		dsc_copy_string(colourname, sizeof(colourname),
+		    dsc->line+n, dsc->line_length-n, &i);
+	    n+=i;
+	    if (i && strlen(colourname)) {
+		if ((pcolour = dsc_find_colour(dsc, colourname)) == NULL) {
+		    pcolour = (CDSCCOLOUR *)malloc(sizeof(CDSCCOLOUR));
+		    if (pcolour == NULL)
+			return CDSC_ERROR;	/* out of memory */
+		    memset(pcolour, 0, sizeof(CDSCCOLOUR));
+		    pcolour->name = dsc_alloc_string(dsc, 
+			colourname, (int)strlen(colourname));
+	            pcolour->type = CDSC_COLOUR_UNKNOWN;
+		    if (dsc->colours == NULL)
+			dsc->colours = pcolour;
+		    else {
+			CDSCCOLOUR *this_colour = dsc->colours;
+			while (this_colour->next)
+			    this_colour = this_colour->next;
+			this_colour->next = pcolour;
+		    }
+		}
+		pcolour->custom = CDSC_CUSTOM_COLOUR_RGB;
+		pcolour->red = red;
+		pcolour->green = green;
+		pcolour->blue = blue;
+	    }
+	}
+    } while (i != 0);
+    return CDSC_OK;
+}

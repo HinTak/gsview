@@ -95,7 +95,7 @@ GFile *gfile_open_handle(int hFile)
     return gf;
 }
 
-GFile *gfile_open(LPCTSTR lpszFileName, UINT nOpenFlags)
+GFile *gfile_open(LPCSTR lpszFileName, UINT nOpenFlags)
 {
     GFile *gf;
     DWORD dwAccess = GENERIC_READ;
@@ -114,7 +114,7 @@ GFile *gfile_open(LPCTSTR lpszFileName, UINT nOpenFlags)
     if ((nOpenFlags & 0xf00) == gfile_modeCreate)
 	dwCreate = CREATE_ALWAYS;
 
-    hFile = CreateFile(lpszFileName, dwAccess,
+    hFile = CreateFileA(lpszFileName, dwAccess,
 	dwShareMode, NULL, dwCreate, FILE_ATTRIBUTE_NORMAL,
 	NULL);
     if (hFile == INVALID_HANDLE_VALUE)
