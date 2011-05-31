@@ -251,6 +251,7 @@ struct prfentry *pe, *ne;
         }
 	ne = ns->entry;
 	pe = NULL;
+	/* should add code to remove section here if entry==NULL */
 	while (ne) {
 	    if (ne->name && (strcmp(ne->name, entry) == 0))
 	    	break;
@@ -276,9 +277,19 @@ struct prfentry *pe, *ne;
 	}
 	if (ne->value != (char *)NULL)
 	    free(ne->value);	/* release old value */
-	if ( (ne->value = (char *)malloc(strlen(value)+1)) == (char *)NULL )
-	    return FALSE;
-	strcpy(ne->value, value);
+	if (value) { /* change value */
+	    if ( (ne->value = (char *)malloc(strlen(value)+1)) == (char *)NULL )
+		return FALSE;
+	    strcpy(ne->value, value);
+	}
+	else { /* delete entry */
+	    free(ne->name);
+	    if (pe)
+	        pe->next = ne->next;
+	    else
+		ns->entry = ne->next;
+	    free(ne);
+	}
 	prf->changed = TRUE;
 	return TRUE;
 }

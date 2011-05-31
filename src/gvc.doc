@@ -11,16 +11,53 @@ E
  Conventions,
  GSview allows selected pages to be viewed or printed.
 W
- GSview should be used with Ghostscript 3.33 or later.
+ GSview should be used with Ghostscript 3.53 or later.
 P
- GSview should be used with Ghostscript 3.33 or later.
+ GSview should be used with Ghostscript 3.53 or later.
 E
  GSview was inspired by Tim Theisen's X11 Ghostview program.
 2Installation
 ?Installation
+ It is recommended that you use the installation program for
+ installing GSview.  For OS/2, use os2setup.exe.  For MS-Windows, 
+ use winsetup.exe.  See the file README.GV for more details.
+
+ If you wish to install GSview manually, see the `Manual Installation`
+ topic.
+3Uninstalling GSview and Ghostscript
+ To uninstall GSview, remove all the files in the `gsview` directory.
+ To uninstall Ghostscript, remove all the files in the `gs3.53` directory.
+
+ Also remove
+P
+  c:\os2\gvpm.ini
+W
+  c:\windows\gsview.ini
+  c:\windows\gsview32.ini
+  c:\windows\gswin.ini
+  c:\windows\gswin32.ini
+E
+ from the appropriate system directory.
+
+P
+ Remove the `GSview` program object from the desktop.
+W
+ Remove the `GS Tools` group from the Program Manager.
+
+ If you know how to edit the registry, remove the following keys:
+  psfile
+  .eps 
+  .ps
+E
+3Manual Installation
+?Manual Installation
+ It is recommended that you use the installation program for
+ installing GSview.  The following instructions describe how
+ to install GSview without using the installation program.
+
 W
  First you need to install Ghostscript.
- It is recommended that Ghostscript 3.33 or later be used.
+ It is recommended that Ghostscript 3.53 or later be used.
  (If you wish to use 16-bit Ghostscript 2.6.1, see the 
  `Ghostscript Version` topic.
  If using the 32-bit versions of GSview or Ghostscript, you must use
@@ -28,35 +65,48 @@ W
 P
  First you need to install Ghostscript 3.12 or later.
  This version of GSview will not work with earlier versions of Ghostscript.
- Ghostscript 3.33 or later is preferred.
+ Ghostscript 3.53 or later is preferred.
 E
+
+ Make a directory d:\gsview.
 
  Next install
 P
  PM GSview by copying gvpm.exe and gvpm.hlp
 W
- GSview for Windows by copying gsview.exe, gsview32.exe and gsview.hlp
+ GSview for Windows by copying gsview.exe, gsview32.exe, gsview.hlp
+ and gsv16spl.exe
 E
- to your Ghostscript directory.
+ to the `d:\gsview` directory.
 
- Start GSview then select `Options` | `Ghostscript Command`,
- and enter the correct executable path and include path for Ghostscript.
+ Start GSview then select `Options` | `Configure Ghostscript`.
+
+ Enter the correct executable path for Ghostscript.
  For example
 P
-   c:\gs\gsos2.exe -Ic:\gs;c:\psfonts
+   c:\gs3.53\gsos2.exe
 W
-   c:\gs\gswin.exe -Ic:\gs;c:\gs\fonts
+   c:\gs3.53\gswin.exe
 E
 
- It is essential that you get both the executable and the include path
- correct otherwise GSview will either complain that it cannot run
+ Enter the correct Ghostscript include path into the
+ `Ghostscript Include Path` field.
+ This include path must include the directories where the Ghostscript
+ library files (gs_*.ps and Fontmap) and the Ghostscript fonts (*.gsf)
+ are located. For example:
 P
- gsos2,
+   c:\gs3.53;c:\gs3.53\fonts;c:\psfonts
 W
- gswin,
+   c:\gs3.53;c:\gs3.53\fonts
 E
- or it will start and then immediately exit with an
- error code.
+ Do NOT put a `-I` before the include path.
+
+ Leave the `Other Options` field empty.
+
+ If you do not get the `Ghostscript EXE` field correct, GSview will
+ not be able to load Ghostscript.
+ If you do not get the `Ghostscript Include Path` correct, Ghostscript
+ will immediately exit with an error code.
 
 W
  Under Windows 95 or NT, the 32 bit version of GSview (gsview32.exe)
@@ -78,14 +128,6 @@ E
  supplied with Ghostscript for examples.  See the `Fonts` topic.
 
  If you have problems, try reading the help topic `Common Problems`.
-
- To uninstall GSview, remove the files you installed above, then remove
-P
- c:\os2\gvpm.ini
-W
- c:\windows\gsview.ini and c:\windows\gsview32.ini
-E
- from the appropriate system directory.
 3Ghostscript Installation
 ?Ghostscript Installation
  The following describes how to install Ghostscript, not GSview.
@@ -95,29 +137,29 @@ E
  Aladdin Ghostscript for the PC is available on the Internet from
   ftp://ftp.cs.wisc.edu/ghost/aladdin/gsNNNxxx.zip
  Where NNN is the version number.   
- For Ghostscript 3.33, the files requires to run Ghostscript are:
-  gs333ini.zip
+ For Ghostscript 3.53, the files required to run Ghostscript are:
+  gs353ini.zip
  plus one or more of
-  gs333dos.zip   (MS-DOS 386 EXE)
-  gs333os2.zip   (OS/2 2.0 or later EXE)
-  gs333win.zip   (MS-Windows 3.1 16bit EXE)
-  gs333w32.zip   (MS-Windows 3.1/Win32s or MS-Windows 95 or NT EXE)
+  gs353dos.zip   (MS-DOS 386 EXE)
+  gs353os2.zip   (OS/2 2.0 or later EXE)
+  gs353win.zip   (MS-Windows 3.1 16bit EXE)
+  gs353w32.zip   (MS-Windows 3.1/Win32s or MS-Windows 95 or NT EXE)
  If you do not already have a set of Type 1 fonts, you will
  also need
-  gs333fn1.zip
+  gs353fn1.zip
 
  The following assumes that Ghostscript is to be installed on
  drive d:.
  Unzip the INI zip file and the required EXE zip files from the
- root directory.  This should put the files into the directory d:\gs3.33.
+ root directory.  This should put the files into the directory d:\gs3.53.
 
- If you also need the fonts, change to the d:\gs3.33 directory and
- then unzip gs333fn1.zip.  This will put font files into .\fonts.
+ If you also need the fonts, change to the d:\gs3.53 directory and
+ then unzip gs353fn1.zip.  This will put font files into .\fonts.
  To run Ghostscript, set the GS_LIB environment variable as follows
-  SET GS_LIB=d:\gs3.33;d:\gs3.33\fonts
+  SET GS_LIB=d:\gs3.53;d:\gs3.53\fonts
  then start the appropriate EXE.  To run Ghostscript without using
  the environment variable, use the following command
-  d:\gs3.33\gs -Id:\gs3.33;d:\gs3.33\fonts
+  d:\gs3.53\gs -Id:\gs3.53;d:\gs3.53\fonts
  where the EXE name needs to be replaced with the appropriate name
  (gs, gs386, gswin, gswin32 or gsos2).
 
@@ -132,9 +174,12 @@ P
 ?Portable Document Format
 ?PDF
  GSview can display PDF files, although there are a number of problems
- with the current method.  To enable display of PDF files, copy the
- file pdf2dsc.ps from the GSview src directory to the Ghostscript
- lib directory.  When you open a PDF file, GSview will start up
+ with the current method.  To enable display of PDF files with
+ Aladdin Ghostscript 3.33, copy the file pdf2dsc.ps from the GSview src 
+ directory (unzip src.zip) to the Ghostscript directory.  
+ With Aladdin Ghostscript 3.53 you do not need to do this because this
+ file is distributed with Aladdin Ghostscript 3.53.
+ When you open a PDF file, GSview will start up
  Ghostscript and using pdf2dsc.ps will create a temporary DSC file which 
  will contain commands to display pages of the PDF file.  GSview will
  then start Ghostscript a second time to actually display the PDF file.
@@ -144,9 +189,10 @@ P
  - For long PDF files, GSview will take a long time to scan the PDF file.
  Be patient.
 
- - Ghostscript is used twice to scan the PDF file,  which makes it take
- even longer.  The GSview PDF code should eventually be rewritten to
- avoid using the temporary DSC file so that only one pass is needed. 
+ - Ghostscript is used twice, firstly to scan the PDF file, then a second
+ time to display the PDF file.  These two passes makes it take even longer.  
+ The GSview PDF code should eventually be rewritten to avoid using the 
+ temporary DSC file so that only one pass is needed. 
 
  - Zoom doesn't work for PDF files.  Attempting to use it will probably
  cause GSview to crash with an out of memory error.
@@ -157,7 +203,7 @@ E
 ?Include Path
  Ghostscript needs to read some initialisation files during startup,
  and needs to read font files before drawing text.
- When used on a PC with GSview, it is normal to tell Ghostscript where to
+ When used on a PC, it is normal to tell Ghostscript where to
  find these files using the Ghostscript `-I` command line switch.
  Alternatively, the `GS_LIB` environment variable can be used.
  See below for details for Unix or VMS.
@@ -185,12 +231,12 @@ E
  might be in
   /usr/local/bin
  while the include files are in
-  /usr/local/lib/ghostscript/gs3.33
+  /usr/local/lib/ghostscript/gs3.53
  and the fonts in
   /usr/local/lib/ghostscript/fonts
  Consequently, the `GS_LIB` environment variable would need to
  be set to
-  /usr/local/lib/ghostscript/gs3.33:/usr/local/lib/ghostscript/fonts
+  /usr/local/lib/ghostscript/gs3.53:/usr/local/lib/ghostscript/fonts
  It is to be hoped that these were set as the default when Ghostscript
  was compiled, and that it is unnecessary to use `GS_LIB`.
 
@@ -669,16 +715,21 @@ E
 ?Print File
  The `Print` command on the `File `menu allows printing of the document
  using Ghostscript.
- The Ghostscript printer driver and resolution are selected using the
- `Select Device` dialog box.   Pages are selected using the `Select Pages`
- dialog box.  The `All`, `Odd` and `Even` buttons provide quick selection
- of pages.
+ A `Printer Setup` dialog box allows selection of 
+ the Ghostscript printer driver and resolution, the page range
+ and the `Spooler` output.
+
+ All pages, individual pages or any combination may be printed.
+ The `All`, `Odd` and `Even` buttons provide quick selection of pages.
 
 W
- The `mswinprn` printer driver uses the windows printer drivers
+ The `mswinpr2` printer driver uses the windows printer drivers
  and should work with any printer with raster capabilities.
  Printer resolution cannot be selected from within GSview; use
- the Control Panel instead.  This driver is very slow and should
+ the Control Panel instead.  
+
+ The `mswinprn` printer driver is an older version of `mswinpr2`
+ and may not still work.  This driver is very slow and should
  be considered a last resort if no other Ghostscript printer
  driver is available.
 
@@ -723,18 +774,96 @@ E
  printer drivers.
  This is useful for sending a document to a PostScript printer,
  or for sending an output file produced by Ghostscript to a printer.
+3Spooler
+?Spooler
+ The
+P
+ `Printer Setup` dialog box prompts you for the name of a printer queue
+ to which output should be sent.
+ This queue will be saved and will be the default selection next time.
+W
+ `Select Printer Port` or `Select Printer` dialog box prompts you for the
+ name of a printer queue or port to which output should be sent.
+ This queue or port will be saved and will be the default selection
+ next time.
+
+ Under Windows 3.1, a port name is used.  Output will be spooled for
+ this port.
+
+ Under Windows 3.1 / Win32s, a port name is used.  Output will be
+ written directly to this port.  The spooler is not used.
+
+ Under Windows 95 or NT, a printer queue name is used.
+ At present this must be a local queue.
+E
+
+ See also `Print`
 3Properties
 ?Properties
- Some printer drivers allow extra properties to be specified.
- If two sections are added to the
+ The `Printer Setup` dialog box has a `Properties` button which
+ allows some printer drivers to configure extra properties and
+ a page offset to be specified.
+
+ A page offset can be specified for each printer.  This will
+ only work if `Ghostscript Version` is set to 3.51 or later.
+ The page offset is useful for correcting a mismatch between the page
+ origin of a Ghostscript printer device and a particular printer.
+ Increasing the X value will translate the image towards the right.
+ Increasing the Y value will translate the image downwards.
+
+ `Properties` are typically used to set BitsPerPixel for a colour 
+ printer or other types of colour or density correction.
+
+ `Properties` are specific to a particular printer.  Changing
+ the value of the `BitsPerPixel` property on one printer does not 
+ change it for any other printer.
+
+ When you press the `OK` button in the `Properties` dialog
+ box, the current settings are written to the
 W
  gsview.ini (or gsview32.ini for gsview32.exe)
 P
  gvpm.ini
 E
- file for these printer
- drivers, GSview will enable the `Properties` button which will
- display the `Edit Properties` dialog box.
+ file.
+
+ No `Properties` are predefined in GSview.  The `Edit` and `New`
+ buttons allow you to modify available `Properties` for that printer.
+ See the `Edit Properties` topic for more details.
+4Edit Properties
+?Edit Properties
+ Not every printer supports the use of optional `Properties`.  To find
+ out which printers support `Properties` and which `Properties` are
+ recognised by each printer, read the Ghostscript
+ file devices.doc or look at the Ghostscript source code.
+
+ There are two ways to add or edit `Properties`.
+
+ The first method uses the `Edit` or `New` button on the `Properties` 
+ dialog box.
+
+ Each property must be either a number or a string.  Number properties
+ are equivalent to the Ghostscript `-d` command line option.  String 
+ properties are equivalent to the Ghostscript `-s` command line option.
+ Each property consists of a `Name` and `Value`.  These are used as 
+ `-dNAME=VALUE` or `-sNAME=VALUE`.
+ The `Value` is chosen from the comma separated list of `Values`
+ entered into the `Edit Properties` dialog box.  Spaces must not
+ be embedded in the `Name` or `Values`.
+
+ To delete a property, select it on the `Properties` dialog box,
+ then press `Edit`, then press the `Delete` button on the `Edit Properties`
+ dialog box.
+
+ The second method is to manually edit the GSview INI file.
+
+ For each printer, you must add two sections to the
+W
+ gsview.ini (or gsview32.ini for gsview32.exe)
+P
+ gvpm.ini
+E
+ file.  
  The following example shows how to add property information
  for the cdjcolor driver.
  First add a section which gives the current values.
@@ -755,15 +884,6 @@ E
   dShingling=0,1,2
   dBlackCorrect=0,1,2,3,4,5,6,7,8,9
  GSview will also add the value `[Not defined]` to the listbox.
-
- When you press the `OK` button in the `Edit Properties` dialog
- box, the current settings are written to the
-W
- gsview.ini (or gsview32.ini for gsview32.exe)
-P
- gvpm.ini
-E
- file.
 
  When GSview prints a file, it will give Ghostscript the contents
  of the [cdjcolor] section of
@@ -832,7 +952,7 @@ E
 W
  The bitmap may be a Device Independent Bitmap or it may be a Device
  Dependent Bitmap, depending on how Ghostscript was compiled.
- The default for Ghostscript 3.33 is a Device Independent Bitmap
+ The default for Ghostscript 3.53 is a Device Independent Bitmap
  (BMP format).
 E
 
@@ -960,21 +1080,35 @@ W
 E
  Only the Ghostscript EXE and include path may be specified -
  other items will confuse GSview.
-W
 3Ghostscript Version
 ?Ghostscript Version
- GSview is best used with Ghostscript version 3.12 or later,
- preferably version 3.33 or later.
+ GSview is best used with Ghostscript version 3.53 or later.
+
+W
  The 16-bit version of GSview can be used with the 16-bit
  Ghostscript 2.6.1 by setting this option to `Ghostscript 2.6.1`.
 
- The default is `Ghostscript 3.12 or later`.
-
- The `Ghostscript Version` option is not available from 32-bit
- GSview.
+E
+ The default is `Ghostscript 3.51 or later`.
 
  See `Common Problems` for a description of what happens if you
  set the `Ghostscript Version` to the wrong setting.
+P
+3Draw Method
+?Draw Method
+ A number of buggy display drivers have been written for OS/2.
+ Many of these have a non-functional GpiDrawBits() API.
+ The default `Draw Method` is to use GpiDrawBits() for most
+ displays, and a slower double buffering method using
+ WinDrawBitmap for VGA (4bit/pixel) displays.
+
+ If your display has problems drawing the bitmap (usually
+ seen during scrolling) or a SYS3175 (memory access violation)
+ occurs in the display driver, then try explicitly using the
+ GpiDrawBits or WinDrawBitmap method.
+
+ If you have bugs in your display driver, please complain to
+ the company that wrote it.
 E
 3Sounds
 ?Sounds
@@ -1331,9 +1465,13 @@ W
 2Running GSview from the File Manager
 ?Registration Info Editor
 ?File Manager
+ If you used the GSview installation program, then the File Manager
+ will already know about PostScript files.  If you didn't use the
+ GSview installation program, read on.
+
  To run GSview when a PostScript file is double clicked in the
- File Manager, the following sequence must be followed to teach
- File Manager about PostScript files.
+ Windows 3.1 File Manager, the following sequence must be followed 
+ to teach File Manager about PostScript files.
 
  From the `Program Manager`, run the Registration Info Editor using
  `File `| `Run...` then type `regedit`.
@@ -1359,6 +1497,28 @@ W
  That's it!  Now when you double click on a PostScript file,
  the `File Manager` will run GSview.  When you drop a PostScript
  file on the `Print Manager`, GSview will print the file.
+
+ For Windows 95, the configuration is instead made using Windows
+ Explorer.
+
+ Start `Windows Explorer`.  Select `View `| `Options `.  Select the
+ `File Types` tab.  Select the `New Type` button.  
+ Enter the following fields:
+  Description of type = PostScript
+  Associated Extension = PS EPS
+ Press the `New` button, then enter
+  Action = open
+  Application used to perform action = c:\gsview\gsview32.exe
+ Press the `OK` button
+
+ Press the `New` button, then enter
+  Action = print
+  Application used to perform action = c:\gsview\gsview32.exe /p
+ Press the `OK` button
+
+ Press the `Close `button.
+
+ Press the `Close `button.
 E
 2Command line options
 ?Command line options
@@ -1434,7 +1594,7 @@ W
 P
   GVPM.EXE - A Ghostscript graphical interface
 E
-  Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+  Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   Portions Copyright (C) 1994, Timothy O. Theisen.  All rights reserved.
 
  This file is part of GSview.
@@ -1575,6 +1735,25 @@ W
  and is read-write.
 
  3. Disk is full.
+
+ `Problem:` Ghostscript under Win32s won't print anything.
+
+ Under Win32s, the 16 bit spooler functions are not available
+ and the 32 bit spooler functions are not implemented.
+ That is, Win32s is the worst of both worlds.
+ The printer output code in Aladdin Ghostscript 3.51 for Win32s 
+ attempts to write directly to a port.  
+ This works on some computers, but fails on others.  
+ If it doesn't work on your computer, you have two options:
+
+ 1. `Print To File`, then `Print File`.  GSview under Win32s can
+ write to the 16 bit spooler, using a 16 bit program.
+
+ 2. Try the mswinpr2 device.
+
+ Aladdin Ghostscript 3.53 starts the 16 bit program gs16spl.exe
+ to spool printer output.  It does not suffer from the problem
+ described above.
 E
 
  `Problem:` GSview says that a multipage PostScript file produced
@@ -1666,6 +1845,81 @@ W
  You must wait until Ghostscript is not busy before attempting to
  display another page.  Exit and then restart GSview.
 E
+2Whats new
+?What's new
+  ----------------------
+  Version 1.4 1996-01-02
+  ----------------------
+  All:
+   File was being opened twice if file was changed.
+   Should be used with Aladdin Ghostscript 3.53.
+  Win16:
+   Prevented GPF when running out of memory.
+   Reduced stack size and pipe buffer size to allow larger documents
+   to be displayed.  If only numeric page labels are used, 500 page
+   documents should be OK.
+  PM:
+   Requires emx 0.9b or later.
+   PDF viewing was broken when "Configure Ghostscript" was added.
+
+
+  ----------------------------
+  Version 1.33 beta 1995-11-30
+  ----------------------------
+  All:
+   Added PageOffset for printers.  See the Properties dialog box.
+   Add 'Edit Properties' dialog box to allow user to add, edit or delete
+   properties for a printer without having to hand edit the INI file.
+  Win:
+   Installation program now creates "GS Tools" program group and
+   adds File Manager associations for .ps and .eps to the registry.
+   
+
+  ----------------------------
+  Version 1.32 beta 1995-11-23
+  ----------------------------
+  All:
+   Installation programs added.
+  Win32s:
+   Uses new gsv16spl.exe to write to the 16-bit spooler from Win32s.
+  PM:
+   Fixed printing of non DSC documents (was broken when printer
+   dialog boxes were combined).
+
+  ----------------------------
+  Version 1.31 beta 1995-11-03
+  ----------------------------
+  This is an interim release, intended to fix some known problems
+  and add a few new features, but does not include the full DLL
+  implementation needed to work reliably under Windows 95/NT,
+  or paper size handling using level 2 setpagedevice.
+  It is intended for use with Aladdin Ghostscript 3.51.
+  All:
+   Still doesn't work with landscape PostScript that sets the
+   clipping path.
+   Combined printer dialog boxes.
+   Allow user supplied preview file in creation of DOS EPS file for both 
+   GSview "Edit | Add EPS Preview | User Supplied Preview" and EPSTOOL.
+   Added warning if EPS BoundingBox was entirely off the page.
+   Replace label of "%%Pages: () 1" with page number.
+   Changed "Ghostscript Command" into "Configure Ghostscript" which
+   has separate "Ghostscript EXE" and "Ghostscript Include Path".
+   Changed TIFF code to work on big-endian architectures, to allow
+   EPSTOOL to run under Solaris.
+   Directories src, gsgrab and epstool are now in ZIP files, since
+   most people won't want them unzipped.
+  PM:
+   Uses print queues instead of writing to ports.
+   It is now possible to use a Ghostscript path with embedded spaces.
+   Allow user to specify drawing method GpiDrawBits or WinDrawBitmap
+   to dodge display driver bugs.
+   Recover when last directory is invalid (usually no floppy in drive).
+  Win:
+   Added Ghostscript 3.51 to "Options | Ghostscript Version".  Selecting
+   GS 3.51 puts quotes around filenames in response files to allow embedded
+   spaces.  This won't work with GS 3.33.
+  Win32:
+   Uses print queues under Win95 and WinNT.
 2Internals
 ?Internals
 W

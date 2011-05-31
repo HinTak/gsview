@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,24 +18,30 @@
 /* epstool.c */
 #include "epstool.h"
 
+char szVersion[] = "0.71 alpha 1995-11-23";
+
 char iname[MAXSTR];
 char oname[MAXSTR];
+char upname[MAXSTR];
 char gsname[MAXSTR] = GSCOMMAND;
 char bmpname[MAXSTR];
+char devname[MAXSTR];
 char szScratch[] = "ep";
 char szAppName[] = "epstool";
-char szVersion[] = "0.2 alpha 1995-04-26";
 int resolution = 72;
 int page = 1;	/* default is page 1 */
 BOOL calc_bbox = FALSE;
 BOOL got_op = FALSE;
 BOOL debug = FALSE;
+BOOL quiet = FALSE;
 int op = 0;
 #define EXTRACTPS	1
 #define EXTRACTPRE	2
 #define INTERCHANGE	3
 #define TIFF4 		4
 #define TIFF5		5
+#define TIFFGS		6
+#define USER		7
 
 /* KLUDGE variables */
 PSDOC *doc;
@@ -71,10 +77,9 @@ main(int argc, char *argv[])
 {
 	if (scan_args(argc, argv))
 	   return 1;
-
-	if (calc_bbox && op!=INTERCHANGE) {
-	   fprintf(stderr, "Calculation of bbox only works for interchange preview\n");
-	}
+#if defined(__EMX__) || defined(MSDOS)
+	setmode(fileno(stdout), O_BINARY);
+#endif
 
 	strcpy(psfile.name, iname);
 	if ((psfile.file = fopen(psfile.name, READBIN)) == (FILE *)NULL) {
@@ -83,13 +88,15 @@ main(int argc, char *argv[])
 	}
 	doc = psscan(psfile.file);
 	if (doc == (PSDOC *)NULL) {
-	   fprintf(stderr, "File %s does not contain DSC comments\n", psfile.file);
+	   fprintf(stderr, "File %s does not contain DSC comments\n", psfile.name);
 	   fclose(psfile.file);
 	   return 1;
 	}
 
-	if (op==INTERCHANGE || op==TIFF4 || op==TIFF5)
+	if (op==INTERCHANGE || op==TIFF4 || op==TIFF5 || op==TIFFGS)
 	   return add_preview();
+	if (op==USER)
+	   return make_eps_user();
 	if (op==EXTRACTPS || op==EXTRACTPRE)
 	   return extract_section();
 
@@ -117,7 +124,15 @@ char tempname[MAXSTR];
 FILE *tempfile;
 FILE *bmpfile;
 char gscommand[MAXSTR+MAXSTR];
+char rspname[MAXSTR];
+FILE *rspfile;
 int width, height;
+int code = 0;
+	if ((op == TIFFGS) && calc_bbox) {
+	    calc_bbox = FALSE;
+	    fprintf(stderr, "Can't calculate Bounding Box when using GS TIFF driver\n");
+	    fprintf(stderr, "Using %%BoundingBox from EPS file\n");
+	}
 	if ( !calc_bbox &&
              ((doc->boundingbox[URX] == doc->boundingbox[LLX]) ||
 	      (doc->boundingbox[URY] == doc->boundingbox[LLY])) ) {
@@ -125,9 +140,9 @@ int width, height;
 	   return 1;
 	   /* if calc_bbox, this shouldn't be an error */
 	}
-	if (doc->numpages==0) {
-	    fprintf(stderr, "\nFile %s does not contain any pages\n", psfile.name);
-	    return 1;
+	if (!quiet && doc->numpages==0) {
+	    fprintf(stderr, "\nFile %s does not contain any pages.\n", psfile.name);
+	    fprintf(stderr, "Using the entire file and hoping the DSC comments are wrong.\n\n");
 	}
         if (doc->numpages > 1) {
 	    /* create temporary file to hold extracted page */
@@ -144,12 +159,12 @@ int width, height;
 	    /* scan new file */
 	    strcpy(psfile.name, ename);
 	    if ((psfile.file = fopen(psfile.name, READBIN)) == (FILE *)NULL) {
-	       fprintf(stderr, "Can't open %s\n", psfile.file);
+	       fprintf(stderr, "Can't open %s\n", psfile.name);
 	       return 1;
 	    }
 	    doc = psscan(psfile.file);
 	    if (doc == (PSDOC *)NULL) {
-	       fprintf(stderr, "File %s does not contain DSC comments\n", psfile.file);
+	       fprintf(stderr, "File %s does not contain DSC comments\n", psfile.name);
 	       fclose(psfile.file);
 	       return 1;
 	    }
@@ -160,9 +175,20 @@ int width, height;
 	    fprintf(stderr, "Couldn't open temporary file %s\n", tempname);
 	    return 1;
 	}
+	rspfile = gp_open_scratch_file(szScratch, rspname, WRITEBIN);
+	if (rspfile == (FILE *)NULL) {
+	    fprintf(stderr, "Couldn't open temporary response file %s\n", rspname);
+	    if (!debug)
+		unlink(tempname);
+	    return 1;
+	}
 	bmpfile = gp_open_scratch_file(szScratch, bmpname, WRITEBIN);
 	if (bmpfile == (FILE *)NULL) {
-	    fprintf(stderr, "Couldn't open temporary file %s\n", bmpname);
+	    fprintf(stderr, "Couldn't open temporary bitmap file %s\n", bmpname);
+	    if (!debug) {
+		unlink(tempname);
+		unlink(rspname);
+	    }
 	    return 1;
 	}
 	fclose(bmpfile);
@@ -199,36 +225,60 @@ int width, height;
 	}
 	fprintf(tempfile, "\nquit\n");
 	fclose(tempfile);
+	if (op != TIFFGS) {
 #ifdef UNIX
-#define DEVICE "pbmraw"
+	    strcpy(devname, "pbmraw");
 #else
-#define DEVICE "bmpmono"
+	    strcpy(devname, "bmpmono");
 #endif
-	sprintf(gscommand, "%s -dNOPAUSE -sDEVICE=%s -sOutputFile=%s -r%d -g%dx%d %s",
-	   gsname, DEVICE, bmpname, resolution, width, height, tempname);
-	fprintf(stderr,"%s\n", gscommand);
-	system(gscommand);
-	if (!load_bitmap()) {
-	    if (!debug) {
-	        unlink(bmpname);
-	        unlink(tempname);
-	    }
-	    fprintf(stderr, "no bitmap\n");
-	    return 1;
+        }
+#ifdef UNIX
+	sprintf(gscommand, "%s -dNOPAUSE -dQUIET -sDEVICE=%s -sOutputFile=\042%s\042 -r%d -g%dx%d %s",
+	   gsname, devname, bmpname, resolution, width, height, tempname);
+#else
+	sprintf(gscommand, "-dNOPAUSE\n-dQUIET\n-sDEVICE=%s\n-sOutputFile=\042%s\042\n-r%d\n-g%dx%d\n\042%s\042",
+	   devname, bmpname, resolution, width, height, tempname);
+	if (!quiet) {
+	    fputs(gscommand, stderr);
+	    fputs("\n", stderr);
 	}
+	fputs(gscommand, rspfile);
+	fclose(rspfile);
+	sprintf(gscommand, "%s @%s", gsname, rspname);
+#endif
+	if (!quiet)
+	    fprintf(stderr,"%s\n", gscommand);
+	system(gscommand);
 	if (!debug) {
-	    unlink(bmpname);
+	    unlink(rspname);
 	    unlink(tempname);
 	}
-	/* now create new file with preview */
-	if (op == INTERCHANGE)
-	    make_eps_interchange(calc_bbox);
-	else if (op == TIFF4)
-	    make_eps_tiff(IDM_MAKEEPST4);
-	else if (op == TIFF5)
-	    make_eps_tiff(IDM_MAKEEPST);
-	else
-	    fprintf(stderr, "Unknown operation %d\n", op);
+
+	if (op == TIFFGS) {
+	    strcpy(upname, bmpname);
+	    code = make_eps_user();	/* create user TIFF preview */
+	    if (!debug)
+		unlink(bmpname);
+	}
+	else {
+	    if (!load_bitmap()) {
+		if (!debug)
+		    unlink(bmpname);
+		fprintf(stderr, "no bitmap\n");
+		return 1;
+	    }
+	    if (!debug)
+		unlink(bmpname);
+	    /* now create new file with preview */
+	    if (op == INTERCHANGE)
+		code = make_eps_interchange(calc_bbox);
+	    else if (op == TIFF4)
+		code = make_eps_tiff(IDM_MAKEEPST4, calc_bbox);
+	    else if (op == TIFF5)
+		code = make_eps_tiff(IDM_MAKEEPST, calc_bbox);
+	    else
+		fprintf(stderr, "Unknown operation %d\n", op);
+	}
 
 	if (*ename) {
 	    fclose(psfile.file);
@@ -236,8 +286,10 @@ int width, height;
 	        unlink(ename);	/* remove temporary file */
 	}
 
-	fprintf(stderr, "Add_preview was successful\n");
-	return 0;
+	if (!code && !quiet)
+	    fprintf(stderr, "Add_preview was successful\n");
+
+	return code;
 }
 
 int 
@@ -257,41 +309,26 @@ int count;
 		  return 1;
 		case 'o':
 		  if (argp[2])
-		    strcpy(oname, argp+2);
+		      strcpy(oname, argp+2);
 		  else {
-		    count++;
-		    if (count >= argc) {
 		      fprintf(stderr,"Missing output filename for -o\n");
 		      return 1;
-		    }
-		    argp=argv[count];
-		    strcpy(oname, argp);
 		  }
 		  break;
 		case 'n':
 		  if (argp[2])
-		    page = atoi(argp+2);
+		      page = atoi(argp+2);
 		  else {
-		    count++;
-		    if (count >= argc) {
 		      fprintf(stderr,"Missing page number for -n\n");
-		      return 1;
-		    }
-		    argp=argv[count];
-		    page = atoi(argp);
+		      page = atoi(argp);
 		  }
 		  break;
 		case 'r':
 		  if (argp[2])
-		    resolution = atoi(argp+2);
+		      resolution = atoi(argp+2);
 		  else {
-		    count++;
-		    if (count >= argc) {
 		      fprintf(stderr,"Missing resolution for -r\n");
 		      return 1;
-		    }
-		    argp=argv[count];
-		    resolution = atoi(argp);
 		  }
 		  break;
 		case 'b':
@@ -300,17 +337,15 @@ int count;
 		case 'd':
 		  debug = !debug;
 		  break;
+		case 'q':
+		  quiet = !quiet;
+		  break;
 		case 'g':
 		  if (argp[2])
 		    strcpy(gsname, argp+2);
 		  else {
-		    count++;
-		    if (count >= argc) {
 		      fprintf(stderr,"Missing Ghostscript command for -g\n");
 		      return 1;
-		    }
-		    argp=argv[count];
-		    strcpy(gsname, argp);
 		  }
 		  break;
 		case 't':
@@ -326,8 +361,14 @@ int count;
 		    op = TIFF5;
 		    got_op = TRUE;
 		  }
+		  else if (argp[2]) {
+		    op = TIFFGS;
+		    got_op = TRUE;
+		    strcpy(devname, argp+2);
+		  }
 		  else {
-		    fprintf(stderr,"Unknown option %s\n", argp);
+		      fprintf(stderr,"Missing TIFF type or device name for -t\n");
+		      return 1;
 		  }
 		  break;
 		case 'i':
@@ -337,6 +378,20 @@ int count;
 		  }
 		  op = INTERCHANGE;
 		  got_op = TRUE;
+		  break;
+		case 'u':
+		  if (got_op) {
+		    fprintf(stderr,"Can't select two operations");
+		    return 1;
+		  }
+		  op = USER;
+		  got_op = TRUE;
+		  if (argp[2])
+		      strcpy(upname, argp+2);
+		  else {
+		      fprintf(stderr,"Missing input filename for -u\n");
+		      return 1;
+		  }
 		  break;
 		case 'p':
 		  if (got_op) {
@@ -384,26 +439,31 @@ void
 do_help(void)
 {
    fprintf(stderr,"Usage:  epstool [option] operation filename\n");
+   fprintf(stderr,"  Copyright (C) 1995 Russell Lang.  All rights reserved.\n");
    fprintf(stderr,"  Version: %s\n", szVersion);
    fprintf(stderr,"  Options:\n");
    fprintf(stderr,"     -b             Calculate BoundingBox from image\n");
-   fprintf(stderr,"     -g command     Ghostscript command\n");
-   fprintf(stderr,"     -n number      Page number to extract\n");
-   fprintf(stderr,"     -o filename    Output filename\n");
-   fprintf(stderr,"     -r number      Preview resolution in dpi\n");
+   fprintf(stderr,"     -gcommand      Ghostscript command\n");
+   fprintf(stderr,"     -nnumber       Page number to extract\n");
+   fprintf(stderr,"     -ofilename     Output filename\n");
+   fprintf(stderr,"     -q             Quiet (no messages)\n");
+   fprintf(stderr,"     -rnumber       Preview resolution in dpi\n");
    fprintf(stderr,"  Operations: (one only)\n");
-   fprintf(stderr,"     -i             Add Interchange preview (EPSI)\n");
-   fprintf(stderr,"     -t4            Add TIFF4 preview       (DOS EPS)\n");
-   fprintf(stderr,"     -t5            Add TIFF5 preview       (DOS EPS)\n");
-   fprintf(stderr,"     -p             Extract PostScript      (DOS EPS)\n");
-   fprintf(stderr,"     -v             Extract Preview         (DOS EPS)\n");
+   fprintf(stderr,"     -i             Add Interchange preview   (EPSI)\n");
+   fprintf(stderr,"     -t4            Add TIFF4 preview         (DOS EPS)\n");
+   fprintf(stderr,"     -t5            Add TIFF5 preview         (DOS EPS)\n");
+   fprintf(stderr,"     -ttiffg3       Add GS TIFF preview       (DOS EPS)\n");
+   fprintf(stderr,"     -ufilename     Add user supplied preview (DOS EPS)\n");
+   fprintf(stderr,"     -p             Extract PostScript        (DOS EPS)\n");
+   fprintf(stderr,"     -v             Extract Preview           (DOS EPS)\n");
 }
 
-char *err_msgs[] = {"No preview in input file", ""};
+char *err_msgs[] = {"", "No preview in input file", "Preview file is not TIFF or Windows Metafile", ""};
+
 void 
 gserror(UINT id, char *str, UINT icon, int sound)
 {
-	fprintf(stderr, "%s %s\n", err_msgs[id], str);
+	fprintf(stderr, "%s %s\n", err_msgs[id], str ? str : "");
 }
 
 /* Create and open a scratch file with a given name prefix. */
@@ -473,10 +533,11 @@ read_file(char *fname)
     fprintf(stderr, "File %s is empty\n", fname);
   }
 #ifdef MSDOS	/* I hate segmented architectures */
-  if ( (base = farmalloc(length)) == (char *)NULL ) {
+  if ( (base = farmalloc(length)) == (char *)NULL )
 #else
-  if ( (base = malloc(length)) == (char *)NULL ) {
+  if ( (base = malloc(length)) == (char *)NULL )
 #endif
+  {
     fprintf(stderr, "Can't malloc memory to hold file %s\n", fname);
     fclose(f);
     return NULL;

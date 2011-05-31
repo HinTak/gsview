@@ -18,9 +18,8 @@
 # EPSTOOL
 
 # Edit COMPBASE and WIN32 as required
-#COMPBASE = d:\bc4
-COMPBASE = g:\utility\bc4
-# WIN32=1 for Win32s version
+COMPBASE = d:\bc45
+# WIN32=1 for Win32 version (not supported yet)
 WIN32=0
 
 # Shouldn't need editing below here
@@ -38,7 +37,7 @@ WINEXT=
 CC = bcc
 CCAUX = bcc
 MODEL=l
-CFLAGS=-v -m$(MODEL) -h -w -DMSDOS -DEPSTOOL -I$(INCDIR)
+CFLAGS=-v -m$(MODEL) -h -w -DMSDOS -DEPSTOOL -I$(INCDIR) -I..\src
 !endif
 OBJS=epstool.obj ps.obj gvceps.obj
 
@@ -61,8 +60,12 @@ $(LIBDIR)\c$(MODEL)
 epstool.obj: epstool.c epstool.h ../src/ps.h ../src/gvceps.c
 
 ps.obj: ../src/ps.c epstool.h ../src/ps.h ../src/gvceps.c
-	$(COMPDIR)\$(CC) -c $(CFLAGS) {../src/$< }
+	$(COMPDIR)\$(CC) -c $(CFLAGS) ../src/ps.c
 
 gvceps.obj: ../src/gvceps.c epstool.h ../src/ps.h ../src/gvceps.c
-	$(COMPDIR)\$(CC) -c $(CFLAGS) {../src/$< }
+	$(COMPDIR)\$(CC) -c $(CFLAGS) ../src/gvceps.c
 
+clean:
+	-del epstool.obj
+	-del ps.obj
+	-del gvceps.obj

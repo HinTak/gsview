@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -17,60 +17,141 @@
 
 /* epstool.doc */
 
-1994-03-24
+1995-10-20
+
+EPSTOOL - Create or extract preview bitmaps in EPS files.
 
 epstool is not yet finished.
-
 The documentation below is not complete and may be incorrect.
 
-Works on little-endian machines (Intel).
-May work on big-endian (Sun, Motorola), but has not had much testing.
-  In particular, I haven't tested the TIFF output.
+EPSTOOL.EXE is a combined OS/2 and MS-DOS executable.
+For OS/2 or MS-DOS you will need
+    ftp://ftp-os2.nmsu.edu/os2/unix/emx09a/emxrt.zip
+For a DOS Window under Windows 3.1 you will need
+    ftp://ftp-os2.nmsu.edu/os2/unix/emx09a/rsxwin2a.zip
 
-Purpose: Add EPSI or DOS EPS previews.
-         Extract postscript from DOS EPS files.
-
-- To work under OS/2, Unix and possibly MS-DOS.
+Features:
+- Add EPSI or DOS EPS previews.
+- Extract postscript from DOS EPS files.
 - Uses Ghostscript to create preview bitmaps.
-- Scan bmp file to find bounding box.
-- Create TIFF or Interchange from part of BMP file.
+- Scan a bitmap created by Ghostscript to find bounding box.
+- Create TIFF or Interchange from part of a bitmap created by Ghostscript.
 - output to stdout or file.
-- input must be from file.
+- input must be from a file.
+- works under OS/2, Unix and MS-DOS.
+- works on little-endian machines (Intel) or big endian 
+  (Sun Sparc, Motorola) machines.
 - Options:
    input file,                 (on command line)
-	DONE
-   output file,                -o filename  or -ofilename
-	Half done.  Need to put stdout into binary mode.
-   page number,                -n pagenumber
-	DONE
-   resolution,                 -r dpi
-	DONE
+   output file,                -ofilename
+   page number,                -npagenumber
+   resolution,                 -rdpi  (default 72)
    calculate bounding box,     -b
-	no support at all
-   gs command,                 -gcommand or -g command
-	DONE
+   gs command,                 -gcommand
+   debug mode,                 -d  (leaves temporary files)
+   non verbose mode,           -q  (no messages unlesss error occurs)
+
 - Operations:  
    Add TIFF 4,                  -t4 or -t
    Add TIFF 5,                  -t5
+   Add TIFF using GS device     -tdevice
    Add Interchange,             -i
-	Need to extract part of bitmap
+   Add user supplied preview,	-ufilename
    Extract PostScript,          -p
-	DONE
    Extract Preview,             -v
-	DONE
 
 On-line help says:
 Usage:  epstool [option] operation filename
   Options:
      -b             Calculate BoundingBox from image
-     -g command     Ghostscript command
-     -n number      Page number to extract
-     -o filename    Output filename
-     -r number      Preview resolution in dpi
+     -gcommand      Ghostscript command
+     -nnumber       Page number to extract
+     -ofilename     Output filename
+     -q             Quiet (no messages)
+     -rnumber       Preview resolution in dpi
   Operations: (one only)
-     -i             Add Interchange preview (EPSI)
-     -t4            Add TIFF4 preview       (DOS EPS)
-     -t5            Add TIFF5 preview       (DOS EPS)
-     -p             Extract PostScript      (DOS EPS)
-     -v             Extract Preview         (DOS EPS)
+     -i             Add Interchange preview   (EPSI)
+     -t4            Add TIFF4 preview         (DOS EPS)
+     -t5            Add TIFF5 preview         (DOS EPS)
+     -ttiffg3       Add GS TIFF preview       (DOS EPS)
+     -ufilename     Add user supplied preview (DOS EPS)
+     -p             Extract PostScript        (DOS EPS)
+     -v             Extract Preview           (DOS EPS)
+
+
+=========
+Examples:
+=========
+
+Create EPS file tiger.eps with TIFF (G3 Fax) preview
+  epstool -ttiffg3 -g"gsos2 -Id:\gs;d:\psfonts" -otiger.eps tiger.ps
+Any GS TIFF device can be used, e.g. -ttiffg4, -ttiffpack
+
+Extract TIFF preview from tiger.eps
+  epstool -v -otiger.tif tiger.eps
+
+EPS file has incorrect %%BoundingBox.
+Add TIFF4 preview and calculate %%BoundingBox from bitmap.
+  epstool -b -t4 -g"gsos2 -Id:\gs;d:\psfonts" -ogolfer.eps golfer.ps
+
+Adjust the BoundingBox of an existing EPS file, but don't add a preview:
+  epstool -b -t4 -otemp.eps existing.eps
+  epstool -p -oexisting.eps temp.eps
+  del temp.eps
+
+Add user supplied Windows Metafile to EPS file.
+Typically used when an application can export EPS and WMF separately
+but can't export EPS with WMF preview.
+  epstool -ulogo.wmf -ologo2.eps logo.eps
+
+
+=====
+Notes
+=====
+Under OS/2 or MS-DOS, epstool requires Ghostscript 3.51 or later.
+If you have command line length problems, try setting the Ghostscript
+include path using the GS_LIB environment variable instead of using
+-g"c:\gs3.51\gsos2.exe -Ic:\gs3.51;c:\gs3.51\fonts;c:\psfonts"
+
+If running under MS-DOS, you can use gsos2.exe provided you don't
+use the os2pm device.
+
+The "-b   Calculate BoundingBox from image" option works by scanning
+a bitmap returned by Ghostscript.  This will only work for the
+operations -i, -t4 and -t5.  It does not work with -ttiffg3 or 
+-ufilename. -ttiff3 does not return a bitmap in a format understood
+by epstool.  -ufilename does not even use Ghostscript.
+
+When adding a WMF preview to an EPS file using -ufilename, the
+placeable metafile header is removed from the metafile as it is put 
+into the EPS file.
+When extracting a WMF preview from an EPS file, a placeable metafile
+header is created from the EPS BoundingBox information.  
+This placeable metafile header assumes that the WMF has it's origin 
+at (0,0), which might not be correct.
+
+================
+Revision History
+================
+0.7 alpha 1995-10-20
+  Fixed a few error messages.
+  Use @file to reduce Ghostscript command line length under MS-DOS and OS/2.
+  Added -q option to GSview and -dQUIET option to Ghostscript command line 
+  to allow EPS files to be written to stdout.
+
+0.6 alpha 1995-10-12
+  Delete temporary bmp file.
+  Add user supplied preview to a DOS EPS file (which already had a
+  preview) was wrong.
+
+0.5 alpha 1995-09-27
+  Put stdout into binary mode.
+  Write placeable WMF header correctly on 32bit and big-endian machines.
+
+0.4 alpha 1995-09-15
+  Remove placeable WMF header when adding to EPS file, add placeable
+  WMF header when extracting from EPS file.
+
+0.3 alpha 1995-09-14
+  First release separate from GSview.
 

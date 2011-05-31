@@ -1,0 +1,104 @@
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+  
+  This file is part of GSview.
+  
+  This program is distributed with NO WARRANTY OF ANY KIND.  No author
+  or distributor accepts any responsibility for the consequences of using it,
+  or for whether it serves any particular purpose or works at all, unless he
+  or she says so in writing.  Refer to the GSview Free Public Licence 
+  (the "Licence") for full details.
+  
+  Every copy of GSview must include a copy of the Licence, normally in a 
+  plain ASCII text file named LICENCE.  The Licence grants you the right 
+  to copy, modify and redistribute GSview, but only under certain conditions 
+  described in the Licence.  Among other things, the Licence requires that 
+  the copyright notice and this notice be preserved on all copies.
+*/
+/* os2setup.rc */
+/* Resources for OS/2 installation program */
+
+#include <os2.h>
+#include "setup.h"
+
+#ifndef ES_ANY	/* emx08g doesn't define this */
+#define ES_ANY 0x00000000L
+#endif
+
+/* POINTER ID_GSVIEW "gvpm.ico" */
+
+DLGTEMPLATE IDD_INTRO 
+BEGIN
+	DIALOG "GSview Install - Introduction", IDD_INTRO, 18, 15, 231, 95, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		DEFPUSHBUTTON "OK", DID_OK, 6, 4, 51, 14
+		PUSHBUTTON "Cancel", DID_CANCEL, 60, 4, 51, 14
+		CONTROL "Installation program for:\012    GSview 1.4\012    Aladdin Ghostscript 3.53", IDD_INTRO_T1, 6, 61, 200, 28, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_WORDBREAK | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "Before continuing installation, make sure you have the 4 disks listed in README.GV.", IDD_INTRO_T2, 6, 28, 213, 20, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_WORDBREAK | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+	END
+
+END
+
+
+DLGTEMPLATE IDD_COPYRIGHT 
+BEGIN
+	DIALOG "GSview Install - Copyright", IDD_COPYRIGHT, 12, 12, 260, 124, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		DEFPUSHBUTTON "OK", DID_OK, 6, 4, 51, 14
+		PUSHBUTTON "Cancel", DID_CANCEL, 60, 4, 51, 14
+		CONTROL "GSview and Aladdin Ghostscript are separate programs.  They are owned by separate entities.", IDD_COPYRIGHT_T1, 8, 102, 236, 18, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_WORDBREAK | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "GSview:\012  Copyright (C) 1993-1995 Russell Lang.\012  All rights reserved.\012  See the file LICENCE for more details.", IDD_COPYRIGHT_T2, 8, 60, 240, 37, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_WORDBREAK | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "Aladdin Ghostscript:\012  Copyright (C) 1994, 1995 Aladdin Enterprises,\012  Menlo Park, California, U.S.A.  All rights reserved.\012  See the file PUBLIC for more details.", IDD_COPYRIGHT_T3, 8, 24, 240, 33, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_WORDBREAK | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+	END
+
+END
+
+
+DLGTEMPLATE IDD_DIR 
+BEGIN
+	DIALOG "GSview Install - Directory", IDD_DIR, 12, 12, 292, 113, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		DEFPUSHBUTTON "OK", DID_OK, 6, 4, 51, 14
+		PUSHBUTTON "Cancel", DID_CANCEL, 60, 4, 51, 14
+		CONTROL "The base directory for GSview and Ghostscript is shown below.\012Within the base directory, GSview will be installed into the subdirectory 'gsview' and Ghostscript will be installed into the subdirectory 'gs3.53'.\012Change the base directory if you wish.", IDD_DIR_TEXT, 12, 51, 267, 51, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_WORDBREAK | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", ID_ANSWER, 12, 32, 264, 12, WC_ENTRYFIELD, ES_LEFT | ES_AUTOSCROLL | ES_MARGIN | ES_ANY | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+	END
+
+END
+
+
+DLGTEMPLATE IDD_UNZIP 
+BEGIN
+	DIALOG "GSview Install", IDD_UNZIP, 12, 12, 110, 48, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		DEFPUSHBUTTON "Cancel", DID_CANCEL, 6, 4, 51, 14
+		CONTROL "Unzipping files", IDD_UNZIP_TEXT, 8, 25, 86, 13, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_WORDBREAK | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+	END
+
+END
+
+DLGTEMPLATE IDD_FILE 
+BEGIN
+	DIALOG "GSview Install - Missing ZIP file", IDD_FILE, 12, 12, 279, 61, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		DEFPUSHBUTTON "OK", DID_OK, 6, 4, 51, 14
+		PUSHBUTTON "Cancel", DID_CANCEL, 60, 4, 51, 14
+		CONTROL "Can't find ZIP file.  Insert disk with the file below.", IDD_FILE_TEXT, 9, 42, 267, 10, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_WORDBREAK | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+		CONTROL "", ID_ANSWER, 8, 26, 264, 12, WC_ENTRYFIELD, ES_LEFT | ES_AUTOSCROLL | ES_MARGIN | ES_ANY | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+	END
+
+END
+
+
+
+DLGTEMPLATE IDD_CONFIG 
+BEGIN
+	DIALOG "GSview Install - Config", IDD_CONFIG, 12, 12, 215, 49, WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+	BEGIN
+		DEFPUSHBUTTON "OK", DID_OK, 6, 4, 51, 14
+		PUSHBUTTON "Don't update config.sys", DID_CANCEL, 60, 4, 121, 14
+		CONTROL "Some changes will be made to your config.sys.\012Your old config.sys will be renamed config.gs.", IDD_CONFIG_TEXT, 8, 24, 198, 20, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_WORDBREAK | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+	END
+
+END
+
+

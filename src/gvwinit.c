@@ -89,6 +89,10 @@ int length = 64;
 	if ((LOBYTE(LOWORD(version))<<8) + HIBYTE(LOWORD(version)) >= 0x400) {
 	    is_win95 = TRUE;
 	}
+	if (!(is_win95 || is_winnt))
+	    szSpoolPrefix[0] = '\0';;	/* no spooler in Win32s */
+#else
+	szSpoolPrefix[0] = '\0';	/* no spooler prefix needed for Win16 */
 #endif
 
 	/* get path to EXE */
@@ -128,19 +132,14 @@ int length = 64;
 	wndclass.lpszClassName = szClassName;
 	RegisterClass(&wndclass);
 
-	strcpy(option.gscommand, szExePath);
-	strcat(option.gscommand, DEFAULT_GSCOMMAND);
-	strcat(option.gscommand, " -I");
-	strcat(option.gscommand, szExePath);
-	strcpy(option.gscommand+strlen(option.gscommand)-1, ";");
-	strcat(option.gscommand, szExePath);
-	strcat(option.gscommand, "fonts;");
-	strcat(option.gscommand, "c:\\psfonts");
+	strcpy(option.gsexe, install_default(INSTALL_EXE));
+	strcpy(option.gsinclude, install_default(INSTALL_INCLUDE));
+	strcpy(option.gsother, install_default(INSTALL_OTHER));
 	option.img_origin.x = CW_USEDEFAULT;
 	option.img_origin.y = CW_USEDEFAULT;
 	option.img_size.x = CW_USEDEFAULT;
 	option.img_size.y = CW_USEDEFAULT;
-	option.gsversion = IDM_GS3;
+	option.gsversion = IDM_GS351;
 	option.unit = IDM_UNITPT;
 	option.quick = TRUE;
 	option.settings = TRUE;
@@ -258,10 +257,11 @@ int length = 64;
 	        chdir(filedir);
 	}
 	play_sound(SOUND_START);
+  	info_wait(IDS_NOWAIT);
         if (changed_version) {
 	    message_box("The installed version of GSview has changed.  \
 Please read the Installation help and then correctly set\r\
-Options | Ghostscript Command", 0);
+Options | Configure Ghostscript", 0);
 	    load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
 	    get_help();
         }
@@ -361,9 +361,7 @@ HFONT old_hfont;
 	option.media = i;
 	strncpy(option.medianame,thismedia,sizeof(option.medianame));
 	CheckMenuItem(hmenu, option.unit, MF_BYCOMMAND | MF_CHECKED);
-#if !defined(__WIN32__) && defined(GS261)
 	check_menu_item(IDM_GSVERMENU, option.gsversion, TRUE);
-#endif
 	CheckMenuItem(hmenu, option.media, MF_BYCOMMAND | MF_CHECKED);
 	CheckMenuItem(hmenu, option.orientation, MF_BYCOMMAND | MF_CHECKED);
 	CheckMenuItem(hmenu, gsview_depth_to_menu(option.depth), MF_BYCOMMAND | MF_CHECKED);
@@ -425,6 +423,37 @@ HFONT old_hfont;
 	}
 	FreeResource(hglobal);
 }
+
+char *
+install_default(int id)
+{
+static char defstr[MAXSTR];
+    switch(id) {
+	case INSTALL_EXE:
+	    strcpy(defstr, szExePath);
+#ifdef __WIN32__
+	    strcat(defstr, "GSWIN32.EXE");
+#else
+	    strcat(defstr, "GSWIN.EXE");
+#endif
+	    break;
+	case INSTALL_INCLUDE:
+	    strcpy(defstr, szExePath);
+	    strcat(defstr, ";");
+	    strcat(defstr, szExePath);
+	    strcat(defstr, "fonts;");
+	    strcat(defstr, "c:\\psfonts");
+	    break;
+	case INSTALL_OTHER:
+	    defstr[0] = '\0';
+	    break;
+	default:
+	    defstr[0] = '\0';
+	    break;
+    }
+    return defstr;
+}
+
 
 void
 show_buttons(void)

@@ -21,6 +21,9 @@
 #define INCL_DOS
 #define INCL_WIN
 #define INCL_GPI
+#define INCL_SPL
+#define INCL_SPLDOSPRINT
+#define INCL_SPLERRORS
 #define INCL_DOSERRORS
 #include <os2.h>
 #include <stdio.h>
@@ -85,6 +88,9 @@ typedef unsigned long DWORD;
 #ifndef max
 #define max(x,y)  ( (x) > (y) ? (x) : (y) )
 #endif
+
+#include "gvceps.h"
+#include "gvcprf.h"
 
 /* program details */
 typedef struct tagPROG {
@@ -158,8 +164,12 @@ typedef struct tagPSFILE {
 
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
-	char	gscommand[MAXSTR];
+	/* char	gscommand[MAXSTR]; */ /* no longer used */
+	char	gsexe[MAXSTR];
+	char	gsinclude[MAXSTR];
+	char	gsother[MAXSTR];
 	int	gsversion;
+	int	drawmethod;
 	POINTL	img_origin;
 	POINTL	img_size;
 	BOOL	img_max;
@@ -192,6 +202,7 @@ typedef struct tagOPTIONS {
 } OPTIONS;
 
 typedef struct tagDISPLAY {
+	char	optname[MAXSTR]; /* file storing command line options */
 	BOOL	abort;
 	BOOL	busy;
 	ULONG	id;
@@ -218,34 +229,10 @@ typedef struct tagDISPLAY {
 
 typedef struct tagPRINTER {
 	PROG	prog;		/* Ghostscript program doing printing */
-	char	cfname[MAXSTR]; /* file storing command line options */
-	char	fname[MAXSTR];	/* file storing temporary postscript */
+	char	optname[MAXSTR]; /* file storing command line options */
+	char	psname[MAXSTR];	/* file storing temporary postscript */
 	ULONG	tid;		/* Thread ID which waits for GS to exit */
 } PRINTER;
-
-struct prfentry {
-	char *name;
-	char *value;
-	struct prfentry *next;
-};
-
-struct prfsection {
-	char *name;
-	struct prfentry *entry;
-	struct prfsection *next;
-};
-
-struct prop_item_s {
-	char	name[MAXSTR];
-	char	value[MAXSTR];
-};
-
-typedef struct tagPROFILE {
-	char *name;
-	FILE *file;
-	BOOL changed;
-	struct prfsection *section;
-} PROFILE;
 
 /* button bar */
 struct button {
@@ -300,6 +287,7 @@ extern char szIniFile[MAXSTR];
 extern char szMMini[MAXSTR];
 extern char previous_filename[MAXSTR];	/* to remember name between file dlg boxes */
 extern const char szScratch[];	/* temporary filename prefix */
+extern char szSpoolPrefix[];	/* usually \\spool\ */
 extern ULONG os_version;
 extern HAB hab;
 extern HWND hwnd_frame;
@@ -350,6 +338,7 @@ BOOL get_cursorpos(float *x, float *y);
 /* in gvpinit.c */
 APIRET gsview_init(int argc, char *argv[]);
 void show_buttons(void);
+char * install_default(int id);
 
 /* in gvcmisc.c */
 void error_message(char *str);
@@ -367,11 +356,11 @@ int get_menu_string(int menuid, int itemid, char *str, int len);
 int load_string(int id, char *str, int len);
 void play_system_sound(char *id);
 void play_sound(int i);
-void info_wait(BOOL flag);
+void info_wait(int id);
 void send_prolog(FILE *f, int resource);
 void profile_create_section(PROFILE *prf, char *section, int id);
-int _chdir(char *dirname);
-char * _getcwd(char *dirname, int size);
+int gs_chdir(char *dirname);
+char * gs_getcwd(char *dirname, int size);
 
 /* in gvcdisp.c */
 void transform_cursorpos(float *x, float *y);
@@ -437,17 +426,8 @@ void change_sounds(void);
 void gs_showmess(void);
 int gs_addmess(char *str, int count);
 
-/* in gvcprf.c */
-PROFILE * profile_open(char *filename);
-int profile_read_string(PROFILE *prf, char *section, char *entry, char *def, char *buffer, int len);
-BOOL profile_write_string(PROFILE *prf, char *section, char *entry, char *value);
-BOOL profile_close(PROFILE *prf);
-
 /* in gvceps.c */
-void extract_doseps(int);
 void make_eps_metafile(void);
-void make_eps_tiff(int);
-void make_eps_interchange(BOOL calc_bbox);
 void ps_to_eps(void);
 void paste_to_file(void);
 void clip_convert(void);
@@ -462,7 +442,11 @@ void gsview_extract(void);
 struct prop_item_s * get_properties(char *device);
 BOOL gsview_cprint(BOOL to_file, char *cfname, char *optfname);
 
-/* in gvwprn.c */
+/* in gvpprn.c */
+#ifndef NERR_BufTooSmall
+#define NERR_BufTooSmall 2123	/* for SplEnumQueue */
+#endif
+BOOL get_portname(char *portname, char *port);
 int gp_printfile(char *filename, char *port);
 void gsview_print(BOOL);
 extern char not_defined[];

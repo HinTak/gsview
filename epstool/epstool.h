@@ -22,6 +22,10 @@
 #include <ctype.h>
 #include <time.h>
 
+#if defined(HAVE_UNISTD_H)
+#include <unistd.h>
+#endif
+
 #ifdef __EMX__
 #define GSCOMMAND "gsos2"
 #define BYTE unsigned char	/* 8 bits unsigned */
@@ -37,6 +41,9 @@
 #define MAXSTR 256
 #define DIRSEP '\\'
 #define EOLSTR "\r\n"
+#define PACKED
+#include <io.h>
+#include <fcntl.h>
 #endif
 
 #ifdef MSDOS
@@ -54,11 +61,14 @@
 #define MAXSTR 126
 #define DIRSEP '\\'
 #define EOLSTR "\r\n"
+#define PACKED
 #include <alloc.h>
 #include <dir.h>
+#include <io.h>
+#include <fcntl.h>
 #endif
 
-#ifdef UNIX
+#if defined(UNIX) || defined(__UNIX) || defined(__unix)
 #define GSCOMMAND "gs"
 #define BYTE unsigned char
 #define WORD  unsigned short
@@ -73,7 +83,12 @@
 #define MAXSTR 256
 #define DIRSEP '/'
 #define EOLSTR "\n"
-char *getcwd(char *, int);
+#define PACKED __attribute__ ((packed))
+#if defined(__NeXT__)
+extern char *getwd (char *pathname);
+#define getcwd(s,n) getwd(s)
+#endif
+/* char *getcwd(char *, int); */
 #define stricmp(s1, s2) strcasecmp(s1, s2)
 #ifndef SEEK_SET
 #define SEEK_SET 0
@@ -95,6 +110,7 @@ char *getcwd(char *, int);
 #endif
 
 extern char oname[MAXSTR];
+extern char upname[MAXSTR];
 extern char szScratch[];
 extern char szAppName[];
 
@@ -124,6 +140,7 @@ typedef struct tagOPTION {
 
 FILE * gp_open_scratch_file(const char *prefix, char *fname, const char *mode);
 void gserror(UINT id, char *str, UINT icon, int sound);
+void pserror(char *str);
 char * _getcwd(char *dirname, int size);
 void play_sound(int i);
 
@@ -142,3 +159,4 @@ extern OPTION option;
 
 /* error messages */
 #define IDS_NOPREVIEW 1
+#define IDS_EPSUSERINVALID 2

@@ -83,23 +83,25 @@ play_sound(int num)
 
 /* display or remove 'wait' message */
 void
-info_wait(BOOL wait)
+info_wait(int id)
 {
 HWND hwnd;
 POINT pt;
-	waiting = wait;
+	if (id)
+	    load_string(id, szWait, sizeof(szWait));  /* revert to generic text */
+	else
+	    szWait[0] = '\0';
+
 	InvalidateRect(hwndimg, (LPRECT)&info_rect, FALSE);
 	UpdateWindow(hwndimg);
 
-	if (waiting) {
+	if (szWait[0] != '\0') {
             GetCursorPos(&pt);
 	    hwnd = WindowFromPoint(pt);
 	    if ((hwnd == hwndimg) || IsChild(hwndimg,hwnd))
 		SetCursor(hcWait);
 	}
 	else {
-	    /* revert to generic text */
-	    load_string(IDS_WAIT, szWait, sizeof(szWait));
 	    /* set cursor to that of active window */
 	    hwnd = GetFocus();
 	    if ( (hwndimgchild && IsWindow(hwndimgchild))
@@ -115,7 +117,7 @@ POINT pt;
 
 /* change directory and drive */
 int
-_chdir(char *dirname)
+gs_chdir(char *dirname)
 {
 #ifdef __WIN32__
 	SetCurrentDirectory(dirname);
@@ -129,7 +131,7 @@ _chdir(char *dirname)
 }
 
 char * 
-_getcwd(char *dirname, int size)
+gs_getcwd(char *dirname, int size)
 {
 #ifdef __WIN32__
 	GetCurrentDirectory(size, dirname);

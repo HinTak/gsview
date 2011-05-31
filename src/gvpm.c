@@ -35,6 +35,7 @@ char szIniFile[MAXSTR];
 char szMMini[MAXSTR];
 char previous_filename[MAXSTR];
 const char szScratch[] = "gv";	/* temporary filename prefix */
+char szSpoolPrefix[] = "\\\\spool\\";
 HAB hab;		/* Anchor Block */
 HELPINIT hi_help;
 ULONG os_version;
@@ -52,7 +53,6 @@ POINTL info_file;
 POINTL info_page;
 POINTL scroll_pos;
 RECTL info_coord;
-BOOL waiting;
 TID queue_tid;
 TID term_tid;
 #define SB_TOP 20
@@ -284,12 +284,12 @@ exit_func(void)
 	if (printer.prog.valid) {
 	    /* clean up after printer */
 	    stop_pgm(&printer.prog);
-	    if ((printer.cfname[0] != '\0') && !debug)
-	        unlink(printer.cfname);
-	    printer.cfname[0] = '\0';
-	    if ((printer.fname[0] != '\0') && !debug)
-	        unlink(printer.fname);
-	    printer.fname[0] = '\0';
+	    if ((printer.optname[0] != '\0') && !debug)
+	        unlink(printer.optname);
+	    printer.optname[0] = '\0';
+	    if ((printer.psname[0] != '\0') && !debug)
+	        unlink(printer.psname);
+	    printer.psname[0] = '\0';
 	}
 	if (psfile.ispdf && psfile.name[0] && psfile.pdftemp[0])
 	    unlink(psfile.pdftemp);  /* remove temporary DSC file */
@@ -345,6 +345,7 @@ main(int argc, char *argv[])
 	    WinAssociateHelpInstance(hwnd_help, hwnd_frame);
   }
 
+  info_wait(IDS_NOWAIT);
   play_sound(SOUND_START);
   /* message loop */
   while (!rc && WinGetMsg(hab, &q_mess, 0L, 0, 0))
@@ -656,10 +657,9 @@ paint_bitmap(HPS ps, PRECTL prect, int scrollx, int scrolly)
     apts[1].y = apts[0].y + wy - 1;
 #endif
 
-#ifdef NOTUSED
-    if ( (display.bitcount == 4)  /* standard VGA is buggy */
-	|| ( (os_version==201100) && (display.bitcount==8) && (bitmap.depth==1)) /* S3 and ATI GU are buggy */
-         ) {
+    if ( (option.drawmethod == IDM_DRAWWIN) || 
+         ((option.drawmethod == IDM_DRAWDEF) && (display.bitcount == 4)) ) /* standard VGA is buggy */
+        {
 	/* slow code to dodge OS/2 bugs */
 	/* this code double buffers the bitmap and works on a standard VGA
 	 * but didn't work on an ATI Ultra Graphics Pro in 8514 emulation
@@ -674,8 +674,7 @@ paint_bitmap(HPS ps, PRECTL prect, int scrollx, int scrolly)
 	    GpiDeleteBitmap(hbmp);
 	}
     }
-    else {
-#endif
+    else {   /* (option.drawmethod == IDM_DRAWGPI) || (default and non buggy display) */
 	/* fast code which doesn't always work */
 	/* This code works on the Trident SVGA and 8514 in 256 color mode,
  	 * but GpiDrawBits fails with a SYS3175 on the standard VGA.
@@ -683,9 +682,7 @@ paint_bitmap(HPS ps, PRECTL prect, int scrollx, int scrolly)
 	/* This won't work for version 2.11, S3 or ATI GU, 8bit/pixel display, 1bit/pixel bitmap */
 	GpiDrawBits(ps, bitmap.bits, bitmap.pbmi, 4, apts, 
 		(bitmap.depth != 1) ? ROP_SRCCOPY : ROP_NOTSRCCOPY, 0);
-#ifdef NOTUSED
     }
-#endif
     /* Fill areas around page */
     if (prect->yBottom < display.offset.y) {	/* bottom centre */
 	rect.yBottom = prect->yBottom;
@@ -816,8 +813,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		display.page = FALSE;
 		display.sync = FALSE;
 		display.end = FALSE;
-		load_string(IDS_WAITDRAW, szWait, sizeof(szWait));
-		info_wait(TRUE);
+		info_wait(IDS_WAITDRAW);
 		if (!gsprog.valid) {
 		    /* someone has killed GS */
 	    	    WinSendMsg(hwnd_bmp, WM_GSCLOSE, MPFROMLONG(0), MPFROMLONG(0));
@@ -851,7 +847,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 			error_message("error updating window");
 /*
 		if (!display.busy)
-		    info_wait(FALSE);
+		    info_wait(IDS_NOWAIT);
 */
 		return 0;
 	case WM_GSPAGE:
@@ -863,7 +859,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 			error_message("error invalidating rect");
   		if (!WinUpdateWindow(hwnd_bmp))
 			error_message("error updating window");
-		info_wait(FALSE);
+		info_wait(IDS_NOWAIT);
 		return 0;
 	case WM_GSCLOSE:
 		display.page = FALSE;
@@ -899,7 +895,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		}
 		else
 		    cleanup_pgm(&gsprog);
-		info_wait(FALSE);
+		info_wait(IDS_NOWAIT);
 		return 0;
 	case WM_GSERROR:
 		display.page = FALSE;
@@ -907,7 +903,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		display.end = FALSE;
 		if (display.busy)
 			display.abort = TRUE;
-		info_wait(FALSE);
+		info_wait(IDS_NOWAIT);
 		message_box("Ghostscript Error\rSee Ghostscript window for more details", 0);
     		DosPostEventSem(gsview.next_event);
 		if (!display.busy)
@@ -925,17 +921,17 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
   		if (!WinUpdateWindow(hwnd_bmp))
 			error_message("error updating window");
 		if (!display.busy)
-		    info_wait(FALSE);
+		    info_wait(IDS_NOWAIT);
 		return 0;
 	case WM_GSPRNEXIT:
 		{   PRINTER *prn = (PRINTER *)mp1;
 		    cleanup_pgm(&prn->prog);
-		    if ((prn->cfname[0] != '\0') && !debug)
-	    	        unlink(prn->cfname);
-		    prn->cfname[0] = '\0';
-		    if ((prn->fname[0] != '\0') && !debug)
-			    unlink(prn->fname);
-		    prn->fname[0] = '\0';
+		    if ((prn->optname[0] != '\0') && !debug)
+	    	        unlink(prn->optname);
+		    prn->optname[0] = '\0';
+		    if ((prn->psname[0] != '\0') && !debug)
+			    unlink(prn->psname);
+		    prn->psname[0] = '\0';
 		}
 		return 0;
 	case WM_INITMENU:
@@ -999,7 +995,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		    free(cmd);
 		}
 		else {
-		    if (waiting) {
+		    if (szWait[0] != '\0') {
 			switch(LONGFROMMP(mp1)) {
 	    		    case IDM_INFO:
 	    		    case IDM_SAVEDIR:
@@ -1029,17 +1025,16 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 			play_sound(SOUND_ERROR);
 			break;
 		    }
-		    load_string(IDS_WAIT, szWait, sizeof(szWait));
-		    info_wait(TRUE);
+		    info_wait(IDS_WAIT);
 		    if (!gs_open()) {
-		        info_wait(FALSE);
+		        info_wait(IDS_NOWAIT);
 	    		return FALSE;
 		    }
 		    if (display.busy) {
 			play_sound(SOUND_ERROR);
 			if (!gsprog.valid) {
 			    message_box("Problem with gs.  Exit and restart PM GSview", 0);
-		            info_wait(FALSE);
+		            info_wait(IDS_NOWAIT);
 			}
 		    }
 		    else {
@@ -1057,7 +1052,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		        display.id = _beginthread(display_thread, NULL, 16384, NULL);
 #endif
 		        if (display.id == -1) {
-		          info_wait(FALSE);
+		          info_wait(IDS_NOWAIT);
 			  message_box("_beginthread() output thread failed", 0);
 			  display.busy = FALSE;
 			  display.abort = FALSE;
@@ -1070,7 +1065,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		    }
 		}
 		else
-		    info_wait(FALSE);
+		    info_wait(IDS_NOWAIT);
 	    break;
 	case WM_REALIZEPALETTE:
 	    if ((bitmap.depth == 8) && display.hasPalMan && display.hpal_exists) {
@@ -1407,7 +1402,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		WinFillRect(hps, &info_coord, SYSCLR_BUTTONMIDDLE);
 		cursorpos_paint(hps);
 		WinReleasePS(hps);
-		if (waiting)
+		if (szWait[0] != '\0')
     		    WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_WAIT, FALSE));
 		else {
 		    if (!bitmap.valid)
@@ -1543,7 +1538,7 @@ char fmt[MAXSTR];
 		p++;
 	    strcat(buf, p);
 	    GpiCharStringAt(ps, &info_file, strlen(buf), buf);
-	    if (waiting) {
+	    if (szWait[0] != '\0') {
 /*
 		i = load_string(IDS_WAIT, buf, sizeof(buf));
 	        GpiCharStringAt(ps, &info_page, strlen(buf), buf);
@@ -1578,7 +1573,7 @@ char fmt[MAXSTR];
 	else {
 	    i = load_string(IDS_NOFILE, buf, sizeof(buf));
 	    GpiCharStringAt(ps, &info_file, strlen(buf), buf);
-	    if (waiting) {
+	    if (szWait[0] != '\0') {
 /*
 		i = load_string(IDS_WAIT, buf, sizeof(buf));
 	        GpiCharStringAt(ps, &info_page, strlen(buf), buf);

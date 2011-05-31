@@ -57,7 +57,7 @@ gsview_init(int argc, char *argv[])
   short *pButtonID;
   ULONG version[3];
 
-    _getcwd(workdir, sizeof(workdir));	/* remember the working directory */
+    gs_getcwd(workdir, sizeof(workdir));	/* remember the working directory */
     if (DosQuerySysInfo(QSV_VERSION_MAJOR, QSV_VERSION_REVISION, &version, sizeof(version)))
 	os_version = 201000;  /* a guess */
     else {
@@ -84,7 +84,7 @@ gsview_init(int argc, char *argv[])
         error_message("gsview_init: Failed to create termination queue thread");
         return rc;
     }
-    load_string(IDS_WAIT, szWait, sizeof(szWait));
+    info_wait(IDS_WAIT);
 
     init_options();
     read_profile();
@@ -215,7 +215,7 @@ gsview_init(int argc, char *argv[])
     if (changed_version) {
 	message_box("The installed version of GSview has changed.  \
 Please read the Installation help and then correctly set\r\
-Options | Ghostscript Command", MB_ICONEXCLAMATION);
+Options | Configure Ghostscript", MB_ICONEXCLAMATION);
 	load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
 	get_help();
     }
@@ -246,7 +246,7 @@ Options | Ghostscript Command", MB_ICONEXCLAMATION);
 
     if (strlen(cmd) > 2) {
 	/* file given on command line, so use current directory not saved one */
-	_chdir(workdir);
+	gs_chdir(workdir);
 	/* skip commands /F /P or /S */
 	if ((cmd[0] == '/') || (cmd[0] == '-')) {
 	    cmd += 2;
@@ -276,14 +276,14 @@ Options | Ghostscript Command", MB_ICONEXCLAMATION);
 		/* change to drive, get directory, append relative path */
 		strncpy(filedir, cmd, 2); /* copy drive code */
 		filedir[2] = '\0';
-		i = _chdir(filedir);
-		_getcwd(filedir, sizeof(filedir));	/* get path on specified drive */
+		i = gs_chdir(filedir);
+		gs_getcwd(filedir, sizeof(filedir));	/* get path on specified drive */
 		if (filedir[0] && (filedir[strlen(filedir)-1]!='/')
 		    && (filedir[strlen(filedir)-1]!='\\'))
 		    strcat(filedir, "\\");
 		strcat(filedir, cmd+2);	/* append relative path */
 		strcpy(cmd, filedir);
-		i = _chdir(workdir);
+		i = gs_chdir(workdir);
 	    }
 	}
 	else {
@@ -511,13 +511,46 @@ init2(void)
 	if (option.epsf_warn) check_menu_item(IDM_OPTIONMENU, IDM_EPSFWARN, TRUE);
 	if (option.ignore_dsc) check_menu_item(IDM_OPTIONMENU, IDM_IGNOREDSC, TRUE);
 	if (option.show_bbox) check_menu_item(IDM_OPTIONMENU, IDM_SHOWBBOX, TRUE);
+	check_menu_item(IDM_DRAWMENU, option.drawmethod, TRUE);
 	check_menu_item(IDM_UNITMENU, option.unit, TRUE);
 	check_menu_item(IDM_ORIENTMENU, option.orientation, TRUE);
 	check_menu_item(IDM_MEDIAMENU, option.media, TRUE);
 	check_menu_item(IDM_DEPTHMENU, gsview_depth_to_menu(option.depth), TRUE);
+	check_menu_item(IDM_GSVERMENU, option.gsversion, TRUE);
 	update_scroll_bars();
 	return 0;
 }
+
+char *
+install_default(int id)
+{
+int i;
+static char defstr[MAXSTR];
+    switch(id) {
+	case INSTALL_EXE:
+	    strcpy(defstr, szExePath);
+	    strcat(defstr, "GSOS2.EXE");
+	    break;
+	case INSTALL_INCLUDE:
+	    strcpy(defstr, szExePath);
+	    strcat(defstr, ";");
+	    strcat(defstr, szExePath);
+	    strcat(defstr, "fonts;");
+	    i = strlen(defstr);
+	    defstr[i++] = tolower(szIniFile[0]);
+	    defstr[i] = '\0';
+	    strcat(defstr, ":\\psfonts");
+	    break;
+	case INSTALL_OTHER:
+	    defstr[0] = '\0';
+	    break;
+	default:
+	    defstr[0] = '\0';
+	    break;
+    }
+    return defstr;
+}
+
 
 
 void
@@ -525,23 +558,16 @@ init_options()
 {
 int i;
 	/* make an educated guess about gs command */
-	strcpy(option.gscommand, szExePath);
-	strcat(option.gscommand, DEFAULT_GSCOMMAND);
-	strcat(option.gscommand, " -I");
-	strcat(option.gscommand, szExePath);
-	strcpy(option.gscommand+strlen(option.gscommand)-1, ";");
-	strcat(option.gscommand, szExePath);
-	strcat(option.gscommand, "fonts;");
-	i = strlen(option.gscommand);
-	option.gscommand[i++] = tolower(szIniFile[0]);
-	option.gscommand[i] = '\0';
-	strcat(option.gscommand, ":\\psfonts");
+	strcpy(option.gsexe, install_default(INSTALL_EXE));
+	strcpy(option.gsinclude, install_default(INSTALL_INCLUDE));
+	strcpy(option.gsother, install_default(INSTALL_OTHER));
 	option.img_origin.x = CW_USEDEFAULT;
 	option.img_origin.y = CW_USEDEFAULT;
 	option.img_size.x = CW_USEDEFAULT;
 	option.img_size.y = CW_USEDEFAULT;
 	option.img_max = FALSE;
-	option.gsversion = IDM_GS3;
+	option.gsversion = IDM_GS351;
+	option.drawmethod = IDM_DRAWDEF;
 	option.unit = IDM_UNITPT;
 	option.quick = TRUE;
 	option.settings = TRUE;

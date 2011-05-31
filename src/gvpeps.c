@@ -19,7 +19,6 @@
 /* EPS file manipulation module for PM GSview */
 
 #include "gvpm.h"
-#include "gvceps.h"
 
 LPBITMAP2
 get_bitmap()

@@ -42,6 +42,8 @@ char command[256];
 #else
 char command[512];
 #endif
+FILE *optfile;
+int depth;
 	/* return if already open */
 	if ((gsprog.valid) && IsWindow(hwndimgchild))
 		return TRUE;
@@ -51,19 +53,61 @@ char command[512];
 	zoom = FALSE;
 	pipeinit();		/* so we wait for first request */
 	gs_size();
-	sprintf(command,"%s -dBitsPerPixel=%d %s -r%gx%g -g%ux%u -sGSVIEW=%u -",
-		option.gscommand, (option.depth ? option.depth : display.bitcount*display.planes),
+#ifdef OLD
+	sprintf(command,"\042%s\042 %s -I\042%s\042 -dBitsPerPixel=%d %s -r%gx%g -g%ux%u -sGSVIEW=%u -",
+		option.gsexe, option.gsother, option.gsinclude,
+		(option.depth ? option.depth : display.bitcount*display.planes),
 		option.safer ? "-dSAFER" : "", 
 		option.xdpi, option.ydpi, 
                 display.width, display.height, (unsigned int)hwndimg);
+#else
+	/* new version uses temporary file to reduce command line length */
+	/* avoids setting FIXEDMEDIA and does sanity check on BitsPerPixel */
+
+	/* restrict depth to values supported by Ghostscript */
+	depth = display.planes * display.bitcount;
+	if (depth >= 24)
+	    depth = 24;
+	else if (depth >=15)
+	    depth = 16;
+	else if (depth >=8)
+	    depth = 8;
+	else if (depth >=4)
+	    depth = 4;
+	else 
+	    depth = 1;
+
+	if ((display.optname[0] != '\0') && !debug)
+	    unlink(display.optname);
+	display.optname[0] = '\0';
+	if ( (optfile = gp_open_scratch_file(szScratch, display.optname, "w")) == (FILE *)NULL) {
+	    play_sound(SOUND_ERROR);
+	    return FALSE;
+	}
+
+	if (option.gsversion == IDM_GS351)
+	    fprintf(optfile, "-I\042%s\042\n", option.gsinclude);
+	else
+	    fprintf(optfile, "-I%s\n", option.gsinclude);
+	if (option.safer)
+	    fprintf(optfile, "-dSAFER\n");
+	fprintf(optfile, "-dBitsPerPixel=%d\n", option.depth ? option.depth : depth);
+	fprintf(optfile, "-dDEVICEXRESOLUTION=%g\n", (double)option.xdpi);
+	fprintf(optfile, "-dDEVICEYRESOLUTION=%g\n", (double)option.ydpi);
+	fprintf(optfile, "-dDEVICEWIDTH=%u\n", display.width);
+	fprintf(optfile, "-dDEVICEHEIGHT=%u\n", display.height);
+	fclose(optfile);
+	sprintf(command,"%s %s @%s -sGSVIEW=%u -", option.gsexe, 
+	    option.gsother, display.optname, (unsigned int)hwndimg);
+#endif
+
 	if ( ((strlen(command) > 126) && !(is_winnt || is_win95))
 	  ||  (strlen(command) > 256) ) {
 		display.do_display = FALSE;
 		gserror(IDS_TOOLONG, command, MB_ICONSTOP, SOUND_ERROR);
 		return FALSE;
 	}
-	load_string(IDS_WAITGSOPEN, szWait, sizeof(szWait));
-	info_wait(TRUE);
+	info_wait(IDS_WAITGSOPEN);
 	gsprog.hinst = (HINSTANCE)WinExec(command, SW_SHOWMINNOACTIVE);
 
 #ifdef __WIN32__
@@ -73,7 +117,7 @@ char command[512];
 #else
 	if (gsprog.hinst < HINSTANCE_ERROR) {
 #endif
-		info_wait(FALSE);
+		info_wait(IDS_NOWAIT);
 		display.do_display = FALSE;
 		gserror(IDS_CANNOTRUN, command, MB_ICONSTOP, SOUND_ERROR);
 		load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
@@ -101,7 +145,7 @@ char command[512];
 		hwndimgchild = (HWND)NULL;
 		gsprog.hinst = (HINSTANCE)NULL;
 		clear_timer();
-		info_wait(FALSE);
+		info_wait(IDS_NOWAIT);
 		gserror(IDS_WRONGGS, NULL, MB_ICONSTOP, SOUND_ERROR);
 		return FALSE;
 	}
@@ -118,6 +162,10 @@ char command[512];
 	display.page = FALSE;
 	display.sync = FALSE;
 	gsprog.input = pipeopen();	/* open pipe to gswin */
+	if (gsprog.input == (FILE *)NULL) {
+	    gs_close();
+	    return FALSE;
+	}
 	gsprog.valid = TRUE;
 	BringWindowToTop(hwndimg);
 	SetFocus(hwndimg);	/* kludge: without this desktop gets focus */
@@ -188,6 +236,10 @@ BOOL force = FALSE;
 	display.page = FALSE;
 	display.sync = FALSE;
 	pipeclose();
+
+	if ((display.optname[0] != '\0') && !debug)
+	    unlink(display.optname);
+	display.optname[0] = '\0';
 	return TRUE;
 }
 

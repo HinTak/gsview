@@ -1,4 +1,4 @@
-#  Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+#  Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -16,7 +16,7 @@
 
 # gvpm.mak
 # PM GSview 
-# requires emx 0.8h
+# requires emx 0.9b
 #
 # edit COMPBASE and EMXPATH as required.
 
@@ -24,19 +24,25 @@
 # set USE_EMX=1 for EMX/GCC
 USE_EMX=1
 # USE_OMF=1 for EMX/GCC with LINK386
-USE_OMF=0
+USE_OMF=1
+# DEBUG=1 for debugging
+DEBUG=0
 
 !if $(USE_EMX)
 # EMX
-DRIVE=e:
+DRIVE=c:
 COMP=gcc
 COMPBASE=$(DRIVE)\emx
 EMXPATH=$(DRIVE)/emx
+!if $(DEBUG)
+DEBUGFLAG=-g
+DEBUGLINK=/DEBUG
+!endif
 !if $(USE_OMF)
-FLAGS=-Zomf -Zmts -g
+FLAGS=-Zomf -Zmts -O $(DEBUGFLAG)
 OBJ=obj
 !else
-FLAGS=-Zmts -g -O
+FLAGS=-Zmts -O $(DEBUGFLAG)
 OBJ=o
 !endif
 !else
@@ -65,7 +71,7 @@ OBJS=gvpm.$(OBJ) gvpdlg.$(OBJ) gvpdisp.$(OBJ) gvpeps.$(OBJ) gvpinit.$(OBJ)\
    gvccmd.$(OBJ) gvcdisp.$(OBJ) ps.$(OBJ) gvceps.$(OBJ) gvcmisc.$(OBJ)\
    gvcprf.$(OBJ) gvcprn.$(OBJ) gvctext.$(OBJ)
 
-all: gvpm.exe gvpm.hlp gvpm.inf gvpm.tex
+all: gvpm.exe gvpm.hlp gvpm.inf gvpm.tex os2setup.exe
 
 .c.$(OBJ):
 	$(COMP) $(FLAGS) -DOS2 -c $*.c
@@ -97,7 +103,7 @@ gvcmisc.$(OBJ): gvcmisc.c gvpm.h ps.h gvcrc.h
 
 gvcprn.$(OBJ): gvcprn.c gvpm.h ps.h
 
-gvcprf.$(OBJ): gvcprf.c gvpm.h
+gvcprf.$(OBJ): gvcprf.c gvpm.h gvcprf.h
 
 gvctext.$(OBJ): gvctext.c gvpm.h ps.h
 
@@ -107,7 +113,8 @@ gvpm.res: gvpm.rc gvpm.h binary\gvpm.ico
 gvpm.exe: $(OBJS) gvpm.res gvpm.def
 !if $(USE_EMX)
 !if $(USE_OMF)
-	$(COMP) $(FLAGS) -o gvpm $(OBJS) gvpm.def
+#	LINK386 $(DEBUGLINK) $(COMPBASE)\lib\crt0.obj $(OBJS), gvpm.exe, ,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\mt\c.lib $(COMPBASE)\lib\mt\c_app.lib $(COMPBASE)\lib\mt\emx.lib $(COMPBASE)\lib\emx2.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, gvpm.def
+	$(COMP) $(FLAGS) -o gvpm.exe $(OBJS) gvpm.def
 	rc gvpm.res gvpm.exe
 !else
 	$(COMP) $(FLAGS) -o gvpm $(OBJS)
@@ -118,6 +125,20 @@ gvpm.exe: $(OBJS) gvpm.res gvpm.def
 	$(COMP) $(FLAGS) -egvpm.exe $(OBJS)
 	RC gvpm.res gvpm.exe
 !endif
+
+os2setup.res: os2setup.rc setup.h
+	rc -i $(COMPBASE)\include -r $*.rc
+
+os2setup.exe: os2setup.c setup.h os2setup.res os2setup.def
+!if $(USE_EMX)
+	$(COMP) -Zomf -Zsys -c -o setupprf.obj gvcprf.c
+	$(COMP) -Zomf -Zsys $(DEBUGFLAG) $*.c setupprf.obj os2setup.def
+!else
+	$(COMP) -c /Foos2setup.obj gvcprf.c
+	$(COMP) $*.c setupprf.obj os2setup.def
+!endif
+	rc os2setup.res os2setup.exe
+	
 
 gvdoc.exe: gvdoc.c
 !if $(USE_EMX)
@@ -193,19 +214,32 @@ doc2tex.exe: doc2tex.c
 !endif
 
 
-prezip: gvpm.exe gvpm.hlp gvpm.inf README.GV FILE_ID.DIZ LICENCE
+prezip: gvpm.exe gvpm.hlp gvpm.inf os2setup.exe README.GV FILE_ID.DIZ LICENCE
 	copy gvpm.exe ..
+!if $(USE_EMX) && !$(USE_OMF)
 	emxbind -s ../gvpm.exe
+!endif
 	copy gvpm.hlp ..
 	copy gvpm.inf ..
 	copy README.GV ..\README.GV
 	copy FILE_ID.DIZ ..\FILE_ID.DIZ
 	copy LICENCE ..\LICENCE
+	copy os2setup.exe ..
+	-del ..\epstool.zip
+	-del ..\gsgrab.zip
 	-del ..\gsview.zip
+	-del ..\src.zip
+	-del ..\gsviewXX.zip
 
 zip: prezip
 	cd ..
-	zip -9 -@ gsview.zip < src/gvclist.doc
+	zip -9 -@ epstool.zip < src\gvcliste.doc
+	zip -9 -@ gsgrab.zip  < src\gvclistg.doc
+	zip -9 -@ src.zip     < src\gvclists.doc
+	cd ..
+	zip -9 -@ gsview\gsview.zip  < gsview\src\gvclist.doc
+	cd gsview
+	zip -9 gsviewXX.zip gsview.zip README.GV FILE_ID.DIZ os2setup.exe os2unzip.exe winsetup.exe winunzip.exe 
 	cd src
 
 clean:
@@ -241,6 +275,9 @@ clean:
 	-del gvpm.toc
 	-del gvphelp.h
 	-del gsview.doc
+	-del setupprf.obj
+	-del os2setup.obj
+	-del os2setup.res
 
 veryclean: clean
 	-del gvpm.exe
@@ -249,3 +286,4 @@ veryclean: clean
 	-del gvpm.tex
 	-del gvpm.htm
 	-del gsview.htm
+	-del os2setup.exe

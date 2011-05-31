@@ -31,7 +31,11 @@ extern BOOL is_pipe_done(void);	/* true if pipe has just been reset */
 /* internal to this module */
 
 /* imitation pipes using SHAREABLE GLOBAL MEMORY */
+#ifdef __WIN32__
 #define PIPE_DATASIZE 16380	/* maximum block size */
+#else
+#define PIPE_DATASIZE 4092	/* maximum block size */
+#endif
 /* Data is passed to gswin in a global shareable memory block.
  * The global handle is passed in lParam and the byte count
  * is stored in the first word of the global memory block.
@@ -99,6 +103,11 @@ pipeopen(void)
 	    return (FILE *)NULL;
 	}
 	pipebuf = malloc(PIPE_DATASIZE);
+	if (pipebuf == (char *)NULL) {
+	    gserror(IDS_PIPE_EMEM, NULL, NULL, SOUND_ERROR);
+	    fclose(pipe_file);
+	    return (FILE *)NULL;
+	}
 	pipereset();
 	return pipe_file;
 }
@@ -173,7 +182,7 @@ pipereset(void)
 	fgetpos(pipe_file, &pipe_rpos);
 	fgetpos(pipe_file, &pipe_wpos);
 	pipe_empty = TRUE;
-	info_wait(FALSE);
+	info_wait(IDS_NOWAIT);
 }
 
 /* give another block of data to gswin */
@@ -237,7 +246,7 @@ pipeflush(void)
 	    pipe_empty = FALSE;
 	    piperequest();	/* repeat the request */
 	}
-	info_wait(TRUE);
+	info_wait(IDS_WAIT);
 }
 
 /* true  if pipereset was last called */

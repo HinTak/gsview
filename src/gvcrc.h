@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,16 +18,19 @@
 /* gvcrc.h */
 /* Common Resource header file */
 
-#define GSVIEW_VERSION "1995-05-23  1.3"
-#define EMX_NEEDED "0.9a"
+#define GSVIEW_VERSION "1996-01-10  1.4"
+#define EMX_NEEDED "0.9b"
 
-#define ID_GSVIEW 42
+#define PACKED			/* packing set by other means */
+
+#define ID_GSVIEW 1
 
 #define IDD_ABOUT 	50
 #define IDD_INPUT 	51
 #define ID_ANSWER	52
 #define ID_PROMPT	53
 #define ID_HELP		54
+#define ID_DEFAULT	55
 
 #define IDM_FILEMENU	100
 #define IDM_OPEN	101
@@ -52,12 +55,13 @@
 #define IDM_MAKEEPST4	156
 #define IDM_MAKEEPST	157
 #define IDM_MAKEEPSW	158
-#define IDM_EXTEPSMENU	159
-#define IDM_EXTRACTPS	160
-#define IDM_EXTRACTPRE	161
-#define IDM_TEXTEXTRACT	162
-#define IDM_TEXTFIND	163
-#define IDM_TEXTFINDNEXT 164
+#define IDM_MAKEEPSU	159
+#define IDM_EXTEPSMENU	160
+#define IDM_EXTRACTPS	161
+#define IDM_EXTRACTPRE	162
+#define IDM_TEXTEXTRACT	163
+#define IDM_TEXTFIND	164
+#define IDM_TEXTFINDNEXT 165
 
 #define IDM_OPTIONMENU	  174
 #define IDM_GSCOMMAND	  175
@@ -80,18 +84,24 @@
 #define IDM_UNITMM	192
 #define IDM_UNITINCH	193
 
-#define IDM_GSVERMENU	195
-#define IDM_GS261	196
-#define IDM_GS3		197
+#define IDM_DRAWMENU	195	/* OS/2 only */
+#define IDM_DRAWDEF	196
+#define IDM_DRAWGPI	197
+#define IDM_DRAWWIN	198
 
-#define IDM_VIEWMENU    200
-#define IDM_NEXT	201
-#define IDM_NEXTSKIP	202
-#define IDM_PREV	203
-#define IDM_PREVSKIP	204
-#define IDM_GOTO	205
-#define IDM_REDISPLAY   206
-#define IDM_SKIP	207
+#define IDM_GSVERMENU	200
+#define IDM_GS261	201
+#define IDM_GS333	202
+#define IDM_GS351	203
+
+#define IDM_VIEWMENU    210
+#define IDM_NEXT	211
+#define IDM_NEXTSKIP	212
+#define IDM_PREV	213
+#define IDM_PREVSKIP	214
+#define IDM_GOTO	215
+#define IDM_REDISPLAY   216
+#define IDM_SKIP	217
 
 #define IDM_ORIENTMENU	220
 #define IDM_PORTRAIT	221
@@ -167,15 +177,18 @@
 
 #define IDD_SPOOL	524
 #define SPOOL_PORT	525
+#define SPOOL_PORTTEXT	526
+#define SPOOL_TOFILE	527
 
 #define CANCEL_PCDONE	541
 
 #define IDD_PAGE	550
 #define IDD_MULTIPAGE	551
 #define PAGE_LIST	552
-#define PAGE_ALL	553
-#define PAGE_ODD	554
-#define PAGE_EVEN	555
+#define PAGE_LISTTEXT	553
+#define PAGE_ALL	554
+#define PAGE_ODD	555
+#define PAGE_EVEN	556
 
 #define IDD_DEVICE	560
 #define DEVICE_NAME	561
@@ -186,10 +199,27 @@
 #define IDD_PROP	570
 #define PROP_NAME	571
 #define PROP_VALUE	572
+#define PROP_EDIT	573
+#define PROP_NEW	574
+#define PROP_XOFFSET	575
+#define PROP_YOFFSET	576
 
-#define IDD_BBOX	590
-#define BB_PROMPT	591
-#define BB_CLICK	592
+#define IDD_EDITPROP	580
+#define EDITPROP_STRING	581
+#define EDITPROP_NUMBER	582
+#define EDITPROP_NAME	583
+#define EDITPROP_VALUE	584
+#define NEWPROP_DEL	55
+#define EDITPROP_DEL	585
+
+#define IDD_INSTALL	590
+#define INSTALL_EXE	591
+#define INSTALL_INCLUDE	592
+#define INSTALL_OTHER	593
+
+#define IDD_BBOX	595
+#define BB_PROMPT	596
+#define BB_CLICK	597
 
 /* file filters */
 #define FILTER_PSALL	0
@@ -251,12 +281,14 @@
 #define IDS_BADEPS	649
 #define IDS_NOPREVIEW	650
 #define IDS_NOTDFNAME   651
-#define IDS_PIPE_EOPEN	652
-#define IDS_PIPE_EMEM	653
-#define IDS_CANCELDONE	654
-#define IDS_BADCLI      655
+#define IDS_NOTEMP	652
+#define IDS_CANCELDONE	653
+#define IDS_BADCLI      654
+#define IDS_DUPOPT	655
 #define IDS_TEXTFIND	656
 #define IDS_TEXTNOTFIND	657
+#define IDS_PIPE_EOPEN	658
+#define IDS_PIPE_EMEM	659
 
 #define IDS_SOUNDNAME	670
 #define IDS_SNDPAGE	671
@@ -275,15 +307,19 @@
 #define IDS_TOPICROOT	701
 #define IDS_TOPICOPEN	702
 #define IDS_TOPICPRINT	703
-#define IDS_TOPICEDIT	704
-#define IDS_TOPICGSCMD	705
-#define IDS_TOPICSOUND	706
-#define IDS_TOPICMEDIA  707
-#define IDS_TOPICPSTOEPS 708
-#define	IDS_TOPICGOTO    709
-#define IDS_TOPICINSTALL 710
-#define IDS_TOPICTEXT    711
-#define IDS_TOPICKEYS    712
+#define IDS_TOPICPROP	704
+#define IDS_TOPICEDITPROP 705
+#define IDS_TOPICEDIT	706
+#define IDS_TOPICGSCMD	707
+#define IDS_TOPICSOUND	708
+#define IDS_TOPICMEDIA  709
+#define IDS_TOPICPSTOEPS 710
+#define	IDS_TOPICGOTO    711
+#define IDS_TOPICINSTALL 712
+#define IDS_TOPICTEXT    713
+#define IDS_TOPICKEYS    714
+#define IDS_TOPICMESS    715
+#define IDS_TOPICSPOOL   716
 
 /* ps_to_eps */
 #define IDS_BBPROMPT	750
@@ -294,8 +330,12 @@
 #define IDS_EPSQPAGES	755
 #define IDS_EPSNOBBOX	756
 #define IDS_EPSREAD     757
+#define IDS_EPSUSERINVALID 758
+#define IDS_EPSUSERTITLE 759
+#define IDS_EPS_OFF_PAGE 760
 
 /* wait messages */
+#define IDS_NOWAIT	0
 #define IDS_WAIT	770
 #define IDS_WAITREAD	771
 #define IDS_WAITWRITE	772

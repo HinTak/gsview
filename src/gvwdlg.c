@@ -77,13 +77,13 @@ char cReplace;
 		if (strlen(temp) > 2) {
 		    if (isalpha(temp[0]) && (temp[1]==':')) {
 			temp[2] = '\0';
-			_chdir(temp);
+			gs_chdir(temp);
 		    }
 		}
 	    }
 	    else {
 		*p = '\0';
-		_chdir(temp);
+		gs_chdir(temp);
 	    }
 	}
 #endif
@@ -529,16 +529,18 @@ SoundDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 BOOL CALLBACK _export
 PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 {
-	char buf[40];
 	int i;
 	WORD notify_message;
 	switch (wmsg) {
 	    case WM_INITDIALOG:
+/*
+		char buf[40];
 		if (page_list.multiple)
 		    LoadString(phInstance, IDS_SELECTPAGES, buf, sizeof(buf));
 		else
 		    LoadString(phInstance, IDS_SELECTPAGE, buf, sizeof(buf));
 		SetWindowText(hDlg, buf);
+*/
 		for (i=0; i<doc->numpages; i++) {
 		    SendDlgItemMessage(hDlg, PAGE_LIST, LB_ADDSTRING, 0, 
 			(LPARAM)((LPSTR)doc->pages[map_page(i)].label));
@@ -597,6 +599,7 @@ get_page(int *ppage, BOOL multiple)
 DLGPROC lpProcPage;
 #endif
 BOOL flag;
+LPSTR dlgname;
 	if (doc == (PSDOC *)NULL)
 		return FALSE;
 	if (doc->numpages == 0) {
@@ -608,11 +611,15 @@ BOOL flag;
 	if (page_list.select == (BOOL *)NULL)
 		return FALSE;
 	memset(page_list.select, 0, doc->numpages * sizeof(BOOL) );
+	if (page_list.multiple)
+	    dlgname = "PageMultiDlgBox";
+	else
+	    dlgname = "PageDlgBox";
 #ifdef __WIN32__
-	flag = DialogBoxParam( phInstance, "PageDlgBox", hwndimg, PageDlgProc, (LPARAM)NULL);
+	flag = DialogBoxParam( phInstance, dlgname, hwndimg, PageDlgProc, (LPARAM)NULL);
 #else
 	lpProcPage = (DLGPROC)MakeProcInstance((FARPROC)PageDlgProc, phInstance);
-	flag = DialogBoxParam( phInstance, "PageDlgBox", hwndimg, lpProcPage, (LPARAM)NULL);
+	flag = DialogBoxParam( phInstance, dlgname, hwndimg, lpProcPage, (LPARAM)NULL);
 	FreeProcInstance((FARPROC)lpProcPage);
 #endif
 	if (flag && (page_list.current >= 0))
@@ -698,6 +705,62 @@ DLGPROC lpfnBoundingBoxProc;
 	FreeProcInstance((FARPROC)lpfnBoundingBoxProc);
 #endif
 	return bbox.valid;
+}
+
+
+/* input string dialog box */
+BOOL CALLBACK _export
+InstallDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch(message) {
+        case WM_INITDIALOG:
+	    SetDlgItemText(hDlg, INSTALL_EXE, option.gsexe);
+	    SetDlgItemText(hDlg, INSTALL_INCLUDE, option.gsinclude);
+	    SetDlgItemText(hDlg, INSTALL_OTHER, option.gsother);
+            return( TRUE);
+        case WM_COMMAND:
+            switch(LOWORD(wParam)) {
+		case ID_DEFAULT:
+		    SetDlgItemText(hDlg, INSTALL_EXE, install_default(INSTALL_EXE));
+		    SetDlgItemText(hDlg, INSTALL_INCLUDE, install_default(INSTALL_INCLUDE));
+		    SetDlgItemText(hDlg, INSTALL_OTHER, install_default(INSTALL_OTHER));
+		    return(FALSE);
+		case ID_HELP:
+		    SendMessage(hwndimg, help_message, 0, 0L);
+		    return(FALSE);
+		case IDOK:
+		    /* do sanity check on the following strings */
+		    GetDlgItemText(hDlg, INSTALL_EXE, option.gsexe, MAXSTR);
+		    GetDlgItemText(hDlg, INSTALL_INCLUDE, option.gsinclude, MAXSTR);
+		    GetDlgItemText(hDlg, INSTALL_OTHER, option.gsother, MAXSTR);
+                    EndDialog(hDlg, TRUE);
+                    return(TRUE);
+                case IDCANCEL:
+                    EndDialog(hDlg, FALSE);
+                    return(TRUE);
+                default:
+                    return(FALSE);
+            }
+        default:
+            return(FALSE);
+    }
+}
+
+BOOL
+install_gsexe(void)
+{
+BOOL flag;
+#ifndef __WIN32__
+DLGPROC lpProcInstall;
+#endif
+#ifdef __WIN32__
+	flag = DialogBoxParam( phInstance, "InstallDlgBox", hwndimg, InstallDlgProc, (LPARAM)NULL);
+#else
+	lpProcInstall = (DLGPROC)MakeProcInstance((FARPROC)InstallDlgProc, phInstance);
+	flag = DialogBoxParam( phInstance, "InstallDlgBox", hwndimg, lpProcInstall, (LPARAM)NULL);
+	FreeProcInstance((FARPROC)lpProcInstall);
+#endif
+	return flag;
 }
 
 

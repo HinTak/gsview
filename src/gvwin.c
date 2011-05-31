@@ -28,11 +28,13 @@ char szFindText[MAXSTR];
 char previous_filename[MAXSTR];
 const char szClassName[] = "gsview_class";
 const char szScratch[] = "gsview";	/* temporary filename prefix */
+char szSpoolPrefix[] = "\\\\spool\\";
 
 HWND hwndimg;			/* gsview main window */
 HWND hDlgModeless;		/* any modeless dialog box */
 HWND hwndtext;			/* gswin text window */
 HWND hwndimgchild;		/* gswin image child window */
+HWND hwndspl;			/* window handle of gsv16spl.exe */
 HINSTANCE phInstance;		/* instance of gsview */
 int bitmap_scrollx=0;		/* offset from bitmap to origin of child window */
 int bitmap_scrolly=0;
@@ -74,7 +76,6 @@ RECT  info_coord;		/* position and size of coordinate information */
 RECT  button_rect;		/* position and size of button area */
 
 BOOL prev_in_child;		/* true if cursor previously in gswin child window */
-BOOL waiting = FALSE;		/* true when 'wait' to be displayed in info area */
 int page_extra;			/* extra pages to skip */
 int page_skip = 5;		/* number of pages to skip in IDM_NEXTSKIP or IDM_PREVSKIP */
 BOOL changed_version = FALSE;	/* to warn user to update Ghostscript Command */
@@ -174,7 +175,7 @@ RECT rect;
 		page_extra = 0;
 		pipeclose();
 		clear_timer();
-		info_wait(FALSE);
+		info_wait(IDS_NOWAIT);
 		break;
 	    case OUTPUT_PAGE:
 		/* showpage has just been called */
@@ -190,7 +191,7 @@ RECT rect;
 		    }
 		}
 		display.page = TRUE;
-		info_wait(FALSE);
+		info_wait(IDS_NOWAIT);
 		if (page_extra) {
 		    PostMessage(hwndimg, WM_COMMAND, IDM_SKIP, (LPARAM)0);
 		}
@@ -215,8 +216,7 @@ RECT rect;
 		UpdateWindow(hwndimg);
 		break;
 	    case PIPE_REQUEST:
-		load_string(IDS_WAITDRAW, szWait, sizeof(szWait));
-		info_wait(TRUE);
+		info_wait(IDS_WAITDRAW);
 		piperequest();
 		break;
 	    case BEGIN:
@@ -228,6 +228,10 @@ RECT rect;
 	    default:
 		gserror(0, "Unknown Message", MB_ICONEXCLAMATION, -1);
 	}
+	return 0;
+    }
+    else if (message == WM_GSV16SPL) {
+	hwndspl = (HWND)lParam;	   /* gsv16spl.c window handle */
 	return 0;
     }
     else if (message == help_message) {
@@ -260,7 +264,7 @@ RECT rect;
 			clear_timer();
 			bTimeout = TRUE;
 			gserror(IDS_TIMEOUT, NULL, MB_ICONINFORMATION, SOUND_TIMEOUT);
-			info_wait(FALSE);
+			info_wait(IDS_NOWAIT);
 		    }
 		}
 		break;
@@ -384,7 +388,7 @@ RECT rect;
 			    play_sound(SOUND_ERROR);
 			    return 0;	/* obtaining Bounding Box so ignore commands */
 			}
-			if (waiting) {
+			if (szWait[0] != '\0') {
 			    switch(LOWORD(wParam)) {
 	    		        case IDM_INFO:
 	    		        case IDM_SAVEDIR:
@@ -452,7 +456,7 @@ RECT rect;
 		return 0;
 	case WM_SETCURSOR:
 		/* if waiting, display hourglass cursor over our window */
-		if (waiting) {
+		if (szWait[0] != '\0') {
 		    if (hwndimgchild && IsWindow(hwndimgchild)) {
 			if (in_child_client_area() || in_info_area() || (LOWORD(lParam)==HTMENU)) {
 			    SetCursor(hcWait);
@@ -788,7 +792,7 @@ HFONT old_hfont;
 	    i = LoadString(phInstance, IDS_FILE, buf, sizeof(buf));
 	    GetFileTitle(psfile.name, buf+i, (WORD)(sizeof(buf)-i));
 	    TextOut(hdc, info_file.x, info_file.y, buf, strlen(buf));
-	    if (waiting) {
+	    if (szWait[0] != '\0') {
 		TextOut(hdc, info_page.x, info_page.y, szWait, strlen(szWait));
 	    }
 	    else {
@@ -819,7 +823,7 @@ HFONT old_hfont;
 	else {
 	    i = LoadString(phInstance, IDS_NOFILE, buf, sizeof(buf));
 	    TextOut(hdc, info_file.x, info_file.y, buf, strlen(buf));
-	    if (waiting) {
+	    if (szWait[0] != '\0') {
 		TextOut(hdc, info_page.x, info_page.y, szWait, strlen(szWait));
 	    }
 	}

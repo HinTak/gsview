@@ -18,7 +18,6 @@
 /* gvwclip.c */
 /* Clipboard module for Windows GSview */
 #include "gvwin.h"
-#include "gvceps.h"
 
 long hugewrite(HFILE hf, const void _huge *hpvBuffer, long cbBuffer);  /* in gvweps.c */
 void paste_to_file(void);

@@ -39,11 +39,13 @@ PROFILE *prf;
 	    return NULL;
 	}
 	profile_read_string(prf, device, NULL, "", entries, PROFILE_SIZE);
+/*
 	if (strlen(entries) == 0) {
 	    profile_close(prf);
 	    free(entries);
 	    return NULL;
 	}
+*/
 	p = entries;
 	for (numentry=0; p!=(char *)NULL && strlen(p)!=0; numentry++)
 	    p += strlen(p) + 1;
@@ -159,8 +161,7 @@ char *buffer;
 	    return;
 	}
 
-	load_string(IDS_WAITWRITE, szWait, sizeof(szWait));
-	info_wait(TRUE);
+	info_wait(IDS_WAITWRITE);
 
         while ( (count = fread(buffer, 1, COPY_BUF_SIZE, infile)) != 0 ) {
 	    fwrite(buffer, 1, count, f);
@@ -169,7 +170,7 @@ char *buffer;
 	fclose(infile);
 	fclose(f);
 
-	info_wait(FALSE);
+	info_wait(IDS_NOWAIT);
 	return;
 }
 
@@ -203,19 +204,16 @@ gsview_extract()
 		return;
 	}
 
-	load_string(IDS_WAITWRITE, szWait, sizeof(szWait));
-	info_wait(TRUE);
+	info_wait(IDS_WAITWRITE);
 	if (doc->numpages != 0)
 	    psfile_extract(f);
 	else {
-	    dfreopen();
 	    pscopyuntil(psfile.file, f, doc->beginheader, doc->endtrailer, NULL);
-	    dfclose();
 	}
 
 	fclose(f);
 
-	info_wait(FALSE);
+	info_wait(IDS_NOWAIT);
 	return;
 }
 
@@ -229,7 +227,7 @@ psfile_extract(FILE *f)
     BOOL pages_written = FALSE;
     BOOL pages_atend = FALSE;
     int pages = 0;
-    int page = 1;
+    int page;
     int i;
     long position;
 
@@ -302,122 +300,223 @@ psfile_extract(FILE *f)
 
 /* common printer code */
 BOOL
-gsview_cprint(BOOL to_file, char *cfname, char *optfname)
+gsview_cprint(BOOL to_file, char *psname, char *optname)
 {
-char buf[MAXSTR];
 int i;
 float print_xdpi, print_ydpi;
 int width, height;
 struct prop_item_s *proplist;
-int pages;
-int thispage = psfile.pagenum;
 FILE *optfile;
 FILE *pcfile;
-char *fname;
 char *p;
 static char output[MAXSTR]; /* output filename for printing */
+char section[MAXSTR];
+char buf[MAXSTR];
+float xoffset, yoffset;
+PROFILE *prf;
 
-	fname = (char *)NULL;
-	if (doc == (PSDOC *)NULL) {
-		play_sound(SOUND_NONUMBER);
-	    	load_string(IDS_PRINTINGALL, buf, sizeof(buf));
-		if (message_box(buf, MB_ICONASTERISK) == IDCANCEL)
-			return FALSE;
-		fname = psfile.name;
-		pages = 1;
-	}
-	else {
-	    pages = 1;
-	    if (doc->numpages != 0) {
-		if (!get_page(&thispage, TRUE))
+#ifdef OLD
+    fname = (char *)NULL;
+    if (doc == (PSDOC *)NULL) {
+	    play_sound(SOUND_NONUMBER);
+	    load_string(IDS_PRINTINGALL, buf, sizeof(buf));
+	    if (message_box(buf, MB_ICONASTERISK) == IDCANCEL)
 		    return FALSE;
-	        pages = 0;
-	        for (i=0; i< doc->numpages; i++) {
-	            if (page_list.select[i]) pages++;
-	        }
-	    }
-
-	    if ((cfname[0] != '\0') && !debug)
-		unlink(cfname);
-	    cfname[0] = '\0';
-	    if ( (pcfile = gp_open_scratch_file(szScratch, cfname, "wb")) == (FILE *)NULL) {
-		play_sound(SOUND_ERROR);
+	    fname = psfile.name;
+	    pages = 1;
+    }
+    else {
+	pages = 1;
+	if (doc->numpages != 0) {
+	    if (!get_page(&thispage, TRUE))
 		return FALSE;
+	    pages = 0;
+	    for (i=0; i< doc->numpages; i++) {
+		if (page_list.select[i]) pages++;
 	    }
-	    if (doc->numpages != 0)
-	        psfile_extract(pcfile);
-	    else {
-	        dfreopen();
-	        pscopyuntil(psfile.file, pcfile, doc->beginheader, doc->endtrailer, NULL);
-	        dfclose();
-	    }
-	    fclose(pcfile);
-	    fname = cfname;
-	}
-	
-	if (to_file) {
-	    if (!get_filename(output, TRUE, FILTER_ALL, IDS_OUTPUTFILE, IDS_TOPICPRINT))
-		return FALSE;
 	}
 
-	/* calculate image size */
-	switch (sscanf(option.device_resolution,"%fx%f", &print_xdpi, &print_ydpi)) {
-	    case EOF:
-	    case 0:
-	        print_xdpi = print_ydpi = DEFAULT_RESOLUTION;
-	        break;
-	    case 1:
-	        print_ydpi = print_xdpi;
+	if ((cfname[0] != '\0') && !debug)
+	    unlink(cfname);
+	cfname[0] = '\0';
+	if ( (pcfile = gp_open_scratch_file(szScratch, cfname, "wb")) == (FILE *)NULL) {
+	    play_sound(SOUND_ERROR);
+	    return FALSE;
 	}
-	i = get_paper_size_index();
-	if (i < 0) {
-	    width = option.user_width;
-	    height = option.user_height;
-	}
+	if (doc->numpages != 0)
+	    psfile_extract(pcfile);
 	else {
-	    width = papersizes[i].width;
-	    height = papersizes[i].height;
+	    dfreopen();
+	    pscopyuntil(psfile.file, pcfile, doc->beginheader, doc->endtrailer, NULL);
+	    dfclose();
 	}
-	width  = (unsigned int)(width  / 72.0 * print_xdpi);
-	height = (unsigned int)(height / 72.0 * print_ydpi);
+	fclose(pcfile);
+	fname = cfname;
+    }
 
-	if ((optfname[0] != '\0') && !debug)
-		unlink(optfname);
-	optfname[0] = '\0';
-	if ( (optfile = gp_open_scratch_file(szScratch, optfname, "w")) == (FILE *)NULL) {
-		play_sound(SOUND_ERROR);
+    if (to_file) {
+	if (!get_filename(output, TRUE, FILTER_ALL, IDS_OUTPUTFILE, IDS_TOPICPRINT))
+	    return FALSE;
+    }
+#else
+    psname[0] = '\0';
+    if ( (pcfile = gp_open_scratch_file(szScratch, psname, "wb")) == (FILE *)NULL) {
+	gserror(IDS_NOTEMP, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
+	play_sound(SOUND_ERROR);
+	return FALSE;
+    }
+
+    if (doc == (PSDOC *)NULL) {
+	/* copy non-DSC file */
+	char *buffer;
+	int count;
+	/* create buffer for PS file copy */
+	buffer = malloc(COPY_BUF_SIZE);
+	if (buffer == (char *)NULL) {
+	    play_sound(SOUND_ERROR);
+	    fclose(pcfile);
+	    unlink(psname);
+	    return FALSE;
+	}
+	while ( (count = fread(buffer, 1, COPY_BUF_SIZE, psfile.file)) != 0 ) {
+	    fwrite(buffer, 1, count, pcfile);
+	}
+	free(buffer);
+    }
+    else {
+/* A temporary DSC file already exists so don't bother with this.
+	if (psfile.ispdf) {
+	    if (!pdf_extract(pcfile)) {
+		fclose(pcfile);
 		return FALSE;
-	}
-	fprintf(optfile, "-dNOPAUSE\n");
-	if (option.safer)
-	    fprintf(optfile, "-dSAFER\n");
-	fprintf(optfile, "-sDEVICE=%s\n",option.device_name);
-	fprintf(optfile, "-r%gx%g\n", (double)print_xdpi, (double)print_ydpi);
-	fprintf(optfile, "-g%ux%u\n",width,height);
-	if (to_file) {
-	    fprintf(optfile, "-sOutputFile=");
-	    for (p=output; *p != '\0'; p++)
-	        if (*p == '\\')
-	            fputc('/',optfile);
-	        else
-	            fputc(*p,optfile);
-	    fputc('\n',optfile);
-	}
-	if ((proplist = get_properties(option.device_name)) != (struct prop_item_s *)NULL) {
-	    /* output current property selections */
-	    for (i=0; proplist[i].name[0]; i++) {
-		if (strcmp(proplist[i].value, not_defined) != 0)
-		    fprintf(optfile,"-%s=%s\n", proplist[i].name, proplist[i].value);
 	    }
-	    free((char *)proplist);
 	}
-	for (p=fname; *p != '\0'; p++)
-	    if (*p == '\\')
-	        fputc('/',optfile);
+	else
+*/
+	     {
+	    /* copy DSC file */
+	    if (doc->numpages != 0)
+		psfile_extract(pcfile);
 	    else
-	        fputc(*p,optfile);
-        fputs("\nquit.ps\n", optfile);
-	fclose(optfile);
-	return TRUE;
+		pscopyuntil(psfile.file, pcfile, doc->beginheader, doc->endtrailer, NULL);
+	}
+    }
+
+    fclose(pcfile);
+	
+    if (to_file || (strcmp(option.printer_port, "FILE:")==0)) {
+	if (!get_filename(output, TRUE, FILTER_ALL, IDS_OUTPUTFILE, IDS_TOPICPRINT))
+	    return FALSE;
+    }
+    else {
+	strcpy(output, szSpoolPrefix);
+	strcat(output, option.printer_port);
+    }
+
+#endif
+
+    /* calculate image size */
+    switch (sscanf(option.device_resolution,"%fx%f", &print_xdpi, &print_ydpi)) {
+	case EOF:
+	case 0:
+	    print_xdpi = print_ydpi = DEFAULT_RESOLUTION;
+	    break;
+	case 1:
+	    print_ydpi = print_xdpi;
+    }
+    i = get_paper_size_index();
+    if (i < 0) {
+	width = option.user_width;
+	height = option.user_height;
+    }
+    else {
+	width = papersizes[i].width;
+	height = papersizes[i].height;
+    }
+    width  = (unsigned int)(width  / 72.0 * print_xdpi + 0.5);
+    height = (unsigned int)(height / 72.0 * print_ydpi + 0.5);
+
+    if ((optname[0] != '\0') && !debug)
+	    unlink(optname);
+    optname[0] = '\0';
+    if ( (optfile = gp_open_scratch_file(szScratch, optname, "w")) == (FILE *)NULL) {
+	    play_sound(SOUND_ERROR);
+	    return FALSE;
+    }
+    if (option.gsversion == IDM_GS351)
+        fprintf(optfile, "-I\042%s\042\n", option.gsinclude);
+    else
+        fprintf(optfile, "-I%s\n", option.gsinclude);
+    fprintf(optfile, "-dNOPAUSE\n");
+    if (option.safer)
+	fprintf(optfile, "-dSAFER\n");
+    fprintf(optfile, "-sDEVICE=%s\n",option.device_name);
+#ifdef OLD
+    /* this version causes FIXEDMEDIA to be set in gs 3.51 */
+    /* which causes lots of configurationerror */
+    fprintf(optfile, "-r%gx%g\n", (double)print_xdpi, (double)print_ydpi);
+    fprintf(optfile, "-g%ux%u\n",width,height);
+#else
+    fprintf(optfile, "-dDEVICEXRESOLUTION=%g\n", (double)print_xdpi);
+    fprintf(optfile, "-dDEVICEYRESOLUTION=%g\n", (double)print_ydpi);
+    fprintf(optfile, "-dDEVICEWIDTH=%u\n", width);
+    fprintf(optfile, "-dDEVICEHEIGHT=%u\n", height);
+#endif
+/*
+    if (to_file) {
+*/
+	fprintf(optfile, "-sOutputFile=");
+        if (option.gsversion == IDM_GS351)
+	    fputc('\042', optfile);
+	for (p=output; *p != '\0'; p++)
+	    if (*p == '\\')
+		fputc('/',optfile);
+	    else
+		fputc(*p,optfile);
+        if (option.gsversion == IDM_GS351)
+	    fputc('\042', optfile);
+	fputc('\n',optfile);
+/*
+    }
+*/
+    if ((proplist = get_properties(option.device_name)) != (struct prop_item_s *)NULL) {
+	/* output current property selections */
+	for (i=0; proplist[i].name[0]; i++) {
+	    if (strcmp(proplist[i].value, not_defined) != 0)
+		fprintf(optfile,"-%s=%s\n", proplist[i].name, proplist[i].value);
+	}
+	free((char *)proplist);
+    }
+
+    /* PageOffset */
+    if (option.gsversion == IDM_GS351) {
+	strcpy(section, option.device_name);
+	strcat(section, " PageOffset");
+	if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+	    profile_read_string(prf, section, "X", "0", buf, sizeof(buf)-2);
+	    if (sscanf(buf, "%f", &xoffset) != 1)
+		xoffset = 0;
+	    profile_read_string(prf, section, "Y", "0", buf, sizeof(buf)-2);
+	    if (sscanf(buf, "%f", &yoffset) != 1)
+		yoffset = 0;
+	    profile_close(prf);
+	}
+	if ((xoffset != 0) || (yoffset != 0))
+	    fprintf(optfile, "-c \042<< /PageOffset [%g %g] >> setpagedevice\042\n-f\n", 
+	    (double)xoffset, (double)yoffset);
+    }
+
+    if (option.gsversion == IDM_GS351)
+	fputc('\042', optfile);
+    for (p=psname; *p != '\0'; p++)
+	if (*p == '\\')
+	    fputc('/',optfile);
+	else
+	    fputc(*p,optfile);
+    if (option.gsversion == IDM_GS351)
+	fputc('\042', optfile);
+    fputs("\nquit.ps\n", optfile);
+    fclose(optfile);
+    return TRUE;
 }
 

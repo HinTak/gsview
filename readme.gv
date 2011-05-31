@@ -1,7 +1,7 @@
 ===============================================================
-README.GV         1995-05-23
+README.GV         1996-01-10
 ===============================================================
-GSview 1.3 - PostScript previewer.  Needs Ghostscript 3.33.
+GSview 1.4 - PostScript previewer.  Needs Ghostscript 3.53.
 
 ========
 Overview
@@ -49,15 +49,66 @@ New features in version 1.3:
  - Display PDF files (OS/2 only).
  - Works under Windows 95 (see gvcbugs.doc)
  - Smaller text in Windows Dialog boxes.
+New features in version 1.4:
+ - Installation program (os2setup, winsetup).
+ - Uses print queues under OS/2 and Win95/NT.
+ - Uses gs16spl to talk to 16-bit print queue from Win32s.
+ - Add user supplied preview (usually WMF) to EPS file.
+ - Page Offset for printing
 
-PM GSview and GSview for Windows were written by 
-Russell Lang <rjl@aladdin.com>
+PM GSview and GSview for Windows were written by Russell Lang.
+
+============
+Installation
+============
+Create four 1.44M floppies containing the following files, or
+put them all in the same directory on your hard disk.
+
+Disk 1:
+  gsview.zip
+  README.GV
+  FILE_ID.DIZ
+  os2setup.exe      OS/2 installation program
+  os2unzip.exe      OS/2 INFO-ZIP unzip utility
+  winsetup.exe      MS-Windows installation program
+  winunzip.exe      MS-Windows INFO-ZIP unzip utility
+  emxrt.zip         EMX Run Time library for OS/2.
+
+Disk 2:
+  gs353ini.zip      Aladdin Ghostscript library files
+  gs353dos.zip      MS-DOS 386 Aladdin Ghostscript
+
+Disk 3:
+  gs353os2.zip      OS/2 Aladdin Ghostscript
+  gs353w32.zip      MS-Windows Win32 Aladdin Ghostscript
+  gs353win.zip      MS-Windows 3.1 Aladdin Ghostscript
+
+Disk 4:
+  gs353fn1.zip      Aladdin Ghostscript fonts.
+
+Disk 1 is the contents of gsview14.zip plus the file emxrt.zip obtained
+from ftp://ftp-os2.nmsu.edu/os2/unix/emx09b/emxrt.zip.
+Disks 2 to 4 are obtained from ftp://ftp.cs.wisc.edu/ghost/aladdin/
+
+If using the floppy install method, 7Mbytes of hard disk space is required.
+
+To install from OS/2, run 'os2setup.exe' from disk 1.
+To install from MS-Windows, run 'winsetup.exe' from disk 1.
+The installation will overwrite any version of GSview or
+Aladdin Ghostscript in the destination directories.  If you
+wish to save your Fontmap file, back it up to another directory.
+Make sure that the zip files are transferred in binary mode and
+are all present.  The install program will not report bad zip files.
+
+If you don't like automatic installation programs, it is 
+possible to install GSview and Ghostscript manually.  See
+the Setup topic below for more details.
 
 ===========
 Compilation
 ===========
-To compile PM GSview you need IBM NMAKE.EXE and EMX/GCC 0.8h
-with emxfix05 or later.
+To compile PM GSview you need IBM NMAKE.EXE and EMX/GCC 0.9b
+with emxfix01 or later.
 To create the PM GSview online help you need the IBM toolkit.
 Copy gvpm.mak to Makefile and edit COMPBASE and EMXPATH as required.
 Type 'nmake'
@@ -70,17 +121,19 @@ Type 'make'.
 =====
 Setup
 =====
-Copy gvpm.exe, gvpm.hlp, gsview.exe, gsview32.exe and gsview.hlp to the 
-Ghostscript directory.  
-Start GSview then select "Options | Ghostscript Command",
-and enter the correct executable path and include path for Ghostscript.
-For example "c:\gs\gsos2.exe -Ic:\gs;c:\psfonts"
+Copy gvpm.exe, gvpm.hlp, gsview.exe, gsview32.exe, gsview.hlp 
+and gsv16spl.exe to the Ghostscript directory.  
+Start GSview then select "Options | Configure Ghostscript",
+and enter the correct executable and include paths for Ghostscript.
+For example:
+  c:\gs\gsos2.exe
+  c:\gs;c:\psfonts
 
 PM GSview will run under OS/2 2.1 and OS/2 Warp.  
 It may run under OS/2 2.0.
-PM GSview has been compiled with EMX/GCC 0.9a and requires
-the emx 0.9a DLL's.  These are available from
-  ftp://ftp.cdrom.com/pub/os2/unix/emx09a/emxrt.zip
+PM GSview has been compiled with EMX/GCC 0.9b and requires
+the emx 0.9b DLL's.  These are available from
+  ftp://hobbes.nmsu.edu/os2/unix/emx09b/emxrt.zip
 
 GSview for Windows will run under Windows 3.1.
 GSview will probably run under Windows 3.0, but you need a special
@@ -102,7 +155,9 @@ Send bug reports to Russell Lang <rjl@aladdin.com>.
 an employee or agent of Aladdin Enterprises).
 When reporting bugs, please include the version number and date of 
 GSview (from the Help | About box), the version number of Ghostscript, 
-and the exact wording of any error messages.
+and the exact wording of any error messages.  Ghostscript error
+messages can be copied to the clipboard using the system menu of
+the Ghostscript text window.
 Do not send me large files unless requested.
 If you get a SYS3175 or GPF, please send the address of the GPF - I can 
 use this to help locate the bug.

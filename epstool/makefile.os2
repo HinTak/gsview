@@ -16,7 +16,7 @@
 
 # makefile.os2
 # EPSTOOL
-# requires emx 0.8h
+# requires emx 0.9a
 #
 # edit COMPBASE and EMXPATH as required.
 
@@ -79,11 +79,11 @@ gvceps.$(OBJ): ../src/gvceps.c epstool.h ../src/ps.h
 epstool.exe: $(OBJS) epstool.def
 !if $(USE_EMX)
 !if $(USE_OMF)
-	$(COMP) $(FLAGS) -o epstool $(OBJS) epstool.def
+	$(COMP) $(FLAGS) -o epstool.exe $(OBJS) epstool.def
 !else
-	$(COMP) $(FLAGS) -o epstool $(OBJS)
-	emxbind $(COMPDIR)\emxl.exe epstool epstool.exe
-	del $*
+	$(COMP) $(FLAGS) -o epstool.out $(OBJS)
+	emxbind $(COMPDIR)\emxl.exe epstool.out epstool.exe
+	del epstool.out
 !endif
 !else
 	$(COMP) $(FLAGS) -eepstool.exe $(OBJS)
@@ -97,11 +97,44 @@ clean:
 veryclean: clean
 	-del epstool.exe
 
-ZIPFILES = epstool.c epstool.h epstool.def epstool.doc epstool.exe\
- makefile.os2 makefile.tc makefile.unx
+EPSFILES=\
+ epstool/epstool.c\
+ epstool/epstool.h\
+ epstool/epstool.def\
+ epstool/epstool.doc\
+ epstool/epstest.cmd\
+ epstool/makefile.os2\
+ epstool/makefile.tc\
+ epstool/makefile.unx
 
-zip:
-	zip ..\epstool $(ZIPFILES)
+SRCFILES1=\
+ src/LICENCE\
+ src/gvceps.c\
+ src/gvceps.h\
+ src/PUBLIC\
+ src/ps.c\
+ src/ps.h
 
+ZIPFILES=\
+ epstool.exe\
+ epstool.doc\
+ $(EPSFILES)\
+ $(SRCFILES1)
 
+zip: all
+	copy epstool.doc ..
+	copy epstool.exe ..
+	emxbind -s ../epstool.exe
+	cd ..
+	-del epstool.zip
+	zip epstool $(ZIPFILES)
+	cd epstool
 
+tar:	zip
+	unzip -o ..\epstool
+	copy src\* epstool
+	-del ..\epstool.tar
+	cd epstool
+	flip -u *
+	cd ..
+	tar -cvf ../epstool.tar epstool

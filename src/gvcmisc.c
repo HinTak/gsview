@@ -236,16 +236,50 @@ PROFILE *prf;
 	if (sscanf(profile,"%d", &i) == 1)
 		option.save_dir = i;
 	if (option.save_dir) {
+	    char workdir[MAXSTR];
+	    gs_getcwd(workdir, sizeof(workdir));	/* save current in case chdir fails */
 	    profile_read_string(prf, section, "LastDir", "", profile, sizeof(profile));
-	    _chdir(profile);
-_getcwd(profile, sizeof(profile));
+	    if (gs_chdir(profile))
+	        gs_chdir(workdir);
 	}
+#ifdef OLD
 	profile_read_string(prf, section, "Ghostscript", "", profile, sizeof(profile));
 	if (profile[0] != '\0')	/* don't copy a default - assume already set */
 		strcpy(option.gscommand, profile);
-	profile_read_string(prf, section, "GS261", "", profile, sizeof(profile));
-	if (sscanf(profile,"%d", &i) == 1)
-		option.gsversion = i ? IDM_GS261 : IDM_GS3;
+#endif
+	profile_read_string(prf, section, "GhostscriptEXE", "", profile, sizeof(profile));
+	if (profile[0] != '\0')	/* don't copy a default - assume already set */
+		strcpy(option.gsexe, profile);
+	profile_read_string(prf, section, "GhostscriptInclude", "", profile, sizeof(profile));
+	if (profile[0] != '\0')	/* don't copy a default - assume already set */
+		strcpy(option.gsinclude, profile);
+	profile_read_string(prf, section, "GhostscriptOther", "", profile, sizeof(profile));
+	if (profile[0] != '\0')	/* don't copy a default - assume already set */
+		strcpy(option.gsother, profile);
+	profile_read_string(prf, section, "GhostscriptVersion", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1) {
+	    if (i <= 261) 
+		option.gsversion = IDM_GS261;
+	    else if (i <= 333)
+		option.gsversion = IDM_GS333;
+	    else
+		option.gsversion = IDM_GS351;
+	}
+	profile_read_string(prf, section, "DrawMethod", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1) {
+	    switch (i) {
+		case (IDM_DRAWGPI-IDM_DRAWMENU):
+		    option.drawmethod = IDM_DRAWGPI;
+		    break;
+		case (IDM_DRAWWIN-IDM_DRAWMENU):
+		    option.drawmethod = IDM_DRAWWIN;
+		    break;
+		default:
+		case (IDM_DRAWDEF-IDM_DRAWMENU):
+		    option.drawmethod = IDM_DRAWDEF;
+		    break;
+	    }
+	}
 	profile_read_string(prf, section, "Printer", ",", profile, sizeof(profile));
 	device_ptr = strtok(profile, ",");
 	if (device_ptr != (char *)NULL) {
@@ -322,12 +356,30 @@ PROFILE *prf;
 	sprintf(profile, "%d", option.save_dir);
 	profile_write_string(prf, section, "SaveLastDir", profile);
 	if (option.save_dir) {
-	    _getcwd(profile, sizeof(profile));
+	    gs_getcwd(profile, sizeof(profile));
 	    profile_write_string(prf, section, "LastDir", profile);
 	}
+#ifdef OLD
 	profile_write_string(prf, section, "Ghostscript", option.gscommand);
-	sprintf(profile, "%d", (option.gsversion == IDM_GS261 ? 1 : 0));
-	profile_write_string(prf, section, "GS261", profile);
+#endif
+	profile_write_string(prf, section, "GhostscriptEXE", option.gsexe);
+	profile_write_string(prf, section, "GhostscriptInclude", option.gsinclude);
+	profile_write_string(prf, section, "GhostscriptOther", option.gsother);
+	switch (option.gsversion) {
+	    case IDM_GS261:
+		i = 261;
+		break;
+	    case IDM_GS333:
+		i = 333;
+		break;
+	    case IDM_GS351:
+	    default:
+		i = 351;
+	}
+	sprintf(profile, "%d", i);
+	profile_write_string(prf, section, "GhostscriptVersion", profile);
+	sprintf(profile, "%d", (option.drawmethod - IDM_DRAWMENU));
+	profile_write_string(prf, section, "DrawMethod", profile);
 	if (option.device_name[0] != '\0') {
 	    sprintf(profile,"%s,%s",option.device_name,option.device_resolution);
 	    profile_write_string(prf, section, "Printer", profile);

@@ -162,8 +162,7 @@ gsview_text_extract()
 		return;
 	}
 
-	load_string(IDS_WAITWRITE, szWait, sizeof(szWait));
-	info_wait(TRUE);
+	info_wait(IDS_WAITWRITE);
 	if (doc == (PSDOC *)NULL) {
 	    /* scan whole document */
 	    unsigned long end;
@@ -197,7 +196,7 @@ gsview_text_extract()
 
 	fclose(f);
 
-	info_wait(FALSE);
+	info_wait(IDS_NOWAIT);
 	return;
 }
 
@@ -318,15 +317,14 @@ char *p;
 	    return;
 	}
 	dfreopen();
-	load_string(IDS_WAITSEARCH, szWait, sizeof(szWait));
-	info_wait(TRUE);
+	info_wait(IDS_WAITSEARCH);
 	for (i = 0; i < doc->numpages; i++) {
 	    if (page_list.select[map_page(i)])  {
 		page_list.select[map_page(i)] = FALSE;
 	        fseek(psfile.file, doc->pages[map_page(i)].begin, SEEK_SET);
 		p = text_find_section(psfile.file, doc->pages[map_page(i)].end, szFindText);
 		if (p) {	/* found it */
-		    info_wait(FALSE);
+		    info_wait(IDS_NOWAIT);
 		    free(p);
 		    psfile.pagenum = i+1;
 		    if (gs_open())
@@ -337,6 +335,6 @@ char *p;
 	    }
 	}
 	dfclose();
-        info_wait(FALSE);
+        info_wait(IDS_NOWAIT);
 	gserror(IDS_TEXTNOTFIND, NULL, MB_ICONEXCLAMATION, 0);
 }

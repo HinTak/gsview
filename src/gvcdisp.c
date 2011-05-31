@@ -282,7 +282,7 @@ gsview_unit(int new_unit)
 	check_menu_item(IDM_UNITMENU, option.unit, FALSE);
 	option.unit = new_unit;
 	check_menu_item(IDM_UNITMENU, option.unit, TRUE);
-	info_wait(FALSE);
+	info_wait(IDS_NOWAIT);
 	return;
 }
 
@@ -320,8 +320,7 @@ void
 gsview_openfile(char *filename)
 {
 int i;
-	load_string(IDS_WAITREAD, szWait, sizeof(szWait));
-	info_wait(TRUE);
+	info_wait(IDS_WAITREAD);
 	psfile.pagenum = 1;
 	page_extra = 0;
 	if (dsc_scan(filename)) {
@@ -370,7 +369,7 @@ gsview_selectfile(char *filename)
 	     filename++;
 	gsview_openfile(filename);
 	strcpy(previous_filename, filename);
-	info_wait(FALSE);
+	info_wait(IDS_NOWAIT);
 }
 
 /* get filename then open a new document and display it */
@@ -450,7 +449,7 @@ FILE *
 gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 {	char *temp;
 	if ( (temp = getenv("TEMP")) == NULL )
-		_getcwd(fname, MAXSTR);
+		gs_getcwd(fname, MAXSTR);
 	else
 		strcpy(fname, temp);
 
@@ -479,11 +478,13 @@ char *filename;
 	    filename = psfile.pdftemp;
 	else
 	    filename = psfile.name;
+/*
 	if (doc == (PSDOC *)NULL)
 		return TRUE;
+*/
 	dfclose();
 	if (filename[0] == '\0')
-		return TRUE;
+		return FALSE;
 	if ( (psfile.file = fopen(filename, "rb")) == (FILE *)NULL ) {
 	    if (debug)
 		message_box("dfreopen: file missing",0);
@@ -500,6 +501,7 @@ char *filename;
 		    filename = psfile.pdftemp;
 		else
 		    filename = psfile.name;
+		dfclose();
 	        if ( (psfile.file = fopen(filename, "rb")) == (FILE *)NULL ) {
 		        psfile.name[0] = '\0';
 		        return FALSE;
@@ -530,6 +532,8 @@ dsc_pdf(void)
 	char temp[MAXSTR];
 	int i;
 	
+	gs_close();  /* kill GS to avoid termination queue problems */
+
 	/* change directory separators from \ to / */
 	strcpy(temp, psfile.name);
 	for (args=temp; *args; args++) {
@@ -537,23 +541,17 @@ dsc_pdf(void)
 		*args = '/';
 	}
 
-	args = strchr(option.gscommand, ' ');
-	if (args) {
-	    strncpy(progname, option.gscommand, (int)(args-option.gscommand));
-	    progname[(int)(args-option.gscommand)] = '\0';
-	    args++;
-	}
-	else {
-	    strncpy(progname, option.gscommand, MAXSTR);
-	    args = "";
-	}
-
 	/* get a temporary filename for pdf DSC index */
 	if ( (tempfile = gp_open_scratch_file(szScratch, psfile.pdftemp, "wb")) == (FILE *)NULL)
 	    return FALSE;
 	fclose(tempfile);
 	
-	sprintf(command,"%s -dNODISPLAY -sPDFname=%s -sDSCname=%s pdf2dsc.ps", args, temp, psfile.pdftemp);
+        if (option.gsversion == IDM_GS351)
+	    sprintf(command,"-I\042%s\042 %s -dNODISPLAY -sPDFname=\042%s\042 -sDSCname=\042%s\042 pdf2dsc.ps", 
+		option.gsinclude, option.gsother, temp, psfile.pdftemp);
+	else
+	    sprintf(command,"-I%s %s -dNODISPLAY -sPDFname=%s -sDSCname=%s pdf2dsc.ps", 
+		option.gsinclude, option.gsother, temp, psfile.pdftemp);
 
 	if (strlen(command) > MAXSTR-1) {
 		/* command line too long */
@@ -564,16 +562,15 @@ dsc_pdf(void)
 		return FALSE;
 	}
 
-	load_string(IDS_WAIT, szWait, sizeof(szWait));
-	info_wait(TRUE);
+	info_wait(IDS_WAIT);
 
-	flag = pdf_convert(progname, command, &pdfconv);
+	flag = pdf_convert(option.gsexe, command, &pdfconv);
 	if (!flag) {
 		gserror(IDS_CANNOTRUN, command, MB_ICONHAND, SOUND_ERROR);
 		if (!debug)
 		    unlink(psfile.pdftemp);
 		psfile.pdftemp[0] = '\0';
-		info_wait(FALSE);
+		info_wait(IDS_NOWAIT);
 		return FALSE;
 	}
 	/* open DSC index file */
@@ -639,6 +636,45 @@ char line[MAXSTR];
 	if (!psfile.preview && (doc->beginpreview != doc->endpreview))
 	    psfile.preview = IDS_EPSI;
 	page_list.select = (BOOL *)malloc( doc->numpages * sizeof(BOOL) );
+	if (doc->numpages) {
+	    int i;
+	    char *label;
+	    for (i=0; i<doc->numpages; i++) {
+		if ( (label = doc->pages[i].label) != NULL)  {
+		    if (strlen(label)==0) {	/* remove old empty label */
+			free(label);
+			sprintf(line, "%d", i+1);
+			label = malloc(strlen(line)+1);
+			if (label)
+			    strcpy(label, line);
+			doc->pages[i].label = label;
+		    }
+		}
+	    }
+	    page_list.select = (BOOL *)malloc( doc->numpages * sizeof(BOOL) );
+	}
+	if (doc->epsf) {
+	    /* warn if bounding box off the page */
+	    int i = get_paper_size_index();
+	    int width, height;
+	    if (i < 0) {
+	        width = option.user_width;
+	        height = option.user_height;
+	    }
+	    else {
+	        width = papersizes[i].width;
+	        height = papersizes[i].height;
+	    }
+	    if (!option.epsf_clip &&
+	        ((doc->boundingbox[LLX] > width) || 
+		 (doc->boundingbox[LLY] > height) ||
+	         (doc->boundingbox[URX] < 0) || 
+		 (doc->boundingbox[URY] < 0))
+	       ) {
+		load_string(IDS_EPS_OFF_PAGE, line, sizeof(line));
+		message_box(line, 0);
+	    }
+	}
 	return TRUE;
 }
 
@@ -712,8 +748,7 @@ char buf[MAXSTR];
 void
 dsc_dopage(void)
 {
-	load_string(IDS_WAITDRAW, szWait, sizeof(szWait));
-	info_wait(TRUE);
+	info_wait(IDS_WAITDRAW);
 	display.do_display = TRUE;
 }
 
@@ -726,7 +761,7 @@ dsc_skip(int skip)
 	  || ((skip < 0) && (psfile.pagenum == 1))
 	  || (doc->numpages == 0) ) {
 	    play_sound(SOUND_NOPAGE);
-	    info_wait(FALSE);
+	    info_wait(IDS_NOWAIT);
 	    return;
 	}
 	psfile.pagenum += skip;
@@ -734,8 +769,7 @@ dsc_skip(int skip)
 	     psfile.pagenum = doc->numpages;
 	if (psfile.pagenum < 1)
 	    psfile.pagenum = 1;
-	load_string(IDS_WAIT, szWait, sizeof(szWait));
-	info_wait(TRUE);
+	info_wait(IDS_WAIT);
 	if (display.page)
 	    next_page();
 	if (gs_open())

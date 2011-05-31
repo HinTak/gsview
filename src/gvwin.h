@@ -55,6 +55,9 @@
 /* from gsview to gswin text window */
 #define PIPE_DATA	12
 
+/* for gsv16spl.exe 16-bit spooler interface for Win32s */
+#define WM_GSV16SPL WM_USER+1
+extern HWND hwndspl;	/* window handle of gsv16spl.exe */
 
 #define PROFILE_SIZE 2048
 #ifdef WIN32
@@ -76,6 +79,8 @@
 #define GVFAR FAR
 #define GVHUGE _huge
 
+#include "gvceps.h"
+#include "gvcprf.h"
 
 /* program details */
 typedef struct tagPROG {
@@ -118,8 +123,12 @@ typedef struct tagPSFILE {
 
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
-	char	gscommand[MAXSTR];
+	/* char	gscommand[MAXSTR]; */ /* no longer used */
+	char	gsexe[MAXSTR];
+	char	gsinclude[MAXSTR];
+	char	gsother[MAXSTR];
 	int	gsversion;
+	int	drawmethod;
 	POINT	img_origin;
 	POINT	img_size;
 	BOOL	img_max;
@@ -152,6 +161,7 @@ typedef struct tagOPTIONS {
 } OPTIONS;
 
 typedef struct tagDISPLAY {
+	char	optname[MAXSTR]; /* file storing command line options */
 	BOOL	abort;
 	BOOL	busy;
 	int	width;
@@ -169,29 +179,6 @@ typedef struct tagDISPLAY {
 	BOOL	sync;		/* GS_SYNC received */
 } DISPLAY;
 
-struct prfentry {
-	char *name;
-	char *value;
-	struct prfentry *next;
-};
-
-struct prfsection {
-	char *name;
-	struct prfentry *entry;
-	struct prfsection *next;
-};
-
-struct prop_item_s {
-	char	name[MAXSTR];
-	char	value[MAXSTR];
-};
-
-typedef struct tagPROFILE {
-	char *name;
-	FILE *file;
-	BOOL changed;
-	struct prfsection *section;
-} PROFILE;
 
 extern BOOL debug;			/* /D command line option used */
 extern FILE *debug_file;		/* for gs input logging */
@@ -224,6 +211,7 @@ extern FPSPS lpfnSndPlaySound;	/* pointer to sndPlaySound function if loaded */
 
 extern const char szClassName[];
 extern const char szScratch[];  /* temporary filename prefix */
+extern char szSpoolPrefix[];	/* usually \\spool\ */
 extern char szAppName[MAXSTR];
 extern char szHelpTopic[MAXSTR];
 extern char szWait[MAXSTR];
@@ -314,9 +302,9 @@ void check_menu_item(int menuid, int itemid, BOOL checked);
 int get_menu_string(int menuid, int itemid, char *str, int len);
 int load_string(int id, char *str, int len);
 void play_sound(int i);
-void info_wait(BOOL flag);
-int _chdir(char *dirname);
-char * _getcwd(char *dirname, int size);
+void info_wait(int id);
+int gs_chdir(char *dirname);
+char * gs_getcwd(char *dirname, int size);
 void send_prolog(FILE *f, int resource);
 void profile_create_section(PROFILE *prf, char *section, int id);
 
@@ -376,10 +364,12 @@ int gsview_depth_to_menu(int depth);
 /* in gvwdlg.c */
 BOOL get_filename(char *filename, BOOL save, int filter, int title, int help);
 BOOL get_string(char *, char *);
+BOOL CALLBACK _export PageDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam);
 BOOL get_page(int *, BOOL);
 void show_info(void);
 void show_about(void);
 void change_sounds(void);
+BOOL install_gsexe(void);
 
 /* in gvwpipe.c */
 void pipeinit(void);	/* prepare pipe for opening */
@@ -395,6 +385,7 @@ void gsview_init0(LPSTR lpszCmdLine);
 void gsview_init1(LPSTR lpszCmdLine);
 void gsview_create(void);
 void show_buttons(void);
+char * install_default(int id);
 
 /* in gvcprn.c */
 struct prop_item_s * get_properties(char *device);
@@ -411,23 +402,14 @@ int gp_printfile(char *filename, char *port);
 void gsview_print(BOOL);
 extern char not_defined[];
 
-/* in gvceps.c */
-void extract_doseps(int);
+/* in gvweps.c */
 void make_eps_metafile(void);
-void make_eps_tiff(int);
-void make_eps_interchange(BOOL calc_bbox);
-void ps_to_eps(void);
+void ps_to_eps(void); /* actually in gvceps.c */
 BOOL get_bbox(void);
 
 /* in gvwclip.c */
 void paste_to_file(void);
 void clip_convert(void);
-
-/* in gvwprf.c */
-PROFILE * profile_open(char *filename);
-int profile_read_string(PROFILE *prf, char *section, char GVFAR *entry, char *def, char *buffer, int len);
-BOOL profile_write_string(PROFILE *prf, char *section, char *entry, char *value);
-BOOL profile_close(PROFILE *prf);
 
 /* in gvctext.c */
 void gsview_text_extract(void);

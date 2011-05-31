@@ -101,7 +101,7 @@ int i;
 	    load_string(title, szTitle, sizeof(szTitle));
 	    FileDlg.pszTitle = szTitle;
 	}
-	_getcwd(FileDlg.szFullFile, sizeof(FileDlg.szFullFile));
+	gs_getcwd(FileDlg.szFullFile, sizeof(FileDlg.szFullFile));
 	for (p=FileDlg.szFullFile; *p; p++) {
 	    if (*p == '/')
 		*p = '\\';
@@ -125,7 +125,7 @@ int i;
 	    p = strrchr(FileDlg.szFullFile, '\\');
 	    if (p) {
 		*p = '\0';
-		_chdir(FileDlg.szFullFile);
+		gs_chdir(FileDlg.szFullFile);
 	    }
 	    return TRUE;
 	}
@@ -237,11 +237,13 @@ int i;
 int notify_message;
     switch(msg) {
     case  WM_INITDLG:
+/*
 	if (page_list.multiple)
 	    load_string(IDS_SELECTPAGES, buf, sizeof(buf));
 	else
 	    load_string(IDS_SELECTPAGE, buf, sizeof(buf));
 	WinSetWindowText(hwnd, buf);
+*/
 	for (i=0; i<doc->numpages; i++) {
 	    WinSendMsg( WinWindowFromID(hwnd, PAGE_LIST),
 	    	LM_INSERTITEM, MPFROMLONG(LIT_END), 
@@ -798,4 +800,64 @@ ULONG drivenum, drivemap;
 	  drivemap >>= 1;
 	}
 }
+
+MRESULT EXPENTRY 
+InstallDlgProc(HWND hwnd, ULONG mess, MPARAM mp1, MPARAM mp2)
+{
+    switch(mess) {
+	case WM_INITDLG:
+	    WinSendMsg( WinWindowFromID(hwnd, INSTALL_EXE),
+	    	EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
+	    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_EXE),
+	    	option.gsexe );
+	    WinSendMsg( WinWindowFromID(hwnd, INSTALL_INCLUDE),
+	    	EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
+	    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_INCLUDE),
+	    	option.gsinclude );
+	    WinSendMsg( WinWindowFromID(hwnd, INSTALL_OTHER),
+	    	EM_SETTEXTLIMIT, MPFROM2SHORT(MAXSTR, 0), MPFROMLONG(0) );
+	    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_OTHER),
+	    	option.gsother );
+	    WinSetFocus(HWND_DESKTOP, WinWindowFromID(hwnd, INSTALL_INCLUDE));
+    	    break;
+        case WM_COMMAND:
+            switch(SHORT1FROMMP(mp1)) {
+		case ID_DEFAULT:
+		    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_EXE),
+			install_default(INSTALL_EXE) );
+		    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_INCLUDE),
+			install_default(INSTALL_INCLUDE) );
+		    WinSetWindowText( WinWindowFromID(hwnd, INSTALL_OTHER),
+			install_default(INSTALL_OTHER) );
+		    return(FALSE);
+                case DID_OK:
+                    WinEnableWindow(WinWindowFromID(hwnd, DID_OK), FALSE);
+                    WinQueryWindowText(WinWindowFromID(hwnd, INSTALL_EXE),
+                    	MAXSTR, option.gsexe);
+                    WinQueryWindowText(WinWindowFromID(hwnd, INSTALL_INCLUDE),
+                    	MAXSTR, option.gsinclude);
+                    WinQueryWindowText(WinWindowFromID(hwnd, INSTALL_OTHER),
+                    	MAXSTR, option.gsother);
+                    WinDismissDlg(hwnd, DID_OK);
+                    break;
+		case ID_HELP:
+		    get_help();
+		    return (MRESULT)TRUE;
+            }
+            break;
+    }
+    return WinDefDlgProc(hwnd, mess, mp1, mp2);
+}
+
+BOOL
+install_gsexe(void)
+{
+	load_string(IDS_TOPICINSTALL, szHelpTopic, sizeof(szHelpTopic));
+	if (WinDlgBox(HWND_DESKTOP, hwnd_frame, InstallDlgProc, 0, IDD_INSTALL, NULL)
+	   == DID_OK) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
 

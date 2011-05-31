@@ -28,6 +28,7 @@ void gsview_depth(int new_depth);
 void gsview_gsversion(int new_version);
 BOOL gsview_usersize(void);
 void gsview_unzoom(void);
+void gsview_drawmethod(int new_drawmethod);
 
 /* gsview menu commands */
 int
@@ -95,7 +96,10 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		}
 		if (!gs_open())
 		    return 0;
-		dfreopen();
+		if (!dfreopen()) {
+		    gserror(0, "Someone deleted the file!", MB_ICONEXCLAMATION, SOUND_ERROR);
+		    return 0;
+	 	}
 		gsview_unzoom();
 		if (display.page)
 		    next_page(); 
@@ -222,6 +226,8 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		clip_convert();
 		return 0;
 	case IDM_GSCOMMAND:
+	        install_gsexe();
+#ifdef OLD
 		load_string(IDS_GSCOMMAND, prompt, sizeof(prompt));
 		strcpy(answer, option.gscommand);
 		load_string(IDS_TOPICGSCMD, szHelpTopic, sizeof(szHelpTopic));
@@ -229,10 +235,17 @@ char answer[MAXSTR];		/* input dialog box answer string */
 		    strcpy(option.gscommand, answer);
 		if (option.gscommand[0]=='\0')
 		    strcpy(option.gscommand, DEFAULT_GSCOMMAND);
+#endif
 		return 0;
-	case IDM_GS3:
+	case IDM_GS351:
+	case IDM_GS333:
 	case IDM_GS261:
 		gsview_gsversion(command);
+		return 0;
+	case IDM_DRAWDEF:
+	case IDM_DRAWGPI:
+	case IDM_DRAWWIN:
+		gsview_drawmethod(command);
 		return 0;
 	case IDM_UNITPT:
 	case IDM_UNITMM:
@@ -313,12 +326,17 @@ char answer[MAXSTR];		/* input dialog box answer string */
 	case IDM_MAKEEPST4:
 	case IDM_MAKEEPST:
 		dfreopen();
-		make_eps_tiff(command);
+		make_eps_tiff(command, FALSE);
 		dfclose();
 		return 0;
 	case IDM_MAKEEPSW:
 		dfreopen();
 		make_eps_metafile();
+		dfclose();
+		return 0;
+	case IDM_MAKEEPSU:
+		dfreopen();
+		make_eps_user();
 		dfclose();
 		return 0;
 	case IDM_EXTRACTPS:
@@ -514,7 +532,7 @@ gserror(UINT id, char *str, UINT icon, int sound)
 {
 int i;
 char mess[300];
-	info_wait(FALSE);
+	info_wait(IDS_NOWAIT);
 	if (sound >= 0)
 	    play_sound(sound);
 	i = 0;
@@ -652,7 +670,17 @@ gsview_gsversion(int new_version)
 	check_menu_item(IDM_GSVERMENU, option.gsversion, FALSE);
 	option.gsversion = new_version;
 	check_menu_item(IDM_GSVERMENU, option.gsversion, TRUE);
-	info_wait(FALSE);
+	info_wait(IDS_NOWAIT);
+	return;
+}
+
+/* allow OS/2 to select the API for drawing the bitmap */
+void
+gsview_drawmethod(int new_drawmethod)
+{
+	check_menu_item(IDM_DRAWMENU, option.drawmethod, FALSE);
+	option.drawmethod = new_drawmethod;
+	check_menu_item(IDM_DRAWMENU, option.drawmethod, TRUE);
 	return;
 }
 

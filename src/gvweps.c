@@ -19,7 +19,6 @@
 /* EPS file manipulation module for Windows GSview */
 
 #include "gvwin.h"
-#include "gvceps.h"
 
 
 HGLOBAL make_dib(void);  /* in gvwclip.c */

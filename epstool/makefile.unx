@@ -17,34 +17,47 @@
 # makefile.unx
 # EPSTOOL
 
+
+# VERY IMPORTANT
+# The structures in gvceps.c and gvceps.h MUST BE BYTE ALIGNED
+# This needs to be forced using a compiler option, a #pragma
+# of by redefining PACKED in epstool.h
+
+RM=/bin/rm -f
+SHELL=/bin/sh
+
+BINDIR=/usr/local/bin
+INCLUDES=-I/usr/openwin/include
+LIBS=
+DEFINES=-DUNIX -DEPSTOOL -DHAVE_UNISTD_H
 OBJ=o
 COMP=gcc
-# need to add flag to cause structures to be byte aligned.
-# Not sure what flag should be used
-FLAGS=
 
 OBJS=epstool.$(OBJ) gvceps.$(OBJ) ps.$(OBJ)
 
 all: epstool
 
 .c.$(OBJ):
-	$(COMP) $(FLAGS) -DUNIX -DEPSTOOL -c $*.c
+	$(COMP) $(INCLUDES) $(DEFINES) -c $*.c
 
 
-epstool.$(OBJ): epstool.c epstool.h ps.h
+epstool.$(OBJ): epstool.c epstool.h ps.h gvceps.h
 
-ps.$(OBJ): ps.c epstool.h ps.h
+ps.$(OBJ): ps.c epstool.h ps.h gvceps.h
 
-gvceps.$(OBJ): gvceps.c epstool.h ps.h
+gvceps.$(OBJ): gvceps.c epstool.h ps.h gvceps.h
 
 epstool: $(OBJS)
-	$(COMP) $(FLAGS) -o epstool $(OBJS)
+	$(COMP) $(INCLUDES) -o epstool $(OBJS) $(LIBS) 
 
 clean:
-	-del epstool.$(OBJ)
-	-del gvceps.$(OBJ)
-	-del ps.$(OBJ)
+	-$(RM) epstool.$(OBJ)
+	-$(RM) gvceps.$(OBJ)
+	-$(RM) ps.$(OBJ)
 
 veryclean: clean
-	-del epstool
+	-$(RM) epstool
 
+install: epstool
+	cp epstool $(BINDIR)
+	chmod 755 $(BINDIR)/epstool

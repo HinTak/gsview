@@ -39,12 +39,19 @@
  */
 
 #include <stdio.h>
+
 #if defined(__TURBOC__) || defined(OS2)
+
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #define strcasecmp(s,t) stricmp(s,t)
 extern void pserror(char *str);
+
+#else
+
+#if defined(__STDC__)
+#include <stdlib.h>
+#include <string.h>
 #else
 #ifndef SEEK_SET
 #define SEEK_SET 0
@@ -52,14 +59,25 @@ extern void pserror(char *str);
 #ifndef BUFSIZ
 #define BUFSIZ 1024
 #endif
-#include <ctype.h>
 #include <X11/Xos.h>		/* #includes the appropriate <string.h> */
-#define pserror(str) fprintf(stderr,str)
 #endif
+#define pserror(str) fprintf(stderr,str)
+
+#endif
+
+#include <ctype.h>
 #include "ps.h"
 
 #ifdef BSD4_2
 #define memset(a,b,c) bzero(a,c)
+#endif
+
+/* redefine fgets to use a version that handles Unix, PC, or Mac EOL characters */
+#define fgets psfgets
+#if NeedFunctionPrototypes
+char *psfgets(char *s, int n, FILE *stream);
+#else
+char *psfgets();
 #endif
 
 /* length calculates string length at compile time */
@@ -1624,3 +1642,40 @@ ps_read_doseps(file, doseps)
 	return doseps->ps_begin + doseps->ps_length;
 }
 
+
+#undef fgets
+char *
+psfgets(s, n, stream)
+    char *s;
+    int n;
+    FILE *stream;
+{
+/*
+    return fgets(s, n, stream);
+*/
+    int ch = 0;
+    char *p;
+    p = s;
+    while ( (--n > 0)  && ((ch = fgetc(stream)) != EOF) ) {
+	*p++ = ch;
+	if (ch == '\n')
+	    break;
+	if (ch == '\r') {
+	    /* cope with MS-DOS \r\n or Mac \r */
+	    if (--n > 0) {
+	        ch = fgetc(stream);
+	        if (ch == EOF)
+		    break;
+	        if (ch == '\n')
+	            *p++ = ch;
+		else
+		    ungetc(ch, stream);
+		break;
+	    }
+	}
+    }
+    if ((ch == EOF) && (p == s))
+	return NULL;
+    *p = '\0';
+    return (ferror(stream)) ? NULL : s;
+}

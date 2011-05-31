@@ -124,17 +124,19 @@ ULONG rc;
 
 
 void
-info_wait(BOOL flag)
+info_wait(int id)
 {
 POINTL pt, pt_save;
 RECTL rect;
-	waiting = flag;
+	if (id)
+	    load_string(id, szWait, sizeof(szWait));  /* revert to generic text */
+	else
+	    szWait[0] = '\0';
+
 	if (hwnd_status) {
 	    WinInvalidateRect(hwnd_status, (PRECTL)NULL, TRUE);
   	    WinUpdateWindow(hwnd_status);
 	}
-	if (!waiting)
-	    load_string(IDS_WAIT, szWait, sizeof(szWait));  /* revert to generic text */
 	/* find out if cursor over hwnd_bmp */
 	if (!WinQueryPointerPos(HWND_DESKTOP, &pt))
 	    return;
@@ -144,7 +146,7 @@ RECTL rect;
 
 
 int 
-_chdir(char *dirname)
+gs_chdir(char *dirname)
 {
 #ifdef __BORLANDC__
 	if (isalpha(dirname[0]) && (dirname[1]==':'))
@@ -154,13 +156,14 @@ _chdir(char *dirname)
 	return TRUE;
 #else
 	if (isalpha(dirname[0]) && (dirname[1]==':'))
-		(void) _chdrive(dirname[0]);
+	    if (_chdrive(dirname[0]))
+		return -1;
 	return _chdir2(dirname);
 #endif
 }
 
 char * 
-_getcwd(char *dirname, int size)
+gs_getcwd(char *dirname, int size)
 {
 #ifdef __BORLANDC__
 	return getcwd(dirname, size);

@@ -31,67 +31,67 @@
 
 typedef struct tagRGB3
 {
-    BYTE    rgbtBlue;
-    BYTE    rgbtGreen;
-    BYTE    rgbtRed;
+    BYTE    rgbtBlue PACKED;
+    BYTE    rgbtGreen PACKED;
+    BYTE    rgbtRed PACKED;
 } RGB3;
 typedef RGB3 GVFAR* LPRGB3;
 
 typedef struct tagRGB4
 {
-    BYTE    rgbBlue;
-    BYTE    rgbGreen;
-    BYTE    rgbRed;
-    BYTE    rgbReserved;
+    BYTE    rgbBlue PACKED;
+    BYTE    rgbGreen PACKED;
+    BYTE    rgbRed PACKED;
+    BYTE    rgbReserved PACKED;
 } RGB4;
 typedef RGB4 GVFAR* LPRGB4;
 
 typedef struct tagBITMAP1
 {
-    DWORD   bcSize;
-    short   bcWidth;
-    short   bcHeight;
-    WORD    bcPlanes;
-    WORD    bcBitCount;
+    DWORD   bcSize PACKED;
+    short   bcWidth PACKED;
+    short   bcHeight PACKED;
+    WORD    bcPlanes PACKED;
+    WORD    bcBitCount PACKED;
 } BITMAP1;
 typedef BITMAP1 GVFAR* LPBITMAP1;
 
 typedef struct tagBITMAP2
 {
-    DWORD   biSize;
-    LONG    biWidth;
-    LONG    biHeight;
-    WORD    biPlanes;
-    WORD    biBitCount;
-    DWORD   biCompression;
-    DWORD   biSizeImage;
-    LONG    biXPelsPerMeter;
-    LONG    biYPelsPerMeter;
-    DWORD   biClrUsed;
-    DWORD   biClrImportant;
+    DWORD   biSize PACKED;
+    LONG    biWidth PACKED;
+    LONG    biHeight PACKED;
+    WORD    biPlanes PACKED;
+    WORD    biBitCount PACKED;
+    DWORD   biCompression PACKED;
+    DWORD   biSizeImage PACKED;
+    LONG    biXPelsPerMeter PACKED;
+    LONG    biYPelsPerMeter PACKED;
+    DWORD   biClrUsed PACKED;
+    DWORD   biClrImportant PACKED;
 } BITMAP2;
 typedef BITMAP2 GVFAR* LPBITMAP2;
 
 typedef struct tagBITMAPFILE
 {
-    WORD    bfType;
-    DWORD   bfSize;
-    WORD    bfReserved1;
-    WORD    bfReserved2;
-    DWORD   bfOffBits;
+    WORD    bfType PACKED;
+    DWORD   bfSize PACKED;
+    WORD    bfReserved1 PACKED;
+    WORD    bfReserved2 PACKED;
+    DWORD   bfOffBits PACKED;
 } BITMAPFILE;
 typedef BITMAPFILE GVFAR* LPBITMAPFILE;
 
 
 struct eps_header_s {
-    char id[4];
-    DWORD ps_begin;
-    DWORD ps_length;
-    DWORD mf_begin;
-    DWORD mf_length;
-    DWORD tiff_begin;
-    DWORD tiff_length;
-    WORD  checksum;
+    char id[4] PACKED;
+    DWORD ps_begin PACKED;
+    DWORD ps_length PACKED;
+    DWORD mf_begin PACKED;
+    DWORD mf_length PACKED;
+    DWORD tiff_begin PACKED;
+    DWORD tiff_length PACKED;
+    WORD  checksum PACKED;
 };
 
 #ifdef __EMX__
@@ -105,7 +105,8 @@ void release_bitmap(void);
 /* in gvceps.c */
 unsigned long dib_bytewidth(LPBITMAP2 pbm);
 unsigned int dib_pal_colors(LPBITMAP2 pbm);
-void make_eps_tiff(int type);
-void make_eps_interchange(BOOL calc_bbox);
+int make_eps_tiff(int type, BOOL calc_bbox);
+int make_eps_interchange(BOOL calc_bbox);
+int make_eps_user(void);
 void extract_doseps(int command);
 void copy_bbox_header(FILE *f);

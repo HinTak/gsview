@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -26,10 +26,12 @@
 #else
 #include "gvpm.h"
 #endif
-#include "gvceps.h"
 #endif
 
 PSBBOX bbox;
+void tiff_long(DWORD val, int little_endian, FILE *f);
+void tiff_short(WORD val, int little_endian, FILE *f);
+void tiff_word(WORD val, int little_endian, FILE *f);
 
 #ifndef EPSTOOL
 /* At present only allows bounding box to be specified */
@@ -86,8 +88,7 @@ long here;
 	}
 
 	if (doc == (PSDOC *)NULL) {
-	    load_string(IDS_WAITWRITE, szWait, sizeof(szWait));
-	    info_wait(TRUE);
+	    info_wait(IDS_WAITWRITE);
 	    fputs("%!PS-Adobe-3.0 EPSF-3.0\r\n",f);
 	    /* if this is not a single page document then gsview has just lied */
 	    fprintf(f, "%%%%BoundingBox: %u %u %u %u\r\n",
@@ -130,13 +131,11 @@ long here;
 	    fputs("%%EndDocument\r\n",f);
 	    fputs("%%Trailer\r\n",f);
 	    fclose(f);
-	    info_wait(FALSE);
+	    info_wait(IDS_NOWAIT);
 	}
 	else {
 	    /* document already has DSC comments */
-	    load_string(IDS_WAITWRITE, szWait, sizeof(szWait));
-	    info_wait(TRUE);
-	    dfreopen();
+	    info_wait(IDS_WAITWRITE);
 	    fseek(psfile.file, doc->beginheader, SEEK_SET);
 	    fgets(text, PSLINELENGTH, psfile.file);
 	    if (doc->epsf)
@@ -154,27 +153,26 @@ long here;
 		bbox.llx, bbox.lly, bbox.urx, bbox.ury);
 	    here = ftell(psfile.file);
 	    pscopyuntil(psfile.file, f, here, doc->endtrailer, NULL);
-	    dfclose();
 	    fclose(f);
-	    info_wait(FALSE);
+	    info_wait(IDS_NOWAIT);
 	}
 }
 #endif
 
 typedef struct tagWINRECT {
-	WORD	left;
-	WORD	top;
-	WORD	right;
-	WORD	bottom;
+	WORD	left PACKED;
+	WORD	top PACKED;
+	WORD	right PACKED;
+	WORD	bottom PACKED;
 } WINRECT;
 
 typedef struct {
-    DWORD	key;
-    WORD 	hmf;
-    WINRECT 	bbox;
-    WORD	inch;
-    DWORD	reserved;
-    WORD	checksum;
+    DWORD	key PACKED;
+    WORD 	hmf PACKED;
+    WINRECT 	bbox PACKED;
+    WORD	inch PACKED;
+    DWORD	reserved PACKED;
+    WORD	checksum PACKED;
 } METAFILEHEADER;
 
 
@@ -190,7 +188,8 @@ FILE* epsfile;
 BOOL is_meta = TRUE;
 char outname[MAXSTR];
 FILE *outfile;
-unsigned int filter;
+DWORD key;
+int filter;
 	if ((doc == (PSDOC *)NULL) || (doc->doseps == (DOSEPS *)NULL)) {
 	    gserror(IDS_NOPREVIEW, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    return;
@@ -256,24 +255,45 @@ unsigned int filter;
 	}
 
 	if ((command == IDM_EXTRACTPRE) && is_meta) {
-	    /* write placeable Windows Metafile header */
-	    METAFILEHEADER mfh;
-	    int i;
-	    unsigned short *pw;
-	    mfh.key = reorder_dword(0x9ac6cdd7L);
-	    mfh.hmf = 0;
-	    mfh.bbox.left = 0;
-	    mfh.bbox.right = reorder_word((WORD)(doc->boundingbox[URX] - doc->boundingbox[LLX]));
-	    mfh.bbox.top = 0;
-	    mfh.bbox.bottom = reorder_word((WORD)(doc->boundingbox[URY] - doc->boundingbox[LLY]));
-	    mfh.inch = reorder_word(72);	/* PostScript points */
-	    mfh.reserved = 0L;
-	    mfh.checksum =  0;
-	    pw = (WORD *)&mfh;
-	    for (i=0; i<10; i++) {
-	    	mfh.checksum ^= *pw++;
+	    /* check if metafile already contains header */
+	    fread(&key, 4, 1, epsfile);
+	    fseek(epsfile, pos, SEEK_SET);	/* seek to section to extract */
+	    if ( key != reorder_dword(0x9ac6cdd7L) ) {
+	        /* write placeable Windows Metafile header */
+	        METAFILEHEADER mfh;
+	        int i, temp;
+	        unsigned short *pw;
+		int bo = ( reorder_dword(1) == 1 );	/* true for little endian */
+	        mfh.key = 0x9ac6cdd7L;
+	        mfh.hmf = 0;
+		/* guess the location - this might be wrong */
+	        mfh.bbox.left = 0;
+	        mfh.bbox.top = 0;
+		temp = (doc->boundingbox[URX] - doc->boundingbox[LLX]);
+		mfh.bbox.right = (WORD)temp;	/* double transfer to avoid GCC Solaris bug */
+	        mfh.bbox.bottom = (WORD)(doc->boundingbox[URY] - doc->boundingbox[LLY]);
+	        temp = (doc->boundingbox[URY] - doc->boundingbox[LLY]);
+		mfh.bbox.bottom = (WORD)temp;
+	        mfh.inch = 72;	/* PostScript points */
+	        mfh.reserved = 0L;
+	        mfh.checksum =  0;
+	        pw = (WORD *)&mfh;
+		temp = 0;
+	        for (i=0; i<10; i++) {
+	    	    temp ^= *pw++;
+	        }
+		mfh.checksum = (WORD)temp;
+	        /* fwrite(&mfh, sizeof(mfh), 1, outfile); */
+	        tiff_long(mfh.key, bo, outfile);
+	        tiff_word(mfh.hmf, bo, outfile);
+	        tiff_word(mfh.bbox.left,   bo, outfile);
+	        tiff_word(mfh.bbox.top,    bo, outfile);
+	        tiff_word(mfh.bbox.right,  bo, outfile);
+	        tiff_word(mfh.bbox.bottom, bo, outfile);
+	        tiff_word(mfh.inch, bo, outfile);
+	        tiff_long(mfh.reserved, bo, outfile);
+	        tiff_word(mfh.checksum, bo, outfile);
 	    }
-	    fwrite(&mfh, sizeof(mfh), 1, outfile);
 	}
 
         while ( (count = (unsigned int)min(len,COPY_BUF_SIZE)) != 0 ) {
@@ -535,195 +555,273 @@ int j;
 #define TIFF_RATIONAL 5
 
 struct rational_s {
-	DWORD numerator;
-	DWORD denominator;
+	DWORD numerator PACKED;
+	DWORD denominator PACKED;
 };
+#define TIFF_RATIONAL_SIZE 8
 
 struct ifd_entry_s {
-	WORD tag;
-	WORD type;
-	DWORD length;
-	DWORD value;
+	WORD tag PACKED;
+	WORD type PACKED;
+	DWORD length PACKED;
+	DWORD value PACKED;
 };
+#define TIFF_IFD_SIZE 12
 
 struct tiff_head_s {
-	WORD order;
-	WORD version;
-	DWORD ifd_offset;
+	WORD order PACKED;
+	WORD version PACKED;
+	DWORD ifd_offset PACKED;
 };
+#define TIFF_HEAD_SIZE 8
 
-/* write tiff file from DIB bitmap */
+/* write DWORD as DWORD */
 void
-write_tiff(FILE *f, LPBITMAP2 pbm, BOOL tiff4)
+tiff_long(DWORD val, int little_endian, FILE *f)
+{
+unsigned char *p = (unsigned char *)&val;
+    if (little_endian)
+	fwrite(p, 1, 4, f);
+    else {
+	fwrite(p+3, 1, 1, f);
+	fwrite(p+2, 1, 1, f);
+	fwrite(p+1, 1, 1, f);
+	fwrite(p, 1, 1, f);
+    }
+}
+
+/* write WORD as DWORD */
+void
+tiff_short(WORD val, int little_endian, FILE *f)
+{
+unsigned char *p = (unsigned char *)&val;
+    if (little_endian)
+	fwrite(p, 1, 2, f);
+    else {
+	fwrite(p+1, 1, 1, f);
+	fwrite(p, 1, 1, f);
+    }
+    fputc('\0', f);
+    fputc('\0', f);
+}
+
+/* write WORD as WORD */
+void
+tiff_word(WORD val, int little_endian, FILE *f)
+{
+unsigned char *p = (unsigned char *)&val;
+    if (little_endian)
+	fwrite(p, 1, 2, f);
+    else {
+	fwrite(p+1, 1, 1, f);
+	fwrite(p, 1, 1, f);
+    }
+}
+
+/* Write tiff file from DIB bitmap */
+/* Since this will be used by a DOS EPS file, we write an Intel TIFF file */
+void
+write_tiff(FILE *f, LPBITMAP2 pbm, BOOL tiff4, BOOL calc_bbox)
 {
 char *now;
-DWORD *strip;
 #define IFD_MAX_ENTRY 12
-struct tiff_head_s tiff_head;
 WORD ifd_length;
 DWORD ifd_next;
-struct ifd_entry_s ifd_entry[IFD_MAX_ENTRY];
-struct ifd_entry_s *pifd_entry;
-struct rational_s rational;
 DWORD tiff_end, end;
 time_t t;
 int i;
 unsigned char *preview;
 BYTE GVHUGE *line;
-int bwidth;
+int preview_width, bwidth;
 BOOL soft_extra = FALSE;
 BOOL date_extra = FALSE;
 PREBMAP prebmap;
+PSBBOX devbbox;	/* in pixel units */
+int bo;	/* byte order */
+int width, height;	/* size of preview */
 	
 	if (*(char *)pbm == 'P')
 	    scan_pbmplus(&prebmap, pbm);
 	else
 	    scan_dib(&prebmap, pbm);
 
+	if (calc_bbox) {
+	    scan_bbox(&prebmap, &devbbox);
+	    if (devbbox.valid) {
+	    	/* copy to global bbox as if obtained by PS to EPS */
+	    	bbox.llx = devbbox.llx * 72.0 / option.xdpi;
+	    	bbox.lly = devbbox.lly * 72.0 / option.ydpi;
+	    	bbox.urx = devbbox.urx * 72.0 / option.xdpi;
+	    	bbox.ury = devbbox.ury * 72.0 / option.ydpi;
+	    	bbox.valid = TRUE;
+	    }
+	    else {
+		devbbox.urx = prebmap.width;
+		devbbox.ury = prebmap.height;
+		devbbox.llx = devbbox.lly = 0;
+	    }
+	}
+	else {
+	    devbbox.urx = prebmap.width;
+	    devbbox.ury = prebmap.height;
+	    devbbox.llx = devbbox.lly = 0;
+	}
+
+	width  = devbbox.urx - devbbox.llx;	/* width  of dest bitmap */
+	height = devbbox.ury - devbbox.lly;	/* height of dest bitmap */
 	/* byte width with 1 bit/pixel, rounded up even word */
-	bwidth = ((prebmap.width + 15) & ~15) >> 3;
+	bwidth = ((width + 15) & ~15) >> 3;
 
-	tiff_end = sizeof(tiff_head);
-	if (reorder_word(1) == 1)
-	    tiff_head.order = 0x4949;	/* Intel = little endian */
-	else
-	    tiff_head.order = 0x4d4d;	/* Motorola = big endian */
-	tiff_head.version = 42;
-	tiff_head.ifd_offset = tiff_end;
+	/* byte width of source bitmap */
+	preview_width = ((prebmap.width + 7) & ~7) >> 3; /* byte width with 1 bit/pixel */
 
+	/* determine if we are big or little endian */
+	/* save in global variable */
+	bo = ( reorder_dword(1) == 1 );	/* true for little endian */
+
+	/* write header */
+	tiff_end = TIFF_HEAD_SIZE;
+	tiff_word(0x4949, bo, f);	/* Intel = little endian */
+	tiff_word(42, bo, f);
+	tiff_long(tiff_end, bo, f);
+
+	/* write count of ifd entries */
 	tiff_end += sizeof(ifd_length);
-
 	if (tiff4)
 	    ifd_length = 10;
 	else
 	    ifd_length = 12;
+	tiff_word(ifd_length, bo, f);
 
 	tiff_end += ifd_length * sizeof(struct ifd_entry_s) + sizeof(ifd_next);
 	ifd_next = 0;
-	pifd_entry = &ifd_entry[0];
+
+	/* write each of the ifd entries */
 	if (tiff4) {
-	    pifd_entry->tag = 0xff;	/* SubfileType */
-	    pifd_entry->type = TIFF_SHORT;
+	    tiff_word(0xff, bo, f);	    /* SubfileType */
+	    tiff_word(TIFF_SHORT, bo, f);  /* value type */
+	    tiff_long(1, bo, f);		    /* length */
+	    tiff_short(0, bo, f);		    /* value */
 	}
 	else {
-	    pifd_entry->tag = 0xfe;	/* NewSubfileType */
-	    pifd_entry->type = TIFF_LONG;
+	    tiff_word(0xfe, bo, f);	/* NewSubfileType */
+	    tiff_word(TIFF_LONG, bo, f);
+	    tiff_long(1, bo, f);		    /* length */
+	    tiff_long(0, bo, f);		    /* value */
 	}
-	pifd_entry->length = 1;
-	pifd_entry->value = 0;
 
-	pifd_entry = &ifd_entry[1];
-	pifd_entry->tag = 0x100;	/* ImageWidth */
-	if (tiff4)
-	    pifd_entry->type = TIFF_SHORT;
-	else
-	    pifd_entry->type = TIFF_LONG;
-	pifd_entry->length = 1;
-	pifd_entry->value = prebmap.width;
+	tiff_word(0x100, bo, f);	/* ImageWidth */
+	if (tiff4) {
+	    tiff_word(TIFF_SHORT, bo, f);
+	    tiff_long(1, bo, f);
+	    tiff_short((WORD)width, bo, f);
+	}
+	else {
+	    tiff_word(TIFF_LONG, bo, f);
+	    tiff_long(1, bo, f);
+	    tiff_long(width, bo, f);
+	}
 
-	pifd_entry = &ifd_entry[2];
-	pifd_entry->tag = 0x101;	/* ImageLength */
-	if (tiff4)
-	    pifd_entry->type = TIFF_SHORT;
-	else
-	    pifd_entry->type = TIFF_LONG;
-	pifd_entry->length = 1;
-	pifd_entry->value = prebmap.height;
+	tiff_word(0x101, bo, f);	/* ImageHeight */
+	if (tiff4) {
+	    tiff_word(TIFF_SHORT, bo, f);
+	    tiff_long(1, bo, f);
+	    tiff_short((WORD)height, bo, f);
+	}
+	else {
+	    tiff_word(TIFF_LONG, bo, f);
+	    tiff_long(1, bo, f);
+	    tiff_long(height, bo, f);
+	}
 
-	pifd_entry = &ifd_entry[3];
-	pifd_entry->tag = 0x103;	/* Compression */
-	pifd_entry->type = TIFF_SHORT;
-	pifd_entry->length = 1;
-	pifd_entry->value = 1;		/* no compression */
+	tiff_word(0x103, bo, f);	/* Compression */
+	tiff_word(TIFF_SHORT, bo, f);
+	tiff_long(1, bo, f);
+	tiff_short(1, bo, f);		/* no compression */
 
-	pifd_entry = &ifd_entry[4];
-	pifd_entry->tag = 0x106;	/* PhotometricInterpretation */
-	pifd_entry->type = TIFF_SHORT;
-	pifd_entry->length = 1;
-	pifd_entry->value = 1;		/* black is zero */
+	tiff_word(0x106, bo, f);	/* PhotometricInterpretation */
+	tiff_word(TIFF_SHORT, bo, f);
+	tiff_long(1, bo, f);
+	tiff_short(1, bo, f);		/* black is zero */
 
-	pifd_entry = &ifd_entry[5];
-	pifd_entry->tag = 0x111;	/* StripOffsets */
-	pifd_entry->type = TIFF_LONG;
-	pifd_entry->length = prebmap.height;
-	pifd_entry->value = tiff_end;
-	tiff_end += (pifd_entry->length * sizeof(DWORD));
+	tiff_word(0x111, bo, f);	/* StripOffsets */
+	tiff_word(TIFF_LONG, bo, f);
+	tiff_long(height, bo, f);
+	tiff_long(tiff_end, bo, f);
+	tiff_end += (height * sizeof(DWORD));
 
-	pifd_entry = &ifd_entry[6];
-	pifd_entry->tag = 0x116;	/* RowsPerStrip */
-	pifd_entry->type = TIFF_LONG;
-	pifd_entry->length = 1;
-	pifd_entry->value = 1;
+	tiff_word(0x116, bo, f);	/* RowsPerStrip */
+	tiff_word(TIFF_LONG, bo, f);
+	tiff_long(1, bo, f);
+	tiff_long(1, bo, f);
 
-	pifd_entry = &ifd_entry[7];
-	pifd_entry->tag = 0x117;	/* StripByteCounts */
-	pifd_entry->type = TIFF_LONG;
-	pifd_entry->length = prebmap.height;
-	pifd_entry->value = tiff_end;
-	tiff_end += (pifd_entry->length * sizeof(DWORD));
+	tiff_word(0x117, bo, f);	/* StripByteCounts */
+	tiff_word(TIFF_LONG, bo, f);
+	tiff_long(height, bo, f);
+	tiff_long(tiff_end, bo, f);
+	tiff_end += (height * sizeof(DWORD));
 
-	pifd_entry = &ifd_entry[8];
-	pifd_entry->tag = 0x11a;	/* XResolution */
-	pifd_entry->type = TIFF_RATIONAL;
-	pifd_entry->length = 1;
-	pifd_entry->value = tiff_end;
-	tiff_end += sizeof(struct rational_s);
+	tiff_word(0x11a, bo, f);	/* XResolution */
+	tiff_word(TIFF_RATIONAL, bo, f);
+	tiff_long(1, bo, f);
+	tiff_long(tiff_end, bo, f);
+	tiff_end += TIFF_RATIONAL_SIZE;
 
-	pifd_entry = &ifd_entry[9];
-	pifd_entry->tag = 0x11b;	/* YResolution */
-	pifd_entry->type = TIFF_RATIONAL;
-	pifd_entry->length = 1;
-	pifd_entry->value = tiff_end;
-	tiff_end += sizeof(struct rational_s);
+	tiff_word(0x11b, bo, f);	/* YResolution */
+	tiff_word(TIFF_RATIONAL, bo, f);
+	tiff_long(1, bo, f);
+	tiff_long(tiff_end, bo, f);
+	tiff_end += TIFF_RATIONAL_SIZE;
 
 	if (!tiff4) {
-	    pifd_entry = &ifd_entry[10];
-	    pifd_entry->tag = 0x131;	/* Software */
-	    pifd_entry->type = TIFF_ASCII;
-	    pifd_entry->length = strlen(szAppName) + 1;
-	    pifd_entry->value = tiff_end;
-	    tiff_end += pifd_entry->length;
+	    tiff_word(0x131, bo, f);	/* Software */
+	    tiff_word(TIFF_ASCII, bo, f);
+	    i = strlen(szAppName) + 1;
+	    tiff_long(i, bo, f);
+	    tiff_long(tiff_end, bo, f);
+	    tiff_end += i;
 	    if (tiff_end & 1) { /* pad to word boundary */
 	        soft_extra = TRUE;
 	        tiff_end++;
 	    }
 
-	    pifd_entry = &ifd_entry[11];
-	    pifd_entry->tag = 0x132;	/* DateTime */
-	    pifd_entry->type = TIFF_ASCII;
+	    tiff_word(0x132, bo, f);	/* DateTime */
+	    tiff_word(TIFF_ASCII, bo, f);
 	    t = time(NULL);
 	    now = ctime(&t);
 	    now[strlen(now)-1] = '\0';	/* remove trailing \n */
-	    pifd_entry->length = strlen(now)+1;
-	    pifd_entry->value = tiff_end;
-	    tiff_end += pifd_entry->length;
+	    i = strlen(now) + 1;
+	    tiff_long(i, bo, f);
+	    tiff_long(tiff_end, bo, f);
+	    tiff_end += i;
 	    if (tiff_end & 1) { /* pad to word boundary */
 	        date_extra = TRUE;
 	        tiff_end++;
 	    }
 	}
 
-	fwrite(&tiff_head, sizeof(tiff_head), 1, f);
-	fwrite(&ifd_length, sizeof(ifd_length), 1, f);
-	fwrite(ifd_entry, ifd_length * sizeof(struct ifd_entry_s), 1, f);
-	fwrite(&ifd_next, sizeof(ifd_next), 1, f);
-	strip = (DWORD *)malloc(prebmap.height * sizeof(DWORD));
+	/* write end of ifd tag */
+	tiff_long(ifd_next, bo, f);
+
+	/* strip offsets */
 	end = tiff_end;
-	for (i=0; i<prebmap.height; i++) {
-		strip[i] = end;		/* strip offsets */
+	for (i=0; i<height; i++) {
+		tiff_long(end, bo, f);
 		end += bwidth;
 	}
-	fwrite(strip, 1, prebmap.height * sizeof(DWORD), f);
-	for (i=0; i<prebmap.height; i++)
-		strip[i] = bwidth;	/* strip byte counts */
-	fwrite(strip, 1, prebmap.height * sizeof(DWORD), f);
-	free((void *)strip);
-	rational.numerator = (int)option.xdpi;
-	rational.denominator = 1;
-	fwrite(&rational, sizeof(rational), 1, f);
-	rational.numerator = (int)option.ydpi;
-	rational.denominator = 1;
-	fwrite(&rational, sizeof(rational), 1, f);
+
+	/* strip byte counts */
+	for (i=0; i<height; i++)
+		tiff_long(bwidth, bo, f);
+
+	/* XResolution rational */
+	tiff_long((int)option.xdpi, bo, f);
+	tiff_long(1, bo, f);
+	/* YResolution rational */
+	tiff_long((int)option.ydpi, bo, f);
+	tiff_long(1, bo, f);
+
+	/* software and time strings */
 	if (!tiff4) {
 	    fwrite(szAppName, 1, strlen(szAppName)+1, f);
 	    if (soft_extra)
@@ -733,16 +831,18 @@ PREBMAP prebmap;
 	        fputc('\0',f);
 	}
 
-	preview = (unsigned char *) malloc(bwidth);
-	memset(preview,0xff,bwidth);
+	preview = (unsigned char *) malloc(preview_width);
+	memset(preview,0xff,preview_width);
 
 	if (prebmap.topleft)
-	    line = (BYTE GVHUGE *)prebmap.bits;
+	    line = (BYTE GVHUGE *)prebmap.bits + ((long)prebmap.bytewidth * (prebmap.height - devbbox.ury));
 	else
-	    line = (BYTE GVHUGE *)prebmap.bits + ((long)prebmap.bytewidth * (prebmap.height-1));
+	    line = (BYTE GVHUGE *)prebmap.bits + ((long)prebmap.bytewidth * (devbbox.ury-1));
         /* process each line of bitmap */
-	for (i = 0; i < prebmap.height; i++) {
+	for (i = 0; i < height; i++) {
 	    get_dib_line(line, preview, prebmap.width, prebmap.depth);
+	    if (devbbox.llx)
+		shift_preview(preview, preview_width, devbbox.llx);
 	    fwrite(preview, 1, bwidth, f);
 	    if (prebmap.topleft)
 		line += prebmap.bytewidth;
@@ -755,8 +855,8 @@ PREBMAP prebmap;
 
 /* make a PC EPS file with a TIFF Preview */
 /* from a PS file and a bitmap */
-void
-make_eps_tiff(int type)
+int
+make_eps_tiff(int type, BOOL calc_bbox)
 {
 char epsname[MAXSTR];
 LPBITMAP2 pbm;
@@ -772,21 +872,41 @@ struct eps_header_s eps_header;
 #ifdef __EMX__
 #pragma pack()
 #endif
-
+FILE *tpsfile;
+char tpsname[MAXSTR];
 	
 	if ( (pbm = get_bitmap()) == (LPBITMAP2)NULL) {
 	    play_sound(SOUND_ERROR);
-	    return;
+	    return 1;
 	}
 
 	if ( (tiff_file = gp_open_scratch_file(szScratch, tiffname, "wb")) == (FILE *)NULL) {
 	    play_sound(SOUND_ERROR);
 	    release_bitmap();
-	    return;
+	    return 1;
 	}
-	write_tiff(tiff_file, pbm, (type == IDM_MAKEEPST4));
+	write_tiff(tiff_file, pbm, (type == IDM_MAKEEPST4), calc_bbox);
 	fclose(tiff_file);
 	release_bitmap();
+
+	if (calc_bbox) {
+	    /* we need to copy the psfile to a temporary file */
+	    /* because we will be changing the %%BoundingBox line */
+	    if ( (tpsfile = gp_open_scratch_file(szScratch, tpsname, "wb")) == (FILE *)NULL) {
+		play_sound(SOUND_ERROR);
+		return 1;
+	    }
+	    copy_bbox_header(tpsfile); /* adjust %%BoundingBox: comment */
+	    pscopyuntil(psfile.file, tpsfile, doc->endheader, doc->endtrailer, NULL);
+	    fclose(tpsfile);
+	    if ( (tpsfile = fopen(tpsname, "rb")) == (FILE *)NULL) {
+		play_sound(SOUND_ERROR);
+		return 1;
+	    }
+	}
+	else {
+	    tpsfile = psfile.file;
+	}
 
 #ifdef EPSTOOL
 	strcpy(epsname, oname);
@@ -799,14 +919,14 @@ struct eps_header_s eps_header;
 	epsname[0] = '\0';
 	if (!get_filename(epsname, TRUE, FILTER_EPS, 0, IDS_TOPICEDIT)) {
 	    unlink(tiffname);
-	    return;
+	    return 1;
 	}
 	epsfile = fopen(epsname,"wb");
 #endif
 	if (epsfile == (FILE *)NULL) {
 	    play_sound(SOUND_ERROR);
 	    release_bitmap();
-	    return;
+	    return 1;
 	}
 
 	/* write DOS EPS binary header */
@@ -815,8 +935,8 @@ struct eps_header_s eps_header;
 	eps_header.id[2] = 0xd3;
 	eps_header.id[3] = 0xc6;
 	eps_header.ps_begin = sizeof(eps_header);
-	fseek(psfile.file, 0, SEEK_END);
-	eps_header.ps_length = ftell(psfile.file);
+	fseek(tpsfile, 0, SEEK_END);
+	eps_header.ps_length = ftell(tpsfile);
 	eps_header.mf_begin = 0;
 	eps_header.mf_length = 0;
 	eps_header.tiff_begin = eps_header.ps_begin + eps_header.ps_length;
@@ -830,11 +950,7 @@ struct eps_header_s eps_header;
 	eps_header.tiff_begin = reorder_dword(eps_header.tiff_begin);
 	eps_header.tiff_length = reorder_dword(eps_header.tiff_length);
 	fwrite(&eps_header, sizeof(eps_header), 1, epsfile);
-	rewind(psfile.file);
-	pscopyuntil(psfile.file, epsfile, doc->beginheader, doc->endtrailer, NULL);
-	
-	/* copy tiff file */
-	rewind(tiff_file);
+
 	buffer = malloc(COPY_BUF_SIZE);
 	if (buffer == (char *)NULL) {
 	    play_sound(SOUND_ERROR);
@@ -842,15 +958,38 @@ struct eps_header_s eps_header;
 	    unlink(epsname);
 	    fclose(tiff_file);
 	    unlink(tiffname);
-	    return;
+	    if (calc_bbox) {
+		fclose(tpsfile);
+		unlink(tpsname);
+	    }
+	    return 1;
 	}
+
+	/* copy EPS file */
+	rewind(tpsfile);
+	if (calc_bbox) {
+	    while ( (count = fread(buffer, 1, COPY_BUF_SIZE, tpsfile)) != 0 )
+		fwrite(buffer, 1, count, epsfile);
+	}
+	else {
+	    pscopyuntil(psfile.file, epsfile, doc->beginheader, doc->endtrailer, NULL);
+	}
+	
+	/* copy tiff file */
+	rewind(tiff_file);
         while ( (count = fread(buffer, 1, COPY_BUF_SIZE, tiff_file)) != 0 )
 	    fwrite(buffer, 1, count, epsfile);
+
 	free(buffer);
 	fclose(tiff_file);
 	unlink(tiffname);
+	if (calc_bbox) {
+	    fclose(tpsfile);
+	    unlink(tpsname);
+	}
 	if (*epsname!='\0')
 	   fclose(epsfile);
+	return 0;
 }
 
 static char hex[16] = "0123456789ABCDEF";
@@ -929,12 +1068,14 @@ write_interchange(FILE *f, LPBITMAP2 pbm, BOOL calc_bbox)
 	fputs("%%EndPreview",f);
 	fputs(EOLSTR, f);
 	free(preview);
-	pscopyuntil(psfile.file, f, doc->endpreview, doc->endtrailer, NULL);
+	pscopyuntil(psfile.file, f, 
+	    doc->endpreview ? doc->endpreview : doc->endheader, 
+	    doc->endtrailer, NULL);
 }
 
 /* make an EPSI file with an Interchange Preview */
 /* from a PS file and a bitmap */
-void
+int
 make_eps_interchange(BOOL calc_bbox)
 {
 char epiname[MAXSTR];
@@ -943,7 +1084,7 @@ LPBITMAP2 pbm;
 
 	if ( (pbm = get_bitmap()) == (LPBITMAP2)NULL) {
 	    play_sound(SOUND_ERROR);
-	    return;
+	    return 1;
 	}
 
 #ifdef EPSTOOL
@@ -958,7 +1099,7 @@ LPBITMAP2 pbm;
 	if (!get_filename(epiname, TRUE, FILTER_EPI, 0, IDS_TOPICEDIT)) {
 	    play_sound(SOUND_ERROR);
 	    release_bitmap();
-	    return;
+	    return 1;
 	}
 	epifile = fopen(epiname,"wb");
 #endif
@@ -966,7 +1107,7 @@ LPBITMAP2 pbm;
 	if (epifile == (FILE *)NULL) {
 	    play_sound(SOUND_ERROR);
 	    release_bitmap();
-	    return;
+	    return 1;
 	}
 
 	rewind(psfile.file);
@@ -974,6 +1115,7 @@ LPBITMAP2 pbm;
 	if (*epiname!='\0')
 	    fclose(epifile);
 	release_bitmap();
+	return 0;
 }
 
 
@@ -1120,5 +1262,146 @@ copy_bbox_header(FILE *f)
       position = ftell(psfile.file);
       comment = pscopyuntil(psfile.file, f, position, doc->endheader, NULL);
     }
+}
+
+/* make a PC EPS file */
+/* from a PS file and a user supplied preview */
+/* preview may be WMF or TIFF */
+/* returns 0 on success */
+int
+make_eps_user(void)
+{
+char epsname[MAXSTR];
+char *buffer;
+unsigned int count;
+FILE *epsfile;
+FILE *preview_file;
+char preview_name[MAXSTR];
+unsigned long preview_length;
+#ifdef __EMX__
+#pragma pack(1)
+#endif
+struct eps_header_s eps_header;
+#ifdef __EMX__
+#pragma pack()
+#endif
+int type = 0;
+#define TIFF 1
+#define WMF 2
+char id[4];
+
+	/* get user supplied preview */
+#ifdef EPSTOOL
+	strcpy(preview_name, upname);
+#else
+	if (!get_filename(preview_name, FALSE, FILTER_ALL, IDS_EPSUSERTITLE, IDS_TOPICEDIT))
+	    return 1; /* failure */
+#endif
+
+	/* open preview, determine length and type */
+	preview_file = fopen(preview_name, "rb");
+	if (preview_file == (FILE *)NULL) {
+	 
+	    play_sound(SOUND_ERROR);
+	    return 1;
+	}
+
+	id[0] = (char)fgetc(preview_file);
+	id[1] = (char)fgetc(preview_file);
+	id[2] = (char)fgetc(preview_file);
+	id[3] = (char)fgetc(preview_file);
+	fseek(preview_file, 0, SEEK_END);
+	preview_length = ftell(preview_file);
+	fseek(preview_file, 0, SEEK_SET);
+
+	if ((id[0] == 'I') && (id[1] == 'I'))
+	    type = TIFF;
+	if ((id[0] == 'M') && (id[1] == 'M'))
+	    type = TIFF;
+	if ((id[0] == (char)0x01) && (id[1] == (char)0x00) && (id[2] == (char)0x09) && (id[3] == (char)0x00))
+	    type = WMF;
+	if ((id[0] == (char)0xd7) && (id[1] == (char)0xcd) && (id[2] == (char)0xc6) && (id[3] == (char)0x9a)) {
+	    type = WMF;
+	    preview_length -= 22;	/* skip over placeable metafile header */
+	    fseek(preview_file, 22, SEEK_SET);
+	}
+
+	if (type == 0) {
+	    gserror(IDS_EPSUSERINVALID, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
+	    fclose(preview_file);
+	    return 1;
+	}
+
+#ifdef EPSTOOL
+	strcpy(epsname, oname);
+	if (*epsname!='\0')
+	    epsfile = fopen(epsname,"wb");
+	else
+	    epsfile = stdout;
+#else
+	/* create EPS file */
+	epsname[0] = '\0';
+	if (!get_filename(epsname, TRUE, FILTER_EPS, 0, IDS_TOPICEDIT)) {
+	    fclose(preview_file);
+	    return 1;
+	}
+	epsfile = fopen(epsname,"wb");
+#endif
+	if (epsfile == (FILE *)NULL) {
+	    play_sound(SOUND_ERROR);
+	    fclose(preview_file);
+	    return 1;
+	}
+
+	/* write DOS EPS binary header */
+	eps_header.id[0] = 0xc5;
+	eps_header.id[1] = 0xd0;
+	eps_header.id[2] = 0xd3;
+	eps_header.id[3] = 0xc6;
+	eps_header.ps_begin = sizeof(eps_header);
+	eps_header.ps_length = doc->endtrailer - doc->beginheader;
+	if (type == WMF) {
+	    eps_header.mf_begin = eps_header.ps_begin + eps_header.ps_length;
+	    eps_header.mf_length = preview_length;
+	    eps_header.tiff_begin = 0;
+	    eps_header.tiff_length = 0;
+	}
+	else {
+	    eps_header.mf_begin = 0;
+	    eps_header.mf_length = 0;
+	    eps_header.tiff_begin = eps_header.ps_begin + eps_header.ps_length;
+	    eps_header.tiff_length = preview_length;
+	}
+	eps_header.checksum = -1;
+
+	/* reverse byte order if big endian machine */
+	eps_header.ps_begin = reorder_dword(eps_header.ps_begin);
+	eps_header.ps_length = reorder_dword(eps_header.ps_length);
+	eps_header.mf_begin = reorder_dword(eps_header.mf_begin);
+	eps_header.mf_length = reorder_dword(eps_header.mf_length);
+	eps_header.tiff_begin = reorder_dword(eps_header.tiff_begin);
+	eps_header.tiff_length = reorder_dword(eps_header.tiff_length);
+	fwrite(&eps_header, sizeof(eps_header), 1, epsfile);
+	rewind(psfile.file);
+	pscopyuntil(psfile.file, epsfile, doc->beginheader, doc->endtrailer, NULL);
+	
+	/* copy preview file */
+	buffer = malloc(COPY_BUF_SIZE);
+	if (buffer == (char *)NULL) {
+	    play_sound(SOUND_ERROR);
+	    fclose(epsfile);
+	    unlink(epsname);
+	    fclose(preview_file);
+	    return 1;
+	}
+        while ( (count = fread(buffer, 1, COPY_BUF_SIZE, preview_file)) != 0 )
+	    fwrite(buffer, 1, count, epsfile);
+	free(buffer);
+	fclose(preview_file);
+	if (*epsname!='\0')
+	   fclose(epsfile);
+	return 0; /* success */
+#undef TIFF
+#undef WMF
 }
 

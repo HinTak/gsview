@@ -254,42 +254,71 @@ message_box(buf, 0);
 BOOL
 gs_open()
 {
-char progname[256];
-char progargs[256];
 char *args;
 BOOL flag;
 ULONG count;
+char progargs[256];
+FILE *optfile;
+int depth;
 	/* return if already open */
 	if (gsprog.valid)
 		return TRUE;
 
 	gs_size();
-	args = strchr(option.gscommand, ' ');
-	if (args) {
-	    strncpy(progname, option.gscommand, (int)(args-option.gscommand));
-	    progname[(int)(args-option.gscommand)] = '\0';
-	    args++;
-	}
-	else {
-	    strncpy(progname, option.gscommand, MAXSTR);
-	    args = "";
-	}
 	
-	sprintf(progargs,"%s -dBitsPerPixel=%d %s -r%gx%g -g%ux%u -sGSVIEW=%s -",
-		args, (option.depth ? option.depth : display.bitcount*display.planes), 
+#ifdef OLD
+	sprintf(progargs,"%s -I\042%s\042 -dBitsPerPixel=%d %s -r%gx%g -g%ux%u -sGSVIEW=%s -",
+		option.gsother, option.gsinclude, 
+		(option.depth ? option.depth : display.bitcount*display.planes), 
 		option.safer ? "-dSAFER" : "",
 		option.xdpi, option.ydpi, 
                 display.width, display.height,
 		gsview.id);
+#else
+	/* new version uses temporary file to reduce command line length */
+	/* avoids setting FIXEDMEDIA and does sanity check on BitsPerPixel */
+
+	/* restrict depth to values supported by Ghostscript */
+	depth = display.planes * display.bitcount;
+	if (depth >= 24)
+	    depth = 24;
+	else if (depth >=15)
+	    depth = 16;
+	else if (depth >=8)
+	    depth = 8;
+	else if (depth >=4)
+	    depth = 4;
+	else 
+	    depth = 1;
+
+	if ((display.optname[0] != '\0') && !debug)
+	    unlink(display.optname);
+	display.optname[0] = '\0';
+	if ( (optfile = gp_open_scratch_file(szScratch, display.optname, "w")) == (FILE *)NULL) {
+	    play_sound(SOUND_ERROR);
+	    return FALSE;
+	}
+	fprintf(optfile, "-I%s\n", option.gsinclude);
+	if (option.safer)
+	    fprintf(optfile, "-dSAFER\n");
+	fprintf(optfile, "-dBitsPerPixel=%d\n", option.depth ? option.depth : depth);
+	fprintf(optfile, "-dDEVICEXRESOLUTION=%g\n", (double)option.xdpi);
+	fprintf(optfile, "-dDEVICEYRESOLUTION=%g\n", (double)option.ydpi);
+	fprintf(optfile, "-dDEVICEWIDTH=%u\n", display.width);
+	fprintf(optfile, "-dDEVICEHEIGHT=%u\n", display.height);
+	fclose(optfile);
+	sprintf(progargs,"%s @%s -sGSVIEW=%s -",
+		option.gsother, display.optname, gsview.id);
+#endif
+
 	display.saved = FALSE;
 	display.page = FALSE;
 	display.sync = FALSE;
 	zoom = FALSE;
 	display.do_endfile = FALSE;
 	display.do_resize = FALSE;
-	load_string(IDS_WAITGSOPEN, szWait, sizeof(szWait));
-	info_wait(TRUE);
-	flag = exec_pgm(progname, progargs, TRUE, &gsprog);
+	info_wait(IDS_WAITGSOPEN);
+	flag = exec_pgm(option.gsexe, progargs, TRUE, &gsprog);
 	if (!flag)
 	    display.do_display = FALSE;
 	return flag;
@@ -317,6 +346,10 @@ gs_close()
 	bitmap.valid = FALSE;
 	DosExitCritSec();
 	DosReleaseMutexSem(gsview.bmp_mutex);
+
+	if ((display.optname[0] != '\0') && !debug)
+	    unlink(display.optname);
+	display.optname[0] = '\0';
 	return TRUE;
 }
 
