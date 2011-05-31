@@ -72,11 +72,15 @@ exec_pgm(char *name, char *arg, PROG* prog)
 char command[MAXSTR*2];
 	prog->valid = FALSE;
 	command[0] = '\0';
+#ifdef __WIN32__
 	if (!is_win32s)
 	    strcat(command, "\042");
+#endif
 	strcat(command, name);
+#ifdef __WIN32__
 	if (!is_win32s)
 	    strcat(command, "\042");
+#endif
 	strcat(command, " ");
 	strcat(command, arg);
 	prog->hinst = (HINSTANCE)WinExec(command, SW_SHOWNORMAL);

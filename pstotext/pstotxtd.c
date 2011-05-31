@@ -13,7 +13,13 @@
 #ifndef MSDOS
 #ifdef _Windows
 #include <windows.h>
+#ifdef _MSC_VER
+/* You also need to add -D__WIN32__ and -D_Windows to the CL command line */
+#include <io.h>    /* MSVC++ 4.2 includes _mktemp here */
+#define mktemp _mktemp
+#else
 #include <dir.h>
+#endif
 #else
 #define INCL_DOS
 #include <os2.h>
@@ -386,7 +392,7 @@ char *gstemp = NULL;
 static void *instance; /* pstotext state */
 
 static int cleanup(void) {
-  int gsstatus, status = 0;
+  int status = 0;
   unload_pstotext();
   if (gs!=NULL) {
 #if defined(_Windows) || defined(MSDOS)
@@ -402,7 +408,11 @@ static int cleanup(void) {
   return status;
 }
 
+#ifdef _MSC_VER
+static void handler(int notused) {
+#else
 static void handler() {
+#endif
   int status = cleanup();
   if (status!=0)
     exit(status);
@@ -484,7 +494,7 @@ static void do_it(char *path) {
     );
 
 #else   /* !MSDOS */
-  sprintf(gs_cmd, "%s -r72 -dNODISPLAY -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE %s %s %s ",
+  sprintf(gs_cmd, "%s -r72 -dNODISPLAY -dDELAYBIND -dWRITESYSTEMDICT %s -dNOPAUSE %s %s %s %s %s",
     gscommand,
     (debug ? "" : "-q"),
     ocr_path,

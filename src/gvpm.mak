@@ -33,10 +33,12 @@ DEBUG=0
 
 # Language is English (en) or Deutsch (de)
 LANGUAGE=en
+# GSview version
+GSVIEW_VERSION=22
 
 !if $(USE_EMX)
 # EMX
-DRIVE=c:
+DRIVE=e:
 COMP=gcc
 COMPBASE=$(DRIVE)\emx
 EMXPATH=$(DRIVE)/emx
@@ -156,7 +158,7 @@ gvpmen.res: gvpmen.hlp gvcrc.h gvpm1.rc gvcen.rc gvpen.rc gvpm2.rc binary\gvpm1.
 gvpmen.dll: gvpmen.res gvpmen.def gvplang.c
 !if $(USE_EMX)
 	$(COMP) -Zdll -Zso -Zsys -Zomf -c gvplang.c
-	LINK386 /DEBUG $(COMPBASE)\lib\dll0.obj gvplang.obj, gvpmen.dll, ,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\os2.lib, gvpmen.def
+	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj gvplang.obj, gvpmen.dll, ,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, gvpmen.def
 	rc gvpmen.res gvpmen.dll
 !endif
 
@@ -174,7 +176,7 @@ gvpmde.res: gvpmde.hlp gvcrc.h gvpm1.rc gvcde.rc gvpde.rc gvpm2.rc binary\gvpm1.
 gvpmde.dll: gvpmde.res gvpmde.def gvplang.c
 !if $(USE_EMX)
 	$(COMP) -Zdll -Zso -Zsys -Zomf -c gvplang.c
-	LINK386 /DEBUG $(COMPBASE)\lib\dll0.obj gvplang.obj, gvpmde.dll, ,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\os2.lib, gvpmde.def
+	LINK386 $(LDEBUG) $(COMPBASE)\lib\dll0.obj gvplang.obj, gvpmde.dll, ,$(COMPBASE)\lib\gcc.lib $(COMPBASE)\lib\st\c.lib $(COMPBASE)\lib\st\c_dllso.lib $(COMPBASE)\lib\st\sys.lib $(COMPBASE)\lib\c_alias.lib $(COMPBASE)\lib\end.lib $(COMPBASE)\lib\os2.lib, gvpmde.def
 	rc gvpmde.res gvpmde.dll
 !endif
 
@@ -206,15 +208,47 @@ os2setup.res: os2setup.rc setup.h gvc$(LANGUAGE).h ansi2oem.exe
 	ansi2oem < gvc$(LANGUAGE).h > gvclang.h
 	rc -i $(COMPBASE)\include -r $*.rc
 
-os2setup.exe: os2setup.c setup.h os2setup.res os2setup.def gvcrc.h gvcbeta.h
+os2beta.obj: gvcbeta.c gvcbeta.h gvcrc.h
+!if $(USE_EMX)
+	$(COMP) -Zomf -Zsys -c -o os2beta.obj gvcbeta.c
+!else
+	$(COMP) -c /Foos2beta.obj gvcbeta.c
+!endif
+
+os2prf.obj: gvcprf.c
 !if $(USE_EMX)
 	$(COMP) -Zomf -Zsys -c -o os2prf.obj gvcprf.c
-	$(COMP) -Zomf -Zsys -c -o os2beta.obj gvcbeta.c
-	$(COMP) -Zomf -Zsys $(DEBUGFLAG) $*.c os2prf.obj os2beta.obj os2setup.def
 !else
 	$(COMP) -c /Foos2prf.obj gvcprf.c
-	$(COMP) -c /Foos2beta.obj gvcbeta.c
-	$(COMP) $*.c os2prf.obj os2beta.obj os2setup.def
+!endif
+
+os2unzip.obj: unzip2.h os2unzip.c
+!if $(USE_EMX)
+	$(COMP) -Zomf -Zsys -DOS2 -c os2unzip.c
+!else
+	$(COMP) -DOS2 -c os2unzip.c
+!endif
+
+setupc.obj: setup.h setupc.c
+!if $(USE_EMX)
+	$(COMP) -Zomf -Zsys -DOS2 -c setupc.c
+!else
+	$(COMP) -DOS2 -c setupc.c
+!endif
+
+os2setup.obj: os2setup.c setup.h os2setup.def gvcrc.h gvcbeta.h ansi2oem.exe
+	ansi2oem < gvc$(LANGUAGE).h > gvclang.h
+!if $(USE_EMX)
+	$(COMP) -Zomf -Zsys -c $(DEBUGFLAG) $*.c
+!else
+	$(COMP) -c $*.c
+!endif
+
+os2setup.exe: os2setup.obj os2setup.res os2setup.def gvcrc.h gvcbeta.h os2unzip.obj os2beta.obj os2prf.obj setupc.obj
+!if $(USE_EMX)
+	$(COMP) -Zomf -Zsys $(DEBUGFLAG) os2setup.obj os2unzip.obj setupc.obj os2prf.obj os2beta.obj os2setup.def
+!else
+	$(COMP) os2setup.obj os2unzip.obj setupc.obj os2prf.obj os2beta.obj os2setup.def
 !endif
 	rc os2setup.res os2setup.exe
 	
@@ -327,38 +361,49 @@ gvpgs.exe: gvpgs.$(OBJ) gvpgs.res gvpgs.def
 !endif
 
 
-prezip: gvpm.exe gvpmen.dll gvpmen.hlp gvpmde.dll gvpmde.hlp README.TXT FILE_ID.DIZ LICENCE
+gsv$(GSVIEW_VERSION)os2.zip:
+	copy README.TXT ..
+	copy LICENCE ..
+	copy FILE_ID.DIZ ..
 	copy gvpm.exe ..
 !if $(USE_EMX) && !$(USE_OMF)
 	emxbind -s ../gvpm.exe
 !endif
-	-del ..\gvpm.eas
-	eautil ..\gvpm.exe ..\gvpm.eas /s
+	copy binary\gvpm1.ico ..\gvpm.ico
 	copy gvpmen.hlp ..
 	copy gvpmde.hlp ..
 	copy gvpmen.dll ..
 	copy gvpmde.dll ..
-	copy binary\gvpm1.ico ..\gvpm.ico
 	copy gvpgs.exe ..
 	copy os2setup.exe ..
 	copy printer.ini ..\printer.ini
-	copy README.TXT ..\README.TXT
-	copy FILE_ID.DIZ ..\FILE_ID.DIZ
-	copy LICENCE ..\LICENCE
-	-del ..\epstool.zip
-	-del ..\gsview.zip
-	-del ..\pstotext.zip
-	-del ..\src.zip
-	-del gsviewXX.zip
+	cd ..
+	-del os2.zip
+	zip -9 -@ os2.zip < src\gvclist2.txt
+	echo Redistribution of this OS/2 GSview MUST be accompanied by the> README2.TXT
+	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> README2.TXT
+	-del gsv$(GSVIEW_VERSION)os2.zip
+	zip -9 gsv$(GSVIEW_VERSION)os2.zip os2.zip os2setup.exe unzip2.dll README2.TXT README.TXT FILE_ID.DIZ LICENCE
+	-del README2.TXT
+	-del README.TXT
+	-del LICENCE
+	-del FILE_ID.DIZ
+	-del gvpm.exe
+	-del gvpm.ico
+	-del gvpmen.hlp
+	-del gvpmde.hlp
+	-del gvpmen.dll
+	-del gvpmde.dll
+	-del gvpgs.exe
+	-del os2setup.exe
+	-del printer.ini
+	cd src
+
+prezip: gsv$(GSVIEW_VERSION)os2.zip
 
 zip: prezip
-	cd ..
-	zip -9 -@ epstool.zip  < src\gvcliste.txt
-	zip -9 -@ pstotext.zip < src\gvclistp.txt
-	zip -9 -@ src.zip      < src\gvclists.txt
-	zip -9 -@ gsview.zip   < src\gvclist.txt
-	zip -9 gsviewXX.zip gsview.zip README.TXT FILE_ID.DIZ LICENCE os2setup.exe os2unzip.exe setup.exe wizunz32.dll
-	cd src
+	echo Doesn't work from here
+	echo Use the Windows makefile
 
 language:
 	-del gvclang.h
@@ -409,8 +454,10 @@ clean: language
 	-del gvpgs.$(OBJ)
 	-del os2setup.obj
 	-del os2setup.res
+	-del os2unzip.obj
 	-del os2beta.obj
 	-del os2prf.obj
+	-del setupc.obj
 	-del gvplang.obj
 	-del gvpmen.map
 	-del gvpmde.map

@@ -1,4 +1,69 @@
 ----------------------
+Version 2.2 1997-06-27
+----------------------
+All:
+ Allow user to enter 5.0 as the GS version number instead of
+ requiring 5.00.
+ Added "Options" edit field to Printer Setup dialog.  This is to allow
+ adding "gamma.ps" or "@printer.upp" to the print command line.  This 
+ is stored on a per printer basis in the INI file.
+ Changed where PageOffset is stored in INI file.
+ Avoid bug in GS 5.0 and 5.01 by patching /.runstringbegin
+ German language help file isn't up to date.  The Ghostscript
+ installation section needs updating.
+Win:
+ Fixed bug restricting magnitude of page offset.
+Win16:
+ Don't put quotes around EXE name in exec_pgm().  This stopped
+ gvwgs16.exe from running under Windows 3.1, but not Windows 95.
+
+----------------------------
+Version 2.12 beta 1997-06-16
+----------------------------
+All:
+ Works with Aladdin Ghostscript 4.03 - 5.99.
+ GS 5.0 doesn't run well with GSview because gsdll.execute_cont()
+ does not return error codes (i.e. it always returns zero).
+ When extracting DOS EPS PostScript or preview, don't get stuck in
+ an infinite loop when DOS EPS header has bad lengths.
+ Display error message if DOS EPS header has bad lengths.
+ Fixed bug (reversed triples) in TIFF 4 preview when depth 
+ was 24 bits/pixel.
+ Don't change orientation menu selection when displaying PDF, 
+ just disable the menu.
+ Changed the behaviour of "Fit Window to Page" so that window can
+ now enlarge as well as reduce in size.
+ Fixed wildcard matching so *.pdf will now match both a.pdf and 
+ a.b.pdf.  This affected the file type filter used in OS/2.
+
+----------------------------
+Version 2.11 beta 1997-05-26
+----------------------------
+All:
+ Ignore reversed bounding box values when using EPSF Clip.
+ Fixed memory leak when displaying PDF files which contain links.
+ Use zlib DLL to uncompress gzipped files.
+ Handle Latin-1 accented characters.
+ Major change to setup program - now looks like install wizard.
+ Added configure wizard to GSview.
+ Added "Orientation | Auto".  The remaining items on the orientation
+ menu are no longer changed by DSC documents.
+ Auto orientation now supports %%PageOrientation.
+PM:
+ Changed the Frame window formatting to work correctly under Far East
+ versions of OS/2 (which have extra child windows).
+Win16:
+ Is available again.  Hopefully it won't get much use.
+Win32:
+ Language DLLs were marked as MULTIPLE SHARED.  This didn't allow
+ them to be loaded multiple times under Win32s.  Tried changing them
+ to SINGLE SHARED.  This should allow them to be loaded multiple times 
+ under Win32s, but it doesn't.  SINGLE SHARED also prevented two copies
+ of GSview running under WinNT.  Changed back to MULTIPLE SHARED.
+ When a second copy of GSview started under Win32s, give command
+ line to first copy and then exit.
+
+----------------------
 Version 2.1 1996-11-04
 ----------------------
 All:

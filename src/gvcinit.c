@@ -25,7 +25,7 @@
 
 
 /* copy printer profiles */
-void
+int
 gsview_printer_profiles(void)
 {
 char buf[MAXSTR];
@@ -33,10 +33,6 @@ FILE *pf;
 char section[MAXSTR];
 char *key, *value;
 PROFILE *prf;
-    load_string(IDS_UPDATEPRINTER, buf, sizeof(buf)-1);
-    if (message_box(buf, MB_YESNO) != IDYES)
-	return;
-
     /* open an INI file and copy everything to user ini file
      * overwriting anything the user already had
      */
@@ -45,12 +41,12 @@ PROFILE *prf;
     pf = fopen(buf, "r");
     if (!pf) {
 	gserror(IDS_NOPRINTERINI, NULL, 0, SOUND_ERROR);
-	return;
+	return 1;
     }
     prf = profile_open(szIniFile);
     if (!prf) {
 	gserror(IDS_NOINI, NULL, 0, SOUND_ERROR);
-	return;
+	return 1;
     }
     while (fgets(buf, sizeof(buf)-1, pf)) {
 	if (buf[0] == '[') {
@@ -81,6 +77,7 @@ PROFILE *prf;
     }
     profile_close(prf);
     fclose(pf);
+    return 0;
 }
 
 
@@ -103,7 +100,7 @@ init_options(void)
     option.pstotext = IDM_PSTOTEXTNORM - IDM_PSTOTEXTMENU - 1;
     option.settings = TRUE;
     option.button_show = TRUE;
-    option.fit_page = TRUE;
+    option.fit_page = FALSE;	/* Changed after 2.1 */
     option.safer = TRUE;
     option.media = IDM_A4;
     strcpy(option.medianame, "A4");
@@ -114,6 +111,7 @@ init_options(void)
     option.ignore_dsc = FALSE;
     option.show_bbox = FALSE;
     option.redisplay = TRUE;
+    option.auto_orientation = TRUE;	/* Added after 2.1 */
     option.orientation = IDM_PORTRAIT;
     option.swap_landscape = FALSE;
     option.xdpi = DEFAULT_RESOLUTION;
@@ -124,7 +122,7 @@ init_options(void)
     option.alpha_text = 1;
     option.alpha_graphics = 1;
     option.save_dir = TRUE;
-    strcpy(option.device_name, "deskjet");
+    strcpy(option.device_name, "djet500");
     strcpy(option.device_resolution, "300");
     option.print_to_file = FALSE;
     option.psprinter = FALSE;
@@ -175,7 +173,10 @@ init_check_menu(void)
     check_menu_item(IDM_UNITMENU, option.unit, TRUE);
     check_menu_item(IDM_LANGMENU, option.language, TRUE);
     check_menu_item(IDM_PSTOTEXTMENU, option.pstotext + IDM_PSTOTEXTMENU + 1, TRUE);
-    check_menu_item(IDM_ORIENTMENU, option.orientation, TRUE);
+    if (option.auto_orientation)
+        check_menu_item(IDM_ORIENTMENU, IDM_AUTOORIENT, TRUE);
+    else 
+        check_menu_item(IDM_ORIENTMENU, option.orientation, TRUE);
     check_menu_item(IDM_ORIENTMENU, IDM_SWAPLANDSCAPE, option.swap_landscape);
     check_menu_item(IDM_MEDIAMENU, option.media, TRUE);
     check_menu_item(IDM_OPTIONMENU, IDM_QUICK_OPEN, option.quick_open);
@@ -191,23 +192,27 @@ init_check_menu(void)
     check_menu_item(IDM_OPTIONMENU, IDM_SHOWBBOX, option.show_bbox);
 }
 
+void
+default_gsdir(char *buf)
+{
+char *p;
+    /* assume that GS is in the adjacent directory */
+    strcpy(buf, szExePath);
+    p = strrchr(buf, '\\');	/* remove trailing gsview */
+    if (p)
+	*(++p) = '\0';
+    if (option.gsversion % 100 == 0)
+	sprintf(buf+strlen(buf), "gs%d.%01d", 
+	    option.gsversion / 100, option.gsversion % 100);
+    else
+	sprintf(buf+strlen(buf), "gs%d.%02d", 
+	    option.gsversion / 100, option.gsversion % 100);
+}
 
 void
 default_gsdll(char *buf)
 {
-char destdir[MAXSTR];
-char *p;
-    /* assume that GS is in the adjacent directory */
-    strcpy(destdir, szExePath);
-    p = strrchr(destdir, '\\');	/* remove trailing \ */
-    if (p)
-	*p = '\0';
-    p = strrchr(destdir, '\\');	/* remove trailing gsview */
-    if (p)
-	*(++p) = '\0';
-    strcat(destdir, GS_BASEDIR);
-
-    strcpy(buf, destdir);
+    default_gsdir(buf);
     strcat(buf, "\\");
     strcat(buf, GS_DLLNAME);
 }
@@ -216,16 +221,7 @@ void
 default_gsinclude(char *buf)
 {
 char destdir[MAXSTR];
-char *p;
-    /* assume that GS is in the adjacent directory */
-    strcpy(destdir, szExePath);
-    p = strrchr(destdir, '\\');	/* remove trailing \ */
-    if (p)
-	*p = '\0';
-    p = strrchr(destdir, '\\');	/* remove trailing gsview */
-    if (p)
-	*(++p) = '\0';
-    strcat(destdir, GS_BASEDIR);
+    default_gsdir(destdir);
 
     strcpy(buf, destdir);
 
@@ -259,9 +255,6 @@ char buf[MAXSTR];
 int
 gsview_changed(void)
 {
-FILE *f;
-char buf[MAXSTR];
-char *p;
     if (!getenv("TEMP")) {
 	gserror(IDS_NEEDTEMP, NULL, 0, 0);
 	putenv("TEMP=c:\\");   /* just in case the user ignores us */
@@ -275,51 +268,8 @@ char *p;
 
     check_language();	/* offer to change language if doesn't match WIN.INI */
 
-    load_string(IDS_VERSIONCHANGED, buf, sizeof(buf)-1);
-    if (message_box(buf, MB_YESNO) != IDYES) {
-        load_string(IDS_CONFIGURECANCELLED, buf, sizeof(buf)-1);
-	message_box(buf, 0);
-	return 0;
-    }
+    config_wizard();
     
-    default_gsdll(option.gsdll);
-    default_gsinclude(option.gsinclude);
-    option.gsother[0] = '\0';
-
-    /* check if Ghostscript really has been installed */
-    /* first look for the DLL */
-    if ( (f = fopen(option.gsdll, "rb")) == (FILE *)NULL ) {
-	gserror(IDS_GSNOTINSTALLED, NULL, 0, SOUND_ERROR);
-	return 0;
-    }
-    fclose(f);
-
-    /* next look for gs_init.ps */
-    strcpy(buf, option.gsdll);
-    p = strrchr(buf, '\\');	/* remove trailing DLLNAME */
-    if (p)
-	*(++p) = '\0';
-    strcat(buf, "gs_init.ps");
-    if ( (f = fopen(buf, "rb")) == (FILE *)NULL ) {
-	gserror(IDS_GSLIBNOTINSTALLED, NULL, 0, SOUND_ERROR);
-	return 0;
-    }
-    fclose(f);
-    /* at this stage we don't look for fonts, but maybe we should */
-    
-    option.configured = TRUE;
-
-    /* save the current options */
-    write_profile();
-
-    /* copy printer profiles */
-    gsview_printer_profiles();
-
-    /* update for platform, e.g. registry, progman, object */
-    gsview_create_objects();
-
-    load_string(IDS_CONFIGURECOMPLETE, buf, sizeof(buf)-1);
-    message_box(buf, 0);
     return 0;
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -166,7 +166,7 @@ PSDOC *doc = psfile.doc;
 	        return;
 	    }
 
-	    infile = fopen(psfile.name, "rb");
+	    infile = fopen(psfile_name(&psfile), "rb");
 	    if (infile == (FILE *)NULL) {
 	        play_sound(SOUND_ERROR);
 	        fclose(f);
@@ -262,7 +262,7 @@ PSDOC *doc = psfile.doc;
 	    gserror(IDS_NOPREVIEW, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
 	    return;
 	}
-	epsfile = fopen(psfile.name,"rb");
+	epsfile = fopen(psfile_name(&psfile),"rb");
 	pos = doc->doseps->ps_begin;
 	len = doc->doseps->ps_length;
 	if (command == IDM_EXTRACTPRE) {
@@ -365,7 +365,10 @@ PSDOC *doc = psfile.doc;
         while ( (count = (unsigned int)min(len,COPY_BUF_SIZE)) != 0 ) {
 	    count = fread(buffer, 1, count, epsfile);
 	    fwrite(buffer, 1, count, outfile);
-	    len -= count;
+	    if (count == 0)
+		len = 0;
+	    else
+		len -= count;
 	}
 	free(buffer);
 	fclose(epsfile);
@@ -1073,7 +1076,7 @@ int lastrow;
 			memmove(preview,  line, prebmap.bytewidth);
 		    if (bitoffset)
 			shift_preview(preview, source_bwidth, bitoffset);
-		    if ( (*(char *)pbm != 'P') && (prebmap.depth==24) )
+		    if ( !tiff4 && (*(char *)pbm != 'P') && (prebmap.depth==24) )
 			reverse_triples(preview, width);
 		    comp_length[strip] += (WORD)packbits(comp_line, preview, bwidth);
 		    if (prebmap.bits) {
@@ -1392,7 +1395,7 @@ int lastrow;
 		    memmove(preview,  line, prebmap.bytewidth);
 		if (bitoffset)
 		    shift_preview(preview, source_bwidth, bitoffset);
-		if ( (*(char *)pbm != 'P') && (prebmap.depth==24) )
+		if ( !tiff4 && (*(char *)pbm != 'P') && (prebmap.depth==24) )
 		    reverse_triples(preview, width);
 		if (use_packbits) {
 		    len = (WORD)packbits(comp_line, preview, bwidth);
@@ -1505,8 +1508,14 @@ int code;
 	eps_header.id[2] = 0xd3;
 	eps_header.id[3] = 0xc6;
 	eps_header.ps_begin = EPS_HEADER_SIZE;
-	fseek(tpsfile, 0, SEEK_END);
-	eps_header.ps_length = ftell(tpsfile);
+	if (calc_bbox) {
+	    fseek(tpsfile, 0, SEEK_END);
+	    eps_header.ps_length = ftell(tpsfile);
+	}
+	else {
+	    /* don't use ftell(), because we may already have an eps preview */
+	    eps_header.ps_length = psfile.doc->endtrailer - psfile.doc->beginheader;
+	}
 	eps_header.mf_begin = 0;
 	eps_header.mf_length = 0;
 	eps_header.tiff_begin = eps_header.ps_begin + eps_header.ps_length;
@@ -2492,3 +2501,4 @@ int code;
 	return code;
 }
 
+

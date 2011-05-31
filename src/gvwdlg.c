@@ -124,7 +124,7 @@ InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
 		case ID_HELP:
-		    SendMessage(hwndimg, help_message, 0, 0L);
+		    get_help();
 		    return(FALSE);
                 case ID_ANSWER:
                     return(TRUE);
@@ -467,7 +467,7 @@ SoundDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		notify_message = GetNotification(wParam,lParam);
 		switch (LOWORD(wParam)) {
 		    case ID_HELP:
-		        SendMessage(hwndimg, help_message, 0, 0L);
+			get_help();
 		        return(FALSE);
 		    case SOUND_EVENT:
 			if (notify_message != LBN_SELCHANGE) {
@@ -775,7 +775,7 @@ PSTOEPSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	    case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		    case ID_HELP:
-		        SendMessage(hwndimg, help_message, 0, 0L);
+			get_help();
 		        return FALSE;
 		    case IDOK:
 		    case IDYES:
@@ -784,7 +784,7 @@ PSTOEPSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			EndDialog(hDlg, IDYES);
 			return TRUE;
 		    case IDNO:
-		        SendMessage(hwndimg, help_message, 0, 0L);
+			get_help();
 		    case IDCANCEL:
 			EndDialog(hDlg, FALSE);
 			return TRUE;
@@ -832,7 +832,7 @@ InstallDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		    install_default(hDlg);
 		    return(FALSE);
 		case ID_HELP:
-		    SendMessage(hwndimg, help_message, 0, 0L);
+		    get_help();
 		    return(FALSE);
 		case IDOK:
 		    /* do sanity check on the following strings */
@@ -956,7 +956,7 @@ DisplaySettingsDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	    switch (LOWORD(wParam)) {
 		case ID_HELP:
 		    load_string(IDS_TOPICDSET, szHelpTopic, sizeof(szHelpTopic));
-		    SendMessage(hwndimg, help_message, 0, 0L);
+		    get_help();
 		    return FALSE;
 		case DSET_DEPTH:
 		    if (notify_message == CBN_SELCHANGE)
@@ -1088,7 +1088,7 @@ PDF2PSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	    case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		    case ID_HELP:
-		        SendMessage(hwndimg, help_message, 0, 0L);
+			get_help();
 		        return FALSE;
 		    case IDOK:
 			/* get Print to File status */
@@ -1172,7 +1172,7 @@ TextDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                     EndDialog(hDlg, TRUE);
                     return(TRUE);
 		case ID_HELP:
-		    PostMessage(hwndimg, help_message, 0, 0L);
+		    get_help();
 		    return(FALSE);
 		case TEXTWIN_COPY:
 		    {HGLOBAL hglobal;

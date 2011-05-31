@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -132,5 +132,9 @@ int make_eps_interchange(BOOL calc_bbox);
 int make_eps_user(void);
 int make_eps_metafile(BOOL calc_bbox);
 void extract_doseps(int command);
+void copy_bbox_header(FILE *f);
+int scan_pbmplus(PREBMAP *ppbmap, LPBITMAP2 pbm);
+int scan_dib(PREBMAP *ppbmap, LPBITMAP2 pbm);
+void scan_bbox(PREBMAP *pprebmap, PSBBOX *devbbox);
 
 

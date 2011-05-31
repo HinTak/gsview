@@ -1,5 +1,3 @@
-PM: change os2setup to use unzip DLL
-
 WinNT: set page size from mswinpr2
 
 Print to printer device context using mswindll/os2dll device.
@@ -9,8 +7,12 @@ Update interval
 Win32 accelerators (VK_F1, VK_BACK) while button has mouse capture.
 
 You can use spaces in the Ghostscript path, but I can't figure out
-how to create a Win95 shortcut to "-Ic:\gs tools"
+how to create a Win95 shortcut to "-Ic:\gs tools" using Progman DDE.
 
 View bitmap files with viewjpg/viewbmp/viewpcx
 
 GSgrab needs a start_timer() added just before the main message loop.
+
+Check periodically if file is modified OR redisplay button.
+
+

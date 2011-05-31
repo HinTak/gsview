@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -138,6 +138,7 @@ typedef struct tagPAGELIST {
 
 typedef struct tagPSFILE {
 	char 	name[MAXSTR];	/* name of selected document file */
+	char	tname[MAXSTR];	/* name of temporary file (gunzipped) */
 	FILE 	*file;		/* selected file */
 	PSDOC	*doc;		/* DSC structure.  NULL if not DSC */
 	PAGELIST page_list;	/* selected page list */
@@ -147,6 +148,7 @@ typedef struct tagPSFILE {
 	int 	pagenum;	/* current page number */
 	BOOL	ctrld;		/* TRUE if file starts with ^D */
 	BOOL	pjl;		/* TRUE if file starts with HP LaserJet PJL prologue */
+	BOOL	gzip;		/* TRUE if file compressed with gzip */
 	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
 #ifdef _Windows
 	struct	ftime datetime;	/* time/date of selected file */
@@ -210,6 +212,7 @@ typedef struct tagGSDLL {
 	BOOL		valid;		/* true if loaded */
 	HMODULE		hmodule;	/* handle to module */
 	int		state;
+	long		revision_number;
 
 	/* pointers to DLL functions */
 	PFN_gsdll_revision	revision;
@@ -234,6 +237,7 @@ typedef struct tagGSDLL {
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
 	int	language;
+	int	gsversion;
 	char	gsdll[MAXSTR];
 	char	gsinclude[MAXSTR];
 	char	gsother[MAXSTR];
@@ -258,6 +262,7 @@ typedef struct tagOPTIONS {
 	BOOL	redisplay;
 	BOOL    ignore_dsc;
 	BOOL	show_bbox;
+	BOOL	auto_orientation;
 	int	orientation;
 	BOOL	swap_landscape;
 	float	xdpi;
@@ -352,6 +357,17 @@ extern PFN_pstotextSetCork pstotextSetCork;
 char pstotextLine[2048];
 int pstotextCount;
 
+/* for zlib gunzip decompression */
+extern HMODULE zlib_hmodule;
+typedef void *gzFile ;
+typedef gzFile (*PFN_gzopen)(const char *path, const char *mode);
+typedef int (*PFN_gzread)(gzFile file, void *buf, unsigned len);
+typedef int (*PFN_gzclose)(gzFile file);
+extern PFN_gzopen gzopen;
+extern PFN_gzread gzread;
+extern PFN_gzclose gzclose;
+
+
 extern BOOL debug;			/* /D command line option used */
 extern FILE *debug_file;		/* for gs input logging */
 
@@ -418,6 +434,7 @@ extern PFNWP OldFrameWndProc;
 extern int percent_done;		/* percentage of document processed */
 extern int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
 extern BOOL ignore_sync;		/* ignore next GSDLL_SYNC */
+extern BOOL fit_page_enabled;		/* next WM_SIZE is allowed to resize window */
 
 
 extern PROG pdfconv;
@@ -465,4 +482,3 @@ int gp_printfile(char *filename, char *port);
 extern char not_defined[];
 
 #endif
-

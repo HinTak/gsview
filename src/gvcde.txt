@@ -11,7 +11,7 @@
  entwickelten PostScript Document Structuring Conventions
  (DSC-Konventionen) entsprechen, auf dem Bildschirm dargestellt und auf
  einen Drucker ausgegeben werden.
- Die Version GSview 2.1 erfordert Ghostscript in der Version 4.03.
+ Die Version GSview 2.2 erfordert Ghostscript in der Version 4.03 - 5.99.
  Grundlage für GSview ist das von Tim Theisen entwickelte Programm
  Ghostview für X11.
 2Installation
@@ -29,7 +29,7 @@
  Um das Programm GSview zu entfernen, löschen Sie die Dateien im
  Verzeichnis `gsview`.
  Um das Programm Ghostscript zu entfernen, löschen Sie die Dateien im
- Verzeichnis `gs4.03`.
+ Verzeichnis `gs5.01`.
 
  Löschen Sie anschließend folgende Datei aus dem Systemverzeichnis:
 P
@@ -88,8 +88,8 @@ W
 E
  in das Verzeichnis `c:\gstools\gsview` kopieren.
 
- Starten Sie das Programm GSview und beantworten alle Fragen zur
- Konfiguration mit 'Ja'.
+ Starten Sie das Programm GSview und folgen Sie den Anweisungen im
+ Konfigurationsprogramm.
 
  Dadurch werden automatisch das Menü
  `Optionen` | `Konfiguriere Ghostscript` konfiguriert, eine
@@ -100,16 +100,13 @@ W
  Dateiverknüpfungen im Register und eine Programmgruppe erzeugt.
 E
 
- Sollen GSview und Ghostscript in ein anderes Verzeichnis als in das
- Standardverzeichnis
- installiert werden, gehen Sie folgendermaßen vor:
+ Wenn Sie das Konfigurationsprogramm später noch einmal starten wollen,
+ so wählen Sie `Optionen` | `Konfiguration`.
+3Manuelle Experteninstallation
+?Manuelle Experteninstallation
+ Anstatt den Menüpunkt `Optionen` | `Konfiguration` zu wählen, nehmen
+ Sie `Optionen` | `Konfiguriere Ghostscript`.
 
- Kopieren Sie die GSview- und Ghostscript-Dateien in das Zielverzeichnis
- und starten GSview.
- Beantworten Sie die Frage ,Konfiguration von GSview fortsetzen?" mit
- "Nein".
-
- Wählen Sie `Optionen` | `Konfiguriere Ghostscript` an.
  Geben Sie im Feld `Ghostscript DLL` den vollständigen Pfad für
  Ghostscript DLL an.
 P
@@ -161,9 +158,8 @@ E
  die Versionsnummer geändert wurde, führt GSview die Konfiguration des
  lokalen Computers durch.
 
- Wird bei der Installation von GSview ein UNC-Pfad verwendet, können unter
- Windows 3.1 Probleme auftreten. Mit Windows 95 sind keine Probleme
- bekannt.
+ Unter Windows 3.x darf kein UNC-Pfad verwendet werden! Mit Windows 95
+ sind keine Probleme bekannt.
 3Ghostscript Installation
 ?Ghostscript Installation
  ACHTUNG: EINIGE DER HIER AUFGEFÜHRTEN INFORMATIONEN SIND VERALTET.
@@ -819,7 +815,8 @@ E
  Werte die x- und y-Koordinaten der linken unteren (lower left) und der
  rechten oberen (upper right) Ecken der Bounding Box an.
 
- Die `Ausrichtung` ist entweder Hoch- oder Querformat.
+ Die `Ausrichtung` ist die default Seitenausrichtung und entweder Hoch-
+ oder Querformat.
 
  Die `Seitenordnung` kann `Ascending` (aufsteigend), `Descending`
  (absteigend) oder `Special` (spezial) sein.
@@ -900,7 +897,7 @@ P
 E
  gespeichert.
  Die Standard-Liste der Ausgabegeräte und Einstellungen stammt
- aus der Ghostscript Version 4.02, ist aber unter Umständen nicht
+ aus der Ghostscript Version 5.0, ist aber unter Umständen nicht
  vollständig.
 
  Wenn ein Dokument sofort gedruckt werden soll, vorher jedoch auf dem
@@ -1118,8 +1115,8 @@ E
 
  Mit dem Befehl `Bearbeiten `| `Suche nächsten` wird die Suche auf der
  nächsten Seite fortgesetzt.
-3Schnelles extrahieren und Suchen 
-?Schnelles extrahieren und Suchen 
+3Schnelles extrahieren und Suchen
+?Schnelles extrahieren und Suchen
 ?pstotext
  Diese Methode verwendet pstotext und Ghostscript, um Text aus
  PostScript-Dateien zu extrahieren. Bevor Sie den Suchvorgang oder das
@@ -1196,7 +1193,7 @@ W
  Enthält die Zwischenablage keine Farbpalette, wird sie aus dem Device
  Independent Bitmap erzeugt und der Zwischenablage hinzugefügt.
  Diese Option ist notwendig, da einige Anwendungen (insbesondere
- Paintbrush) ein Device Independent Bitmap in der Zwischenablage nicht 
+ Paintbrush) ein Device Independent Bitmap in der Zwischenablage nicht
  erkennen können.
 P
  Mit dem Befehl `Einfügen` wird das aktuelle Bild als BMP-Datei
@@ -1501,20 +1498,25 @@ E
  `Anzeige Einstellungen` verwendet werden.
 3Fenster an Seite anpassen
 ?Fenster an Seite anpassen
- Ist die Option `Fenster an Seite anpassen` aktiviert, wird die Fenstergröße
- auf die Bildschirmgröße verkleinert, so daß das Fenster genauso groß wie
- die angezeigte Seite ist. In der Default-Einstellung ist diese Option
- aktiviert.
- Das Fenster kann nur verkleinert werden, wenn die angezeigte Seite
- verkleinert wurde. Die neue Fensterbreite wird nicht unmittelbar nach dem
- Ändern angezeigt, sondern erst nach dem erneuten Öffnen der Datei.
+ Ist die Option `Fenster an Seite anpassen` aktiviert, bewirken
+ Veränderungen der Seitengröße oder -ausrichtung, daß das Fenster
+ vergrößert oder verkleinert wird um sich der neuen Seitengröße anzupassen.
+ Wenn die Fenstergröße manuell verändert wird, erzwingt GSview, daß das
+ Fenster niemals größer wird, als die darzustellende Seite.
+ Fenstergröße auf die Bildschirmgröße verkleinert, so daß das Fenster
+ genauso groß wie die angezeigte Seite ist.
+
+ Änderungen der Fenstergröße werden vorgenommen, wenn die Fenstergröße oder
+ die Seitengröße vom Benutzer verändert werden; dies geschieht nicht
+ unmittelbar durch Setzen der Option.
  In der Vollbilddarstellung wird diese Option ignoriert.
 
  Ist die Option `Fenster an Seite anpassen` deaktiviert, wird die
- Fenstergröße nicht verkleinert. Die Fläche zwischen der angezeigten Seite
+ Fenstergröße nicht verändert. Die Fläche zwischen der angezeigten Seite
  und dem Fensterrahmen wird dann hellgrau angezeigt.
  Deaktivieren Sie die Option, wenn z.B. die Fenstergröße nicht verkleinert
  werden soll, weil Seiten geringer Auflösung angezeigt werden sollen.
+ In der Default-Einstellung ist diese Option deaktiviert.
 3Schnelles Öffnen
 ?Schnelles Öffnen
  Ist die Option `Schnelles Öffnen` aktiviert, startet GSview Ghostscript
@@ -1597,8 +1599,10 @@ E
  Druckausgabe. Sie wird nur bei `DSC`-kompatiblen Dokumenten angezeigt
  (Dokumente, die keine DSC-Kommentare enthalten, haben keine Bounding Box).
 
- In der Default-Einstellung ist die Option `Zeige Bounding Box` eaktiviert.
+ In der Default-Einstellung ist die Option `Zeige Bounding Box`
+ deaktiviert.
 2Seitenausrichtung
+?Auto Ausrichtung
 ?Ausrichtung
 ?Hochformat
 ?Querformat
@@ -1608,14 +1612,16 @@ E
  Mit den Befehlen `Hochformat`, `Querformat`, `Kopfüber` und `Umgekehrt
  quer` im Menü `Ausrichtung `bestimmen Sie die Seitenausrichtung, die
  angezeigt werden soll.
- Mit dem Befehl `Querformat` wird das Papier  um 90 Grad im Uhrzeigersinn
+ Mit dem Befehl `Querformat` wird das Papier um 90 Grad im Uhrzeigersinn
  gedreht.
  Mit dem Befehl `Umgekehrt quer` wird das Papier um 90 Grad gegen den
  Uhrzeigersinn gedreht.
  Die Ausrichtung, die Sie hier wählen, gilt nur für die Darstellung auf
  dem Bildschirm und hat keine Auswirkung auf das Drucken.
- Enthält das Dokument einen `DSC`-Kommentar zur Seitenausrichtung
- (%%Orientation), wird die Seitenausrichtung automatisch ausgewählt.
+ Wenn die Option `Automatisch` im Menü `Seitenausricht` gesetzt ist und
+ das Dokument einen `DSC`-Kommentar zur Seitenausrichtung enthält
+ (%%Orientation oder %%PageOrientation), wird die Seitenausrichtung
+ automatisch ausgewählt.
 
  Ist die Option `Gedreht quer` aktiviert, wird die Bedeutung von `Querformat`
  und `Umgekehrt quer` vertauscht.
@@ -2166,6 +2172,12 @@ E
  ein
 
  Anschließend sollte eine korrekte Anzeige der Datei möglich sein.
+ `Problem:` Gsview erkennt keine DSC Anweisungen in Dateien, die mit dem
+ 32-Bit Adobe Postscripttreiber 4.10 erzegt wurden.
+
+ Verwenden Sie nicht das "Tagged binary communications protocol".
+ Ändern Sie dies in "Printers | Postscript tab | Advanced... |
+ Data format group box | ASCII data".
 2Weitere Hilfethemen
 ?Weitere Hilfethemen
  Zu diesen Themen gelangen Sie über die Schaltfläche `Hilfe` in jedem
@@ -2187,6 +2199,25 @@ E
 
  Im Hilfethema `Häufig auftretende Probleme` werden einige der
  Fehlermeldungen erklärt, die Sie mit `Meldungen anzeigen` erhalten.
+3zlib
+?zlib
+?gzip
+ Wenn Sie eine Datei bearbeiten wollen, die mit dem Programm gzip
+ komprimiert wurde, versucht Gsview die zlib DLL zu laden und die
+ Datei damit automatisch zu dekomprimieren.
+
+ Wenn Sie eine Fehlermeldung erhalten, daß diese zlib DLL nicht geladen
+ werden konnte, dann ist diese möglicherweise nicht auf ihrem System
+ installiert. Sie können diese DLL von dort bekommen, wo Sie Gsview
+ erhalten haben, oder von
+  ftp://ftp.cs.wisc.edu/ghost/rjl/
+ Kopieren Sie die zlib DLL in dasselbe Verzeichnis wie Gsview.exe.
+ zlib16.dll ist für Win16. zlib32.dll ist für Win32.
+ zlib2.dll ist für OS/2.
+
+ zlib unterliegt dem Copyright 1995-1996 von Jean-loup Gailly und
+ Mark Adler. Der Quelltext kann bezogen werden von
+  http://www.cdrom.com/pub/infozip/zlib/
 2GSview intern
 ?GSview intern
  GSview verwendet Aladdin Ghostscript DLL zur Übertragung von
@@ -2204,9 +2235,10 @@ E
  gsv16spl kann für sich alleine nicht verwendet werden und muß von Gsview
  geladen werden. Von Windows 95 oder Windows NT wird es nicht benötigt.
 
- Mit gvwgs.exe (Windows) und gvpgs.exe (OS/2) wird GS DLL zum Drucken
+ Mit gvwgs32.exe (Windows) und gvpgs.exe (OS/2) wird GS DLL zum Drucken
  geladen. Man könnte sie auch aus der Kommandozeile heraus aufrufen.
  Da sie allerdings die Dateien löschen, die in der Kommandozeile stehen,
  ist die Verwendung gswin32.exe (Win32), gswin32c.exe (Win32 Konsole)
  oder gsos2.exe (OS/2) sicherer.
 
+

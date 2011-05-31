@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,6 +20,9 @@
 
 MENU ID_GSVIEW 
 BEGIN
+/*
+        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+*/
 	SUBMENU "~File", IDM_FILEMENU
 	BEGIN
 		MENUITEM "~Open...\tO", IDM_OPEN
@@ -73,6 +76,7 @@ BEGIN
 
 	SUBMENU "O~ptions", IDM_OPTIONMENU
 	BEGIN
+		MENUITEM "Configure...", IDM_CFG
 		MENUITEM "Configure ~Ghostscript...", IDM_GSCOMMAND
 		MENUITEM "Sounds...", IDM_SOUNDS
 		SUBMENU "~Units", IDM_UNITMENU
@@ -120,6 +124,8 @@ BEGIN
 
 	SUBMENU "~Orientation", IDM_ORIENTMENU
 	BEGIN
+		MENUITEM "~Auto", IDM_AUTOORIENT
+		MENUITEM SEPARATOR
 		MENUITEM "~Portrait", IDM_PORTRAIT
 		MENUITEM "~Landscape", IDM_LANDSCAPE
 		MENUITEM "~Upside-down", IDM_UPSIDEDOWN
@@ -262,3 +268,4 @@ BEGIN
 	IDS_FILTER_TXT	"*.txt"
 END
 
+

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,11 +20,11 @@
 
 #define GSVIEW_BASEDIR "gsview"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1996 Russell Lang."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1997 Russell Lang."
 #define GSVIEW_COPYRIGHT2 "All rights reserved."
 #define GSVIEW_COPYRIGHT3 "See the file LICENCE for more details."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-1996 Aladdin Enterprises,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-1997 Aladdin Enterprises,"
 #define GS_COPYRIGHT2 "Menlo Park, California, U.S.A.  All rights reserved."
 #define GS_COPYRIGHT3 "See the file PUBLIC for more details."
 
@@ -39,6 +39,10 @@
 #define AATEST "&Test"
 #define AAYES "&Yes"
 #define AANO "&No"
+#define AANEXTGT "&Next >"
+#define AABACKLT "< &Back"
+#define AAFINISHGT "Fi&nish >"
+#define AAEXIT "E&xit"
 #else
 #define AAOK "~Ok"
 #define AACANCEL "~Cancel"
@@ -49,6 +53,10 @@
 #define AATEST "~Test"
 #define AAYES "~Yes"
 #define AANO "~No"
+#define AANEXTGT "~Next >"
+#define AABACKLT "< ~Back"
+#define AAFINISHGT "Fi~nish >"
+#define AAEXIT "E~xit"
 #endif
 
 /* About dialog box */
@@ -114,6 +122,7 @@
 #define AAQUEUEC "Queue:"
 #define AAPRINTTOFILE "Print to File"
 #define AAPSPRINTER "PostScript Printer"
+#define AAOPTIONSC "Options:"
 
 /* PDF2PS dialog box */
 #define AAPDFTOPS	"PDF to PostScript"
@@ -188,34 +197,88 @@
 
 /* Installation program */
 #define AAINSTALL1 "GSview Install"
-#define AAINSTALLINTRO1 "GSview Install - Introduction"
-#define AAINSTALLINTRO2 "Installation program for:"
-#define AAINSTALLINTRO3 "Before continuing installation, make sure you have the 3 disks listed in README.TXT."
-#define AAINSTALLCOPYRIGHT1 "GSview Install - Copyright"
+#define AAINSTALLINTRO1 "This wizard will help you install"
+#define AAINSTALLINTRO2 "Before continuing installation, make sure you have the 3 disks listed in README.TXT."
+#define AAINSTALLINTRO3 "The installation will require 10 M bytes of hard disk space."
+#define AAINSTALLCOPYRIGHT1 "Copyright Notices"
 #define AAINSTALLCOPYRIGHT2 "GSview and Aladdin Ghostscript are separate programs."
 #define AAINSTALLCOPYRIGHT3 "They are owned by separate entities."
-#define AAINSTALLDIR1 "GSview Install - Directory"
-#define AAINSTALLDIR2 "The base directory for GSview and Ghostscript is:"
-#define AAINSTALLDIR3 "Within the base directory, GSview will be installed into the subdirectory:"
-#define AAINSTALLDIR4 "Ghostscript will be installed into the subdirectory:"
-#define AAINSTALLDIR5 "Change the base directory if you wish."
-#define AAINSTALLMKDIR1 "GSview Install - Make Directory"
-#define AAINSTALLMKDIR2 "The directory" 
-#define AAINSTALLMKDIR3 "does not exist.  Create it?" 
-#define AAINSTALLMISSING1 "GSview Install - Missing ZIP file"
+#define AAINSTALLGSVER1 "Which components do you wish to install?"
+#define AAINSTALLGSVER2 "Install GSview"
+#define AAINSTALLGSVER3 "Install Ghostscript"
+#define AAINSTALLGSVER4 "Which version of Ghostscript do you wish to use?"
+#define AAINSTALLDIR1 "Select a directory in which to install GSview and Ghostscript."
+#define AAINSTALLDIR2 "Within this directory, GSview will be in the subdirectory:"
+#define AAINSTALLDIR3 "Ghostscript will be in the subdirectory:"
+#define AAINSTALLMKDIR1 "The directory you specified does not exist."
+#define AAINSTALLMKDIR2 "A new directory will be created." 
+#define AAINSTALLMISSING1 "GSview Setup - Missing ZIP file"
 #define AAINSTALLMISSING2 "Can't find ZIP file.  Insert disk with the file below."
-#define AAINSTALLCONFIG1 "GSview Install - Config"
-#define AAINSTALLCONFIG2 "Don't update autoexec.bat"
-#define AAINSTALLCONFIG3 "The following line will be added to your autoexec.bat\r     SET TEMP=C:\\\rYour old autoexec.bat will be renamed autoexec.gs"
-#define AAINSTALLUNZIP1 "GSview Install - Unzipping"
+#define AAINSTALLCONFIG1 "GSview and Ghostscript use the environment variable TEMP to specify a directory for temporary files."
+#define AAINSTALLCONFIG2 "You do not have TEMP already defined."
+#define AAINSTALLCONFIG3 "The following line will be added to your autoexec.bat\r     SET TEMP=C:\\"
+#define AAINSTALLCONFIG4 "Update autoexec.bat"
+#define AAINSTALLCONFIG5 "Keep backup of old autoexec.bat"
+#define AAINSTALLCONFIGPM1 "GSview and Ghostscript use the environment variable TEMP to specify a directory for temporary files."
+#define AAINSTALLCONFIGPM2 "You do not have TEMP already defined, or you need to install EMX."
+#define AAINSTALLCONFIGPM3 "The following line will be added to your config.sys   'SET TEMP=C:\\'  and/or your PATH and LIBPATH will be updated for EMX."
+#define AAINSTALLCONFIGPM4 "Update config.sys"
+#define AAINSTALLCONFIGPM5 "Keep backup of old config.sys"
+#define AAINSTALLFINISH "GSview Setup is now ready to start installation.  \r\rPress Finish to continue."
+#define AAINSTALLUNZIP1 "Unzipping files..."
 #define AAINSTALLEA1 "Updating Extended Attributes"
 #define AADIRNOTEXIST "Directory '%s' does not exist.  Create it?"
 #define AAMKDIRFAIL "Couldn't make directory"
 #define AABETAWARN "This is a BETA test version of GSview.  It will disable on %04d-%02d-%02d."
-#define AAINSTALLOKWIN "Installation successful.\015A Program Manager group named \042GS Tools\042 has been created."
-#define AAINSTALLOKPM "Installation successful.\012A GSview program object has been created on the desktop" 
-#define AAINSTALLABORT "Installation aborted\012%s"
-#define AASKIPGSINSTALL "Ghostscript %s appears to be already installed.  Skip installation of Ghostscript?"
+#define AAINSTALLOKWIN "Installation successful."
+#define AAINSTALLOKPM "Installation successful. \012A GSview program object has been created on the desktop." 
+#define AAINSTALLFAILED "Installation failed"
+#define AAPROGMANGROUP1 "GSview Setup can create a Program Manager Group or Start Menu Item."
+#define AAPROGMANGROUP2 "Create Group / Item"
+#define AAPROGMANGROUP3 "Name"
+#define AAPROGMANGROUP4 "GS Tools"
+#define AAPROGMANGROUP5 "A Program Manager group named \042%s\042 has been created."
+#define AAPMOBJECT1 "GSview Setup can create a desktop object for GSview."
+#define AAPMOBJECT2 "Create GSview program object."
+#define AADONEBAK "The old autoexec.bat has been renamed to %s"
+
+/* configure */
+#define AACFG10 "This wizard will help you configure GSview."
+#define AACFG11 "If you don't understand an item on the following pages,\
+ don't change it.  The default are all sensible."
+#define AACFG20 "GSview needs to know which version of Ghostscript to use\
+ and where it is located."
+#define AACFG21 "Which version of Ghostscript do you wish to use?"
+#define AACFG22 "In which directory is Ghostscript located?"
+#define AACFG23 "Look for additional Type 1 fonts in"
+#define AACFG30 "GSview keeps a list of Ghostscript printer devices and\
+ resolutions in its initialization file. \
+ The default list of devices and resolutions is taken from the standard\
+ distribution version of Ghostscript 4.03 and may not be complete."
+#define AACFG31 "Update GSview printer list, overwriting any existing entries" 
+#define AACFG32 "Update GSview printer list" 
+#define AACFG33 "Updating the  GSview printer list will overwrite any existing entries." 
+#define AACFG40 "GSview can create file associations for PostScript and\
+ Portable Document Format (PDF) files.\
+ With these associations, double clicking on a PostScript or PDF file will\
+ start GSview.  These associations also allow some WWW browsers\
+ to use GSview as a viewer for PostScript and PDF files."
+#define AACFG41 "Associate PostScript (.ps and .eps) files with GSview."
+#define AACFG42 "Associate PDF (.pdf) files with GSview."
+#define AACFG50 "GSview can create a Program Manager Group or\
+ Start Menu Item for GSview and Aladdin Ghostscript."
+#define AACFG51 "Create Group / Item"
+#define AACFG52 "Name"
+#define AACFG53 "GSview can create a Desktop Program Object for GSview. \
+ This will associate PostScript (.ps and .eps) and PDF (.pdf) files with GSview."
+#define AACFG54 "Create Program Object"
+#define AACFG60 "GSview is now ready to start configuration. \r\rPress Finish to continue."
+#define AACFG70 "Configuration successful."
+#define AACFG72 "If you need to change the configuration later,\
+ run GSview then select \042Options | Configure...\042 or\
+ \042Options | Configure Ghostscript\042."
+#define AACFG73 "Configuration failed."
+#define AACFG74 "Configuration cancelled."
 
 
 /* For gvXgs.rc */

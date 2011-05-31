@@ -1,4 +1,4 @@
-/*  Copyright (C) 1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1996, 1997, Russell Lang.  All rights reserved.
 
  This file is part of GSview.
 
@@ -30,6 +30,7 @@ gs_clear_gsdll(void)
     gsdll.hmodule = (HMODULE)NULL;
     gsdll.valid = FALSE;
     gsdll.device = NULL;
+    gsdll.revision_number = 0;
     gsdll.revision = NULL;
     gsdll.init = NULL;
     gsdll.execute_begin = NULL;
@@ -56,13 +57,78 @@ gs_load_dll_cleanup(void)
     post_img_message(WM_GSSHOWMESS, 0);
 }
 
+/* display error message for LoadLibrary */
+#pragma argsused
+void
+load_error(HMODULE hmodule , const char *dllname)
+{
+char *text_reason;
+char buf[MAXSTR+128];
+int reason;
+#ifdef __WIN32__
+    reason = GetLastError() & 0xffff;
+    switch (reason) {
+	case ERROR_FILE_NOT_FOUND:	/* 2 */
+	    text_reason = "File not found";
+	    break;
+	case ERROR_PATH_NOT_FOUND:	/* 3 */
+	    text_reason = "Path not found";
+	    break;
+	case ERROR_NOT_ENOUGH_MEMORY:	/* 8 */
+	    text_reason = "Not enough memory";
+	    break;
+	case ERROR_BAD_FORMAT:		/* 11 */
+	    text_reason = "Bad EXE or DLL format";
+	    break;
+	case ERROR_OUTOFMEMORY:		/* 14 */
+	    text_reason = "Out of memory";
+	    break;
+	default:
+	    text_reason = (char *)NULL;
+    }
+    if (text_reason)
+        sprintf(buf, "Failed to load %s, error %d = %s\n", dllname, reason, text_reason);
+    else
+	sprintf(buf, "Failed to load %s, error %d\n", dllname, reason);
+    gs_addmess(buf);
+#else
+    reason = (int)hmodule;
+    switch (reason) {
+	case /* ERROR_FILE_NOT_FOUND */		2:
+	    text_reason = "File not found";
+	    break;
+	case /* ERROR_PATH_NOT_FOUND */		3:
+	    text_reason = "Path not found";
+	    break;
+	case /* ERROR_NOT_ENOUGH_MEMORY */	8:
+	    text_reason = "Not enough memory";
+	    break;
+	case /* ERROR_BAD_FORMAT */		11:
+	    text_reason = "Bad EXE or DLL format";
+	    break;
+	case 20:
+	    text_reason = "DLL was invalid";
+	    break;
+	case 21:
+	    text_reason = "Win32s is required";
+	    break;
+	default:
+	    text_reason = (char *)NULL;
+    }
+    if (text_reason)
+        sprintf(buf, "Failed to load %s, error %d = %s\n", dllname, (int)reason, text_reason);
+    else
+	sprintf(buf, "Failed to load %s, error %d\n", dllname, (int)reason);
+    gs_addmess(buf);
+#endif
+}
+
 /* load GS DLL if not already loaded */
 /* return TRUE if OK */
 BOOL
 gs_load_dll(void)
 {
 char buf[MAXSTR+40];
-long revision;
 char fullname[1024];
 const char *shortname;
 char *p;
@@ -80,9 +146,12 @@ const char *dllname;
 	gsdll.hmodule = LoadLibrary(dllname);
 	if (gsdll.hmodule < (HINSTANCE)HINSTANCE_ERROR) {
 	    /* failed */
+	    load_error(gsdll.hmodule, dllname);
 	    /* try again, with path of EXE */
 	    if ((shortname = strrchr((char *)option.gsdll, '\\')) == (const char *)NULL)
 		shortname = option.gsdll;
+	    else
+		shortname++;
 	    GetModuleFileName(phInstance, fullname, sizeof(fullname));
 	    if ((p = strrchr(fullname,'\\')) != (char *)NULL)
 		p++;
@@ -97,12 +166,17 @@ const char *dllname;
 	    gsdll.hmodule = LoadLibrary(dllname);
 	    if (gsdll.hmodule < (HINSTANCE)HINSTANCE_ERROR) {
 		/* failed again */
+		load_error(gsdll.hmodule, dllname);
 		/* try once more, this time on system search path */
 		dllname = shortname;
 		sprintf(buf, "Trying to load %s\n", dllname);
 		if (debug)
 		    gs_addmess(buf);
 		gsdll.hmodule = LoadLibrary(dllname);
+		if (gsdll.hmodule < (HINSTANCE)HINSTANCE_ERROR) {
+		    /* failed again */
+		    load_error(gsdll.hmodule, dllname);
+		}
 	    }
 	}
 
@@ -117,12 +191,21 @@ const char *dllname;
 		return FALSE;
 	    }
 	    /* check DLL version */
-	    gsdll.revision(NULL, NULL, &revision, NULL);
-	    if ( (revision < GS_REVISION) || (revision > GS_REVISION_MAX) ) {
-		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld\n", revision, (long)GS_REVISION);
+	    gsdll.revision(NULL, NULL, &gsdll.revision_number, NULL);
+	    if ( (gsdll.revision_number < GS_REVISION_MIN) || (gsdll.revision_number > GS_REVISION_MAX) ) {
+		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld - %ld\n", 
+			gsdll.revision_number, (long)GS_REVISION_MIN, (long)GS_REVISION_MAX);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
+	    }
+	    if ( (gsdll.revision_number == 500) || (gsdll.revision_number == 501) ) {
+		gs_addmess("\
+**********************************************************************\n\
+GSview warning: Ghostscript 5.0 and 5.01 do not work well with GSview.\n\
+Please upgrade to a later version.\n\
+**********************************************************************\n\
+");
 	    }
 	    /* continue loading other functions */
 	    gsdll.init = (PFN_gsdll_init) GetProcAddress(gsdll.hmodule, "gsdll_init");
@@ -357,6 +440,10 @@ char buf[MAXSTR];
 	    bitmap.width = ((WORD)count & 0xffff);
 	    bitmap.height = ((WORD)((count)>>16) & 0xffff);
 	    bitmap.changed = TRUE;
+
+	    /* allow window to be resized without user control */
+	    fit_page_enabled = option.fit_page;
+
 	    if (debug) {
 		sprintf(buf,"Callback: SIZE %p width=%d height=%d\n", str,
 		    (count & 0xffff), ((count>>16) & 0xffff) );

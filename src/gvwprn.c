@@ -102,7 +102,7 @@ static char device[MAXSTR];	/* contains printer device name */
 		}
 		return TRUE;
 	    case ID_HELP:
-		SendMessage(hwndimg, help_message, 0, 0L);
+		get_help();
 		return(FALSE);
 	    case IDOK:
 		{
@@ -172,10 +172,10 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	    EnableWindow(GetDlgItem(hDlg, PROP_EDIT), (iprop != 0));
 
 	    strcpy(section, device);
-	    strcat(section, " PageOffset");
-	    GetPrivateProfileString(section, "X", "0", buf, sizeof(buf)-2, INIFILE);
+	    strcat(section, " Options");
+	    GetPrivateProfileString(section, "Xoffset", "0", buf, sizeof(buf)-2, INIFILE);
 	    SetDlgItemText(hDlg, PROP_XOFFSET, buf);
-	    GetPrivateProfileString(section, "Y", "0", buf, sizeof(buf)-2, INIFILE);
+	    GetPrivateProfileString(section, "Yoffset", "0", buf, sizeof(buf)-2, INIFILE);
 	    SetDlgItemText(hDlg, PROP_YOFFSET, buf);
 
 	    SetFocus(GetDlgItem(hDlg, IDOK));
@@ -185,7 +185,7 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	    switch (LOWORD(wParam)) {
 		case ID_HELP:
 		    load_string(IDS_TOPICPROP, szHelpTopic, sizeof(szHelpTopic));
-		    SendMessage(hwndimg, help_message, 0, 0L);
+		    get_help();
 		    load_string(IDS_TOPICPRINT, szHelpTopic, sizeof(szHelpTopic));
 		    return(FALSE);
 		case PROP_NAME:
@@ -292,11 +292,11 @@ PropDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			WritePrivateProfileString(device, propitem[iprop].name, propitem[iprop].value, INIFILE);
 		    }
 		    strcpy(section, device);
-		    strcat(section, " PageOffset");
-		    GetDlgItemText(hDlg, PROP_XOFFSET, buf, sizeof(buf-2));
-		    WritePrivateProfileString(section, "X", buf, INIFILE);
-		    GetDlgItemText(hDlg, PROP_YOFFSET, buf, sizeof(buf-2));
-		    WritePrivateProfileString(section, "Y", buf, INIFILE);
+		    strcat(section, " Options");
+		    GetDlgItemText(hDlg, PROP_XOFFSET, buf, sizeof(buf)-2);
+		    WritePrivateProfileString(section, "Xoffset", buf, INIFILE);
+		    GetDlgItemText(hDlg, PROP_YOFFSET, buf, sizeof(buf)-2);
+		    WritePrivateProfileString(section, "Yoffset", buf, INIFILE);
 		    free((char *)propitem);
 		    EndDialog(hDlg, TRUE);
 		    return TRUE;
@@ -403,6 +403,7 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), FALSE);
 		    EnableWindow(GetDlgItem(hDlg, DEVICE_RES), FALSE);
 		    EnableWindow(GetDlgItem(hDlg, DEVICE_PROP), FALSE);
+		    EnableWindow(GetDlgItem(hDlg, DEVICE_OPTIONS), FALSE);
 		    EnableWindow(GetDlgItem(hDlg, SPOOL_TOFILE), FALSE);
 		}
 		else {
@@ -446,6 +447,8 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			    enable = !i;
 			    EnableWindow(GetDlgItem(hDlg, DEVICE_NAMETEXT), enable);
 			    EnableWindow(GetDlgItem(hDlg, DEVICE_NAME), enable);
+			    EnableWindow(GetDlgItem(hDlg, DEVICE_OPTIONSTEXT), enable);
+			    EnableWindow(GetDlgItem(hDlg, DEVICE_OPTIONS), enable);
 			    if (i) {
 				EnableWindow(GetDlgItem(hDlg, DEVICE_RESTEXT), FALSE);
 				EnableWindow(GetDlgItem(hDlg, DEVICE_RES), FALSE);
@@ -459,7 +462,7 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			}
 			return FALSE;
 		    case ID_HELP:
-		        SendMessage(hwndimg, help_message, 0, 0L);
+		        get_help();
 		        return FALSE;
 		    case DEVICE_NAME:
 			if (notify_message != CBN_SELCHANGE) {
@@ -503,6 +506,13 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 			if (SendDlgItemMessage(hDlg, DEVICE_RES, CB_GETLBTEXT, 0, (LPARAM)(LPSTR)buf)
 			    != CB_ERR)
 		            SetDlgItemText(hDlg, DEVICE_RES, buf);
+			/* update printer options */
+			{ char section[MAXSTR];
+			strcpy(section, entry);
+			strcat(section, " Options");
+			GetPrivateProfileString(section, "Options", "", buf, sizeof(buf)-2, INIFILE);
+			SetDlgItemText(hDlg, DEVICE_OPTIONS, buf);
+			}
 			return FALSE;
 		    case DEVICE_RES:
 			/* don't have anything to do */
@@ -563,6 +573,13 @@ DeviceDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 #ifndef __WIN32__
 			FreeProcInstance((FARPROC)lpProcPage);
 #endif
+			/* get options */
+			{ char section[MAXSTR];
+			strcpy(section, option.device_name);
+			strcat(section, " Options");
+		        GetDlgItemText(hDlg, DEVICE_OPTIONS, buf, sizeof(buf)-2);
+			WritePrivateProfileString(section, "Options", buf, INIFILE);
+			}
 			EndDialog(hDlg, TRUE);
 			return TRUE;
 		    case IDCANCEL:

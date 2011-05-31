@@ -84,6 +84,7 @@ RECT  button_rect;		/* position and size of button area */
 int on_link;			/* TRUE if we were or are over link */
 int on_link_page;		/* page number of link target */
 BOOL ignore_sync = FALSE;	/* ignore next GSDLL_SYNC */
+BOOL fit_page_enabled = FALSE;	/* next WM_SIZE is allowed to resize window */
 
 BOOL prev_in_child;		/* true if cursor previously in gswin child window */
 int page_skip = 5;		/* number of pages to skip in IDM_NEXTSKIP or IDM_PREVSKIP */
@@ -214,7 +215,9 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
 	    return FALSE;
 	}
 
-	gsview_init1(lpszCmdLine);
+	if (!gsview_init1(lpszCmdLine))
+	    return FALSE;
+
 	load_SetScrollInfo();
 #ifdef __WIN32__
 	{   STARTUPINFO sti;
@@ -322,8 +325,30 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			cyClient = HIWORD(lParam);
 			cxClient = LOWORD(lParam);
 
+#ifdef OLD
 			cyAdjust = min(bitmap.height, cyClient) - cyClient;
 			cyClient += cyAdjust;
+#else
+			if (bitmap.height < cyClient) {
+			    /* shrink window */
+			    cyAdjust = bitmap.height - cyClient;
+			}
+			else {
+			    if (fit_page_enabled) {
+				/* We just got a GSDLL_SIZE and option.fitpage was TRUE */
+				/* enlarge window to smaller of bitmap height */
+				/* and height if client extended to bottom of screen */
+				GetWindowRect(GetParent(hwnd),&rect);
+				cyAdjust = min(bitmap.height, 
+				    cyClient + GetSystemMetrics(SM_CYFULLSCREEN) + 
+				    GetSystemMetrics(SM_CYCAPTION) - rect.bottom)
+				    - cyClient;
+			    }
+			    else
+				cyAdjust = 0;
+			}
+			cyClient += cyAdjust;
+#endif
 
 			nVscrollMax = max(0, bitmap.height - cyClient);
 			nVscrollPos = min(nVscrollPos, nVscrollMax);
@@ -355,8 +380,29 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			    SetScrollPos(hwnd, SB_VERT, nVscrollPos, TRUE);
 			}
 
+#ifdef OLD
 			cxAdjust = min(bitmap.width,  cxClient) - cxClient;
 			cxClient += cxAdjust;
+#else
+			if (bitmap.width < cxClient) {
+			    /* shrink window */
+			    cxAdjust = bitmap.width - cxClient;
+			}
+			else {
+			    if (fit_page_enabled) {
+				/* We just got a GSDLL_SIZE and option.fitpage was TRUE */
+				/* enlarge window to smaller of bitmap width */
+				/* and width if client extended to right of screen */
+				GetWindowRect(GetParent(hwnd),&rect);
+				cxAdjust = min(bitmap.width, 
+				    cxClient + GetSystemMetrics(SM_CXFULLSCREEN)-rect.right)
+				    - cxClient;
+			    }
+			    else
+				cxAdjust = 0;
+			}
+			cxClient += cxAdjust;
+#endif
 
 			nHscrollMax = max(0, bitmap.width - cxClient);
 			nHscrollPos = min(nHscrollPos, nHscrollMax);
@@ -399,6 +445,7 @@ WndImgChildProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				rect.bottom-rect.top+cyAdjust, TRUE);
 			    cxAdjust = cyAdjust = 0;
 			}
+			fit_page_enabled = FALSE;
 			return(0);
 		case WM_VSCROLL:
 			switch(LOWORD(wParam)) {
@@ -987,6 +1034,7 @@ RECT rect;
 		enable_menu_item(IDM_EDITMENU, IDM_TEXTFIND, idle);
 		enable_menu_item(IDM_EDITMENU, IDM_TEXTFINDNEXT, idle);
 
+		enable_menu_item(IDM_ORIENTMENU, IDM_AUTOORIENT, !psfile.ispdf);
 		enable_menu_item(IDM_ORIENTMENU, IDM_PORTRAIT, !psfile.ispdf);
 		enable_menu_item(IDM_ORIENTMENU, IDM_LANDSCAPE, !psfile.ispdf);
 		enable_menu_item(IDM_ORIENTMENU, IDM_UPSIDEDOWN, !psfile.ispdf);
@@ -1687,6 +1735,7 @@ gsview_close()
 	DeleteCriticalSection(&crit_sec);
     }
 #endif
+    unload_zlib();
     if (hlanguage)
 	FreeLibrary(hlanguage);
     return;

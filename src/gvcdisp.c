@@ -83,6 +83,7 @@ int width, height;
 	oldy = *y;
 	width  = (unsigned int)(display.width  * 72.0 / option.xdpi);
 	height = (unsigned int)(display.height * 72.0 / option.ydpi);
+#ifdef OLD
 	real_orientation = option.orientation;
 	if (option.swap_landscape) {
 	    if (option.orientation == IDM_LANDSCAPE)
@@ -90,6 +91,9 @@ int width, height;
 	    else if (option.orientation == IDM_SEASCAPE)
 		real_orientation = IDM_LANDSCAPE;
 	}
+#else
+	real_orientation = IDM_PORTRAIT + d_orientation(psfile.pagenum);
+#endif
 
 	if (psfile.ispdf)
 	    real_orientation = pdf_orientation();
@@ -127,6 +131,7 @@ int width, height;
 	oldy = *y;
 	width  = (unsigned int)(display.width  * 72.0 / option.xdpi);
 	height = (unsigned int)(display.height * 72.0 / option.ydpi);
+#ifdef OLD
 	real_orientation = option.orientation;
 	if (option.swap_landscape) {
 	    if (option.orientation == IDM_LANDSCAPE)
@@ -134,6 +139,9 @@ int width, height;
 	    else if (option.orientation == IDM_SEASCAPE)
 		real_orientation = IDM_LANDSCAPE;
 	}
+#else
+	real_orientation = IDM_PORTRAIT + d_orientation(psfile.pagenum);
+#endif
 
 	if (psfile.ispdf)
 	    real_orientation = pdf_orientation();
@@ -233,15 +241,31 @@ int xtemp, ytemp;
 void
 gsview_orientation(int new_orientation)
 {
-	if (new_orientation == option.orientation)
+	if (new_orientation == IDM_AUTOORIENT) {
+	    check_menu_item(IDM_ORIENTMENU, option.orientation, option.auto_orientation);
+	    option.auto_orientation = !option.auto_orientation;
+	    check_menu_item(IDM_ORIENTMENU, IDM_AUTOORIENT, option.auto_orientation);
+	    zoom = FALSE;
+	    gs_resize();
+	    return;
+	}
+
+	if (option.auto_orientation && (new_orientation != IDM_SWAPLANDSCAPE)) {
+	    option.auto_orientation = FALSE;
+	    check_menu_item(IDM_ORIENTMENU, IDM_AUTOORIENT, option.auto_orientation);
+	} 
+  	else if (new_orientation == option.orientation)
 		return;
+
 	if (new_orientation == IDM_SWAPLANDSCAPE) {
 	    option.swap_landscape = !option.swap_landscape;
 	    if (option.swap_landscape) 
 	        check_menu_item(IDM_ORIENTMENU, IDM_SWAPLANDSCAPE, TRUE);
 	    else
 	        check_menu_item(IDM_ORIENTMENU, IDM_SWAPLANDSCAPE, FALSE);
-	    if ((option.orientation != IDM_LANDSCAPE) && (option.orientation != IDM_SEASCAPE))
+	    if ((option.orientation != IDM_LANDSCAPE) && 
+		(option.orientation != IDM_SEASCAPE) && 
+		(option.auto_orientation == FALSE))
 	        return;
 	}
 	else {
@@ -304,10 +328,12 @@ PSFILE *tpsfile;
     if (dsc_scan(tpsfile)) {
         PSDOC *doc = tpsfile->doc;
 	/* found DSC comments */
+#ifdef OLD
 	if (doc->orientation == PORTRAIT)
 	    gsview_orientation(IDM_PORTRAIT);
 	if (doc->orientation == LANDSCAPE)
 	    gsview_orientation(IDM_LANDSCAPE);
+#endif
 	if (doc->default_page_media) {
 	    char thismedia[20];
 	    for (i=IDM_LETTER; i<IDM_USERSIZE; i++) {
@@ -453,7 +479,7 @@ char *filename;
 	psfile.locked = TRUE;	/* stop others using it */
 	end_crit_section();
 
-	filename = psfile.name;
+	filename = psfile_name(&psfile);
 
 	if (psfile.file) {	/* should never happen */
 	    fclose(psfile.file);
@@ -495,6 +521,51 @@ dfclose()
 }
 
 
+/* gunzip to temporary file */
+BOOL
+dsc_gunzip(PSFILE *psf)
+{
+FILE *outfile;
+gzFile *infile;
+char *buffer;
+int count;
+    
+    if (!load_zlib())
+	return FALSE;
+
+    /* create buffer for file copy */
+    buffer = malloc(COPY_BUF_SIZE);
+    if (buffer == (char *)NULL) {
+	play_sound(SOUND_ERROR);
+	unload_zlib();
+	return FALSE;
+    }
+
+    if ((infile = gzopen(psf->name, "rb")) == (gzFile)NULL) {
+	play_sound(SOUND_ERROR);
+	unload_zlib();
+	free(buffer);
+	return FALSE;
+    }
+
+    if ( (outfile = gp_open_scratch_file(szScratch, psf->tname, "wb")) == (FILE *)NULL) {
+	gserror(IDS_NOTEMP, NULL, MB_ICONEXCLAMATION, SOUND_ERROR);
+	gzclose(infile);
+	unload_zlib();
+	free(buffer);
+	return FALSE;
+    }
+	
+    while ( (count = gzread(infile, buffer, COPY_BUF_SIZE)) != 0 ) {
+	fwrite(buffer, 1, count, outfile);
+    }
+    free(buffer);
+    gzclose(infile);
+    fclose(outfile);
+    /* unload_zlib(); */
+    return TRUE;
+}
+
 /* scan file for PostScript Document Structuring Conventions */
 /* return TRUE if valid DSC comments found */
 BOOL
@@ -502,6 +573,7 @@ dsc_scan(PSFILE *psf)
 {
 char line[MAXSTR];
 PSDOC *doc;
+long file_length;
 	if (psf->file) {
 	    message_box("dsc_scan: file is open but shouldn't be", 0);
 	    fclose(psf->file);
@@ -532,10 +604,37 @@ PSDOC *doc;
 		psfree(psf->doc);
 	psf->preview = 0;
 	
-	/* check for PDF */
-	psf->ispdf = FALSE;
+	/* get first line to look for magic numbers */
 	fgets(line, sizeof(line)-1, psf->file);
         rewind(psf->file);
+
+	/* check for gzip */
+	psf->gzip = FALSE;
+	if ( (line[0]=='\037') && (line[1]=='\213') ) { /* 1F 8B */
+	    psf->gzip = TRUE;
+	    fclose(psf->file);
+	    psf->file = NULL;
+	    if (!dsc_gunzip(psf)) {
+/* ENGLISH */
+		message_box("Failed to gunzip file", 0);
+		psf->name[0] = '\0';
+		psf->locked = FALSE;
+		return FALSE;
+	    }
+	    if ( (psf->file = fopen(psfile_name(psf), "rb")) == (FILE *)NULL ) {
+		char buf[MAXSTR+MAXSTR];
+		sprintf(buf, "File '%s' does not exist", psfile_name(psf));
+		message_box(buf, 0);
+		psf->name[0] = '\0';
+		psf->locked = FALSE;
+		return FALSE;
+	    }
+	    fgets(line, sizeof(line)-1, psf->file);
+            rewind(psf->file);
+	}
+
+	/* check for PDF */
+	psf->ispdf = FALSE;
 	if ( strncmp("%PDF-", line, 5) == 0 ) {
 	    fclose(psf->file);
 	    psf->locked = FALSE;
@@ -557,6 +656,8 @@ PSDOC *doc;
 	    psf->doc = (PSDOC *)NULL;
 	else 
 	    psf->doc = psscan(psf->file);
+	fseek(psf->file, 0, SEEK_END);
+	file_length = ftell(psf->file);
 	fclose(psf->file);
 	psf->file = NULL;
 	psf->locked = FALSE;
@@ -565,11 +666,34 @@ PSDOC *doc;
 	if (doc == (PSDOC *)NULL)
 	    return FALSE;
 	if (doc->doseps) {
+	    BOOL bad_header = FALSE;
 	    /* check what sort of preview is present */
 	    if (doc->doseps->tiff_begin)
 		psf->preview = IDS_EPST;
 	    if (doc->doseps->mf_begin)
 		psf->preview = IDS_EPSW;
+	    /* check for errors in header */
+	    if (doc->doseps->ps_begin > file_length)
+		bad_header = TRUE;
+	    if (doc->doseps->ps_begin + doc->doseps->ps_length > file_length)
+		bad_header = TRUE;
+	    if (doc->doseps->mf_begin > file_length)
+		bad_header = TRUE;
+	    if (doc->doseps->mf_begin + doc->doseps->mf_length > file_length)
+		bad_header = TRUE;
+	    if (doc->doseps->tiff_begin > file_length)
+		bad_header = TRUE;
+	    if (doc->doseps->tiff_begin + doc->doseps->tiff_length > file_length)
+		bad_header = TRUE;
+	    if (bad_header) {
+		char buf[MAXSTR];
+	        load_string(IDS_BAD_DOSEPS_HEADER, buf, sizeof(buf));
+	        message_box(buf, 0);
+		/* Ignore the bad information */
+		psfree(psf->doc);
+		psf->doc = (PSDOC *)NULL;
+		return FALSE;
+	    }
 	}
 	if (!psf->preview && (doc->beginpreview != doc->endpreview))
 	    psf->preview = IDS_EPSI;
@@ -614,6 +738,14 @@ PSDOC *doc;
 	        load_string(IDS_EPS_OFF_PAGE, buf, sizeof(buf));
 	        message_box(buf, 0);
 	    }
+	    if ( ((doc->boundingbox[LLX] > doc->boundingbox[URX]) || 
+		 (doc->boundingbox[LLY] > doc->boundingbox[URY]))
+		&& option.epsf_clip)
+	    {
+		char buf[MAXSTR];
+	        load_string(IDS_EPS_BAD_BBOX, buf, sizeof(buf));
+	        message_box(buf, 0);
+	    }
 	}
 	return TRUE;
 }
@@ -644,6 +776,11 @@ psfile_free(PSFILE *psf)
     psf->file = (FILE *)NULL;
     psf->locked = FALSE;
 
+    if ((psf->tname[0] != '\0') && (!debug))
+	unlink(psf->tname);
+    psf->tname[0] = '\0';
+
+
     if (psf->page_list.select)
 	free(psf->page_list.select);
     psf->page_list.select = NULL;
@@ -656,3 +793,14 @@ psfile_free(PSFILE *psf)
         psf->text_name[0] = '\0';
     }
 }
+
+char *
+psfile_name(PSFILE *psf)
+{
+    /* if original file was gzipped, give name of gunzipped file */
+    if ((psf->tname[0]!='\0') && (psf->gzip))
+	return psf->tname;
+    /* otherwise return original file name */
+    return psf->name;
+}
+

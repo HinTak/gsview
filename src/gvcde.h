@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
 
   This file is part of GSview.
 
@@ -20,11 +20,11 @@
 
 #define GSVIEW_BASEDIR "gsview"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1996 Russell Lang."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-1997 Russell Lang."
 #define GSVIEW_COPYRIGHT2 "Alle Rechte vorbehalten."
 #define GSVIEW_COPYRIGHT3 "Siehe Datei LICENCE für mehr Details."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-1996 Aladdin Enterprises,"
+#define GS_COPYRIGHT1 "Copyright (C) 1994-1997 Aladdin Enterprises,"
 #define GS_COPYRIGHT2 "Menlo Park, California, U.S.A.  Alle Rechte vorbehalten."
 #define GS_COPYRIGHT3 "Siehe Datei PUBLIC für mehr Details."
 
@@ -39,6 +39,10 @@
 #define AATEST "&Test"
 #define AAYES "&Ja"
 #define AANO "&Nein"
+#define AANEXTGT "&Weiter >"
+#define AABACKLT "< &Zurück"
+#define AAFINISHGT "&Fertig>"
+#define AAEXIT "&Ende"
 #else
 #define AAOK "~Ok"
 #define AACANCEL "~Abbruch"
@@ -49,6 +53,10 @@
 #define AATEST "~Test"
 #define AAYES "~Ja"
 #define AANO "~Nein"
+#define AANEXTGT "~Weiter >"
+#define AABACKLT "< ~Zurück"
+#define AAFINISHGT "~Fertig>"
+#define AAEXIT "~Ende"
 #endif
 
 /* About dialog box */
@@ -114,6 +122,7 @@
 #define AAQUEUEC "Drucker:"
 #define AAPRINTTOFILE "Druck in Datei"
 #define AAPSPRINTER "PostScript Drucker"
+#define AAOPTIONSC "Optionen:"
 
 /* PDF2PS dialog box */
 #define AAPDFTOPS	"PDF zu PostScript"
@@ -186,6 +195,8 @@
 #define AABITS "bits"
 
 /* Installation program */
+/* THIS SECTION IS OLD AND NEEDS UPDATING BEFORE A GERMAN */
+/* LANGUAGE INSTALL PROGRAM CAN BE COMPILED */
 #define AAINSTALL1 "GSview Installation"
 #define AAINSTALLINTRO1 "GSview Installation - Einführung"
 #define AAINSTALLINTRO2 "Installationsprogramm für:"
@@ -215,6 +226,51 @@
 #define AAINSTALLOKPM "Installation erfolgreich.\012A GSview Programobjekt wurde auf dem Desktop angelegt"
 #define AAINSTALLABORT "Installation abgebrochen\012%s"
 #define AASKIPGSINSTALL "Ghostscript %s scheint schon installiert zu sein. Installation von Ghostscript überspringen?"
+#define AAPROGMANGROUP1 "GSview kann eine Programm Manager Gruppe oder ein Start Menü anlegen."
+#define AAPROGMANGROUP2 "Lege Gruppe / Symbol an"
+#define AAPROGMANGROUP3 "Name"
+#define AAPROGMANGROUP4 "GS Tools"
+#define AAPROGMANGROUP5 "Eine Programm Manager Gruppe namens \042%s\042 wurde angelegt."
+#define AADONEBAK "Die altw autoexec.bat wurde umbenannt in %s"
+
+/* configure */
+#define AACFG10 "Dieser Wizard hilft Ihnen Gsview zu konfigurieren."
+#define AACFG11 "Wenn Sie einen Eintrag der folgenden Seiten nicht verstehen,\
+ dann ändern Sie ihn nicht.  Die Defaults sollten sinnvoll sein."
+#define AACFG20 "GSview muß die Version von Ghostscript kennen\
+ und wo es installiert ist."
+#define AACFG21 "Welche Version von Ghostscript wollen Sie einsetzen?"
+#define AACFG22 "In welchem Verzeichnis ist Ghostscript installiert?"
+#define AACFG23 "Zusätzliche Typ 1 Zeichensätze sind in"
+#define AACFG30 "GSview hält eine Liste von Ghostscript Druckern und\
+ Auflösungen in seiner INI Datei vor. \
+ Die Default Liste der Geräte und Auflösungen wurde der Standarddistribution \
+ von Ghostscript 4.03 entnommen und könnte unvollständig sein."
+#define AACFG31 "Aktualisiere GSview Druckerliste, überschreibe vorhandene Einträge" 
+#define AACFG32 " Aktualisiere GSview Druckerliste " 
+#define AACFG33 " Aktualisierung der GSview Druckerliste überschreibt vorhandene Einträge"
+#define AACFG40 "GSview kann Dateiverknüfungen für PostScript und\
+ Portable Document Format (PDF) Dateien anlegen.\
+ Durch diese Verknüpfungen führt ein Doppelklick auf jene Dateien \
+ zum start von GSview.  Außerdem bewirken sie bei einigen WWW browsern,\
+ daß GSview als ein Viewer für PostScript und PDF Dateien benutzt wird."
+#define AACFG41 "Verknüpfung von PostScript (.ps and .eps) Dateien mit GSview."
+#define AACFG42 " Verknüpfung von PDF (.pdf) Dateien mit GSview."
+#define AACFG50 "GSview kann eine Programm Manager Gruppe oder\
+ Start Menü Einträge für GSview und Aladdin Ghostscript anlegen."
+#define AACFG51 "Lege Gruppe / Eintrag an"
+#define AACFG52 "Name"
+#define AACFG60 "GSview ist jetzt bereit die Konfiguration zu starten.\r\r \
+ Drücken Sie Fertig um weiter zu machen."
+#define AACFG53 "GSview kann ein Desktop Programm Objekt für Gsview anlegen. \
+ Dies verknüpft PostScript (.ps und .eps) und PDF (.pdf) Dateien mit GSview."
+#define AACFG54 "Lege Programm Objekt an"
+#define AACFG70 "Konfiguration erfolgreich."
+#define AACFG72 "Um die Konfiguration später zu verändern,\
+ starten Sie GSview und wählen \042Optionen | Konfiguriere...\042 oderr\
+ \042Optionen | Konfiguriere Ghostscript\042."
+#define AACFG73 "Konfiguration fehlgeschlagen."
+#define AACFG74 "Konfiguration abgebrochen."
 
 /* Menu items for gvXgs.rc */
 #define AAGSVIEWPRINT "GSview Druck"
@@ -239,7 +295,9 @@
 
 
 /* Language changing */
-#define AASELECTLANGUAGE "Select Language"
+#define AASELECTLANGUAGE "Select Language"   /* Don't translate this */
 #define AAENGLISH "English"
 #define AADEUTSCH "Deutsch"
 
+
+

@@ -39,48 +39,27 @@
 #include "gvcrc.h"
 #include "setup.h"
 #include "gvclang.h"
+#include "setupc.h"
 
-int unzip(char *zipname);
-int load_unzip(LPSTR lpszDllName, HINSTANCE hInstance, HWND hmain, HWND hlist);
-int free_unzip(void);
-HWND gs_showmess_modeless(void);
-void gs_showmess_destroy(void);
-void gs_addmess(char *str);
-void gs_addmess_update(HWND hwnd);
+void install_init(void);
 
-BOOL CALLBACK _export GeneralDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK _export InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK _export ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK _export MainDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
-char workdir[MAXSTR];
-char bootdrive[MAXSTR];
-char sourcedir[MAXSTR];
-char destdir[MAXSTR];
-char unzipname[MAXSTR];
-char winsetup[MAXSTR];
-char gsviewbase[MAXSTR];
+/* variables that affect where we install things */
+char groupname[MAXSTR];
+char groupfile[MAXSTR];
+
 HINSTANCE phInstance;
-char get_string_answer[MAXSTR];
-char szAppName[]="GSview Install";
 #ifdef __WIN32__
-char szUnzipDll[] = "wizunz32.dll";
+char szUnzipDll[]="wizunz32.dll";
 char szIniName[]="gsview32.ini";
 #else
-char szUnzipDll[] = "wizunz16.dll";
+char szUnzipDll[]="wizunz16.dll";
 char szIniName[]="gsview16.ini";
 #endif
-char error_message[MAXSTR];
-char no_error[] = "";
 int is_win32s;
 int is_win4;
-HWND hwndmess;
-int batch;
-
-#define DID_OK IDOK
-#define DID_CANCEL IDCANCEL
-#define MBID_YES IDYES
-#define MBID_NO IDNO
-#define MB_MOVEABLE 0
 
 int
 dialog(int resource, DLGPROC dlgproc) 
@@ -90,10 +69,10 @@ int flag;
 DLGPROC lpProcDlg;
 #endif
 #ifdef __WIN32__
-    flag = DialogBoxParam( phInstance, MAKEINTRESOURCE(resource), HWND_DESKTOP, dlgproc, (LPARAM)NULL);
+    flag = DialogBoxParam( phInstance, MAKEINTRESOURCE(resource), hMain, dlgproc, (LPARAM)NULL);
 #else
     lpProcDlg = (DLGPROC)MakeProcInstance((FARPROC)dlgproc, phInstance);
-    flag = DialogBoxParam( phInstance, MAKEINTRESOURCE(resource), HWND_DESKTOP, lpProcDlg, (LPARAM)NULL);
+    flag = DialogBoxParam( phInstance, MAKEINTRESOURCE(resource), hMain, lpProcDlg, (LPARAM)NULL);
     FreeProcInstance((FARPROC)lpProcDlg);
 #endif
     return flag;
@@ -101,7 +80,7 @@ DLGPROC lpProcDlg;
 
 int message_box(char *str, int icon)
 {
-    return MessageBox(HWND_DESKTOP, str, szAppName, icon);
+    return MessageBox(hMain, str, szAppName, icon);
 }
 
 /* change directory and drive */
@@ -125,66 +104,86 @@ load_string(int id, char *str, int len)
 	return LoadString(phInstance, id, str, len);
 }
 
-/* INCLUDE COMMON CODE */
-#include "setup.c"
-
-
-
-
-int
-cleanup(void)
+void
+gs_addmess_update(void)
 {
+  HWND hwndmess = find_page_from_id(IDD_TEXTWIN)->hwnd;
+
+  if (IsWindow(hwndmess)) {
+    HWND hwndtext = GetDlgItem(hwndmess, TEXTWIN_MLE);
+    DWORD linecount;
+    SendMessage(hwndtext, WM_SETREDRAW, FALSE, 0);
+    SetDlgItemText(hwndmess, TEXTWIN_MLE, twbuf);
+#ifdef __WIN32__
+    /* EM_SETSEL, followed by EM_SCROLLCARET doesn't work */
+    linecount = SendDlgItemMessage(hwndmess, TEXTWIN_MLE, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
+    SendDlgItemMessage(hwndmess, TEXTWIN_MLE, EM_LINESCROLL, (WPARAM)0, (LPARAM)linecount-14);
+#else
+    linecount = SendDlgItemMessage(hwndmess, TEXTWIN_MLE, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
+    SendDlgItemMessage(hwndmess, TEXTWIN_MLE, EM_LINESCROLL, (WPARAM)0, MAKELPARAM(linecount-14, 0));
+#endif
+    SendMessage(hwndtext, WM_SETREDRAW, TRUE, 0);
+    InvalidateRect(hwndtext, (LPRECT)NULL, TRUE);
+    UpdateWindow(hwndtext);
+  }
+}
+
+void
+goto_page(HWND hwnd, int id)
+{
+WIZPAGE *page;
+HWND hbutton;
+    page = find_page_from_id(id);
+    if (page) {
+	ShowWindow(hwnd, SW_HIDE);
+	ShowWindow(page->hwnd, SW_SHOW);
+	hwnd_current = page->hwnd;
+	if (IsWindowEnabled(GetDlgItem(page->hwnd, IDNEXT)))
+	    hbutton = GetDlgItem(page->hwnd, IDNEXT);
+	else
+	    hbutton = GetDlgItem(page->hwnd, IDCANCEL);
+	SetFocus(hbutton);
+	SendMessage(hbutton, BM_SETSTYLE, (WPARAM)BS_DEFPUSHBUTTON, TRUE);
+	return;
+    }
+}
+
+#pragma argsused
+/* exit from program */
+int
+done(HWND hwnd)
+{
+    PostQuitMessage(0);
     return 0;
 }
 
-
+/* commence installation */
 int
-unzip_to_dir(char *filename, char *destination)
+finish(HWND hwnd)
 {
-    /* start unzip session */  
-    char fullname[256];
-    FILE *f;
-    int file_exists = 0;
-    char cwd[256];
-    int rc;
+WIZPAGE *page;
+    page = find_page_from_id(IDD_GSVER);
+    install_gsview = (BOOL)SendDlgItemMessage(page->hwnd, PARTIAL_GSVIEW, BM_GETCHECK, 
+		    (WPARAM)0, (LPARAM)0);
+    install_gs = (BOOL)SendDlgItemMessage(page->hwnd, PARTIAL_GS, BM_GETCHECK, 
+		    (WPARAM)0, (LPARAM)0);
+    /* assume gsver is already correct */
 
-    /* prompt for disk to be installed */
-    strcpy(fullname, sourcedir);
-    strcat(fullname, filename);
-    while (!file_exists) {
-        if ( (f = fopen(fullname, "r")) == (FILE *)NULL ) {
-	    char buf[256];
-	    sprintf(buf, "Insert disk containing %s", fullname);
-	    strcpy(get_string_answer, fullname);
-	    if (dialog(IDD_FILE, InputDlgProc) != DID_OK) {
-		strcpy(error_message, no_error);
-		return 1;
-	    }
-	    strcpy(fullname, get_string_answer);
-	}
-	else {
-	    file_exists = TRUE;
-	    fclose(f);
-	}
-    }
+    page = find_page_from_id(IDD_CONFIG);
+    install_autoexec = (BOOL)SendDlgItemMessage(page->hwnd, IDM_AUTOEXECBAT, BM_GETCHECK, 
+		    (WPARAM)0, (LPARAM)0);
+    install_autoexecbak = (BOOL)SendDlgItemMessage(page->hwnd, IDM_AUTOEXECBAK, BM_GETCHECK, 
+		    (WPARAM)0, (LPARAM)0);
+    /* assume destdir is already correct */
 
-    getcwd(cwd, sizeof(cwd));
-    gs_chdir(destination);
-    gs_addmess("Unzipping ");
-    gs_addmess(fullname);
-    gs_addmess("\n");
-    rc = unzip(fullname);
-    gs_chdir(cwd);
+    page = find_page_from_id(IDD_FINISH);
+    install_group = (BOOL)SendDlgItemMessage(page->hwnd, IDM_PROGMAN1, BM_GETCHECK, 
+		    (WPARAM)0, (LPARAM)0);
+    GetDlgItemText(page->hwnd, IDM_PROGMAN2, groupname, sizeof(groupname));
 
-    if (!rc) {
-        if (!IsWindow(hwndmess)) {
-	    strcpy(error_message, "Unzip cancelled");
-	    return -1;
-	}
-    }
-    return rc;
+    PostMessage(hwnd, WM_COMMAND, (WPARAM)IDFINISH, (LPARAM)0);
+    return 0;
 }
-
 
 int
 update_config(void)
@@ -193,24 +192,15 @@ FILE *infile, *outfile;
 char inname[MAXSTR], outname[MAXSTR];
 char line[1024];
 char tempname[MAXSTR];
-char buf[MAXSTR];
-int replace;
+int i;
     
-    if (getenv("TEMP"))
-	return 0;	/* assume TEMP is in autoexec.bat */
-
     strcpy(inname, bootdrive);
     strcat(inname, "\\autoexec.bat");
-
-    if (batch)
-	replace = TRUE;
-    else 
-        replace = (dialog(IDD_CONFIG, GeneralDlgProc) == DID_OK);
 
     strcpy(tempname, bootdrive);
     strcat(tempname, "\\GSXXXXXX");
     if (mktemp(tempname) == (char *)NULL) {
-		strcpy(error_message, "Can't get temporary filename");
+	strcpy(error_message, "Can't create temporary filename");
 		return 1;
     }
 
@@ -219,10 +209,17 @@ int replace;
 	return 1;
     }
     if ( (outfile = fopen(tempname, "w")) == (FILE *)NULL)  {
-	sprintf(error_message, "Can't create %s for writing", outname);
+	sprintf(error_message, "Can't create %s for writing", tempname);
 	return 1;
     }
     while (fgets(line, sizeof(line), infile)) {
+	if (strnicmp(line, "SET TEMP=", 9)==0) {
+	    /* it has been added recently */
+	    fclose(outfile);
+	    fclose(infile);
+	    unlink(tempname);
+	    return 0;
+	}
 	fputs(line, outfile);
     }
     sprintf(line, "SET TEMP=%s\\\n", bootdrive);
@@ -231,35 +228,26 @@ int replace;
     fclose(outfile);
     fclose(infile);
 
-    strcpy(outname, bootdrive);
-    strcat(outname, "\\autoexec.gs");
-    if ( (outfile = fopen(outname, "r")) != (FILE *)NULL)  {
-	fclose(outfile);
-	sprintf(buf, "File %s exists.  Overwrite?", outname);
-	if (!batch && (message_box(buf, MB_YESNO) != MBID_YES)) {
-	    return 0;
+    if (install_autoexecbak) {
+	for (i=0; i<=999; i++) {
+	    sprintf(outname, "%s\\autoexec.%03d", bootdrive, i);
+	    if ( (infile = fopen(outname, "r")) != (FILE *)NULL)
+		fclose(infile);
+	    else
+		break;   /* found a suitable name */
 	}
-	unlink(outname);
-    }
-    if (replace) {
-	/* modify autoexec.bat */
-	if (rename(inname, outname)) {
+        if (rename(inname, outname)) {
 	    sprintf(error_message, "Error renaming %s to %s", inname, outname);
 	    return 1;
 	}
-	if (rename(tempname, inname)) {
-	    sprintf(error_message, "Error renaming %s to %s", tempname, inname);
-	    return 1;
-	}
+	strcpy(autoexec_bak, outname);
     }
-    else {
-	if (rename(tempname, outname)) {
-	    sprintf(error_message, "Error renaming %s to %s", tempname, outname);
-	    return 1;
-	}
-	sprintf(buf, "Changes were saved in %s", outname);
-	if (!batch)
-	    message_box(buf, MB_MOVEABLE | MB_OK);
+    else
+	unlink(inname);
+
+    if (rename(tempname, inname)) {
+	sprintf(error_message, "Error renaming %s to %s", tempname, inname);
+	return 1;
     }
 
     return 0;
@@ -268,7 +256,10 @@ int replace;
 int
 update_ini(char *ininame)
 {
+char buf[16];
+    sprintf(buf, "%3d", gsver);
     WritePrivateProfileString("Options", "Configured", "0", ininame);
+    WritePrivateProfileString("Options", "GSversion", buf, ininame);
     return 0;
 }
 
@@ -283,6 +274,12 @@ DdeCallback(UINT type, UINT fmt, HCONV hconv,
   }
 }
 
+#ifdef __WIN32__
+#define GSVIEW_NAME "GSview"
+#else
+#define GSVIEW_NAME "GSview 16"
+#endif
+
 int
 create_object(void)
 {
@@ -292,6 +289,7 @@ HSZ hszServName;
 HSZ hszSysTopic;
 HCONV hConv;
 char setup[MAXSTR+MAXSTR];
+char buf[MAXSTR];
 DWORD dwResult;
 
     lpDdeProc = MakeProcInstance((FARPROC)DdeCallback, phInstance);
@@ -305,7 +303,8 @@ DWORD dwResult;
     hszSysTopic = DdeCreateStringHandle(idInst, "PROGMAN", CP_WINANSI);
     hConv = DdeConnect(idInst, hszServName, hszSysTopic, (PCONVCONTEXT)NULL);
     if (hConv == NULL) {
-	message_box("Couldn't open DDE connection to Program Manager\n", 0);
+	
+	sprintf(error_message, "Couldn't open DDE connection to Program Manager\n", 0);
 	return 1;
     }
 
@@ -313,16 +312,17 @@ DWORD dwResult;
     DdeClientTransaction((LPBYTE)str, strlen(str)+1, hConv,\
 	NULL, CF_TEXT, XTYP_EXECUTE, 2000, &dwResult)
 
-    sprintf(setup, "[CreateGroup(\042GS Tools\042,gstools.grp)][ShowGroup(\042GS Tools\042,1)]");
+    sprintf(setup, "[CreateGroup(\042%s\042,%s.grp)][ShowGroup(\042%s\042,1)]",
+	groupname, groupfile, groupname);
     DDEEXECUTE(setup);
-    sprintf(setup, "[ReplaceItem(\042GSview\042)]");
+    sprintf(setup, "[ReplaceItem(\042%s\042)]", GSVIEW_NAME);
     DDEEXECUTE(setup);
     if (!is_win4)
-       sprintf(setup, "[AddItem(\042%s\\%s\\%s\042,\042GSview\042, \042%s\\%s\\gsview32.ico\042)]", 
-	  destdir, gsviewbase, GSVIEW_EXENAME, destdir, gsviewbase);
+       sprintf(setup, "[AddItem(\042%s\\%s\\%s\042,\042%s\042, \042%s\\%s\\gsview32.ico\042)]", 
+	  destdir, gsviewbase, GSVIEW_EXENAME, GSVIEW_NAME, destdir, gsviewbase);
     else
-       sprintf(setup, "[AddItem(\042%s\\%s\\%s\042,\042GSview\042)]", 
-	  destdir, gsviewbase, GSVIEW_EXENAME);
+       sprintf(setup, "[AddItem(\042%s\\%s\\%s\042,\042%s\042)]", 
+	  destdir, gsviewbase, GSVIEW_EXENAME, GSVIEW_NAME);
     DDEEXECUTE(setup);
 
 /* Win3.1 documentation says you must put quotes around names */
@@ -344,38 +344,141 @@ DWORD dwResult;
     DDEEXECUTE(setup);
     if (!is_win4)
         sprintf(setup, "[AddItem(\042%s\\%s\\%s -I%s\\%s;%s\\%s\\fonts\042,\042Ghostscript\042, \042%s\\%s\\gstext.ico\042)]", 
-	    destdir, GS_BASEDIR, GS_EXENAME, destdir, GS_BASEDIR, destdir, GS_BASEDIR,  destdir, GS_BASEDIR);
+	    destdir, gs_basedir, GS_EXENAME, destdir, gs_basedir, destdir, gs_basedir,  destdir, gs_basedir);
     else
         sprintf(setup, "[AddItem(\042%s\\%s\\%s\042 \042-I%s\\%s;%s\\%s\\fonts\042,\042Ghostscript\042)]", 
-	    destdir, GS_BASEDIR, GS_EXENAME, destdir, GS_BASEDIR, destdir, GS_BASEDIR);
+	    destdir, gs_basedir, GS_EXENAME, destdir, gs_basedir, destdir, gs_basedir);
     DDEEXECUTE(setup);
 
     sprintf(setup, "[ReplaceItem(\042Ghostscript README\042)]");
     DDEEXECUTE(setup);
     if (!is_win4)
         sprintf(setup, "[AddItem(\042notepad.exe %s\\%s\\README.\042,\042Ghostscript README\042)]", 
-	     destdir, GS_BASEDIR);
+	     destdir, gs_basedir);
     else
         sprintf(setup, "[AddItem(\042notepad.exe\042 \042%s\\%s\\README.\042,\042Ghostscript README\042, \042notepad.exe\042,1)]", 
-	     destdir, GS_BASEDIR);
+	     destdir, gs_basedir);
     DDEEXECUTE(setup);
 #undef DDEXECUTE
 
     DdeDisconnect(hConv);
     DdeUninitialize(idInst);
 
+    /* tell user what we have done */
+    load_string(IDS_PROGMANGROUP5, setup, sizeof(setup));
+    sprintf(buf, setup, groupname);
+    SetDlgItemText(find_page_from_id(IDD_DONE)->hwnd, IDD_DONE_GROUP, buf);
 
     return 0;
 }
 
+DLGPROC lpMainDlgProc;
+DLGPROC lpChildDlgProc;
+
 
 int
-install(void)
+create_dialog(void)
 {
+WIZPAGE *page;
 char buf[MAXSTR];
-int rc = 0;
+    /* main dialog box */
+#ifdef __WIN32__
+    hMain = CreateDialogParam(phInstance, MAKEINTRESOURCE(IDD_MAIN), (HWND)NULL, MainDlgProc, (LPARAM)NULL);
+#else
+    lpMainDlgProc = (DLGPROC)MakeProcInstance((FARPROC)MainDlgProc, phInstance);
+    lpChildDlgProc = (DLGPROC)MakeProcInstance((FARPROC)ModelessDlgProc, phInstance);
+    hMain = CreateDialogParam(phInstance, MAKEINTRESOURCE(IDD_MAIN), (HWND)NULL, lpMainDlgProc, (LPARAM)NULL);
+#endif
+
+    sprintf(buf, "%d.%02d - %d.%02d", 
+	GS_REVISION_MIN / 100, GS_REVISION_MIN % 100,
+	GS_REVISION_MAX / 100, GS_REVISION_MAX % 100);
+    SetDlgItemText(find_page_from_id(IDD_INTRO)->hwnd,
+	IDD_INTRO_T3, buf);
+
+    /* initialize GS version */
+    page = find_page_from_id(IDD_GSVER);
+    if (page) {
+	sprintf(buf, "%d.%02d", GS_REVISION / 100, GS_REVISION % 100);
+	SetDlgItemText(page->hwnd, IDD_GSVER_TEXT, buf);
+	SendDlgItemMessage(page->hwnd, PARTIAL_GSVIEW, BM_SETCHECK, 
+		    (WPARAM)1, (LPARAM)0);
+	SendDlgItemMessage(page->hwnd, PARTIAL_GS, BM_SETCHECK, 
+		    (WPARAM)1, (LPARAM)0);
+    }
+    /* initialize destination directory */
+    strcpy(destdir, bootdrive);
+    strcat(destdir, INSTALL_DIR);
+    SetDlgItemText(find_page_from_id(IDD_DIR)->hwnd, ID_ANSWER, destdir);
+    if (init_temp()) {
+        page = find_page_from_id(IDD_CONFIG);
+	SendDlgItemMessage(page->hwnd, IDM_AUTOEXECBAT, BM_SETCHECK, 
+		    (WPARAM)1, (LPARAM)0);
+	SendDlgItemMessage(page->hwnd, IDM_AUTOEXECBAK, BM_SETCHECK, 
+		    (WPARAM)1, (LPARAM)0);
+	find_page_from_id(IDD_FINISH)->prev = IDD_CONFIG; 
+    }
+
+    /* program group */
+    load_string(IDS_PROGMANGROUP4, buf, sizeof(buf));
+    page = find_page_from_id(IDD_FINISH);
+    if (page) {
+	SendDlgItemMessage(page->hwnd, IDM_PROGMAN1, BM_SETCHECK, 
+		    (WPARAM)1, (LPARAM)0);
+        SetDlgItemText(page->hwnd, IDM_PROGMAN2, buf);
+    }
+
+    return 0; /* success */
+}
+
+void
+install_init(void)
+{
+int i;
+char *s, *d;
+    if (gsver % 100 == 0)
+	sprintf(gs_basedir, "gs%d.%01d", gsver / 100, gsver % 100);
+    else
+	sprintf(gs_basedir, "gs%d.%02d", gsver / 100, gsver % 100);
+    sprintf(gs_zipprefix, "gs%3d", gsver);
+
+    /* derive group filename from group name */
+    for (i=0, s=groupname, d=groupfile; i<8 && *s; s++) {
+	if (isalpha(*s) || isdigit(*s)) {
+	    *d++ = *s;
+	    i++;
+	} 
+    }
+    *d = '\0';
+    if (strlen(groupfile)==0)
+	strcpy(groupfile, "gstools");
+}
+
+
+int
+init_setup(LPSTR lpszCmdLine)
+{
 char *p;
 DWORD version = GetVersion();
+LPSTR d, s;
+    if (lpszCmdLine[0] != '\0') {
+	d = destdir;
+	s = lpszCmdLine;
+	if (*s == '\042')
+	    s++; 		/* don't copy quotes */
+	while (*s) {
+	    if (*s == '\042')
+		s++; 	/* don't copy quotes */
+	    else
+		*d++ = *s++;
+	    if (d - destdir > sizeof(destdir) - 1) {
+	        *d = '\0';
+		break;
+	    }
+	}
+	batch = TRUE;
+    }
+    load_string(IDS_GSVIEWBASE, gsviewbase, sizeof(gsviewbase));
 
     /* find out if we are running under Win32s */
     /* Win32s */
@@ -397,177 +500,53 @@ DWORD version = GetVersion();
     getcwd(workdir, sizeof(workdir));	/* remember the working directory */
     strcpy(bootdrive, "c:");
 
-    if (!rc)
-        rc = intro();	/* display intro dialog boxes */
+    gsver = GS_REVISION;
+    load_string(IDS_PROGMANGROUP4, groupname, sizeof(groupname));
 
-    if (!rc)
-	rc = getdest();	/* get destination directory */
-
-
-    if (!rc) {
-	/* copy unzip program for faster loading */
-	strcpy(unzipname, destdir);
-	strcat(unzipname, "\\");
-	strcat(unzipname, gsviewbase);
-	mkdir(unzipname);
-	strcat(unzipname, "\\");
-	strcat(unzipname, szUnzipDll);
-	strcpy(buf, sourcedir);
-	strcat(buf, szUnzipDll);
-	rc = copyfile(unzipname, buf);
-    }
-
-    if (rc)
-	return rc;
-
-    /* unzip GSview and Ghostscript */
-    if (!rc) {
-	hwndmess = gs_showmess_modeless();
-	load_unzip(unzipname, phInstance, hwndmess, (HWND)NULL);
-	strcpy(buf, destdir);
-	if (strlen(buf) == 2)
-	    strcat(buf, "\\");	/* is root directory */
-	if (!rc) {
-	    char buf2[MAXSTR];
-	    strcpy(buf2, buf);
-	    if (strlen(buf2) && (buf2[strlen(buf2)-1] != '\\'))
-	        strcat(buf2, "\\");
-	    strcat(buf2, gsviewbase);
-	    mkdir(buf2);
-	    rc = unzip_to_dir(GSVIEW_ZIP, buf2);
-	}
-	if (!rc) {
-	    int skip_gs = FALSE;
-	    if (already_installed()) {
-		char buf3[MAXSTR];
-		char buf4[MAXSTR];
-		load_string(IDS_SKIPGSINSTALL, buf3, sizeof(buf3));
-		sprintf(buf4, buf3, GS_VERSION);
-		if (message_box(buf4, MB_YESNO) == MBID_YES)
-		    skip_gs = TRUE;
-	    }
-		
-	    if (!skip_gs) {
-		if (!rc)
-		    rc = unzip_to_dir(GS_INIZIP, buf);
-		if (!rc)
-#ifdef __WIN32__
-		    rc = unzip_to_dir(GS_W32ZIP, buf);
-#else
-		    rc = unzip_to_dir(GS_W16ZIP, buf);
-#endif
-		if (!rc) {
-		    if (strlen(buf) && (buf[strlen(buf)-1] != '\\'))
-			strcat(buf, "\\");
-		    strcat(buf, GS_BASEDIR);
-		    rc = unzip_to_dir(GS_FN1ZIP, buf);
-		}
-	    }
-	}
-	gs_chdir(workdir);
-	if (rc) {
-	    MSG msg;
-	    /* wait for user to read error message */
-	    gs_addmess("unzip error");
-	    gs_addmess_update(hwndmess);
-	    while (hwndmess && IsWindow(hwndmess) && 
-		GetMessage(&msg, (HWND)NULL, 0, 0)) {
-		    TranslateMessage(&msg);
-		    DispatchMessage(&msg);
-	    }
-	}
-	gs_showmess_destroy();
-	free_unzip();
-    }
-
-    /* remove unneeded unzip DLL */
-    unlink(unzipname);
-
-    if (!rc)
-	rc = update_config();
-
-    if (!rc)
-	rc = update_ini(szIniName);
-
-    if (!rc)
-	rc = create_object();
-
-    if (!rc) {
-        load_string(IDS_SETUPOK, buf, sizeof(buf));
-	if (!batch)
-	    message_box(buf, MB_MOVEABLE | MB_OK);
-    }
-    return rc;
+    return 0;
 }
-
 
 #pragma argsused	/* ignore warning for next function */
 int PASCAL 
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmdShow)
 {
-    int rc;
+int rc;
+MSG msg;
     /* copy the hInstance into a variable so it can be used */
     phInstance = hInstance;
-    if (lpszCmdLine[0] != '\0') {
-	LPSTR d, s;
-	d = destdir;
-	s = lpszCmdLine;
-	if (*s == '\042')
-	    s++; 		/* don't copy quotes */
-	while (*s) {
-	    if (*s == '\042')
-		s++; 	/* don't copy quotes */
-	    else
-		*d++ = *s++;
-	    if (d - destdir > sizeof(destdir) - 1) {
-	        *d = '\0';
-		break;
-	    }
-	}
-	batch = TRUE;
-    }
-    load_string(IDS_GSVIEWBASE, gsviewbase, sizeof(gsviewbase));
+    init_setup(lpszCmdLine);
 
     if (beta_warn())
 	return 1;
-
-    rc = install();
-
-    if (rc) {
-	char mess[256];
-        char buf[256];
-	load_string(IDS_INSTALLABORT, mess, sizeof(mess));
-	sprintf(buf, mess, error_message);
-	message_box(buf, MB_MOVEABLE | MB_OK);
+    
+    if (batch)
+	rc = do_install();
+    else
+        rc = create_dialog();
+    
+    if (!batch) {
+	while (GetMessage(&msg, (HWND)NULL, 0, 0)) {
+	    if (!IsDialogMessage(hwnd_current, &msg)
+		&& !IsDialogMessage(hMain, &msg) ) {
+		    TranslateMessage(&msg);
+		    DispatchMessage(&msg);
+	    }
+	}
+	DestroyWindow(hMain);
     }
 
-    rc = cleanup();
+#ifndef __WIN32__
+    if (!batch) {
+	if (lpMainDlgProc)
+	    FreeProcInstance((FARPROC)lpMainDlgProc);
+	if (lpChildDlgProc)
+	    FreeProcInstance((FARPROC)lpChildDlgProc);
+    }
+#endif
+
     return rc;
 }
 
-
-#pragma argsused	/* ignore warning for next function */
-/* General Dialog Box */
-BOOL CALLBACK _export
-GeneralDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    switch(message) {
-        case WM_INITDIALOG:
-            return( TRUE);
-        case WM_COMMAND:
-            switch(LOWORD(wParam)) {
-                case IDOK:
-                    EndDialog(hDlg, IDOK);
-                    return(TRUE);
-                case IDCANCEL:
-                    EndDialog(hDlg, IDCANCEL);
-                    return(TRUE);
-                default:
-                    return(FALSE);
-            }
-    }
-    return(FALSE);
-}
 
 #pragma argsused	/* ignore warning for next function */
 /* input string dialog box */
@@ -594,6 +573,49 @@ InputDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return(FALSE);
 }
 
+#pragma argsused	/* ignore warning for next function */
+/* Modeless Dialog Box */
+BOOL CALLBACK _export
+MainDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+static BOOL initialised;
+    switch(message) {
+        case WM_INITDIALOG:
+	    /* create child dialog windows */
+	    if (!initialised) {
+		WIZPAGE *page;
+		initialised=TRUE;
+		for (page=pages; page->id; page++) {
+#ifdef __WIN32__
+		    page->hwnd = CreateDialogParam(phInstance, MAKEINTRESOURCE(page->id), hDlg, ModelessDlgProc, (LPARAM)NULL);
+#else
+		    page->hwnd = CreateDialogParam(phInstance, MAKEINTRESOURCE(page->id), hDlg, lpChildDlgProc, (LPARAM)NULL);
+#endif
+		    ShowWindow(page->hwnd, SW_HIDE);
+		}
+		ShowWindow(pages[0].hwnd, SW_SHOW);
+		SetFocus(GetDlgItem(pages[0].hwnd, IDNEXT));
+		SendDlgItemMessage(pages[0].hwnd, IDNEXT, BM_SETSTYLE, 
+		    (WPARAM)BS_DEFPUSHBUTTON, TRUE);
+		hwnd_current = pages[0].hwnd;
+	    }
+            return FALSE;	/* we decide the focus */
+        case WM_COMMAND:
+            switch(LOWORD(wParam)) {
+                case IDCANCEL:
+                case IDOK:
+		    PostQuitMessage(0);
+                    return(TRUE);
+                default:
+                    return(FALSE);
+            }
+	case WM_CLOSE:
+	    PostQuitMessage(0);
+	    return TRUE;
+    }
+    return FALSE;
+}
+
 
 #pragma argsused	/* ignore warning for next function */
 /* Modeless Dialog Box */
@@ -605,20 +627,123 @@ ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
             return( TRUE);
         case WM_COMMAND:
             switch(LOWORD(wParam)) {
-                case IDOK:
-		    DestroyWindow(hDlg);
+		case IDOK:
+                case IDNEXT:
+		    next_page(hDlg);
+                    return(TRUE);
+                case IDPREV:
+		    SendDlgItemMessage(hDlg, IDPREV, BM_SETSTYLE, 
+		        (WPARAM)0, TRUE);	/* remove default style */
+		    prev_page(hDlg);
+                    return(TRUE);
+		case IDFINISH:
+		    installing = TRUE;
+		    if (do_install() || cancelling) {
+			WIZPAGE *page;
+			/* FAILED */
+			failed = TRUE;
+		        page = find_page_from_id(IDD_TEXTWIN);
+			page->next = IDD_FAILED;	/* KLUDGE */
+			EnableWindow(GetDlgItem(page->hwnd, IDNEXT), TRUE);
+			SetDlgItemText(find_page_from_id(IDD_FAILED)->hwnd,
+			   IDD_FAILED_REASON, error_message); 
+			gs_addmess(error_message);
+			gs_addmess_update();
+		    }
+		    else {
+			WIZPAGE *page;
+		        page = find_page_from_id(IDD_TEXTWIN);
+			page->next = IDD_DONE;	/* KLUDGE */
+			EnableWindow(GetDlgItem(page->hwnd, IDNEXT), TRUE);
+		    }
+		    installing = FALSE;
+		    if (autoexec_bak[0] != '\0') {
+			char buf1[MAXSTR], buf2[MAXSTR];
+			load_string(IDS_DONEBAK, buf1, sizeof(buf2));
+			sprintf(buf2, buf1, autoexec_bak);
+			SetDlgItemText(find_page_from_id(IDD_DONE)->hwnd,
+			   IDD_DONE_BAK, buf2); 
+		    }
+		    PostMessage(find_page_from_id(IDD_TEXTWIN)->hwnd,
+			WM_COMMAND, (WPARAM)IDNEXT, (LPARAM)0);
                     return(TRUE);
                 case IDCANCEL:
-		    DestroyWindow(hDlg);
+		    if (installing) {
+			gs_addmess("\ncancelling\n");
+			cancelling = 1;
+		    }
+		    else
+		        PostMessage(GetParent(hDlg), WM_COMMAND, (WPARAM)IDCANCEL, (LPARAM)0);
                     return(TRUE);
+		case TEXTWIN_COPY:
+		    {HGLOBAL hglobal;
+		    LPSTR p;
+		    DWORD result;
+		    int start, end;
+		    result = SendDlgItemMessage(hDlg, TEXTWIN_MLE, EM_GETSEL, (WPARAM)0, (LPARAM)0);
+		    start = LOWORD(result);
+		    end   = HIWORD(result);
+		    if (start == end) {
+			start = 0;
+			end = twend;
+		    }
+		    hglobal = GlobalAlloc(GHND | GMEM_SHARE, end-start+1);
+		    if (hglobal == (HGLOBAL)NULL) {
+			MessageBeep(-1);
+			return(FALSE);
+		    }
+		    p = GlobalLock(hglobal);
+		    if (p == (LPSTR)NULL) {
+			MessageBeep(-1);
+			return(FALSE);
+		    }
+		    lstrcpyn(p, twbuf+start, end-start);
+		    GlobalUnlock(hglobal);
+		    OpenClipboard(hDlg);
+		    EmptyClipboard();
+		    SetClipboardData(CF_TEXT, hglobal);
+		    CloseClipboard();
+		    }
                 default:
                     return(FALSE);
             }
+	case WM_VSCROLL:
+	    { int ver;
+	      char buf[16];
+		switch(LOWORD(wParam)) {
+		    case SB_LINEUP:
+			ver = add_gsver(hDlg, 1);
+			break;
+		    case SB_LINEDOWN:
+			ver = add_gsver(hDlg, -1);
+			break;
+		    default:
+			ver = add_gsver(hDlg, 0);
+			break;
+		}
+		sprintf(buf, "%d.%02d", ver / 100, ver % 100);
+		SetDlgItemText(hDlg, IDD_GSVER_TEXT, buf);
+	    }
+	    return TRUE;
 	case WM_CLOSE:
-	    DestroyWindow(hDlg);
+	    PostMessage(GetParent(hDlg), WM_COMMAND, (WPARAM)IDCANCEL, (LPARAM)0);
 	    return TRUE;
     }
     return FALSE;
 }
+
+
+/* uninstall */
+/* HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\GSview */
+/*   DisplayName="GSview" */
+/*   UninstallString=""c:\gstools\setup.exe" /uninstall"
+/* delete x:\gstools\* */
+/*    use a log of installed files */
+/* delete .ini file */
+/* delete registry entries */
+/*    only if they really are GSview related */
+/*    keep record of keys added */
+/* delete program group */
+/*    want this to fail if user has added to contents of group */
 
 

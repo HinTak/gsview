@@ -114,6 +114,7 @@ typedef struct tagPAGELIST {
 
 typedef struct tagPSFILE {
 	char 	name[MAXSTR];	/* name of selected document file */
+	char	tname[MAXSTR];	/* name of temporary file (gunzipped) */
 	FILE 	*file;		/* selected file */
 	PSDOC	*doc;		/* DSC structure.  NULL if not DSC */
 	PAGELIST page_list;	/* selected page list */
@@ -123,6 +124,7 @@ typedef struct tagPSFILE {
 	int 	pagenum;	/* current page number */
 	BOOL	ctrld;		/* TRUE if file starts with ^D */
 	BOOL	pjl;		/* TRUE if file starts with HP LaserJet PJL prologue */
+	BOOL	gzip;		/* TRUE if file compressed with gzip */
 	int 	preview;	/* preview type IDS_EPSF, IDS_EPSI, etc. */
 #ifdef _Windows
 	struct	ftime datetime;	/* time/date of selected file */
@@ -187,6 +189,7 @@ typedef struct tagGSDLL {
 	BOOL		valid;		/* true if loaded */
 	HINSTANCE	hmodule;	/* handle to module */
 	int		state;
+	long		revision_number;
 
 	/* pointers to DLL functions */
 	PFN_gsdll_revision	 revision;
@@ -214,6 +217,7 @@ typedef struct tagGSDLL {
 /* options that are saved in INI file */
 typedef struct tagOPTIONS {
 	int	language;
+	int	gsversion;
 	char	gsdll[MAXSTR];
 	char	gsinclude[MAXSTR];
 	char	gsother[MAXSTR];
@@ -238,6 +242,7 @@ typedef struct tagOPTIONS {
 	BOOL	redisplay;
 	BOOL    ignore_dsc;
 	BOOL	show_bbox;
+	BOOL	auto_orientation;
 	int	orientation;
 	BOOL	swap_landscape;
 	float	xdpi;
@@ -272,7 +277,7 @@ typedef struct tagDISPLAY {
 	float	ydpi;
 	int	xoffset;	/* offset of page in pixels */
 	int	yoffset;
-	int	orientation;	/* 0, 90, 180 or 270 degrees */
+	int	orientation;	/* 0-3 = 0, 90, 180 or 270 degrees */
 	BOOL	init;		/* viewer initialised */
 	BOOL	saved;		/* interpreter state saved */
 	BOOL	need_header;
@@ -330,6 +335,17 @@ extern PFN_pstotextExit pstotextExit;
 extern PFN_pstotextSetCork pstotextSetCork;
 extern char pstotextLine[2048];
 extern int pstotextCount;
+
+/* for zlib gunzip decompression */
+extern HINSTANCE zlib_hinstance;
+typedef void GVFAR *gzFile ;
+typedef gzFile WINAPI (*PFN_gzopen)(const char GVFAR *path, const char GVFAR *mode);
+typedef int WINAPI    (*PFN_gzread)(gzFile file, void GVFAR *buf, unsigned len);
+typedef int WINAPI    (*PFN_gzclose)(gzFile file);
+extern PFN_gzopen gzopen;
+extern PFN_gzread gzread;
+extern PFN_gzclose gzclose;
+
 
 extern BOOL debug;			/* /D command line option used */
 extern FILE *debug_file;		/* for gs input logging */
@@ -405,6 +421,7 @@ extern WNDPROC lpfnButtonWndProc;
 extern int percent_done;		/* percentage of document processed */
 extern int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
 extern BOOL ignore_sync;		/* ignore next GSDLL_SYNC */
+extern BOOL fit_page_enabled;		/* next WM_SIZE is allowed to resize window */
 
 extern PROG gsprog;
 extern BMAP bitmap;
@@ -450,7 +467,7 @@ BOOL in_child_client_area(void);
 
 /* in gvwinit.c */
 void gsview_init0(LPSTR lpszCmdLine);
-void gsview_init1(LPSTR lpszCmdLine);
+BOOL gsview_init1(LPSTR lpszCmdLine);
 void gsview_create(void);
 
 /* in gvwdisp.c */
@@ -469,4 +486,3 @@ extern char not_defined[];
 void start_gvwgs(void);
 
 #endif
-

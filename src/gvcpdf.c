@@ -41,7 +41,7 @@ int code;
 char filename[MAXSTR];
 char *p;
     pdf_rotate = IDM_PORTRAIT;
-    strcpy(filename, psfile.name);
+    strcpy(filename, psfile_name(&psfile));
     for (p=filename; *p; p++)
 	if (*p == '\\')
 	    *p = '/';
@@ -109,12 +109,16 @@ char buf[16];
 PSDOC *doc;
 char filename[MAXSTR];
 char textname[MAXSTR];
+char tname[MAXSTR];
     strcpy(filename, psfile.name);	/* remember filename */
     strcpy(textname, psfile.text_name);	/* remember filename */
+    strcpy(tname, psfile.tname);	/* remember filename */
     psfile.text_name[0] = '\0';		/* hide filename so it doesn't get deleted */
+    psfile.tname[0] = '\0';		/* hide filename so it doesn't get deleted */
     psfile_free(&psfile);
     strcpy(psfile.name, filename);
     strcpy(psfile.text_name, textname);
+    strcpy(psfile.tname, tname);
     psfile.doc = (PSDOC *) malloc(sizeof(PSDOC));
     if (psfile.doc == (PSDOC *)NULL)
 	return FALSE;
@@ -314,10 +318,16 @@ char *line = str;
 		    pdf_rotate = IDM_PORTRAIT;
 		    break;
 	    }
+#ifdef OLD
 	    check_menu_item(IDM_ORIENTMENU, option.orientation, FALSE);
 	    option.orientation = pdf_rotate;
 	    check_menu_item(IDM_ORIENTMENU, option.orientation, TRUE);
-/* should disable orientation menu here */
+#else
+	    /* should put check mark next to actual orientation on */
+	    /* disabled menu, or check mark next to auto, since  */
+	    /* PDF always uses auto orientation */
+	    /* This should be done in WM_INITMENU */
+#endif
 	    return TRUE;
 	}
     }
@@ -408,7 +418,7 @@ char *p;
 int i, page, pages;
 PSDOC *doc = psfile.doc;
     /* convert \ to / in filename */
-    strcpy(filename, psfile.name);
+    strcpy(filename, psfile_name(&psfile));
     for (p=filename; *p; p++)
 	if (*p == '\\')
 	    *p = '/';
@@ -497,7 +507,7 @@ char *p;
 
 #ifdef UNUSED
     fprintf(pcfile, "(");
-    for (p=psfile.name; *p != '\0'; p++)
+    for (p=psfile_name(&psfile); *p != '\0'; p++)
 	if (*p == '\\')
 	    fputc('/',pcfile);
 	    /* fputc('\\',pcfile); */

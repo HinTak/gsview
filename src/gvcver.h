@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -31,28 +31,35 @@
 /* GSview */
 
 #define GSVIEW_PRODUCT "GSview"
-#define GSVIEW_VERSION "2.1"
-#define GSVIEW_DATE    "1996-11-04"
-#define GSVIEW_ZIP     "gsview.zip"
+#define GSVIEW_VERSION "2.2"
+#define GSVIEW_DATE    "1997-06-23"
+#ifdef _Windows
+#ifdef __WIN32__
+#define GSVIEW_ZIP     "win32.zip"
+#else
+#define GSVIEW_ZIP     "win16.zip"
+#endif
+#else
+#define GSVIEW_ZIP     "os2.zip"
+#endif
 
-/* undefine this for a final release */
-/* #define BETA	*/
-#define BETA_YEAR    1996
-#define BETA_MONTH   11
-#define BETA_DAY     7
+
+/* undefine BETA for a final release */
+/* #define BETA */
+#define BETA_YEAR    1997
+#define BETA_MONTH   07
+#define BETA_DAY     31
 
 
 /* Ghostscript */
 #define GS_PRODUCT  "Aladdin Ghostscript"
-#define GS_REVISION 403
-#define GS_REVISION_MAX   499
-#define GS_VERSION  "4.03"
-#define GS_BASEDIR  "gs4.03"
-#define GS_INIZIP   "gs403ini.zip"
-#define GS_W32ZIP   "gs403w32.zip"
-#define GS_W16ZIP   "gs403win.zip"
-#define GS_OS2ZIP   "gs403os2.zip"
-#define GS_FN1ZIP   "gs403fn1.zip"
+#if defined(_Windows) && !defined(__WIN32__)
+#define GS_REVISION	  403		/* this is the last 16-bit version */
+#else
+#define GS_REVISION	  501
+#endif
+#define GS_REVISION_MIN   403
+#define GS_REVISION_MAX   599
 #ifdef _Windows
 #ifdef __WIN32__
 #define GSVIEW_EXENAME "gsview32.exe"
@@ -72,4 +79,4 @@
 #define EMX_NEEDED "0.9b"
 #define INSTALL_DIR "\\gstools"
 
-
+

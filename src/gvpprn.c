@@ -524,14 +524,14 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	{
 	    PROFILE *prf;
 	    strcpy(section, device);
-	    strcat(section, " PageOffset");
+	    strcat(section, " Options");
   /* need to reopen profile file - this is wasteful */
 	    if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
-		profile_read_string(prf, section, "X", "0", buf, sizeof(buf)-2);
+		profile_read_string(prf, section, "Xoffset", "0", buf, sizeof(buf)-2);
 	        WinSendMsg( WinWindowFromID(hwnd, PROP_XOFFSET),
 	    	    EM_SETTEXTLIMIT, MPFROM2SHORT(sizeof(buf)-2, 0), MPFROMLONG(0) );
 		WinSetWindowText(WinWindowFromID(hwnd, PROP_XOFFSET), buf);
-		profile_read_string(prf, section, "Y", "0", buf, sizeof(buf)-2);
+		profile_read_string(prf, section, "Yoffset", "0", buf, sizeof(buf)-2);
 	        WinSendMsg( WinWindowFromID(hwnd, PROP_YOFFSET),
 	    	    EM_SETTEXTLIMIT, MPFROM2SHORT(sizeof(buf)-2, 0), MPFROMLONG(0) );
 		WinSetWindowText(WinWindowFromID(hwnd, PROP_YOFFSET), buf);
@@ -645,11 +645,11 @@ PropDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			profile_write_string(prf, device, propitem[iprop].name, propitem[iprop].value);
 		    }
 		    strcpy(section, device);
-		    strcat(section, " PageOffset");
+		    strcat(section, " Options");
 	    	    WinQueryWindowText(WinWindowFromID(hwnd, PROP_XOFFSET), sizeof(buf)-2, buf);
-		    profile_write_string(prf, section, "X", buf);
+		    profile_write_string(prf, section, "Xoffset", buf);
 	    	    WinQueryWindowText(WinWindowFromID(hwnd, PROP_YOFFSET), sizeof(buf)-2, buf);
-		    profile_write_string(prf, section, "Y", buf);
+		    profile_write_string(prf, section, "Yoffset", buf);
 		    profile_close(prf);
 		  }
 		}
@@ -765,6 +765,8 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		    MPFROMLONG(WinWindowFromID(hwnd, DEVICE_NAME)));
 		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_PROP), FALSE);
 		WinEnableWindow(WinWindowFromID(hwnd, SPOOL_TOFILE), FALSE);
+		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_OPTIONSTEXT), FALSE);
+		WinEnableWindow(WinWindowFromID(hwnd, DEVICE_OPTIONS), FALSE);
 	    }
 	    else {
 		/* set Print to File check box */
@@ -795,8 +797,15 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		/* now look up entry in gvpm.ini */
 		/* and update DEVICE_RES list box */
 		{PROFILE *prf;
+		 char section[MAXSTR];
 /* need to reopen profile file - this is wasteful */
 		  if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+		    /* update printer options */
+		    strcpy(section, entry);
+		    strcat(section, " Options");
+		    profile_read_string(prf, section, "Options", "", buf, sizeof(buf)-2);
+		    WinSetWindowText(WinWindowFromID(hwnd, DEVICE_OPTIONS), buf);
+		    /* now look up resolutions */
 		    profile_read_string(prf, DEVSECTION, entry, "", buf, sizeof(buf)-2);
 		    profile_close(prf);
 		  }
@@ -869,6 +878,8 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 			i = !i;
 			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_NAMETEXT), i);
 			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_NAME), i);
+			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_OPTIONSTEXT), i);
+			WinEnableWindow(WinWindowFromID(hwnd, DEVICE_OPTIONS), i);
 			if (i)
 			    WinSendMsg(hwnd, WM_CONTROL, MPFROM2SHORT(DEVICE_NAME, CBN_LBSELECT),
 				MPFROMLONG(WinWindowFromID(hwnd, DEVICE_NAME)));
@@ -909,6 +920,21 @@ DeviceDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 		    /* save pages numbers */
 	    	    if ( (psfile.doc != (PSDOC *)NULL) && (psfile.doc->numpages != 0))
 		        PageDlgProc(hwnd, msg, mp1, mp2);
+
+		    /* get options */
+		    {PROFILE *prf;
+		      char section[MAXSTR];
+		      if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
+/* need to reopen profile file - this is wasteful */
+			/* update printer options */
+			strcpy(section, option.device_name);
+			strcat(section, " Options");
+			WinQueryWindowText(WinWindowFromID(hwnd, DEVICE_OPTIONS), 
+			    sizeof(buf), buf);
+		        profile_write_string(prf, section, "Options", buf);
+		        profile_close(prf);
+		      }
+		    }
 		    WinDismissDlg(hwnd, DID_OK);
             	    return (MRESULT)TRUE;
 	        case ID_HELP:

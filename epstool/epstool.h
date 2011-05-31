@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -158,6 +158,7 @@ void gserror(UINT id, char *str, UINT icon, int sound);
 void pserror(char *str);
 char * gs_getcwd(char *dirname, int size);
 void play_sound(int i);
+char * psfile_name(PSFILE *psf);
 
 /* temporary kludges */
 extern PSDOC *doc;

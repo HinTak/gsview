@@ -31,6 +31,9 @@
 #define ID_PROMPT	53
 #define ID_HELP		54
 #define ID_DEFAULT	55
+#define IDNEXT 56
+#define IDPREV 57
+#define IDFINISH 58
 
 #define IDM_FILEMENU	100
 #define IDM_OPEN	101
@@ -69,14 +72,15 @@
 
 #define IDM_OPTIONMENU	  174
 #define IDM_GSCOMMAND	  175
-#define IDM_SOUNDS	  176
-#define IDM_SETTINGS	  177
-#define IDM_SAVESETTINGS  178
-#define IDM_SAFER         179  
-#define IDM_SAVEDIR	  180
-#define IDM_BUTTONSHOW	  181
-#define IDM_FITPAGE	  182
-#define IDM_QUICK_OPEN	  183
+#define IDM_CFG	  	  176
+#define IDM_SOUNDS	  177
+#define IDM_SETTINGS	  178
+#define IDM_SAVESETTINGS  179
+#define IDM_SAFER         180  
+#define IDM_SAVEDIR	  181
+#define IDM_BUTTONSHOW	  182
+#define IDM_FITPAGE	  183
+#define IDM_QUICK_OPEN	  184
 #define IDM_AUTOREDISPLAY 185
 #define IDM_EPSFCLIP	  186
 #define IDM_EPSFWARN	  187
@@ -110,6 +114,7 @@
 #define IDM_UPSIDEDOWN  223
 #define IDM_SEASCAPE	224
 #define IDM_SWAPLANDSCAPE 225
+#define IDM_AUTOORIENT  226
 
 #define IDM_DISPLAYSETTINGS	250
 #define IDM_ZOOM	251
@@ -154,20 +159,42 @@
 #define IDM_PSTOTEXTNORM	367
 #define IDM_PSTOTEXTCORK	368
 
+/* configuration dialog resource IDs */
+#define IDD_CFG0	380	/* parent */
+#define IDD_CFG1	381	/* intro */
+#define IDD_CFG2	382	/* gsver */
+#define IDD_CFG3	383	/* printer.ini */
+#define IDD_CFG4	384	/* associate */
+#define IDD_CFG5	385	/* progman */
+#define IDD_CFG6	386	/* finish */
+#define IDD_CFG7	387	/* done */
+/* control IDs */
+#define IDC_CFG20	390	/* gsver edit field */
+#define IDC_CFG21	391	/* gsver scroll bar */
+#define IDC_CFG22	392	/* GS dir edit field */
+#define IDC_CFG23	393	/* additional fonts edit field */
+#define IDC_CFG31	394	/* printer.ini checkbox */
+#define IDC_CFG41	395	/* PS associate checkbox */
+#define IDC_CFG42	396	/* PDF associate checkbox */
+#define IDC_CFG51	397	/* create group checkbox */
+#define IDC_CFG52	398	/* group name */
+#define IDC_CFG70	399	/* result */
+#define IDC_CFG71	400	/* failed reason */
+
 /* info dialog box */
-#define IDD_INFO	400
-#define INFO_FILE	401
-#define INFO_TYPE	402
-#define INFO_TITLE	403
-#define INFO_DATE	404
-#define INFO_BBOX	405
-#define INFO_ORIENT	406
-#define INFO_ORDER	407
-#define INFO_DEFMEDIA	408
-#define INFO_NUMPAGES	409
-#define INFO_PAGE	410
-#define INFO_BITMAP	411
-#define INFO_ICON	412
+#define IDD_INFO	410
+#define INFO_FILE	411
+#define INFO_TYPE	412
+#define INFO_TITLE	413
+#define INFO_DATE	414
+#define INFO_BBOX	415
+#define INFO_ORIENT	416
+#define INFO_ORDER	417
+#define INFO_DEFMEDIA	418
+#define INFO_NUMPAGES	419
+#define INFO_PAGE	420
+#define INFO_BITMAP	421
+#define INFO_ICON	422
 
 #define ABOUT_ICON	451
 #define ABOUT_VERSION	452
@@ -214,6 +241,8 @@
 #define DEVICE_RESTEXT	544
 #define DEVICE_PROP	545
 #define DEVICE_PSPRINT  546
+#define DEVICE_OPTIONS  547
+#define DEVICE_OPTIONSTEXT  548
 
 #define IDD_PROP	550
 #define PROP_NAME	551
@@ -323,6 +352,7 @@
 #define IDS_TEXTNOTFIND	667
 #define IDS_PRINTPDFPS	668
 #define IDS_NOPDFQUICKTEXT 669
+#define IDS_BAD_DOSEPS_HEADER 670
 
 #define IDS_SOUNDNAME	680
 #define IDS_SNDPAGE	681
@@ -357,6 +387,7 @@
 #define IDS_TOPICKEYS    716
 #define IDS_TOPICMESS    717
 #define IDS_TOPICSPOOL   718
+#define IDS_TOPICZLIB	 719
 
 /* ps_to_eps */
 #define IDS_BBPROMPT	750
@@ -370,7 +401,8 @@
 #define IDS_EPSUSERINVALID 758
 #define IDS_EPSUSERTITLE 759
 #define IDS_EPS_OFF_PAGE 760
-#define IDS_MUSTUSEPORTRAIT 761
+#define IDS_EPS_BAD_BBOX 761
+#define IDS_MUSTUSEPORTRAIT 762
 
 /* wait messages */
 #define IDS_NOWAIT	0
@@ -419,6 +451,7 @@
 #define IDS_NOTIMPLEMENTED	841
 #define IDS_NOLINKTARGET	842
 #define IDS_PARSEERROR		844
+#define IDS_ZLIB_FAIL		845
 
 #define IDS_BETAEXPIRED		850
 #define IDS_BETAWARN		851
@@ -445,7 +478,11 @@
 #define IDS_DIRNOTEXIST		872
 #define IDS_GSVIEWBASE		873
 #define IDS_GSVIEWVERSION	874
-#define IDS_SKIPGSINSTALL 	875
+#define IDS_PROGMANGROUP4	875
+#define IDS_PROGMANGROUP5	876
+#define IDS_DONEBAK		877
+#define IDS_CFG73		878
+#define IDS_CFG74		879
 
 
 /* RCDATA resources */
@@ -479,3 +516,4 @@
 
 /* non standard scroll bar code */
 #define SB_FIND WM_USER
+

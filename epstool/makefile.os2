@@ -1,4 +1,4 @@
-# Copyright (C) 1993, 1994, Russell Lang.  All rights reserved.
+# Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -96,12 +96,13 @@ clean:
 
 veryclean: clean
 	-del epstool.exe
+	-del epstool2.exe
 
 EPSFILES=\
  epstool/epstool.c\
  epstool/epstool.h\
  epstool/epstool.def\
- epstool/epstool.doc\
+ epstool/epstool.txt\
  epstool/epstest.cmd\
  epstool/makefile.os2\
  epstool/makefile.tc\
@@ -117,12 +118,18 @@ SRCFILES1=\
 
 ZIPFILES=\
  epstool.exe\
- epstool.doc\
+ epstool.txt\
  $(EPSFILES)\
  $(SRCFILES1)
 
+prezip:
+	copy epstool.exe ..\epstool2.exe
+	cd ..
+	emxbind -s epstool2.exe
+	cd epstool
+
 zip: all
-	copy epstool.doc ..
+	copy epstool.txt ..
 	copy epstool.exe ..
 	emxbind -s ../epstool.exe
 	cd ..

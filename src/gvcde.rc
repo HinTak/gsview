@@ -91,6 +91,7 @@ BEGIN
 	IDS_TEXTNOTFIND, "Text nicht gefunden"
 	IDS_PRINTPDFPS "Kann eine PDF Datei nicht auf einem PostScript Drucker drucken. Benutzen Sie bitte Datei | Extrahiere"
 	IDS_NOPDFQUICKTEXT "Ausführen von schnellem Text Suchen/Ersetzen in PDF Datei nicht möglich. Bitte Optionen|PSzuText benutzen"
+	IDS_BAD_DOSEPS_HEADER "Falscher DOS EPS header.  DSC Anweisung wird ignoriert."
 END
 
 STRINGTABLE
@@ -131,6 +132,7 @@ BEGIN
 	IDS_TOPICKEYS, "Tastenkombinationen"
 	IDS_TOPICMESS, "Zeige Meldungen"
 	IDS_TOPICSPOOL, "Druck-Manager"
+	IDS_TOPICZLIB, "zlib"
 END
 
 STRINGTABLE
@@ -145,6 +147,7 @@ BEGIN
 	IDS_EPSUSERINVALID, "Vorschau Datei ist kein TIFF oder Windows Metafile"
 	IDS_EPSUSERTITLE, "Öffne Vorschau Datei"
 	IDS_EPS_OFF_PAGE, "EPS Bounding Box ist vollkommen außerhalb der Seite. Aufruf von 'Optionen | EPSF Ausschnitt'"
+	IDS_EPS_BAD_BBOX, "EPS Bounding Box ist inkonsistent.  'Optionen | EPS Ausschnitt' ignoriert"
 	IDS_MUSTUSEPORTRAIT, "Sie müssen Portrait anwählen."
 END
 
@@ -194,6 +197,7 @@ BEGIN
 	IDS_NOTIMPLEMENTED, "Nicht implementiert"
 	IDS_NOLINKTARGET, "Unbekanntes Verweisziel"
 	IDS_PARSEERROR, "Kommandozeile syntaktisch falsch"
+	IDS_ZLIB_FAIL, "zlib DLL konnte nicht geladen werden.  Druck auf OK gibt Hilfe."
 END
 
 STRINGTABLE
@@ -221,4 +225,3 @@ BEGIN
 	IDS_WRONGEMX, "Sie haben EMX %s.\rSie brauchen EMX %s oder höher.\rPM GSview wird nicht laufen."
 	IDS_GSVIEWVERSION, GSVIEW_VERSION
 END
-

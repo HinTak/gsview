@@ -544,8 +544,9 @@ const char *dllname;
 	    }
 	    /* check DLL version */
 	    gsdll.revision(NULL, NULL, &revision, NULL);
-	    if ( (revision < GS_REVISION) || (revision > GS_REVISION_MAX) ) {
-		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld\n", revision, (long)GS_REVISION);
+	    if ( (revision < GS_REVISION_MIN) || (revision > GS_REVISION_MAX) ) {
+		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld - %ld\n", 
+			revision, (long)GS_REVISION_MIN, (long)GS_REVISION_MAX);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;

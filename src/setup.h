@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -22,10 +22,15 @@
 #define ID_GHOSTSCRIPT	2
 
 #define ID_ANSWER 52
+#define IDM_AUTOEXECBAT 106
+#define IDM_AUTOEXECBAK 107
+
+#define IDD_MAIN	150
 
 #define IDD_INTRO	200
 #define IDD_INTRO_T1	201
 #define IDD_INTRO_T2	202
+#define IDD_INTRO_T3	203
 
 #define IDD_COPYRIGHT	250
 #define IDD_COPYRIGHT_T1	251
@@ -34,6 +39,7 @@
 
 #define IDD_DIR 320
 #define IDD_DIR_TEXT 321
+#define IDD_DIR_GSVER 322
 #define IDC_LTEXT2	54
 #define IDC_LTEXT1	53
 
@@ -59,4 +65,21 @@
 #define TEXTWIN_COPY	572
 
 #define IDS_INSTALLABORT 900
+
+#define IDD_GSVER	580
+#define IDD_GSVER_TEXT	581
+#define IDD_GSVER_SCROLL 582
+#define PARTIAL_GSVIEW	583
+#define PARTIAL_GS	584
+
+#define IDD_FINISH	585
+#define IDM_PROGMAN1	586
+#define IDM_PROGMAN2	587
+
+#define IDD_DONE	590
+#define IDD_DONE_BAK	591
+#define IDD_DONE_GROUP	592
+
+#define IDD_FAILED	595
+#define IDD_FAILED_REASON	596
 

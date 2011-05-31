@@ -9,9 +9,8 @@ ALL
 
 MS-WINDOWS
 ==========
-If a space is used in the GSview or Ghostscript path,
-printing from GSview won't work and the Ghostscript icon
-won't work.
+If a space is used in the Ghostscript path, the Program Manager
+Ghostscript icon won't work.
 
 
 MS-WINDOWS Win32s

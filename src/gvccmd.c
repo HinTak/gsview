@@ -263,6 +263,9 @@ gsview_command(int command)
 	case IDM_CONVERT:
 		clip_convert();
 		return 0;
+	case IDM_CFG:
+		config_wizard();
+		return 0;
 	case IDM_GSCOMMAND:
 	        install_gsdll();
 		return 0;
@@ -350,7 +353,8 @@ gsview_command(int command)
 		}
 		return 0;
 	case IDM_MAKEEPSI:
-		if (option.orientation == IDM_PORTRAIT) {
+		if ( (option.orientation == IDM_PORTRAIT) ||
+		     (option.auto_orientation == TRUE) ) {
 		    if (!dfreopen())
 			return 0;
 		    if (gsdll.lock_device && gsdll.device)
@@ -366,7 +370,8 @@ gsview_command(int command)
 	case IDM_MAKEEPST4:
 	case IDM_MAKEEPST6U:
 	case IDM_MAKEEPST6P:
-		if (option.orientation == IDM_PORTRAIT) {
+		if ( (option.orientation == IDM_PORTRAIT) ||
+		     (option.auto_orientation == TRUE) ) {
 		    if (!dfreopen())
 			return 0;
 		    if (gsdll.lock_device && gsdll.device)
@@ -380,7 +385,8 @@ gsview_command(int command)
 		    gserror(IDS_MUSTUSEPORTRAIT, 0, MB_ICONEXCLAMATION, 0); 
 		return 0;
 	case IDM_MAKEEPSW:
-		if (option.orientation == IDM_PORTRAIT) {
+		if ( (option.orientation == IDM_PORTRAIT) ||
+		     (option.auto_orientation == TRUE) ) {
 		    if (!dfreopen())
 			return 0;
 		    if (gsdll.lock_device && gsdll.device)
@@ -422,6 +428,7 @@ gsview_command(int command)
 	case IDM_SOUNDS:
 		change_sounds();
 		return 0;
+	case IDM_AUTOORIENT:
 	case IDM_PORTRAIT:
 	case IDM_LANDSCAPE:
 	case IDM_UPSIDEDOWN:

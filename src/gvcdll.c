@@ -38,6 +38,13 @@ gs_execute(char GVFAR *str, int len)
     if (gsdll.execute_cont == NULL)
 	return 255;
     execute_code = gsdll.execute_cont(str, len);
+#ifdef UNUSED
+    if (debug) {
+	char buf[MAXSTR];
+	sprintf(buf, "gsdll.execute_cont returns %d\n", execute_code);
+	gs_addmess(buf);
+    }
+#endif
     return execute_code;
 }
 
@@ -59,6 +66,54 @@ char buf[1024];
 }
 
 /* private funtions */
+
+/* Get auto orientation for specified page */
+int
+gsview_page_orientation(int page)
+{
+    PSDOC *doc = psfile.doc;
+    int orientation = IDM_PORTRAIT;
+
+    if (doc == (PSDOC *)NULL)
+	return IDM_PORTRAIT;
+
+    if (doc->orientation == LANDSCAPE)
+	orientation = IDM_LANDSCAPE;
+    if ((doc->numpages >= 1) && (doc->pages)) {
+	/* check for page orientation */
+	if (doc->pages[map_page(page-1)].orientation == PORTRAIT)
+	    orientation = IDM_PORTRAIT;
+	if (doc->pages[map_page(page-1)].orientation == LANDSCAPE)
+	    orientation = IDM_LANDSCAPE;
+    }
+    return orientation;
+}
+
+/* get orientation for display of given page */
+int
+d_orientation(int pagenum)
+{
+int orientation;
+    if (option.auto_orientation == TRUE)
+	orientation = gsview_page_orientation(pagenum);
+    else
+	orientation = option.orientation;
+    switch (orientation) {
+	case IDM_LANDSCAPE:
+	    if (option.swap_landscape)
+		return 1;
+	    return 3;
+	case IDM_SEASCAPE:
+	    if (option.swap_landscape)
+		return 3;
+	    return 1;
+	case IDM_PORTRAIT:
+	    return 0;
+	case IDM_UPSIDEDOWN:
+	    return 2;
+    }
+    return 0;
+}
 
 /* calculate new size then set it */
 int
@@ -96,40 +151,28 @@ int	yoffset;	  /* page origin offset in 1/72" */
 	height = doc->boundingbox[URY] - doc->boundingbox[LLY];
 	xoffset = doc->boundingbox[LLX];
 	yoffset = doc->boundingbox[LLY];
-    }
-    else if (i < 0) {
-	width = option.user_width;
-	height = option.user_height;
-	xoffset = 0;
-	yoffset = 0;
+	if (width <= 0)
+	    display.epsf_clipped = FALSE;
+	if (height <= 0)
+	    display.epsf_clipped = FALSE;
     }
     else {
-	width = papersizes[i].width;
-	height = papersizes[i].height;
-	xoffset = 0;
-	yoffset = 0;
+	/* !zooming && !display.epsf_clipped */
+	if (i < 0) {
+	    width = option.user_width;
+	    height = option.user_height;
+	    xoffset = 0;
+	    yoffset = 0;
+	}
+	else {
+	    width = papersizes[i].width;
+	    height = papersizes[i].height;
+	    xoffset = 0;
+	    yoffset = 0;
+	}
     }
 
-    switch (option.orientation) {
-	case IDM_LANDSCAPE:
-	    if (option.swap_landscape)
-		display.orientation = 1;
-	    else
-		display.orientation = 3;
-	    break;
-	case IDM_SEASCAPE:
-	    if (option.swap_landscape)
-		display.orientation = 3;
-	    else
-		display.orientation = 1;
-	    break;
-	case IDM_PORTRAIT:
-	    display.orientation = 0;
-	    break;
-	case IDM_UPSIDEDOWN:
-	    display.orientation = 2;
-	    break;
-    }
+    display.orientation = d_orientation(psfile.pagenum);
 
     display.width  = (unsigned int)(width  * display.xdpi / 72.0 + 0.5);
     display.height = (unsigned int)(height * display.ydpi / 72.0 + 0.5);
@@ -493,6 +536,19 @@ int i;
 	return 0;
     }
 
+    /* move to desired page */
+    if (psfile.doc != (PSDOC *)NULL) {
+	if (ppend->pagenum < 0)
+	    ppend->pagenum = psfile.pagenum;
+	if (psfile.doc->numpages && (ppend->pagenum > (int)psfile.doc->numpages))
+	     ppend->pagenum = psfile.doc->numpages;
+	if (ppend->pagenum < 0)
+	    ppend->pagenum = 1;
+    }
+    if (ppend->pagenum > 0)
+	psfile.pagenum = ppend->pagenum;
+    ppend->pagenum = 0;
+
     if (!display.init) {
 	if (!code)
 	    code = d_init1();	/* create GSview dict */
@@ -524,19 +580,6 @@ int i;
 	return code;
     }
 
-    /* move to desired page */
-    if (psfile.doc != (PSDOC *)NULL) {
-	if (ppend->pagenum < 0)
-	    ppend->pagenum = psfile.pagenum;
-	if (psfile.doc->numpages && (ppend->pagenum > (int)psfile.doc->numpages))
-	     ppend->pagenum = psfile.doc->numpages;
-	if (ppend->pagenum < 0)
-	    ppend->pagenum = 1;
-    }
-    if (ppend->pagenum > 0)
-	psfile.pagenum = ppend->pagenum;
-    ppend->pagenum = 0;
-
     /* highlight search word if needed */
     if (psfile.text_bbox.valid) {
 	display.show_find = TRUE;
@@ -553,6 +596,7 @@ int i;
 		return code;
 	}
 	display.need_header = FALSE;
+	display.need_trailer = TRUE;
 	if (ppend->pagenum > 0)
 	    psfile.pagenum = ppend->pagenum;
 	ppend->pagenum = 0;
@@ -669,6 +713,20 @@ int code = 0;
 	    pending.restart = FALSE;
 	    release_mutex();
 
+	    if (option.auto_orientation && !lpending.psfile && lpending.pagenum) {
+		/* If moving to another page in the same document
+		 * and new page orientation doesn't match the current,
+		 * then we need to resize.
+		 */
+		if (display.orientation != d_orientation(lpending.pagenum))
+		    lpending.resize = TRUE;
+
+		/* If we are changing file then resize will occur automatically.
+		 * If we are redisplaying the current page then we don't need
+		 * to force a resize.
+		 */
+	    }
+
 	    if (lpending.psfile && display.init)
 		lpending.restart = TRUE;
 
@@ -752,7 +810,55 @@ int code = 0;
     return 0;
 }
 
+/* patch around a bug in Ghostscript 5.0 and 5.01 */
+/* KLUDGE part 2 */
+int
+gs_501_kludge_part2(void)
+{
+int code;
+    if ((gsdll.revision_number != 500) && (gsdll.revision_number != 501))
+	return 0;	/* no kludge needed */
 
+    if (gsdll.execute_begin == NULL)
+	return 0;
+
+    if ( (code = gsdll.execute_begin()) != 0 ) {
+	char buf[256];
+	sprintf(buf,"gsdll.execute_begin returns %d\n", code);
+	gs_addmess(buf);
+	pending.unload = TRUE;
+	post_img_message(WM_GSSHOWMESS, 0);
+	return 0;
+    }
+
+    /* patch around a bug in Ghostscript */
+    /* GS 5.0 and 5.01 use  "{ .runexec } execute" which runs .runexec
+     * inside "stopped".  This prevents error codes from being passed
+     * back to gsdll_execute_cont().  We redefine .runstringbegin to
+     * fix this.
+     */
+    if (!code)
+	code = gs_printf("systemdict begin\n");
+    if (!code)
+	code = gs_printf("\
+/.runstringbegin {\n\
+  .currentglobal true .setglobal\n\
+  { .needinput } bind 0 () .subfiledecode\n\
+  exch .setglobal cvx .runexec\n\
+} bind def\n");
+    /* close up systemdict  */
+    if (!code)
+	code = gs_printf("end\n");
+    if (!code && !pending.text)
+	code = gs_printf("systemdict readonly pop\n");
+
+    gsdll.execute_end();
+
+    if (code)
+	gs_addmess("Error trying to install GS 5.0 / 5.01 kludge\n");
+
+    return code;
+}
 
 /********************************************************/
 /* public functions */
@@ -815,6 +921,7 @@ int code;
 	    pending.unload = TRUE;
 	    break;
 	}
+
 	if (!code) {
 	    if (gsdll.execute_begin == NULL)
 		break;
@@ -1029,12 +1136,21 @@ char **argv;
 	p += strlen(p)+1;
 	*p = '\0';
 
-/* KLUDGE UNTIL BUG IS FIXED IN GHOSTSCRIPT */
-if (!pending.text)
-	if (option.safer) {
+	if (! (pending.text && (gsdll.revision_number < 500)) )
+	  /* disable -dSAFER when gsversion < 500 and using pstotext */
+	  if (option.safer) {
 	    strcpy(p, "-dSAFER");
 	    p += strlen(p)+1;
 	    *p = '\0';
+	  }
+
+	if ((gsdll.revision_number == 500) || (gsdll.revision_number == 501)) {
+	    /* KLUDGE part 1 */
+	    /* patch around a bug in Ghostscript */
+	    strcpy(p, "-dWRITESYSTEMDICT");
+	    p += strlen(p)+1;
+	    *p = '\0';
+	    /* we will close this up later */
 	}
 
 	if (option.alpha_text > 1) {
@@ -1094,6 +1210,8 @@ free((void *)argv);
 	    gs_load_dll_cleanup();
 	    return code;
 	}
+
+	code = gs_501_kludge_part2();	/* KLUDGE part 2 */
 /*
 	zoom = FALSE;
 */
@@ -1375,4 +1493,3 @@ int pcdone;
     pending.abort = TRUE;    /* ignore errors */
     return 0;
 }
-

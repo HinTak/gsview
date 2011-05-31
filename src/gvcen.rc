@@ -91,6 +91,7 @@ BEGIN
 	IDS_TEXTNOTFIND, "Text not found"
 	IDS_PRINTPDFPS "Can't print PDF to a PostScript printer.  Use File | Extract"
 	IDS_NOPDFQUICKTEXT "Can't do quick text extract or find on PDF file.  Use Options | PStoText"
+	IDS_BAD_DOSEPS_HEADER "DOS EPS header is bad.  Ignoring DSC comments."
 END
 
 STRINGTABLE
@@ -131,6 +132,7 @@ BEGIN
 	IDS_TOPICKEYS, "Keys"
 	IDS_TOPICMESS, "Show Messages"
 	IDS_TOPICSPOOL, "Spooler"
+	IDS_TOPICZLIB, "zlib"
 END
 
 STRINGTABLE
@@ -194,6 +196,7 @@ BEGIN
 	IDS_NOTIMPLEMENTED, "Not implemented"
 	IDS_NOLINKTARGET, "Unknown target for link"
 	IDS_PARSEERROR, "Error parsing command line"
+	IDS_ZLIB_FAIL, "Failed to load zlib DLL.  Press OK button for help."
 END
 
 STRINGTABLE
@@ -220,6 +223,9 @@ BEGIN
 	IDS_SETUPABORT, "Installation aborted\012%s"
 	IDS_WRONGEMX, "You have emx %s.\rYou need emx %s or later.\rPM GSview will not run correctly."
 	IDS_GSVIEWVERSION, GSVIEW_VERSION
+	IDS_CFG73, AACFG73
+	IDS_CFG74, AACFG74
+	IDS_PROGMANGROUP4 AAPROGMANGROUP4
 END
 
 

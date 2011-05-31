@@ -1,4 +1,4 @@
-/* Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
 
   This file is part of GSview.
 
@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvwen.rc */
+/* gvwde.rc */
 
 /* Windows German language resources */
 
@@ -114,6 +114,8 @@ BEGIN
 	END
 	POPUP "&Seitenausrichtung"
 	BEGIN
+		MENUITEM "&Auto Ausrichtung", IDM_AUTOORIENT
+		MENUITEM SEPARATOR
 		MENUITEM "&Hochformat", IDM_PORTRAIT
 		MENUITEM "&Querformat", IDM_LANDSCAPE
 		MENUITEM "&Kopfüber", IDM_UPSIDEDOWN
@@ -221,3 +223,4 @@ BEGIN
 END
 
 
+

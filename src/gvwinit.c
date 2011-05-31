@@ -38,7 +38,7 @@ BOOL parse_args(LPSTR str);
 void
 gsview_init0(LPSTR lpszCmdLine)
 {
-	HWND hwnd = FindWindow(szClassName, szAppName);
+	HWND hwnd = FindWindow(szClassName, NULL);
 	BringWindowToTop(hwnd);
 #if __BORLANDC__ == 0x452
 	/* avoid bug in BC++ 4.0 */
@@ -176,7 +176,7 @@ int language;
 }
 
 /* main initialisation */
-void
+BOOL
 gsview_init1(LPSTR lpszCmdLine)
 {
 WNDCLASS wndclass;
@@ -211,6 +211,14 @@ int length = 64;
 
 	multithread = FALSE;
 #ifdef __WIN32__
+	if (is_win32s) {
+	    /* don't allow multiple copies under Win32s */
+	    HWND hwnd = FindWindow(szClassName, NULL);
+	    if (hwnd != (HWND)NULL) {
+		gsview_init0(lpszCmdLine);
+		return FALSE;
+	    }
+	}
 	if (is_win95 || is_winnt) {
 	    display.event = CreateEvent(NULL, TRUE, FALSE, NULL);
   	    if (display.event)
@@ -341,6 +349,7 @@ int length = 64;
 
 	if (!parse_args(lpszCmdLine))
 	    gserror(IDS_PARSEERROR, NULL, 0, SOUND_ERROR);
+	return TRUE;
 }
 
 BOOL
@@ -633,19 +642,7 @@ create_registry_type(char *keyname, char *description)
 HKEY hkey;
 HKEY hsubkey;
 LONG rc;
-char gs_dir[MAXSTR];
 char buf[MAXSTR];
-char *p;
-
-    /* assume that GS is in the adjacent directory */
-    strcpy(gs_dir, szExePath);
-    p = strrchr(gs_dir, '\\');	/* remove trailing \ */
-    if (p)
-	*p = '\0';
-    p = strrchr(gs_dir, '\\');	/* remove trailing gsview */
-    if (p)
-	*(++p) = '\0';
-    strcat(gs_dir, GS_BASEDIR);
 
     rc = RegCreateKey(HKEY_CLASSES_ROOT, keyname, &hkey);
     if (rc != ERROR_SUCCESS)
@@ -781,7 +778,7 @@ DdeCallback(UINT type, UINT fmt, HCONV hconv,
 }
 
 int
-gsview_create_objects(void)
+gsview_create_objects(char *groupname)
 {
 DWORD idInst = 0L;
 FARPROC lpDdeProc;
@@ -792,25 +789,26 @@ char setup[MAXSTR+MAXSTR];
 DWORD dwResult;
 char gspath[MAXSTR];
 char *p;
-BOOL register_ps;
-BOOL register_pdf;
-char buf[MAXSTR];
 #ifdef __WIN32__
 #define GSVIEW_NAME "GSview"
 #else
 #define GSVIEW_NAME "GSview 16"
 #endif
+char groupfile[MAXSTR];
+int i;
+char *s, *d;
 
-    load_string(IDS_ASSOCPS, buf, sizeof(buf)-1);
-    register_ps = (message_box(buf, MB_YESNO) == IDYES);
-    load_string(IDS_ASSOCPDF, buf, sizeof(buf)-1);
-    register_pdf = (message_box(buf, MB_YESNO) == IDYES);
-    if (update_registry(register_ps, register_pdf))
-	gserror(IDS_REGERROR, NULL, 0, SOUND_ERROR);
 
-    load_string(IDS_CREATEGROUP, buf, sizeof(buf)-1);
-    if (message_box(buf, MB_YESNO) != IDYES)
-	return 0;
+    /* derive group filename from group name */
+    for (i=0, s=groupname, d=groupfile; i<8 && *s; s++) {
+	if (isalpha(*s) || isdigit(*s)) {
+	    *d++ = *s;
+	    i++;
+	} 
+    }
+    *d = '\0';
+    if (strlen(groupfile)==0)
+	strcpy(groupfile, "gstools");
 
     lpDdeProc = MakeProcInstance((FARPROC)DdeCallback, phInstance);
     if (DdeInitialize(&idInst, (PFNCALLBACK)lpDdeProc, CBF_FAIL_POKES, 0L)) {
@@ -831,7 +829,8 @@ char buf[MAXSTR];
     DdeClientTransaction((LPBYTE)str, strlen(str)+1, hConv,\
 	NULL, CF_TEXT, XTYP_EXECUTE, 2000, &dwResult)
 
-    sprintf(setup, "[CreateGroup(\042GS Tools\042,gstools.grp)][ShowGroup(\042GS Tools\042,1)]");
+    sprintf(setup, "[CreateGroup(\042%s\042,%s.grp)][ShowGroup(\042%s\042,1)]",
+	groupname, groupfile, groupname);
     DDEEXECUTE(setup);
     sprintf(setup, "[ReplaceItem(\042%s\042)]", GSVIEW_NAME);
     DDEEXECUTE(setup);
@@ -891,5 +890,534 @@ char buf[MAXSTR];
 
     return 0;
 }
+
+HINSTANCE zlib_hinstance;
+PFN_gzopen gzopen;
+PFN_gzread gzread;
+PFN_gzclose gzclose;
+
+void
+unload_zlib(void)
+{
+    if (zlib_hinstance == (HINSTANCE)NULL)
+	return;
+    FreeLibrary(zlib_hinstance);
+    zlib_hinstance = NULL;
+    gzopen = NULL;
+    gzread = NULL;
+    gzclose = NULL;
+}
+
+/* load zlib DLL for gunzip */
+BOOL
+load_zlib(void)
+{   
+char buf[MAXSTR];
+    if (zlib_hinstance != (HINSTANCE)NULL)
+	return TRUE;	/* already loaded */
+
+    strcpy(buf, szExePath);
+#ifdef __WIN32__
+    strcat(buf, "zlib32.dll");
+#else
+    strcat(buf, "zlib16.dll");
+#endif
+    zlib_hinstance = LoadLibrary(buf);
+    if (zlib_hinstance >= (HINSTANCE)HINSTANCE_ERROR) {
+        gzopen = (PFN_gzopen) GetProcAddress(zlib_hinstance, "gzopen");
+	if (gzopen == NULL) {
+	    unload_zlib();
+	}
+	else {
+	    gzread = (PFN_gzread) GetProcAddress(zlib_hinstance, "gzread");
+	    if (gzread == NULL) {
+		unload_zlib();
+	    }
+	    else {
+		gzclose = (PFN_gzclose) GetProcAddress(zlib_hinstance, "gzclose");
+		if (gzclose == NULL) {
+		    unload_zlib();
+		}
+	    }
+	}
+    }
+    else
+	zlib_hinstance = NULL;
+
+    if (zlib_hinstance == NULL) {
+	load_string(IDS_ZLIB_FAIL, buf, sizeof(buf));
+	if (message_box(buf, MB_OKCANCEL) == IDOK) {
+	    load_string(IDS_TOPICZLIB, szHelpTopic, sizeof(szHelpTopic));
+	    get_help();
+	}
+	return FALSE;
+    }
+    
+    return TRUE;
+}
+
+/***************************/
+/* configure dialog wizard */
+
+HWND hWiz = HWND_DESKTOP;
+int gsver = GS_REVISION;
+
+int wiz_exit(HWND hwnd);
+int check_gsver(HWND hwnd);
+int config_finish(HWND hwnd);
+BOOL CALLBACK _export CfgChildDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK _export CfgMainDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+
+/* hDlgModeless */
+typedef struct tagWIZPAGE {
+   int id;		/* resource ID */
+   int prev;		/* resource id of previous page */
+   int next;		/* resource id of next page */
+   int (*func)(HWND);	/* function to run on exit from page */
+   HWND hwnd;		/* window handle of dialog */
+} WIZPAGE;
+
+WIZPAGE pages[]={
+	{IDD_CFG1, IDD_CFG1, IDD_CFG2, NULL, 0},
+	{IDD_CFG2, IDD_CFG1, IDD_CFG3, check_gsver, 0},
+	{IDD_CFG3, IDD_CFG2, IDD_CFG4, NULL, 0},
+	{IDD_CFG4, IDD_CFG3, IDD_CFG5, NULL, 0},
+	{IDD_CFG5, IDD_CFG4, IDD_CFG6, NULL, 0},
+	{IDD_CFG6, IDD_CFG5, IDD_CFG7, config_finish, 0},
+	{IDD_CFG7, IDD_CFG7, IDD_CFG7, wiz_exit, 0},
+	{0, 0, 0, NULL, 0}
+};
+
+#pragma argsused
+int wiz_exit(HWND hwnd)
+{
+    PostMessage(hWiz, WM_COMMAND, (WPARAM)IDOK, (LPARAM)0);
+    return 0;
+}
+
+WIZPAGE *
+find_page_from_id(int id)
+{
+WIZPAGE *page;
+    for (page=pages; page->id; page++) {
+	if (page->id == id)
+	    return page;
+    }
+    return NULL;
+}
+
+void
+goto_page(HWND hwnd, int id)
+{
+WIZPAGE *page;
+HWND hbutton;
+    page = find_page_from_id(id);
+    if (page) {
+	ShowWindow(hwnd, SW_HIDE);
+	ShowWindow(page->hwnd, SW_SHOW);
+	hDlgModeless = page->hwnd;
+	if (IsWindowEnabled(GetDlgItem(page->hwnd, IDNEXT)) )
+	    hbutton = GetDlgItem(page->hwnd, IDNEXT);
+	else
+	    hbutton = GetDlgItem(page->hwnd, IDCANCEL);
+	SetFocus(hbutton);
+	SendMessage(hbutton, BM_SETSTYLE, (WPARAM)BS_DEFPUSHBUTTON, TRUE);
+	return;
+    }
+}
+
+void
+next_page(HWND hwnd)
+{
+WIZPAGE *page;
+int id;
+    for (page=pages; page->id; page++) {
+	if (page->hwnd == hwnd) {
+	    if (page->func) {
+		/* need to execute a function before continuing */
+		if ( (id = page->func(hwnd)) != 0) {
+		    goto_page(hwnd, id);
+		    return;
+		}
+	    }
+	    goto_page(hwnd, page->next);
+	    return;
+	}
+    }
+}
+
+void
+prev_page(HWND hwnd)
+{
+WIZPAGE *page;
+    for (page=pages; page->id; page++) {
+	if (page->hwnd == hwnd) {
+	    goto_page(hwnd, page->prev);
+	}
+    }
+}
+
+int
+add_gsver(HWND hwnd, int offset)
+{
+char buf[MAXSTR];
+int ver;
+    GetDlgItemText(hwnd, IDC_CFG20, buf, sizeof(buf));
+    if (strlen(buf) == 4)
+	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10 + (buf[3]-'0');
+    else if (strlen(buf) == 3)
+	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10;
+    else
+	return GS_REVISION;
+    ver += offset;
+    if (ver > GS_REVISION_MAX)
+       ver = GS_REVISION_MAX;
+    if (ver < GS_REVISION_MIN)
+       ver = GS_REVISION_MIN;
+    return ver;
+}
+
+int
+check_gsver(HWND hwnd)
+{
+char buf[MAXSTR];
+int ver = GS_REVISION;
+BOOL fixit = FALSE;
+    /* should allow edit field to be changed  */
+    /* then make sure it is within range */
+    GetDlgItemText(hwnd, IDC_CFG20, buf, sizeof(buf));
+    if (strlen(buf) == 4) {
+	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10 + (buf[3]-'0');
+	if ( (ver > GS_REVISION_MAX) || (ver < GS_REVISION_MIN) )
+	    fixit = TRUE;
+    }
+    else
+	fixit = TRUE;
+    if (fixit) {
+	ver = GS_REVISION;
+	sprintf(buf, "%d.%02d", ver / 100, ver % 100);
+	SetDlgItemText(hwnd, IDC_CFG20, buf);
+	/* don't move until it is valid */
+	return IDD_CFG2;
+    }
+    
+    gsver = ver;
+    return 0;
+}
+
+/* update GS directory edit field when version number changes */
+void
+gsdir_fix(HWND hwnd, char *verstr)
+{
+char buf[MAXSTR];
+char *p;
+    GetDlgItemText(hwnd, IDC_CFG22, buf, sizeof(buf));
+    if (strlen(buf) < 6)
+	return;
+    p = buf + strlen(buf) - 4;
+    if (isdigit(p[0]) && (p[1]=='.') && isdigit(p[2]) && isdigit(p[3])) {
+	strcpy(p, verstr);
+        SetDlgItemText(hwnd, IDC_CFG22, buf);
+    }
+    else {
+	p = buf + strlen(buf) - 3;
+	if (isdigit(p[0]) && (p[1]=='.') && isdigit(p[2])) {
+	    strcpy(p, verstr);
+	    SetDlgItemText(hwnd, IDC_CFG22, buf);
+	}
+    }
+}
+
+int
+config_now(void)
+{
+BOOL assoc_ps;
+BOOL assoc_pdf;
+char buf[MAXSTR];
+WIZPAGE *page;
+FILE *f;
+char *p;
+
+    /* get info from wizard */
+    page = find_page_from_id(IDD_CFG2);
+    option.gsversion = add_gsver(page->hwnd, 0);
+    GetDlgItemText(page->hwnd, IDC_CFG22, buf, sizeof(buf));
+    sprintf(option.gsdll, "%s\\%s", buf, GS_DLLNAME);
+    sprintf(option.gsinclude, "%s;%s\\fonts", buf, buf);
+    GetDlgItemText(page->hwnd, IDC_CFG23, buf, sizeof(buf));
+    if (strlen(buf)) {
+	strcat(option.gsinclude, ";");
+	strcat(option.gsinclude, buf);
+    }
+
+    /* check if Ghostscript really has been installed */
+    /* first look for the DLL */
+    if ( (f = fopen(option.gsdll, "rb")) == (FILE *)NULL ) {
+	load_string(IDS_GSNOTINSTALLED, buf, sizeof(buf));
+	SetDlgItemText(find_page_from_id(IDD_CFG7)->hwnd, IDC_CFG71,
+	    buf);
+	return 1;
+    }
+    fclose(f);
+
+    /* next look for gs_init.ps */
+    strcpy(buf, option.gsdll);
+    p = strrchr(buf, '\\');	/* remove trailing DLLNAME */
+    if (p)
+	*(++p) = '\0';
+    strcat(buf, "gs_init.ps");
+    if ( (f = fopen(buf, "rb")) == (FILE *)NULL ) {
+	load_string(IDS_GSLIBNOTINSTALLED, buf, sizeof(buf));
+	SetDlgItemText(find_page_from_id(IDD_CFG7)->hwnd, IDC_CFG71,
+	    buf);
+	return 1;
+    }
+    fclose(f);
+    /* at this stage we don't look for fonts, but maybe we should */
+    
+
+    assoc_ps = (BOOL)SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, 
+	    IDC_CFG41, BM_GETCHECK, (WPARAM)0, (LPARAM)0);
+    assoc_pdf = (BOOL)SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, 
+	    IDC_CFG42, BM_GETCHECK, (WPARAM)0, (LPARAM)0);
+    if (update_registry(assoc_ps, assoc_pdf))
+	return 1;
+
+    GetDlgItemText(find_page_from_id(IDD_CFG5)->hwnd, 
+	IDC_CFG52, buf, sizeof(buf));
+    if (SendDlgItemMessage(find_page_from_id(IDD_CFG5)->hwnd, 
+	    IDC_CFG51, BM_GETCHECK, (WPARAM)0, (LPARAM)0)
+	&& gsview_create_objects(buf))
+	return 1;
+    
+    if (SendDlgItemMessage(find_page_from_id(IDD_CFG3)->hwnd, 
+	    IDC_CFG31, BM_GETCHECK, (WPARAM)0, (LPARAM)0))
+	gsview_printer_profiles();
+
+
+    option.configured = TRUE;
+
+    write_profile();
+
+    return 0;
+}
+
+
+int
+config_finish(HWND hwnd)
+{
+    EnableWindow(GetDlgItem(hwnd, IDNEXT), FALSE);
+    EnableWindow(GetDlgItem(hwnd, IDPREV), FALSE);
+    EnableWindow(GetDlgItem(hwnd, IDCANCEL), FALSE);
+    if (config_now())
+    {	char buf[MAXSTR];
+	load_string(IDS_CFG73, buf, sizeof(buf));
+	SetDlgItemText(find_page_from_id(IDD_CFG7)->hwnd, IDC_CFG70, buf);
+    }
+    return 0;
+}
+
+
+#ifndef __WIN32__
+DLGPROC lpProcCfgMain;
+DLGPROC lpProcCfgChild;
+#endif
+
+int
+config_wizard(void)
+{
+    /* main dialog box */
+    EnableWindow(hwndimg, FALSE);
+    /* we must use modeless dialog box to get the correct dialog control */
+    /* handling in the child windows */
+#ifdef __WIN32__
+    hWiz = CreateDialogParam(hlanguage, MAKEINTRESOURCE(IDD_CFG0), hwndimg, CfgMainDlgProc, (LPARAM)NULL);
+#else
+    if (!lpProcCfgMain)
+        lpProcCfgMain = (DLGPROC)MakeProcInstance((FARPROC)CfgMainDlgProc, phInstance);
+    if (!lpProcCfgChild)
+        lpProcCfgChild = (DLGPROC)MakeProcInstance((FARPROC)CfgChildDlgProc, phInstance);
+    hWiz = CreateDialogParam(hlanguage, MAKEINTRESOURCE(IDD_CFG0), hwndimg, lpProcCfgMain, (LPARAM)NULL);
+    
+/* We can't free these thunks until the dialog box has returned */
+/* This happens elsewhere which makes it hard to delete them */
+/* For the present, leave them lying around because we won't be */
+/* using the config wizard often */
+/* 
+    FreeProcInstance((FARPROC)lpProcCfgMain);
+    lpProcCfgMain = (DLGPROC)NULL;
+    FreeProcInstance((FARPROC)lpProcCfgChild);
+    lpProcCfgChild = (DLGPROC)NULL;
+*/
+#endif
+
+    return 0; /* success */
+}
+
+
+
+#pragma argsused	/* ignore warning for next function */
+/* Modeless Dialog Box */
+BOOL CALLBACK _export
+CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch(message) {
+        case WM_INITDIALOG:
+	    /* create child dialog windows */
+	    {
+		WIZPAGE *page;
+		char buf[MAXSTR];
+		char gsdir[MAXSTR];
+		char *p;
+		for (page=pages; page->id; page++) {
+#ifdef __WIN32__
+		    page->hwnd = CreateDialogParam(hlanguage, MAKEINTRESOURCE(page->id), hwnd, CfgChildDlgProc, (LPARAM)NULL);
+#else
+		    page->hwnd = CreateDialogParam(hlanguage, MAKEINTRESOURCE(page->id), hwnd, lpProcCfgChild, (LPARAM)NULL);
+#endif
+		    ShowWindow(page->hwnd, SW_HIDE);
+		}
+		ShowWindow(pages[0].hwnd, SW_SHOW);
+		SetFocus(GetDlgItem(pages[0].hwnd, IDNEXT));
+		SendDlgItemMessage(pages[0].hwnd, IDNEXT, BM_SETSTYLE, 
+		    (WPARAM)BS_DEFPUSHBUTTON, TRUE);
+		hDlgModeless = pages[0].hwnd;
+
+		/* initialize GS version */
+		page = find_page_from_id(IDD_CFG2);
+		if (page) {
+		    sprintf(buf, "%d.%02d", option.gsversion / 100, 
+			option.gsversion % 100);
+		    SetDlgItemText(page->hwnd, IDC_CFG20, buf);
+		    SetDlgItemText(page->hwnd, IDC_CFG22, szExePath);
+		    SetDlgItemText(page->hwnd, IDC_CFG23, "c:\\psfonts");
+		}
+
+		/* assume that GS is in the adjacent directory */
+		if (option.gsversion % 100 == 0)
+		    sprintf(buf, "%d.%01d", option.gsversion / 100, 
+			option.gsversion % 100);
+		else
+		    sprintf(buf, "%d.%02d", option.gsversion / 100, 
+			option.gsversion % 100);
+		strcpy(gsdir, szExePath);
+		p = strrchr(gsdir, '\\');	/* remove trailing \ */
+		if (p)
+		    *p = '\0';
+		p = strrchr(gsdir, '\\');	/* remove trailing gsview */
+		if (p)
+		    *(++p) = '\0';
+		strcat(gsdir, "gs");
+		strcat(gsdir, buf);
+		SetDlgItemText(page->hwnd, IDC_CFG22, gsdir);
+		SetDlgItemText(page->hwnd, IDC_CFG23, "c:\\psfonts");
+
+		SendDlgItemMessage(find_page_from_id(IDD_CFG3)->hwnd, IDC_CFG31, BM_SETCHECK, 
+			    (WPARAM)1, (LPARAM)0);
+		SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, IDC_CFG41, BM_SETCHECK, 
+			    (WPARAM)1, (LPARAM)0);
+		SendDlgItemMessage(find_page_from_id(IDD_CFG4)->hwnd, IDC_CFG42, BM_SETCHECK, 
+			    (WPARAM)1, (LPARAM)0);
+
+		/* program group */
+		load_string(IDS_PROGMANGROUP4, buf, sizeof(buf));
+		page = find_page_from_id(IDD_CFG5);
+		if (page) {
+		    SendDlgItemMessage(page->hwnd, IDC_CFG51, BM_SETCHECK, 
+				(WPARAM)1, (LPARAM)0);
+		    SetDlgItemText(page->hwnd, IDC_CFG52, buf);
+		}
+
+	    }
+            return FALSE;	/* we decide the focus */
+        case WM_COMMAND:
+            switch(LOWORD(wParam)) {
+                case IDCANCEL:
+                case IDOK:
+		    EnableWindow(hwndimg, TRUE);
+		    DestroyWindow(hwnd);
+		    hDlgModeless = NULL;
+		    /* should post message to main window to delete thunks */
+                    return(TRUE);
+                default:
+                    return(FALSE);
+            }
+	case WM_CLOSE:
+	    EnableWindow(hwndimg, TRUE);
+	    DestroyWindow(hwnd);
+	    hDlgModeless = NULL;
+	    return TRUE;
+    }
+    return FALSE;
+}
+
+
+#pragma argsused	/* ignore warning for next function */
+/* Modeless Dialog Box */
+BOOL CALLBACK _export
+CfgChildDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch(message) {
+        case WM_INITDIALOG:
+            return( TRUE);
+        case WM_COMMAND:
+            switch(LOWORD(wParam)) {
+		case IDOK:
+                case IDNEXT:
+		    next_page(hwnd);
+                    return(TRUE);
+                case IDPREV:
+		    SendDlgItemMessage(hwnd, IDPREV, BM_SETSTYLE, 
+		        (WPARAM)0, TRUE);	/* remove default style */
+		    prev_page(hwnd);
+                    return(TRUE);
+                case IDCANCEL:
+		    {	char buf[MAXSTR];
+			load_string(IDS_CFG74, buf, sizeof(buf));
+			SetDlgItemText(find_page_from_id(IDD_CFG7)->hwnd, IDC_CFG70, buf);
+			goto_page(hwnd, IDD_CFG7);
+		    }
+                    return(TRUE);
+		case IDC_CFG20:
+		    if (GetNotification(wParam,lParam) == EN_CHANGE)
+		    { int ver;
+		      char buf[16];
+		      ver = add_gsver(hwnd, 0);
+		      if (ver % 100 == 0)
+			  sprintf(buf, "%d.%01d", ver / 100, ver % 100);
+		      else
+			  sprintf(buf, "%d.%02d", ver / 100, ver % 100);
+		      /* don't use touch IDC_CFG20 - this would be recursive */
+		      gsdir_fix(hwnd, buf);
+		    }
+                    return(TRUE);
+                default:
+                    return(FALSE);
+            }
+	case WM_VSCROLL:
+	    { int ver;
+	      char buf[16];
+		switch(LOWORD(wParam)) {
+		    case SB_LINEUP:
+			ver = add_gsver(hwnd, 1);
+			break;
+		    case SB_LINEDOWN:
+			ver = add_gsver(hwnd, -1);
+			break;
+		    default:
+			ver = add_gsver(hwnd, 0);
+			break;
+		}
+		sprintf(buf, "%d.%02d", ver / 100, ver % 100);
+		SetDlgItemText(hwnd, IDC_CFG20, buf);
+	    }
+	    return TRUE;
+	case WM_CLOSE:
+	    PostMessage(GetParent(hwnd), WM_COMMAND, (WPARAM)IDCANCEL, (LPARAM)0);
+	    return TRUE;
+    }
+    return FALSE;
+}
+
 
 

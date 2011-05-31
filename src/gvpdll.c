@@ -35,6 +35,7 @@ gs_clear_gsdll(void)
     gsdll.hmodule = (HMODULE)NULL;
     gsdll.valid = FALSE;
     gsdll.device = NULL;
+    gsdll.revision_number = 0;
     gsdll.revision = NULL;
     gsdll.init = NULL;
     gsdll.execute_begin = NULL;
@@ -61,7 +62,6 @@ gs_load_dll(void)
 {
 APIRET rc;
 char buf[MAXSTR+40];
-long revision;
 char fullname[1024];
 const char *shortname;
 char *p;
@@ -115,12 +115,21 @@ const char *dllname;
 		return FALSE;
 	    }
 	    /* check DLL version */
-	    gsdll.revision(NULL, NULL, &revision, NULL);
-	    if ( (revision < GS_REVISION) || (revision > GS_REVISION_MAX) ) {
-		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld\n", revision, (long)GS_REVISION);
+	    gsdll.revision(NULL, NULL, &gsdll.revision_number, NULL);
+	    if ( (gsdll.revision_number < GS_REVISION_MIN) || (gsdll.revision_number > GS_REVISION_MAX) ) {
+		sprintf(buf, "Wrong version of DLL found.\n  Found version %ld\n  Need version  %ld - %ld\n", 
+			gsdll.revision_number, (long)GS_REVISION_MIN, (long)GS_REVISION_MAX);
 		gs_addmess(buf);
 		gs_load_dll_cleanup();
 		return FALSE;
+	    }
+	    if ( (gsdll.revision_number == 500) || (gsdll.revision_number == 500) ) {
+		gs_addmess("\
+**********************************************************************\n\
+GSview warning: Ghostscript 5.0 and 5.01 do not work well with GSview.\n\
+Please upgrade to a later version.\n\
+**********************************************************************\n\
+");
 	    }
 	    if ((rc = DosQueryProcAddr(gsdll.hmodule, 0, "GSDLL_INIT", (PFN *)(&gsdll.init)))!=0) {
 	        sprintf(buf, "Can't find GSDLL_INIT, rc = %ld\n", rc);
@@ -254,6 +263,10 @@ char buf[MAXSTR];
 		(*gsdll.lock_device)(gsdll.device, 0);
 	    }
 */
+	    /* allow window resize when document first displayed */
+	    if (gsdll.device)
+		fit_page_enabled = option.fit_page;
+
 	    WinPostMsg(hwnd_frame, WM_GSDEVICE, (MPARAM)gsdll.device, (MPARAM)0);
 	    break;
 	case GSDLL_SYNC:
@@ -324,6 +337,10 @@ char buf[MAXSTR];
 	    bitmap.height = ((count>>16) & 0xffff);
 	    bitmap.changed = TRUE;
 */
+
+	    /* allow window to be resized without user control */
+	    fit_page_enabled = option.fit_page;
+
 	    if (debug) {
 		sprintf(buf,"Callback: SIZE %p width=%d height=%d\n", str,
 		    (int)(count & 0xffff), (int)((count>>16) & 0xffff) );

@@ -44,10 +44,14 @@ info_init(HWND hwnd)
 	if (doc) {
 	    p = buf;
 	    *p = '\0';
+	    if (psfile.gzip) {
+		strcpy(p, "gzip ");
+	        p += strlen(p);
+	    }
 	    if (psfile.ctrld)
-		load_string(IDS_CTRLD, buf, sizeof(buf));
+		load_string(IDS_CTRLD, p, sizeof(buf));
 	    if (psfile.pjl)
-		load_string(IDS_PJL, buf, sizeof(buf));
+		load_string(IDS_PJL, p, sizeof(buf));
 	    p += strlen(p);
 	    if (psfile.ispdf) {
 		load_string(IDS_PDF, p, sizeof(buf)-strlen(buf));
@@ -150,6 +154,14 @@ PROFILE *prf;
 	    option.configured = i;
 	else
 	    option.configured = FALSE;
+	profile_read_string(prf, section, "GSversion", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+	    option.gsversion = i;
+	else
+	    option.gsversion = GS_REVISION;
+	if ( (option.gsversion < GS_REVISION_MIN) ||
+	     (option.gsversion > GS_REVISION_MAX) )
+	    option.gsversion = GS_REVISION;
 	profile_read_string(prf, section, "Version", "", profile, sizeof(profile));
 	if (strcmp(profile, GSVIEW_VERSION)!=0)
 	    option.configured = FALSE;
@@ -237,6 +249,9 @@ PROFILE *prf;
 	profile_read_string(prf, section, "ShowBBox", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
 		option.show_bbox = i;
+	profile_read_string(prf, section, "AutoOrientation", "", profile, sizeof(profile));
+	if (sscanf(profile,"%d", &i) == 1)
+		option.auto_orientation = i;
 	profile_read_string(prf, section, "Orientation", "", profile, sizeof(profile));
 	if (sscanf(profile,"%d", &i) == 1)
 		option.orientation = i+IDM_PORTRAIT;
@@ -326,6 +341,8 @@ int i;
 PROFILE *prf;
 	prf = profile_open(szIniFile);
 	profile_write_string(prf, section, "Version", GSVIEW_VERSION);
+	sprintf(profile, "%d", (int)option.gsversion);
+	profile_write_string(prf, section, "GSversion", profile);
 	switch (option.language) {
 	    case IDM_LANGDE:
 		strcpy(profile, "de");
@@ -376,6 +393,8 @@ PROFILE *prf;
 	profile_write_string(prf, section, "IgnoreDSC", profile);
 	sprintf(profile, "%d", (int)option.show_bbox);
 	profile_write_string(prf, section, "ShowBBox", profile);
+	sprintf(profile, "%d", (int)option.auto_orientation);
+	profile_write_string(prf, section, "AutoOrientation", profile);
 	sprintf(profile, "%d", option.orientation - IDM_PORTRAIT);
 	profile_write_string(prf, section, "Orientation", profile);
 	sprintf(profile, "%d", (int)option.swap_landscape);
@@ -417,4 +436,3 @@ PROFILE *prf;
 	profile_close(prf);
 }
 
-

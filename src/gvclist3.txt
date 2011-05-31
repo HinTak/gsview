@@ -1,19 +1,6 @@
-src.zip
-epstool.zip
-pstotext.zip
 pstotext.txt
-pstotxt2.dll
-pstotxt2.exe
 pstotxt3.dll
 pstotxt3.exe
-gvpm.exe
-gvpm.eas
-gvpmen.dll
-gvpmde.dll
-gvpmen.hlp
-gvpmde.hlp
-gvpm.ico
-gvpgs.exe
 gsview32.exe
 gsview32.ico
 gsviewde.hlp
@@ -22,6 +9,7 @@ gsvw32de.dll
 gsvw32en.dll
 gsv16spl.exe
 gvwgs32.exe
+zlib32.dll
 printer.ini
 README.TXT
 LICENCE

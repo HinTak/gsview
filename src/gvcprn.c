@@ -156,7 +156,7 @@ int filter;
     }
 
     /* don't use dfreopen, since that wouldn't work for PDF files */
-    infile = fopen(psfile.name, "rb");
+    infile = fopen(psfile_name(&psfile), "rb");
     if (infile == (FILE *)NULL) {
 	play_sound(SOUND_ERROR);
 	free(buffer);
@@ -481,21 +481,26 @@ PROFILE *prf;
     fputc('\042',optfile);
     fputc('\n',optfile);
 
-    /* PageOffset */
     strcpy(section, option.device_name);
-    strcat(section, " PageOffset");
+    strcat(section, " Options");
     if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
-	profile_read_string(prf, section, "X", "0", buf, sizeof(buf)-2);
+        /* PageOffset */
+	profile_read_string(prf, section, "Xoffset", "0", buf, sizeof(buf)-2);
 	if (sscanf(buf, "%f", &xoffset) != 1)
 	    xoffset = 0;
-	profile_read_string(prf, section, "Y", "0", buf, sizeof(buf)-2);
+	profile_read_string(prf, section, "Yoffset", "0", buf, sizeof(buf)-2);
 	if (sscanf(buf, "%f", &yoffset) != 1)
 	    yoffset = 0;
+	if ((xoffset != 0) || (yoffset != 0))
+	    fprintf(optfile, "-c \042<< /PageOffset [%g %g] >> setpagedevice\042\n-f\n", 
+	    (double)xoffset, (double)yoffset);
+
+	/* Options */
+	profile_read_string(prf, section, "Options", "", buf, sizeof(buf)-2);
+	if (strlen(buf) > 0)
+	   fprintf(optfile, "%s\n", buf);
 	profile_close(prf);
     }
-    if ((xoffset != 0) || (yoffset != 0))
-	fprintf(optfile, "-c \042<< /PageOffset [%g %g] >> setpagedevice\042\n-f\n", 
-	(double)xoffset, (double)yoffset);
 
 
     if ((proplist = get_properties(option.device_name)) != (struct prop_item_s *)NULL) {
@@ -514,3 +519,4 @@ PROFILE *prf;
     return TRUE;
 }
 
+

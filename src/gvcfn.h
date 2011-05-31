@@ -26,12 +26,16 @@ void scroll_to_find(void);
 
 /* in gvpinit.c  or gvwinit.c */
 void show_buttons(void);
-int gsview_create_objects(void);
+int gsview_create_objects(char *name);
 BOOL load_language(int language);
 void change_language(void);
 void check_language(void);
+void unload_zlib(void);
+BOOL load_zlib(void);
+int config_wizard(void);
 
 /* in gvcinit.c */
+int gsview_printer_profiles(void);
 void init_options(void);
 void gsview_initc(LPSTR cmdline);
 void init_check_menu(void);
@@ -94,6 +98,7 @@ void dsc_dopage(void);
 void dsc_skip(int skip);
 int map_page(int page);
 void psfile_free(PSFILE *);
+char * psfile_name(PSFILE *psf);
 
 /* in gvpdisp.c or gvwdisp.c */
 BOOL psfile_changed(void);
@@ -162,6 +167,7 @@ int word_find(int x, int y);
 BOOL wildmatch(char *w, char *s);
 
 /* in gvcdll.c */
+int d_orientation(int pagenum);
 int gs_execute(char GVFAR *str, int len);
 int gs_printf(const char *fmt, ...);
 void gs_process(void);

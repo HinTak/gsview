@@ -17,9 +17,7 @@
 #endif
 
 /* ************ EXTERNALS *********** */
-extern HWND hwndmess;
-void gs_addmess_count(char *str, int count);
-void gs_addmess_update(HWND hwnd);
+extern zip_message(char *str, int count);
 
 #define WIZUNZIP_MAX_PATH       128   /* max total file or directory name path   */
 #define OPTIONS_BUFFER_LEN      256   /* buffer to hold .INI file options         */
@@ -110,8 +108,7 @@ do_print(FILE *file, unsigned int size, char *buffer)
      * that of the caller.
      */
 MSG msg;
-    gs_addmess_count(buffer, size);
-    gs_addmess_update(hwndmess);
+    zip_message(buffer, size);
     while (PeekMessage(&msg, (HWND)NULL, 0, 0, PM_REMOVE)) {
 	if ((lpDCL->hWndMain==0) || !IsDialogMessage(lpDCL->hWndMain, &msg)) {
 	    TranslateMessage(&msg);

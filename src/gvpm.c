@@ -62,6 +62,7 @@ RECTL info_coord;
 int on_link;			/* TRUE if we were or are over link */
 int on_link_page;		/* page number of link target */
 BOOL ignore_sync = FALSE;	/* ignore next GSDLL_SYNC */
+BOOL fit_page_enabled = FALSE;	/* next WM_SIZE is allowed to resize window */
 BOOL quitnow = FALSE;		/* Used to cause exit from nested message loops */
 
 int percent_done;		/* percentage of document processed */
@@ -147,6 +148,7 @@ exit_func(void)
     psfile_free(&psfile);
     if (option.settings)
 	write_profile();
+    unload_zlib();
 }
 
 
@@ -814,6 +816,14 @@ BOOL addeps;
 	    enable_menu_item(IDM_EDITMENU, IDM_TEXTFINDNEXT, idle);
 	    release_mutex();
 	    break;
+	case IDM_ORIENTMENU:
+	    enable_menu_item(IDM_ORIENTMENU, IDM_AUTOORIENT, !psfile.ispdf);
+	    enable_menu_item(IDM_ORIENTMENU, IDM_PORTRAIT, !psfile.ispdf);
+	    enable_menu_item(IDM_ORIENTMENU, IDM_LANDSCAPE, !psfile.ispdf);
+	    enable_menu_item(IDM_ORIENTMENU, IDM_UPSIDEDOWN, !psfile.ispdf);
+	    enable_menu_item(IDM_ORIENTMENU, IDM_SEASCAPE, !psfile.ispdf);
+	    enable_menu_item(IDM_ORIENTMENU, IDM_SWAPLANDSCAPE, !psfile.ispdf);
+	    break;
     }
 }
 
@@ -1085,8 +1095,30 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		cyClient = SHORT2FROMMP(mp2);
 		cxClient = SHORT1FROMMP(mp2);
 
+#ifdef OLD
 		cyAdjust = min(bitmap.height, cyClient) - cyClient;
 		cyClient += cyAdjust;
+#else
+		if (bitmap.height < cyClient) {
+		    /* shrink window */
+		    cyAdjust = bitmap.height - cyClient;
+		}
+		else {
+		    if (fit_page_enabled) {
+			/* We just got a GSDLL_SIZE and option.fitpage was TRUE */
+			/* enlarge window to smaller of bitmap height */
+			/* and height if client extended to bottom of screen */
+		        SWP swp;
+			DosSleep(50);  /* see note below */
+		        WinQueryWindowPos(WinQueryWindow(hwnd, QW_PARENT), &swp);
+			cyAdjust = min(bitmap.height, cyClient + swp.y)
+			    - cyClient;
+		    }
+		    else
+			cyAdjust = 0;
+		}
+		cyClient += cyAdjust;
+#endif
 
 		nVscrollMax = max(0, bitmap.height - cyClient);
 		nVscrollPos = min(nVscrollPos, nVscrollMax);
@@ -1105,8 +1137,32 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		    WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, MPFROM2SHORT(1, 1),
 			MPFROMLONG(0));
 
+#ifdef OLD
 		cxAdjust = min(bitmap.width,  cxClient) - cxClient;
 		cxClient += cxAdjust;
+#else
+		if (bitmap.width < cxClient) {
+		    /* shrink window */
+		    cxAdjust = bitmap.width - cxClient;
+		}
+		else {
+		    if (fit_page_enabled) {
+			/* We just got a GSDLL_SIZE and option.fitpage was TRUE */
+			/* enlarge window to smaller of bitmap width */
+			/* and width if client extended to right of screen */
+		        SWP swp;
+			DosSleep(50);  /* see note below */
+		        WinQueryWindowPos(WinQueryWindow(hwnd, QW_PARENT), &swp);
+			cxAdjust = min(bitmap.width, 
+			    cxClient + WinQuerySysValue(HWND_DESKTOP, SV_CXFULLSCREEN) -
+				(swp.x + swp.cx) /* Windows uses rect.right */)
+			    - cxClient;
+		    }
+		    else
+			cxAdjust = 0;
+		}
+		cxClient += cxAdjust;
+#endif
 
 		nHscrollMax = max(0, bitmap.width - cxClient);
 		nHscrollPos = min(nHscrollPos, nHscrollMax);
@@ -1125,7 +1181,8 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		    WinSendMsg(hwndScroll, SBM_SETTHUMBSIZE, MPFROM2SHORT(1, 1),
 			MPFROMLONG(0));
 
-		if ( option.fit_page && (cxAdjust!=0 || cyAdjust!=0) ) {
+		if ( option.fit_page && gsdll.device &&
+			(cxAdjust!=0 || cyAdjust!=0) ) {
 		        SWP swp;
 			/* don't interrogate the window location immediately since */
 			/* it causes the Diamond Stealth VL24 with IBM S3 drivers */
@@ -1150,6 +1207,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd, ULONG mess,
 		        option.img_max = ((swp.fl & SWP_MAXIMIZE) != 0);
 		    }
 		}
+		fit_page_enabled = FALSE;
 		break;
 	case WM_VSCROLL:
 	    if (!gsdll.device && !bitmap.valid)
@@ -1913,7 +1971,7 @@ MRESULT EXPENTRY FrameWndProc(HWND hwnd, ULONG mess,
 			MPARAM mp1, MPARAM mp2)
 {
 MRESULT mr;
-int sCount;
+int sCount, i;
 PSWP pswpNew, pswpClient, pswp;
 
   switch(mess) {
@@ -1953,16 +2011,31 @@ PSWP pswpNew, pswpClient, pswp;
 	mr =  (*OldFrameWndProc)(hwnd, mess, mp1, mp2);
 	sCount = (int)mr;
 	pswp = (PSWP)mp1;
-	pswpClient = (PSWP)mp1 + sCount - 1;
-	pswpNew = pswpClient + 1;
+	/* find client window */
+	pswpClient = ((PSWP)mp1) + (FID_CLIENT - FID_SYSMENU);  /* guess */
+	for (i=0; i<sCount; i++)
+	    if (pswp->hwnd == WinWindowFromID(hwnd, FID_CLIENT)) {
+		pswpClient = pswp+i;
+		break;
+	    }
+	pswpNew = ((PSWP)mp1) + sCount;
 	*pswpNew = *pswpClient;
 	pswpNew->hwnd = WinWindowFromID(hwnd, ID_STATUSBAR);
 	pswpNew->cy = statusbar.y;
 	pswpClient->cy -= pswpNew->cy;
 	pswpNew->y = pswpClient->y + pswpClient->cy;
-	pswp[FID_VERTSCROLL - FID_SYSMENU].cy -= pswpNew->cy;
-	pswpNew->x = pswp[FID_MENU - FID_SYSMENU].x;
-	pswpNew->cx = pswp[FID_MENU - FID_SYSMENU].cx;
+	/* find vertical scroll bar */
+	for (i=0; i<sCount; i++)
+	    if (pswp[i].hwnd == WinWindowFromID(hwnd, FID_VERTSCROLL))
+		break;
+	pswp[i].cy -= pswpNew->cy;	/* reduce height of vert scroll bar */
+	/* find menu bar */
+	for (i=0; i<sCount; i++)
+	    if (pswp[i].hwnd == WinWindowFromID(hwnd, FID_MENU))
+		break;
+	/* set status bar dimensions from menu bar */
+	pswpNew->x = pswp[i].x;
+	pswpNew->cx = pswp[i].cx;
 	statusbar.x = pswpNew->cx;
 	sCount++;
 	/* reformat frame to make room for button bar */
@@ -2269,4 +2342,3 @@ PDFLINK link;
 	}
     }
 }
-

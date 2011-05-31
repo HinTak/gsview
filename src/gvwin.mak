@@ -1,4 +1,4 @@
-#  Copyright (C) 1993, 1994, 1995, Russell Lang.  All rights reserved.
+#  Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -20,7 +20,7 @@
 #
 
 # Edit COMPBASE and WIN32 as required
-COMPBASE = c:\bc45
+COMPBASE = e:\bc45
 # DEBUG=1 for Debugging options
 DEBUG=1
 # WIN32 is the default
@@ -28,6 +28,8 @@ WIN32=1
 # Language is English (en) or Deutsch (de)
 # This only applies to the utilties, not GSview itself.
 LANGUAGE=en
+# GSview version
+GSVIEW_VERSION=22
 
 # Shouldn't need editing below here
 COMPDIR = $(COMPBASE)\bin
@@ -92,7 +94,7 @@ gvwin16.def, +
 gvwin16.res
 !
 
-gsvw32en.res: gvwin2.rc gvcen.h gvcen.rc gvwen.rc
+gsvw32en.res: gvwin2.rc gvcen.h gvcen.rc gvwen.rc gvcver.h
 	copy gvcen.h  gvclang.h
 	copy gvcen.rc gvclang.rc
 	copy gvwen.rc gvwlang.rc
@@ -113,7 +115,7 @@ gsvw32en.res
 !
 
 
-gsvw16en.res: gvwin2.rc gvcen.h gvcen.rc gvwen.rc
+gsvw16en.res: gvwin2.rc gvcen.h gvcen.rc gvwen.rc gvcver.h
 	copy gvcen.h  gvclang.h
 	copy gvcen.rc gvclang.rc
 	copy gvwen.rc gvwlang.rc
@@ -133,7 +135,7 @@ gsvw16en.def, +
 gsvw16en.res
 !
 
-gsvw32de.res: gvwin2.rc gvcde.h gvcde.rc gvwde.rc
+gsvw32de.res: gvwin2.rc gvcde.h gvcde.rc gvwde.rc gvcver.h
 	copy gvcde.h  gvclang.h
 	copy gvcde.rc gvclang.rc
 	copy gvwde.rc gvwlang.rc
@@ -153,7 +155,7 @@ gsvw32de.def, +
 gsvw32de.res
 !
 
-gsvw16de.res: gvwin2.rc gvcde.h gvcde.rc gvwde.rc
+gsvw16de.res: gvwin2.rc gvcde.h gvcde.rc gvwde.rc gvcver.h
 	copy gvcde.h  gvclang.h
 	copy gvcde.rc gvclang.rc
 	copy gvwde.rc gvwlang.rc
@@ -223,9 +225,6 @@ gvctext.obj: gvctext.c $(HDRS)
 winunzip.obj: winunzip.c wizdll.h
 	$(COMPDIR)\$(CC) -c $(CFLAGS) $*.c
 
-gvwtxt.obj: gvwtxt.c $(HDRS)
-	$(COMPDIR)\$(CC) -c $(CFLAGS) $*.c
-
 winsetup.res: winsetup.rc setup.h gvc$(LANGUAGE).h
 	copy gvc$(LANGUAGE).h  gvclang.h
 !if $(WIN32)
@@ -234,16 +233,19 @@ winsetup.res: winsetup.rc setup.h gvc$(LANGUAGE).h
 	$(COMPDIR)\brcc -i$(INCDIR) -r $*.rc
 !endif
 
+setupc.obj: setupc.c setup.h setupc.h gvcrc.h gvcbeta.h
+	$(COMPDIR)\$(CC) -c $(CFLAGS) setupc.c
+
 winsetup.obj: winsetup.c setup.h setup.c gvcrc.h gvcbeta.h gvc$(LANGUAGE).h 
 	copy gvc$(LANGUAGE).h gvclang.h
 	$(COMPDIR)\$(CC) -c $(CFLAGS) winsetup.c
 
-winsetup.exe: winsetup.obj winsetup.res winsetup.def winunzip.obj gvwtxt.obj gvcbeta.obj
+winsetup.exe: winsetup.obj winsetup.res winsetup.def setupc.obj winunzip.obj gvcbeta.obj
 !if $(WIN32)
 	$(COMPDIR)\tlink32 -Tpe -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0w32 +
 winsetup.obj +
-winunzip.obj gvwtxt.obj gvcbeta.obj +
+winunzip.obj setupc.obj gvcbeta.obj +
 ,winsetup.exe,winsetup, +
 $(LIBDIR)\import32 +
 $(LIBDIR)\cw32, +
@@ -256,7 +258,7 @@ winsetup.res
 	$(COMPDIR)\tlink -Twe -c -m -s $(DEBUGLINK) @&&!
 $(LIBDIR)\c0w$(MODEL) +
 winsetup.obj +
-winunzip.obj gvwtxt.obj gvcbeta.obj +
+winunzip.obj setupc.obj gvcbeta.obj +
 ,winsetup.exe,winsetup, +
 $(LIBDIR)\import +
 $(LIBDIR)\mathw$(MODEL) +
@@ -358,10 +360,33 @@ $*.def
 strip: gsview$(WINEXT).exe
 	$(COMPDIR)\tdstrp32 gsview32.exe
 
-prezip:
-	copy gsview$(WINEXT).exe ..\gsview$(WINEXT).exe
+gsv$(GSVIEW_VERSION)src.zip:
+	copy README.TXT ..
+	copy LICENCE ..
+	copy FILE_ID.DIZ ..
+	cd ..
+	-del epstool.zip
+	zip -9 -@ epstool.zip < src\gvcliste.txt
+	-del pstotext.zip
+	zip -9 -@ pstotext.zip     < src\gvclistp.txt
+	-del src.zip
+	copy src\gvclists.txt gvclists.txt
+	zip -9 -@ src.zip     < gvclists.txt
+	-del gvclists.txt
+	-del gsv$(GSVIEW_VERSION)src.zip
+	zip -9 gsv$(GSVIEW_VERSION)src.zip epstool.zip pstotext.zip src.zip README.TXT FILE_ID.DIZ LICENCE
+	-del README.TXT
+	-del LICENCE
+	-del FILE_ID.DIZ
+	cd src
+	
+gsv$(GSVIEW_VERSION)w32.zip:
+	copy README.TXT ..\README.TXT
+	copy LICENCE ..\LICENCE
+	copy FILE_ID.DIZ ..\FILE_ID.DIZ
+	copy gsview32.exe ..\gsview32.exe
 	copy binary\gvwin1.ico ..\gsview32.ico
-	# used to do nothing, rely on  gsview32 being without symbol table
+	# used to do nothing, rely on gsview32 being without symbol table
 	$(COMPDIR)\tdstrp32 ..\gsview32.exe
 	copy gsviewen.hlp ..\gsviewen.hlp
 	copy gsviewde.hlp ..\gsviewde.hlp
@@ -374,62 +399,95 @@ prezip:
 	copy printer.ini ..\printer.ini
 	copy winsetup.exe ..\setup.exe
 	$(COMPDIR)\tdstrp32 ..\setup.exe
-	# change OS/2 filenames to lower case
 	cd ..
-	rename gvpm.exe gvpm.exe
-	rename gvpm.eas gvpm.eas
-	rename gvpm.ico gvpm.ico
-	rename gvpmen.dll gvpmen.dll
-	rename gvpmde.dll gvpmde.dll
-	rename gvpmen.hlp gvpmen.hlp
-	rename gvpmde.hlp gvpmde.hlp
-	rename gvpgs.exe gvpgs.exe
-	rename os2setup.exe os2setup.exe
-	rename os2unzip.exe os2unzip.exe
-	rename pstotxt2.dll pstotxt2.dll
-	rename pstotxt2.exe pstotxt2.exe
+	-del win32.zip
+	zip -9 -@ win32.zip < src\gvclist3.txt
+	echo Redistribution of this Win32 GSview MUST be accompanied by the> README32.TXT
+	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> README32.TXT
+	-del gsv$(GSVIEW_VERSION)w32.zip
+	zip -9 gsv$(GSVIEW_VERSION)w32.zip win32.zip setup.exe wizunz32.dll README32.TXT README.TXT FILE_ID.DIZ LICENCE
+	-del README32.TXT
+	-del README.TXT
+	-del LICENCE
+	-del FILE_ID.DIZ
+	-del gsview32.exe
+	-del gsview32.ico
+	-del gsviewen.hlp
+	-del gsviewde.hlp
+	-del gsvw32en.dll
+	-del gsvw32de.dll
+	-del gsv16spl.exe
+	-del gvwgs32.exe
+	-del printer.ini
+	-del setup.exe
 	cd src
+	
+gsv$(GSVIEW_VERSION)w16.zip:
 	copy README.TXT ..\README.TXT
-	copy FILE_ID.DIZ ..\FILE_ID.DIZ
 	copy LICENCE ..\LICENCE
-	-del ..\epstool.zip
-	-del ..\gsview.zip
-	-del ..\pstotext.zip
-	-del ..\src.zip
-	-del ..\gsviewXX.zip
-
-zip: prezip
+	copy FILE_ID.DIZ ..\FILE_ID.DIZ
+	copy gsview16.exe ..\gsview16.exe
+	copy binary\gvwin1.ico ..\gsview32.ico
+	$(COMPDIR)\tdstrip ..\gsview16.exe
+	copy gsviewen.hlp ..\gsviewen.hlp
+	copy gsviewde.hlp ..\gsviewde.hlp
+	copy gsvw16en.dll ..\gsvw16en.dll
+	copy gsvw16de.dll ..\gsvw16de.dll
+	$(COMPDIR)\tdstrip ..\gsvw16en.dll
+	$(COMPDIR)\tdstrip ..\gsvw16de.dll
+	copy gsvw16de.dll ..\gsvw16de.dll
+	copy gvwgs16.exe ..\gvwgs16.exe
+	copy printer.ini ..\printer.ini
+	copy winsetup.exe ..\setup16.exe
+	$(COMPDIR)\tdstrip ..\setup16.exe
 	cd ..
-	copy src\gvcliste.txt gvcliste.txt
-	copy src\gvclistp.txt gvclistp.txt
-	copy src\gvclists.txt gvclists.txt
-	copy src\gvclist.txt gvclist.txt
-	zip -9 -@ epstool.zip < gvcliste.txt
-	zip -9 -@ pstotext.zip     < gvclistp.txt
-	zip -9 -@ src.zip     < gvclists.txt
-	zip -9 -@ gsview.zip  < gvclist.txt
-	del gvcliste.txt
-	del gvclistp.txt
-	del gvclists.txt
-	del gvclist.txt
-	zip -9 gsviewXX.zip gsview.zip README.TXT FILE_ID.DIZ LICENCE os2setup.exe os2unzip.exe setup.exe wizunz32.dll
-	cd src
-
-zip16:
-	tdstrip gsview16.exe
-	tdstrip gsvw16en.dll
-	tdstrip gsvw16de.dll
+	# convert names to lower case
+	-rename gsview16.exe gsview16.exe
+	-rename gsvw16en.dll gsvw16en.dll
+	-rename gsvw16de.dll gsvw16de.dll
+	-rename gvwgs16.exe gvwgs16.exe
+	-rename setup16.exe setup16.exe
+	-del win16.zip
+	zip -9 -@ win16.zip < src\gvclist1.txt
 	echo You are advised to use the 32-bit version of GSview > README16.TXT
 	echo instead of this 16-bit version. >> README16.TXT
-	echo You must use manual installation.  See the help file GSVIEWEN.HLP. >> README16.TXT
-	echo Redistribution of this 16-bit GSview MUST be accompanied >> README16.TXT
-	echo by the 32-bit version, to meet the licence requirement >> README16.TXT
-	echo that it be accompanied by source code. >> README16.TXT
+	echo Redistribution of this Win16 GSview MUST be accompanied by the >> README16.TXT
+	echo sources in gsv$(GSVIEW_VERSION)src.zip to meet the licence requirements. >> README16.TXT
 	echo Do not ask the author any questions about the 16-bit version. >> README16.TXT
-	-del ..\gsview16.zip
-	zip -9 ..\gsview16.zip README16.TXT README.TXT LICENCE gsview16.exe gsvw16en.dll gsvw16de.dll 
-	zip -9 ..\gsview16.zip gsviewen.hlp gsviewde.hlp gvwgs16.exe pstotxt1.dll printer.ini
-	zip -z ..\gsview16.zip < README16.TXT
+	-del gsv$(GSVIEW_VERSION)w16.zip
+	zip -9 gsv$(GSVIEW_VERSION)w16.zip win16.zip setup16.exe wizunz16.dll README16.TXT README.TXT FILE_ID.DIZ LICENCE
+	-del README16.TXT
+	-del README.TXT
+	-del LICENCE
+	-del FILE_ID.DIZ
+	-del gsview16.exe
+	-del gsview32.ico
+	-del gsviewen.hlp
+	-del gsviewde.hlp
+	-del gsvw16en.dll
+	-del gsvw16de.dll
+	-del gvwgs16.exe
+	-del printer.ini
+	-del setup16.exe
+	cd src
+	
+
+prezip: gsv$(GSVIEW_VERSION)w$(WINEXT).zip
+
+zip: prezip gsv$(GSVIEW_VERSION)src.zip
+	copy README.TXT ..\README.TXT
+	copy LICENCE ..\LICENCE
+	copy FILE_ID.DIZ ..\FILE_ID.DIZ
+	cd ..
+	-del gsview$(GSVIEW_VERSION).zip
+	rename gsv$(GSVIEW_VERSION)w16.zip gsv$(GSVIEW_VERSION)w16.zip 
+	rename gsv$(GSVIEW_VERSION)os2.zip gsv$(GSVIEW_VERSION)os2.zip 
+	zip -9 gsview$(GSVIEW_VERSION) gsv$(GSVIEW_VERSION)src.zip gsv$(GSVIEW_VERSION)os2.zip gsv$(GSVIEW_VERSION)w16.zip gsv$(GSVIEW_VERSION)w32.zip
+	zip -9 gsview$(GSVIEW_VERSION) README.TXT FILE_ID.DIZ LICENCE
+	-del README.TXT
+	-del LICENCE
+	-del FILE_ID.DIZ
+	cd src
 
 language:
 	del *.res
@@ -494,8 +552,8 @@ clean: language
 	del winsetup.obj
 	del winsetup.res
 	del winsetup.map
+	del setupc.obj
 	del winunzip.obj
-	del gvwtxt.obj
 	del gvwgs.obj
 	del gvwgs16.res
 	del gvwgs16.map

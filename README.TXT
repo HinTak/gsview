@@ -1,7 +1,7 @@
 ===============================================================
-README.TXT         1996-11-04
+README.TXT         1997-06-27
 ===============================================================
-GSview 2.1 - PostScript previewer.  Needs Ghostscript 4.03.
+GSview 2.2 - PostScript previewer.  Needs Ghostscript 5.01.
 
 ========
 Overview
@@ -11,63 +11,41 @@ or OS/2.  Ghostscript is an interpreter for the PostScript page
 description language used by laser printers.
 For documents following the Adobe PostScript Document Structuring 
 Conventions, GSview allows selected pages to be viewed or printed.
-GSview must be used with Ghostscript 4.03.
+GSview requires Ghostscript 4.03 - 5.99.
 
 Features include:
- - view pages in arbitrary order (Next, Previous, Goto).
- - selectable display resolution, depth, alpha.
- - page size is automatically selected from DSC comments
+ - View pages in arbitrary order (Next, Previous, Goto).
+ - Selectable display resolution, depth, alpha.
+ - Page size is automatically selected from DSC comments
    or can be selected using the menu.
- - orientation is automatically selected from DSC comments
+ - Orientation can be automatically selected from DSC comments
    or can be selected using the menu (Portrait, Landscape).
- - single button zoom
- - print selected pages using Ghostscript.
-   page offset can be applied.
- - extract selected pages to another file.
- - copy display bitmap to clipboard.
- - save clipboard bitmap as BMP file.
- - add bitmap or user preview to EPS file 
+ - Single button zoom.
+ - Print selected pages using Ghostscript.
+   A page offset can be applied.
+ - Extract selected pages to another file.
+ - Copy display bitmap to clipboard.
+ - Save clipboard bitmap as BMP file.
+ - Add bitmap or user preview to EPS file 
    (Interchange, TIFF or Windows Metafile)
- - graphically select and show bounding box for EPS file.
- - extract bitmap preview or postscript from DOS EPS file.
- - display PDF files
- - on-line help.
- - OS/2 or Win32 executables
- - installation program for GSview and Ghostscript
- - free (GSview Free Public Licence).
-New features in version 2.0:
- - 32-bit only.
- - Uses Ghostscript DLL.  Should now be faster and more robust.
- - Multi-threaded under OS/2, Windows 95, Windows NT.
- - Single-threaded under Win32s (same EXE).
- - Ghostscript command line limit is much longer (1024 vs 127 bytes).
- - Supports long filenames with embedded spaces.
-   (except in Start Menu or Program Manager).
- - More network friendly for installation.  Can be run directly
-   off a CD-ROM.
- - GSview now owns the image window, so "Options | Show BoundingBox"
-   is now available under Windows.  A few other nasties should
-   also have been eliminated by this change.
- - Simple PDF viewer works better.
- - Handles documents that change the page size or resolution
-   by simply ignoring these requests.
- - Better text display now that Ghostscript has better fonts.
- - Checks Ghostscript version.  It will only operate with
-   Aladdin Ghostscript 4.01.
- - pstotext for improved text extraction and searching.
-   Highlights found words.  Mark text for copying to the clipboard.
- - Setup program uses DLL version of unzip.
- - Anti-aliasing of text and graphics.
+ - Graphically select and show bounding box for EPS file.
+ - Extract bitmap preview or postscript from DOS EPS file.
+ - Extract text or search for text.
+ - Display PDF files.
+ - On-line help.
+ - OS/2, Win16 and Win32 executables.
+ - Can be run directly off a CD-ROM.
+ - German translation (Deutsch, siehe unten).
+ - Installation program for GSview and Ghostscript.
+ - Free (GSview Free Public Licence).
+New features in version 2.2:
+ - Works with Aladdin Ghostscript 4.03 - 5.99 (GSview checks the
+   Ghostscript version number).
+ - New install program.
+ - Can read gzip compressed PostScript and PDF files.
+ - Honours %%PageOrientation.
  - See gvcnews.txt in the GSview sources for more detailed change
    notes.
-New features in version 2.1:
- - German translation (Deutsch, siehe unten).
- - Add EPS Preview no longer requires EPS Clip.
- - Add WMF preview under OS/2.
- - Colour TIFF 6 preview (compressed or uncompressed).
- - PS to EPS can automatically calculate the bounding box.
- - Print to almost any OS/2 printer using os2prn device.
- - Requires Aladdin Ghostscript 4.03.
 
 GSview was written by Russell Lang.
 
@@ -78,47 +56,80 @@ Create three 1.44M floppies containing the following files, or
 put them all in the same directory on your hard disk.
 
 Disk 1:
-  gsview.zip
-  README.TXT	    (this file)
-  LICENCE
-  FILE_ID.DIZ
-  os2setup.exe      OS/2 installation program
-  os2unzip.exe      OS/2 Info-ZIP unzip utility
-  setup.exe         MS-Windows installation program
-  wizunz32.dll      MS-Windows Info-ZIP unzip utility
+  For Win32, unzip gsv22w32.zip
+      README.TXT    (this file)
+      LICENCE
+      FILE_ID.DIZ
+      README32.TXT
+      win32.zip
+      setup.exe     Installation program
+      wizunz32.dll  Info-ZIP unzip utility
+
+  For Win16, unzip gsv22w16.zip
+      README.TXT   (this file)
+      LICENCE
+      FILE_ID.DIZ
+      README16.TXT
+      win16.zip
+      setup16.exe   Installation program
+      wizunz16.dll  Info-ZIP unzip utility
+
+  For OS/2, unzip gsv22os2.zip
+      README.TXT    (this file)
+      LICENCE
+      FILE_ID.DIZ
+      README2.TXT
+      os2.zip
+      os2setup.exe  Installation program
+      unzip2.dll    Info-ZIP unzip utility
 
 Disk 2:
-  gs403ini.zip      Aladdin Ghostscript library files
+  gs501ini.zip      Aladdin Ghostscript library files
     PLUS
-  gs403w32.zip      MS-Windows Win32 Aladdin Ghostscript
+  gs501w32.zip      MS-Windows Win32 Aladdin Ghostscript
      OR 
-  gs403os2.zip      OS/2 Aladdin Ghostscript
+  gs501os2.zip      OS/2 Aladdin Ghostscript
+
+  (for Windows 3.1/Win16 use gs403ini.zip plus gs403win.zip)
 
 Disk 3:
-  gs403fn1.zip      Aladdin Ghostscript fonts.
+  gs501fn1.zip      Aladdin Ghostscript fonts.
 
-Disk 1 is the contents of gsview21.zip.
+Disk 1 is the contents of gsv22w32.zip or gsv22w16.zip or gsv22os2.zip
+(all of which are contained in gsview22.zip).
 Disks 2 and 3 are obtained from ftp://ftp.cs.wisc.edu/ghost/aladdin/
 
-If using the floppy install method, 7Mbytes of hard disk space is required.
+If using the floppy install method, 10 Mbytes of hard disk space is 
+required.
 
-To install from OS/2, run 'os2setup.exe' from disk 1.
-Make sure that the zip files are transferred in binary mode and
-are all present.  The install program will not report bad zip files.
-If you do not already have EMX isntalled on your system, you will 
-also need a Disk 4:
-  emxrt.zip         EMX Run Time library (OS/2 only).
-from ftp://ftp-os2.nmsu.edu/os2/unix/emx09b/emxrt.zip.
-
-For MS-Windows 3.1, you must have Win32s installed before
-installing GSview.  See http://www.microsoft.com/ or
-  ftp://ftp.microsoft.com/softlib/mslfiles/PW1118.EXE
-To install from MS-Windows, run 'setup.exe' from disk 1.
 The installation will overwrite any version of GSview or
 Aladdin Ghostscript in the destination directories.  If you
 wish to save your Fontmap file, back it up to another directory.
 Make sure that the zip files are transferred in binary mode and
 are all present.
+
+To install from OS/2, run 'os2setup.exe' from disk 1.
+If you do not already have EMX isntalled on your system, you will 
+also need a Disk 4:
+  emxrt.zip         EMX Run Time library (OS/2 only).
+from ftp://ftp.cdrom.com/pub/os2/emx09c/emxrt.zip
+or   ftp://ftp-os2.nmsu.edu/pub/os2/dev/emx/v0.9c/emxrt.zip
+
+For Windows NT or Windows 95, run 'setup.exe' from disk 1.
+If you get a "Can't open DDE connection to Program Manager"
+message, your system is corrupted.  Reboot Windows then try again.
+
+For MS-Windows 3.1, it is recommended that you use the
+Win32 version.  You must have Win32s installed before
+installing GSview.  See http://www.microsoft.com/ or
+  ftp://ftp.microsoft.com/softlib/mslfiles/PW1118.EXE
+GSview and Ghostscript will not work with some versions
+of Win32s.  If it doesn't work with your version, try 
+updating to a later version of Win32s.  Some computers
+will work with Win32s v1.15, others will not.
+To install from MS-Windows, run 'setup.exe' from disk 1.
+If you wish to use the slower 16-bit version, install
+using 'setup16.exe' from gsv22w16.zip.
 
 If you don't like automatic installation programs, it is 
 possible to install GSview and Ghostscript manually.  See
@@ -139,12 +150,13 @@ English:
 Brief instructions for German readers.
 Obtain the files listed in the section above titled "Installation".
 Run setup.exe (MS-Windows) or os2setup.exe (OS/2).
-Answer "Ok" to all questions.
+Press the "Next>" button on several pages, then the "Finish>" button
+and finally the "Exit" button.
 Run GSview.
 If running a non-English version of MS-Windows, you will be prompted
 to select "English" or "Deutsch".
-Otherwise, configure GSview (answer "Yes" or "Ok" to the questions)
-then select "Options | Language | German"
+Otherwise, configure GSview (press the "Next>", "Finish>" and "Exit"
+buttons) then select "Options | Language | German"
 
 
 Deutsch:                                     ISO 8859-1 (Latin-1)
@@ -152,19 +164,19 @@ Kurze Beschreibung für deutsche Leser.
 Besorgen Sie sich bitte die Dateien,  die in dem obigen Abschnitt 
 "Installation" aufgeführt sind.
 Starten Sie setup.exe (MS-Windows) oder os2setup.exe (OS/2).
-Antworten Sie "Ok" auf alle Fragen.
+Drücken Sie den "Next>" Knopf mehrfach, dann den "Finish>" Knopf und schließlich "Exit".
 Starten Sie GSview.
 Wenn Sie eine Version von Windows haben, die nicht Englisch ist, 
 so werden Sie dazu aufgefordert zwischen "English" und "Deutsch" 
 zu wählen.
-Ansonsten wählen Sie bitte "configure GSview" und antworten mit 
-"Yes" oder "Ok" auf die Fragen.
-Wählen Sie dann bitte "Options | Language | German"
+Werden Sie dazu nicht aufgefordert, dann konfigurieren Sie Gsview (drücken 
+der "Next>", "Finish>" und "Exit" Knöpfe) und wählen dann
+"Optionen | Sprache | Deutsch"
 
 ===========
 Compilation
 ===========
-To compile GSview for OS/2 you need IBM NMAKE.EXE and EMX/GCC 0.9b.
+To compile GSview for OS/2 you need IBM NMAKE.EXE and EMX/GCC 0.9c.
 To create the GSview online help you need the IBM toolkit.
 Copy gvpm.mak to Makefile and edit COMPBASE and EMXPATH as required.
 Type 'nmake'
@@ -195,15 +207,14 @@ to the GSview directory.
 Unzip Ghostscript into the gsN.NN directory and the Ghostscript
 fonts into gsN.NN\fonts.
 
-Start GSview and answer 'Yes' to all the configuration question.
-The configuration DEPENDS on ghostscript being in ../gsN.NN
-relative to the GSview directory.
+Start GSview and follow the configurations wizard instructions.
 
 GSview (gvpm.exe) will run under OS/2 2.1 and OS/2 Warp. 
 It may run under OS/2 2.0.
-PM GSview has been compiled with EMX/GCC 0.9b and requires
-the emx 0.9b DLL's.  These are available from
-  ftp://hobbes.nmsu.edu/os2/unix/emx09b/emxrt.zip
+PM GSview has been compiled with EMX/GCC 0.9c and requires
+the emx 0.9c DLL's.  These are available from
+  ftp://ftp.cdrom.com/pub/os2/emx09c/emxrt.zip
+  ftp://ftp-os2.nmsu.edu/pub/os2/dev/emx/v0.9c/emxrt.zip
 
 GSview (gsview32.exe) will run under Windows NT, Windows 95 and
 Windows 3.1/Win32s.  It will not run under Windows 3.0.
@@ -253,7 +264,7 @@ involved in developing and maintaining GSview.  These may be sent to
 Donations are preferred in Australian dollars because it costs AUS$5
 to bank an overseas currency cheque.
 If the donation is over AUS$40 or US$40 then the author will mail 
-the next update to you on a 3.5" HD disk, provided you supply the 
+the next update to you on 3.5" HD disks, provided you supply the 
 information below.  Updates are not likely to be frequent.
 Please accompany donations with the following information:
     Your name.
@@ -284,6 +295,14 @@ See the licence in pstotext.txt or pstotext.zip for more details.
 If you do not agree to the pstotext licence, delete pstotext.zip,
 pstotxt2.dll and pstotxt3.dll.
 
+GSview uses zlib 1.0.4 in an external DLL.  zlib is
+  Copyright (C) 1995-1996 Jean-loup Gailly and Mark Adler.
+  See http://www.cdrom.com/pub/infozip/zlib/
+
+The installation programs use an unzip decompression library (DLL)
+by the Info-ZIP group.  The original sources are freely available
+from ftp://ftp.cdrom.com/pub/infozip/ on the Internet.
+
 ================
 Acknowledgements
 ================
@@ -297,7 +316,7 @@ Paul McJones and Andrew Birrell of DEC, for making pstotext available
 and making changes to it for use with GSview.
 
 Thomas Pfeiffer and Mrs. Stefanie Kolweyh for translating GSview into 
-German/Deustch.
+German/Deutsch.
 
 ==============================================================
 

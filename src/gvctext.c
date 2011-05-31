@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -30,6 +30,26 @@ void gsview_text_extract_slow(void);
 void gsview_text_extract_quick(void);
 void gsview_text_findnext_slow(void);
 void gsview_text_findnext_quick(void);
+
+char
+toupper_latin1(char ch)
+{
+    if ((ch >= 'a') && (ch <= 'z'))
+	return (char)(ch - ('a' - 'A'));
+    if ((ch >= '\340') && (ch <= '\377'))   /* Latin-1 accented chars */
+	return (char)(ch - ('\340' - '\300'));
+    return ch;
+}
+
+char
+tolower_latin1(char ch)
+{
+    if ((ch >= 'A') && (ch <= 'Z'))
+	return (char)(ch + ('a' - 'A'));
+    if ((ch >= '\300') && (ch <= '\337'))   /* Latin-1 accented chars */
+	return (char)(ch + ('\340' - '\300'));
+    return ch;
+}
 
 
 /* extract text from next line of ps file */
@@ -161,7 +181,7 @@ gsview_text_extract_quick()
     if (psfile.doc == (PSDOC *)NULL) {
 	/* scan whole document */
 	unsigned long end;
-	if ( (psfile.file = fopen(psfile.name, "rb")) == (FILE *)NULL ) {
+	if ( (psfile.file = fopen(psfile_name(&psfile), "rb")) == (FILE *)NULL ) {
 	    fclose(f);
 	    return;
 	}
@@ -257,7 +277,7 @@ int mcount = 0;
 		continue;	/* ignore white space */
 	    }
 	    if (mcount) {
-	        if (toupper(*p) == find[mcount])
+	        if (toupper_latin1(*p) == find[mcount])
 		    mcount++;	/* matched one more character */
 		else {
 		    mcount = 0;
@@ -265,7 +285,7 @@ int mcount = 0;
 		}
 	    }
 	    else {
-		if (toupper(*p) == *find) {
+		if (toupper_latin1(*p) == *find) {
 		    last = p;
 		    mcount++;	/* start of partial match */
 		}
@@ -293,7 +313,7 @@ int count;
 	    if (slength > PSLINELENGTH/4)
 		return NULL;
 	    if (str[count] != ' ')			/* ignore spaces */
-	        sbuf[slength++] = (char)toupper(str[count]);	/* searches are case insensitive */
+	        sbuf[slength++] = (char)toupper_latin1(str[count]);	/* searches are case insensitive */
 	}
 	sbuf[slength] = '\0';
 	if (slength==0)
@@ -512,7 +532,6 @@ gsview_text_extract_slow()
     return;
 }
 
-
 /* compare string w with string s */
 /* case insensitive */
 /* w may contain wildcards * and ? in any position */
@@ -520,8 +539,13 @@ gsview_text_extract_slow()
 BOOL
 wildmatch(char *w, char *s)
 {
+char *lastw = "";	/* location of last possible '*' */
+char *lasts = s;	/* location of character after the last matched by '*' */
+BOOL nomatch = FALSE;
     while (*s && *w) {
+	nomatch = FALSE;
 	if (*w == '*') {
+	    lastw = w;
 	    w++;		/* look at character after '*' */
 	    while (*w && (*w == '*'))
 		w++;		/* '**' is same as '*' */
@@ -531,19 +555,28 @@ wildmatch(char *w, char *s)
 		if (*w == '?') {
 		    break;	/* '*?' is same as '?' */
 		}
-		else if (tolower(*w) == tolower(*s))
+		else if (tolower_latin1(*w) == tolower_latin1(*s)) {
+		    lasts = s;	/* remember location in case we need to extend wildcard match */
 		    break;	/* break loop when match found */
+		}
 		s++;
 	    }
 	    if (*s == '\0')
 		break;		/* end of s without matching next in w */
 	}
 	else if (*w != '?') {  /* '?' always matches */
-	    if (tolower(*w) != tolower(*s))
-		return FALSE;	/* no match */
+	    if (tolower_latin1(*w) != tolower_latin1(*s))
+		nomatch = TRUE;
 	}
-	w++;
-	s++;
+	if (nomatch && *lastw && *lastw=='*' && *lasts) {
+	    /* try extending the length matched by the '*' wildcard */
+	    w = lastw;
+	    s = lasts + 1;
+	}
+	else {
+	    w++;
+	    s++;
+	}
     }
 
     /* skip over trailing '*' */
@@ -552,6 +585,7 @@ wildmatch(char *w, char *s)
 
     if ((*s == '\0') && (*w == '\0'))
 	return TRUE;		/* at end of both strings, so matched */
+
     return FALSE;
 }
 
@@ -825,4 +859,3 @@ int i;
     return -1;
 }
 
-

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-1996, Russell Lang.  All rights reserved.
+/* Copyright (C) 1993-1997, Russell Lang.  All rights reserved.
   
   This file is part of GSview.
   
@@ -18,7 +18,7 @@
 /* epstool.c */
 #include "epstool.h"
 
-char szVersion[] = "1.0  1996-10-13";
+char szVersion[] = "1.02  1997-02-15";
 
 char iname[MAXSTR];
 char oname[MAXSTR];
@@ -44,6 +44,7 @@ int op = 0;
 #define TIFFGS		7
 #define USER		8
 #define WMF		9
+#define COPY		10
 
 /* KLUDGE variables */
 PSDOC *doc;
@@ -60,6 +61,7 @@ int extract_section(void);
 int add_preview(void);
 void psfile_extract_header(FILE *f);
 void psfile_extract_page(FILE *f, int page);
+int make_eps_copy(void);
 
 /* KLUDGE functions */
 LPBITMAP2 get_bitmap(void)
@@ -73,6 +75,13 @@ void play_sound(int i)
 {
 }
 
+char *
+psfile_name(PSFILE *psf)
+{
+    /* don't support gzipped files in epstool */
+    /* so return original file name */
+    return psf->name;
+}
 
 int
 main(int argc, char *argv[])
@@ -101,7 +110,8 @@ main(int argc, char *argv[])
 	   return 1;
 	}
 
-	if (op==INTERCHANGE || op==TIFF4 || op==TIFF6U || op==TIFF6P || op==TIFFGS || op==WMF)
+	if (op==INTERCHANGE || op==TIFF4 || op==TIFF6U || op==TIFF6P || op==TIFFGS 
+		|| op==WMF || op==COPY)
 	   return add_preview();
 	if (op==USER)
 	   return make_eps_user();
@@ -136,6 +146,12 @@ char rspname[MAXSTR];
 FILE *rspfile;
 int width, height;
 int code = 0;
+	if (!calc_bbox &&
+             ((doc->boundingbox[URX] < doc->boundingbox[LLX]) ||
+	      (doc->boundingbox[URY] < doc->boundingbox[LLY])) ) {
+	   fprintf(stderr, "Bounding Box is inconsistent");
+	   return 1;
+	}
 	if ((op == TIFFGS) && calc_bbox) {
 	    calc_bbox = FALSE;
 	    fprintf(stderr, "Can't calculate Bounding Box when using GS TIFF driver\n");
@@ -147,10 +163,6 @@ int code = 0;
 	   fprintf(stderr, "Bounding Box is empty");
 	   return 1;
 	   /* if calc_bbox, this shouldn't be an error */
-	}
-	if (!quiet && doc->numpages==0) {
-	    fprintf(stderr, "\nFile %s does not contain any pages.\n", psfile.name);
-	    fprintf(stderr, "Using the entire file and hoping the DSC comments are wrong.\n\n");
 	}
         if (doc->numpages > 1) {
 	    /* create temporary file to hold extracted page */
@@ -208,18 +220,20 @@ int code = 0;
 	/* calculate page size */
 	if (calc_bbox) {
 	   if (doc->default_page_media) {
-	       width = doc->default_page_media->width*resolution/72;
-	       height = doc->default_page_media->height*resolution/72;
+	       width = (int)(doc->default_page_media->width*(long)resolution/72L);
+	       height = (int)(doc->default_page_media->height*(long)resolution/72L);
 	   }
 	   else {
-	       width = 612*resolution/72;
-	       height = 792*resolution/72;
+	       width = (int)(612L*resolution/72L);	/* letter width */
+	       height = (int)(842L*resolution/72L);	/* A4 height */
 	   }
 	}
 	else {
-	   width = (doc->boundingbox[URX] - doc->boundingbox[LLX])*resolution/72;
-	   height = (doc->boundingbox[URY] - doc->boundingbox[LLY])*resolution/72;
+	   width = (int)((doc->boundingbox[URX] - doc->boundingbox[LLX])*(long)resolution/72L);
+	   height = (int)((doc->boundingbox[URY] - doc->boundingbox[LLY])*(long)resolution/72L);
 	}
+	/* cope with EPS files with and without showpage */
+	fprintf(tempfile, "/EPSTOOL_save save def\n/showpage {} def\n");
 	/* copy page to temporary file */
 	if (doc->numpages != 0) {
 	    psfile_extract_header(tempfile);
@@ -231,6 +245,8 @@ int code = 0;
 	    pscopyuntil(psfile.file, tempfile, doc->beginheader, doc->beginpreview, NULL);
 	    pscopyuntil(psfile.file, tempfile, doc->endpreview, doc->endtrailer, NULL);
 	}
+	/* cope with EPS files with and without showpage */
+	fprintf(tempfile, "\nEPSTOOL_save restore\nshowpage\n");
 	fprintf(tempfile, "\nquit\n");
 	fclose(tempfile);
 #ifdef UNIX
@@ -281,6 +297,8 @@ int code = 0;
 		code = make_eps_tiff(IDM_MAKEEPST6P, calc_bbox);
 	    else if (op == WMF)
 		code = make_eps_metafile(calc_bbox);
+	    else if (op == COPY)
+		code = make_eps_copy();
 	    else
 		fprintf(stderr, "Unknown operation %d\n", op);
 	}
@@ -292,7 +310,7 @@ int code = 0;
 	}
 
 	if (!quiet)
-	    fprintf(stderr, "Add_preview %s\n", 
+	    fprintf(stderr, "Operation %s\n", 
 		code ? "failed" : "was successful");
 
 	return code;
@@ -392,6 +410,14 @@ int count;
 		  if (argp[2])
 		      strcpy(devname, argp+2);
 		  break;
+		case 'c':
+		  if (got_op) {
+		    fprintf(stderr,"Can't select two operations");
+		    return 1;
+		  }
+		  op = COPY;
+		  got_op = TRUE;
+		  break;
 		case 'w':
 		  if (got_op) {
 		    fprintf(stderr,"Can't select two operations");
@@ -480,6 +506,7 @@ do_help(void)
    fprintf(stderr,"     -ufilename     Add user supplied preview (DOS EPS)\n");
    fprintf(stderr,"     -p             Extract PostScript        (DOS EPS)\n");
    fprintf(stderr,"     -v             Extract Preview           (DOS EPS)\n");
+   fprintf(stderr,"     -c             Copy without preview      (use with -b)\n");
 }
 
 char *err_msgs[] = {"", "No preview in input file", "Preview file is not TIFF or Windows Metafile", ""};
@@ -496,7 +523,11 @@ FILE *
 gp_open_scratch_file(const char *prefix, char *fname, const char *mode)
 {	char *temp;
 	if ( (temp = getenv("TEMP")) == NULL )
+#if defined(UNIX) || defined(__UNIX) || defined(__unix)
+		strcpy(fname, "/tmp");
+#else
 		gs_getcwd(fname, MAXSTR);
+#endif
 	else
 		strcpy(fname, temp);
 
@@ -684,3 +715,55 @@ psfile_extract_page(FILE *f, int page)
     }
 }
 
+/* copy psfile, updating %%BoundingBox */
+int
+make_eps_copy(void)
+{
+char epsname[MAXSTR];
+FILE *epsfile;
+PREBMAP prebmap;
+PSBBOX devbbox;	/* in pixel units */
+LPBITMAP2 pbm;
+int code;
+    if ( (pbm = get_bitmap()) == (LPBITMAP2)NULL) {
+	return 1;
+    }
+    if (*(char *)pbm == 'P')
+	code = scan_pbmplus(&prebmap, pbm);
+    else
+	code = scan_dib(&prebmap, pbm);
+    if (code) {
+	release_bitmap();
+	return code;
+    }
+
+    strcpy(epsname, oname);
+    if (*epsname!='\0')
+	epsfile = fopen(epsname,"wb");
+    else
+	epsfile = stdout;
+    if (epsfile == (FILE *)NULL) {
+	release_bitmap();
+	return 1;
+    }
+    if (calc_bbox) {
+	scan_bbox(&prebmap, &devbbox);
+	if (devbbox.valid) {
+	    /* copy to global bbox as if obtained by PS to EPS */
+	    bbox.llx = devbbox.llx * 72.0 / option.xdpi;
+	    bbox.lly = devbbox.lly * 72.0 / option.ydpi;
+	    bbox.urx = devbbox.urx * 72.0 / option.xdpi;
+	    bbox.ury = devbbox.ury * 72.0 / option.ydpi;
+	    bbox.valid = TRUE;
+	}
+	copy_bbox_header(epsfile); /* adjust %%BoundingBox: comment */
+	pscopyuntil(psfile.file, epsfile, psfile.doc->endheader, psfile.doc->endtrailer, NULL);
+    }
+    else {
+	pscopyuntil(psfile.file, epsfile, psfile.doc->beginheader, psfile.doc->endheader, NULL);
+    }
+    if (*epsname!='\0')
+       fclose(epsfile);
+    release_bitmap();
+    return 0;
+}
