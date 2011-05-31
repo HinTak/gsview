@@ -20,7 +20,7 @@
  * Internet: rjl@monu1.cc.monash.edu.au
  */
 
-#define GSVIEW_VERSION "1.0  1993-08-05"
+#define GSVIEW_VERSION "1.0a  1993-11-10"
 
 #define ID_ANSWER	51
 #define ID_PROMPT	52

@@ -57,7 +57,10 @@ Windows won't work.
 ====
 Bugs
 ====
-This is Ghostview for Windows 1.0.
+This is Ghostview for Windows 1.0a, a minor bug fix to 1.0.
+Bugs fixed are:
+ EPSF Warn option:
+ INI file printer name and resolution parsing.
 Send bug reports to rjl@monu1.cc.monash.edu.au.
 When reporting bugs, please include the version number and date of 
 Ghostview for Windows (from the Help | About box), the version number

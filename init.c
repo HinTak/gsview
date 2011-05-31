@@ -367,6 +367,7 @@ int i;
 char profile[128];
 LPSTR file = INIFILE;
 LPSTR section = INISECTION;
+char *device_ptr;
 	GetPrivateProfileString(section, "Origin", "", profile, sizeof(profile), file);
 	if (sscanf(profile,"%d %d", &img_origin.x, &img_origin.y) != 2) {
 		img_origin.x = CW_USEDEFAULT;
@@ -448,8 +449,19 @@ LPSTR section = INISECTION;
 	else
 		strcpy(szGSwin, profile);
 	GetPrivateProfileString(section, "Printer", ",", profile, sizeof(profile), file);
-	strcpy(device_name, strtok(profile,","));
-	strcpy(device_resolution, strtok(NULL, ","));
+	if (profile[0] == ',') {
+		device_name[0] = '\0';
+		device_resolution[0] = '\0';
+	}
+	else {
+		device_ptr = strtok(profile, ",");
+		if (device_ptr != (char *)NULL) {
+		    strcpy(device_name, device_ptr);
+		    device_ptr = strtok(NULL, ",");
+		    if (device_ptr != (char *)NULL)
+		    	strcpy(device_resolution, device_ptr);
+		}
+	}
 	for (i=0; i<NUMSOUND; i++) {
 		GetPrivateProfileString(section, sound[i].entry, sound[i].file, profile, sizeof(profile), file);
 		strcpy(sound[i].file, profile);

@@ -144,7 +144,8 @@ BEGIN
 	"  countdictstack eps_countdictstack\015\012"
 	"  ne {(Warning: EPS file altered dictionary stack count\\n) print flush} if\015\012"
 	"} def\015\012"
-	"/gsview_cleanup {eps_countcheck systemdict begin clear cleardictstack end\015\012"
+	"/gsview_cleanup {eps_countcheck systemdict /clear get exec\015\012"
+	"  systemdict /cleardictstack get exec} def\015\012"
 	"\0"
 END
 
