@@ -56,13 +56,23 @@ gs_printf(const char *fmt, ...)
 va_list args;
 int count;
 int code;
-char buf[1024];
+char buf[2048];
+	if (strlen(fmt) > sizeof(buf) - 256) {
+	    message_box("gs_printf buffer overrun\n", 0);
+	    return 0;
+	}
 	va_start(args,fmt);
 	count = vsprintf(buf,fmt,args);
 	if (debug)
 	    gs_addmess(buf);
 	code = gs_execute(buf, count);
 	va_end(args);
+	if (count >= (int)sizeof(buf)) {
+	    debug |= DEBUG_GENERAL | DEBUG_LOG;
+	    gs_addmess("gs_printf buffer overrun\n");
+	    gs_addmess(buf);
+	    message_box("Please send c:\\gsview.txt to the author", 0);
+	}
 	return code;
 }
 

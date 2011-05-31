@@ -329,6 +329,8 @@ char sysini[MAXSTR];
     check_language();	/* offer to change language if doesn't match WIN.INI */
 
     config_wizard();
+
+    post_command_line();
     
     return 0;
 }

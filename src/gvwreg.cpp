@@ -135,8 +135,37 @@ read_registration(unsigned int *preg_receipt, unsigned int *preg_number,
 	    RegCloseKey(hkey);
 	}
 	
-	if (rc != ERROR_SUCCESS)
-	    return FALSE;
+	if (rc != ERROR_SUCCESS) {
+	    /* couldn't read registration info */
+	    /* Try to read it from ini file in EXE directory */
+	    char sysini[MAXSTR];
+	    unsigned int i;
+	    char profile[MAXSTR];
+	    char *section = INISECTION;
+	    PROFILE *prf;
+ 	    BOOL success = TRUE;
+	    strncpy(sysini, szExePath, MAXSTR-1);
+	    strncat(sysini, INIFILE, MAXSTR-1-strlen(sysini));
+	    prf = profile_open(sysini);
+	    profile_read_string(prf, section, "RegistrationReceipt", "", 
+		    profile, sizeof(profile));
+	    if (sscanf(profile,"%u", &i) == 1)
+		*preg_receipt = i;
+	    else
+		success = FALSE;
+	    profile_read_string(prf, section, "RegistrationNumber", "", 
+		    profile, sizeof(profile));
+	    if (sscanf(profile,"%u", &i) == 1)
+		*preg_number = i ^ 0xffff;
+	    else
+		success = FALSE;
+	    profile_read_string(prf, section, "RegistrationName", "", 
+		    reg_name, reg_len);
+	    if (strlen(reg_name) == 0)
+		success = FALSE;
+	    profile_close(prf);
+	    return success;
+	}
     }
     return TRUE;
 }

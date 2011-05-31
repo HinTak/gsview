@@ -500,10 +500,10 @@ AdvPSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 	    char section[MAXSTR];
 	    int prectrld=0;
 	    int postctrld=0;
-	    SendDlgItemMessage(GetParent(hDlg), SPOOL_PORT, LB_GETTEXT, 
-		(int)SendDlgItemMessage(GetParent(hDlg), SPOOL_PORT, 
-			LB_GETCURSEL, 0, 0L),
-		(LPARAM)(LPSTR)section);
+#ifndef cmb4
+#define cmb4 0x0473
+#endif
+	    GetDlgItemText(GetParent(hDlg), cmb4, section, sizeof(section));
 	    if ( (prf = profile_open(szIniFile)) != (PROFILE *)NULL ) {
 		profile_read_string(prf, section, "PreCtrlD", "0", buf, 
 		    sizeof(buf)-2);
@@ -557,10 +557,7 @@ AdvPSDlgProc(HWND hDlg, UINT wmsg, WPARAM wParam, LPARAM lParam)
 		    int prectrld;
 		    int postctrld;
 		    /* save settings */
-		    SendDlgItemMessage(GetParent(hDlg), SPOOL_PORT, LB_GETTEXT, 
-			(int)SendDlgItemMessage(GetParent(hDlg), SPOOL_PORT, 
-				LB_GETCURSEL, 0, 0L),
-			(LPARAM)(LPSTR)section);
+		    GetDlgItemText(GetParent(hDlg), cmb4, section, sizeof(section));
 		    prectrld = (int)SendDlgItemMessage(hDlg, ADVPS_PRECTRLD, 
 			BM_GETCHECK, 0, 0);
 		    WritePrivateProfileString(section, "PreCtrlD", 
@@ -2999,7 +2996,12 @@ gsview_print(BOOL convert)
 	option.print_method = PRINT_GS;
     
     if (convert) {
-	if (!print_silent) {
+	if (print_silent) {
+	    if (psfile.dsc != (CDSC *)NULL)
+		for (int i=0; i< (int)psfile.dsc->page_count; i++)
+		    psfile.page_list.select[i] = TRUE;
+	}
+	else {
 	    nHelpTopic = IDS_TOPICCONVERT;
 	    if (DialogBoxParam(hlanguage, "ConvertDlgBox", hwndimg, 
 		NewDeviceDlgProc, (LPARAM)TRUE) != IDOK)

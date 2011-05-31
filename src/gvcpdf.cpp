@@ -41,10 +41,6 @@ void pdf_add_link(PDFLINK link);
 int 
 pdf_add_pdfmark(void)
 {
-#ifdef NOTUSED
-/* This code only works if using default user space */ 
-        return gs_printf("userdict /pdfmark {(%s) print ==only counttomark 2 idiv { ( ) print exch ==only ( ) print ==only} repeat pop (\\n) print flush} bind put\n", pdf_mark_tag);
-#else
 /* pdfmark operates in user space, not in default user space */
 /* Within a PDF file however, annotations use default user space */
 /* Based on code provided by Valeriy Ushakov */
@@ -66,7 +62,12 @@ userdict /pdfmark { \
    { ( ) print ==only ( ) print dup length 4 eq \
     {aload \
      5 -2 roll dtransform matrix defaultmatrix idtransform \
-     5 -2 roll dtransform matrix defaultmatrix idtransform \
+     5 -1 roll dup dtransform matrix defaultmatrix idtransform pop \
+     5 -1 roll \
+      1 1 dtransform matrix defaultmatrix idtransform pop \
+      exch dup length 0 exch 1 exch 1 sub \
+      { 1 index 1 index get 3 index mul 2 index 3 1 roll put } \
+      for exch pop \
      5 -1 roll astore ==only \
     } \
     {aload \
@@ -84,7 +85,6 @@ userdict /pdfmark { \
  } repeat pop (\n) print flush \
 } bind put \
 \n", pdf_mark_tag);
-#endif
 }
 
 int

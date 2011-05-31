@@ -12,7 +12,7 @@
  entwickelten PostScript Document Structuring Conventions
  (DSC-Konventionen) entsprechen, auf dem Bildschirm dargestellt und auf
  einen Drucker ausgegeben werden.
- Die Version GSview 3.3 erfordert Ghostscript in der Version 4.03 - 6.99.
+ Die Version GSview 3.4 erfordert Ghostscript in der Version 4.03 - 6.99.
 2Installation
 ?Installation
  Zur Installation von GSview verwenden Sie das Installationsprogramm
@@ -192,7 +192,7 @@ E
  Kopieren Sie gsview32.ini oder gvpm.ini aus dem Systemverzeichnis oder dem Benutzerprofil-Verzeichnis in
  das Gsview Verzeichnis und entfernen alle Einträge bis auf:
   [Options]
-  Version=3.3
+  Version=3.4
   GSversion=601
   Configured=1
   GhostscriptDLL=E:\GSTOOLS\gs6.01\gsdll32.dll

@@ -7,7 +7,7 @@
  utilizado por las impresoras láser.
  Para los documentos construidos siguiendo las especificaciones de Adobe acerca
  de la estructura de los documentos PostScript (DSC), GSview permite
- seleccionar las páginas que serán visualizadas o impresas. GSview 3.3 requiere
+ seleccionar las páginas que serán visualizadas o impresas. GSview 3.4 requiere
  Ghostscript 4.03 - 6.99, siendo preferible la versión 6.0 o superior.
 2Instalación
 ?Instalación
@@ -215,7 +215,7 @@ E
  desde el directorio del perfil de usuario, al directorio de GSview, edítelo y
  elimine todas las entradas excepto:
   [Options]
-  Version=3.3
+  Version=3.4
   GSversion=601
   Configured=1
   GhostscriptDLL=e:\Aladdin\gs6.01\bin\gsdll32.dll

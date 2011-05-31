@@ -1509,7 +1509,7 @@ config_easy(void)
 #ifndef __WIN32__
 #error Win16 is no longer supported
 #endif
-	int result;
+	int result = 0;
 	int *gsver;
 	int gs_count = 0;
 	get_gs_versions(&gs_count);
@@ -1521,8 +1521,17 @@ config_easy(void)
 	gsver[0] = gs_count+1;
 	nHelpTopic = IDS_TOPICEASYCFG;
 	if (get_gs_versions(gsver)) {
-	    result = DialogBoxParam(hlanguage, "EasyConfigureDlgBox", hwndimg, 
-		EasyConfigureDlgProc, (LPARAM)gsver);
+	    if (gsver[0] == 1) {
+		/* Only one copy of Ghostscript installed */
+		/* Don't prompt user */
+		result = gsver[1];
+	    }
+	    else {
+		/* Multiple copies of Ghostscript installed */
+		/* Ask user to choose one */
+		result = DialogBoxParam(hlanguage, "EasyConfigureDlgBox", 
+			hwndimg, EasyConfigureDlgProc, (LPARAM)gsver);
+	    }
 	}
 	free(gsver);
 
@@ -1859,7 +1868,7 @@ config_wizard(void)
      * the setup program.
      * Instead we have several options:
      * 1. GS is installed on hard disk - offer the easy configure
-     *    which relys on the setup program having written entries
+     *    which relies on the setup program having written entries
      *    to the registry.
      * 2. If GS not installed, or 1. fails, look for 
      *      ..\gsN.NN\bin\gsdll32.dll 

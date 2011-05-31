@@ -1385,7 +1385,12 @@ gsview_print(BOOL convert)
     
 
     if (convert) {
-	if (!print_silent) {
+	if (print_silent) {
+	    if (psfile.dsc != (CDSC *)NULL)
+		for (int i=0; i< (int)psfile.dsc->page_count; i++)
+		    psfile.page_list.select[i] = TRUE;
+	}
+	else {
 	    nHelpTopic = IDS_TOPICCONVERT;
 	    if (WinDlgBox(HWND_DESKTOP, hwnd_frame, DeviceDlgProc, 
 		    hlanguage, IDD_CONVERT, (MPARAM)TRUE) != DID_OK)

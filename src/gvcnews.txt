@@ -1,4 +1,24 @@
 ----------------------
+Version 3.4 2000-07-29
+----------------------
+All:
+  This is based on 3.3 with some bug fixes which were in 3.31 alpha.
+
+  "gsview /F filename" didn't print any pages.
+
+  The pdfmark fix for user space coordinates was broken if
+  link had dashed border.
+
+Win32:
+  Advanced PS print options were not saved correctly.
+
+  Fixed incorrect use of memset in gsprint.cpp main().
+
+  When configuring GSview, don't ask which version of Ghostscript
+  to use if only one version of Ghostscript installed.
+  Don't forget to open file on command line.
+
+----------------------
 Version 3.3 2000-07-01
 ----------------------
 All:

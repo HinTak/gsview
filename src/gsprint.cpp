@@ -50,7 +50,7 @@ PROCESS_INFORMATION piProcInfo;
 BOOL global_debug;
 
 #define COPYRIGHT TEXT("Copyright (C) 2000, Ghostgum Software Pty Ltd.  All Rights Reserved.\n")
-#define VERSION TEXT("2000-07-01 gsprint 1.2\n")
+#define VERSION TEXT("2000-07-29 gsprint 1.3\n")
 
 #define MAXSTR 256
 
@@ -808,7 +808,7 @@ int main(int argc, char *argv[])
 	return 1;
 #endif
 
-    memset(&opt, sizeof(opt), 0);
+    memset(&opt, 0, sizeof(opt));
     opt.args_end = 0;
     opt.args[0] = '\0';
     opt.args[1] = '\0';
