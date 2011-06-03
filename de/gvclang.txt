@@ -1,5 +1,6 @@
-1 GSview Hilfe
+ GSview Hilfe
 1Inhaltsübersicht
+-Overview
 ?Inhaltsübersicht
 
  Das Programm `GSview` stellt eine grafische Schnittstelle für Ghostscript
@@ -14,6 +15,7 @@
  einen Drucker ausgegeben werden.
  Die Version GSview 4.8 erfordert Ghostscript in der Version 7.04 - 9.19.
 2Installation
+-Installation
 ?Installation
  Zur Installation von GSview verwenden Sie
 W
@@ -39,6 +41,7 @@ E
 
  Siehe auch `Optionen` | `Sprache`.
 3Beschaffung von Ghostscript
+-Obtaining_Ghostscript
 ?Beschaffung von Ghostscript
  GSview benötigt Aladdin or AFPL Ghostscript.  GSview und Ghostscript
  sind gesondert erhältlich von
@@ -46,6 +49,7 @@ E
  Um GSview zu konfigurieren, muss man Ghostscript und GSview
  beschaffen und installieren und dann GSview starten.
 3Ghostscript installieren
+-Ghostscript_Installation
 ?Ghostscript installieren
 W
  AFPL Ghostscript ist als selbstentpackendes Archiv
@@ -60,11 +64,13 @@ E
  Details der manuellen Installation von Ghostscript lese man in den
  Ghostscript-Dokumentationsdateien Install.htm and Use.htm nach.
 3Deinstallation von GSview
+-Uninstalling_GSview
 ?Deinstallation von GSview
 W
  Um GSview von Windows 95 oder NT 4.0 zu deinstallieren,
  benutzen Sie `Installieren/Deinstallieren` aus dem Windows Menü.
 4Manuelle Deinstallation
+-Maunual_uninstallation
 ?Manuelle Deinstallation
 P
  Um GSview zu deinstallieren, löschen Sie die Dateien im
@@ -117,6 +123,7 @@ X
  Verzeichnis `/usr/share/gsview`.
 E
 3Manuelle Installation
+-Manual_Installation
 ?Manuelle Installation
 X
  Kopieren Sie `gsview` und `pstotext` in ein Verzeichnis in Ihrem Suchpfad.
@@ -177,6 +184,7 @@ E
  Für mehr Kontrolle über die Konfiguration siehe
  `Fortgeschrittene manuelle Installation`.
 3Fortgeschrittene manuelle Installation
+-Advanced_Manual_Installation
 ?Fortgeschrittene manuelle Installation
 WP
  Anstatt den Menüpunkt `Optionen` | `Einfache Konfiguration` zu wählen,
@@ -226,6 +234,7 @@ E
  Lösungsansätze in `Häufig auftretende Probleme`.
 WP
 3Installation im Netzwerk
+-Network_Installation
 ?Installation im Netzwerk
  Installieren Sie das Programm GSview in ein Netzwerk-Verzeichnis.
 
@@ -313,6 +322,7 @@ W
 E
 W
 3GSview vom Datei-Manager oder Windows Explorer starten
+-Running_from_Windows_Explorer
 ?Registriereditor
 ?Datei-Manager
 ?Windows Explorer
@@ -377,6 +387,7 @@ W
  Klicken Sie auf die Schaltfläche` Schließen`.
 E
 2Registrierung
+-Registration
 ?Registrierung
  Wenn Sie die Entwicklung von GSview unterstützen wollen,
  oder die Startseite von GSview nicht mehr sehen wollen,
@@ -395,6 +406,7 @@ E
  zu finden ist.
  Wir bevorzugen die online Registrierung.
 2Document Structuring Conventions (DSC-Kommentare)
+-DSC
 ?Document Structuring Conventions (DSC-Kommentare)
 ?DSC
 ?Encapsulated PostScript
@@ -461,6 +473,7 @@ E
  Mit der Funktion `EPS Vorschau einfügen` kann eine EPS-Datei um diesen
  Preview-Teil ergänzt werden.
 2PDF-Format (Portable Document Format)
+-PDF
 ?PDF-Format (Portable Document Format)
 ?PDF
 ?pdf2ps
@@ -508,6 +521,7 @@ WP
  entweder mit `-I` oder mit der Umgebungsvariablen `GS_LIB`.
 E
 2Datei öffnen
+-Open
 ?Datei
 ?Öffnen
 ?Auswahl Datei
@@ -552,6 +566,7 @@ E
 
  Siehe auch `Drucken`.
 2Seiten auswählen
+-Page_Selection
 ?Seiten auswählen
 ?Nächste Seite
 ?Vorherige Seite
@@ -596,6 +611,7 @@ E
  (ohne Titelbalken, Rollbalken usw.) an.
  Durch Drücken der Escape-Taste kehrt man zur normalen Anzeige zurück.
 2Datei-Informationen
+-Document_Information
 ?Info
  Im oberen Bildschirmbereich werden der Dateiname und die aktuelle
  Seitenzahl angezeigt.
@@ -663,6 +679,7 @@ E
  benötigt.
 W
 2Drucken
+-Print
 ?Drucken
  Der Befehl `Drucken` im `Datei`-Menü erlaubt Dokumente mittels Ghostscript
  auszudrucken. GSview verwendet drei Methoden zum Drucken:
@@ -689,6 +706,7 @@ W
 
  Siehe auch `Dateikonvertierungen` und `Konvertierung`.
 3Seitenauswahl
+-Select_Pages
 ?Seitenauswahl
  Beim Drucken kann ein Seitenbereich ausgewählt werden.
  Innerhalb dieses Bereichs kann man alle, alle ungeraden oder alle geraden
@@ -705,6 +723,7 @@ W
  (d.h. mit Seiten, die nicht umsortiert werden können) drucken, so muss man
  `Windows GDI-Drucker` und `Ignoriere DSC` wählen.
 3Windows GDI-Drucker
+-Windows_GDI_Printer
 ?Windows GDI-Drucker
  Diese Methode nutzt Ghostscript um ein Bitmap für jede Seite zu
  erzeugen, und druckt diese mit dem Standard-Windowsdruckertreiber.
@@ -727,6 +746,7 @@ W
  Berechnung aller Seiten mit anschließender Versendung nur der ausgewählten
  Seiten an den Drucker erreicht. Dadurch kann die Methode sehr langsam sein.
 3Ghostscript-Gerät
+-Ghostscript_device
 ?Ghostscript-Gerät
 ?uniprint
  Die `Wähle Ghostscript-Gerät`-Dialogbox erlaubt die Auswahl des Ghostscript-
@@ -750,6 +770,7 @@ W
  Die Konfiguration des uniprint-Gerätes ist in der Ghostscriptdatei
  `Devices.htm` genauer beschrieben.
 3PostScript-Drucker
+-PostScript_printer
 ?PostScript-Drucker
  Wird `PostScript-Drucker` gewählt, werden die ausgewählten Seiten unter
  Umgehung von Ghostscript direkt an die Druckerwarteschlange geschickt.
@@ -784,6 +805,7 @@ W
  Wenn das Dokument `PDF` ist, wird Ghostscript zur Konvertierung in
  Postscript verwendet, welches dann zum Drucker geschickt wird.
 3Drucke Datei
+-Print_File
 ?Drucke Datei
  `Datei | Drucke Datei` schickt eine Datei an eine lokale Schnittstelle unter
  Umgehung des Windowsdruckertreibers.
@@ -791,6 +813,7 @@ W
  um eine von Ghostscript erzeugte Ausgabedatei an einen Drucker zu schicken.
 PX
 2Drucken
+-Printing2
 ?Drucken
 ?Druck in Datei
 ?Drucke Datei
@@ -896,6 +919,7 @@ PX
   http://www.cs.wisc.edu/~ghost/doc/printer.htm
  verfügbar.
 3PostScript-Drucker
+-PostScript_Printer2
 ?PostScript-Drucker
 ?Fortgeschritten
  Wenn ein PostScript-Drucker über eine serielle Schnittstelle angeschlossen
@@ -920,6 +944,7 @@ PX
  Postscriptdatei an den Drucker zu senden.
 E
 3Einstellung
+-Properties
 ?Einstellung
  Im Dialogfeld `Druckereinstellung` befindet sich die Schaltfläche
  `Einstellung`, mit der Sie für einige Gerätetreiber spezielle
@@ -957,6 +982,7 @@ E
  für das jeweilige Gerät neu definieren bzw. verändern.
  Siehe hierzu auch das Hilfethema `Einstellung bearbeiten`.
 4Einstellung bearbeiten
+-Edit_Properties
 ?Einstellung bearbeiten
  Nicht jedes Gerät unterstützt die Verwendung dieser optionalen
  `Einstellung`. Um herauszufinden, welches Gerät die Funktion
@@ -1033,6 +1059,7 @@ E
  Handelt es sich um einen `[Undefiniert]`-Wert, wird die Einstellung nicht
  an Ghostscript weitergeleitet.
 3Seitengrößenanpassung
+-Page_Size_Matching
 ?Seitengrößenanpassung
 ?Fixed Medium
 ?Feste Seitengröße
@@ -1054,6 +1081,7 @@ E
  aus dem Formatmenü, aber erlaubt den Dokumenten, diese zu ändern.
 
 2Konvertierungen
+-Conversions
 ?Konvertierungen
  Es gibt verschiedene Möglichkeiten, PostScript- und PDF-Dateien zu
  konvertieren.
@@ -1089,6 +1117,7 @@ W
  Zwischenablage in ein geräteabhängiges Zwischenablage-Bitmap um.
 E
 2Dateikonvertierungen und Tricks
+-File_conversions_and_tricks
 ?Dateikonvertierungen
 ?Tricks
  Einige gängige Dateikonvertierungen unter Mithilfe von GSview und
@@ -1146,6 +1175,7 @@ E
  Konvertierung unter Verwendung eines Bitmapgerätes und setzen der Eigenschaften
     -dTextAlphaBits=4 -dGraphicsAlphaBits=4
 3Konvertierung
+-Convert
 ?Konvertierung
  `Datei `| `Konvertierung` nutzt Ghostscript um PostScript oder PDF
  in Bitmaps, PostScript or PDF umzuwandeln.
@@ -1181,6 +1211,7 @@ E
 
  Siehe auch `Konvertierungen`.
 3Extrahiere
+-Extract
 ?Extrahiere
  `Extrahiere` erlaubt eine Seitenfolge aus dem aktuellen Dokument in ein
  neues Dokument zu kopieren. Es können zum Beispiel zehn Seiten aus der
@@ -1191,6 +1222,7 @@ E
 
  Siehe auch `Konvertierungen`.
 3PS zu EPS
+-PS_to_EPS
 ?PS zu EPS
 ?Bounding Box
  Normalerweise ist es nicht möglich, eine PostScript-Datei in eine
@@ -1283,6 +1315,7 @@ E
  Siehe hierzu auch die Hilfethemen `Füge EPS Vorschau ein`, `Extrahiere`,
  und `EPS Warnung`.
 3EPS Vorschau (Preview)
+-EPS_Preview
 ?EPS Vorschau (Preview)
 ?EPS Vorschau einfügen
 ?Extrahiere EPS
@@ -1339,6 +1372,7 @@ E
 
  Siehe auch `PS zu EPS`.
 3Benutzerdefinierte Vorschau
+-User_Supplied_Preview
 ?Benutzerdefinierte Vorschau
  Mit dem Befehl `Bearbeiten `| `EPS Vorschau einfügen` | `Benutzer
  definiert` können bereits vorhandene TIFF- oder WMF-Dateien in eine
@@ -1355,6 +1389,7 @@ E
  PostScript hat. Dies ist allerdings nicht wünschenswert.
 WP
 3Konvertierung in Vektor Format
+-PStoEdit
 ?Konvertierung in Vektor Format
 ?PSzuEdit
  Sie können eine Postscript oder PDF Datei in ein editierbares
@@ -1421,6 +1456,7 @@ WP
  Siehe auch `Konvertierungen`.
 E
 3Text extrahieren und Suche
+-Text_Extract_and_Find
 ?Text extrahieren und Suche
 ?Text
 ?Text extrahieren
@@ -1450,6 +1486,7 @@ E
 
  Siehe auch `Konvertierungen`.
 4Schnelles extrahieren und Suchen
+=Quick_Text_Extract_and_Find
 ?Schnelles extrahieren und Suchen
  In PostScript-Dateien ist der Text normalerweise genauso angeordnet wie er
  auf der Seite erscheint, wobei die PostScript Strings (Textanweisungen) in
@@ -1488,6 +1525,7 @@ E
  Mit dem Befehl `Bearbeiten `| `Suche nächsten` wird die Suche auf der
  nächsten Seite fortgesetzt.
 4PSzuText Text extrahieren und Suchen
+-PStoText_TextExtract_and_Find
 ?PSzuText Text extrahieren und Suchen
  Diese Methode verwendet pstotext und Ghostscript, um Text aus
  PostScript-Dateien zu extrahieren. Bevor Sie den Suchvorgang oder das
@@ -1539,6 +1577,7 @@ E
  LaTeX  Dokumenten erzeugt wurden. Unglücklicherweise unterscheidet
  dvips nicht,  welche Zeichensatzkodierungen verwendet wurden.
 3Zwischenablage
+-Clipboard
 ?Zwischenablage
 ?Bearbeiten
 ?Kopieren
@@ -1593,6 +1632,7 @@ E
  `Text extrahieren` oder `Suche` angewendet wird und dabei
  `Optionen` | `PSzuText` aktiviert ist.
 2Messen
+-Measure
 ?Messen
 ?Berechnung der transformierten Einheiten
  Längen können gemessen werden indem die Cursorposition
@@ -1632,10 +1672,12 @@ E
 
  Siehe auch `Einheiten`.
 2Optionen
+-Options
 ?Optionen
  Das Menü `Optionen` enthält die folgenden Befehle:
 WP
 3Einfache Konfiguration
+-Easy_Configure
 ?Einfache Konfiguration
 W
  Die einfache Konfiguration erlaubt die Auswahl der zu verwendenden
@@ -1655,6 +1697,7 @@ P
  die Ghostscript-Version und Datei-Assoziationen zu wählen.
 E
 3Fortgeschrittene Konfiguration
+-Advanced_Configure
 ?Fortgeschrittene Konfiguration
 ?Ghostscript DLL
 ?Ghostscript Suchpfad
@@ -1723,6 +1766,7 @@ E
  Lesen Sie hierzu auch den Punkt `Installation`.
 WP
 3Klänge
+-Sounds
 ?Klänge
  Mit der Option `Klänge` können verschiedene Aktionen akustisch untermalt
  werden. Dabei kann für jede Aktion `Kein Ton`, `Piepton` oder `Audiodateien`
@@ -1763,6 +1807,7 @@ WP
  Standardeinstellungen `Piepton`, bei allen anderen `kein Ton`.
 E
 3Maßeinheiten
+-Units
 ?Maßeinheiten
  Mit der Option `Maßeinheiten` legen Sie fest, in welcher Einheit die
  Cursorposition in der Statuszeile angegeben wird. Folgende Maßeinheiten
@@ -1774,6 +1819,7 @@ E
 
  Siehe auch `Messen`.
 3Sprache
+-Language
 ?Sprache
 ?International
  GSview ist in Englisch, Niederländisch, Französisch, Deutsch, Griechisch, 
@@ -1786,6 +1832,7 @@ E
  ab, insbesondere von den gewählten locales oder Systemcodeseiten (code pages).
 
 3PSzuText
+-PStoText
 ?PSzuText
  Gsview unterstützt zwei verschiedene Methoden, um Text zu suchen und
  aus dem Postscriptdokument zu extrahieren.
@@ -1804,6 +1851,7 @@ E
 
  Voreinstellung ist `Normal`.
 3DSC Warnungen
+-DSC_Warnings
 ?DSC Warnungen
  Einige Dokumente enthalten Fehler in den DSC-Kommentaren.
  Der Schwellenwert der Warnungen kann bei `Optionen` | `DSC Warnungen`
@@ -1827,6 +1875,7 @@ E
  Dokumente mit inkorrekten DSC-Kommentaren verursachen wahrscheinlich
  Probleme.
 3Optionen speichern
+-Save_Settings
 ?Optionen speichern
 ?Speichere Optionen jetzt
 ?Speichere Optionen am Ende
@@ -1850,6 +1899,7 @@ E
  die oben aufgelisteten Einstellungen gespeichert, wenn Sie das Programm
  beenden.
 3Schreibschutz für Dateien
+-sSafer
 ?Schreibschutz für Dateien
  Ist die Option ` Schreibschutz für Dateien ` aktiviert, erhält Ghostscript das
  Kennzeichen `-dSAFER`.
@@ -1860,6 +1910,7 @@ E
  Ist die Option `Schreibschutz für Dateien` deaktiviert, kann Ghostscript
  Dateien verändern.
 3Merke letztes Verzeichnis
+-Save_Last_Directory
 ?Merke letztes Verzeichnis
  Ist die Option `Merke letztes Verzeichnis` aktiviert, wird beim Beenden
  von GSview das aktuelle Verzeichnis gespeichert.
@@ -1871,6 +1922,7 @@ E
  Verzeichnis beim Starten von GSview das Verzeichnis, in dem sich Gsview
  befindet, oder das entsprechende Arbeitsverzeichnis.
 3Hilfsmittelpalette
+-Button_Bar
 ?Hilfsmittelpalette
 ?Vergrößern
  Ist die Option `Hilfsmittelpalette` aktiviert, wird am
@@ -1972,6 +2024,7 @@ E
  Hilfsmittelpalette an.
 WP
 3Fenster an Seite anpassen
+-Fit_Windows_to_Page
 ?Fenster an Seite anpassen
  Ist die Option `Fenster an Seite anpassen` aktiviert, bewirken
  Veränderungen der Seitengröße oder -ausrichtung, daß das Fenster
@@ -1994,6 +2047,7 @@ WP
  Siehe auch `Anzeige` | `Fenster an Seite anpassen`.
 E
 3Automatisches Neuzeichnen
+-Auto_Redisplay
 ?Automatisches Neuzeichnen
  Ist die Option `Automatisches Neuzeichnen` aktiviert, werden
  `DSC`-kompatible Dokumente neu auf dem Bildschirm aufgebaut,
@@ -2008,6 +2062,7 @@ E
  stattdessen den Befehl `Anzeige` | `Wiederaufbau`, nachdem eine der oben
  aufgeführten Einstellungen geändert wurde.
 3EPS Ausschnitt
+-EPS_Clip
 ?EPS Ausschnitt
 ?PDF Ausschnitt
  Ist die Option `EPS Ausschnitt` aktiviert, wird das Bitmap auf dem
@@ -2028,6 +2083,7 @@ E
 
  Siehe hierzu auch den Befehl `Bearbeiten`| `EPS Vorschau einfügen`.
 3EPS Warnung
+-EPS_Warn
 ?EPS Warnung
  Wenn die Option `EPS Warnung` aktiviert ist, wird bei jedem Öffnen einer
  Datei ein Prolog in Ghostscript geschrieben.
@@ -2045,6 +2101,7 @@ E
 
  Siehe auch `PS zu EPS`.
 3Ignoriere DSC
+-Ignore_DSC
 ?Ignoriere DSC
  Manche Dokumente behaupten fälschlich, den Adobe DSC-Konventionen zu
  entsprechen. In diesem Fall können bei dem Versuch, das Dokument anzuzeigen,
@@ -2055,6 +2112,7 @@ E
 
  In der Voreinstellung ist die Option `Ignoriere DSC` deaktiviert.
 3Zeige Bounding Box
+-Show_Bounding_Box
 ?Zeige Bounding Box
  Nach Auswahl dieser Option wird ein Rechteck über die Graphik gezogen,
  das die Position der Bounding Box anzeigt. Die Bounding Box wird nur auf
@@ -2064,6 +2122,7 @@ E
 
  In der Voreinstellung ist die Option `Zeige Bounding Box` deaktiviert.
 2Seitenausrichtung
+-Page_Orientation
 ?Auto Ausrichtung
 ?Ausrichtung
 ?Hochformat
@@ -2098,6 +2157,7 @@ E
 
  Siehe auch `Seitenformat` und `Anzeige Einstellungen`.
 2Anzeige Einstellungen
+-Display_Settings
 ?Anzeige Einstellungen
 ?Auflösung
 ?Zoom Auflösung
@@ -2168,6 +2228,7 @@ P
   http://www.scitechsoft.com/products/enterprise/sdd_home.html
 E
 3Zoomen
+-Zoom
 ?Zoomen
  Um die Darstellung zu vergrößern, positionieren Sie den Mauszeiger auf die
  Stelle, die vergrößert werden soll, und drücken die rechte Maustaste.
@@ -2189,6 +2250,7 @@ E
  `Formate` | `Anzeige Einstellung` oder benutzen die Symbole der
  Hilfsmittelpalette.
 2Seitenformat
+-Media
 ?Seitenformat
 ?Formate
 ?Benutzerdefiniert
@@ -2229,6 +2291,7 @@ E
  Es ist eher üblich, die Einstellungen im Menü `Seitenausrichtung` als
  `Rotiere Medium` zu wählen.
 2Tastenkombinationen
+-Keys
 ?Tastenkombinationen
  In GSview wurden den einzelnen Befehlen folgende Tastenkombinationen
  zugeordnet:
@@ -2305,6 +2368,7 @@ E
 
  `Ende`  Ende der Seite.
 2Aufruf-Optionen
+-Command_line_options
 ?Aufruf-Optionen
  GSview ignoriert Groß/Kleinschreibung der Optionen:
  -p ist dasselbe wie -P.  Unter Windows oder OS/2 kann man auch
@@ -2386,6 +2450,7 @@ X
 E
 W
 3Dynamischer Datenaustausch (DDE)
+-DDE
 ?Dynamischer Datenaustausch (DDE)
 ?DDE
  GSview implementiert einen DDE-Server mit service="GSview" und topic="GSview".
@@ -2413,6 +2478,7 @@ W
  Der Parameter /X verwendet [FileExit()].
 E
 2World Wide Web
+-WWW
 ?World Wide Web
 ?WWW
 ?HTML
@@ -2432,6 +2498,7 @@ E
  Extrakt seines Buches mit dem Titel `Die PostScript- und Acrobat-Bibel`,
  daß in englisch (`PostScript and Acrobat/PDF`) und deutsch erhältlich ist.
 2Copyright
+-Copyright
 ?Copyright
  Über den Menüpunkt `Über GSview` erhalten Sie Informationen zum Copyright
  und zur Versions-Nummer.
@@ -2474,6 +2541,7 @@ E
  pstotext nicht einverstanden, löschen Sie die Dateien pstotext.zip,
  pstotxt2.dll und pstotxt3.dll von Ihrem System.
 2Häufig auftretende Probleme
+-Common_Problems
 ?Häufig auftretende Probleme
 ?Probleme
 WP
@@ -2677,6 +2745,7 @@ E
 
 W
 2Andere nützliche Programme
+-Other_Useful_Programs
 ?Andere nützliche Programme
 ?RedMon
 ?PrintFile
@@ -2698,10 +2767,12 @@ W
  Programmen nach.
 E
 2Weitere Hilfethemen
+-Other_Help_Topics
 ?Weitere Hilfethemen
  Zu diesen Themen gelangen Sie über die Schaltfläche `Hilfe` in jedem
  Dialogfeld.
 3Meldungen anzeigen
+-Show_Messages
 ?Meldungen anzeigen
  Das Zusatzprogramm GSview benutzt Ghostscript, um PostScript-Dateien auf
  dem Bildschirm oder dem Drucker auszugeben. Über den Befehl `Zeige
@@ -2721,6 +2792,7 @@ E
  Fehlermeldungen erklärt, die Sie mit `Meldungen anzeigen` erhalten.
 WX
 3bzip2
+-bzip2
 ?bzip2
  Wenn Sie versuchen eine Datei zu öffnen, die mit bzip2 gepackt
  wurde, dann versucht GSview die bzip2-DLL zu laden und die Datei
@@ -2744,6 +2816,7 @@ WX
   http://sourceware.cygnus.com/bzip2/index.html
 E
 3zlib
+-zlib
 ?zlib
 ?gzip
  Wenn Sie eine Datei bearbeiten wollen, die mit dem Programm gzip
@@ -2768,6 +2841,7 @@ E
   http://www.info-zip.org/pub/infozip/zlib/
 WP
 3GSview intern
+-Internals
 ?GSview intern
  GSview verwendet die AFPL Ghostscript-DLL zur Darstellung von
  PostScript-Dateien.

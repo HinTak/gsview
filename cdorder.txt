@@ -2,7 +2,7 @@
 Order for CD-ROM containing GSview and AFPL/GPL Ghostscript.
 =================================================================
 
-This offer is valid until 28 February 2008.
+This offer is valid until 31 December 2011.
 Please clearly fill in the details below (typewritten preferred), 
 making sure you include your postal code (if any) and your country.  
 All orders must be clearly signed.
@@ -28,7 +28,7 @@ Telephone number:  [                                            ]
 Internet email address:  [                                      ]
 
 Payment:
-    [ ] Cheque for USD60 or equivalent in your currency.
+    [ ] Cheque for USD70 or equivalent in your currency.
         (Currency MUST match the bank.  For example, USD on USA 
         bank, GBP on UK bank).
 
@@ -55,10 +55,9 @@ Signature:   [                                                  ]
 Please airmail your order and payment to
    Russell Lang
    Ghostgum Software Pty Ltd
-   218 Gallaghers Rd
+   25 Kennedy St
    GLEN WAVERLEY   VIC  3150
    AUSTRALIA
-This address will change in March 2008.
 
 or if paying by credit card, you can fax it to
    +61 3 9886 6616

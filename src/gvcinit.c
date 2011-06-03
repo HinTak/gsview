@@ -554,7 +554,9 @@ char temp[MAXSTR];
         strncat(buf, "\\lib", MAXSTR-2-strlen(buf));
     strcat(buf, ";");
 
-    if (option.gsversion >= 810) {
+    if ( (option.gsversion >= 810) && (option.gsversion <= 863) ) {
+	/* Versions before this range didn't have a resource directory */
+	/* Versions after this range use compiled resources */
         strncat(buf, gspath, MAXSTR-2-strlen(buf));
         strncat(buf, "\\Resource", MAXSTR-2-strlen(buf));
         strcat(buf, ";");

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -20,12 +20,12 @@
 
 #define AAGREEK "Ελληνικά"
 
-#define GSVIEW_COPYRIGHT1 "Πνευματικά δικαιώματα (C) 1993-2006 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Πνευματικά δικαιώματα (C) 1993-2011 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Με επιφύλαξη κάθε νόμιμου δικαιώματος."
 #define GSVIEW_COPYRIGHT3 "Για περισσότερες πληροφορίες ανατρέξτε στο αρχείο LICENCE."
 
-#define GS_COPYRIGHT1 "Πνευματικά δικαιώματα (C) 1994-2006 artofcode LLC,"
-#define GS_COPYRIGHT2 "Benicia, California, U.S.A. Με επιφύλαξη κάθε νόμιμου δικαιώματος."
+#define GS_COPYRIGHT1 "Πνευματικά δικαιώματα (C) 2011 Artifex Softw3are, Inc."
+#define GS_COPYRIGHT2 "California, U.S.A. Με επιφύλαξη κάθε νόμιμου δικαιώματος."
 #define GS_COPYRIGHT3 "Για περισσότερες πληροφορίες ανατρέξτε στο αρχείο PUBLIC."
 
 /* Buttons */
@@ -443,4 +443,4 @@
 #define AAMABOUT "~Πληροφορίες..."
 #endif
 
-#define WINHELPFILE "gsviewgr.hlp"
+#define WINHELPFILE "gsviewgr.chm"

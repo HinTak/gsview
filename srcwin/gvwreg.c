@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2007, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2005-2011, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -15,7 +15,7 @@
   the copyright notice and this notice be preserved on all copies.
 */
 
-/* gvwreg.cpp */
+/* gvwreg.c */
 
 /* GSview Windows registration */
 
@@ -69,12 +69,38 @@ void registry_error(HKEY root, const TCHAR *name, const TCHAR *value,
     gs_showmess();
 }
 
+/* Run the external program gsvwrg32/64.exe, which will invoke
+ * process elevation, then save the registration details.
+ */
+LONG
+run_gsvwrg(unsigned int reg_receipt, unsigned int reg_number,
+  TCHAR *reg_name)
+{
+    HINSTANCE hinst;
+    TCHAR command[MAXSTR+MAXSTR];
+    TCHAR params[MAXSTR+MAXSTR];
+#ifdef _WIN64
+    const TCHAR prog[] = "gsvwrg64.exe";
+#else
+    const TCHAR prog[] = "gsvwrg32.exe";
+#endif
+    wsprintf(command, "\042%s%s\042", szExePath, prog);
+    wsprintf(params, "%d %d \042%s\042", reg_receipt, reg_number, reg_name);
+
+    hinst = ShellExecute(NULL, "runas", command, params, NULL, SW_SHOWNORMAL);
+    if ((int)hinst < 32)
+	return GetLastError();
+
+    return ERROR_SUCCESS;
+}
+
+
 BOOL
 write_registration(unsigned int reg_receipt, unsigned int reg_number,
   TCHAR *reg_name)
 {
-    LONG rc;
-    HKEY hkey;
+    LONG rc = -1;
+    HKEY hkey = NULL;
     DWORD dwValue;
     HKEY root;
     TCHAR *name;
@@ -124,6 +150,13 @@ write_registration(unsigned int reg_receipt, unsigned int reg_number,
 			(CONST BYTE *)reg_name, lstrlen(reg_name)+1);
 	    }
 	    RegCloseKey(hkey);
+	}
+
+	if (rc != ERROR_SUCCESS) {
+	    /* Run gsvwrg32/64.exe to request process elevation
+ 	     * and then save the registration details.
+	     */
+	    rc = run_gsvwrg(reg_receipt, reg_number, reg_name);
 	}
 	
 	if (rc != ERROR_SUCCESS) {

@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,12 +20,12 @@
 
 #define AARUSSIAN "Russian"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2006 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2011 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Все права сохранены."
 #define GSVIEW_COPYRIGHT3 "Подробности см. файл LICENCE."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2006 artofcode LLC,"
-#define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Все права сохранены."
+#define GS_COPYRIGHT1 "Copyright (C) 2011 Artifex Software, Inc."
+#define GS_COPYRIGHT2 "California, U.S.A.  Все права сохранены."
 #define GS_COPYRIGHT3 "Подробности см. файл PUBLIC."
 
 /* Buttons */
@@ -441,4 +441,4 @@
 #define AAMABOUT "~О программе..."
 #endif
 
-#define WINHELPFILE "gsviewru.hlp"
+#define WINHELPFILE "gsviewru.chm"

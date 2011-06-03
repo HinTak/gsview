@@ -1,5 +1,6 @@
  GSview Help
 1Overview
+-Overview
 ?Overview
  `GSview` is a graphical interface for Ghostscript under MS-Windows,
  OS/2 and GNU/Linux.
@@ -7,8 +8,9 @@
  used by laser printers.
  For documents following the Adobe PostScript Document Structuring
  Conventions, GSview allows selected pages to be viewed or printed.
- GSview 4.8 requires Ghostscript 7.04 - 9.19.
+ GSview 4.9 requires Ghostscript 7.04 - 9.99.
 2Installation
+-Installation
 ?Installation
 W
  It is recommended that you use the installation program `setup.exe`
@@ -33,33 +35,37 @@ E
 
  See also `Options` | `Language`.
 3Obtaining Ghostscript
+-Obtaining_Ghostscript
 ?Obtaining Ghostscript
- GSview needs AFPL Ghostscript.  GSview and Ghostscript
+ GSview needs GPL Ghostscript.  GSview and Ghostscript
  are available separately from
   http://www.cs.wisc.edu/~ghost/
  To configure GSview, obtain and install both Ghostscript
  and GSview, then run GSview.
 3Ghostscript Installation
+-Ghostscript_Installation
 ?Ghostscript Installation
 W
- AFPL Ghostscript for Win32 is available as a self extracting
+ GPL Ghostscript for Win32 is available as a self extracting
  archive which installs itself.
 P
- AFPL Ghostscript for OS/2 is available as a zip file which
+ GPL Ghostscript for OS/2 is available as a zip file which
  you must manually install.
 X
- AFPL Ghostscript is available as an RPM package, or as source code
+ GPL Ghostscript is available as an RPM package, or as source code
  which you have to compile.
 E
  For details of how to manually install Ghostscript, please read
  the Ghostscript documentation files Install.htm and Use.htm
 3Uninstalling GSview
+-Uninstalling_GSview
 ?Uninstalling GSview
 W
  To uninstall GSview from Windows 95 or NT 4.0,
  use `Add/Remove Programs` from the Windows `Control Panel`.
 E
 4Manual uninstallation
+-Manual_uninstallation
 ?Manual uninstallation
 P
  To uninstall GSview, remove the files in the `gsview ` directory.
@@ -107,6 +113,7 @@ X
  The exact paths may vary depending on how GSview was compiled.
 E
 3Manual Installation
+-Manual_Installation
 ?Manual Installation
 X
  Copy `gsview`, `gsview-help`, `epstool` and `pstotext`
@@ -162,6 +169,7 @@ E
 
  For more control over configuration, see `Advanced Manual Installation`.
 3Advanced Manual Installation
+-Advanced_Manual_Installation
 ?Advanced Manual Installation
 WP
  Instead of using `Options` | `Easy Configure`, use
@@ -200,8 +208,37 @@ E
  supplied with Ghostscript for examples.  See the `Fonts` topic.
 
  If you have problems, try reading the help topic `Common Problems`.
+W
+3Portable Application
+-Portable_Application
+?Portable Application
+ GSview can be installed as a Portable Application that can
+ run directly from a USB memory stick or CD-ROM.
+ To install as a portable application, obtain the GSview and Ghostscript
+ self extracting archives and unpack them as follows:
+  mkdir GSview
+  cd GSview
+  unzip gvNNNw32.exe
+  unzip gsvNNw32.exe
+  del set*.*
+  del FILE_ID.DIZ
+  del filelist.txt
+  del fontlist.txt
+  del un*.exe
+ You should then have a directory structure as follows
+  GSview/GSviewPortable.exe
+  GSview/fonts
+  GSview/gsN.NN
+  GSview/gsview
+  GSview/pstotext
+ Run GSviewPortable.  This will automatically find ghostscript, 
+ and will write the configuration file gsview32.ini into the 
+ GSview/gsview directory.
+ GSview as a portable application will not modify the registry.
+E
 WP
 3Network Installation
+-Network_Installation
 ?Network Installation
 ?User Profiles
  Install GSview to a network directory.
@@ -236,12 +273,12 @@ WP
  Copy gsview32.ini or gvpm.ini from the system directory or your
  user profile directory to the GSview directory, then edit it to
  remove all entries except for:
-  [GSview-4.8]
-  Version=4.8
-  GSversion=853
+  [GSview-4.9]
+  Version=4.9
+  GSversion=860
   Configured=1
-  GhostscriptDLL=e:\gs\gs8.53\bin\gsdll32.dll
-  GhostscriptInclude=e:\gs\gs8.53\lib;e:\gs\fonts
+  GhostscriptDLL=e:\gs\gs8.60\bin\gsdll32.dll
+  GhostscriptInclude=e:\gs\gs8.60\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  When a user starts GSview, their INI file will normally be used.
  The first time GSview is run, or when the GSview version doesn't
@@ -276,9 +313,13 @@ W
  any prompting, unzip the self extracting archive then run the setup
  program as follows:
   setup -name "Your Name" -number XXXXX-XXXXX "c:\ghostgum"
+
+ A silent uninstall can be done using:
+  "C:\Program Files\Ghostgum\gsview\uninstgs.exe" "C:\Program Files\Ghostgum\gsview\uninstal.txt" -q
 E
 W
-3Running GSview from the File Manager or Windows Explorer
+3Running GSview from Windows Explorer
+-Running_from_Windows_Explorer
 ?Registration Info Editor
 ?File Manager
 ?Windows Explorer
@@ -288,38 +329,7 @@ W
  If you didn't update the registry during GSview installation,
  the following information explains how to do it manually.
 
- To run GSview when a PostScript file is double clicked in the
- File Manager, the following sequence must be followed to teach
- File Manager about PostScript files.
-
- From the `Program Manager`, run the Registration Info Editor using
- `File `| `Run...` then type `regedit`.
- From the `Registration Info Editor` select `Edit `| `Add File Type...`
- then enter the following fields:
-  Identifier = psfile
-  Filetype = PostScript
-  Action = Open
-  Command = c:\ghostgum\gsview\gsview32 %1
-  Uses DDE = unchecked
-  Action = Print
-  Command = c:\ghostgum\gsview\gsview32 /p %1
-  Uses DDE = unchecked
- Then press `OK`.
-
- From the `File Manager`, select `File `| `Associate` then
- enter the following fields:
-  Files with Extension = ps
-  Associate With = PostScript (gsview)
- Then press `OK`.
-
- That's it!  Now when you double click on a PostScript file,
- the `File Manager` will run GSview.  When you drop a PostScript
- file on the `Print Manager`, GSview will print the file.
- If you have a PostScript printer, this won't be useful.
- In this case you will need to remove the Print action from
- the registry.
-
- For Windows 95, the configuration is instead made using Windows
+ For Windows 95 and later, the configuration is made using Windows
  Explorer.
 
  Start `Windows Explorer`.  Select `View `| `Options `.  Select the
@@ -342,6 +352,7 @@ W
  Press the `Close `button.
 E
 2Registration
+-Registration
 ?Registration
  If you wish to support the development of GSview or wish
  to disable the GSview nag screen, please consider registering
@@ -358,6 +369,7 @@ E
  in the GSview directory.
  Ghostgum Software prefers that you use the online registration.
 2Document Structuring Conventions
+-DSC
 ?Document Structuring Conventions
 ?DSC
 ?Encapsulated PostScript
@@ -417,6 +429,7 @@ E
  GSview may give warnings when documents contain incorrect DSC
  comments.  This can be changed with `Options` | `DSC Warnings`.
 2Portable Document Format
+-PDF
 ?Portable Document Format
 ?PDF
 ?pdf2ps
@@ -462,6 +475,7 @@ WP
  include path using `-I` or the environment variable `GS_LIB`.
 E
 2Opening a Document
+-Open
 ?File
 ?Open
 ?Select File
@@ -500,6 +514,7 @@ E
 
  See also `Print`.
 2Page Selection
+-Page_Selection
 ?Page Selection
 ?Next Page
 ?Previous Page
@@ -539,6 +554,7 @@ E
  (without title bar, scroll bars etc.).
  To return to normal display, press the Escape key.
 2Document Information
+-Document_Information
 ?Info
  A brief information area at the top of the window is used by
  GSview to display the document filename, the current page number
@@ -596,6 +612,7 @@ E
  useful if you are copying the displayed image to the clipboard.
 W
 2Printing
+-Print
 ?Print
  The `Print` command on the `File `menu allows printing of the document
  using Ghostscript.  There are three methods used by GSview for
@@ -608,7 +625,7 @@ W
  most printers.
 
  `Ghostscript device` uses the Ghostscript printer drivers.
- This is faster, but you need Ghostscript to have driver for
+ This is faster, but you need Ghostscript to have a driver for
  your printer and you need to know what it is called.
  For example, the HP LaserJet 4 uses ljet4.
  See the Ghostscript documentation for more details.
@@ -624,6 +641,7 @@ W
 
  See also `Conversions` and `Convert`.
 3Select Pages
+-Select_Pages
 ?Select Pages
  When printing, a range of pages can be selected.
  Within this range, you can select all pages, odd pages or even pages.
@@ -639,8 +657,9 @@ W
 
  If you wish to print selected pages from a `DSC` document that
  has special page ordering (i.e. the pages can not be reordered),
- select `Windows GDI printer` and`Ignore DSC`.
+ select `Windows GDI printer` and `Ignore DSC`.
 3Windows GDI printer
+-Windows_GDI_printer
 ?Windows GDI printer
  This uses Ghostscript to create a bitmap for each page, and
  these are printed using the standard Windows printer driver.
@@ -662,6 +681,7 @@ W
  this by rendering all pages, but only sending the requested ones
  to the printer.  This may be very slow.
 3Ghostscript device
+-Ghostscript_device
 ?Ghostscript device
 ?uniprint
  The `Select Ghostscript Device` dialog box allows selection of
@@ -685,6 +705,7 @@ W
  See the Ghostscript file `Devices.htm` for details of how to configure
  the uniprint device.
 3PostScript printer
+-PostScript_printer
 ?PostScript printer
  If `PostScript Printer` is selected, the selected pages will be
  sent direct to the printer queue, without using Ghostscript.
@@ -717,6 +738,7 @@ W
  If the document is `PDF`, Ghostscript will be used to convert
  the document to PostScript which will then be sent to the printer.
 3Print File
+-Print_File
 ?Print File
  `File | Print File` sends a file to a local port, bypassing the
  Windows printer drivers.
@@ -724,6 +746,7 @@ W
  or for sending an output file produced by Ghostscript to a printer.
 PX
 2Printing
+-Printing2
 ?Print
 ?Print To File
 ?Print File
@@ -819,6 +842,7 @@ PX
  Some information of printer compatibility is available from
   http://www.cs.wisc.edu/~ghost/doc/printer.htm
 3PostScript Printer
+-PostScript_Printer2
 ?PostScript Printer
 ?Advanced
  When a PostScript printer is connected via a serial port, it sometimes
@@ -842,6 +866,7 @@ PX
  printer before and after the PostScript file.
 E
 3Properties
+-Properties
 ?Properties
  The `Properties` button allows some Ghostcript devices to configure
  extra properties and a page offset to be specified.
@@ -877,6 +902,7 @@ E
  buttons allow you to modify available `Properties` for that device.
  See the `Edit Properties` topic for more details.
 4Edit Properties
+-Edit_Properties
 ?Edit Properties
  Not every device supports the use of optional `Properties`.  To find
  out which devices support `Properties` and which `Properties` are
@@ -947,6 +973,7 @@ E
  If the value of a property is `[Not defined]`, that property will
  not be sent to Ghostscript.
 3Page Size Matching
+-Page_Size_Matching
 ?Page Size Matching
 ?Fixed Media
 ?Fixed Page Size
@@ -967,6 +994,7 @@ E
  If `Variable Page Size` GSview will set the default page
  size from the Media menu, but allow the page size to be changed.
 2Conversions
+-Conversions
 ?Conversions
  There are several ways to convert PostScript and PDF files.
 
@@ -999,6 +1027,7 @@ WP
  to a clipboard device dependent bitmap.
 E
 3File conversions and tricks
+-File_conversions_and_tricks
 ?File Conversions
 ?Tricks
  Some common file conversions that can be performed
@@ -1058,6 +1087,7 @@ E
  in the properties.
     -dTextAlphaBits=4 -dGraphicsAlphaBits=4
 3Convert
+-Convert
 ?Convert
  `File `| `Convert` uses Ghostscript to convert PostScript or PDF
  to bitmaps, PostScript or PDF.
@@ -1091,6 +1121,7 @@ E
 
  See also `Conversions`.
 3Extract
+-Extract
 ?Extract
  `Extract` allows a range of pages to be copied from the current
  document to a new document.  For example, ten pages can be extracted
@@ -1101,6 +1132,7 @@ E
 
  See also `Conversions`.
 3PS to EPS
+-PS_to_EPS
 ?PS to EPS
 ?BoundingBox
  In general, it is not possible to convert a PostScript file to `EPS`.
@@ -1179,6 +1211,7 @@ E
 
  See also `Add EPS Preview`, `Extract`, `EPS Warn` and `Conversions`.
 3EPS Preview
+-EPS_Preview
 ?EPS Preview
 ?Add EPS Preview
 ?Extract EPS
@@ -1234,6 +1267,7 @@ E
 
  See also `PS to EPS`.
 3User Supplied Preview
+-User_Supplied_Preview
 ?User Supplied Preview
  The `Edit `| `Add EPS Preview` | `User Supplied Preview` command
  allows an existing TIFF or WMF file to be added to an EPS file
@@ -1249,6 +1283,7 @@ E
  which is most undesirable.
 WP
 3Convert to vector format
+-PStoEdit
 ?Convert to vector format
 ?PStoEdit
  You can convert a PostScript or PDF file to an editable vector
@@ -1309,6 +1344,7 @@ WP
  See also `Conversions`.
 E
 3Text Extract and Find
+-Text_Extract_and_Find
 ?Text Extract and Find
 ?Text
 ?Text Extract
@@ -1335,6 +1371,7 @@ E
 
  See also `Conversions`.
 4Quick Text Extract and Find
+-Quick_Text_Extract_and_Find
 ?Quick Text Extract and Find
  It is common for PostScript documents to contain text in the
  same order as it appears on the page, and for it to be given in
@@ -1367,6 +1404,7 @@ E
 
  `Edit `| `Find Next` will continue the search from the next page.
 4PStoText Text Extract and Find
+-PStoText_Text_Extract_and_Find
 ?PStoText Text Extract and Find
  This method uses pstotext and Ghostscript to extract text from
  a PostScript document.  Before doing any text extraction or
@@ -1415,6 +1453,7 @@ E
  files produced by dvips don't distinguish which font encodings were
  used.
 3Clipboard
+-Clipboard
 ?Clipboard
 ?Copy
 ?Paste To
@@ -1462,6 +1501,7 @@ E
  Text cannot be marked until either `Text Extract`
  or `Find` has been used with `Options` | `PStoText` enabled.
 2Measure
+-Measure
 ?Measure
 ?Calculate Transformed Units
  Lengths can be measured using the cursor location displayed on
@@ -1498,14 +1538,16 @@ E
 
  See also `Units`.
 2Options
+-Options
 ?Options
  The `Options` menu has the following selections:
 3Easy Configure
+-Easy_Configure
 ?Easy Configure
 W
  Easy configure allows you to select which version of
  Ghostscript to use.  It is assumed that you have already installed
- AFPL Ghostscript 7.04 or later.
+ GPL Ghostscript 7.04 or later.
  If you do not have Ghostscript installed, see the topic
  `Obtaining Ghostscript`.
  For more control over configuration of GSview, see
@@ -1519,6 +1561,7 @@ P
  Ghostscript version and file associations.
 E
 3Advanced Configure
+-Advanced_Configure
 ?Advanced Configure
 ?Ghostscript DLL
 ?Ghostscript Include Path
@@ -1586,6 +1629,7 @@ E
  See the `Installation` topic.
 WP
 3Sounds
+-Sounds
 ?Sounds
  The `Sounds` option assigns sounds to various events.
  For each event the sound can be set to `None`, a `Speaker Beep` or
@@ -1623,6 +1667,7 @@ WP
  `Speaker Beep` and all other events to be `None`.
 E
 3Units
+-Units
 ?Units
  The `Units` option sets the units used to display the cursor location
  on the status bar.  Available units are PostScript points (`pt` = 1/72"),
@@ -1634,6 +1679,7 @@ E
 
  See also `Measure`.
 3Language
+-Language
 ?Language
 ?International
  GSview is available in English, Dutch, French, German, Greek,
@@ -1646,6 +1692,7 @@ E
  selected regional settings, in particular the chosen locale
  or system code page.
 3PStoText
+-PStoText
 ?PStoText
  GSview has two methods of extracting and searching text.
 
@@ -1665,6 +1712,7 @@ E
 
  The default is `Normal`.
 3DSC Warnings
+-DSC_Warnings
 ?DSC Warnings
  Some documents contain errors in the Document Structuring Conventions.
  The level of warnings provided by GSview can be set using
@@ -1685,6 +1733,7 @@ E
  If `DSC Warnings` is` Off`, GSview will assume `Cancel`.
  Documents with incorrect DSC comments will be likely to cause problems.
 3Save Settings
+-Save_Settings
 ?Save Settings
 ?Save Settings Now
 ?Save Settings on Exit
@@ -1708,6 +1757,7 @@ E
  When the `Save Settings on Exit` option is checked, GSview will
  automatically save the above settings when you quit GSview.
 3Safer
+-Safer
 ?Safer
  When the `Safer` option is `checked`, GSview will give Ghostscript
  the `-dSAFER` flag, which disables the deletefile and renamefile operators,
@@ -1717,6 +1767,7 @@ E
  When the `Safer` option is `unchecked` Ghostscript can change
  files.
 3Save Last Directory
+-Save_Last_Directory
 ?Save Last Directory
  When the `Save Last Directory` option is `checked`, GSview will
  save the current directory when you quit GSview.  When GSview
@@ -1727,6 +1778,7 @@ E
  directory when GSview is started will be the current directory
  of the program that started GSview.
 3Button Bar
+-Button_Bar
 ?Button Bar
 ?Magnify
  When the `Button Bar` option is `checked`, GSview will display
@@ -1743,6 +1795,7 @@ WX
 P
  top to bottom:
 E
+
 W
  {bmlwd gvwopen.bmp}
 E
@@ -1825,6 +1878,7 @@ E
  display the Button Bar.
 WP
 3Fit Window To Page
+-Fit_Window_To_Page
 ?Fit Window To Page
  When the `Fit Window To Page` option is `checked`, changes to the page
  size or orientation will cause the window size to be enlarged or
@@ -1845,6 +1899,7 @@ WP
  See also `View` | `Fit Window`.
 E
 3Auto Redisplay
+-Auto_Redisplay
 ?Auto Redisplay
  When the `Auto Redisplay` option is `checked`, GSview will
  redisplay `DSC` documents when the `Orientation`, `Resolution`,
@@ -1858,6 +1913,7 @@ E
  must be used to redisplay a document after changing the
  `Orientation`, `Resolution`, `Depth` or `Media`.
 3EPS Clip
+-EPS_Clip
 ?EPS Clip
 ?PDF Crop
  When the `EPS Clip` option is `checked`, GSview will clip the
@@ -1876,6 +1932,7 @@ E
 
  See also `Edit `| `Add EPS Preview`
 3EPS Warn
+-EPS_Warn
 ?EPS Warn
  When the `EPS Warn` option is `checked`, GSview will write a
  prolog to Ghostscript when each file is opened.  This prolog will
@@ -1891,6 +1948,7 @@ E
 
  See also `PS to EPS`.
 3Ignore DSC
+-Ignore_DSC
 ?Ignore DSC
  Some documents incorrectly claim to conform to the Adobe Document
  Structuring Conventions.  Attempting to display one of these bogus
@@ -1901,6 +1959,7 @@ E
 
  The default for `Ignore DSC` is `unchecked`.
 3Show Bounding Box
+-Show_Bounding_Box
 ?Show Bounding Box
  Selecting this option causes a dashed rectangle to drawn over
  the image, showing the location of the bounding box.
@@ -1911,6 +1970,7 @@ E
 
  The default for `Show Bounding Box` is `unchecked`.
 2Page Orientation
+-Page_Orientation
 ?Auto Orientation
 ?Orientation
 ?Portrait
@@ -1927,13 +1987,14 @@ E
  the print commands.
 
  If the `Auto` command on the orientation menu is checked and
- a `DSC` page orientation comment is found (%%Orientation or
- %%PageOrientation), the orientation will be selected automatically.
+ a `DSC` page orientation comment is found (%%Orientation, 
+ %%PageOrientation or %%ViewingOrientation), 
+ the orientation will be selected automatically.
 
  When the `Swap Landscape` option is `checked`, GSview swaps the
  meaning of Landscape and Seascape.
- Most of the Landscape documents that I have encountered require a 90
- clockwise rotation of the paper to view.
+ Most Landscape documents require a 90 clockwise rotation of
+ the paper to view.
  However, there is no standard and some documents need to be rotated
  the other way.
  The `Swap Landscape` button allows GSview to automatically rotate the
@@ -1942,6 +2003,7 @@ E
 
  See also `Page Size` and `Display Settings`.
 2Display Settings
+-Display_Settings
 ?Display Settings
 ?Resolution
 ?Zoom Resolution
@@ -2003,8 +2065,13 @@ P
 
  If you have bugs in your display driver, please complain to
  the company that wrote it.
+
+ Another alternative is to install the video package made by SDD 
+ (Scitech Display Doctor).
+  http://www.scitechsoft.com/products/enterprise/sdd_home.html
 E
 3Zoom
+-Zoom
 ?Zoom
  To enlarge a displayed feature, position the cross-hair mouse pointer
  over the feature then press the right mouse button.
@@ -2022,6 +2089,7 @@ E
  on the `Media` | `Display Settings` dialog box, use the magnifying
  glass toolbar buttons.
 2Page Size
+-Media
 ?Page Size
 ?Media
 ?User Defined
@@ -2061,6 +2129,7 @@ E
  It is more common to use the settings on the `Orientation` menu
  than `Rotate Media`.
 2Keys
+-Keys
 ?Keys
  Following are the key assignments for GSview.
 X
@@ -2133,6 +2202,7 @@ E
 
  `End`  Scroll to bottom of page.
 2Command line options
+-Command_line_options
 ?Command line options
  GSview ignores the case of options:
  -p is the same as -P.  On Windows or OS/2, you can also
@@ -2192,6 +2262,8 @@ E
 W
  Windows supports a few additional command line options.
 
+ `-a` runs as a `Portable Application`.
+
  `-s` spools a file directly to the printer, without using Ghostscript.
  GSview will exit when the file has been spooled.
  Some examples are:
@@ -2212,6 +2284,7 @@ X
 E
 W
 3Dynamic Data Exchange
+-DDE
 ?Dynamic Data Exchange
 ?DDE
  GSview implements a DDE server, service="GSview and topic="GSview".
@@ -2238,6 +2311,7 @@ W
  The /X command line option uses [FileExit()].
 E
 2World Wide Web
+-WWW
 ?World Wide Web
 ?WWW
 ?HTML
@@ -2256,6 +2330,7 @@ E
  book written by Thomas Merz titled `PostScript and Acrobat/PDF`,
  available in English and German.
 2Copyright
+-Copyright
 ?Copyright
  The `About` menu item shows the GSview copyright message
  and GSview version number.
@@ -2267,7 +2342,7 @@ P
 X
   gsview - A Ghostscript graphical interface
 E
-  Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+  Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
 
  This file is part of GSview.
 
@@ -2295,13 +2370,14 @@ E
  If you do not agree to the pstotext licence, delete pstotext.zip,
  pstotxt2.dll and pstotxt3.dll.
 2Common Problems
+-Common_Problems
 ?Common Problems
 ?Problems
 WP
  `Problem:` Can't load Ghostscript DLL ...
 
  GSview requires the Ghostscript DLL
- (gsdll2.dll for OS/2, gsdll32.dll for Win32).
+ (gsdll2.dll for OS/2, gsdll32.dll for Win32, gsdll63.dll for Win64).
  This error message usually occurs if you don't have Ghostscript,
  or if GSview can't find Ghostscript.
 
@@ -2481,6 +2557,7 @@ E
  Change the page size with the `Media` menu.
 W
 2Other Useful Programs
+-Other_Useful_Programs
 ?Other Useful Programs
 ?RedMon
 ?PrintFile
@@ -2502,10 +2579,12 @@ W
  See the Ghostscript `WWW` page for more useful programs.
 E
 2Other Help Topics
+-Other_Help_Topics
 ?Other Help Topics
  These topics are usually accessed by pressing the `Help` button
  on a dialog box.
 3Show Messages
+-Show_Messages
 ?Show Messages
  GSview uses Ghostscript to display or print PostScript files.
  `Show Messages` displays the console output from Ghostscript,
@@ -2521,6 +2600,7 @@ E
  `Show Messages` are given in the `Common Problems` topic.
 WX
 3bzip2
+-bzip2
 ?bzip2
  If you attempt to load a file that has been compressed by bzip2,
  GSview will attempt to load the bzip2 DLL, then uncompress it
@@ -2539,11 +2619,12 @@ X
  you probably don't have the libbz2.so available.
 WX
 
- bzip2 is Copyright 1996-2000 by Julian Seward
+ bzip2 is Copyright 1996-2002 by Julian Seward
  The source code can be obtained from
-  http://sourceware.cygnus.com/bzip2/index.html
+  http://sources.redhat.com/bzip2/
 E
 3zlib
+-zlib
 ?zlib
 ?gzip
  If you attempt to load a file that has been compressed by gzip,
@@ -2556,30 +2637,23 @@ WP
  Obtain it from the same place you obtained GSview or from
   ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Place the zlib DLL in the same directory as the GSview EXE.
- zlib16.dll is for Win16.  zlib32.dll is for Win32.
+ zlib32.dll is for Win32 (same as official zlib1.dll).
+ zlib64.dll is for Win64 (AMD64).
+P
  zlib2.dll is for OS/2.
 X
  If you get an error message `Failed to load zlib DLL...` then
  you probably don't have libz.so available.
 E
 
- zlib is Copyright 1995-1996 by Jean-loup Gailly and Mark Adler.
+ zlib is Copyright 1995-2005 by Jean-loup Gailly and Mark Adler.
  The source code can be obtained from
-  http://www.info-zip.org/pub/infozip/zlib/
+  http://www.zlib.net/
 3Internals
+-Internals
 ?Internals
 WP
- GSview uses the AFPL Ghostscript DLL to render PostScript files.
-
- Under Win32s, the GS DLL can be used by only one application at a
- time.  Under Windows 95, Windows NT and OS/2, the GS DLL can be used
- by many applications at a time (provided you have enough memory).
- When using Win32s, GSview must unload the GS DLL while it is being
- used by gvwgs.exe for printing.
-
- gsv16spl.exe is a 16 bit Windows application used by GSview to spool
- files from GSview Win32s.  gsv16spl can not be used on its own - it
- must be started by GSview.  It is not used by Windows 95 or NT.
+ GSview uses the GPL Ghostscript DLL to render PostScript files.
 
  gvwgs32.exe (Windows) and gvpgs.exe (OS/2) are GS DLL loaders for
  printing.  It would be possible to use them from the command line,

@@ -1,6 +1,6 @@
 /*
- * doc2html.c  -- program to convert Gnuplot .DOC format to 
- *        World Wide Web (WWW) HyperText Markup Language (HTML) format
+ * doc2hhp.c  -- program to convert GSview (ex gnuplot) .DOC format to 
+ *        Microsoft HTML Help format
  *
  * Created by Russell Lang from doc2ipf by Roger Fearick from 
  *   doc2rtf by M Castro from doc2gih by Thomas Williams.
@@ -20,8 +20,18 @@
  *   Replace isspace() which doesn't work with c > 127.
  *   Allow charset to be specified.  If charset provided, do not
  *   quote non-ascii characters.  This is to allow use with Greek.
+ * Modified by Russell Lang 2011-05-28
+ *   from doc2html
  *
- * usage:  doc2html gnuplot.doc gnuplot.htm
+ * Usage:  doc2hhp gnuplot.doc gnuplot.hhp
+ *   This creates the following file:
+ *     gnuplot.hhp (HTML Help Project)
+ *     gnuplot.hhk (keyword index file)
+ *     gnuplot.hhc (Table of contents file)
+ *     gnuplotNNNNN.htm  (The topics, where NNNNN is a number)
+ *   This should be run in a subdirectory where you can cleanup
+ *   all the files afterwards.
+ *   NNNNN is the line number of each topic
  *
  */
 
@@ -52,23 +62,35 @@ struct LIST *head = NULL;
 struct LIST *keylist = NULL;
 struct LIST *keyhead = NULL;
 
+struct LIST *fnamelist = NULL;
+struct LIST *fnamehead = NULL;
+
 int debug = FALSE;
 int nolinks = FALSE;
 char *charset = NULL;
+char basename[256];
+char title[256];
 
 void parse(FILE *a);
 int lookup(char *s);
 char *title_from_index(int id);
+char *fname_from_index(int id);
 void refs(int l, FILE *f);
-void convert(FILE *a,FILE *b);
-void process_line(char *line, FILE *b);
+void convert(FILE *a);
+void process_line(char *line, FILE **topic_file);
 void putquoted(char *s, FILE *f);
+void write_hhp(FILE *f);
+void write_hhk(void);
+void write_hhc(void);
+char *topic_safename(int lineno);
+
 
 int
 main(int argc,char *argv[])
 {
 FILE * infile;
 FILE * outfile;
+char *p;
 
     if (argv[argc-1][0]=='-' && argv[argc-1][1]=='d') {
         debug = TRUE;
@@ -80,7 +102,7 @@ FILE * outfile;
 	argc--;
     }
 
-    if ( (argc > 4) || (argc == 1) ) {
+    if ( (argc > 4) || (argc < 3) ) {
         fprintf(stderr,"Usage: %s infile outfile [charset]\n", argv[0]);
         fprintf(stderr,"charset is ISO-8859-1 for ISO-Latin1, ISO-8859-7 for Greek, UTF-8 for Unicode\n");
         return(1);
@@ -96,19 +118,196 @@ FILE * outfile;
             argv[0], argv[2]);
       }
     }
-    else {
-        outfile = stdout;
+
+    memset(basename, 0, sizeof(basename));
+    strncpy(basename, argv[2], sizeof(basename)-1);
+    for (p=basename; *p; p++) {
+	if (*p == '.') {
+	    *p = '\0';
+	    break;
+	}
     }
 
     if (argc >= 4)
 	charset = argv[3];
 
+    /* Look for topics and keywords */
     parse(infile);
-    convert(infile,outfile);
+    
+    /* Write individual topic files */
+    convert(infile);
+
+    /* Write all keywords */
+    write_hhk();
+
+    /* Write table of contents */
+    write_hhc();
+
+    /* Write HTML Help Project file */
+    write_hhp(outfile);
+
+    fclose(infile);
+    fclose(outfile);
+
     return(0);
 }
 
-/* scan the file and build a list of line numbers where particular levels are */
+void write_hhp(FILE *f)
+{
+    const char *language="0xc09";	/* English */
+
+    fprintf(f, "[OPTIONS]\nCompiled file=%s.chm\n", basename);
+    fprintf(f, "Index file=%s.hhk\n", basename);
+    fprintf(f, "Contents file=%s.hhc\n", basename);
+    fprintf(f, "Default topic=%s.htm\n", topic_safename(head->line));
+    fprintf(f, "Title=%s\n", title);
+    fprintf(f, "Full-text search=Yes\n");
+
+    if (charset) {
+	/* This is backwards, we should be specifying the language,
+	 * and then deriving the encoding. We will need to fix this
+	 * if we end up with two languages using the same charset.
+	 */
+	if (strcmp(charset,"ISO-8859-7") == 0) 
+	    language="0x408"; 		/* Greek */
+	if (strcmp(charset,"Windows-1251") == 0) 
+	    language="0x419"; 		/* Russian */
+	if (strcmp(charset,"ISO-8859-2") == 0) 
+	    language="0x41b"; 		/* Slovak */
+    }
+    fprintf(f, "Language=%s\n",language);
+
+
+    fprintf(f, "\n[FILES]\n");
+
+    list = head;
+    while (list != NULL) {
+	fprintf(f, "%s.htm\n", topic_safename(list->line));
+	list = list->next;
+    }
+}
+
+void write_hhk(void)
+{
+FILE *f;
+char buf[256];
+
+    sprintf(buf, "%s.hhk", basename);
+    f = fopen(buf, "w");
+    if (f == (FILE *)NULL)
+	return;
+    fprintf(f, "<HTML>\n<HEAD>\n");
+/*
+    fprintf(f, "<OBJECT type=\042text/site properties\042\n");
+    fprintf(f, "</OBJECT>\n<UL>\n");
+*/
+    fprintf(f, "<!-- Sitemap 1.0 -->\n");
+    if (charset)
+	fprintf(f,"<meta http-equiv=\042Content-Type\042 content=\042text/html; charset=%s\042>\n", charset);
+    else
+	fprintf(f,"<meta http-equiv=\042Content-Type\042 content=\042text/html; charset=ISO-8859-1\042>\n");
+    fprintf(f, "</HEAD>\n<BODY>\n<UL>\n");
+
+    keylist = keyhead;
+    while (keylist != NULL) {
+        /* Find topic description for this keyword */
+ 	list = head;
+        while ( (list != NULL) && (list->line != keylist->line) )
+	    list = list->next;
+	if (list == NULL)
+	    continue;
+
+	fprintf(f, " <LI> <OBJECT type=\042text/sitemap\042>\n");
+	fprintf(f, "  <param name=\042Keyword\042 value=\042%s\042>\n",
+	    keylist->string); 
+	fprintf(f, "  <param name=\042Name\042 value=\042%s\042>\n",
+	    list->string); 
+	fprintf(f, "  <param name=\042Local\042 value=\042%s.htm\042>\n",
+	    topic_safename(keylist->line));
+	fprintf(f, "  </OBJECT>\n");
+	keylist = keylist->next;
+    }
+    fprintf(f, "</UL>\n</BODY>\n</HTML>\n");
+    
+    fclose(f);
+}
+
+char * indent(int level)
+{
+    static char buf[256];
+    memset(buf, ' ', level*2);
+    buf[level*2] = '\0';
+    return buf;
+}
+
+void write_hhc(void)
+{
+FILE *f;
+char buf[256];
+int level;
+
+    sprintf(buf, "%s.hhc", basename);
+    f = fopen(buf, "w");
+    if (f == (FILE *)NULL)
+	return;
+    fprintf(f, "<HTML>\n<HEAD>\n");
+    fprintf(f, "<!-- Sitemap 1.0 -->\n");
+    if (charset)
+	fprintf(f,"<meta http-equiv=\042Content-Type\042 content=\042text/html; charset=%s\042>\n", charset);
+    else
+	fprintf(f,"<meta http-equiv=\042Content-Type\042 content=\042text/html; charset=ISO-8859-1\042>\n");
+    fprintf(f, "</HEAD>\n<BODY>\n");
+    fprintf(f, "<OBJECT type=\042text/site properties\042>\n");
+    fprintf(f, "  <param name=\042ImageType\042 value=\042Folder\042>\n");
+    fprintf(f, "</OBJECT>\n");
+    fprintf(f, "<UL>\n");
+
+    list = head;
+    level = list->level;
+    while (list != NULL) {
+        if (list->level == level) {
+	    /* do nothing */
+        }
+	else if (list->level > level) {
+	    /* subtopic */
+	    while (list->level > level) {
+	        fprintf(f, "%s<UL>\n", indent(level));
+		level++;
+	    }
+	}
+	else if (list->level < level) {
+	    /* returning to higher level */
+	    while (list->level < level) {
+	        fprintf(f, "%s</UL>\n", indent(level));
+		level--;
+	    }
+	}
+
+	fprintf(f, "%s<LI> <OBJECT type=\042text/sitemap\042>\n", 
+	    indent(level));
+	fprintf(f, "%s  <param name=\042Name\042 value=\042%s\042>\n",
+	    indent(level), list->string); 
+	fprintf(f, "%s  <param name=\042Local\042 value=\042%s.htm\042>\n",
+	    indent(level), topic_safename(list->line));
+	fprintf(f, "%s  </OBJECT>\n", 
+	    indent(level));
+
+	list = list->next;
+    }
+
+    /* returning to higher level */
+    while (0 < level) {
+	level--;
+	fprintf(f, "%s</UL>\n", indent(level));
+    }
+    fprintf(f, "</BODY>\n</HTML>\n");
+    
+    fclose(f);
+}
+
+
+/* scan the file and build a list of line numbers of each level, */
+/* for the topic names, filenames, and keywords */
 void parse(FILE *a)
 {
     static char line[MAX_LINE_LEN];
@@ -116,8 +315,15 @@ void parse(FILE *a)
     int lineno=0;
     int lastline=0;
 
-    /* skip title line */
-    fgets(line,MAX_LINE_LEN,a);
+    /* get title from first line */
+    fgets(line ,MAX_LINE_LEN,a);
+    strcpy(title, line+1);
+    for (c=title; *c; c++) {
+	if ( (*c == '\r') || (*c == '\n') ) {
+	    *c = '\0';
+	    break;
+	}
+    }
 
     while (fgets(line,MAX_LINE_LEN,a)) 
     {
@@ -134,6 +340,20 @@ void parse(FILE *a)
         c = strtok(&(line[1]),"\n");
         strcpy(list->string, c);
         list->next = NULL;
+      }
+      if (line[0]=='-')
+      {
+        if (fnamelist == NULL)    
+            fnamehead = (fnamelist = (struct LIST *) malloc(sizeof(struct LIST)));
+        else
+            fnamelist = (fnamelist->next = (struct LIST *) malloc(sizeof(struct LIST)));
+        fnamelist->line = lastline;
+        fnamelist->level = line[0] - '0';
+        c = strtok(&(line[1]),"\n");
+        if( c == NULL || *c == '\0' ) c = list->string ;
+        fnamelist->string = (char *) malloc (strlen(c)+1);
+        strcpy(fnamelist->string, c);
+        fnamelist->next = NULL;
       }
       if (line[0]=='?')
       {
@@ -209,6 +429,7 @@ lookup(char *s)
 	return(-1);
 }
 
+/* return the topic title from the line number */
 char *title_from_index(int id)
 {
     struct LIST *l = NULL;
@@ -222,6 +443,50 @@ char *title_from_index(int id)
         l = l->next;
     }
     return NULL;
+}
+
+char *fname_from_index(int id)
+{
+    struct LIST *l = NULL;
+    static char empty[] = "";
+    static char buf[32];
+    if (id < 0)
+	return empty;
+    l = fnamehead;
+    while (l != NULL) {
+	if (id == l->line)
+	    return l->string;
+        l = l->next;
+    }
+    /* return NULL; */
+
+    /* If name doesn't exist, use id */
+    sprintf(buf, "%06d", id);
+    return buf;
+}
+
+
+/* return the topic title in html safe format, from the line number */
+char *topic_safename(int id)
+{
+#ifdef NOTUSED
+    static char buf[256];
+    int i = 0;
+    char *p = title_from_index(id);
+    while (p && *p) {
+	if (*p == ' ')
+	    buf[i++] = '_';
+	else if (isalpha(*p) || isdigit(*p))
+	    buf[i++] = *p;
+	p++;
+	if (i == sizeof(buf)-1)
+	    break;
+    }
+    buf[i] = '\0';
+    return buf;
+#else
+    return fname_from_index(id);
+#endif
 }
 
 void putquoted(char *s, FILE *f)
@@ -256,8 +521,10 @@ refs(int l, FILE *f)
 
     /* find current line */
     list = head;
-    while (list->line != l)
+    while ((list != NULL) && (list->line != l))
         list = list->next;
+    if (list == NULL)
+	return;
     curlevel = list->level;
     list = list->next;        /* look at next element before going on */
     if (list != NULL)
@@ -280,31 +547,7 @@ refs(int l, FILE *f)
 	        fprintf(f,"</b><br>\n");
 	    }
 	    else {
-		char *p = c;
-	        fprintf(f,"<a href=\042#");
-		while (*p) {
-		    if (*p == ' ')
-			fputc('_', f);
-		    else {
-			if ((charset == NULL) && (*p & 0x80)) {
-			    unsigned int value = *p & 0xff;
-			    unsigned int digit;
-			    fputc('&', f);
-			    fputc('#', f);
-			    digit = value / 100;
-			    value -= digit * 100;
-			    fputc('0' + digit, f);
-			    digit = value / 10;
-			    value -= digit * 10;
-			    fputc('0' + digit, f);
-			    fputc('0' + value, f);
-			}
-			else
-			    fputc(*p, f);
-		    }
-		    p++;
-		}
-	        fprintf(f,"\042>");
+	        fprintf(f,"<a href=\042%s.htm\042>", topic_safename(list->line));
 		putquoted(c, f);
 	        fprintf(f,"</a><br>\n");
 	    }
@@ -316,38 +559,38 @@ refs(int l, FILE *f)
 }
 
 void
-convert(FILE *a,FILE *b)
+convert(FILE *a)
 {
+FILE *topic_file = NULL;
+int lineno;
+int last_lineno;
     static char line[MAX_LINE_LEN];
     
-    /* generate html header */
-    fprintf(b,"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2//EN\">\n");
-    fprintf(b,"<html>\n");
-    fprintf(b,"<head>\n");
+    /* process each line of the file */
+    lineno = 0;
+    last_lineno = -1;
     fgets(line,sizeof(line)-1,a);
     strtok(line, "\n");
-    if (charset)
-        fprintf(b,"<meta http-equiv=\042Content-Type\042 content=\042text/html; charset=%s\042>\n", charset);
-    else
-        fprintf(b,"<meta http-equiv=\042Content-Type\042 content=\042text/html; charset=ISO-8859-1\042>\n");
-    fprintf(b,"<title>%s</title>\n", line+1);
-    fprintf(b,"</head>\n");
-    fprintf(b,"<body>\n");
-    fprintf(b,"<h1>%s</h1>\n", line+1);
 
-    /* process each line of the file */
-        while (fgets(line, sizeof(line)-1, a)) {
-       process_line(line, b);
-       }
+    while (fgets(line, sizeof(line)-1, a)) {
+	if (isdigit(line[0]))
+	    last_lineno = lineno;
+        process_line(line, &topic_file);
+	lineno++;
+    }
 
-    /* close final page and generate trailer */
-    fprintf(b,"\n<p><hr>Created automatically by doc2html\n");
-    fprintf(b,"</body>\n");
-    fprintf(b,"</html>\n");
+    /* close old topic file */
+    if (topic_file != NULL) {
+	if (last_lineno > 0)
+	    refs(last_lineno,topic_file);
+	fprintf(topic_file,"</body>\n");
+	fprintf(topic_file,"</html>\n");
+	fclose(topic_file);
+    }
 }
 
 void
-process_line(char *line, FILE *b)
+process_line(char *line, FILE **topic_file)
 {
     static int line_count = 0;
     /* quoting can increase the line length five fold */
@@ -363,6 +606,8 @@ process_line(char *line, FILE *b)
     static int para=0;
     static int inquote = FALSE;
     static int inref = FALSE;
+    FILE *b = *topic_file;
+    char filename[256];
 
     line_count++;
 
@@ -410,18 +655,8 @@ process_line(char *line, FILE *b)
 			else {
 			    char *p = title_from_index(k);
 			    char *t;
-                            sprintf( hyplink1, "<a href=\042#");
-			    t = hyplink1 + strlen(hyplink1);
-			
-			    while (p && *p) {
-				if (*p == ' ')
-				    *t++ = '_';
-				else 
-				    *t++ = *p;
-				p++;
-			    }
-			    *t = '\0';
-			    strcat(hyplink1, "\042>") ;
+			    sprintf(hyplink1, "<a href=\042%s.htm\042>",
+				topic_safename(k));
 			}
                         strcpy( line2+j, hyplink1 ) ;
                         j += strlen( hyplink1 )-1 ;
@@ -496,9 +731,10 @@ process_line(char *line, FILE *b)
                if( intable ) intablebut = TRUE ;
                fprintf(b,"\n:i1. %s", &(line[1])); /* index entry */
 #endif
+/* doc2hhp: do nothing */
                break;
        }
-       case '-': {            /* filename */
+       case '-': {            /* filename, ignore on second pass */
           break;            /* ignore */
        }
        case '@': {            /* start/end table */
@@ -545,6 +781,9 @@ process_line(char *line, FILE *b)
 		   ; /* skip over spaces */
 		for (; *p && *p!='.' && *p!=' '; p++)
 		    fprintf(b, "%c", *p);
+/*
+		fprintf(b, ".png\042>\n");
+*/
 		fprintf(b, ".gif\042>\n");
 	      }
 	  else 
@@ -562,12 +801,42 @@ process_line(char *line, FILE *b)
        }
        default: {
           if (isdigit(line[0])) { /* start of section */
-	    if (tabl)
-	          fprintf(b,"</pre>\n"); /* rjl */
-            if (!startpage)
-            {
-                refs(last_line,b);
-                }
+/* doc2hhp: do nothing, already handled in convert */
+	    /* close old topic file */
+	    if (b != NULL) {
+	        if (tabl)
+	            fprintf(b,"</pre>\n");
+		if (!startpage)
+                    refs(last_line, b);
+		fprintf(b,"</body>\n");
+		fprintf(b,"</html>\n");
+		fclose(b);
+		*topic_file = b = NULL;
+	    }
+
+	    /* Start a new output file */
+	    sprintf(filename, "%s.htm", topic_safename(line_count));
+	    *topic_file = b = fopen(filename, "w");
+	    if (*topic_file == (FILE *)NULL) {
+		fprintf(stderr, 
+		    "Failed to open \042%s\042 for topic \042%s\042\n",
+		    filename, line);
+		return;
+	    }
+
+	    fprintf(b,"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n");
+	    fprintf(b,"<html>\n");
+	    fprintf(b,"<head>\n");
+	    if (charset)
+		fprintf(b,"<meta http-equiv=\042Content-Type\042 content=\042text/html; charset=%s\042>\n", charset);
+	    else
+		fprintf(b,"<meta http-equiv=\042Content-Type\042 content=\042text/html; charset=ISO-8859-1\042>\n");
+	    fprintf(b,"<title>%s</title>\n", &(line2[1]));
+	    fprintf(b,"</head>\n");
+	    fprintf(b,"<body>\n");
+	    fprintf(b,"<h1>%s</h1>\n", &(line2[1]));
+
+
             para = 0;                    /* not in a paragraph */
             tabl = 0;
             last_line = line_count;
@@ -575,24 +844,6 @@ process_line(char *line, FILE *b)
 	    if (debug)
 		fprintf( stderr, "%d: %s\n", line_count, &line2[1] ) ;
             k=lookup(&line2[1]) ;
-	    /* output unique ID and section title */
-	    if (nolinks)
-                fprintf(b,"<hr>\n<h%c>", line[0]=='1'?line[0]:line[0]-1);
-	    else {
-		char *p = &(line2[1]);
-                fprintf(b,"<hr>\n<h%c><a name=\042", 
-			line[0]=='1'?line[0]:line[0]-1);
-		while (*p) {
-		    if (*p == ' ')
-			fputc('_', b);
-		    else 
-			fputc(*p, b);
-		    p++;
-		}
-                fprintf(b,"\042>");
-	    }
-            fprintf(b,&(line2[1])); /* title */
-            fprintf(b,"</a></h%c>\n", line[0]=='1'?line[0]:line[0]-1) ;
           } else
             fprintf(stderr, "unknown control code '%c' in column 1, line %d\n",
                 line[0], line_count);

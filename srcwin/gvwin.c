@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2007, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -128,6 +128,53 @@ int percent_pending;		/* TRUE if WM_GSPERCENT is pending */
 
 int number_of_displays = 1; /* number of active displays */
 DISPLAY_INFO win_display[4];
+
+
+/* GSview on Windows now uses HtmlHelp, and topics are accessed by 
+ * HTML filename within the compressed HTML help file.
+ * The names are the same for all languages, as below.
+ * The topic names in gvclang.rc are not used by Windows
+ * but may still be used by other platforms.
+ */
+struct help_entry_s {
+	int id;			/* Help topic identifier */
+	const TCHAR *name;	/* profile entry */
+};
+
+struct help_entry_s help_entry[] = {
+	/* Help topics */
+	/* These need to match -filenames in XX\gvclang.txt */
+	/* and need to be the same for all languages */
+	{IDS_TOPICROOT,  "Overview"},
+	{IDS_TOPICOPEN,  "Open"},
+	{IDS_TOPICPRINT, "Print"},
+	{IDS_TOPICPROP, "Properties"},
+	{IDS_TOPICEDITPROP, "Edit_Properties"},
+	{IDS_TOPICCONVERT, "Convert"},
+	{IDS_TOPICCLIP, "Clipboard"},
+	{IDS_TOPICPREVIEW, "EPS_Preview"},
+	{IDS_TOPICSOUND, "Sounds"},
+	{IDS_TOPICDSET, "Display_Settings"},
+	{IDS_TOPICMEDIA, "Media"},
+	{IDS_TOPICPSTOEPS, "PS_to_EPS"},
+	{IDS_TOPICGOTO, "Page_Selection"},
+	{IDS_TOPICINSTALL, "Installation"},
+	{IDS_TOPICTEXT, "Text_Extract_and_Find"},
+	{IDS_TOPICKEYS, "Keys"},
+	{IDS_TOPICMESS, "Show_Messages"},
+	{IDS_TOPICSPOOL, "Spooler"},
+	{IDS_TOPICZLIB, "zlib"},
+	{IDS_TOPICBZIP2, "bzip2"},
+	{IDS_TOPICPSTOEDIT, "PStoEdit"},
+	{IDS_TOPICMEASURE, "Measure"},
+	{IDS_TOPICEASYCFG, "Easy_Configure"},
+	{IDS_TOPICADVANCEDCFG, "Advanced_Configure"},
+	{IDS_TOPICDOWNLOAD, "Obtaining_Ghostscript"},
+	{IDS_TOPICDSCWARN, "DSC_Warnings"},
+	{IDS_TOPICREG, "Registration"},
+	{0, NULL}
+};
+
 
 #if (WINVER < 0x0400)
 /* Windows 4.0 scroll bar extras */
@@ -347,7 +394,6 @@ int gsview_main(HINSTANCE hInstance, LPSTR lpszCmdLine)
     free_SetScrollInfo();
 #ifdef USE_HTMLHELP
     HtmlHelp(hwndimg,szHelpName, HH_UNINITIALIZE, (DWORD)dwHelpCookie);
-    gs_addmessf("HtmlHelp: %s HH_CLOSE_ALL\n", szHelpName);
 #else
     WinHelp(hwndimg,szHelpName,HELP_QUIT,(DWORD)NULL);
 #endif
@@ -1088,18 +1134,21 @@ RECT rect;
 
     if (message == help_message) {
 #ifdef USE_HTMLHELP
-/* should be able to do this with keyword lookup instead */
 	TCHAR buf[MAXSTR];
-	lstrcpy(buf, TEXT("html/"));
-	load_string(nHelpTopic, buf+5, sizeof(buf)/sizeof(TCHAR)-6);
+	char strh[MAXSTR];
+	char strb[MAXSTR];
 	int i;
-	for (i=0; buf[i]; i++)
-	    if (buf[i] == ' ')
-		buf[i] = '_';
-	lstrcat(buf, TEXT(".htm"));
+	for (i=0; help_entry[i].id != 0; i++) {
+	    if (nHelpTopic == help_entry[i].id)
+		break;
+	}
+	if (help_entry[i].name != NULL) {
+	    lstrcpy(buf, help_entry[i].name);
+	    lstrcat(buf, TEXT(".htm"));
+	}
+
 	HtmlHelp(hwndimg,szHelpName,HH_DISPLAY_TOPIC,(DWORD)buf);
-char strh[MAXSTR];
-char strb[MAXSTR];
+
 convert_widechar(strh, szHelpName, sizeof(strh)-1);
 convert_widechar(strb, buf, sizeof(strh)-1);
 gs_addmessf("HtmlHelp: %s HH_DISPLAY_TOPIC %s\n", strh, strb);

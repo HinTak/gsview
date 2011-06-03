@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -39,6 +39,9 @@ VCVER=8
 !endif
 !if "$(_NMAKE_VER)" == "8.00.50727.762"
 VCVER=8
+!endif
+!if "$(_NMAKE_VER)" == "9.00.30729.01"
+VCVER=9
 !endif
 !endif
 
@@ -84,6 +87,10 @@ DDKBASE=c:\winddk\3790
 !if $(VCVER) == 8
 DEVBASE=$(PROGRAMFILES)\Microsoft Visual Studio 8
 !endif
+!if $(VCVER) == 9
+DEVBASE=$(PROGRAMFILES)\Microsoft Visual Studio 9.0
+COMMONBASE=$(PROGRAMFILES)\Microsoft SDKs\Windows\v6.0A
+!endif
 !endif
 
 
@@ -122,6 +129,11 @@ PLATLIBDIR=$(COMPBASE)\PlatformSDK\lib
 COMPBASE = $(DEVBASE)\VC
 PLATLIBDIR=$(COMPBASE)\PlatformSDK\lib
 !endif
+!if ($(VCVER) == 9)
+COMPBASE = $(DEVBASE)\VC
+PLATLIBDIR=$(COMMONBASE)\lib
+INCPLAT=-I"$(COMMONBASE)\Include"
+!endif
 
 COMPDIR = $(COMPBASE)\bin
 INCDIR = $(COMPBASE)\include
@@ -129,14 +141,14 @@ LIBDIR = $(COMPBASE)\lib
 
 
 # MSVC 8 (2005) warns about deprecated common functions like fopen.
-!if $(VCVER) == 8
+!if $(VCVER) >= 8
 VC8WARN=/wd4996
 !else
 VC8WARN=
 !endif
 
 !if $(WIN32)
-CDEFS=-D_Windows -D__WIN32__ -I"$(INCDIR)"
+CDEFS=-D_Windows -D__WIN32__  $(INCPLAT) -I"$(INCDIR)"
 WINEXT=32
 CFLAGS=$(CDEFS) /MT /nologo $(VC8WARN)
 LINKMACHINE=IX86
@@ -151,7 +163,7 @@ CPP = "$(COMPDIR)\cl" $(CDEBUG)
 LINK = "$(COMPDIR)\link"
 
 !else if $(WIN64)
-CDEFS=-D_Windows -D__WIN32__ -I"$(INCDIR)"
+CDEFS=-D_Windows -D__WIN32__  $(INCPLAT) -I"$(INCDIR)"
 WINEXT=64
 CFLAGS=$(CDEFS) /MT /nologo $(VC8WARN)
 !if $(VCVER) == 71
@@ -214,9 +226,18 @@ RCOMP="$(DEVBASE)\Vc7\bin\rc" -D_MSC_VER $(CDEFS) $(RIFLAGS)
 !if $(VCVER) == 8
 # Help Compiler is no longer included in the SDK.
 # Search on the Internet for hcw403_setup.zip
-HC="$(PROGRAMFILES)\Help Workshop/hcw" /C /E
+HC="$(PROGRAMFILES)\Help Workshop\hcw" /C /E
+HTMLHELP="C:\Program Files (x86)\HTML Help Workshop\hhc.exe"
 RCOMP="$(DEVBASE)\VC\bin\rc" -D_MSC_VER $(CDEFS) $(RIFLAGS)
 !endif
+!if $(VCVER) == 9
+# Help Compiler is no longer included in the SDK.
+# Search on the Internet for hcw403_setup.zip
+HC="$(PROGRAMFILES)\Help Workshop\hcw" /C /E
+HTMLHELP="C:\Program Files\HTML Help Workshop\hhc.exe"
+RCOMP="$(COMMONBASE)\bin\rc" -D_MSC_VER $(CDEFS) $(RIFLAGS)
+!endif
+
 
 !if $(VIEWONLY)
 VIEWFLAGS=-DVIEWONLY -DPREREGISTER

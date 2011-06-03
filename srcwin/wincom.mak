@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -47,18 +47,21 @@ ICONS=binary/gvwgs.ico binary/gvwinun.ico binary/gvwdoc.ico \
 # Windows target
 
 all: $(BD)gsview$(WINEXT).exe \
-  $(BD)gsviewen.hlp \
-  $(BD)gsvw$(WINEXT)ct.dll $(BD)gsviewct.hlp $(BD)setp$(WINEXT)ct.dll \
-  $(BD)gsvw$(WINEXT)de.dll $(BD)gsviewde.hlp $(BD)setp$(WINEXT)de.dll \
-  $(BD)gsvw$(WINEXT)es.dll $(BD)gsviewes.hlp $(BD)setp$(WINEXT)es.dll \
-  $(BD)gsvw$(WINEXT)fr.dll $(BD)gsviewfr.hlp $(BD)setp$(WINEXT)fr.dll \
-  $(BD)gsvw$(WINEXT)gr.dll $(BD)gsviewgr.hlp $(BD)setp$(WINEXT)gr.dll \
-  $(BD)gsvw$(WINEXT)it.dll $(BD)gsviewit.hlp $(BD)setp$(WINEXT)it.dll \
-  $(BD)gsvw$(WINEXT)nl.dll $(BD)gsviewnl.hlp $(BD)setp$(WINEXT)nl.dll \
-  $(BD)gsvw$(WINEXT)ru.dll $(BD)gsviewru.hlp $(BD)setp$(WINEXT)ru.dll \
-  $(BD)gsvw$(WINEXT)se.dll $(BD)gsviewse.hlp $(BD)setp$(WINEXT)se.dll \
-  $(BD)gsvw$(WINEXT)sk.dll $(BD)gsviewsk.hlp $(BD)setp$(WINEXT)sk.dll \
+  $(BD)gsviewen.chm \
+  $(BD)gsvw$(WINEXT)ct.dll $(BD)gsviewct.chm $(BD)setp$(WINEXT)ct.dll \
+  $(BD)gsvw$(WINEXT)de.dll $(BD)gsviewde.chm $(BD)setp$(WINEXT)de.dll \
+  $(BD)gsvw$(WINEXT)es.dll $(BD)gsviewes.chm $(BD)setp$(WINEXT)es.dll \
+  $(BD)gsvw$(WINEXT)fr.dll $(BD)gsviewfr.chm $(BD)setp$(WINEXT)fr.dll \
+  $(BD)gsvw$(WINEXT)gr.dll $(BD)gsviewgr.chm $(BD)setp$(WINEXT)gr.dll \
+  $(BD)gsvw$(WINEXT)it.dll $(BD)gsviewit.chm $(BD)setp$(WINEXT)it.dll \
+  $(BD)gsvw$(WINEXT)nl.dll $(BD)gsviewnl.chm $(BD)setp$(WINEXT)nl.dll \
+  $(BD)gsvw$(WINEXT)ru.dll $(BD)gsviewru.chm $(BD)setp$(WINEXT)ru.dll \
+  $(BD)gsvw$(WINEXT)se.dll $(BD)gsviewse.chm $(BD)setp$(WINEXT)se.dll \
+  $(BD)gsvw$(WINEXT)sk.dll $(BD)gsviewsk.chm $(BD)setp$(WINEXT)sk.dll \
   $(BD)gvwgs$(WINEXT).exe $(BD)setup.exe $(BD)uninstgs.exe \
+!if $(VCVER) >= 8
+  $(BD)gsvwrg$(WINEXT).exe \
+!endif
   $(BD)gsprint.exe  $(BD)GSviewPortable.exe
 
 $(OD)lib.rsp: makefile srcwin/win.mak srcwin/wincom.mak
@@ -71,6 +74,7 @@ $(OD)lib.rsp: makefile srcwin/win.mak srcwin/wincom.mak
 	echo "$(PLATLIBDIR)$(D)advapi32.lib" >> $(OD)lib.rsp
 	echo "$(PLATLIBDIR)$(D)ole32.lib" >> $(OD)lib.rsp
 	echo "$(PLATLIBDIR)$(D)uuid.lib" >> $(OD)lib.rsp
+	echo "$(PLATLIBDIR)$(D)htmlhelp.lib" >> $(OD)lib.rsp
 	echo /NODEFAULTLIB:LIBC.lib >> $(OD)lib.rsp
 	echo "$(LIBDIR)$(D)libcmt.lib" >> $(OD)lib.rsp
 
@@ -339,82 +343,128 @@ $(BD)uninstgs.exe: $(OD)dwuninst$(OBJ) $(SRCWIN)dwuninst.h $(OD)dwuninst.res $(S
 ##########
 # Documentation
 
-$(BD)gsviewen.hlp: $(GVDOC) $(DOC2RTF) en/gvclang.txt en/gsview.hpj
-	$(CP) en$(D)gsview.hpj $(OD)gsviewen.hpj
-	$(GVDOC) W en$(D)gvclang.txt $(OD)gsview.txt
-	$(DOC2RTF) $(OD)gsview.txt $(OD)gsview.rtf
-	$(HC) $(OD)gsviewen.hpj
-	$(CP) $(OD)gsviewen.hlp $(BD)gsviewen.hlp
+$(BD)gsviewen.chm: $(GVDOC) $(DOC2HHP) en/gvclang.txt
+	-rmdir /s /q hhptemp
+	-mkdir hhptemp
+	$(GVDOC) W en$(D)gvclang.txt hhptemp\gsview.txt
+	-copy binary\*.gif hhptemp
+	-cd hhptemp
+	..\$(DOC2HHP) gsview.txt gsviewen.hhp
+	-$(HTMLHELP) gsviewen.hhp
+	-cd ..
+	$(CP) hhptemp\gsviewen.chm $(BD)gsviewen.chm
 
-$(BD)gsviewde.hlp: $(GVDOC) $(DOC2RTF) de/gvclang.txt de/gsview.hpj
-	$(CP) de$(D)gsview.hpj $(OD)gsviewde.hpj
-	$(GVDOC) W de$(D)gvclang.txt $(OD)gsview.txt
-	$(DOC2RTF) $(OD)gsview.txt $(OD)gsview.rtf
-	$(HC) $(OD)gsviewde.hpj
-	$(CP) $(OD)gsviewde.hlp $(BD)gsviewde.hlp
+$(BD)gsviewct.chm: $(GVDOC) $(DOC2HHP) ct/gvclang.txt
+	-rmdir /s /q hhptemp
+	-mkdir hhptemp
+	$(GVDOC) W ct$(D)gvclang.txt hhptemp\gsview.txt
+	-copy binary\*.gif hhptemp
+	-cd hhptemp
+	..\$(DOC2HHP) gsview.txt gsviewct.hhp
+	-$(HTMLHELP) gsviewct.hhp
+	-cd ..
+	$(CP) hhptemp\gsviewct.chm $(BD)gsviewct.chm
 
-$(BD)gsviewes.hlp: $(GVDOC) $(DOC2RTF) es/gvclang.txt es/gsview.hpj
-	$(CP) es$(D)gsview.hpj $(OD)gsviewes.hpj
-	$(GVDOC) W es$(D)gvclang.txt $(OD)gsview.txt
-	$(DOC2RTF) $(OD)gsview.txt $(OD)gsview.rtf
-	$(HC) $(OD)gsviewes.hpj
-	$(CP) $(OD)gsviewes.hlp $(BD)gsviewes.hlp
+$(BD)gsviewde.chm: $(GVDOC) $(DOC2HHP) de/gvclang.txt
+	-rmdir /s /q hhptemp
+	-mkdir hhptemp
+	$(GVDOC) W de$(D)gvclang.txt hhptemp\gsview.txt
+	-copy binary\*.gif hhptemp
+	-cd hhptemp
+	..\$(DOC2HHP) gsview.txt gsviewde.hhp
+	-$(HTMLHELP) gsviewde.hhp
+	-cd ..
+	$(CP) hhptemp\gsviewde.chm $(BD)gsviewde.chm
 
-$(BD)gsviewfr.hlp: $(GVDOC) $(DOC2RTF) fr/gvclang.txt fr/gsview.hpj
-	$(CP) fr$(D)gsview.hpj $(OD)gsviewfr.hpj
-	$(GVDOC) W fr$(D)gvclang.txt $(OD)gsview.txt
-	$(DOC2RTF) $(OD)gsview.txt $(OD)gsview.rtf
-	$(HC) $(OD)gsviewfr.hpj
-	$(CP) $(OD)gsviewfr.hlp $(BD)gsviewfr.hlp
+$(BD)gsviewes.chm: $(GVDOC) $(DOC2HHP) es/gvclang.txt
+	-rmdir /s /q hhptemp
+	-mkdir hhptemp
+	$(GVDOC) W es$(D)gvclang.txt hhptemp\gsview.txt
+	-copy binary\*.gif hhptemp
+	-cd hhptemp
+	..\$(DOC2HHP) gsview.txt gsviewes.hhp
+	-$(HTMLHELP) gsviewes.hhp
+	-cd ..
+	$(CP) hhptemp\gsviewes.chm $(BD)gsviewes.chm
 
-$(BD)gsviewgr.hlp: $(GVDOC) $(DOC2RTF) gr/gvclang.txt gr/gsview.hpj
-	$(CP) gr$(D)gsview.hpj $(OD)gsviewgr.hpj
-	$(GVDOC) W gr$(D)gvclang.txt $(OD)gsview.txt
-	$(DOC2RTF) $(OD)gsview.txt $(OD)gsview.rtf
-	$(HC) $(OD)gsviewgr.hpj
-	$(CP) $(OD)gsviewgr.hlp $(BD)gsviewgr.hlp
+$(BD)gsviewfr.chm: $(GVDOC) $(DOC2HHP) fr/gvclang.txt
+	-rmdir /s /q hhptemp
+	-mkdir hhptemp
+	$(GVDOC) W fr$(D)gvclang.txt hhptemp\gsview.txt
+	-copy binary\*.gif hhptemp
+	-cd hhptemp
+	..\$(DOC2HHP) gsview.txt gsviewfr.hhp
+	-$(HTMLHELP) gsviewfr.hhp
+	-cd ..
+	$(CP) hhptemp\gsviewfr.chm $(BD)gsviewfr.chm
 
-$(BD)gsviewit.hlp: $(GVDOC) $(DOC2RTF) it/gvclang.txt it/gsview.hpj
-	$(CP) it$(D)gsview.hpj $(OD)gsviewit.hpj
-	$(GVDOC) W it$(D)gvclang.txt $(OD)gsview.txt
-	$(DOC2RTF) $(OD)gsview.txt $(OD)gsview.rtf
-	$(HC) $(OD)gsviewit.hpj
-	$(CP) $(OD)gsviewit.hlp $(BD)gsviewit.hlp
+$(BD)gsviewgr.chm: $(GVDOC) $(CODEPAGE) $(DOC2HHP) gr/gvclang.txt
+	-rmdir /s /q hhptemp
+	-mkdir hhptemp
+	$(GVDOC) W gr$(D)gvclang.txt hhptemp\gsview.txt
+	-copy binary\*.gif hhptemp
+	-cd hhptemp
+	..\$(DOC2HHP) gsview.txt gsviewgr.hhp ISO-8859-7
+	-$(HTMLHELP) gsviewgr.hhp
+	-cd ..
+	$(CP) hhptemp\gsviewgr.chm $(BD)gsviewgr.chm
 
-$(BD)gsviewnl.hlp: $(GVDOC) $(DOC2RTF) nl/gvclang.txt nl/gsview.hpj
-	$(CP) nl$(D)gsview.hpj $(OD)gsviewnl.hpj
-	$(GVDOC) W nl$(D)gvclang.txt $(OD)gsview.txt
-	$(DOC2RTF) $(OD)gsview.txt $(OD)gsview.rtf
-	$(HC) $(OD)gsviewnl.hpj
-	$(CP) $(OD)gsviewnl.hlp $(BD)gsviewnl.hlp
+$(BD)gsviewit.chm: $(GVDOC) $(DOC2HHP) it/gvclang.txt
+	-rmdir /s /q hhptemp
+	-mkdir hhptemp
+	$(GVDOC) W it$(D)gvclang.txt hhptemp\gsview.txt
+	-copy binary\*.gif hhptemp
+	-cd hhptemp
+	..\$(DOC2HHP) gsview.txt gsviewit.hhp
+	-$(HTMLHELP) gsviewit.hhp
+	-cd ..
+	$(CP) hhptemp\gsviewit.chm $(BD)gsviewit.chm
 
-$(BD)gsviewru.hlp: $(GVDOC) $(DOC2RTF) ru/gvclang.txt ru/gsview.hpj
-	$(CP) ru$(D)gsview.hpj $(OD)gsviewru.hpj
-	$(GVDOC) W ru$(D)gvclang.txt $(OD)gsview.txt
-	$(DOC2RTF) $(OD)gsview.txt $(OD)gsview.rtf
-	$(HC) $(OD)gsviewru.hpj
-	$(CP) $(OD)gsviewru.hlp $(BD)gsviewru.hlp
+$(BD)gsviewnl.chm: $(GVDOC) $(DOC2HHP) nl/gvclang.txt
+	-rmdir /s /q hhptemp
+	-mkdir hhptemp
+	$(GVDOC) W nl$(D)gvclang.txt hhptemp\gsview.txt
+	-copy binary\*.gif hhptemp
+	-cd hhptemp
+	..\$(DOC2HHP) gsview.txt gsviewnl.hhp
+	-$(HTMLHELP) gsviewnl.hhp
+	-cd ..
+	$(CP) hhptemp\gsviewnl.chm $(BD)gsviewnl.chm
 
-$(BD)gsviewse.hlp: $(GVDOC) $(DOC2RTF) se/gvclang.txt se/gsview.hpj
-	$(CP) se$(D)gsview.hpj $(OD)gsviewse.hpj
-	$(GVDOC) W se$(D)gvclang.txt $(OD)gsview.txt
-	$(DOC2RTF) $(OD)gsview.txt $(OD)gsview.rtf
-	$(HC) $(OD)gsviewse.hpj
-	$(CP) $(OD)gsviewse.hlp $(BD)gsviewse.hlp
+$(BD)gsviewru.chm: $(GVDOC) $(CODEPAGE) $(DOC2HHP) ru/gvclang.txt
+	-rmdir /s /q hhptemp
+	-mkdir hhptemp
+	$(GVDOC) W ru$(D)gvclang.txt hhptemp\gsview.txt
+	-copy binary\*.gif hhptemp
+	-cd hhptemp
+	..\$(DOC2HHP) gsview.txt gsviewru.hhp Windows-1251
+	-$(HTMLHELP) gsviewru.hhp
+	-cd ..
+	$(CP) hhptemp\gsviewru.chm $(BD)gsviewru.chm
 
-$(BD)gsviewsk.hlp: $(GVDOC) $(DOC2RTF) sk/gvclang.txt sk/gsview.hpj
-	$(CP) sk$(D)gsview.hpj $(OD)gsviewsk.hpj
-	$(GVDOC) W sk$(D)gvclang.txt $(OD)gsview.txt
-	$(DOC2RTF) $(OD)gsview.txt $(OD)gsview.rtf
-	$(HC) $(OD)gsviewsk.hpj
-	$(CP) $(OD)gsviewsk.hlp $(BD)gsviewsk.hlp
+$(BD)gsviewse.chm: $(GVDOC) $(DOC2HHP) se/gvclang.txt
+	-rmdir /s /q hhptemp
+	-mkdir hhptemp
+	$(GVDOC) W se$(D)gvclang.txt hhptemp\gsview.txt
+	-copy binary\*.gif hhptemp
+	-cd hhptemp
+	..\$(DOC2HHP) gsview.txt gsviewse.hhp
+	-$(HTMLHELP) gsviewse.hhp
+	-cd ..
+	$(CP) hhptemp\gsviewse.chm $(BD)gsviewse.chm
 
-$(BD)gsviewct.hlp: $(GVDOC) $(DOC2RTF) ct/gvclang.txt ct/gsview.hpj
-	$(CP) ct$(D)gsview.hpj $(OD)gsviewct.hpj
-	$(GVDOC) W ct$(D)gvclang.txt $(OD)gsview.txt
-	$(DOC2RTF) $(OD)gsview.txt $(OD)gsview.rtf
-	$(HC) $(OD)gsviewct.hpj
-	$(CP) $(OD)gsviewct.hlp $(BD)gsviewct.hlp
+$(BD)gsviewsk.chm: $(GVDOC) $(CODEPAGE) $(DOC2HHP) sk/gvclang.txt
+	-rmdir /s /q hhptemp
+	-mkdir hhptemp
+	$(GVDOC) W sk$(D)gvclang.txt hhptemp\gsview.txt
+	-copy binary\*.gif hhptemp
+	-cd hhptemp
+	..\$(DOC2HHP) gsview.txt gsviewsk.hhp ISO-8859-2
+	-$(HTMLHELP) gsviewsk.hhp
+	-cd ..
+	$(CP) hhptemp\gsviewsk.chm $(BD)gsviewsk.chm
+
+
 
 html: $(DOC2HTML) $(CODEPAGE) $(GVDOC) en/gvclang.txt de/gvclang.txt es/gvclang.txt fr/gvclang.txt gr/gvclang.txt it/gvclang.txt nl/gvclang.txt ru/gvclang.txt se/gvclang.txt
 	$(GVDOC) W en$(D)gvclang.txt $(OD)gsview.txt
@@ -475,6 +525,17 @@ $(BD)gsprint.exe: $(GSPRINTOBJS) $(OD)lib.rsp
 $(OD)gsprint$(OBJ): $(SRCWIN)gsprint.cpp $(SRC)gvcfile.h $(SRCWIN)gvwdib.h $(SRCWIN)gvwpdib.h $(SRC)gvcver.h $(OD)gsvver.h
 	$(CPPCOMP) $(FOO)gsprint$(OBJ) $(CO) $(SRCWIN)gsprint.cpp
 
+
+##########
+# Registration
+!if $(VCVER) >= 8
+$(BD)gsvwrg$(WINEXT).exe: $(SRCWIN)gvwrg.c $(SRCWIN)gvwrg$(WINEXT).manifest
+	$(CPPCOMP) $(FOO)gvwrg$(OBJ) $(CO) $(SRCWIN)gvwrg.c
+	$(LINK) $(DEBUGLINK) $(LCONSOLE) $(LOUT)$(BD)gsvwrg$(WINEXT).exe $(OD)gvwrg$(OBJ)  $(LIBRSP)
+	mt -nologo -manifest $(SRCWIN)gvwrg$(WINEXT).manifest -outputresource:$(BD)gsvwrg$(WINEXT).exe;#1
+!endif
+
+
 #################################################################
 # Testing of DSC parser
 
@@ -488,9 +549,6 @@ $(OD)dsctest$(EXE): $(SRC)dscutil.c $(OD)dscparse$(OBJ) $(HDRS)
 
 clean: commonclean
 	-$(RM) $(OD)*.res
-	-$(RM) $(OD)*.hpj
-	-$(RM) $(OD)*.hlp
-	-$(RM) $(OD)*.HLP
 	-$(RM) $(OD)*.rsp
 	-$(RM) $(OD)gsview.txt
 	-$(RM) $(OD)gsview.rtf
@@ -506,11 +564,13 @@ distclean:
 	-$(RM) $(BD)*.ilk
 	-$(RM) $(BD)*.exp
 	-$(RM) $(BD)*.htm
+	-$(RM) $(BD)*.chw
 
 veryclean: clean distclean
 	-$(RM) $(BD)*.exe
 	-$(RM) $(BD)*.dll
-	-$(RM) $(BD)*.hlp
+	-$(RM) $(BD)*.chm
+	-rmdir /q /s hhptemp
 
 
 srczip:
@@ -612,7 +672,7 @@ viewonlydist:
 	$(CP) regorder.txt dist$(D)gsview$(D)regorder.txt
 	$(CP) $(BD)gsview$(WINEXT).exe dist$(D)gsview$(D)gsview$(WINEXT).exe
 	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(WINEXT).ico
-	$(CP) $(BD)gsviewen.hlp dist$(D)gsview$(D)gsviewen.hlp
+	$(CP) $(BD)gsviewen.chm dist$(D)gsview$(D)gsviewen.chm
 	$(CP) $(SRC)printer.ini dist$(D)gsview$(D)printer.ini
 	$(CP) $(BD)GSviewPortable.exe dist$(D)GSviewPortable.exe
 	$(CP) NUL dist$(D)gsview$(D)gsview$(WINEXT).ini
@@ -681,17 +741,17 @@ distcopy:
 	$(CP) regorder.txt dist$(D)gsview$(D)regorder.txt
 	$(CP) $(BD)gsview$(WINEXT).exe dist$(D)gsview$(D)gsview$(WINEXT).exe
 	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(WINEXT).ico
-	$(CP) $(BD)gsviewen.hlp dist$(D)gsview$(D)gsviewen.hlp
-	$(CP) $(BD)gsviewde.hlp dist$(D)gsview$(D)gsviewde.hlp
-	$(CP) $(BD)gsviewes.hlp dist$(D)gsview$(D)gsviewes.hlp
-	$(CP) $(BD)gsviewfr.hlp dist$(D)gsview$(D)gsviewfr.hlp
-	$(CP) $(BD)gsviewgr.hlp dist$(D)gsview$(D)gsviewgr.hlp
-	$(CP) $(BD)gsviewit.hlp dist$(D)gsview$(D)gsviewit.hlp
-	$(CP) $(BD)gsviewnl.hlp dist$(D)gsview$(D)gsviewnl.hlp
-	$(CP) $(BD)gsviewru.hlp dist$(D)gsview$(D)gsviewru.hlp
-	$(CP) $(BD)gsviewse.hlp dist$(D)gsview$(D)gsviewse.hlp
-	$(CP) $(BD)gsviewsk.hlp dist$(D)gsview$(D)gsviewsk.hlp
-	$(CP) $(BD)gsviewct.hlp dist$(D)gsview$(D)gsviewct.hlp
+	$(CP) $(BD)gsviewen.chm dist$(D)gsview$(D)gsviewen.chm
+	$(CP) $(BD)gsviewde.chm dist$(D)gsview$(D)gsviewde.chm
+	$(CP) $(BD)gsviewes.chm dist$(D)gsview$(D)gsviewes.chm
+	$(CP) $(BD)gsviewfr.chm dist$(D)gsview$(D)gsviewfr.chm
+	$(CP) $(BD)gsviewgr.chm dist$(D)gsview$(D)gsviewgr.chm
+	$(CP) $(BD)gsviewit.chm dist$(D)gsview$(D)gsviewit.chm
+	$(CP) $(BD)gsviewnl.chm dist$(D)gsview$(D)gsviewnl.chm
+	$(CP) $(BD)gsviewru.chm dist$(D)gsview$(D)gsviewru.chm
+	$(CP) $(BD)gsviewse.chm dist$(D)gsview$(D)gsviewse.chm
+	$(CP) $(BD)gsviewsk.chm dist$(D)gsview$(D)gsviewsk.chm
+	$(CP) $(BD)gsviewct.chm dist$(D)gsview$(D)gsviewct.chm
 	$(CP) $(BD)gsvw$(WINEXT)de.dll dist$(D)gsview$(D)gsvw$(WINEXT)de.dll
 	$(CP) $(BD)gsvw$(WINEXT)es.dll dist$(D)gsview$(D)gsvw$(WINEXT)es.dll
 	$(CP) $(BD)gsvw$(WINEXT)fr.dll dist$(D)gsview$(D)gsvw$(WINEXT)fr.dll
@@ -718,6 +778,9 @@ distcopy:
 	$(CP) $(BD)setp$(WINEXT)se.dll dist$(D)setp$(WINEXT)se.dll
 	$(CP) $(BD)setp$(WINEXT)sk.dll dist$(D)setp$(WINEXT)sk.dll
 	$(CP) $(BD)setp$(WINEXT)ct.dll dist$(D)setp$(WINEXT)ct.dll
+!if $(VCVER) >= 8
+	$(CP) $(BD)gsvwrg$(WINEXT).exe dist$(D)gsview$(D)gsvwrg$(WINEXT).exe
+!endif
 	$(CP) gsprint.htm dist$(D)gsview$(D)gsprint.htm
 	$(CP) $(BD)gsprint.exe dist$(D)gsview$(D)gsprint.exe
 	$(CP) epstool.htm dist$(D)gsview$(D)epstool.htm
@@ -769,7 +832,7 @@ gsv$(GSVIEW_VERSION)w$(WINEXT).exe: distcopy gsv$(GSVIEW_VERSION)w$(WINEXT).zip
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .$(D)setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2007 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2011 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview$(D)LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT). > dialog.txt
 	echo GSview uses Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt

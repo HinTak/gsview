@@ -1,4 +1,4 @@
-/* Copyright (C) 1998-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1998-2009, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -136,9 +136,11 @@ void
 process_pstoedit(void *arg)
 {
 int argc = 0;
-const char *argv[20];
+const char *argv[22];
 char flatarg[64];
 char format[MAXSTR];
+char libpath[MAXSTR];
+const char* psinterpreter = NULL;
 
     pending.pstoedit = FALSE;
 
@@ -159,6 +161,15 @@ char format[MAXSTR];
         argv[argc++] = "-flat";
 	sprintf(flatarg, "%g", p2e.flatness);
         argv[argc++] = flatarg;
+    }
+
+    if (portable_app) {
+	psinterpreter = option.gsdll; 
+	strcpy(libpath, "-I\042");
+	strcat(libpath, option.gsinclude);
+	strcat(libpath, "\042");
+	argv[argc++] = "-psarg";
+	argv[argc++] = libpath;
     }
     
     argv[argc++] = "-f";
@@ -183,7 +194,7 @@ char format[MAXSTR];
     }
 
     /* invoke pstoedit */
-    if (pstoedit_plainC(argc, (const char **)argv, 0 ) != 0)
+    if (pstoedit_plainC(argc, (const char **)argv, psinterpreter ) != 0)
 	post_img_message(WM_GSSHOWMESS, 0);
 
     if (!debug)

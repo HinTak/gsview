@@ -269,7 +269,11 @@ find_gs(char *gspath, int len, int minver, BOOL bDLL)
     if (p) {
 	p++;
 	*p = 0;
+#ifdef _WIN64
+	strncpy(p, "gswin64c.exe", sizeof(buf)-1-strlen(buf));
+#else
 	strncpy(p, "gswin32c.exe", sizeof(buf)-1-strlen(buf));
+#endif
 	strncpy(gspath, buf, len-1);
 	return TRUE;
     }

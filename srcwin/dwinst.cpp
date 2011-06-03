@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1999-2011, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -718,6 +718,26 @@ BOOL CInstall::RegistrySetValue(const char *value_name, const char *value)
 ////////////////////////////////////
 // Uninstall
 
+void CInstall::SetUninstallDescription(const char *help, const char *update,
+	    const char *support, const char *publisher, const char *version)
+{
+	/* entries for the Uninstaller */
+	memset(m_szHelp, 0, sizeof(m_szHelp));
+	if (help)
+	    lstrcpyn(m_szHelp, help, sizeof(m_szHelp)-1);
+	memset(m_szUpdate, 0, sizeof(m_szUpdate));
+	if (update)
+	    lstrcpyn(m_szUpdate, update, sizeof(m_szUpdate)-1);
+	memset(m_szSupport, 0, sizeof(m_szSupport));
+	if (support)
+	    lstrcpyn(m_szSupport, support, sizeof(m_szSupport)-1);
+	memset(m_szPublisher, 0, sizeof(m_szPublisher));
+	if (publisher)
+	    lstrcpyn(m_szPublisher, publisher, sizeof(m_szPublisher)-1);
+	memset(m_szVersion, 0, sizeof(m_szVersion));
+	if (version)
+	    lstrcpyn(m_szVersion, version, sizeof(m_szVersion)-1);
+}
 
 BOOL CInstall::WriteUninstall(const char *szProg, BOOL bNoCopy)
 {
@@ -759,6 +779,21 @@ BOOL CInstall::WriteUninstall(const char *szProg, BOOL bNoCopy)
 			AddMessage("\n");
 			RegSetValueEx(hsubkey, UNINSTALLSTRINGKEY, 0, REG_SZ,
 				(CONST BYTE *)buffer, lstrlen(buffer)+1);
+			if (lstrlen(m_szHelp))
+			    RegSetValueEx(hsubkey, "HelpLink", 0, REG_SZ,
+				(CONST BYTE *)m_szHelp, lstrlen(m_szHelp)+1);
+			if (lstrlen(m_szUpdate))
+			    RegSetValueEx(hsubkey, "URLUpdateInfo", 0, REG_SZ,
+				(CONST BYTE *)m_szUpdate, lstrlen(m_szUpdate)+1);
+			if (lstrlen(m_szSupport))
+			    RegSetValueEx(hsubkey, "URLInfoAbout", 0, REG_SZ,
+				(CONST BYTE *)m_szSupport, lstrlen(m_szSupport)+1);
+			if (lstrlen(m_szPublisher))
+			    RegSetValueEx(hsubkey, "Publisher", 0, REG_SZ,
+				(CONST BYTE *)m_szPublisher, lstrlen(m_szPublisher)+1);
+			if (lstrlen(m_szVersion))
+			    RegSetValueEx(hsubkey, "DisplayVersion", 0, REG_SZ,
+				(CONST BYTE *)m_szVersion, lstrlen(m_szVersion)+1);
 			RegCloseKey(hsubkey);
 		}
 		

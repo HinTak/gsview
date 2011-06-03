@@ -419,6 +419,9 @@ process_line(char *line, FILE *b)
                fprintf(bo,"\n:i1. %s", &(line[1])); /* index entry */
                break;
        }
+       case '-': {            /* filename */
+               break;
+       }
        case '@': {            /* start/end table */
                   intable = !intable ;  
                   if( intable ) {

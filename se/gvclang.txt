@@ -1,5 +1,6 @@
  GSview hjälp
 1Översikt
+-Overview
 ?Översikt
  `GSview` är ett grafiskt interface för Ghostscript under MS-Windows,
  OS/2 och GNU/Linux.
@@ -9,6 +10,7 @@
  tillåter GSview att valda sidor visas eller skrivs ut.
  GSview 4.8 kräver Ghostscript 7.04 - 9.19.
 2Installation
+-Installation
 ?Installation
 W
  Det rekommenderas att du använder installationsprogrammet `setup.exe`
@@ -32,6 +34,7 @@ E
 
  Se också `Alternativ` | `Språk`.
 3Hämta Ghostscript
+-Obtaining_Ghostscript
 ?Hämta Ghostscript
  GSview kräver AFPL Ghostscript.  GSview eller Ghostscript
  är tillgängliga separat från
@@ -339,6 +342,7 @@ W
  Tryck på knappen `Avsluta `.
 E
 2Registrering
+-Registration
 ?Registrering
  Om du vill stödja utecklingen av GSview eller vill
  bli av med GSview's påminnelseskärm, var vänlig överväg registrering
@@ -355,6 +359,7 @@ E
  i GSview's katalog.
  Ghostgum Software föredrar att du använder online registreringen.
 2Document Structuring Conventions
+-DSC
 ?Document Structuring Conventions
 ?DSC
 ?Encapsulated PostScript
@@ -412,6 +417,7 @@ E
  GSview kan ge varningar när dokument innehåller felaktiga DSC
  kommentarer.  Detta kan ändras med `Alternativ` | `DSC varningar`.
 2Portabelt dokument format
+-PDF
 ?Portabelt dokument format
 ?PDF
 ?pdf2ps
@@ -457,6 +463,7 @@ WP
  include sökväg med `-I` eller miljövariabeln `GS_LIB`.
 E
 2Öppna ett dokument
+-Open
 ?Arkiv
 ?Öppna
 ?Välj fil
@@ -494,6 +501,7 @@ E
 
  Se också `Skriv ut`.
 2Sid val
+-Page_Selection
 ?Sid val
 ?Nästa sida
 ?Föregående sida
@@ -533,6 +541,7 @@ E
  (utan titelrad, scrollningslister etc.).
  För att återgå till normal visning, tryck Escape tangenten.
 2Dokument information
+-Document_Information
 ?Info
  En informationsarea i toppen av fönstret används av GSview för att
  visa dokumentets filnamn, det aktuella sidnumret och etikett
@@ -588,6 +597,7 @@ E
  användbart om du kopierar den visade bilden till klippbordet.
 W
 2Utskrift
+-Print
 ?Skriv ut
  `Skriv ut` kommandot i `Arkiv `menyn möjliggör utskrift av dokumentet
  genom att använda Ghostscript.  Det finns metoder som används av GSview för
@@ -826,6 +836,7 @@ PX
  skrivare före och efter PostScriptfiler.
 E
 3Inställningar
+-Properties
 ?Inställningar
  Knappen `Inställningar` tillåter vissa Ghostcript devicer att konfigurera
  extra inställningar och en sidooffset kan specificeras.
@@ -860,6 +871,7 @@ E
  tillåter dig att modifiera tillgängliga `Inställningar` för devicet.
  Se ämnet `Redigera inställningar` för fler detaljer.
 4Redigera inställningar
+-Edit_Properties
 ?Redigera inställningar
  Alla device stöder inte användningen av ytterligare `Inställningar`.  För att ta
  reda på vilka devicer som stöder `Inställningar` och vilka `Egenskaper` känns
@@ -949,6 +961,7 @@ E
  Om `Variabel sidstorlek` används kommer GSview att sätta standardstorleken
  från mediamenyn, men tillåter sidan att ändras.
 2Konverteringar
+-Conversions
 ?Konverteringar
  Det finns åtskilliga sätt att konvertera PostScript och PDF filer.
 
@@ -980,6 +993,7 @@ WP
  till en klippbords deviceberoende bitmap.
 E
 3Filkonvertering och tricks
+-File_conversions_and_tricks
 ?Filkonvertering
 ?Tricks
  Några vanliga filkonverteringar som kan utföras genom att
@@ -1038,6 +1052,7 @@ E
  `Konvertera` med ett bitmappsdevice och sätt följande i inställningar.
     -dTextAlphaBits=4 -dGraphicsAlphaBits=4
 3Konvertera
+-Convert
 ?Konvertera
  `Arkiv `| `Konvertera` använder Ghostscript för att konvertera PostScript eller PDF
  till bitmappar, PostScript eller PDF.
@@ -1069,6 +1084,7 @@ E
 
  Se också `Konverteringar`.
 3Extrahera
+-Extract
 ?Extrahera
  `Extrahera` tillåter att ett område av sidor kopieras från ett aktuell
  dokument till ett nytt dokument.  Till exempel, tio sidor kan extraheras
@@ -1078,6 +1094,7 @@ E
 
  Se också `Konverteringar`.
 3PS till EPS
+-PS_to_EPS
 ?PS till EPS
 ?BoundingBox
  I allmänhet, är det inte möjligt att konvertera en PostScriptfil till `EPS`.
@@ -1154,6 +1171,7 @@ E
 
  Se också `Lägg till EPS förhandsvisning`, `Extrahera`, `EPS varning` och `Konverteringar`.
 3EPS förhandsvisning
+-EPS_Preview
 ?EPS förhandsvisning
 ?Lägg till EPS förhandsvisning
 ?Extrahera EPS
@@ -1209,6 +1227,7 @@ E
 
  Se också `PS till EPS`.
 3Användardefinierad förhandsvisning
+-User_Supplied_Preview
 ?Användardefinierad förhandsvisning
  Kommandot `Redigera `| `Lägg till EPS förhandsvisning` | `Användardefinierad förhandsvisning` tillåter
  en existerande TIFF eller WMF fil att adderas till en EPS fil
@@ -1224,6 +1243,7 @@ E
  vilket är mycket ovälkommet.
 WP
 3Konvertera till vektorformat
+-PStoEdit
 ?Konvertera till vektorformat
 ?PStillEdit
  Du kan konvertera en PostScript eller PDF fil till ett redigeringsbart vektorformat
@@ -1284,6 +1304,7 @@ WP
  Se också `Konverteringar`.
 E
 3Text extrahera och finn
+-Text_Extract_and_Find
 ?Text extrahera och finn
 ?Text
 ?Text extrahera
@@ -1390,6 +1411,7 @@ E
  skiljer sig inte filer producerade av dvips vad gäller vilka font encodings som har
  använts.
 3Klippbord
+-Clipboard
 ?Klippbord
 ?Kopiera
 ?Klistra in till
@@ -1437,6 +1459,7 @@ E
  Text kan inte markeras förrän `Text extrahera`
  eller `Finn` har använts med `Alternativ` | `PStillText` aktiverad.
 2Mäta
+-Measure
 ?Mäta
 ?Beräkna transformerade enheter
  Längden kan mätas genom att använda musmarkörens placering visad på
@@ -1472,9 +1495,11 @@ E
 
  Se också `Enheter`.
 2Alternativ
+-Options
 ?Alternativ
  Menyn `Alternativ` har följande val:
 3Enkel konfiguration
+-Easy_Configure
 ?Enkel konfiguration
 W
  Enkel konfiguration tillåter dig att välja vilken version av Ghostscript
@@ -1493,6 +1518,7 @@ P
  Ghostscript version och filassociationer.
 E
 3Avancerad konfiguration
+-Advanced_Configure
 ?Avancerad konfiguration
 ?Ghostscript DLL
 ?Ghostscript Include Path
@@ -1560,6 +1586,7 @@ E
  Se ämnet `Installation`.
 WP
 3Ljud
+-Sounds
 ?Ljud
  Alternativet `Ljud` tilldelar ljud till olika händelser.
  För varje händelse kan ljudet sättas till `Inget`, ett `Högtalarljud` eller
@@ -1597,6 +1624,7 @@ WP
  `Högtalarljud` och alla andra händelser är `Inget`.
 E
 3Enheter
+-Units
 ?Enheter
  Alternativet `Enheter` sätter vilken enhet som skall användas för att visa
  muspekarens placering på statusraden.  Tillgängliga enheter är PostScriptpunkter (`pt` = 1/72"),
@@ -1608,6 +1636,7 @@ E
 
  Se också `Mäta`.
 3Språk
+-Language
 ?Språk
 ?Internationell
  GSview är tillgängligt på engelska, franska, grekiska, holländska, italienska,
@@ -1620,6 +1649,7 @@ E
  inställningar, i synnerhet vald lokal eller
  system code page.
 3PStillText
+-PStoText
 ?PStillText
  GSview har två metoder för att extrahera och söka text.
 
@@ -1639,6 +1669,7 @@ E
 
  Standard är `Normal`.
 3DSC varningar
+-DSC_Warnings
 ?DSC varningar
  Vissa dokument innehåller fel i Document Structuring Conventions.
  Nivån för varningar från GSview kan ställas in med användning av
@@ -1682,6 +1713,7 @@ E
  När alternativet `Spara inställningar vid avslutning` är `markerad`, kommer GSview att
  spara ovanstående inställningar automatiskt när du avslutar GSview.
 3Säkrare
+-Safer
 ?Säkrare
  När alternativet `Säkrare` är `markerad`, kommer GSview att ge Ghostscript
  flaggan `-dSAFER`, vilken avaktiverar deletefile och renamefile operatorerna,
@@ -1700,6 +1732,7 @@ E
  katalogen när GSview startas att bli den aktuella katalogen hos programmet
  som startade GSview.
 3Knapprad
+-Button_Bar
 ?Knapprad
 ?Förstora
  När alternativet `Knapprad` är `markerad`, kommer GSview att visa
@@ -1884,6 +1917,7 @@ E
 
  Standard för `Visa Bounding Box` är `ej markerad`.
 2Sidorientering
+-Page_Orientation
 ?Automatisk orientering
 ?Orientering
 ?Porträtt
@@ -1914,6 +1948,7 @@ E
 
  Se också `Sidstorlek` och `Display inställningar`.
 2Display inställningar
+-Display_Settings
 ?Display inställningar
 ?Upplösning
 ?Zoom uplösning
@@ -1977,6 +2012,7 @@ P
  till det företag som skrivit den.
 E
 3Zoom
+-Zoom
 ?Zoom
  För att förstora en visat parti, positionera kors-hårs muspekaren
  över partiet och tryck sedan på höger musknapp.
@@ -1994,6 +2030,7 @@ E
  på dialoboxen `Media` | `Display inställningar`, eller använd knapparna
  med förstoringsglas på knappraden.
 2Sidstorlek
+-Media
 ?Sidstorlek
 ?Media
 ?Användardefinerad
@@ -2033,6 +2070,7 @@ E
  Det är mera vanligt att använda inställningarna på menyn `Orientering` än
  `Rotera media`.
 2Tangenter
+-Keys
 ?Tangenter
  Följande är de tilldelade tangentkombinationerna för GSview.
 X
@@ -2105,6 +2143,7 @@ E
 
  `End`  Scrolla till längst ner på sidan.
 2Kommandorad alternativ
+-Command_line_options
 ?Kommandorad alternativ
  GSview ignorerar följande fall av alternativ:
  -p är samma som -P.  På Windows eller OS/2, kan du också
@@ -2184,6 +2223,7 @@ X
 E
 W
 3Dynamic Data Exchange
+-DDE
 ?Dynamic Data Exchange
 ?DDE
  GSview implementerar en DDE server, service="GSview och ämne="GSview".
@@ -2212,6 +2252,7 @@ W
  /X kommandoradsalternativet använder [FileExit()].
 E
 2World Wide Web
+-WWW
 ?World Wide Web
 ?WWW
 ?HTML
@@ -2230,6 +2271,7 @@ E
  bok skriven av Thomas Merz med titeln `PostScript och Acrobat/PDF`,
  tillgänglig på Engelska och Tyska.
 2Copyright
+-Copyright
 ?Copyright
  Menyn `Om` visar GSview's copyright meddelande
  och GSview's versionsnummer.
@@ -2477,6 +2519,7 @@ E
  Dessa ämnen nås vanligtvis genom att trycka på `Hjälp` knappen
  i en dialogbox.
 3Visa meddelanden
+-Show_Messages
 ?Visa meddelanden
  GSview använder Ghostscript för att visa eller skriva ut PostScriptfiler.
  `Visa meddelanden` visar konsollutmatningen från Ghostscript,
@@ -2492,6 +2535,7 @@ E
  ges i `Allmänna problem` ämnet.
 WX
 3bzip2
+-bzip2
 ?bzip2
  Om du försöker ladda en fil som har komprimerats av bzip2,
  kommer GSview att försöka ladda bzip2 DLL, och sedan packa upp den
@@ -2515,6 +2559,7 @@ WX
  http://sourceware.cygnus.com/bzip2/index.html
 E
 3zlib
+-zlib
 ?zlib
 ?gzip
  Om du försöker ladda en fil som blivit komprimerad med gzip,
@@ -2538,6 +2583,7 @@ E
  Källkoden kan tas hem från
   http://www.info-zip.org/pub/infozip/zlib/
 3Internt
+-Internals
 ?Internt
 WP
  GSview använder AFPL Ghostscript DLL för att rendera PostScriptfiler.

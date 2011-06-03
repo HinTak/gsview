@@ -25,6 +25,7 @@ GVDOC=$(OD)gvdoc$(EXE)
 DOC2IPF=$(OD)doc2ipf$(EXE)
 DOC2HTML=$(OD)doc2html$(EXE)
 DOC2RTF=$(OD)doc2rtf$(EXE)
+DOC2HHP=$(OD)doc2hhp$(EXE)
 CODEPAGE=$(OD)codepage$(EXE)
 
 OBJCOM1=$(OD)gvcmisc$(OBJ) $(OD)gvcdisp$(OBJ) $(OD)gvccmd$(OBJ) \
@@ -71,6 +72,10 @@ $(DOC2HTML): $(SRC)doc2html.c
 $(DOC2RTF): $(SRC)doc2rtf.c
 	$(CCAUX) $(FOO)doc2rtf$(OBJ) $(CO) $(SRC)doc2rtf.c
 	$(CCAUX) $(CLFLAG) $(FE)$(DOC2RTF) $(OD)doc2rtf$(OBJ)
+
+$(DOC2HHP): $(SRC)doc2hhp.c
+	$(CCAUX) $(FOO)doc2hhp$(OBJ) $(CO) $(SRC)doc2hhp.c
+	$(CCAUX) $(CLFLAG) $(FE)$(DOC2HHP) $(OD)doc2hhp$(OBJ)
 
 
 #################################################################

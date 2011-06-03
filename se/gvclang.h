@@ -20,12 +20,12 @@
 
 #define AASVENSKA "Svenska"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2006 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2011 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Alla rättigheter reserverade."
 #define GSVIEW_COPYRIGHT3 "Se filen LICENCE för fler detaljer."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2006 artofcode LLC,"
-#define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Alla rättigheter reserverade."
+#define GS_COPYRIGHT1 "Copyright (C) 2011 Artifex Software, Inc."
+#define GS_COPYRIGHT2 "California, U.S.A.  Alla rättigheter reserverade."
 #define GS_COPYRIGHT3 "Se filen PUBLIC för fler detaljer."
 
 /* Buttons */
@@ -441,4 +441,4 @@
 #define AAMABOUT "~Om..."
 #endif
 
-#define WINHELPFILE "gsviewse.hlp"
+#define WINHELPFILE "gsviewse.chm"

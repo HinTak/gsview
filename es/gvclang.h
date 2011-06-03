@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd. All rights reserved.
+/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd. All rights reserved.
 
   This file is part of GSview.
 
@@ -20,12 +20,12 @@
 
 #define AAESPANOL "Español" /* Espaniol in code page 1252 */
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2006 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2011 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Reservados todos los derechos."
 #define GSVIEW_COPYRIGHT3 "Léase el archivo LICENCE para más detalles."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2006 artofcode LLC,"
-#define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Reservados todos los derechos."
+#define GS_COPYRIGHT1 "Copyright (C) 2011 Artifex Software, Inc."
+#define GS_COPYRIGHT2 "California, U.S.A.  Reservados todos los derechos."
 #define GS_COPYRIGHT3 "Léase el archivo PUBLIC para más detalles."
 
 /* Buttons */
@@ -440,4 +440,4 @@
 #endif
 
 
-#define WINHELPFILE "gsviewes.hlp"
+#define WINHELPFILE "gsviewes.chm"

@@ -1,5 +1,6 @@
  Guida di GSview
 1Panoramica Generale
+-Overview
 ?Panoramica Generale
  `GSview` è una interfaccia grafica per Ghostscript sotto MS-Windows
  o OS/2.
@@ -9,7 +10,8 @@
  Conventions, GSview permette alle pagine selezionate di essere viste o
  stampate.
  GSview 4.8 necessita di Ghostscript 7.04 - 9.19.
-2knstallazione
+2Installazione
+-Installation
 ?Installazione
  E' consigliabile usare lo specifico programma di installazione per
  installare GSview. Il programma di installazione si chiama `setup.exe`
@@ -29,6 +31,7 @@
 
  Vedere anche `Opzioni` | `Lingua`.
 3Come ottenere Ghostscript
+-Obtaining_Ghostscript
 ?Come ottenere Ghostscript
 ?Ottenere Ghostscript
 ?Download di Ghostscript
@@ -310,6 +313,7 @@ E
  Premere il pulsante` Chiudi`.
 E
 2Registrazione
+-Registration
 ?Registrazione
  Se si vuole sostenere lo sviluppo di GSview oppure si vuole
  disabilitare la schermata di disturbo di GSview, si prega di considerare la
@@ -326,6 +330,7 @@ E
  reperibile presso la cartella di GSview.
  L'uso della registrazione online è comunque preferibible per la Ghostgum Software.
 2Convenzioni sulla struttura del Documento
+-DSC
 ?Convenzioni sulla struttura del Documento
 ?DSC
 ?Encapsulated PostScript
@@ -385,6 +390,7 @@ E
  GSview può dare degli avvisi quando i documenti contengono dei commenti DSC
  scorretti.  Questo può essere cambiato con `Opzioni` | `Avvisi DSC`.
 2Files in formato PDF
+-PDF
 ?Files in formato PDF
 ?PDF
 ?pdf2ps
@@ -423,6 +429,7 @@ E
  al posto di gs.exe.  Sarà necessario anche impostare il path incluso in Ghostscript
  usando `-I` oppure la variabile di ambiente `GS_LIB`.
 2Apertura di un documento
+-Open
 ?File
 ?Apri
 ?Aprire
@@ -463,6 +470,7 @@ E
 
  Vedere anche `Stampa`.
 2Selezione della Pagina
+-Page_Selection
 ?Selezione della Pagina
 ?Pagina Successiva
 ?Pagina Precedente
@@ -504,6 +512,7 @@ E
  Per ritornare alla visualizzazione normale premere il tasto di Escape (Esc).
 
 2Informazioni sul documento
+-Document_Information
 ?Informazioni
  Una piccola area di informazione nella parte alta della finestra è usata da
  GSview per visualizzare il nome del file del documento, il numero di pagina corrente,
@@ -560,6 +569,7 @@ E
  utile se si sta copiando l'immagine visualizzata.
 W
 2Stampa
+-Print
 ?Stampa
  Il comando `Stampa` sul menu `File `permette la stampa del documento
  usando Ghostscript. Ci sono tre metodi usati da GSview per
@@ -797,6 +807,7 @@ P
  prima e dopo il file PostScript.
 E
 3Proprietà
+-Properties
 ?Proprietà
  Il pulsante `Proprietà` permette ad alcuni devices di Ghostcript devices di configurare
  ulteriori proprietà e di specificare l'offset di pagina.  
@@ -827,6 +838,7 @@ E
  permettono di modificare le `Proprietà` disponibili per la stampante in oggetto.
  Vedere il paragrafo `Modifica Proprietà` per maggiori dettagli.
 4Modifica Proprietà
+-Edit_Properties
 ?Modifica Proprietà
  Non tutte le stampanti supportano l'uso di `Proprietà` opzionali.  Per sapere
  quali stampanti supportano `Proprietà` e quali `Proprietà` sono
@@ -892,6 +904,7 @@ E
  Se il valore della proprietà sarà `[Not defined]` la proprietà stessa non
  sarà inviata a Ghostscript.
 2Conversioni
+-Conversions
 ?Conversioni
  Ci sono molti metodi per convertire i files PostScript e PDF.
 
@@ -924,6 +937,7 @@ E
  `Modifica`| `Converti Bitmap` converte negli Appunti un bitmpap DIB 
  in un bitmap Device Dependent Bitmap.
 3Conversione di File e Trucchi
+-File_conversions_and_tricks
 ?Conversione di File
 ?Trucchi
  Alcune comuni conversioni tra file possono essere effettuate
@@ -979,6 +993,7 @@ E
  nelle proprietà.
     -dTextAlphaBits=4 -dGraphicsAlphaBits=4
 3Converti
+-Convert
 ?Converti
  `File `| `Converti` usa Ghostscript per convertire PostScript o PDF
  in bitmaps, PostScript oppure PDF.
@@ -1009,6 +1024,7 @@ E
 
  Vedere anche `Conversioni`.
 3Estrai
+-Extract
 ?Estrai
  `Estrai` abilita un insieme di pagine ad essere copiate dal documento
  corrente in un nuovo documento.  Ad esempio, dieci pagine possono essere estratte
@@ -1019,6 +1035,7 @@ E
 
  Vedere anche `Conversioni`.
 3Converti PS in EPS
+PS_to_EPS
 ?Converti PS in EPS
 ?Limiti del Box
  In generale, non è possibile convertire un file PostScript in un file `EPS`.
@@ -1097,6 +1114,7 @@ E
 
  Vedere anche `Aggiungi Anteprima EPS`, `Estrai`, `Avvisi EPS` e `Conversioni`.
 3Anteprima EPS
+EPS_Preview
 ?Anteprima EPS
 ?Aggiungi Anteprima EPS
 ?Estrai EPS
@@ -1151,6 +1169,7 @@ E
 
  Vedere anche `Converti PS in EPS`.
 3Anteprima fornita dall'Utente
+-User_Supplied_Preview
 ?Anteprima fornita dall'Utente
  Il comando `Modifica `| `Aggiungi Anteprima EPS` | `Anteprima fornita dall'Utente`
  permette ad un file esistente TIFF o WMF di essere aggiunto ad un file EPS per
@@ -1166,6 +1185,7 @@ E
  ma in genere questo non è gradito.
 W
 3Conversione in un formato vettoriale
+-PStoEdit
 ?Converti in formato vettoriale
 ?PStoEdit
  E' possibile convertire un file PostScript o PDF in formato vettoriale modificabile
@@ -1229,6 +1249,7 @@ W
  Vedere anche `Conversioni`.
 E
 3Estrai e Trova Testo
+-Text_Extract_and_Find
 ?Estrai e Trova Testo
 ?Testo
 ?Estrai testo
@@ -1336,6 +1357,7 @@ E
  i files prodotti da dvips non distinguono quale codifica di carattere deve essere
  usata.
 3Appunti
+-Clipboard
 ?Appunti
 ?Copia
 ?Incolla su
@@ -1371,6 +1393,7 @@ E
  di copiare il bitmap.  Il testo non deve essere contrassegnato quando `Estrai testo`
  oppure `Trova` vengono usati con `Opzioni` | `PStoText` abilitati.
 2Misure
+-Measure
 ?Misure
 ?Calcolare Unità di Misura Trasformate
  Le distanze possono essere misurate usando la posizione del cursore visualizzata sulla
@@ -1407,9 +1430,11 @@ E
  Vedere anche `Unità di Misura`.
 E
 2Opzioni
+-Options
 ?Opzioni
  Il menu `Opzioni` ha le seguenti selezioni:
 3Configurazione Facile
+-Easy_Configure
 ?Configurazione Facile
 W
  Configurazione Facile permette di selezionare quale versione di
@@ -1428,6 +1453,7 @@ P
  la versione di Ghostscript e le associazioni dei files.
 E
 3Configurazione Avanzata
+-Advanced_Configure
 ?Configurazione Avanzata
 ?DLL di Ghostscript
 ?Includi Path di Ghostscript
@@ -1484,6 +1510,7 @@ E
 
  Vedere l'argomento `Installazione`.
 3Suoni
+-Sounds
 ?Suoni
  L'opzione `Suoni` assegna dei suoni a vari eventi.
  Per ogni vento il suono può essere impostato a `Nessuno`, `Beep Altoparlante` oppure
@@ -1518,6 +1545,7 @@ E
  I suoni predefiniti per `Nessuna Pagina`, `Errore` e `Occupato` sono
  `Beep Altoparlante`. Per tutti gli altri eventi è `Nessuno`.
 3Unità di Misura
+-Units
 ?Unità di Misura
  L'opzione `Unità di Misura` imposta le unità di misura usate per visualizzare la posizione del cursore
  nella barra di stato.  Le unità di misura disponibili sono punti PostScript (`pt` = 1/72"),
@@ -1529,11 +1557,13 @@ E
 
  Vedere anche `Misure`.
 3Lingua
+-Language
 ?Lingua
 ?Internazionale
  GSview è disponibile in Inglese, Francese, Tedesco, Italiano e Spagnolo.  Per cambiare la
  lingua usare `Opzioni` | `Lingua`.
 3PStoText
+-PStoText
 ?PStoText
  GSview ha due metodi per l'estrazione e la ricerca di testo.
 
@@ -1552,6 +1582,7 @@ E
 
  Il settaggio predefinito è `Normale`.
 3Avvisi DSC
+-DSC_Warnings
 ?Avvisi DSC
  Alcuni documenti contengono errori nelle Document Structuring Conventions (DSC).
  Il livello di avvertimento fornito da GSview può essere impostato usando
@@ -1610,6 +1641,7 @@ E
  sarà nuovamente avviato la cartella corrente sarà la cartella corrente del
  programma che ha avviato GSview.
 3Barra Pulsanti
+-Button_Bar
 ?Barra Pulsanti
 ?Ingrandimento
  Quando l'opzione `Barra Pulsanti` è `attivata`, GSview visualizzerà in modo predefinito
@@ -1754,6 +1786,7 @@ E
 
  Vedere anche `Converti PS in EPS`.
 3Ignora DSC
+-Ignore_DSC
 ?Ignora DSC
  Alcuni documenti dichiarano scorrettamente di essere conformi all'Adobe
  Document Structuring Conventions.  Cercando di visualizzare uno di questi
@@ -1764,6 +1797,7 @@ E
 
  L'impostazione predefinita di `Ignora DSC` è di `disattivato`.
 3Mostra Limiti del Box
+-Show_Bounding_Box
 ?Mostra Limiti del Box
  La selezione di questa opzione fa visualizzare un rettangolo tratteggiato attorno
  all'immagine che mostra la posizione dei limiti del box.
@@ -1774,6 +1808,7 @@ E
 
  L'impostazione predefinita per `Mostra Limiti del Box` è di `disattivato`.
 2Orientamento di Pagina
+-Page_Orientation
 ?Orientamento Automatico
 ?Orientamento
 ?Verticale
@@ -1826,6 +1861,7 @@ P
  un reclamo alla ditta che l'ha scritto.
 E
 3Zoom
+-Zoom
 ?Zoom
  Per ingrandire una parte della visualizzazione posizionare la croce del puntatore del
  mouse sopra di essa e premere quindi il pulsante destro del mouse stesso.
@@ -1843,6 +1879,7 @@ E
  dialogo `Carta` | `Impostazioni di Visualizzazione`, oppure usare i pulsanti di
  ingrandimento a lente presenti nella barra dei pulsanti.
 2Dimensioni della Pagina
+-Media
 ?Dimensioni della Pagina
 ?Carta
 ?Definite dall'Utente
@@ -1879,6 +1916,7 @@ E
  E' più comune l'uso delle impostazioni nel menu `Orientamento`
  che non `Ruota Carta`.
 2Tasti
+-Keys
 ?Tasti
  Qui di seguito vengono riportati i tasti assegnati per GSview.
 
@@ -2315,6 +2353,7 @@ E
  A questi argomenti si accede normalmente premendo il pulsante `?`
  nelle finestre di dialogo.
 3Mostra Messaggi
+-Show_Messages
 ?Mostra Messaggi
  GSview usa Ghostscript per visualizzare o stampare i files PostScript.
  `Mostra Messaggi` visualizza l'output di console da Ghostscript,
@@ -2329,6 +2368,7 @@ E
  `Mostra Messaggi` possono essere trovate all'argomento `Problemi Comuni`.
 W
 3bzip2
+-bzip2
 ?bzip2
  Se si tenta di caricare un file che è stato compresso da bzip2,
  GSview tenterà di caricare la DLL bzip2 e quindi di decomprimerlo
@@ -2347,6 +2387,7 @@ W
   http://sourceware.cygnus.com/bzip2/index.html
 E
 3zlib
+-zlib
 ?zlib
 ?gzip
  Se si tenta di caricare un file che è stato compresso da gzip,
@@ -2365,6 +2406,7 @@ E
  Il codice sorgente può essere ottenuto da
   http://www.info-zip.org/pub/infozip/zlib/
 3All'interno di GsView
+-Internals
 ?All'interno di GsView
  GSview usa le DLL di Aladdin Ghostscript per produrre l'immagine
  dei files PostScript.

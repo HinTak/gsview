@@ -1,5 +1,6 @@
  GSview Hulp
 1Overzicht
+-Overview
 ?Overzicht
  `GSview` is een grafische schil om Ghostscript te gebruiken onder MS-Windows,
  OS/2 en GNU/Linux.
@@ -9,6 +10,7 @@
  laat GSview toe geselecteerde bladzijden te bekijken en af te drukken.
  Voor GSview 4.8 is vereist 7.04 - 9.19.
 2Installatie
+-Installation
 ?Installatie
 W
  Om GSview te installeren dient u het installatieprogramma `setup.exe` te gebruiken.
@@ -31,6 +33,7 @@ E
 
  Zie ook `Opties` | `Taal`.
 3Hoe zich Ghostscript aanschaffen?
+-Obtaining_Ghostscript
 ?Hoe zich Ghostscript aanschaffen?
  GSview moet samengaan met AFPL Ghostscript.  GSview en Ghostscript
  zijn afzonderlijk af te halen van
@@ -332,6 +335,7 @@ W
  Klik dan op `Sluiten`.
 E
 2Registratie
+-Registration
 ?Registratie
  Indien u de ontwikkeling van GSview of wilt steunen en
  het  GSview pestschermpje wilt uigeschakeld hebben,  overweeg dan
@@ -348,6 +352,7 @@ E
  te verzenden.
  Online registratie geniet de voorkeur.
 2DSC: Afspraken over de structuur
+-DSC
 ?DSC: Afspraken over de structuuDocument
 ?DSC
 ?Ingekapselde PostScript Bestanden (EPSF: Encapsulated Postscript Files)
@@ -406,6 +411,7 @@ E
  commentaar bevat. Dit kan worden ingesleld, zie hiervoor:
  `Opties` | `DSC-waarschuwingen`.
 2Portable Document Format
+-PDF
 ?Portable Document Format
 ?PDF
 ?pdf2ps
@@ -452,6 +458,7 @@ WP
  parameter "pad incalculeren": `-I` of de omgevingsvariabele `GS_LIB`.
 E
 2Een document openen.
+-Open
 ?File
 ?Openen
 ?Select File
@@ -496,6 +503,7 @@ E
 
  Zie ook `Afdrukken`.
 2Bladzijde kiezen
+-Page_SElection
 ?Bladzijde kiezen
 ?Volgende bladzijde
 ?Vorige bladzijde
@@ -538,6 +546,7 @@ E
  het document (geen titelbalk, menu etc... zichtbaar).
  Tik op escape om dit op te heffen.
 2Over het document.
+-Document_Information
 ?Info
  In een smalle balk net onder het menum toont GSview de bestandsnaam,
  het huidige paginanummer en, indien beschikbaar, de benaming (label).
@@ -600,6 +609,7 @@ reordered.
 
 W
 2Afdrukken
+-Print
 ?Afdrukken
  Met `Afdrukken` uit het menu `Bestand ` kan een document worden
  afgedrukt via Ghostscript.  GSview gebruikt hier 3 methodes voor:
@@ -854,6 +864,7 @@ PX
  zenden.
 E
 3Instellingen
+-Properties
 ?Instellingen
  Met de knop `Instellingen` kan u extra aanpassingen doen
  aan sommige  Ghostcript apparaten.
@@ -887,6 +898,7 @@ E
  `Bewerken `en `Nieuw` kan u dit eventueel aanpassen.
  Voor meer hierover zie `Instellingen bewerken`.
 4Instellingen bewerken
+-Edit_Properties
 ?Instellingen bewerken
  Dit wordt niet door elke printer ondersteund.  U kan hier meer over
  vernemen in het bestand Devices.htm . U kan ook eventueel de Ghostscript
@@ -955,6 +967,7 @@ E
  Id de eigenschap `[Not defined]` , dan worden er geen gegevens
  naar Ghostscript gezonden.
 3Paginagrootte aanpassen
+-Page_Size_Matching
 ?Paginagrootte aanpassen
 ?Bepaald papierformaat
 ?Bepaalde paginagrootte
@@ -976,6 +989,7 @@ E
  Wanneer `Veranderlijke paginagrootte` werd geselecteerd wordt eerst
  de standaardgrootte ingesteld, die dan vrij kan worden aangepast.
 2Bestand Omzetten
+-Conversions
 ?Bestand Omzetten
  PostScript en PDF kunnen op meerdere verschillende manieren worden
  omgezet.
@@ -1010,6 +1024,7 @@ WP
  prikbordt om in en naar een secundair prikbord.
 E
 3Bestanden omzetten en trucjes hierbij.
+-File_conversions_and_tricks
 ?Bestanden omzetten
 ?Trucjes
  Voorbeelden van omzetten naar een ander formaat aan de hand van
@@ -1068,6 +1083,7 @@ E
  `Omzetten` naar bitmap met de volgende instellingen:
     -dTextAlphaBits=4 -dGraphicsAlphaBits=4
 3Omzetten
+-Convert
 ?Omzetten
  `Bestand `| `Omzetten` maakt gebruik van Ghostscript om PostScript- of
   PDFbestanden om te zetten naar bitmap-, PostScript- of PDFformaat.
@@ -1101,6 +1117,7 @@ E
 
  Zie ook `Omzetten`.
 3Exporteren
+-Extract
 ?Exporteren
  Met `Exporteren` wordt een reeks bladzijden van het huidige document
  naar een nieuw document gekopieerd. Bijvoorbeeld, tien bladzijden
@@ -1110,6 +1127,7 @@ E
 
  Zie ook `Omzetten`.
 3PS naar EPS
+-PS_to_EPS
 ?PS naar EPS
 ?Inbinden
  Normaliter kunnen PostScript bestanden niet naar `EPS` worden omgezet.
@@ -1195,6 +1213,7 @@ E
  Zie ook `EPS afdrukvoorbeeld toevoegen`, `Exporteren`,
  `EPS Waarschuwingen` en `Omzetten`.
 3EPS afdrukvoorbeeld toevoegen
+-EPS_Preview
 ?EPS afdrukvoorbeeld toevoegen
 ?EPS afdrukvoorbeeld toevoegen
 ?EPS exporteren
@@ -1266,6 +1285,7 @@ E
  de PostScript normen, maar dit is beslist af te raden.
 WP
 3Omzetten naar vectorieel formaat
+-PStoEdit
 ?Omzetten naar vectorieel formaat
 ?PStoEdit
  U kan een PostScript- en/of PDF-bestand omzetten naar een te bewerken
@@ -1334,6 +1354,7 @@ WP
  Zie ook `Omzetten`.
 E
 3Tekst zoeken en exporteren
+-Text_Extract_and_Find
 ?Tekst zoeken en exporteren
 ?Tekst
 ?Tekst exporteren
@@ -1438,6 +1459,7 @@ E
  door dvips geen onderscheid kunnen maken tussen de verschillende
  fontcoderingen.
 3Prikbord
+-Clipboard
 ?Prikbord
 ?Kopiëren
 ?Plakken
@@ -1480,6 +1502,7 @@ E
  Tekst kan enkel worden geselecteerd viard  `Tekst exporteren` of
  `Zoeken` NADAT `Opties` | `PStoText` werd geactiveerd.
 2Meeteenheden
+-Measure
 ?Meeteenheden
 ?Omzettingen berekenen
  Lengte kan berekend worden middels de cursor op de statusbalk, of
@@ -1513,9 +1536,11 @@ E
 
  Zie ook `Meeteenheden`.
 2Opties
+-Options
 ?Opties
  Het menu `Opties` heeft de volgende indeling:
 3Eenvoudige configuratie
+-Easy_Configure
 ?Eenvoudige configuratie
 W
  Via "eenvoudige configuratie kan u de gewenste versie van Ghostscript
@@ -1534,6 +1559,7 @@ P
  gekozen en worden de bestandskoppelingen ingesteld.
 E
 3Aangepaste configuratie	
+-Advanced_Configure
 ?Aangepaste configuratie
 ?Ghostscript DLL
 ?Ghostscript  Pad
@@ -1597,6 +1623,7 @@ E
  Zie `Installeren`.
 WP
 3Geluiden
+-Sounds
 ?Geluiden
  Met `Geluiden` kan een geluidje worden toegewezen aan een bepaalde
  handeling. U kan kiezen tussen `Geen`, a `Luidspreker biep` of een
@@ -1631,6 +1658,7 @@ WP
  ingesteld op `Luidspreker biep` en alle andere op `Geen`.
 E
 3Eenheden
+-Units
 ?Eenheden
  `Eenheden` stelt de meeteenheden in aan de hand waarvan de positie van
  de aanwijzer op het scherm wordtgetoond.  Keuze uit PostScript punten
@@ -1642,12 +1670,14 @@ E
 
  Zie ook `Eenheden`.
 3Taal
+-Language
 ?Taal
 ?Internationaal
  GSview is beschikbaar in het Engels, Nederlands, Frans, Duits,
  Italiaans en Spaans.
  In te stellen aan de hand van `Opties` | `Taal`.
 3PStoText
+-PStoText
 ?PStoText
  GSview heeft twee manieren beschikbaar om tekst af te scheiden en te
  zoeken.
@@ -1665,6 +1695,7 @@ E
 
  `Normal` is de standaardinstelling.
 3DSC Waarschuwingen
+-DSC_Warnings
 ?DSC Waarschuwingen
  Sommige documenten bevatten fouten in hun opmaakstructuur.
  U kan instellen hoe de waarschuwingen worden weergegeven middels
@@ -1905,6 +1936,7 @@ E
 
  Standaard is `Inbinden tonen` niet actief.
 2Orientatie
+-Page_Orientation
 ?Auto Orientatie
 ?Orientatie
 ?Staand
@@ -1932,6 +1964,7 @@ E
  Zie ook `Papierformaat` en `Schermresolutie wijzigen`.
 
 2Schermresolutie
+-Display_Settings
 ?Schermresolutie
 ?Schermresolutie
 ?Zoomfactor
@@ -1982,6 +2015,7 @@ P
 
 E
 3Zoom
+-Zoom
 ?Zoom
  Om in te zoemen dient u de muisaanwijzer op de gewenste plaats te
  zetten en op de rechtermuisknop te duwen.
@@ -1995,6 +2029,7 @@ E
  `Resolutie` uit de menuoptie `Papierformaat` | `Schermresolutie`.
 
 2Paginagrootte
+-Media
 ?Paginagrootte
 ?Papierformaat
 ?Door de gebruiker ingesteld
@@ -2032,6 +2067,7 @@ E
  Het is meer aangewezen om van de mogelijkheden `Orientatie` gebruik te
  maken dan van `Papier omdraaien`.
 2Toetsen
+-Keys
 ?Toetsen
  Sneltoetsen.
 X
@@ -2527,6 +2563,7 @@ E
  Hulp kan worden aangeroepen door in het menu op `Help` te klikken.
 
 3Berichten tonen
+-Show_Messages
 ?Berichten tonen
  GSview maakt gebruik van Ghostscript om bestanden te tonen of af te
  drukken. `Berichten tonen` geeft weer wat door Ghostscript werd
@@ -2544,6 +2581,7 @@ E
 
 WX
 3bzip2
+-bzip2
 ?bzip2
  Wanneer u een bestand dat werd gecomprimeerd met bzip2 in het geheugen
  laadt zal GSview ook bzip2.DLL in het geheugen laden en dan uw
@@ -2568,6 +2606,7 @@ WX
 
 E
 3zlib
+-zlib
 ?zlib
 ?gzip
  Wanneer een bestand wordt geladen dat werd ingepakt door gzip, dan
@@ -2591,6 +2630,7 @@ E
  De bronbestanden zijn hier beschikbaar:
   http://www.info-zip.org/pub/infozip/zlib/
 3Intern
+-Internals
 ?Intern
 WP
  GSview maakt gebruik van de AFPL Ghostscript DLL om PostScript

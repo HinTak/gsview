@@ -429,6 +429,9 @@ void process_line(char *line, FILE *b)
 			footnote('K',&(line2[1]),b);
 		  break;
 	   }
+	   case '-': {			/* filename */
+		  break;			/* ignore */
+	   }
 	   case '@': {			/* start/end table */
 		  break;			/* ignore */
 	   }

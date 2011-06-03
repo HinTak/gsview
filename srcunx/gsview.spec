@@ -1,12 +1,12 @@
 #
-# Spec file for GSview 4.9
+# Spec file for GSview 4.91beta
 #
-# 4.9 release
-#  2007-11-18 Russell Lang <gsview@ghostgum.com.au>
+# 4.91beta release
+#  2011-06-03 Russell Lang <gsview@ghostgum.com.au>
 #
 Summary: PostScript and PDF previewer
 Name: gsview
-Version: 4.9
+Version: 4.91
 Release: 1
 Copyright: Aladdin Free Public License, Ghostgum Software Pty Ltd
 Group: Applications/Graphics
@@ -85,6 +85,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Jun 03 2011 Russell Lang <gsview@ghostgum.com.au>
+- GSview 4.91beta release
+  Minor bug fixes, mostly for Windows 7.
 * Sun Nov 18 2007 Russell Lang <gsview@ghostgum.com.au>
 - GSview 4.9 release
   Minor bug fixes.

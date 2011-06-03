@@ -38,7 +38,7 @@
 #define chdir(x) _chdir(x)
 #define mkdir(x) _mkdir(x)
 #endif
-#define DELAY_STEP 500
+#define DELAY_STEP 200
 #define DELAY_FILE 5
 #define MAXSTR 256
 #define UNINSTALLKEY TEXT("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall")

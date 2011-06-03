@@ -32,7 +32,7 @@ OBJ=.obj
 CDEBUG=-g
 LDEBUG=/DEBUG
 !endif
-CFLAGS=-O -Wall -Zomf -Zmts $(CDEBUG) -DOS2
+CFLAGS=-O -Wall -Zomf -Zmts $(CDEBUG) -DOS2 -DNONAG
 
 
 COMPDIR=$(COMPBASE)\bin

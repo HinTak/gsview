@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2007, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -108,7 +108,11 @@ char workdir[MAXSTR];
  * which have the following name.  The ?? is replaced by the two
  * letter Internet country code.
  */
+#ifdef _WIN64
+const TCHAR lang_pattern[] = TEXT("gsvw64??.dll");
+#else
 const TCHAR lang_pattern[] = TEXT("gsvw32??.dll");
+#endif
 const int lang_offset = 6;  /* offset to ?? */
 
 /* We load each of these DLLs and if they contain a version
@@ -371,20 +375,15 @@ int i;
     haccel = LoadAccelerators(hlanguage, TEXT("gsview_accel"));
 
 #ifdef USE_HTMLHELP
-    HtmlHelp(hwndimg,szHelpName, HH_CLOSE_ALL, (DWORD)NULL);
-    gs_addmessf("HtmlHelp: %s HH_CLOSE_ALL\n", szHelpName);
+    HtmlHelp(NULL, NULL, HH_CLOSE_ALL, (DWORD)NULL);
 #else
     WinHelp(hwndimg,szHelpName,HELP_QUIT,(DWORD)NULL);
 #endif
     /* get path to help file */
     lstrcpy(szHelpName, szExePath);
     p = szHelpName + lstrlen(szHelpName);
-#ifdef USE_HTMLHELP
-    lstrcat(szHelpName, TEXT("gsviewen.chm"));
-#else
     load_string(IDS_HELPFILE, p, 
 	sizeof(szHelpName)/sizeof(TCHAR) - (int)(p-szHelpName));
-#endif
     if (debug)
 	gs_addmessf("Help file is %s\n", szHelpName);
 
@@ -2035,7 +2034,14 @@ config_wizard(BOOL bVerbose)
 	sprintf(p, "gs%d.%02d", gsver / 100, gsver % 100);
 
 	strcpy(gsdll, gsdir);
+#ifdef _WIN64
+	if (gsver <= 900)
+	    strcat(gsdll, "\\bin\\gsdll32.dll");
+	else
+	    strcat(gsdll, "\\bin\\gsdll64.dll");
+#else
 	strcat(gsdll, "\\bin\\gsdll32.dll");
+#endif
 
 	if ( (f = fopen(gsdll, "rb")) != (FILE *)NULL ) {
 	    /* GS DLL exists. Configure GSview */

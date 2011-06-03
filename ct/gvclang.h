@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,12 +20,12 @@
 
 #define AACATALA "Català"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2006 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2011 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Tots els drets reservats."
 #define GSVIEW_COPYRIGHT3 "Vegeu el fitxer LICENCE per a més detalls."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2006 artofcode LLC,"
-#define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Tots els drets reservats."
+#define GS_COPYRIGHT1 "Copyright (C) 2011 Artifex Software, Inc."
+#define GS_COPYRIGHT2 "California, U.S.A.  Tots els drets reservats."
 #define GS_COPYRIGHT3 "Vegeu el fitxer PUBLIC per a més detalls."
 
 /* Buttons */
@@ -441,4 +441,4 @@
 #define AAMABOUT "~Quant al..."
 #endif
 
-#define WINHELPFILE "gsviewct.hlp"
+#define WINHELPFILE "gsviewct.chm"

@@ -982,7 +982,7 @@ install_prog()
 	    return FALSE;
 	}
 
-	sprintf(buf, "SOFTWARE\\Microsoft\Windows\\CurrentVersion\\App Paths\\%s", szExeName);
+	sprintf(buf, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\%s", szExeName);
         
 
 	cinst.RegistryCloseKey();
@@ -1118,6 +1118,12 @@ install_prog()
 	if (cinst.MakeLog()) {
 		// add uninstall entry for "Add/Remove Programs"
 		gs_addmess("Adding uninstall program\n");
+		cinst.SetUninstallDescription(
+		    "http://www.ghostgum.com.au/",
+		    NULL, 
+		    "http://www.ghostgum.com.au/",
+		    "Ghostgum Software Pty Ltd",
+		    GSVIEW_DOT_VERSION);
 		if (!cinst.WriteUninstall(UNINSTALLPROG, g_bNoCopy)) {
 			gs_addmess("Failed to write uninstall entry\n");
 			return FALSE;
@@ -1839,7 +1845,7 @@ ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		    char szReadmeName[MAXSTR];
 		    strcpy(szReadmeName, g_szSourceDir);
 		    strcat(szReadmeName, "\\gsview\\Readme.htm");
-		    ShellExecute(hDlg, NULL, szReadmeName, 
+		    ShellExecute(hDlg, "open", szReadmeName, 
 			NULL, NULL, SW_SHOWNORMAL);
 		    }
                     return(TRUE);
@@ -1850,7 +1856,8 @@ ModelessDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		    strcat(szHelpName, "\\gsview\\");
 		    load_string(IDS_HELPFILE, szHelpName+strlen(szHelpName),
 			sizeof(szHelpName) - strlen(szHelpName) - 1);
-		    WinHelp(hDlg,szHelpName,HELP_CONTENTS,(DWORD)NULL);
+		    ShellExecute(hDlg, "open", szHelpName, 
+			NULL, NULL, SW_SHOWNORMAL);
 		    }
                     return(TRUE);
 		case IDC_BROWSE_DIR:

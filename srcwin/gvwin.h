@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2007, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -24,6 +24,7 @@
 #include <commdlg.h>
 #include <shellapi.h>
 #include <mmsystem.h>
+#define USE_HTMLHELP /* FIX */
 #ifdef USE_HTMLHELP
 #include <htmlhelp.h>
 #endif
@@ -92,7 +93,11 @@ extern HWND hwndspl;	/* window handle of gsv16spl.exe */
 #define PROFILE_SIZE 2048
 #define MAXSTR 256	/* maximum file name length and general string length */
 #define DEVICENAME "display"
+#ifdef _WIN64
+#define DEFAULT_GSCOMMAND "gswin64.exe"
+#else
 #define DEFAULT_GSCOMMAND "gswin32.exe"
+#endif
 #define DEFAULT_RESOLUTION 96.0
 #define DEFAULT_ZOOMRES 300.0
 #define INISECTION "Options"

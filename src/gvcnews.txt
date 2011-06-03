@@ -1,4 +1,43 @@
 ---------------------------
+Version 4.91beta 2011-06-03
+---------------------------
+All:
+  Default include path only needs Resource for versions of GS between
+  8.10 and 8.63.  8.64 and later use compiled resources.
+
+OS/2:
+  Remove the nag screen from the OS/2 build, given that Ghostgum
+  Software has little interest in maintaining the OS/2 build.
+
+Win:
+  pstoedit now works with GSviewPortable.exe.
+
+  Uses compressed HTML help (.chm), instead of the older WinHelp,
+  which is not preinstalled on Windows 7 and Vista.
+  The translated help files have been edited, but may not be correct
+  and help topics may not open correctly.
+  Non ISO-Latin1 character set help files do not display the index
+  correctly.
+  Closing the help file or changing the language while the help file
+  is open will cause the GSview program to close.
+
+  On Win64, GS 9.01 and later use gsdll64.dll, while earlier versions
+  use gsdll32.dll.  When looking or ghostscript, use these assumptions.
+
+  On Windows Vista and XP, saving the registration number may 
+  fail on some computers due to security settings.
+  On other computers, the registration number will be saved to 
+  the registry VirtualStore for that user.
+  If GSview fails to write the registration number, it now runs
+  gsvwrg32.exe or gsvwrg64.exe, which will ask for Administator 
+  credentials.
+
+  Now finds other languages on Win64.
+
+  Installer adds Publisher and Help URL to the uninstall data.
+
+
+---------------------------
 Version 4.9 2007-11-18
 ---------------------------
 All:

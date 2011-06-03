@@ -63,6 +63,9 @@ public:
 
 	void CleanUp(void);
 
+	void SetUninstallDescription(const char *help, const char *update,
+	    const char *support, const char *publisher, const char *version);
+
 private:
 	BOOL m_bNoCopy;
 	BOOL m_bUseCommon;
@@ -110,6 +113,12 @@ private:
 					// written to m_fLogNew
 	char m_szParentKeyName[MAXSTR];	// "HKEY_CLASSES_ROOT" etc.
 
+	/* entries for the Uninstaller */
+	char m_szHelp[MAXSTR];
+	char m_szUpdate[MAXSTR];
+	char m_szSupport[MAXSTR];
+	char m_szPublisher[MAXSTR];
+	char m_szVersion[MAXSTR];
 
 	void ResetReadonly(const char *filename);
 	BOOL SetRegistryValue(HKEY hkey, const char *value_name, const char *value);

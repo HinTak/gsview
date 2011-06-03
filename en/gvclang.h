@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2006, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,12 +20,12 @@
 
 #define AAENGLISH "English"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2006 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2011 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "All rights reserved."
 #define GSVIEW_COPYRIGHT3 "See the file LICENCE for more details."
 
-#define GS_COPYRIGHT1 "Copyright (C) 1994-2006 artofcode LLC,"
-#define GS_COPYRIGHT2 "Benicia, California, U.S.A.  All rights reserved."
+#define GS_COPYRIGHT1 "Copyright (C) 2011 Artifex Software, Inc."
+#define GS_COPYRIGHT2 "All rights reserved."
 #define GS_COPYRIGHT3 "See the file PUBLIC for more details."
 
 /* Buttons */
@@ -241,7 +241,7 @@
 /* Download Ghostscript dialog box */
 #define AADOWNLOADGS "Download Ghostscript"
 #define AADOWNLOADNOW "Download Now"
-#define AAGSNOTFOUND "Ghostscript can not be found on your computer.  You will need to download and install AFPL Ghostscript from"
+#define AAGSNOTFOUND "Ghostscript can not be found on your computer.  You will need to download and install GPL Ghostscript from"
 
 #define AAGSMESSWIN "GSview for Windows - Ghostscript Messages"
 #define AAGSMESSPM "PM GSview - Ghostscript Messages"
@@ -296,7 +296,7 @@
 #define AAONLINEREG "Online Registration"
 #define AAREG1 "Please enter your name and registration number"
 #define AAREG2 ""
-#define AANAG1 "GSview is Copyright 2006 Ghostgum Software Pty Ltd."
+#define AANAG1 "GSview is Copyright 2009 Ghostgum Software Pty Ltd."
 #define AANAG2 "Please support the development of GSview by registering it."
 #define AANAG3 ""
 #define AANAG4 "GSview can be registered online at"
@@ -308,9 +308,9 @@
 #define AAINSTALL1 "GSview Install"
 #define AAINSTALLINTRO1 "This wizard will help you install"
 #define AAINSTALLINTRO2 "If you are not using the self extracting EXE install, make sure you have the files listed in Readme.htm in the current directory."
-#define AAINSTALLINTRO3 "The installation will require 20 - 30 M bytes of hard disk space."
+#define AAINSTALLINTRO3 "The installation will require 45 M bytes of hard disk space."
 #define AAINSTALLCOPYRIGHT1 "Copyright Notices"
-#define AAINSTALLCOPYRIGHT2 "GSview and AFPL Ghostscript are separate programs."
+#define AAINSTALLCOPYRIGHT2 "GSview and GPL Ghostscript are separate programs."
 #define AAINSTALLCOPYRIGHT3 "They are owned by separate entities."
 #define AAINSTALLGSVER1 "Which components do you wish to install?"
 #define AAINSTALLGSVER2 "Install GSview"
@@ -360,8 +360,8 @@
 #define AAUNZIPCANCELLED "Unzip cancelled\n"
 #define AACANTALLOCBUF "Can't allocate memory for copy buffer"
 #define AAPROGRAMOBJECTFAILED "Couldn't create desktop program object"
-#define AAUNINSTALLTITLE "GSview and AFPL Ghostscript"
-#define AAUNINSTALLITEM "Uninstall GSview and AFPL Ghostscript"
+#define AAUNINSTALLTITLE "GSview and GPL Ghostscript"
+#define AAUNINSTALLITEM "Uninstall GSview and GPL Ghostscript"
 
 /* setup program */
 #define AAINSTALLSPACE "This installation will require 7 M bytes of hard disk space"
@@ -380,7 +380,7 @@
 
 /* configure */
 #define AAGSVIEWC "GSview:"
-#define AAALADDINGSC "AFPL Ghostscript:"
+#define AAALADDINGSC "GPL Ghostscript:"
 #define AACFG1 "GSview Configure"
 #define AACFG10 "This wizard will help you configure GSview."
 #define AACFG11 "If you don't understand an item on the following pages,\
@@ -405,7 +405,7 @@
 #define AACFG41 "Associate PostScript (.ps and .eps) files with GSview."
 #define AACFG42 "Associate PDF (.pdf) files with GSview."
 #define AACFG50 "GSview can create a Program Manager Group or\
- Start Menu Item for GSview and AFPL Ghostscript."
+ Start Menu Item for GSview and GPL Ghostscript."
 #define AACFG51 "Create Group / Item"
 #define AACFG52 "Name"
 #define AACFG53 "GSview can create a Desktop Program Object for GSview. \
@@ -441,4 +441,4 @@
 #define AAMABOUT "~About..."
 #endif
 
-#define WINHELPFILE "gsviewen.hlp"
+#define WINHELPFILE "gsviewen.chm"

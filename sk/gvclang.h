@@ -20,12 +20,12 @@
 
 #define AASLOVAK "Slovak"
 
-#define GSVIEW_COPYRIGHT1 "Autorské práva (C) 1993-2006 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Autorské práva (C) 1993-2011 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Všetky práva vyhradené."
 #define GSVIEW_COPYRIGHT3 "Pozrite si súbor LICENCE pre viac informácií."
 
-#define GS_COPYRIGHT1 "Autorské práva (C) 1994-2006 artofcode LLC,"
-#define GS_COPYRIGHT2 "Benicia, California, U.S.A.  Všetky práva vyhradené."
+#define GS_COPYRIGHT1 "Autorské práva (C) 2011 Artifex Software, Inc."
+#define GS_COPYRIGHT2 "California, U.S.A.  Všetky práva vyhradené."
 #define GS_COPYRIGHT3 "Pozrite si súbor PUBLIC pre viac informácií."
 
 /* Buttons */
@@ -441,4 +441,4 @@
 #define AAMABOUT "È~o je"
 #endif
 
-#define WINHELPFILE "gsviewsk.hlp"
+#define WINHELPFILE "gsviewsk.chm"

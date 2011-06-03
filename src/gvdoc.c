@@ -78,6 +78,7 @@ FILE * outfile;
 	if ( (outfile = fopen(argv[3],"w")) == (FILE *)NULL) {
 		fprintf(stderr,"%s: Can't open %s for writing\n",
 			argv[0], argv[3]);
+		return 1;
 	}
 	
 	while (fgets(line, MAX_LINE_LEN, infile)) {
