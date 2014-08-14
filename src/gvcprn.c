@@ -26,12 +26,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-void copy_setup(FILE *f, GFile *infile, int copies) ;
+void copy_setup(FILE *f, GVFile *infile, int copies) ;
 int upp_add_list(char *name, char *buffer, int len, int offset);
 int enum_upp(char *path, char *buffer, int len, int offset);
 char * uppname_to_model(char *buffer, char *name);
 void psfile_epsf_print(FILE *f, int copies);
-BOOL gsview_copygfile(FILE *outfile, GFile *infile);
+BOOL gsview_copygfile(FILE *outfile, GVFile *infile);
 BOOL gsview_copyfile(FILE *outfile, FILE *infile);
 
 void add_copies(FILE *f, int copies)
@@ -271,7 +271,7 @@ gsview_extract()
 
 
 void
-copy_setup(FILE *f, GFile *infile, int copies) 
+copy_setup(FILE *f, GVFile *infile, int copies) 
 {
     char line[DSC_LINE_LENGTH+1];
     if (copies > 1) {
@@ -747,7 +747,7 @@ CDSC *dsc = psfile.dsc;
 }
 
 BOOL
-gsview_copygfile(FILE *outfile, GFile *infile)
+gsview_copygfile(FILE *outfile, GVFile *infile)
 {
     char *buffer;
     int count;

@@ -17,7 +17,7 @@
 
 /* gvcmfile.cpp */
 
-/* GFile is similar but not identical to MFC CFile. */
+/* GVFile is similar but not identical to MFC CFile. */
 /* This implementation uses a memory buffer, NOT files. */
 
 
@@ -30,7 +30,7 @@ static const char *g_pBase;
 static long g_nLen;
 
 /* These are the private bits */
-struct GFile_s {
+struct GVFile_s {
 	/* Read from a memory buffer */
 	const char *m_pBase;
 	long m_nOffset;
@@ -43,13 +43,13 @@ void gfile_set_memory(const char *base, long len)
     g_nLen = len;
 }
 
-LONG gfile_get_length(GFile *gf)
+LONG gfile_get_length(GVFile *gf)
 {
     ASSERT(gf != NULL);
     return gf->m_nLen;
 }
 
-BOOL gfile_get_datetime(GFile *gf, UINT *pdt_low, UINT *pdt_high)
+BOOL gfile_get_datetime(GVFile *gf, UINT *pdt_low, UINT *pdt_high)
 {
     ASSERT(gf != NULL);
     *pdt_low = 0;
@@ -57,7 +57,7 @@ BOOL gfile_get_datetime(GFile *gf, UINT *pdt_low, UINT *pdt_high)
     return TRUE;
 }
 
-BOOL gfile_changed(GFile *gf, LONG length, UINT dt_low, UINT dt_high)
+BOOL gfile_changed(GVFile *gf, LONG length, UINT dt_low, UINT dt_high)
 {
     UINT this_dt_low, this_dt_high;
     DWORD this_length = gfile_get_length(gf);
@@ -66,20 +66,20 @@ BOOL gfile_changed(GFile *gf, LONG length, UINT dt_low, UINT dt_high)
 	(this_dt_low != dt_low) || (this_dt_high != dt_high));
 }
 
-GFile *gfile_open_handle(int hFile)
+GVFile *gfile_open_handle(int hFile)
 {
     return NULL;
 }
 
-GFile *gfile_open(LPCTSTR lpszFileName, UINT nOpenFlags)
+GVFile *gfile_open(LPCTSTR lpszFileName, UINT nOpenFlags)
 {
-    GFile *gf;
+    GVFile *gf;
     if (g_pBase == NULL)
 	return NULL;
-    gf = (GFile *)malloc(sizeof(GFile));
+    gf = (GVFile *)malloc(sizeof(GVFile));
     if (gf == NULL)
 	return NULL;
-    memset(gf, 0, sizeof(GFile));
+    memset(gf, 0, sizeof(GVFile));
     m_pBase = g_pBase;
     m_nLen = g_nLen;
     m_nOffset = 0;
@@ -87,14 +87,14 @@ GFile *gfile_open(LPCTSTR lpszFileName, UINT nOpenFlags)
 }
 
 
-void gfile_close(GFile *gf)
+void gfile_close(GVFile *gf)
 {
     ASSERT(gf != NULL);
     free(gf);
 }
 
 
-UINT gfile_read(GFile *gf, void *lpBuf, UINT nCount)
+UINT gfile_read(GVFile *gf, void *lpBuf, UINT nCount)
 {
     ASSERT(gf != NULL);
     ASSERT(gf->m_pBase != NULL);
@@ -111,7 +111,7 @@ UINT gfile_read(GFile *gf, void *lpBuf, UINT nCount)
 
 
 /* only works with reading */
-LONG gfile_seek(GFile *gf, LONG lOff, UINT nFrom)
+LONG gfile_seek(GVFile *gf, LONG lOff, UINT nFrom)
 {
     ASSERT(gf != NULL);
     ASSERT(gf->m_pBase != NULL);
@@ -134,7 +134,7 @@ LONG gfile_seek(GFile *gf, LONG lOff, UINT nFrom)
     return gf->m_nOffset;
 }
 
-LONG gfile_get_position(GFile *gf)
+LONG gfile_get_position(GVFile *gf)
 {
     ASSERT(gf != NULL);
     return gf->m_nOffset;

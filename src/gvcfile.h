@@ -17,7 +17,7 @@
 
 /* gvcfile.h */
 
-/* GFile is similar but to MFC CFile but is implemented as C, not C++. */
+/* GVFile is similar but to MFC CFile but is implemented as C, not C++. */
 
 #if defined(STDIO) || defined(MEMORYFILE) || !defined(_Windows) || defined(OS2)
 #ifndef UINT
@@ -53,7 +53,7 @@
 #endif
 
 
-typedef struct GFile_s GFile;
+typedef struct GVFile_s GVFile;
 
 /* for gfile_open nOpenFlags */
 enum OpenFlags {gfile_modeRead = 0x0000, gfile_modeWrite = 0x0001,
@@ -63,15 +63,15 @@ enum OpenFlags {gfile_modeRead = 0x0000, gfile_modeWrite = 0x0001,
 /* for gfile_seek nFrom */
 enum {gfile_begin, gfile_current, gfile_end};
 
-GFile *gfile_open_handle(int hFile);
-GFile *gfile_open(LPCSTR lpszFileName, UINT nOpenFlags);
-void gfile_close(GFile *gf);
-UINT gfile_read(GFile *gf, void *lpBuf, UINT nCount);
-UINT gfile_write(GFile *gf, void *lpBuf, UINT nCount);
-LONG gfile_seek(GFile *gf, LONG lOff, UINT nFrom);
-LONG gfile_get_position(GFile *gf);
-LONG gfile_get_length(GFile *gf);
-BOOL gfile_get_datetime(GFile *gf, UINT *pdt_low, UINT *pdt_high);
-BOOL gfile_changed(GFile *gf, LONG length, UINT dt_low, UINT dt_high);
-void gfile_set_memory(GFile *gf, const char *base, long len);
+GVFile *gfile_open_handle(int hFile);
+GVFile *gfile_open(LPCSTR lpszFileName, UINT nOpenFlags);
+void gfile_close(GVFile *gf);
+UINT gfile_read(GVFile *gf, void *lpBuf, UINT nCount);
+UINT gfile_write(GVFile *gf, void *lpBuf, UINT nCount);
+LONG gfile_seek(GVFile *gf, LONG lOff, UINT nFrom);
+LONG gfile_get_position(GVFile *gf);
+LONG gfile_get_length(GVFile *gf);
+BOOL gfile_get_datetime(GVFile *gf, UINT *pdt_low, UINT *pdt_high);
+BOOL gfile_changed(GVFile *gf, LONG length, UINT dt_low, UINT dt_high);
+void gfile_set_memory(GVFile *gf, const char *base, long len);
 

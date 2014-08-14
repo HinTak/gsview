@@ -713,7 +713,7 @@ All:
   time (usually 100ms) has passed.  If drawing to the window is
   slow, increase the time between updates.
 
-  Reading of document now uses GFile structure.  There are three 
+  Reading of document now uses GVFile structure.  There are three 
   implementations, C files, Windows files and memory.
 
   Added conditionals to remove all methods to copy, save or print

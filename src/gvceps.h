@@ -180,7 +180,7 @@ void scan_bbox(PREBMAP *pprebmap, PSBBOX *devbbox);
 void write_dword(DWORD val, FILE *f);
 void write_word(WORD val, FILE *f);
 
-void ps_copy(FILE *outfile, GFile *infile, long begin, long end);
-int ps_fgets(char *s, int n, GFile *stream);
-BOOL ps_copy_find(FILE *outfile, GFile *infile, long end, 
+void ps_copy(FILE *outfile, GVFile *infile, long begin, long end);
+int ps_fgets(char *s, int n, GVFile *stream);
+BOOL ps_copy_find(FILE *outfile, GVFile *infile, long end, 
 	char *s, int n, const char *comment);

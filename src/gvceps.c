@@ -52,7 +52,7 @@ int write_interchange(FILE *f, unsigned char *pbitmap, BOOL calc_bbox);
 
 
 void 
-ps_copy(FILE *outfile, GFile *infile, long begin, long end)
+ps_copy(FILE *outfile, GVFile *infile, long begin, long end)
 {
     char *buf;
     int count;
@@ -77,7 +77,7 @@ ps_copy(FILE *outfile, GFile *infile, long begin, long end)
 /* Like fgets, but allows any combination of EOL characters
  * and returns the count of bytes, not the string pointer
  */
-int ps_fgets(char *s, int n, GFile *stream)
+int ps_fgets(char *s, int n, GVFile *stream)
 {
     char ch;
     int not_eof = 0;
@@ -128,7 +128,7 @@ int ps_fgets(char *s, int n, GFile *stream)
 /* Stop if file offset exceeds end */
 /* Assume that end does not occur in the middle of a line */
 /* return TRUE if comment found, FALSE if not found */
-BOOL ps_copy_find(FILE *outfile, GFile *infile, long end, 
+BOOL ps_copy_find(FILE *outfile, GVFile *infile, long end, 
 	char *s, int n, const char *comment)
 {
     int count;

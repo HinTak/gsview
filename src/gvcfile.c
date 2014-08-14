@@ -17,7 +17,7 @@
 
 /* gvcfile.cpp */
 
-/* GFile is similar but not identical to MFC CFile, but is plain C. */
+/* GVFile is similar but not identical to MFC CFile, but is plain C. */
 /* This implementation uses C file streams */
 
 
@@ -32,7 +32,7 @@
 #include "gvcfile.h"
 
 /* These are the private bits */
-struct GFile_s {
+struct GVFile_s {
 	FILE *m_file;
 	time_t	m_filetime;	/* time/date of selected file */
 	long m_length;		/* length of selected file */
@@ -48,14 +48,14 @@ static void gfile_assert(const char *file, int len);
 #endif
 
 
-LONG gfile_get_length(GFile *gf)
+LONG gfile_get_length(GVFile *gf)
 {
     struct stat fstatus;
     fstat(fileno(gf->m_file), &fstatus);
     return fstatus.st_size;
 }
 
-BOOL gfile_get_datetime(GFile *gf, UINT *pdt_low, UINT *pdt_high)
+BOOL gfile_get_datetime(GVFile *gf, UINT *pdt_low, UINT *pdt_high)
 {
     struct stat fstatus;
     ASSERT(gf != NULL);
@@ -65,7 +65,7 @@ BOOL gfile_get_datetime(GFile *gf, UINT *pdt_low, UINT *pdt_high)
     return TRUE;
 }
 
-BOOL gfile_changed(GFile *gf, LONG length, UINT dt_low, UINT dt_high)
+BOOL gfile_changed(GVFile *gf, LONG length, UINT dt_low, UINT dt_high)
 {
     UINT this_dt_low, this_dt_high;
     LONG this_length = gfile_get_length(gf);
@@ -74,12 +74,12 @@ BOOL gfile_changed(GFile *gf, LONG length, UINT dt_low, UINT dt_high)
 	(this_dt_low != dt_low) || (this_dt_high != dt_high));
 }
 
-GFile *gfile_open_handle(int hFile)
+GVFile *gfile_open_handle(int hFile)
 {
-    GFile *gf = (GFile *)malloc(sizeof(GFile));
+    GVFile *gf = (GVFile *)malloc(sizeof(GVFile));
     if (gf == NULL)
 	return NULL;
-    memset(gf, 0, sizeof(GFile));
+    memset(gf, 0, sizeof(GVFile));
     gf->m_file = fdopen(hFile, "rb");
     if (gf->m_file == NULL) {
 	free(gf);
@@ -88,9 +88,9 @@ GFile *gfile_open_handle(int hFile)
     return gf;
 }
 
-GFile *gfile_open(LPCTSTR lpszFileName, UINT nOpenFlags)
+GVFile *gfile_open(LPCTSTR lpszFileName, UINT nOpenFlags)
 {
-    GFile *gf;
+    GVFile *gf;
     FILE *f;
     const char *access = "rb";
     if ((nOpenFlags & 0xf) == gfile_modeWrite)
@@ -100,17 +100,17 @@ GFile *gfile_open(LPCTSTR lpszFileName, UINT nOpenFlags)
     if (f == (FILE *)NULL)
 	return NULL;
 
-    gf = (GFile *)malloc(sizeof(GFile));
+    gf = (GVFile *)malloc(sizeof(GVFile));
     if (gf == NULL) {
 	fclose(f);
 	return NULL;
     }
-    memset(gf, 0, sizeof(GFile));
+    memset(gf, 0, sizeof(GVFile));
     gf->m_file = f;
     return gf;
 }
 
-void gfile_close(GFile *gf)
+void gfile_close(GVFile *gf)
 {
     ASSERT(gf != NULL);
     ASSERT(gf->m_file != 0);
@@ -120,14 +120,14 @@ void gfile_close(GFile *gf)
 }
 
 
-UINT gfile_read(GFile *gf, void *lpBuf, UINT nCount)
+UINT gfile_read(GVFile *gf, void *lpBuf, UINT nCount)
 {
     ASSERT(gf != NULL);
     ASSERT(gf->m_file != 0);
     return fread(lpBuf, 1, nCount, gf->m_file);
 }
 
-UINT gfile_write(GFile *gf, void *lpBuf, UINT nCount)
+UINT gfile_write(GVFile *gf, void *lpBuf, UINT nCount)
 {
     ASSERT(gf != NULL);
     ASSERT(gf->m_file != 0);
@@ -135,7 +135,7 @@ UINT gfile_write(GFile *gf, void *lpBuf, UINT nCount)
 }
 
 /* only works with reading */
-LONG gfile_seek(GFile *gf, LONG lOff, UINT nFrom)
+LONG gfile_seek(GVFile *gf, LONG lOff, UINT nFrom)
 {
     int origin;
     ASSERT(gf != NULL);
@@ -159,7 +159,7 @@ LONG gfile_seek(GFile *gf, LONG lOff, UINT nFrom)
     return ftell(gf->m_file);
 }
 
-LONG gfile_get_position(GFile *gf)
+LONG gfile_get_position(GVFile *gf)
 {
     ASSERT(gf != NULL);
     ASSERT(gf->m_file != 0);

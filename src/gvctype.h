@@ -52,7 +52,7 @@ typedef struct tagPAGELIST {
 typedef struct tagPSFILE {
 	char 	name[MAXSTR];	/* name of selected document file */
 	char	tname[MAXSTR];	/* name of temporary file (gunzipped) */
-	GFile 	*file;		/* selected file */
+	GVFile 	*file;		/* selected file */
 	UINT	filetimel;	/* time/date of selected file */
 	UINT	filetimeh;	/* time/date of selected file */
 	LONG	length;		/* length of selected file */

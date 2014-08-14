@@ -643,7 +643,7 @@ int
 dfchanged()
 {
 char *filename;
-GFile *gf;
+GVFile *gf;
 BOOL changed = FALSE;
 int code = 0;
 	request_mutex();
@@ -711,7 +711,7 @@ char *filename;
 	}
 
 	if ((psfile.file = gfile_open(filename, gfile_modeRead))
-	    == (GFile *)NULL) {
+	    == (GVFile *)NULL) {
 	    if (debug)
 	        delayed_message_box(IDS_DEBUG_DFISMISSING, 0);
 	    filename[0] = '\0';
