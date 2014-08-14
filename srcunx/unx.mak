@@ -77,10 +77,10 @@ PLINK=-lpthread -lrt
 
 # Other possible options are -Wtraditional
 # Compiler flags for C and C++ files.
-CFLAGS=-O -Wall -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -fno-builtin -fno-common -Wcast-qual -Wwrite-strings $(CDEBUG) -DX11 -DUNIX -DNONAG $(RPM_OPT_FLAGS) `pkg-config gtk+ --cflags` $(XINCLUDE) $(PFLAGS)
+CFLAGS=-O -Wall -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -fno-builtin -fno-common -Wcast-qual -Wwrite-strings $(CDEBUG) -DX11 -DUNIX -DNONAG $(RPM_OPT_FLAGS) `pkg-config gtk+-2.0 --cflags` $(XINCLUDE) $(PFLAGS)
 
 # Linker flags
-LFLAGS=$(LDEBUG) $(PLINK) `pkg-config gtk+ --libs` -ldl
+LFLAGS=$(LDEBUG) $(PLINK) `pkg-config gtk+-2.0 --libs` -ldl
 
 COMP=$(CC) $(CFLAGS) -I. -I$(SRCDIR) -I$(SRCUNXDIR) -I$(OBJDIR)
 CCAUX=$(CC) $(CFLAGS) -I$(SRCDIR)
