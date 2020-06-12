@@ -1486,7 +1486,7 @@ E
 
  Siehe auch `Konvertierungen`.
 4Schnelles extrahieren und Suchen
-=Quick_Text_Extract_and_Find
+-Quick_Text_Extract_and_Find
 ?Schnelles extrahieren und Suchen
  In PostScript-Dateien ist der Text normalerweise genauso angeordnet wie er
  auf der Seite erscheint, wobei die PostScript Strings (Textanweisungen) in

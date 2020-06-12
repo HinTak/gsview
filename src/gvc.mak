@@ -353,7 +353,6 @@ src: gsv$(GSVIEW_VERSION)src.zip
 gsv$(GSVIEW_VERSION)src.zip:
 	copy Readme.htm ..
 	copy gsview.css ..
-	copy cdorder.txt ..
 	copy LICENCE ..
 	copy FILE_ID.DIZ ..
 	cd ..
@@ -364,10 +363,9 @@ gsv$(GSVIEW_VERSION)src.zip:
 	zip -9 -@ src.zip     < gvclists.txt
 	-del gvclists.txt
 	-del gsv$(GSVIEW_VERSION)src.zip
-	zip -9 gsv$(GSVIEW_VERSION)src.zip pstotext.zip src.zip Readme.htm gsview.css cdorder.txt FILE_ID.DIZ LICENCE
+	zip -9 gsv$(GSVIEW_VERSION)src.zip pstotext.zip src.zip Readme.htm gsview.css FILE_ID.DIZ LICENCE
 	-del Readme.htm
 	-del gsview.css
-	-del cdorder.txt
 	-del LICENCE
 	-del FILE_ID.DIZ
 	cd src
@@ -377,7 +375,6 @@ prezip: gsv$(GSVIEW_VERSION)w$(WINEXT).exe
 zip: prezip gsv$(GSVIEW_VERSION)src.zip
 	copy Readme.htm ..\Readme.htm
 	copy gsview.css ..\gsview.css
-	copy cdorder.txt ..\cdorder.txt
 	copy LICENCE ..\LICENCE
 	copy FILE_ID.DIZ ..\FILE_ID.DIZ
 	cd ..
@@ -388,10 +385,9 @@ zip: prezip gsv$(GSVIEW_VERSION)src.zip
 # gsv$(GSVIEW_VERSION)w16.zip 
 	zip -9 gsview$(GSVIEW_VERSION) gsv$(GSVIEW_VERSION)w32.exe
 # gsv$(GSVIEW_VERSION)wda.zip
-	zip -9 gsview$(GSVIEW_VERSION) Readme.htm gsview.css cdorder.txt FILE_ID.DIZ LICENCE
+	zip -9 gsview$(GSVIEW_VERSION) Readme.htm gsview.css FILE_ID.DIZ LICENCE
 	-del Readme.htm
 	-del gsview.css
-	-del cdorder.txt
 	-del LICENCE
 	-del FILE_ID.DIZ
 	cd src
@@ -418,7 +414,6 @@ gsv$(GSVIEW_VERSION)wda.zip:
 	copy FILE_ID.DIZ ..\FILE_ID.DIZ
 	copy LICENCE ..\gsview\LICENCE
 	copy Readme.htm ..\gsview\Readme.htm
-	copy cdorder.txt ..\gsview\cdorder.txt
 	copy regorder.txt ..\gsview\regorder.txt
 	copy gsviewda.exe ..\gsview\gsviewda.exe
 	copy NUL ..\gsview\gsview32.ini
@@ -472,7 +467,6 @@ distcopy:
 	copy LICENCE ..\gsview\LICENCE
 	copy Readme.htm ..\gsview\Readme.htm
 	copy gsview.css ..\gsview\gsview.css
-	copy cdorder.txt ..\gsview\cdorder.txt
 	copy regorder.txt ..\gsview\regorder.txt
 	copy gsview32.exe ..\gsview\gsview32.exe
 	copy binary\gvwin1.ico ..\gsview32.ico

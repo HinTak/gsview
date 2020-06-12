@@ -1,4 +1,15 @@
 ---------------------------
+Version 5.0 2012-01-17
+---------------------------
+All:
+  Non-beta release.
+
+X11:
+  This code is temporarily removed, because it is being converted
+  from gtk+-1.2 to gtk-+2.0 and is in a non-functioning state.
+
+
+---------------------------
 Version 4.91beta 2011-06-03
 ---------------------------
 All:

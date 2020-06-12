@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2012, Ghostgum Software Pty Ltd.  All rights reserved.
 
   This file is part of GSview.
 
@@ -20,7 +20,7 @@
 
 #define AANEDERLANDS "Nederlands"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2011 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2012 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Alle rechten voorbehouden"
 #define GSVIEW_COPYRIGHT3 "Zie het LICENCE bestand voor meer details."
 

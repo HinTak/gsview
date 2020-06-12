@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2012, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -21,6 +21,7 @@
 /* Version number changes must be made to
  *   src/gvcver.h
  *   src/gvcver.mak
+ *   src/wincom.mak (Copyright year)
  *   Readme.htm
  *   FILE_ID.DIZ
  *   src/gvcnews.txt
@@ -33,11 +34,11 @@
 
 /* undefine BETA for a final release */
 /*
-*/
 #define BETA
 #define BETA_YEAR    2011
 #define BETA_MONTH   12
 #define BETA_DAY     30
+*/
 
 
 /* GSview */

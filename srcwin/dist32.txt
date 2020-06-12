@@ -36,6 +36,5 @@ gsview\gsprint.htm
 gsview\epstool.htm
 gsview\Readme.htm
 gsview\gsview.css
-gsview\cdorder.txt
 gsview\regorder.txt
 gsview\LICENCE

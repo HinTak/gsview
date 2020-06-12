@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2012, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,7 +20,7 @@
 
 #define AACATALA "Català"
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2011 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2012 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Tots els drets reservats."
 #define GSVIEW_COPYRIGHT3 "Vegeu el fitxer LICENCE per a més detalls."
 

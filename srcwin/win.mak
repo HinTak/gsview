@@ -40,6 +40,9 @@ VCVER=8
 !if "$(_NMAKE_VER)" == "8.00.50727.762"
 VCVER=8
 !endif
+!if "$(_NMAKE_VER)" == "9.00.21022.08"
+VCVER=9
+!endif
 !if "$(_NMAKE_VER)" == "9.00.30729.01"
 VCVER=9
 !endif

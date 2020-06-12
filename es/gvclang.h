@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd. All rights reserved.
+/* Copyright (C) 1993-2012, Ghostgum Software Pty Ltd. All rights reserved.
 
   This file is part of GSview.
 
@@ -20,7 +20,7 @@
 
 #define AAESPANOL "Español" /* Espaniol in code page 1252 */
 
-#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2011 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2012 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Reservados todos los derechos."
 #define GSVIEW_COPYRIGHT3 "Léase el archivo LICENCE para más detalles."
 

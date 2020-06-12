@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2012, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -582,12 +582,12 @@ srczip:
 	echo $(DISTDIR)/gsview.css >> $(OD)src.txt
 	echo $(DISTDIR)/LICENCE >> $(OD)src.txt
 	echo $(DISTDIR)/FILE_ID.DIZ >> $(OD)src.txt
-	echo $(DISTDIR)/cdorder.txt >> $(OD)src.txt
 	echo $(DISTDIR)/regorder.txt >> $(OD)src.txt
 	echo $(DISTDIR)/src >> $(OD)src.txt
 	echo $(DISTDIR)/srcwin >> $(OD)src.txt
 	echo $(DISTDIR)/srcos2 >> $(OD)src.txt
-	echo $(DISTDIR)/srcunx >> $(OD)src.txt
+# temporarily remove GNU/Linux until it is converted to gtk+-2.0
+#	echo $(DISTDIR)/srcunx >> $(OD)src.txt
 	echo $(DISTDIR)/binary >> $(OD)src.txt
 	echo $(DISTDIR)/en >> $(OD)src.txt
 	echo $(DISTDIR)/ct >> $(OD)src.txt
@@ -635,7 +635,6 @@ srctar:
 	echo $(DISTDIR)/Readme.htm > $(OD)src_tar.txt
 	echo $(DISTDIR)/epstool.htm >> $(OD)src_tar.txt
 	echo $(DISTDIR)/gsview.css >> $(OD)src_tar.txt
-	echo $(DISTDIR)/cdorder.txt >> $(OD)src_tar.txt
 	echo $(DISTDIR)/regorder.txt >> $(OD)src_tar.txt
 	echo $(DISTDIR)/LICENCE >> $(OD)src_tar.txt
 	echo $(DISTDIR)/FILE_ID.DIZ >> $(OD)src_tar.txt
@@ -668,7 +667,6 @@ viewonlydist:
 	$(CP) LICENCE dist$(D)gsview$(D)LICENCE
 	$(CP) Readme.htm dist$(D)gsview$(D)Readme.htm
 	$(CP) gsview.css dist$(D)gsview$(D)gsview.css
-	$(CP) cdorder.txt dist$(D)gsview$(D)cdorder.txt
 	$(CP) regorder.txt dist$(D)gsview$(D)regorder.txt
 	$(CP) $(BD)gsview$(WINEXT).exe dist$(D)gsview$(D)gsview$(WINEXT).exe
 	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(WINEXT).ico
@@ -689,7 +687,6 @@ viewonlydist:
 	echo gsview$(D)libbz2.dll>> $(OD)viewlist.txt
 	echo gsview$(D)Readme.htm>> $(OD)viewlist.txt
 	echo gsview$(D)gsview.css>> $(OD)viewlist.txt
-	echo gsview$(D)cdorder.txt>> $(OD)viewlist.txt
 	echo gsview$(D)regorder.txt>> $(OD)viewlist.txt
 	echo gsview$(D)LICENCE>> $(OD)viewlist.txt
 	echo GSview $(GSVIEW_DOT_VERSION)> $(OD)$(D)viewlist.tmp
@@ -713,7 +710,7 @@ viewonlydist:
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .$(D)setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2007 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2012 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview$(D)LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT). > dialog.txt
 	echo GSview uses Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
@@ -737,7 +734,6 @@ distcopy:
 	$(CP) LICENCE dist$(D)gsview$(D)LICENCE
 	$(CP) Readme.htm dist$(D)gsview$(D)Readme.htm
 	$(CP) gsview.css dist$(D)gsview$(D)gsview.css
-	$(CP) cdorder.txt dist$(D)gsview$(D)cdorder.txt
 	$(CP) regorder.txt dist$(D)gsview$(D)regorder.txt
 	$(CP) $(BD)gsview$(WINEXT).exe dist$(D)gsview$(D)gsview$(WINEXT).exe
 	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(WINEXT).ico
@@ -832,7 +828,7 @@ gsv$(GSVIEW_VERSION)w$(WINEXT).exe: distcopy gsv$(GSVIEW_VERSION)w$(WINEXT).zip
 	echo -a about.txt >> setup.rsp
 	echo -t dialog.txt >> setup.rsp
 	echo -c .$(D)setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2011 Ghostgum Software Pty Ltd. > about.txt
+	echo GSview is Copyright (C) 2012 Ghostgum Software Pty Ltd. > about.txt
 	echo See licence in gsview$(D)LICENCE >> about.txt
 	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win$(WINEXT). > dialog.txt
 	echo GSview uses Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
