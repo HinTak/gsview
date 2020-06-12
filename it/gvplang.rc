@@ -86,7 +86,7 @@ BEGIN
 		MENUITEM "Configurazione Facile...", IDM_CFG
 		MENUITEM "Configurazione Avanzata...", IDM_GSCOMMAND
 		MENUITEM "Suoni...", IDM_SOUNDS
-		SUBMENU "~Unit‡ di Misura", IDM_UNITMENU
+		SUBMENU "~Unit√† di Misura", IDM_UNITMENU
 		BEGIN
 			MENUITEM "~pt", IDM_UNITPT
 			MENUITEM "~mm", IDM_UNITMM

@@ -176,7 +176,6 @@ BEGIN
 		MENUITEM "&Search for Help on...", IDM_HELPSEARCH
 		MENUITEM "&Keys Help", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-		MENUITEM "&Register...", IDM_REGISTER
 		MENUITEM "&About...", IDM_ABOUT
 	END
 END
@@ -241,7 +240,7 @@ STRINGTABLE
 BEGIN
 	/* general strings */
 	IDS_SLANGUAGE, "EN,2"
-	IDS_CODEPAGE, "1252"	/* ISO-Latin-1 */
+	IDS_CODEPAGE, "65001"	/* UTF-8 */
 	IDS_HELPFILE, WINHELPFILE
 	IDS_SOUNDNOMM, "Can't load WINMM.DLL\nSounds will be unavailable"
 END

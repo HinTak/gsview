@@ -33,7 +33,7 @@ BEGIN
 		MENUITEM "&Anomena i desa...\tA", IDM_SAVEAS
 #endif
 		MENUITEM "&Tanca\tC", IDM_CLOSE
-		MENUITEM "&InformaciÛ...\tI", IDM_INFO
+		MENUITEM "&Informaci√≥...\tI", IDM_INFO
 		MENUITEM SEPARATOR
 #ifndef VIEWONLY
 		MENUITEM "Converteix...\tF", IDM_CONVERTFILE
@@ -58,32 +58,32 @@ BEGIN
 		MENUITEM "&Enganxa a...", IDM_PASTETO
 		MENUITEM "Converteix el mapa de &bits", IDM_CONVERT
 		MENUITEM SEPARATOR
-		POPUP "&Afegeix la visualitzaciÛ prËvia EPS"
+		POPUP "&Afegeix la visualitzaci√≥ pr√®via EPS"
 		BEGIN
 		    MENUITEM "&Intercanvia", IDM_MAKEEPSI
 		    MENUITEM "TIFF 4", IDM_MAKEEPST4
 		    MENUITEM "&TIFF 6 sense comprimir", IDM_MAKEEPST6U
-		    MENUITEM "TIFF 6 amb compressiÛ de &bits", IDM_MAKEEPST6P
+		    MENUITEM "TIFF 6 amb compressi√≥ de &bits", IDM_MAKEEPST6P
 		    MENUITEM "Metafitxer del &Windows", IDM_MAKEEPSW
-		    MENUITEM "&VisualitzaciÛ prËvia proveÔda per l'usuari", IDM_MAKEEPSU
+		    MENUITEM "&Visualitzaci√≥ pr√®via prove√Øda per l'usuari", IDM_MAKEEPSU
 		END
 		POPUP "&Extreu l'EPS"
 		BEGIN
 		    MENUITEM "&PostScript", IDM_EXTRACTPS
-		    MENUITEM "&VisualitzaciÛ prËvia", IDM_EXTRACTPRE
+		    MENUITEM "&Visualitzaci√≥ pr√®via", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
 		MENUITEM "Mida", IDM_MEASURE
 		MENUITEM "Converteix al format de vector...", IDM_PSTOEDIT
 		MENUITEM "Extreu el &text...", IDM_TEXTEXTRACT
 		MENUITEM "&Cerca...\tCtrl+F", IDM_TEXTFIND
-		MENUITEM "Cerca el &seg¸ent\tF3", IDM_TEXTFINDNEXT
+		MENUITEM "Cerca el &seg√ºent\tF3", IDM_TEXTFINDNEXT
 	END
 #endif
 	POPUP "O&pcions"
 	BEGIN
-		MENUITEM "ConfiguraciÛ f‡cil...", IDM_CFG
-		MENUITEM "ConfiguraciÛ avanÁada...", IDM_GSCOMMAND
+		MENUITEM "Configuraci√≥ f√†cil...", IDM_CFG
+		MENUITEM "Configuraci√≥ avan√ßada...", IDM_GSCOMMAND
 		MENUITEM "Sons...", IDM_SOUNDS
 		POPUP "&Unitats"
 		BEGIN
@@ -91,7 +91,7 @@ BEGIN
 			MENUITEM "&mm", IDM_UNITMM
 			MENUITEM "p&olzada", IDM_UNITINCH
 			MENUITEM SEPARATOR
-			MENUITEM "ResoluciÛ &fina", IDM_UNITFINE
+			MENUITEM "Resoluci√≥ &fina", IDM_UNITFINE
 		END
 		POPUP "&Idioma"
 		BEGIN
@@ -103,7 +103,7 @@ BEGIN
 		BEGIN
 			MENUITEM "Inhabilitat", IDM_PSTOTEXTDIS
 			MENUITEM "Normal", IDM_PSTOTEXTNORM
-			MENUITEM "CodificaciÛ Dvips Cork", IDM_PSTOTEXTCORK
+			MENUITEM "Codificaci√≥ Dvips Cork", IDM_PSTOTEXTCORK
 		END
 #endif
 		POPUP "Avisos DSC"
@@ -113,48 +113,48 @@ BEGIN
 			MENUITEM "Avisos", IDM_DSC_WARN
 			MENUITEM "Tots", IDM_DSC_INFO
 		END
-		MENUITEM "Desa les preferËncies &ara", IDM_SETTINGS
+		MENUITEM "Desa les prefer√®ncies &ara", IDM_SETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "&Desa les preferËncies en sortir", IDM_SAVESETTINGS
-		MENUITEM "&MÈs seguretat", IDM_SAFER
-		MENUITEM "Desa l'˙ltim &directori", IDM_SAVEDIR
+		MENUITEM "&Desa les prefer√®ncies en sortir", IDM_SAVESETTINGS
+		MENUITEM "&M√©s seguretat", IDM_SAFER
+		MENUITEM "Desa l'√∫ltim &directori", IDM_SAVEDIR
 		MENUITEM "&Barra de botons", IDM_BUTTONSHOW
-		MENUITEM "&Ajusta la finestra a la p‡gina", IDM_FITPAGE
-		MENUITEM "&Torna a dibuixar autom‡ticament", IDM_AUTOREDISPLAY
+		MENUITEM "&Ajusta la finestra a la p√†gina", IDM_FITPAGE
+		MENUITEM "&Torna a dibuixar autom√†ticament", IDM_AUTOREDISPLAY
 		MENUITEM "&Retalla els EPS", IDM_EPSFCLIP
 		MENUITEM "A&visos EPS", IDM_EPSFWARN
 		MENUITEM "&Ignora els DSC", IDM_IGNOREDSC
-		MENUITEM "M&ostra el requadre del lÌmit", IDM_SHOWBBOX
+		MENUITEM "M&ostra el requadre del l√≠mit", IDM_SHOWBBOX
 	END
 	POPUP "&Visualitza"
 	BEGIN
-		MENUITEM "P‡gina &seg¸ent\t+", IDM_NEXT
-		MENUITEM "P‡gina &anterior\t-", IDM_PREV
-		MENUITEM "&VÈs a la p‡gina...\tG", IDM_GOTO
-		MENUITEM "VÈs &endarrera\tB", IDM_GOBACK
-		MENUITEM "VÈs e&ndavant", IDM_GOFWD
+		MENUITEM "P√†gina &seg√ºent\t+", IDM_NEXT
+		MENUITEM "P√†gina &anterior\t-", IDM_PREV
+		MENUITEM "&V√©s a la p√†gina...\tG", IDM_GOTO
+		MENUITEM "V√©s &endarrera\tB", IDM_GOBACK
+		MENUITEM "V√©s e&ndavant", IDM_GOFWD
 		MENUITEM "&Torna a dibuixar\tR", IDM_REDISPLAY
 		MENUITEM SEPARATOR
-		MENUITEM "P‡gina seg¸ent i inicial\tSpace", IDM_NEXTHOME
-		MENUITEM "P‡gina anterior i inicial\tBkSp", IDM_PREVHOME
+		MENUITEM "P√†gina seg√ºent i inicial\tSpace", IDM_NEXTHOME
+		MENUITEM "P√†gina anterior i inicial\tBkSp", IDM_PREVHOME
 		MENUITEM SEPARATOR
 		MENUITEM "&Pantalla completa\tF4", IDM_FULLSCREEN
 		MENUITEM "Ajusta a la &finestra\tF6", IDM_FITWIN
 	END
-	POPUP "&OrientaciÛ"
+	POPUP "&Orientaci√≥"
 	BEGIN
-		MENUITEM "&Autom‡tica", IDM_AUTOORIENT
+		MENUITEM "&Autom√†tica", IDM_AUTOORIENT
 		MENUITEM SEPARATOR
 		MENUITEM "&Vertical", IDM_PORTRAIT
 		MENUITEM "&Horitzontal", IDM_LANDSCAPE
 		MENUITEM "V&ertical cap per avall", IDM_UPSIDEDOWN
-		MENUITEM "H&oritzontal al revÈs", IDM_SEASCAPE
+		MENUITEM "H&oritzontal al rev√©s", IDM_SEASCAPE
 		MENUITEM SEPARATOR
-		MENUITEM "&Intercanvia la posiciÛ horitzontal", IDM_SWAPLANDSCAPE
+		MENUITEM "&Intercanvia la posici√≥ horitzontal", IDM_SWAPLANDSCAPE
 	END
 	POPUP "&Suport"
 	BEGIN
-		MENUITEM "&Par‡metres de visualitzaciÛ...", IDM_DISPLAYSETTINGS
+		MENUITEM "&Par√†metres de visualitzaci√≥...", IDM_DISPLAYSETTINGS
 		MENUITEM SEPARATOR
 		MENUITEM "&Gira el suport", IDM_MEDIAROTATE
 		MENUITEM SEPARATOR

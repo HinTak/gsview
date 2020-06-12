@@ -30,7 +30,7 @@ BEGIN
         MENUITEM "Se&leccionar archivo...", IDM_SELECT
         MENUITEM "&Guardar como...\tG", IDM_SAVEAS
         MENUITEM "&Cerrar\tC", IDM_CLOSE
-        MENUITEM "I&nformaciÛn...\tN", IDM_INFO
+        MENUITEM "I&nformaci√≥n...\tN", IDM_INFO
         MENUITEM SEPARATOR
         MENUITEM "C&onvertir...", IDM_CONVERTFILE
         MENUITEM "&Extraer...\tE", IDM_EXTRACT
@@ -54,7 +54,7 @@ BEGIN
         MENUITEM "&Pegar en...", IDM_PASTETO
         MENUITEM "Convertir a &Bitmap", IDM_CONVERT
         MENUITEM SEPARATOR
-        POPUP "&AÒadir vista preliminar a EPS"
+        POPUP "&A√±adir vista preliminar a EPS"
         BEGIN
             MENUITEM "&Interchange", IDM_MAKEEPSI
             MENUITEM "&TIFF 4", IDM_MAKEEPST4
@@ -77,27 +77,27 @@ BEGIN
     END
     POPUP "O&pciones"
     BEGIN
-        MENUITEM "ConfiguraciÛn &sencilla...", IDM_CFG
-        MENUITEM "ConfiguraciÛn &avanzada...", IDM_GSCOMMAND
+        MENUITEM "Configuraci√≥n &sencilla...", IDM_CFG
+        MENUITEM "Configuraci√≥n &avanzada...", IDM_GSCOMMAND
         MENUITEM "Sonidos...", IDM_SOUNDS
         POPUP "&Unidades"
         BEGIN
             MENUITEM "&pt (punto)", IDM_UNITPT
-            MENUITEM "&mm (milÌmetro)", IDM_UNITMM
+            MENUITEM "&mm (mil√≠metro)", IDM_UNITMM
             MENUITEM "&in (pulgada)", IDM_UNITINCH
             MENUITEM SEPARATOR
-            MENUITEM "ResoluciÛn &fina", IDM_UNITFINE
+            MENUITEM "Resoluci√≥n &fina", IDM_UNITFINE
         END
         POPUP "&Idioma"
         BEGIN
         MENUITEM "&English", IDM_LANGEN
         /* Remaining languages are added at run time */
         END
-        POPUP "ConversiÛn a &texto"
+        POPUP "Conversi√≥n a &texto"
         BEGIN
             MENUITEM "Desactivado", IDM_PSTOTEXTDIS
             MENUITEM "Normal", IDM_PSTOTEXTNORM
-            MENUITEM "P·gina de cÛdigos Dvips Cork", IDM_PSTOTEXTCORK
+            MENUITEM "P√°gina de c√≥digos Dvips Cork", IDM_PSTOTEXTCORK
         END
         POPUP "Comentarios DSC"
         BEGIN
@@ -110,10 +110,10 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Guardar opciones al &salir", IDM_SAVESETTINGS
         MENUITEM "&Proteger los ficheros", IDM_SAFER
-        MENUITEM "Guardar el ˙ltimo &directorio", IDM_SAVEDIR
+        MENUITEM "Guardar el √∫ltimo &directorio", IDM_SAVEDIR
         MENUITEM "&Mostrar barra de botones", IDM_BUTTONSHOW
-        MENUITEM "A&justar la ventana a la p·gina", IDM_FITPAGE
-        MENUITEM "ActualizaciÛn autom·tica", IDM_AUTOREDISPLAY
+        MENUITEM "A&justar la ventana a la p√°gina", IDM_FITPAGE
+        MENUITEM "Actualizaci√≥n autom√°tica", IDM_AUTOREDISPLAY
         MENUITEM "Re&cortar EPS", IDM_EPSFCLIP
         MENUITEM "A&visos EPS", IDM_EPSFWARN
         MENUITEM "&Ignorar los comentarios DSC", IDM_IGNOREDSC
@@ -121,22 +121,22 @@ BEGIN
     END
     POPUP "&Ver"
     BEGIN
-        MENUITEM "P·gina si&guiente\t+", IDM_NEXT
-        MENUITEM "P·gina a&nterior\t-", IDM_PREV
-        MENUITEM "Ir a la &p·gina...\tP", IDM_GOTO
+        MENUITEM "P√°gina si&guiente\t+", IDM_NEXT
+        MENUITEM "P√°gina a&nterior\t-", IDM_PREV
+        MENUITEM "Ir a la &p√°gina...\tP", IDM_GOTO
         MENUITEM "Vista &anterior", IDM_GOBACK
         MENUITEM "Vista &siguiente", IDM_GOFWD
         MENUITEM "Ac&tualizar\tF5", IDM_REDISPLAY
         MENUITEM SEPARATOR
-        MENUITEM "Cabecera de p·gina siguiente\tSpace", IDM_NEXTHOME
-        MENUITEM "Cabecera de p·gina anterior\tBkSp", IDM_PREVHOME
+        MENUITEM "Cabecera de p√°gina siguiente\tSpace", IDM_NEXTHOME
+        MENUITEM "Cabecera de p√°gina anterior\tBkSp", IDM_PREVHOME
         MENUITEM SEPARATOR
         MENUITEM "Pantalla &completa\tF4", IDM_FULLSCREEN
         MENUITEM "Ajustar a la &ventana\tF6", IDM_FITWIN
     END
-    POPUP "&OrientaciÛn"
+    POPUP "&Orientaci√≥n"
     BEGIN
-        MENUITEM "&Autom·tica", IDM_AUTOORIENT
+        MENUITEM "&Autom√°tica", IDM_AUTOORIENT
         MENUITEM SEPARATOR
         MENUITEM "&Normal", IDM_PORTRAIT
         MENUITEM "Apaisada a &izquierda", IDM_LANDSCAPE
@@ -147,7 +147,7 @@ BEGIN
     END
     POPUP "&Formatos"
     BEGIN
-        MENUITEM "&Par·metros de pantalla...", IDM_DISPLAYSETTINGS
+        MENUITEM "&Par√°metros de pantalla...", IDM_DISPLAYSETTINGS
         MENUITEM SEPARATOR
         MENUITEM "Intercambiar dimensiones", IDM_MEDIAROTATE
         MENUITEM SEPARATOR
@@ -165,7 +165,7 @@ BEGIN
     END
     POPUP "&Ayuda"
     BEGIN
-        MENUITEM "&Õndice", IDM_HELPCONTENT
+        MENUITEM "&√çndice", IDM_HELPCONTENT
         MENUITEM "&Buscar ayuda sobre...", IDM_HELPSEARCH
         MENUITEM "Los atajos del &teclado", IDM_HELPKEYS
         MENUITEM SEPARATOR

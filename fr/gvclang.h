@@ -18,14 +18,14 @@
 /* fr\gvclang.h */
 /* Common French language defines */
 
-#define AAFRANCAIS "Français"	/* Francais in code page 1252 */
+#define AAFRANCAIS "FranÃ§ais"	/* Francais in code page 1252 */
 
 #define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2012 Ghostgum Software Pty Ltd."
-#define GSVIEW_COPYRIGHT2 "Tous droits réservés."
+#define GSVIEW_COPYRIGHT2 "Tous droits rÃ©servÃ©s."
 #define GSVIEW_COPYRIGHT3 "Voir le fichier LICENCE pour plus d'informations."
 
 #define GS_COPYRIGHT1 "Copyright (C) 2011 Artifex Software, Inc."
-#define GS_COPYRIGHT2 "California, U.S.A. Tous droits réservés."
+#define GS_COPYRIGHT2 "California, U.S.A. Tous droits rÃ©servÃ©s."
 #define GS_COPYRIGHT3 "Voir le fichier PUBLIC pour plus d'informations."
 
 /* Buttons */
@@ -33,35 +33,35 @@
 #define AAOK "Ok"
 #define AACANCEL "Annuler"
 #define AAEDIT "Edition"
-#define AADEFAULTS "Défauts"
+#define AADEFAULTS "DÃ©fauts"
 #define AAHELP "Aide"
 #define AANEW "Nouveau"
 #define AATEST "Test"
 #define AAYES "Oui"
 #define AANO "Non"
 #define AANEXTGT "Suivant >"
-#define AABACKLT "< Précédent"
-#define AAFINISHGT "Démarrer"
+#define AABACKLT "< PrÃ©cÃ©dent"
+#define AAFINISHGT "DÃ©marrer"
 #define AAEXIT "Fin"
 #else
 #ifdef _Windows
 #define AAOK "&Ok"
 #define AACANCEL "&Annuler"
 #define AAEDIT "&Edition"
-#define AADEFAULTS "&Défauts"
+#define AADEFAULTS "&DÃ©fauts"
 #define AAHELP "A&ide"
 #define AANEW "&Nouveau"
 #define AATEST "&Test"
 #define AAYES "&Oui"
 #define AANO "&Non"
 #define AANEXTGT "&Suivant >"
-#define AABACKLT "< &Précédent"
-#define AAFINISHGT "&Démarrer"
+#define AABACKLT "< &PrÃ©cÃ©dent"
+#define AAFINISHGT "&DÃ©marrer"
 #define AAEXIT "&Fin"
 #else
 #define AAOK "~Ok"
 #define AACANCEL "~Annuler"
-#define AADEFAULTS "~Défauts"
+#define AADEFAULTS "~DÃ©fauts"
 #define AAEDIT "~Edition"
 #define AAHELP "A~ide"
 #define AANEW "~Nouveau"
@@ -69,8 +69,8 @@
 #define AAYES "~Oui"
 #define AANO "~Non"
 #define AANEXTGT "~Suivant >"
-#define AABACKLT "< ~Précédent"
-#define AAFINISHGT "~Démarrer"
+#define AABACKLT "< ~PrÃ©cÃ©dent"
+#define AAFINISHGT "~DÃ©marrer"
 #define AAEXIT "~Fin"
 #endif
 #endif
@@ -83,27 +83,27 @@
 #define AAABOUTGSVIEWPRINT "A propos de GSview Print"
 #define AACOPY1 "Version :"
 #define AACOPY2 "Une interface graphique pour Ghostscript"
-#define AACOPY4 "Ce programme est distribué SANS AUCUNE GARANTIE. Les auteurs et"
-#define AACOPY5 "distributeurs n'assument aucune responsabilité pour les conséquences résultant"
-#define AACOPY6 "de son utilisation et n'assurent pas qu'il remplit une fonction particulière ou"
-#define AACOPY7 "simplement fonctionne, à moins qu'ils ou elles ne le précisent par écrit. Voir"
+#define AACOPY4 "Ce programme est distribuÃ© SANS AUCUNE GARANTIE. Les auteurs et"
+#define AACOPY5 "distributeurs n'assument aucune responsabilitÃ© pour les consÃ©quences rÃ©sultant"
+#define AACOPY6 "de son utilisation et n'assurent pas qu'il remplit une fonction particuliÃ¨re ou"
+#define AACOPY7 "simplement fonctionne, Ã  moins qu'ils ou elles ne le prÃ©cisent par Ã©crit. Voir"
 #define AACOPY8 "la GSview Free Public Licence (la 'Licence') pour plus d'informations."
 #define AACOPY9 "Chaque copie de GSview doit contenir une copie de la Licence, classique-"
-#define AACOPY10 "ment sous la forme d'un fichier ASCII nommé LICENCE. La Licence vous"
+#define AACOPY10 "ment sous la forme d'un fichier ASCII nommÃ© LICENCE. La Licence vous"
 #define AACOPY11 "donne le droit de copier, modifier et redistribuer GSview, mais uniquement"
-#define AACOPY12 "sous certaines conditions décrites dans la Licence. Entre autres, la Licence"
-#define AACOPY13 "exige que les informations de copyright et cette note soient présentes sur"
+#define AACOPY12 "sous certaines conditions dÃ©crites dans la Licence. Entre autres, la Licence"
+#define AACOPY13 "exige que les informations de copyright et cette note soient prÃ©sentes sur"
 #define AACOPY14 "toutes les copies."
 #define AACOPY15 "pstotxt3.dll est Copyright (C) 1995-1998, Digital Equipment Corporation et a"
 #define AACOPY16 "pstotxt2.dll est Copyright (C) 1995-1998, Digital Equipment Corporation et a"
 #define AACOPY17 "pstotxt1.dll est Copyright (C) 1995-1998, Digital Equipment Corporation et a"
-#define AACOPY18 "une licence particulière. Voir le fichier pstotext.txt pour plus d'informations."
+#define AACOPY18 "une licence particuliÃ¨re. Voir le fichier pstotext.txt pour plus d'informations."
 #define AACOPY19 "Auteur : Russell Lang, Ghostgum Software Pty Ltd"
 #define AACOPY20 "Une interface sous forme de DLL pour Ghostscript."
 #define AACOPY21 "Ce programme fait partie de GSview."
 #define AACOPY22 "Gestionnaire d'impression GSview Win32s/Win16"
 
-#define AAINPUT "Entrée"
+#define AAINPUT "EntrÃ©e"
 
 /* DSC error dialog box */
 #define AADSC "Document Structuring Conventions" /* ENGLISH */
@@ -125,20 +125,20 @@
 
 /* Sounds dialog box */
 #define AASOUNDS "Sons"
-#define AAEVENTC "Evénement :"
+#define AAEVENTC "EvÃ©nement :"
 #define AASOUNDC "Son :"
 
 /* Select port, printer, page dialog boxes */
-#define AASELECTPORT "Sélection du port de l'imprimante"
-#define AASELECTPRINTER "Sélection de l'imprimante"
+#define AASELECTPORT "SÃ©lection du port de l'imprimante"
+#define AASELECTPRINTER "SÃ©lection de l'imprimante"
 #define AAPRINTING "Impression"
-#define AASELECTPAGE "Sélection de la page"
-#define AASELECTPAGES "Sélection des pages"
+#define AASELECTPAGE "SÃ©lection de la page"
+#define AASELECTPAGES "SÃ©lection des pages"
 
 /* Printer Setup dialog box */
 #define AAPRINTERSETUP "Configuration de l'imprimante"
 #define AADEVICEC "Type :"
-#define AARESOLUTIONC "Résolution :"
+#define AARESOLUTIONC "RÃ©solution :"
 #define AAQUEUEC "Imprimante :"
 #define AAPRINTTOFILE "Impression dans un fichier"
 #define AAPSPRINTER "Imprimante PostScript"
@@ -158,12 +158,12 @@
 #define AAFROMC "From:" /* ENGLISH */
 #define AATOC "To:" /* ENGLISH */
 
-#define AAADVANCED "Avancé"
-#define AAADVANCEDPSOPT "Options PostScript avancées"
+#define AAADVANCED "AvancÃ©"
+#define AAADVANCEDPSOPT "Options PostScript avancÃ©es"
 #define AASENDCTRLDBEFORE "Envoyer CTRL+D avant le travail"
-#define AASENDCTRLDAFTER "Envoyer CTRL+D après le travail"
+#define AASENDCTRLDAFTER "Envoyer CTRL+D aprÃ¨s le travail"
 #define AAPROLOGFILE "Fichier prologue"
-#define AAEPILOGFILE "Fichier épilogue"
+#define AAEPILOGFILE "Fichier Ã©pilogue"
 #define AABROWSE "Parcourir"
 
 /* PS2EPS dialog box */
@@ -172,7 +172,7 @@
 #define AAPSTOEPSAUTO "Calculer automatiquement le cadre limite"
 
 #ifdef UNIX
-#define AAAPROPERTIES "Propriétés"
+#define AAAPROPERTIES "PropriÃ©tÃ©s"
 #define AAALLPAGES "Toutes"
 #define AAODDPAGES "Impaires"
 #define AAEVENPAGES "Paires"
@@ -182,7 +182,7 @@
 #define AAREVERSE "Ordre inverse"
 #else
 #ifdef _Windows
-#define AAAPROPERTIES "&Propriétés"
+#define AAAPROPERTIES "&PropriÃ©tÃ©s"
 #define AAALLPAGES "&Toutes"
 #define AAODDPAGES "I&mpaires"
 #define AAEVENPAGES "Pai&res"
@@ -191,7 +191,7 @@
 #define AAEVEN "Pai&res"
 #define AAREVERSE "&Ordre inverse"
 #else
-#define AAAPROPERTIES "~Propriétés"
+#define AAAPROPERTIES "~PropriÃ©tÃ©s"
 #define AAALLPAGES "~Toutes"
 #define AAODDPAGES "I~mpaires"
 #define AAEVENPAGES "Pai&res"
@@ -204,16 +204,16 @@
 
 
 /* Properties dialog box */
-#define AAPROPERTIES "Propriétés"
-#define AAPROPERTYC "Propriété :"
+#define AAPROPERTIES "PropriÃ©tÃ©s"
+#define AAPROPERTYC "PropriÃ©tÃ© :"
 #define AAVALUEC "Valeur :"
 #define AAPAGEOFFSETPT "Offset de page (pt)"
 #define AAXC "X :"
 #define AAYC "Y :"
 
 /* Edit Properties dialog box */
-#define AAEDITPROPERTIES "Modification des propriétés"
-#define AAPROPERTYTYPEC "Type de propriété :"
+#define AAEDITPROPERTIES "Modification des propriÃ©tÃ©s"
+#define AAPROPERTYTYPEC "Type de propriÃ©tÃ© :"
 #define AANUMBER "Nombre"
 #define AASTRING "Texte"
 #define AANAMEC "Nom : par ex.  BitsPerPixel"
@@ -223,25 +223,25 @@
 #define AABOUNDINGBOX "Cadre limite"
 
 /* Advanced Configure dialog box */
-#define AACONFIGUREGS "Configuration avancée"
+#define AACONFIGUREGS "Configuration avancÃ©e"
 #define AAGHOSTSCRIPTDLLC "DLL de Ghostscript :"
 #define AAGHOSTSCRIPTSOC "Ghostscript Shared Object:" /* ENGLISH */
 #define AAGHOSTSCRIPTEXEC "Ghostscript Program:" /* ENGLISH */
 #define AAGHOSTSCRIPTINCC "Chemin de recherche de Ghostscript :"
 #define AAGHOSTSCRIPTOTHERC "Options de Ghostscript :"
-#define AACOPYPRINTERDEF "Copier les paramètres par défaut de l'imprimante"
+#define AACOPYPRINTERDEF "Copier les paramÃ¨tres par dÃ©faut de l'imprimante"
 #define AAASSOCIATEPS "Associer les fichiers .ps"
 #define AAASSOCIATEPDF "Associer les fichiers .pdf"
-#define AACREATESTARTMENU "Créer les entrées dans le menu Démarrer"
+#define AACREATESTARTMENU "CrÃ©er les entrÃ©es dans le menu DÃ©marrer"
 
 /* Easy Configure dialog box */
 #define AAEASYCONFIGURE "Configuration standard"
 #define AAWHICHGS "Quelle version de Ghostscript souhaitez-vous utiliser ?"
 
 /* Download Ghostscript dialog box */
-#define AADOWNLOADGS "Téléchargement de Ghostscript"
-#define AADOWNLOADNOW "Télécharger maintenant"
-#define AAGSNOTFOUND "Ghostscript ne peut pas être trouvé sur votre ordinateur.  Vous devez télécharger et installer AFPL Ghostscript depuis"
+#define AADOWNLOADGS "TÃ©lÃ©chargement de Ghostscript"
+#define AADOWNLOADNOW "TÃ©lÃ©charger maintenant"
+#define AAGSNOTFOUND "Ghostscript ne peut pas Ãªtre trouvÃ© sur votre ordinateur.  Vous devez tÃ©lÃ©charger et installer AFPL Ghostscript depuis"
 
 #define AAGSMESSWIN "GSview pour Windows - Messages de Ghostscript"
 #define AAGSMESSPM "PM GSview - Messages de Ghostscript"
@@ -249,13 +249,13 @@
 #define AACOPY "Copier"
 
 /* Display Settings dialog box */
-#define AADISPLAYSETTINGS "Paramètres de l'affichage"
-#define AARESOLUTION "Résolution"
-#define AAZOOMRESOLUTION "Résolution du zoom"
-#define AADEPTH "Intensité"
+#define AADISPLAYSETTINGS "ParamÃ¨tres de l'affichage"
+#define AARESOLUTION "RÃ©solution"
+#define AAZOOMRESOLUTION "RÃ©solution du zoom"
+#define AADEPTH "IntensitÃ©"
 #define AATEXTALPHA "Texte Alpha"
 #define AAGRAPHICSALPHA "Graphiques Alpha"
-#define AADRAWMETHOD "Méthode de dessin"
+#define AADRAWMETHOD "MÃ©thode de dessin"
 #define AADPI "dpi"
 #define AABPP "bits/pixel"
 #define AABITS "bits"
@@ -264,10 +264,10 @@
 #define AAPT "pt"
 #define AAMM "mm"
 #define AAINCH "pouce"
-#define AACUSTOM "Personnalisée"
+#define AACUSTOM "PersonnalisÃ©e"
 #define AAMEASURE "Mesure"
-#define AAUNITC	"Unité :"
-#define AASTARTC "Début :"
+#define AAUNITC	"UnitÃ© :"
+#define AASTARTC "DÃ©but :"
 #define AAFINISHC "Fin :"
 #define AADELTAC "Delta :"
 #define AALENGTHC "Longueur :"
@@ -284,8 +284,8 @@
 #define AAFORMATC "Format :"
 #define AADRAWTASP "Dessiner le texte sous forme de polygones"
 #define AAMAPTOLATIN1 "Encodage ISO-Latin1"
-#define AAFLATNESSC "Netteté :"
-#define AADEFAULTFONTC "Police par défaut :"
+#define AAFLATNESSC "NettetÃ© :"
+#define AADEFAULTFONTC "Police par dÃ©faut :"
 #define AADRIVEROPTIONSC "Options du pilote :"
 
 /* Registration */
@@ -305,74 +305,74 @@
 
 /* Installation program */
 #define AAINSTALL1 "Programme d'installation de GSview"
-#define AAINSTALLINTRO1 "Cet assistant vous guide pendant toute la durée de l'installation de :"
-#define AAINSTALLINTRO2 "Avant de poursuivre l'installation, veuillez-vous assurer que les fichiers listés dans le fichier Readme.htm sont présents dans le répertoire courant."
-#define AAINSTALLINTRO3 "L'installation nécessite 20 - 30 M octets d'espace disque."
+#define AAINSTALLINTRO1 "Cet assistant vous guide pendant toute la durÃ©e de l'installation de :"
+#define AAINSTALLINTRO2 "Avant de poursuivre l'installation, veuillez-vous assurer que les fichiers listÃ©s dans le fichier Readme.htm sont prÃ©sents dans le rÃ©pertoire courant."
+#define AAINSTALLINTRO3 "L'installation nÃ©cessite 20 - 30 M octets d'espace disque."
 #define AAINSTALLCOPYRIGHT1 "Informations de Copyright :"
 #define AAINSTALLCOPYRIGHT2 "GSview et AFPL Ghostscript sont deux programmes distincts."
-#define AAINSTALLCOPYRIGHT3 "Ils sont la propriété de différentes personnes morales."
+#define AAINSTALLCOPYRIGHT3 "Ils sont la propriÃ©tÃ© de diffÃ©rentes personnes morales."
 #define AAINSTALLGSVER1 "Quels composants voulez-vous installer ?"
 #define AAINSTALLGSVER2 "GSview"
 #define AAINSTALLGSVER3 "Ghostscript"
 #define AAINSTALLGSVER4 "Quelle version de Ghostscript voulez-vous utiliser ?"
-#define AAINSTALLDIR1 "Sélectionnez le répertoire d'installation de GSview et Ghostscript :"
-#define AAINSTALLDIR2 "GSview va être installé dans le sous-répertoire :"
-#define AAINSTALLDIR3 "Ghostscript va être installé dans le sous-répertoire :"
-#define AAINSTALLMKDIR1 "Le répertoire spécifié n'existe pas."
-#define AAINSTALLMKDIR2 "Un nouveau répertoire va être créé."
+#define AAINSTALLDIR1 "SÃ©lectionnez le rÃ©pertoire d'installation de GSview et Ghostscript :"
+#define AAINSTALLDIR2 "GSview va Ãªtre installÃ© dans le sous-rÃ©pertoire :"
+#define AAINSTALLDIR3 "Ghostscript va Ãªtre installÃ© dans le sous-rÃ©pertoire :"
+#define AAINSTALLMKDIR1 "Le rÃ©pertoire spÃ©cifiÃ© n'existe pas."
+#define AAINSTALLMKDIR2 "Un nouveau rÃ©pertoire va Ãªtre crÃ©Ã©."
 #define AAINSTALLMISSING1 "Programme d'installation de GSview - Fichier ZIP manquant"
-#define AAINSTALLMISSING2 "Impossible de trouver le fichier ZIP. Veuillez insérer la disquette contenant le fichier ci-dessous :"
-#define AAINSTALLCONFIG1 "GSview et Ghostscript utilisent la variable d'environnement TEMP pour spécifier un répertoire pour les fichiers temporaires."
-#define AAINSTALLCONFIG2 "La variable d'environnement TEMP n'est pas encore définie."
-#define AAINSTALLCONFIG3 "La ligne suivante va être ajoutée au fichier autoexec.bat\r     SET TEMP=C:\\"
-#define AAINSTALLCONFIG4 "Mettre à jour le fichier autoexec.bat"
+#define AAINSTALLMISSING2 "Impossible de trouver le fichier ZIP. Veuillez insÃ©rer la disquette contenant le fichier ci-dessous :"
+#define AAINSTALLCONFIG1 "GSview et Ghostscript utilisent la variable d'environnement TEMP pour spÃ©cifier un rÃ©pertoire pour les fichiers temporaires."
+#define AAINSTALLCONFIG2 "La variable d'environnement TEMP n'est pas encore dÃ©finie."
+#define AAINSTALLCONFIG3 "La ligne suivante va Ãªtre ajoutÃ©e au fichier autoexec.bat\r     SET TEMP=C:\\"
+#define AAINSTALLCONFIG4 "Mettre Ã  jour le fichier autoexec.bat"
 #define AAINSTALLCONFIG5 "Faire une copie de sauvegarde l'ancien fichier autoexec.bat"
-#define AAINSTALLCONFIGPM1 "GSview et Ghostscript utilisent la variable d'environnement TEMP pour spécifier un répertoire pour les fichiers temporaires."
-#define AAINSTALLCONFIGPM2 "La variable d'environnement TEMP n'est pas encore définie ou vous devez installer EMX."
-#define AAINSTALLCONFIGPM3 "La ligne suivante va être ajoutée au fichier config.sys   'SET TEMP=C:\\'  et/ou le PATH et le LIBPATH vont être mis à jour pour EMX."
-#define AAINSTALLCONFIGPM4 "Mettre à jour le fichier config.sys"
+#define AAINSTALLCONFIGPM1 "GSview et Ghostscript utilisent la variable d'environnement TEMP pour spÃ©cifier un rÃ©pertoire pour les fichiers temporaires."
+#define AAINSTALLCONFIGPM2 "La variable d'environnement TEMP n'est pas encore dÃ©finie ou vous devez installer EMX."
+#define AAINSTALLCONFIGPM3 "La ligne suivante va Ãªtre ajoutÃ©e au fichier config.sys   'SET TEMP=C:\\'  et/ou le PATH et le LIBPATH vont Ãªtre mis Ã  jour pour EMX."
+#define AAINSTALLCONFIGPM4 "Mettre Ã  jour le fichier config.sys"
 #define AAINSTALLCONFIGPM5 "Faire une copie de sauvegarde de l'ancien fichier config.sys"
-#define AAINSTALLFINISH "L'installation peut maintenant commencer.  \r\rCliquez sur Démarrer pour poursuivre."
-#define AAINSTALLUNZIP1 "Décompression des fichiers..."
-#define AADIRNOTEXIST "Le répertoire '%s' n'existe pas.  Voulez-vous qu'il soit créé ?"
-#define AAMKDIRFAIL "Impossible de créer le répertoire"
+#define AAINSTALLFINISH "L'installation peut maintenant commencer.  \r\rCliquez sur DÃ©marrer pour poursuivre."
+#define AAINSTALLUNZIP1 "DÃ©compression des fichiers..."
+#define AADIRNOTEXIST "Le rÃ©pertoire '%s' n'existe pas.  Voulez-vous qu'il soit crÃ©Ã© ?"
+#define AAMKDIRFAIL "Impossible de crÃ©er le rÃ©pertoire"
 #define AABETAWARN "Ceci est une version BETA de GSview.  Elle cessera de fonctionner le %04d-%02d-%02d."
-#define AAINSTALLOK "Installation réussie."
-#define AAINSTALLFAILED "L'installation a échoué :"
-#define AAPROGMANGROUP1 "Voulez-vous créer un Groupe de programmes ?"
-#define AAPROGMANGROUP2 "Créer un Groupe"
+#define AAINSTALLOK "Installation rÃ©ussie."
+#define AAINSTALLFAILED "L'installation a Ã©chouÃ© :"
+#define AAPROGMANGROUP1 "Voulez-vous crÃ©er un Groupe de programmes ?"
+#define AAPROGMANGROUP2 "CrÃ©er un Groupe"
 #define AAPROGMANGROUP3 "Nom :"
 #define AAPROGMANGROUP4 "GS Tools"
-#define AAPROGMANGROUP5 "Le Groupe de programmes \042%s\042 a été créé."
-#define AAPROGMANGROUP6 "L'objet de programme \042GSview\042 a été créé sur le bureau."
-#define AAPMOBJECT1 "Voulez-vous créer un objet de programme pour GSview sur le bureau ?"
-#define AAPMOBJECT2 "Créer un objet."
-#define AADONEBAK "L'ancien fichier autoexec.bat a été renommé %s."
+#define AAPROGMANGROUP5 "Le Groupe de programmes \042%s\042 a Ã©tÃ© crÃ©Ã©."
+#define AAPROGMANGROUP6 "L'objet de programme \042GSview\042 a Ã©tÃ© crÃ©Ã© sur le bureau."
+#define AAPMOBJECT1 "Voulez-vous crÃ©er un objet de programme pour GSview sur le bureau ?"
+#define AAPMOBJECT2 "CrÃ©er un objet."
+#define AADONEBAK "L'ancien fichier autoexec.bat a Ã©tÃ© renommÃ© %s."
 #define AACANTLOAD "Chargement de %s impossible."
-#define AACANTCREATETEMPFILE "Création du fichier temporaire impossible."
+#define AACANTCREATETEMPFILE "CrÃ©ation du fichier temporaire impossible."
 #define AACANTOPENREAD "Impossible de lire le fichier %s."
-#define AACANTOPENWRITE "Impossible d'écrire le fichier %s."
+#define AACANTOPENWRITE "Impossible d'Ã©crire le fichier %s."
 #define AAERRORRENAME "Erreur en renommant le fichier %s en %s."
 #define AANODDEPROGMAN "Ouverture de la connexion DDE avec le Gestionnaire de Programmes impossible. Veuillez relancer Windows."
-#define AAINSERTDISK "Veuillez insérer la disquette contenant le fichier %s."
+#define AAINSERTDISK "Veuillez insÃ©rer la disquette contenant le fichier %s."
 #define AAZIPNOTFOUND "Impossible de trouver le fichier ZIP."
-#define AAUNZIPCANCELLED "Décompression interrompue.\n"
-#define AACANTALLOCBUF "Allocation de mémoire pour copier le tampon impossible."
-#define AAPROGRAMOBJECTFAILED "Création de l'objet de programme sur le bureau impossible"
+#define AAUNZIPCANCELLED "DÃ©compression interrompue.\n"
+#define AACANTALLOCBUF "Allocation de mÃ©moire pour copier le tampon impossible."
+#define AAPROGRAMOBJECTFAILED "CrÃ©ation de l'objet de programme sur le bureau impossible"
 #define AAUNINSTALLTITLE "GSview et AFPL Ghostscript"
-#define AAUNINSTALLITEM "Désinstaller GSview et AFPL Ghostscript"
+#define AAUNINSTALLITEM "DÃ©sinstaller GSview et AFPL Ghostscript"
 
 /* setup program */
-#define AAINSTALLSPACE "Cette installation nécessite 3 M octets d'espace disque"
-#define AAGSVIEWREQUIRES "GSview nécessite également"
+#define AAINSTALLSPACE "Cette installation nÃ©cessite 3 M octets d'espace disque"
+#define AAGSVIEWREQUIRES "GSview nÃ©cessite Ã©galement"
 #define AAVIEWREADMEDETAILS "Voir le fichier Readme pour savoir comment obtenir Ghostscript."
 #define AACOPYRIGHTNOTICE "Copyright"
-#define AASELECTGSVIEWDIR "Sélectionnez un répertoire dans lequel vous souhaitez installer GSview"
+#define AASELECTGSVIEWDIR "SÃ©lectionnez un rÃ©pertoire dans lequel vous souhaitez installer GSview"
 #define AABROWSEE "Parcourir..."
-#define AAGSVIEWADDSTARTMENU "Le programme d'installation de GSview va ajouter des entrées dans le dossier suivant du menu Démarrer"
-#define AACREATEFOLDER "Créer le dossier"
+#define AAGSVIEWADDSTARTMENU "Le programme d'installation de GSview va ajouter des entrÃ©es dans le dossier suivant du menu DÃ©marrer"
+#define AACREATEFOLDER "CrÃ©er le dossier"
 #define AAALLUSERS "Tous les utilisateurs"
-#define AASELECTFOLDER "Sélection du dossier"
+#define AASELECTFOLDER "SÃ©lection du dossier"
 #define AAFOLDER "Dossier"
 #define AADESTFOLDER "Dossier de destination"
 #define AAVIEWREADME "Visualiser le fichier Readme"
@@ -381,47 +381,47 @@
 #define AAGSVIEWC "GSview :"
 #define AAALADDINGSC "AFPL Ghostscript :"
 #define AACFG1 "Programme de configuration de GSview"
-#define AACFG10 "Cet assistant vous aide à configurer GSview."
+#define AACFG10 "Cet assistant vous aide Ã  configurer GSview."
 #define AACFG11 "Si vous rencontrez une rubrique que vous ne comprenez pas dans les pages suivantes,\
- ne modifiez pas ce qui vous est proposé par défaut."
+ ne modifiez pas ce qui vous est proposÃ© par dÃ©faut."
 #define AACFG20 "GSview doit savoir quelle version de Ghostscript il doit utiliser\
- et où elle se trouve."
+ et oÃ¹ elle se trouve."
 #define AACFG21 "Quelle version de Ghostscript souhaitez-vous utiliser ?"
-#define AACFG22 "Dans quel répertoire se trouve Ghostscript ?"
-#define AACFG23 "Rechercher des polices de Type 1 supplémentaires dans :"
+#define AACFG22 "Dans quel rÃ©pertoire se trouve Ghostscript ?"
+#define AACFG23 "Rechercher des polices de Type 1 supplÃ©mentaires dans :"
 #define AACFG30 "GSview conserve une liste des imprimantes Ghostscript et\
- de leurs résolutions dans son fichier d'initialisation."
-#define AACFG31 "Par défaut, la liste des imprimantes et de leurs résolutions est extraite de la\
- distribution de Ghostscript version 5.50 et il se peut qu'elle soit incomplète."
-#define AACFG32 "Mettre à jour la liste des imprimantes"
-#define AACFG33 "La mise à jour de la liste des imprimantes va remplacer toutes les entrées déjà existantes."
-#define AACFG40 "GSview peut créer des associations de fichiers pour les types de fichiers PostScript et\
+ de leurs rÃ©solutions dans son fichier d'initialisation."
+#define AACFG31 "Par dÃ©faut, la liste des imprimantes et de leurs rÃ©solutions est extraite de la\
+ distribution de Ghostscript version 5.50 et il se peut qu'elle soit incomplÃ¨te."
+#define AACFG32 "Mettre Ã  jour la liste des imprimantes"
+#define AACFG33 "La mise Ã  jour de la liste des imprimantes va remplacer toutes les entrÃ©es dÃ©jÃ  existantes."
+#define AACFG40 "GSview peut crÃ©er des associations de fichiers pour les types de fichiers PostScript et\
  Portable Document Format (PDF)."
-#define AACFG43 "Grâce à ces associations, double-cliquer sur un fichier PostScript\
+#define AACFG43 "GrÃ¢ce Ã  ces associations, double-cliquer sur un fichier PostScript\
  ou PDF lancera GSview qui ouvrira ce fichier.\
-  Ces associations permettent également à certains navigateurs WWW\
+  Ces associations permettent Ã©galement Ã  certains navigateurs WWW\
  d'utiliser GSview comme visualisateur pour les fichiers PostScript et PDF."
 #define AACFG41 "Associer les fichiers PostScript (.ps et .eps) avec GSview."
 #define AACFG42 "Associer les fichiers PDF (.pdf) avec GSview."
-#define AACFG50 "GSview peut créer pour GSview et AFPL Ghostscript un Groupe de programmes dans le Gestionnaire de programmes ou\
- une entrée dans le menu Démarrer."
-#define AACFG51 "Créer Groupe / entrée"
+#define AACFG50 "GSview peut crÃ©er pour GSview et AFPL Ghostscript un Groupe de programmes dans le Gestionnaire de programmes ou\
+ une entrÃ©e dans le menu DÃ©marrer."
+#define AACFG51 "CrÃ©er Groupe / entrÃ©e"
 #define AACFG52 "Nom :"
-#define AACFG53 "GSview peut créer objet de programme pour GSview sur le bureau.\
+#define AACFG53 "GSview peut crÃ©er objet de programme pour GSview sur le bureau.\
  Ceci va associer les fichiers PostScript (.ps and .eps) et PDF (.pdf) avec GSview."
-#define AACFG54 "Créer un objet."
-#define AACFG60 "GSview peut maintenant commencer la configuration. \r\rCliquez sur Démarrer pour poursuivre."
-#define AACFG70 "Configuration réussie."
-#define AACFG72 "Si vous devez modifier la configuration ultérieurement,\
- lancez GSview et exécutez la commande \042Options | Configuration Standard...\042 ou\
- \042Options | Configuration avancée...\042."
-#define AACFG73 "La configuration a échoué."
+#define AACFG54 "CrÃ©er un objet."
+#define AACFG60 "GSview peut maintenant commencer la configuration. \r\rCliquez sur DÃ©marrer pour poursuivre."
+#define AACFG70 "Configuration rÃ©ussie."
+#define AACFG72 "Si vous devez modifier la configuration ultÃ©rieurement,\
+ lancez GSview et exÃ©cutez la commande \042Options | Configuration Standard...\042 ou\
+ \042Options | Configuration avancÃ©e...\042."
+#define AACFG73 "La configuration a Ã©chouÃ©."
 #define AACFG74 "Configuration interrompue."
 
 
 /* For gvXgs.rc */
 #define AAGSVIEWPRINT "Impression avec GSview"
-#define AAGSVIEWPRINTUSAGE "Syntaxe : %s [/d] chemin_d'accès_dll fichier_option fichier_entrée\nfichier_option et fichier_entrée seront effacés en sortie\ngvpgs est destiné à être appelé avec des fichiers temporaires\n"
+#define AAGSVIEWPRINTUSAGE "Syntaxe : %s [/d] chemin_d'accÃ¨s_dll fichier_option fichier_entrÃ©e\nfichier_option et fichier_entrÃ©e seront effacÃ©s en sortie\ngvpgs est destinÃ© Ã  Ãªtre appelÃ© avec des fichiers temporaires\n"
 #ifdef _Windows
 #define AAMFILE "&Fichier"
 #define AAMSAVEAS "Enregistrer &sous..."

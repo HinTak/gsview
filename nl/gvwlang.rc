@@ -46,7 +46,7 @@ BEGIN
         END
         POPUP "Be&werken"
         BEGIN
-                MENUITEM "&Kopiëren\tCtrl+C", IDM_COPYCLIP
+                MENUITEM "&KopiÃ«ren\tCtrl+C", IDM_COPYCLIP
                 MENUITEM SEPARATOR
                 MENUITEM "&Plakken...", IDM_PASTETO
                 MENUITEM "&Bitmap omzetten", IDM_CONVERT

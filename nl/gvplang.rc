@@ -48,7 +48,7 @@ BEGIN
 
         SUBMENU "Be~werken", IDM_EDITMENU
         BEGIN
-                MENUITEM "~Kopiëren\tCtrl+C", IDM_COPYCLIP
+                MENUITEM "~KopiÃ«ren\tCtrl+C", IDM_COPYCLIP
                 MENUITEM SEPARATOR
                 MENUITEM "~Plakken...", IDM_PASTETO
 /*

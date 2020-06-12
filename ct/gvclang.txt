@@ -1,144 +1,144 @@
  Ajuda del GSview
-1Introducció
+1IntroducciÃ³
 -Overview
-?Introducció
- El `GSview` és una interfície gràfica per al Ghostscript sota l'MS-Windows,
+?IntroducciÃ³
+ El `GSview` Ã©s una interfÃ­cie grÃ fica per al Ghostscript sota l'MS-Windows,
  l'OS/2 o el GNU/Linux.
- El Ghostscript és un intèrpret per al llenguatge de descripció de pàgines PostScript
- que utilitzen les impressores làser.
+ El Ghostscript Ã©s un intÃ¨rpret per al llenguatge de descripciÃ³ de pÃ gines PostScript
+ que utilitzen les impressores lÃ ser.
  Per als documents que segueixen les convencions d'estructura dels documents 
- Adobe PostScript, el GSview permet visualitzar o imprimir-ne les pàgines seleccionades.
+ Adobe PostScript, el GSview permet visualitzar o imprimir-ne les pÃ gines seleccionades.
  El GSview 4.8 necessita el Ghostscript 7.04 - 9.19.
-2Instal·lació
+2InstalÂ·laciÃ³
 -Installation
-?Instal·lació
+?InstalÂ·laciÃ³
 W
- Es recomana que utilitzeu el programa d'instal·lació `setup.exe`
- per instal·lar el GSview.
+ Es recomana que utilitzeu el programa d'instalÂ·laciÃ³ `setup.exe`
+ per instalÂ·lar el GSview.
 P
- Es recomana que utilitzeu el programa d'instal·lació `os2setup.exe`
- per instal·lar el GSview.
+ Es recomana que utilitzeu el programa d'instalÂ·laciÃ³ `os2setup.exe`
+ per instalÂ·lar el GSview.
 X
- El millor mètode d'instal·lació és utilitzar el paquet RPM.
+ El millor mÃ¨tode d'instalÂ·laciÃ³ Ã©s utilitzar el paquet RPM.
 E
- Necessitareu instal·lar el Ghostscript per separat.
+ Necessitareu instalÂ·lar el Ghostscript per separat.
 
- Si voleu instal·lar el GSview manualment, vegeu el tema 
- `Instal·lació manual`.
+ Si voleu instalÂ·lar el GSview manualment, vegeu el tema 
+ `InstalÂ·laciÃ³ manual`.
 
- La configuració es durà a terme el primer cop que s'executi el GSview.
- Si voleu canviar la configuració més tard, utilitzeu
+ La configuraciÃ³ es durÃ  a terme el primer cop que s'executi el GSview.
+ Si voleu canviar la configuraciÃ³ mÃ©s tard, utilitzeu
 WP
- `Opcions` | `Configuració fàcil` o bé
+ `Opcions` | `ConfiguraciÃ³ fÃ cil` o bÃ©
 E
- `Opcions` | `Configuració avançada`.
+ `Opcions` | `ConfiguraciÃ³ avanÃ§ada`.
 
- Vegeu també `Opcions` | `Idioma`.
-3Obtenció del Ghostscript
+ Vegeu tambÃ© `Opcions` | `Idioma`.
+3ObtenciÃ³ del Ghostscript
 -Obtaining_Ghostscript
-?Obtenció del Ghostscript
+?ObtenciÃ³ del Ghostscript
  El GSview necessita l'AFPL Ghostscript. El GSview i el Ghostscript
  estan disponibles per separat des de
   http://www.cs.wisc.edu/~ghost/
- Per configurar el GSview, obtingueu i instal·leu el Ghostscript
+ Per configurar el GSview, obtingueu i instalÂ·leu el Ghostscript
  i el GSview, llavors executeu el GSview.
-3Instal·lació del Ghostscript
+3InstalÂ·laciÃ³ del Ghostscript
 -Ghostscript_Installation
-?Instal·lació del Ghostscript
+?InstalÂ·laciÃ³ del Ghostscript
 W
- L'AFPL Ghostscript per al Win32 està disponible com un arxiu autoextraïble
- que s'instal·la ell sol.
+ L'AFPL Ghostscript per al Win32 estÃ  disponible com un arxiu autoextraÃ¯ble
+ que s'instalÂ·la ell sol.
 P
- L'AFPL Ghostscript per a l'OS/2 està disponible com un fitxer zip que
- heu d'instal·lar manualment.
+ L'AFPL Ghostscript per a l'OS/2 estÃ  disponible com un fitxer zip que
+ heu d'instalÂ·lar manualment.
 X
- L'AFPL Ghostscript està disponible com un paquet RPM, o com codi font
+ L'AFPL Ghostscript estÃ  disponible com un paquet RPM, o com codi font
  que heu de compilar.
 E
  Per a detalls sobre com obtenir manualment el Ghostscript, si us plau llegiu
- els fitxers de documentació del Ghostscript Install.htm i Use.htm
-3Desinstal·lació del GSview
+ els fitxers de documentaciÃ³ del Ghostscript Install.htm i Use.htm
+3DesinstalÂ·laciÃ³ del GSview
 -Uninstalling_GSview
-?Desinstal·lació del GSview
+?DesinstalÂ·laciÃ³ del GSview
 W
- Per desinstal·lar el GSview des del Windows 95 o l'NT 4.0,
+ Per desinstalÂ·lar el GSview des del Windows 95 o l'NT 4.0,
  utilitzeu `Afegeix o suprimeix programes` des del `Tauler de control` del Windows.
 E
-4Desinstal·lació manual
+4DesinstalÂ·laciÃ³ manual
 -Manual_uninstallation
-?Desinstal·lació manual
+?DesinstalÂ·laciÃ³ manual
 P
- Per desinstal·lar el GSview, suprimiu els fitxer del directori `gsview `.
- Suprimiu també
+ Per desinstalÂ·lar el GSview, suprimiu els fitxer del directori `gsview `.
+ Suprimiu tambÃ©
   c:\os2\gvpm.ini
  del directori del sistema apropiat.
 
  Suprimiu la icona `GSview ` de l'escriptori.
 
- Per desinstal·lar manualment el Ghostscript, suprimiu els fitxers del directori 
- `gsN.NN` on N.NN és el número de versió del Ghostscript.
+ Per desinstalÂ·lar manualment el Ghostscript, suprimiu els fitxers del directori 
+ `gsN.NN` on N.NN Ã©s el nÃºmero de versiÃ³ del Ghostscript.
 W
- Per desinstal·lar el GSview, suprimiu els fitxers del directori `gsview `.
- Suprimiu també
+ Per desinstalÂ·lar el GSview, suprimiu els fitxers del directori `gsview `.
+ Suprimiu tambÃ©
   c:\windows\gsview32.ini
  del directori del sistema apropiat.
 
- Per al Windows NT potser també necessitareu suprimir el gsview32.ini
+ Per al Windows NT potser tambÃ© necessitareu suprimir el gsview32.ini
  dels directoris de perfils d'usuaris.
 
- Suprimiu el grup `Ghostgum` del Gestor de grups o del Menú d'inici
+ Suprimiu el grup `Ghostgum` del Gestor de grups o del MenÃº d'inici
 
- Si sabeu com editar el registre, suprimiu les següents claus:
+ Si sabeu com editar el registre, suprimiu les segÃ¼ents claus:
   HKEY_CLASSES_ROOT\psfile
   HKEY_CLASSES_ROOT\.eps
   HKEY_CLASSES_ROOT\.ps
   HKEY_CLASSES_ROOT\MIME\Database\Content Type\application/postscript
- Si vau associar els PDF amb el GSview també necessitareu suprimir
+ Si vau associar els PDF amb el GSview tambÃ© necessitareu suprimir
   HKEY_CLASSES_ROOT\pdffile
   HKEY_CLASSES_ROOT\.pdf
   HKEY_CLASSES_ROOT\MIME\Database\Content Type\application/pdf
 
- El millor mètode de desinstal·lar el Ghostscript és
+ El millor mÃ¨tode de desinstalÂ·lar el Ghostscript Ã©s
  utilitzar l'`Afegeix o suprimeix programes` des del `Tauler de control` del Windows.
 
- Per desinstal·lar manualment el Ghostscript, suprimiu els fitxers del directori
- `gsN.NN`, on N.NN és el número de versió del Ghostscript.
+ Per desinstalÂ·lar manualment el Ghostscript, suprimiu els fitxers del directori
+ `gsN.NN`, on N.NN Ã©s el nÃºmero de versiÃ³ del Ghostscript.
 X
- Si vau instal·lar el GSview utilitzant el paquet RPM, utilitzeu l'`rpm` per desinstal·lar-lo.
+ Si vau instalÂ·lar el GSview utilitzant el paquet RPM, utilitzeu l'`rpm` per desinstalÂ·lar-lo.
 
  Alternativament, suprimiu els `gsview`, `gsview-help`, `pstotext` i `epstool`
  del directori /usr/bin,
- la documentació de `/usr/share/doc/gsview-N.N`
+ la documentaciÃ³ de `/usr/share/doc/gsview-N.N`
  i el `/usr/etc/gsview/printer.ini`.
  Els camins exactes poden variar depenent de com es va compilar el GSview.
 E
-3Instal·lació manual
+3InstalÂ·laciÃ³ manual
 -Manual_Installation
-?Instal·lació manual
+?InstalÂ·laciÃ³ manual
 X
  Copieu el `gsview`, `gsview-help`, `epstool` i el `pstotext`
- a un directori del camí de cerca.
+ a un directori del camÃ­ de cerca.
  Copieu `gvx*.htm` al directori `/usr/share/doc/gsview-N.NN`.
  Copieu `printer.ini` al directori `/usr/etc/gsview/printer.ini`.
 WP
- Es recomana que utilitzeu el programa d’instal·lació per instal·lar el
- GSview.  Les instruccions següents descriuen com instal·lar el GSview
- sense utilitzar el programa d’instal·lació.
+ Es recomana que utilitzeu el programa dâ€™instalÂ·laciÃ³ per instalÂ·lar el
+ GSview.  Les instruccions segÃ¼ents descriuen com instalÂ·lar el GSview
+ sense utilitzar el programa dâ€™instalÂ·laciÃ³.
 
- Definiu la variable d’entorn TEMP perquè apunti a un directori per als
+ Definiu la variable dâ€™entorn TEMP perquÃ¨ apunti a un directori per als
  fitxers temporals. Per exemple:
    SET TEMP=c:\temp
- El directori ha d’existir i ha d’estar-hi permesa l’escriptura.
+ El directori ha dâ€™existir i ha dâ€™estar-hi permesa lâ€™escriptura.
 
- Primer necessiteu instal·lar el Ghostscript, més els seus fitxers de biblioteca i fonts.
- Necessiteu la versió del Ghostscript que hi ha llistada a la `Introducció`.
- Aquesta versió del GSview no funcionarà amb d’altres versions del Ghostscript.
- Instal·leu el Ghostscript al directori c:\gs\gsN.NN
- (Reemplaceu N.NN per el número de la versió del Ghostscript.)
+ Primer necessiteu instalÂ·lar el Ghostscript, mÃ©s els seus fitxers de biblioteca i fonts.
+ Necessiteu la versiÃ³ del Ghostscript que hi ha llistada a la `IntroducciÃ³`.
+ Aquesta versiÃ³ del GSview no funcionarÃ  amb dâ€™altres versions del Ghostscript.
+ InstalÂ·leu el Ghostscript al directori c:\gs\gsN.NN
+ (Reemplaceu N.NN per el nÃºmero de la versiÃ³ del Ghostscript.)
 
  Creeu un directori c:\ghostgum\gsview
 
- Després instal·leu
+ DesprÃ©s instalÂ·leu
 P
  el PM GSview copiant el gvpm.exe, gvpgs.exe,
  gvpmde.dll, gvpmes.dll, gvpmfr.dll, gvpmit.dll,
@@ -153,97 +153,97 @@ WP
  al directori  `c:\ghostgum\gsview`.
 
 P
- Inicieu el GSview i després seguiu les instruccions que es donen a l’auxiliar
- de configuració. Això configurarà automàticament la
- `Opcions` | `Configuració avançada`, copieu una llista de les impressores
+ Inicieu el GSview i desprÃ©s seguiu les instruccions que es donen a lâ€™auxiliar
+ de configuraciÃ³. AixÃ² configurarÃ  automÃ ticament la
+ `Opcions` | `ConfiguraciÃ³ avanÃ§ada`, copieu una llista de les impressores
  conegudes al fitxer INI,
- i creeu una drecera del GSview a l’escriptori.
+ i creeu una drecera del GSview a lâ€™escriptori.
 
- Si voleu executar l’auxiliar de configuració més tard, utilitzeu
- `Opcions` | `Configuració fàcil`.
+ Si voleu executar lâ€™auxiliar de configuraciÃ³ mÃ©s tard, utilitzeu
+ `Opcions` | `ConfiguraciÃ³ fÃ cil`.
 W
- Inicieu el GSview i seleccioneu la versió apropiada del Ghostscript
- (normalment l’última). Per canviar-ho més endavant, utilitzeu
- `Opcions` | `Configuració fàcil`.
+ Inicieu el GSview i seleccioneu la versiÃ³ apropiada del Ghostscript
+ (normalment lâ€™Ãºltima). Per canviar-ho mÃ©s endavant, utilitzeu
+ `Opcions` | `ConfiguraciÃ³ fÃ cil`.
 E
 
- Per a un major control sobre la instal·lació, vegeu el `Manual avançat d’instal·lació`.
-3Manual avançat d’instal·lació
+ Per a un major control sobre la instalÂ·laciÃ³, vegeu el `Manual avanÃ§at dâ€™instalÂ·laciÃ³`.
+3Manual avanÃ§at dâ€™instalÂ·laciÃ³
 -Advanced_Manual_Installation
-?Manual avançat d’instal·lació
+?Manual avanÃ§at dâ€™instalÂ·laciÃ³
 WP
- En lloc d’utilitzar `Opcions` | `Configuració fàcil`, utilitzeu
- `Opcions` | `Configuració avançada`.
+ En lloc dâ€™utilitzar `Opcions` | `ConfiguraciÃ³ fÃ cil`, utilitzeu
+ `Opcions` | `ConfiguraciÃ³ avanÃ§ada`.
 
- Primer definiu correctament els tres camps de texts (vegeu `Configuració avançada`).
+ Primer definiu correctament els tres camps de texts (vegeu `ConfiguraciÃ³ avanÃ§ada`).
 
 P
- Sortiu del GSview, i després afegiu el printer.ini al fitxer INI del GSview
+ Sortiu del GSview, i desprÃ©s afegiu el printer.ini al fitxer INI del GSview
  (c:\os2\gvpm.ini).
 
- Creeu una drecera a l’escriptori per al GSview, tot associant-la amb
+ Creeu una drecera a lâ€™escriptori per al GSview, tot associant-la amb
  les extensions de fitxer .ps, .eps i .pdf.
 
 W
- Al quadre de diàleg `Configuració avançada`, seleccioneu els quadres de verificació
- `Copia els paràmetres predeterminats de la impressora`, `Associa els fitxers .ps amb el GSview` i
- `Crea elements al menú d’inici`, o seguiu respectivament els següents tres passos.
+ Al quadre de diÃ leg `ConfiguraciÃ³ avanÃ§ada`, seleccioneu els quadres de verificaciÃ³
+ `Copia els parÃ metres predeterminats de la impressora`, `Associa els fitxers .ps amb el GSview` i
+ `Crea elements al menÃº dâ€™inici`, o seguiu respectivament els segÃ¼ents tres passos.
 
- 1. Sortiu del GSview, i després afegiu el printer.ini al fitxer INI del GSview
+ 1. Sortiu del GSview, i desprÃ©s afegiu el printer.ini al fitxer INI del GSview
  (c:\windows\gsview32.ini)
 
  2. Afegiu els tipus de fitxer .ps i .eps (i opcionalment els .pdf)
  al `Registre`.
 
- 3. Creeu un element al Gestor de programes o al menú d’inici per al GSview.
+ 3. Creeu un element al Gestor de programes o al menÃº dâ€™inici per al GSview.
 X
- Després d'iniciar el GSview, utilitzeu a `Opcions` | `Configuració avançada`.
- Definiu la versió del Ghostscript perquè coincideixi amb la còpia del Ghostscript.
- Si el `gs -h` us diu 5.50, introduïu 550.  Si el `gs -h` us diu 6.50, introduïu 650.
- Definiu correctament els tres camps següents (vegeu `Configuració avançada`).
+ DesprÃ©s d'iniciar el GSview, utilitzeu a `Opcions` | `ConfiguraciÃ³ avanÃ§ada`.
+ Definiu la versiÃ³ del Ghostscript perquÃ¨ coincideixi amb la cÃ²pia del Ghostscript.
+ Si el `gs -h` us diu 5.50, introduÃ¯u 550.  Si el `gs -h` us diu 6.50, introduÃ¯u 650.
+ Definiu correctament els tres camps segÃ¼ents (vegeu `ConfiguraciÃ³ avanÃ§ada`).
 E
 
- Si teniu alguns tipus de lletra Type 1 al sistema, és possible dir-li
+ Si teniu alguns tipus de lletra Type 1 al sistema, Ã©s possible dir-li
  al Ghostscript que les utilitzi.  Vegeu `Fontmap.os2` i `Fontmap.atm`
  que es donen amb el Ghostscript per a exemples.  Vegeu el tema `Fonts`.
 
  Si teniu problemes, proveu de llegir el tema d'ajuda `Problemes comuns`.
 WP
-3Instal·lació de xarxa
+3InstalÂ·laciÃ³ de xarxa
 -Network_Installation
-?Instal·lació de xarxa
+?InstalÂ·laciÃ³ de xarxa
 ?Perfils d'usuari
- Instal·leu el GSview a un directori de la xarxa.
+ InstalÂ·leu el GSview a un directori de la xarxa.
 
- Quan un usuari iniciï el per primer cop, o iniciï el GSview
- després que el número de versió hagi canviat, el GSview configurarà
+ Quan un usuari iniciÃ¯ el per primer cop, o iniciÃ¯ el GSview
+ desprÃ©s que el nÃºmero de versiÃ³ hagi canviat, el GSview configurarÃ 
  l'ordinador local.
 
- L'ús d'un directori UNC quan s'instal·la el GSview no funciona
- des del Windows 3.1, però si des del Windows 95.
+ L'Ãºs d'un directori UNC quan s'instalÂ·la el GSview no funciona
+ des del Windows 3.1, perÃ² si des del Windows 95.
 
 W
- El GSview intenta mantenir un fitxer de configuració per cada usuari.
+ El GSview intenta mantenir un fitxer de configuraciÃ³ per cada usuari.
  Si els perfils d'usuari s'estan utilitzant sota el Windows 95 o l'NT,
- el GSview emmagatzemarà el fitxer INI al directori del perfil de l'usuari,
+ el GSview emmagatzemarÃ  el fitxer INI al directori del perfil de l'usuari,
  tal i com s'indiqui al registre.  Si aquest no es pot trobar,
- i la variable d'entorn USERPROFILE s'ha definit i és un
- directori, el GSview emmagatzemarà el fitxer INI a aquest directori.
- Si això fallés, el GSview emmagatzemarà el fitxer INI a la ubicació
+ i la variable d'entorn USERPROFILE s'ha definit i Ã©s un
+ directori, el GSview emmagatzemarÃ  el fitxer INI a aquest directori.
+ Si aixÃ² fallÃ©s, el GSview emmagatzemarÃ  el fitxer INI a la ubicaciÃ³
  predeterminada, el directori del Windows.
- Si el directori del perfil de l'usuari existeix, però hi té protegida l'escriptura,
- el GSview tindrà un problema.
+ Si el directori del perfil de l'usuari existeix, perÃ² hi tÃ© protegida l'escriptura,
+ el GSview tindrÃ  un problema.
 
 WP
- Si voleu que el GSview no us mostri la `Configuració fàcil`
+ Si voleu que el GSview no us mostri la `ConfiguraciÃ³ fÃ cil`
  quan s'executa per primer cop, o sempre que s'actualitzi el GSview,
  situeu un fitxer INI al directori del GSview.
  `Recordeu suprimir aquest fitxer abans d'actualitzar el GSview en el futur.`
- Només hauria de contenir aquelles entrades que voleu sobreescriure
- a la configuració dels usuaris.
- La tècnica que es suggereix és instal·lar el GSview, i després configurar-lo.
+ NomÃ©s hauria de contenir aquelles entrades que voleu sobreescriure
+ a la configuraciÃ³ dels usuaris.
+ La tÃ¨cnica que es suggereix Ã©s instalÂ·lar el GSview, i desprÃ©s configurar-lo.
  Copieu el gsview32.ini o el gvpm.ini del directori del sistema o del directori
- del perfil de l'usuari al directori del GSview, i després editeu-lo per
+ del perfil de l'usuari al directori del GSview, i desprÃ©s editeu-lo per
  suprimir totes les entrades excepte:
   [GSview-4.8]
   Version=4.8
@@ -253,8 +253,8 @@ WP
   GhostscriptInclude=e:\gs\gs8.53\lib;e:\gs\fonts
   GhostscriptOther=-dNOPLATFONTS -sFONTPATH="c:\psfonts"
  Quan un usuari inicia el GSview, normalment s'utilitza el seu fitxer INI.
- El primer cop que s'inicia el GSview, o quan la versió del GSview no
- coincideix amb el fitxer INI, passa el següent:
+ El primer cop que s'inicia el GSview, o quan la versiÃ³ del GSview no
+ coincideix amb el fitxer INI, passa el segÃ¼ent:
 
  1. Es llegeix el fitxer INI al directori del GSview, tot substituint
  el fitxer INI dels usuaris.
@@ -263,111 +263,111 @@ WP
  del GSview.
 
  3. NO es fan o es canvien associacions dels fitxers (.ps, .eps, .pdf).
- Si les voleu canviar heu d'utilitzar `Opcions` | `Configuració avançada`.
+ Si les voleu canviar heu d'utilitzar `Opcions` | `ConfiguraciÃ³ avanÃ§ada`.
 
- 4. NO es canvien els grups del Gestor de Programes / elements del menú d'inici / 
+ 4. NO es canvien els grups del Gestor de Programes / elements del menÃº d'inici / 
  dreceres del programa.
- Si els voleu canviar heu d'utilitzar `Opcions` | `Configuració avançada`.
+ Si els voleu canviar heu d'utilitzar `Opcions` | `ConfiguraciÃ³ avanÃ§ada`.
 W
 
- Si l'esteu instal·lant al Windows NT4/2000, i seleccioneu "Tots els usuaris",
- llavors l'instal·lador escriurà aquest gsview32.ini al directori del GSview.
- Heu de tenir instal·lat el Ghostscript primer.
+ Si l'esteu instalÂ·lant al Windows NT4/2000, i seleccioneu "Tots els usuaris",
+ llavors l'instalÂ·lador escriurÃ  aquest gsview32.ini al directori del GSview.
+ Heu de tenir instalÂ·lat el Ghostscript primer.
 
- Quan un usuari intenta utilitzar el programa de desinstal·lació del GSview, 
+ Quan un usuari intenta utilitzar el programa de desinstalÂ·laciÃ³ del GSview, 
  s'intenta suprimir els fitxers del GSview i del Ghostscript a la xarxa.
  Assegureu-vos que els directoris del GSview i del Ghostscript no poden ser escrits
  pels usuaris.
- Per a més seguretat, podeu suprimir el fitxer `uninstal.txt` del directori
+ Per a mÃ©s seguretat, podeu suprimir el fitxer `uninstal.txt` del directori
  del GSview.
 
- Alternativament, si voleu instal·lar el GSview a cada ordinador sense
- cap sol·licitud, descomprimiu l'arxiu autoextraïble i després executeu
- el programa d'instal·lació així:
+ Alternativament, si voleu instalÂ·lar el GSview a cada ordinador sense
+ cap solÂ·licitud, descomprimiu l'arxiu autoextraÃ¯ble i desprÃ©s executeu
+ el programa d'instalÂ·laciÃ³ aixÃ­:
   setup -nom "El vostre nom" -numero XXXXX-XXXXX "c:\ghostgum"
 E
 W
-3Execució del GSview des del Gestor de fitxers o l'Explorador del Windows
+3ExecuciÃ³ del GSview des del Gestor de fitxers o l'Explorador del Windows
 -Running_from_Windows_Explorer
-?Editor de la informació de registre
+?Editor de la informaciÃ³ de registre
 ?Gestor de fitxers
 ?Explorador del Windows
 ?Registre
- Si heu utilitzat el programa setup.exe del GSview i heu contestat `sí` a
- a totes les preguntes, la configuració següent ja ha ocorregut.
- Si no vau actualitzar el registre durant la instal·lació del GSview,
- la informació següent us explica com fer-ho manualment.
+ Si heu utilitzat el programa setup.exe del GSview i heu contestat `sÃ­` a
+ a totes les preguntes, la configuraciÃ³ segÃ¼ent ja ha ocorregut.
+ Si no vau actualitzar el registre durant la instalÂ·laciÃ³ del GSview,
+ la informaciÃ³ segÃ¼ent us explica com fer-ho manualment.
 
  Per executar el GSview quan es fa doble clic a un fitxer PostScript al
- Gestor de fitxers, s'ha de seguir la seqüència següent per ensenyar-li
+ Gestor de fitxers, s'ha de seguir la seqÃ¼Ã¨ncia segÃ¼ent per ensenyar-li
  al Gestor de fitxers quant als fitxers PostScript.
 
- Des del `Gestor de programes`, executeu l'Editor d'informació del registre
+ Des del `Gestor de programes`, executeu l'Editor d'informaciÃ³ del registre
  `Fitxer `| `Executa...` i teclegeu `regedit`.
- Des de l'`Editor d'informació del registre` seleccioneu `Edita `| `Afegeix un tipus de fitxer...`
- i introduïu els camps següents:
+ Des de l'`Editor d'informaciÃ³ del registre` seleccioneu `Edita `| `Afegeix un tipus de fitxer...`
+ i introduÃ¯u els camps segÃ¼ents:
   Identificador = psfile
   Tipus de fitxer = PostScript
-  Acció = Open
+  AcciÃ³ = Open
   Ordre = c:\ghostgum\gsview\gsview32 %1
   Utilitza DDE = Sense marcar
-  Acció = Print
+  AcciÃ³ = Print
   Ordre = c:\ghostgum\gsview\gsview32 /p %1
   Utilitza DDE = Sense marcar
  Llavors premeu `D'acord`.
 
  Des del `Gestor de fitxers`, seleccioneu `Fitxer `| `Associa` i llavors
- introduïu els següents camps:
-  Fitxers amb l'extensió = ps
+ introduÃ¯u els segÃ¼ents camps:
+  Fitxers amb l'extensiÃ³ = ps
   Associa amb = PostScript (gsview)
- Desrpés premeu `D'acord`.
+ DesrpÃ©s premeu `D'acord`.
 
- Ja està! Ara quan feu doble clic a un fitxer PostScript,
- el `Gestor de fitxers` executarà el GSview.  Quan arrossegueu un fitxer 
- PostScript al `Gestor d'impressió`, el GSview imprimirà el fitxer.
- Si teniu una impressora PostScript, això no us serà útil.
- En aquest cas, haureu de suprimir l'acció Print
+ Ja estÃ ! Ara quan feu doble clic a un fitxer PostScript,
+ el `Gestor de fitxers` executarÃ  el GSview.  Quan arrossegueu un fitxer 
+ PostScript al `Gestor d'impressiÃ³`, el GSview imprimirÃ  el fitxer.
+ Si teniu una impressora PostScript, aixÃ² no us serÃ  Ãºtil.
+ En aquest cas, haureu de suprimir l'acciÃ³ Print
  del registre.
 
- Per al Windows 95, la configuració es fa amb l'Explorador
+ Per al Windows 95, la configuraciÃ³ es fa amb l'Explorador
  del Windows.
 
- Inicieu l'`Explorador del Windows`.  Seleccioneu `Visualització` | `Opcions`.  Seleccioneu la
- pestanya `Tipus de fitxers`.  Seleccioneu el botó `Crea un tipus`.
- Introduïu els següents camps:
-  Descripció del tipus = PostScript
-  Extensió associada = PS EPS
- Premeu el botó `Crea`, i introduïu
-  Acció = open
-  Aplicació utilitzada per dur a terme l'acció = c:\ghostgum\gsview\gsview32.exe
- Premeu el botó `D'acord`
+ Inicieu l'`Explorador del Windows`.  Seleccioneu `VisualitzaciÃ³` | `Opcions`.  Seleccioneu la
+ pestanya `Tipus de fitxers`.  Seleccioneu el botÃ³ `Crea un tipus`.
+ IntroduÃ¯u els segÃ¼ents camps:
+  DescripciÃ³ del tipus = PostScript
+  ExtensiÃ³ associada = PS EPS
+ Premeu el botÃ³ `Crea`, i introduÃ¯u
+  AcciÃ³ = open
+  AplicaciÃ³ utilitzada per dur a terme l'acciÃ³ = c:\ghostgum\gsview\gsview32.exe
+ Premeu el botÃ³ `D'acord`
 
- Premeu el botó `Crea`, i introduïu
-  Acció = print
-  Aplicació utilitzada per dur a terme l'acció = c:\ghostgum\gsview\gsview32.exe /p
- Premeu el botó `D'acord.`
+ Premeu el botÃ³ `Crea`, i introduÃ¯u
+  AcciÃ³ = print
+  AplicaciÃ³ utilitzada per dur a terme l'acciÃ³ = c:\ghostgum\gsview\gsview32.exe /p
+ Premeu el botÃ³ `D'acord.`
 
- Premeu el botó `Tanca.`
+ Premeu el botÃ³ `Tanca.`
 
- Premeu el botó `Tanca.`
+ Premeu el botÃ³ `Tanca.`
 E
 2Registre
 -Registration
 ?Registre
- Si voleu permetre el desenvolupament del GSview, o bé voleu inhabilitar-ne
+ Si voleu permetre el desenvolupament del GSview, o bÃ© voleu inhabilitar-ne
  la pantalla empipadora, si us plau, penseu el fet de registrar-lo.
  Tanmateix, no teniu cap necessitat de registrar el GSview.
- El GSview està disponible sota la Llicència Pública Gratuïta d'Aladdin (l'AFPL, 
+ El GSview estÃ  disponible sota la LlicÃ¨ncia PÃºblica GratuÃ¯ta d'Aladdin (l'AFPL, 
  Aladdin Free Public Licence), continguda al fixer `LICENCE`.
- Això permet l'ús gratuït, però en restringeix la distribució comercial.
+ AixÃ² permet l'Ãºs gratuÃ¯t, perÃ² en restringeix la distribuciÃ³ comercial.
 
- Ara mateix l'import del registre és de 40 AUD$.
- El GSview es pot registrar en línia a
+ Ara mateix l'import del registre Ã©s de 40 AUD$.
+ El GSview es pot registrar en lÃ­nia a
   http://www.ghostgum.com.au/
  o enviant per fax o per correu el
  formulari de registre que podeu trobar al fitxer `regorder.txt`
  al directori del GSview.
- Ghostgum Software prefereix que utilitzeu el registre en línia.
+ Ghostgum Software prefereix que utilitzeu el registre en lÃ­nia.
 2Convencions de l'estructura del document
 -DSC
 ?Convencions de l'estructura del document
@@ -376,87 +376,87 @@ E
 ?EPSF
 ?EPS
  Adobe ha definit un conjunt de convencions de comentaris esteses que donen
- informació addicional quant a l'estructura de la pàgina i els requeriments
+ informaciÃ³ addicional quant a l'estructura de la pÃ gina i els requeriments
  dels recursos d'un fitxer PostScript.
- Si un fitxer conté aquests comentaris de Convencions de l'estructura del document (DSC),
- el GSview pot visualitzar pàgines en un ordre aleatori utilitzant `Vés a la pàgina` i
- pàgines en ordre invers utilitzant `Pàgina anterior`. Les pàgines seleccionades es poden
+ Si un fitxer contÃ© aquests comentaris de Convencions de l'estructura del document (DSC),
+ el GSview pot visualitzar pÃ gines en un ordre aleatori utilitzant `VÃ©s a la pÃ gina` i
+ pÃ gines en ordre invers utilitzant `PÃ gina anterior`. Les pÃ gines seleccionades es poden
  extreure a un altre fitxer o imprimir-se.
 
- Si un fitxer no conté comentaris DSC, el GSview només pot visualitzar-ne pàgines
+ Si un fitxer no contÃ© comentaris DSC, el GSview nomÃ©s pot visualitzar-ne pÃ gines
  en l'ordre original.
 
- Els fitxers conformes amb els DSC s'inicien amb la línia de comentari:
+ Els fitxers conformes amb els DSC s'inicien amb la lÃ­nia de comentari:
   %!PS-Adobe-3.0
- on el número 3.0 pot canviar i és el número de la versió dels DSC.
+ on el nÃºmero 3.0 pot canviar i Ã©s el nÃºmero de la versiÃ³ dels DSC.
  Alguns programes escriuen fitxers PostScript amb un control-D com a primer
- caràcter del fitxer, seguit de la línia de comentari anteriorment esmentada.
- El GSview informarà correctament què aquests fitxers no són conformes amb els DSC,
- però tot i així els visualitzarà amb les característiques de selecció de pàgina disponibles.
+ carÃ cter del fitxer, seguit de la lÃ­nia de comentari anteriorment esmentada.
+ El GSview informarÃ  correctament quÃ¨ aquests fitxers no sÃ³n conformes amb els DSC,
+ perÃ² tot i aixÃ­ els visualitzarÃ  amb les caracterÃ­stiques de selecciÃ³ de pÃ gina disponibles.
  Queixeu-vos a l'autor del programa que va fer el fitxer PostScript.
- Per fer el fitxer conforme amb els DSC, editeu-lo i suprimiu-ne el caràcter control-D.
+ Per fer el fitxer conforme amb els DSC, editeu-lo i suprimiu-ne el carÃ cter control-D.
 
- Els fitxers conformes amb els DSC contenen línies com:
+ Els fitxers conformes amb els DSC contenen lÃ­nies com:
   %%Pages: 24
   %%Page: 1 1
- Aquestes línies diuen al GSview quantes pàgines conté un document i
- on comencen. El GSview utilitza aquesta informació per seleccionar pàgines
+ Aquestes lÃ­nies diuen al GSview quantes pÃ gines contÃ© un document i
+ on comencen. El GSview utilitza aquesta informaciÃ³ per seleccionar pÃ gines
  individuals.
 
- Els fitxers PostScript encapsulats (EPSF) són documents d'una sola pàgina
+ Els fitxers PostScript encapsulats (EPSF) sÃ³n documents d'una sola pÃ gina
  que contenen un subconjunt dels comentaris `DSC` i ordres PostScript.
- Els fitxers EPS s'inicien amb la següent línia de comentari:
+ Els fitxers EPS s'inicien amb la segÃ¼ent lÃ­nia de comentari:
   %!PS-Adobe-3.0 EPSF-3.0
  Els fitxers EPS s'utilitzen principalment com a inclusions en d'altres documents
- i per aquesta raó requereixen el comentari del requadre del límit:
+ i per aquesta raÃ³ requereixen el comentari del requadre del lÃ­mit:
    %%BoundingBox: llx lly urx ury
- on llx, lly, urx i ury són enters que donen les coordenades x i y
- de les cantonades inferior esquerra i superior dreta d'un requadre del límit que 
- tanca tots els elements de la pàgina.
+ on llx, lly, urx i ury sÃ³n enters que donen les coordenades x i y
+ de les cantonades inferior esquerra i superior dreta d'un requadre del lÃ­mit que 
+ tanca tots els elements de la pÃ gina.
 
- Alguns fitxers EPS contenen una visualització prèvia del document PostScript.
- Aquesta visualització pot ser un metafitxer del Windows, un fitxer TIFF, o una visualització
- prèvia d'intercanvi (format EPSI).
- Per als metafitxers del Windows o els fitxers de visualització prèvia TIFF, el fitxer EPS
- sota el DOS conté una capçalera binària que indica la ubicació i longitud de la visualització
- prèvia i les seccions de llenguatge PostScript del fitxer EPS.
- Per al format d'intercanvi, la visualització prèvia està continguda als comentaris DSC
+ Alguns fitxers EPS contenen una visualitzaciÃ³ prÃ¨via del document PostScript.
+ Aquesta visualitzaciÃ³ pot ser un metafitxer del Windows, un fitxer TIFF, o una visualitzaciÃ³
+ prÃ¨via d'intercanvi (format EPSI).
+ Per als metafitxers del Windows o els fitxers de visualitzaciÃ³ prÃ¨via TIFF, el fitxer EPS
+ sota el DOS contÃ© una capÃ§alera binÃ ria que indica la ubicaciÃ³ i longitud de la visualitzaciÃ³
+ prÃ¨via i les seccions de llenguatge PostScript del fitxer EPS.
+ Per al format d'intercanvi, la visualitzaciÃ³ prÃ¨via estÃ  continguda als comentaris DSC
  que comencen per
-  %%BeginPreview: amplada alçada profunditat línies
- Un fitxer EPS amb visualització prèvia es pot crear des d'un fitxer EPS sense
- visualització prèvia tot utilitzant `Afegeix una visualització prèvia EPS`.
+  %%BeginPreview: amplada alÃ§ada profunditat lÃ­nies
+ Un fitxer EPS amb visualitzaciÃ³ prÃ¨via es pot crear des d'un fitxer EPS sense
+ visualitzaciÃ³ prÃ¨via tot utilitzant `Afegeix una visualitzaciÃ³ prÃ¨via EPS`.
 
  El GSview pot donar avisos quan els documents contenen comentaris DSC
- incorrectes.  Això es pot canviar amb `Opcions` | `Avisos DSC`.
-2Format de document portàtil (PDF)
+ incorrectes.  AixÃ² es pot canviar amb `Opcions` | `Avisos DSC`.
+2Format de document portÃ til (PDF)
 -PDF
-?Format de document portàtil (PDF)
+?Format de document portÃ til (PDF)
 ?PDF
 ?pdf2ps
 ?ps2pdf
  El GSview pot visualitzar i imprimir fitxers PDF, tot i que hi ha un seguit de
- limitacions amb el mètode actual.
+ limitacions amb el mÃ¨tode actual.
 
- Quan s'està visualitzant, el GSview ignora la mida de la pàgina del menú Suport,
+ Quan s'estÃ  visualitzant, el GSview ignora la mida de la pÃ gina del menÃº Suport,
  i en el seu lloc utilitza el /MediaBox del fitxer PDF.
- Si s'habilita el `Opcions` | `Retalla els EPS`, el GSview utilitzarà el /CropBox
+ Si s'habilita el `Opcions` | `Retalla els EPS`, el GSview utilitzarÃ  el /CropBox
  del fitxer PDF.
 
- El GSview necessita que feu `Obre` un fitxer PDF per comptar-ne les pàgines. Si
- feu `Selecciona` un fitxer, el GSview no serà capaç de fer `Extreu el text`,
- `Cerca`, `Vés a la pàgina` o realitzar qualsevol altre operació que necessiti
- saber quantes pàgines hi ha al document.
+ El GSview necessita que feu `Obre` un fitxer PDF per comptar-ne les pÃ gines. Si
+ feu `Selecciona` un fitxer, el GSview no serÃ  capaÃ§ de fer `Extreu el text`,
+ `Cerca`, `VÃ©s a la pÃ gina` o realitzar qualsevol altre operaciÃ³ que necessiti
+ saber quantes pÃ gines hi ha al document.
 
- La compatibilitat amb els enllaços pdfmark no és completa.
+ La compatibilitat amb els enllaÃ§os pdfmark no Ã©s completa.
 
  Per convertir un fitxer PostScript a un de PDF, utilitzeu `Fitxer` | `Converteix`,
- i després seleccioneu el dispositiu `pdfwrite`.
+ i desprÃ©s seleccioneu el dispositiu `pdfwrite`.
 
  Per convertir un fitxer PDF a un de PostScript, utilitzeu `Fitxer` | `Converteix`,
- i després seleccioneu el dispositiu `pswrite`.
+ i desprÃ©s seleccioneu el dispositiu `pswrite`.
 
  `Fitxer` | `Extreu` no funciona pels fitxers PDF.
- L'extracció de pàgines PDF extreu més aviat PostScript que no pas PDF.
+ L'extracciÃ³ de pÃ gines PDF extreu mÃ©s aviat PostScript que no pas PDF.
 
 
  Per convertir massivament diversos fitxers, mireu a
@@ -471,7 +471,7 @@ P
 W
  gswin32c.exe
 WP
- en lloc del gs.exe.  També necessitareu definir el directori d'inclusió 
+ en lloc del gs.exe.  TambÃ© necessitareu definir el directori d'inclusiÃ³ 
  del Ghostscript utilitzant `-I` o la variable d'entorn `GS_LIB`.
 E
 2Obertura d'un document
@@ -481,198 +481,198 @@ E
 ?Selecciona un fitxer
 ?Anomena i desa
 ?Tanca
- L'ordre `Obre` al menú `Fitxer` obre un fitxer i en visualitza
- la primera pàgina.
+ L'ordre `Obre` al menÃº `Fitxer` obre un fitxer i en visualitza
+ la primera pÃ gina.
 
- Si el fitxer conté comentaris `DSC`, les pàgines es poden seleccionar utilitzant
- `Pàgina següent`, `Pàgina anterior` i `Vés a la pàgina`.
+ Si el fitxer contÃ© comentaris `DSC`, les pÃ gines es poden seleccionar utilitzant
+ `PÃ gina segÃ¼ent`, `PÃ gina anterior` i `VÃ©s a la pÃ gina`.
 
- Si el fitxer no conté comentaris `DSC`, `Pàgina anterior` i `Vés a la pàgina`
+ Si el fitxer no contÃ© comentaris `DSC`, `PÃ gina anterior` i `VÃ©s a la pÃ gina`
  no funcionaran. No s'hauria de seleccionar un altre fitxer fins que es visualitzi
- l'última pàgina del document.
+ l'Ãºltima pÃ gina del document.
 
  Quan s'obre un fitxer, el GSview en visualitza el nom del fitxer,
- la pàgina actual (si està disponible) i mentre el cursor és sobre la imatge,
- la ubicació del cursor en les coordenades que s'han indicat
+ la pÃ gina actual (si estÃ  disponible) i mentre el cursor Ã©s sobre la imatge,
+ la ubicaciÃ³ del cursor en les coordenades que s'han indicat
  a `Opcions` | `Unitats`.  Les coordenades poden ser punts del PostScript
- (1/72"), mil·límetres o polzades.
- La ubicació del cursor és útil per calcular els requadres del límit.
+ (1/72"), milÂ·lÃ­metres o polzades.
+ La ubicaciÃ³ del cursor Ã©s Ãºtil per calcular els requadres del lÃ­mit.
 
- L'ordre `Selecciona un fitxer` és similar a `Obre` però aquesta no visualitza
+ L'ordre `Selecciona un fitxer` Ã©s similar a `Obre` perÃ² aquesta no visualitza
  el document.
- Aquesta ordre és útil per obrir documents abans d'imprimir-los.
+ Aquesta ordre Ã©s Ãºtil per obrir documents abans d'imprimir-los.
 
- L'ordre `Anomena i desa` desa una còpia del document actual.
- Això és útil si s'està utilitzant el GSview com a visualitzador de PostScript per
- altres aplicacions i voleu desar el fitxer que s'està visualitzant actualment.
+ L'ordre `Anomena i desa` desa una cÃ²pia del document actual.
+ AixÃ² Ã©s Ãºtil si s'estÃ  utilitzant el GSview com a visualitzador de PostScript per
+ altres aplicacions i voleu desar el fitxer que s'estÃ  visualitzant actualment.
 
  L'ordre `Tanca` tanca el document obert actualment.
- Això s'haurà d'utilitzar abans que un altre programa canviï el fitxer
+ AixÃ² s'haurÃ  d'utilitzar abans que un altre programa canviÃ¯ el fitxer
  actual.
  Si no voleu fer-ho i el GSview detecta que la mida o la data del fitxer
- han canviat, es tancarà el Ghostscript i es tornarà a escannejar el document.
+ han canviat, es tancarÃ  el Ghostscript i es tornarÃ  a escannejar el document.
 
- Vegeu també `Imprimeix`.
-2Selecció de la pàgina
+ Vegeu tambÃ© `Imprimeix`.
+2SelecciÃ³ de la pÃ gina
 -Page_Selection
-?Selecció de la pàgina
-?Pàgina següent
-?Pàgina anterior
+?SelecciÃ³ de la pÃ gina
+?PÃ gina segÃ¼ent
+?PÃ gina anterior
 ?Torna a dibuixar
-?Vés a la pàgina
+?VÃ©s a la pÃ gina
 ?Visualitza
 ?Ajusta la finestra
 ?Pantalla completa
- `Visualitza` | `Pàgina següent` o el botó `+` mouen el document una
- pàgina endavant.
- Això funciona fins i tot si el document no té comentaris `DSC`.
+ `Visualitza` | `PÃ gina segÃ¼ent` o el botÃ³ `+` mouen el document una
+ pÃ gina endavant.
+ AixÃ² funciona fins i tot si el document no tÃ© comentaris `DSC`.
 
- `Visualitza` | `Pàgina anterior` o el botó `-` mouen el document una pàgina endarrere.
+ `Visualitza` | `PÃ gina anterior` o el botÃ³ `-` mouen el document una pÃ gina endarrere.
 
- `Visualitza` | `Torna a dibuixar` o la tecla `F5` tornen a visualitzar i dibuixar la pàgina actual.
+ `Visualitza` | `Torna a dibuixar` o la tecla `F5` tornen a visualitzar i dibuixar la pÃ gina actual.
 
- `Visualitza` | `Vés a la pàgina` o el botó de la `mà que apunta` mostra un quadre de diàleg
- que us permet seleccionar el número de la següent pàgina a mostrar.
- El quadre diàleg `Selecciona la pàgina` mostra les etiquetes de les pàgines perquè acostumen a
- ser més útils que una numeració de pàgines seqüencial.
+ `Visualitza` | `VÃ©s a la pÃ gina` o el botÃ³ de la `mÃ  que apunta` mostra un quadre de diÃ leg
+ que us permet seleccionar el nÃºmero de la segÃ¼ent pÃ gina a mostrar.
+ El quadre diÃ leg `Selecciona la pÃ gina` mostra les etiquetes de les pÃ gines perquÃ¨ acostumen a
+ ser mÃ©s Ãºtils que una numeraciÃ³ de pÃ gines seqÃ¼encial.
 
- `Visualitza` | `Pàgina següent i inicial` o la barra d'espai mouen el document a la part superior
- de la pàgina següent.
+ `Visualitza` | `PÃ gina segÃ¼ent i inicial` o la barra d'espai mouen el document a la part superior
+ de la pÃ gina segÃ¼ent.
 
- `Visualitza` | `Pàgina anterior i inicial` o la tecla de retrocés mouen el document
- a la part superior de la pàgina anterior.
+ `Visualitza` | `PÃ gina anterior i inicial` o la tecla de retrocÃ©s mouen el document
+ a la part superior de la pÃ gina anterior.
 
- Les ordres `Pàgina anterior`, `Torna a dibuixar` i `Vés a la pàgina` només funcionen si el
- document conté comentaris `DSC`.
+ Les ordres `PÃ gina anterior`, `Torna a dibuixar` i `VÃ©s a la pÃ gina` nomÃ©s funcionen si el
+ document contÃ© comentaris `DSC`.
 
- `Visualitza` | `Ajusta la finestra` o la tecla `F6` canvien la resolució de visualització
- per ajustar la pàgina sencera a la finestra actual. L'ús repetit
- fa que tant l'amplada com l'alçada de la pàgina s'ajustin a la finestra
+ `Visualitza` | `Ajusta la finestra` o la tecla `F6` canvien la resoluciÃ³ de visualitzaciÃ³
+ per ajustar la pÃ gina sencera a la finestra actual. L'Ãºs repetit
+ fa que tant l'amplada com l'alÃ§ada de la pÃ gina s'ajustin a la finestra
  actual.
 
- `Visualitza` | `Pantalla completa` o la tecla `F4` visualitzen la pàgina a pantalla completa
- (sense la barra del títol, les barres de desplaçament, etc.).
- Per tornar a la visualització normal, premeu la tecla d'escapada.
-2Informació del document
+ `Visualitza` | `Pantalla completa` o la tecla `F4` visualitzen la pÃ gina a pantalla completa
+ (sense la barra del tÃ­tol, les barres de desplaÃ§ament, etc.).
+ Per tornar a la visualitzaciÃ³ normal, premeu la tecla d'escapada.
+2InformaciÃ³ del document
 -Document_Information
-?Informació
- S'utilitza una àrea d'informació breu a la part superior de la finestra del
- GSview per visualitzar el nom de fitxer del document, el número i etiqueta de la pàgina
- actual (si està disponible) i mentre el cursor és sobre la imatge, la ubicació del cursor
+?InformaciÃ³
+ S'utilitza una Ã rea d'informaciÃ³ breu a la part superior de la finestra del
+ GSview per visualitzar el nom de fitxer del document, el nÃºmero i etiqueta de la pÃ gina
+ actual (si estÃ  disponible) i mentre el cursor Ã©s sobre la imatge, la ubicaciÃ³ del cursor
  (relativa a la cantonada inferior esquerra del paper) 
  amb les coordenades que s'han especificat a `Opcions` | `Unitats`.
- La ubicació del cursor és útil per calcular els requadres del límit.
+ La ubicaciÃ³ del cursor Ã©s Ãºtil per calcular els requadres del lÃ­mit.
 
- L'ordre `Informació` al menú `Fitxer ` mostra un quadre de diàleg amb la informació
- següent quant als comentaris `DSC` al document actual.
+ L'ordre `InformaciÃ³` al menÃº `Fitxer ` mostra un quadre de diÃ leg amb la informaciÃ³
+ segÃ¼ent quant als comentaris `DSC` al document actual.
 
- El `Fitxer `és el nom del camí del document complet.
+ El `Fitxer `Ã©s el nom del camÃ­ del document complet.
 
  El `Tipus` pot ser` DSC`,` EPS`, `Sense comentaris DSC` o `S'estan ignorant els comentaris DSC`.
- L'`EPS` és un fitxer PostScript encapsulat - un document d'una sola pàgina
- que conté un subconjunt de comentaris `DSC` i d'ordres PostScript.
+ L'`EPS` Ã©s un fitxer PostScript encapsulat - un document d'una sola pÃ gina
+ que contÃ© un subconjunt de comentaris `DSC` i d'ordres PostScript.
  Els fitxers `EPS `s'utilitzen normalment com inclusions a d'altres documents.
  `S'estan ignorant els comentaris DSC` es mostra si se selecciona `Opcions` | `Ignora els DSC`.
  Aquests poden tenir el prefixe `Ctrl-D seguit de` o `PJL seguit de`.
  Els dos indiquen que el document no compleix amb els DSC
- perquè hi ha brossa al principi del document.
+ perquÃ¨ hi ha brossa al principi del document.
  Per arreglar el primer, vegeu `Problemes comuns`.
  Per arreglar el segon, no utilitzeu un controlador HP LaserJet quan creeu
  documents PostScript per a distribuir als altres.
 
- El `Títol` és un text que es pot utilitzar quan s'imprimeixen pàgines
- i per escannejar i reconèixer documents.
+ El `TÃ­tol` Ã©s un text que es pot utilitzar quan s'imprimeixen pÃ gines
+ i per escannejar i reconÃ¨ixer documents.
 
- La `Data` és la data de quan es va crear el document.
+ La `Data` Ã©s la data de quan es va crear el document.
 
- El `Requadre del límit` delimita un requadre que tanca tots els elements pintats
- a la pàgina.  Els quatre valors enters són coordenades de les cantonades
- inferior esquerra i superior dreta del requadre del límit en les coordenades
+ El `Requadre del lÃ­mit` delimita un requadre que tanca tots els elements pintats
+ a la pÃ gina.  Els quatre valors enters sÃ³n coordenades de les cantonades
+ inferior esquerra i superior dreta del requadre del lÃ­mit en les coordenades
  predeterminades de l'usuari (1/72 polzades).
 
- L'`Orientació `és la orientació predeterminada de la pàgina i pot ser tant
- `Horitzontal `com` Vertical`.  Vegeu el menú `Orientació`.
+ L'`OrientaciÃ³ `Ã©s la orientaciÃ³ predeterminada de la pÃ gina i pot ser tant
+ `Horitzontal `com` Vertical`.  Vegeu el menÃº `OrientaciÃ³`.
 
- L'`Ordre de pàgines` pot ser tant `Ascendent`, `Descendent` com `Especial`.
- Si l'`Ordre de pàgines` és `Descendent`, el GSview inverteix automàticament
- les pàgines quan s'està visualitzant, o quan s'està imprimint de manera que apareixen en ordre ascendent.  
+ L'`Ordre de pÃ gines` pot ser tant `Ascendent`, `Descendent` com `Especial`.
+ Si l'`Ordre de pÃ gines` Ã©s `Descendent`, el GSview inverteix automÃ ticament
+ les pÃ gines quan s'estÃ  visualitzant, o quan s'estÃ  imprimint de manera que apareixen en ordre ascendent.  
  Quan s'extreu o s'imprimeix, el GSview pot rebre instruccions
- d'imprimir les pàgines en ordre descendent (invers).
- `Especial` significa que les pàgines no s'han de tornar a ordenar.
+ d'imprimir les pÃ gines en ordre descendent (invers).
+ `Especial` significa que les pÃ gines no s'han de tornar a ordenar.
 
- El `Suport predeterminat` dóna el nom del suport seguit de l'amplada i l'alçada
+ El `Suport predeterminat` dÃ³na el nom del suport seguit de l'amplada i l'alÃ§ada
  d'aquest suport en les coordenades predeterminades de l'usuari (1/72 polzades).
 
- Les `Pàgines` són el número total de pàgines del document.
+ Les `PÃ gines` sÃ³n el nÃºmero total de pÃ gines del document.
 
- La `Pàgina` dóna l'etiqueta i el número de la pàgina.
+ La `PÃ gina` dÃ³na l'etiqueta i el nÃºmero de la pÃ gina.
 
- El `Mapa de bits `és la mida del mapa de bits que es visualitza, cosa que pot ser
- útil si copieu al porta-retalls la imatge que es visualitza.
+ El `Mapa de bits `Ã©s la mida del mapa de bits que es visualitza, cosa que pot ser
+ Ãºtil si copieu al porta-retalls la imatge que es visualitza.
 W
-2Impressió
+2ImpressiÃ³
 -Print
 ?Imprimeix
- L'ordre `Imprimeix` del menú `Fitxer ` permet la impressió del document
- tot utilitzant el Ghostscript.  Hi ha tres mètodes que utilitza el GSview per
+ L'ordre `Imprimeix` del menÃº `Fitxer ` permet la impressiÃ³ del document
+ tot utilitzant el Ghostscript.  Hi ha tres mÃ¨todes que utilitza el GSview per
  imprimir: `Impressora Windows GDI`, `Dispositiu Ghostscript`
  o `Impressora PostScript`.
 
  `Impressora Windows GDI` utilitza el Ghostscript per crear mapes de bits per
- cada pàgina, i les imprimeix fent ús del dispositiu estàndard del Windows.
- Aquest és el mètode més lent, però hauria de funcionar amb la majoria d'impressores.
+ cada pÃ gina, i les imprimeix fent Ãºs del dispositiu estÃ ndard del Windows.
+ Aquest Ã©s el mÃ¨tode mÃ©s lent, perÃ² hauria de funcionar amb la majoria d'impressores.
 
  `Dispositiu Ghostscript` utilitza els dispositius d'impressores del Ghostscript.
- Aquest és més ràpid, però necessiteu que el Ghostscript tingui un controlador de
+ Aquest Ã©s mÃ©s rÃ pid, perÃ² necessiteu que el Ghostscript tingui un controlador de
  la vostra impressora i necessiteu saber com es diu.
  Per exemple, l'HP LaserJet 4 utilitza el ljet4.
- Vegeu la documentació del Ghostscript per a més detalls.
+ Vegeu la documentaciÃ³ del Ghostscript per a mÃ©s detalls.
 
  `Impressora PostScript` no utilitza el Ghostscript per imprimir els fitxers
- PostScript. En lloc d'això, s'envia el fitxer directament a la impressora.
+ PostScript. En lloc d'aixÃ², s'envia el fitxer directament a la impressora.
 
- Hi ha una quantitat significativa d'interacció entre els paràmetres
- al quadre de diàleg d'impressió. Per exemple, seleccionar `Dispositiu `
- inhabilita el botó `Propietats ` perquè no és rellevant.
- Hi ha més detalls als temes següents.
+ Hi ha una quantitat significativa d'interacciÃ³ entre els parÃ metres
+ al quadre de diÃ leg d'impressiÃ³. Per exemple, seleccionar `Dispositiu `
+ inhabilita el botÃ³ `Propietats ` perquÃ¨ no Ã©s rellevant.
+ Hi ha mÃ©s detalls als temes segÃ¼ents.
 
- Vegeu també `Conversions` i `Converteix`.
-3Selecció de pàgines
+ Vegeu tambÃ© `Conversions` i `Converteix`.
+3SelecciÃ³ de pÃ gines
 -Select_Pages
-?Selecció de pàgines
- Quan s'imprimeix, es pot seleccionar un rang de pàgines.
- Dins aquest rang, podeu seleccionar totes les pàgines o les pàgines parelles o imparelles.
- Si seleccioneu pàgines imparelles al rang de 10 a 20, la primera pàgina que s'imprimirà
- serà la 11.
+?SelecciÃ³ de pÃ gines
+ Quan s'imprimeix, es pot seleccionar un rang de pÃ gines.
+ Dins aquest rang, podeu seleccionar totes les pÃ gines o les pÃ gines parelles o imparelles.
+ Si seleccioneu pÃ gines imparelles al rang de 10 a 20, la primera pÃ gina que s'imprimirÃ 
+ serÃ  la 11.
 
- El botó `Selecciona` es pot inhabilitar si no és compatible amb el mètode d'impressió.
+ El botÃ³ `Selecciona` es pot inhabilitar si no Ã©s compatible amb el mÃ¨tode d'impressiÃ³.
 
- El quadre de verificació `Inverteix` fa que les pàgines s'imprimeixin en
- ordre descendent. Això s'habilita únicament si el document conté comentaris `DSC`.
+ El quadre de verificaciÃ³ `Inverteix` fa que les pÃ gines s'imprimeixin en
+ ordre descendent. AixÃ² s'habilita Ãºnicament si el document contÃ© comentaris `DSC`.
 
- Si voleu imprimir les pàgines des d'un document `DSC` que tingui un ordre de pàgines
- especial (per exemple, que les pàgines no es puguin tornar a ordenar),
+ Si voleu imprimir les pÃ gines des d'un document `DSC` que tingui un ordre de pÃ gines
+ especial (per exemple, que les pÃ gines no es puguin tornar a ordenar),
  seleccioneu la `Impressora Windows GDI` i `Ignora els DSC`.
 3Impressora Windows GDI
 -Windows_GDI_printer
 ?Impressora Windows GDI
- Utilitza el Ghostscript per crear un mapa de bits per a cada pàgina, i
- aquests s'imprimeixen tot utilitzant el dispositiu estàndard d'impressió del Windows.
- Hauria de funcionar amb totes les impressores que són compatibles amb l'impressió de gràfics.
+ Utilitza el Ghostscript per crear un mapa de bits per a cada pÃ gina, i
+ aquests s'imprimeixen tot utilitzant el dispositiu estÃ ndard d'impressiÃ³ del Windows.
+ Hauria de funcionar amb totes les impressores que sÃ³n compatibles amb l'impressiÃ³ de grÃ fics.
 
- Per defecte, s'utilitza un mapa de bits monocrom per a una màxima velocitat.
- Si voleu color, necessitareu habilitar-ho utilitzant el botó `Paràmetres `.
+ Per defecte, s'utilitza un mapa de bits monocrom per a una mÃ xima velocitat.
+ Si voleu color, necessitareu habilitar-ho utilitzant el botÃ³ `ParÃ metres `.
 
- Per controlar com gestiona les sol·licituts de canvi de mida de la pàgina 
+ Per controlar com gestiona les solÂ·licituts de canvi de mida de la pÃ gina 
  per als documents PostScript o PDF el GSview, vegeu el tema
- `Ajust de la mida de la pàgina`.
+ `Ajust de la mida de la pÃ gina`.
 
- Les `Opcions `normalment són buides, però poden contenir opcions en línies d'ordres.
+ Les `Opcions `normalment sÃ³n buides, perÃ² poden contenir opcions en lÃ­nies d'ordres.
  Utilitzeu-ho amb cura!
 
- Aquest mètode d'impressió permet imprimir les pàgines seleccionades, fins i tot si
- un document PostScript no conté comentaris `DSC`.  Ho fa
- mitjançant la representació de totes les pàgines, però només enviant a la impressora les que se sol·liciten.
+ Aquest mÃ¨tode d'impressiÃ³ permet imprimir les pÃ gines seleccionades, fins i tot si
+ un document PostScript no contÃ© comentaris `DSC`.  Ho fa
+ mitjanÃ§ant la representaciÃ³ de totes les pÃ gines, perÃ² nomÃ©s enviant a la impressora les que se solÂ·liciten.
  Podria ser molt lent.
 3Ghostscript device
 -Ghostscript_device

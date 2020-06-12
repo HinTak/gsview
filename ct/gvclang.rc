@@ -27,19 +27,19 @@ STRINGTABLE
 BEGIN
 	/* these must be in ascending ID order */
 	GSVS(IDM_OPEN, "Obre...")
-	GSVS(IDM_INFO, "InformaciÛ...")
+	GSVS(IDM_INFO, "Informaci√≥...")
 	GSVS(IDM_PRINT, "Imprimeix...")
 	GSVS(IDM_TEXTFIND, "Busca...")
-	GSVS(IDM_TEXTFINDNEXT, "Busca el seg¸ent")
-	GSVS(IDM_NEXT, "P‡gina seg¸ent")
-	GSVS(IDM_NEXTSKIP, "Salta 5 p‡gines endavant")
-	GSVS(IDM_PREV, "P‡gina anterior")
-	GSVS(IDM_PREVSKIP, "Salta 5 p‡gines endarrera")
-	GSVS(IDM_GOTO, "VÈs a la p‡gina...")
-	GSVS(IDM_GOBACK, "VÈs endarrera")
-	GSVS(IDM_GOFWD, "VÈs endavant")
-	GSVS(IDM_MAGPLUS, "Augmenta la resoluciÛ")
-	GSVS(IDM_MAGMINUS, "Redueix la resoluciÛ")
+	GSVS(IDM_TEXTFINDNEXT, "Busca el seg√ºent")
+	GSVS(IDM_NEXT, "P√†gina seg√ºent")
+	GSVS(IDM_NEXTSKIP, "Salta 5 p√†gines endavant")
+	GSVS(IDM_PREV, "P√†gina anterior")
+	GSVS(IDM_PREVSKIP, "Salta 5 p√†gines endarrera")
+	GSVS(IDM_GOTO, "V√©s a la p√†gina...")
+	GSVS(IDM_GOBACK, "V√©s endarrera")
+	GSVS(IDM_GOFWD, "V√©s endavant")
+	GSVS(IDM_MAGPLUS, "Augmenta la resoluci√≥")
+	GSVS(IDM_MAGMINUS, "Redueix la resoluci√≥")
 	GSVS(IDM_HELPCONTENT, "Ajuda")
 END
 
@@ -50,25 +50,25 @@ BEGIN
 	GSVS(IDS_ELANGUAGE, "Catalan")
 	GSVS(IDS_FILE, "Fitxer: ")
 	GSVS(IDS_NOFILE, "Cap fitxer")
-	GSVS(IDS_PAGE, "P‡gina: ")
-	GSVS(IDS_NOPAGE, "La n˙meraciÛ de les p‡gines no est‡ disponible")
-	GSVS(IDS_PAGESPECIAL, "L'ordenaciÛ de les p‡gines Ès Especial. No es poden tornar a ordenar les p‡gines de manera fidedigna.  Vegeu 'Problemes comuns' a l'ajuda.  Voleu continuar?")
+	GSVS(IDS_PAGE, "P√†gina: ")
+	GSVS(IDS_NOPAGE, "La n√∫meraci√≥ de les p√†gines no est√† disponible")
+	GSVS(IDS_PAGESPECIAL, "L'ordenaci√≥ de les p√†gines √©s Especial. No es poden tornar a ordenar les p√†gines de manera fidedigna.  Vegeu 'Problemes comuns' a l'ajuda.  Voleu continuar?")
 	GSVS(IDS_LANDSCAPE, "Horitzontal")
 	GSVS(IDS_PORTRAIT, "Vertical")
 	GSVS(IDS_ASCEND, "Ascendent")
 	GSVS(IDS_DESCEND, "Descendent")
 	GSVS(IDS_SPECIAL, "Especial")
-	GSVS(IDS_PAGEINFO, "P‡gina \042%s\042  %d de %d")
-	GSVS(IDS_LINKPAGE, "EnllaÁa a la p‡gina %d")
+	GSVS(IDS_PAGEINFO, "P√†gina \042%s\042  %d de %d")
+	GSVS(IDS_LINKPAGE, "Enlla√ßa a la p√†gina %d")
 	GSVS(IDS_DEFAULT, "Per defecte")
 	GSVS(IDS_NOTDEFTAG, "[Sense definir]")
 	GSVS(IDS_EPSF, "EPS")
-	GSVS(IDS_EPSI, "EPS amb visualitzaciÛ prËvia Interchange")
-	GSVS(IDS_EPST, "EPS amb visualitzaciÛ prËvia TIFF")
-	GSVS(IDS_EPSW, "EPS amb visualitzaciÛ prËvia Metafile")
+	GSVS(IDS_EPSI, "EPS amb visualitzaci√≥ pr√®via Interchange")
+	GSVS(IDS_EPST, "EPS amb visualitzaci√≥ pr√®via TIFF")
+	GSVS(IDS_EPSW, "EPS amb visualitzaci√≥ pr√®via Metafile")
 	GSVS(IDS_DSC, "DSC")
 	GSVS(IDS_NOTDSC, "No hi ha comentaris DSC")
-	GSVS(IDS_PDF, "Format de document port‡til (PDF)")
+	GSVS(IDS_PDF, "Format de document port√†til (PDF)")
 	GSVS(IDS_IGNOREDSC, "S'estan ignorant els comentaris DSC")
 	GSVS(IDS_CTRLD, "Ctrl-D seguit de ")
 	GSVS(IDS_PJL, "PJL seguit de ")
@@ -78,43 +78,43 @@ END
 STRINGTABLE
 BEGIN
 	GSVS(IDS_OUTPUTFILE, "Nom del fitxer de sortida")
-	GSVS(IDS_PRINTINGALL, "No hi ha comentaris DSC\nS'estan imprimint totes les p‡gines")
+	GSVS(IDS_PRINTINGALL, "No hi ha comentaris DSC\nS'estan imprimint totes les p√†gines")
 	GSVS(IDS_PRINTFILE, "Imprimeix un fitxer")
-	GSVS(IDS_SELECTPAGE, "Selecciona la p‡gina")
-	GSVS(IDS_SELECTPAGES, "Selecciona les p‡gines")
+	GSVS(IDS_SELECTPAGE, "Selecciona la p√†gina")
+	GSVS(IDS_SELECTPAGES, "Selecciona les p√†gines")
 	GSVS(IDS_NOTOPEN, "No hi ha cap document obert")
 	GSVS(IDS_CANNOTRUN, "No es pot executar ")
-	GSVS(IDS_TOOLONG, "La lÌnia d'ordres Ès massa llarga: ")
-	GSVS(IDS_NOMORE, "No mÈs p‡gines")
+	GSVS(IDS_TOOLONG, "La l√≠nia d'ordres √©s massa llarga: ")
+	GSVS(IDS_NOMORE, "No m√©s p√†gines")
 /* OLD
 	GSVS(IDS_GSCOMMAND, "Ordre del Ghostscript?")
 */
-	GSVS(IDS_NOZOOM, "S'ha de visualitzar la p‡gina abans d'apropar-se")
-	GSVS(IDS_USERWIDTH, "Quina Ès l'amplada en unitats d'1/72 de polzada?")
-	GSVS(IDS_USERHEIGHT, "Quina Ès l'alÁada en unitats d'1/72 de polzada?")
+	GSVS(IDS_NOZOOM, "S'ha de visualitzar la p√†gina abans d'apropar-se")
+	GSVS(IDS_USERWIDTH, "Quina √©s l'amplada en unitats d'1/72 de polzada?")
+	GSVS(IDS_USERHEIGHT, "Quina √©s l'al√ßada en unitats d'1/72 de polzada?")
 	GSVS(IDS_BADEPS, "Hi ha un problema en fer el fitxer EPS")
-	GSVS(IDS_NOPREVIEW, "No Ès un fitxer DOS EPS o bÈ\nNo hi ha visualitzaciÛ prËvia bin‡ria")
-	GSVS(IDS_NOTDFNAME, "No es pot utilitzar el mateix nom que tÈ el document obert")
-	GSVS(IDS_NOTEMP, "No s'ha pogut obrir el fitxer temporal.\nPotser el directori Ès nomÈs de lectura.\nPotser no s'ha definit la variable d'entorn TEMP.")
+	GSVS(IDS_NOPREVIEW, "No √©s un fitxer DOS EPS o b√©\nNo hi ha visualitzaci√≥ pr√®via bin√†ria")
+	GSVS(IDS_NOTDFNAME, "No es pot utilitzar el mateix nom que t√© el document obert")
+	GSVS(IDS_NOTEMP, "No s'ha pogut obrir el fitxer temporal.\nPotser el directori √©s nom√©s de lectura.\nPotser no s'ha definit la variable d'entorn TEMP.")
 	GSVS(IDS_CANCELDONE, "%d%% fet")
-	GSVS(IDS_BADCLI, "L'opciÛ de la lÌnia d'ordre Ès incorrecte: ")
-	GSVS(IDS_DUPOPT, "NomÈs podeu indicar una de les opcions /F /P /S.  S'ha produÔt un error a: %s")
+	GSVS(IDS_BADCLI, "L'opci√≥ de la l√≠nia d'ordre √©s incorrecte: ")
+	GSVS(IDS_DUPOPT, "Nom√©s podeu indicar una de les opcions /F /P /S.  S'ha produ√Øt un error a: %s")
 	GSVS(IDS_TEXTFIND, "Quin text voleu buscar?")
 	GSVS(IDS_TEXTNOTFIND, "No s'ha trobat el text")
-	GSVS(IDS_PRINTPDFPS, "No es pot imprimir un PDF a una impressora PostScript.  Utilitzeu l'opciÛ Fitxer | Extreu")
-	GSVS(IDS_NOPDFQUICKTEXT, "No es pot fer la recerca o extracciÛ r‡pida de text en un fitxer PDF.  Utilitzeu l'opciÛ Opcions | PS a Text")
-	GSVS(IDS_BAD_DOSEPS_HEADER, "La capÁalera DOS EPS Ès incorrecta. S'estan ignorant els comentaris DSC.")
-	GSVS(IDS_PROBABLY_PCL, "Sembla PCL, pensat per a impressores HP LaserJet o DeskJet.  Esteu segur que Ès PostScript?")
-	GSVS(IDS_BUSYPRINTING, "El GSview est‡ ocupat tot imprimint.  Premeu Cancel∑la per esperar fins que el GSview hagi acabat.")
+	GSVS(IDS_PRINTPDFPS, "No es pot imprimir un PDF a una impressora PostScript.  Utilitzeu l'opci√≥ Fitxer | Extreu")
+	GSVS(IDS_NOPDFQUICKTEXT, "No es pot fer la recerca o extracci√≥ r√†pida de text en un fitxer PDF.  Utilitzeu l'opci√≥ Opcions | PS a Text")
+	GSVS(IDS_BAD_DOSEPS_HEADER, "La cap√ßalera DOS EPS √©s incorrecta. S'estan ignorant els comentaris DSC.")
+	GSVS(IDS_PROBABLY_PCL, "Sembla PCL, pensat per a impressores HP LaserJet o DeskJet.  Esteu segur que √©s PostScript?")
+	GSVS(IDS_BUSYPRINTING, "El GSview est√† ocupat tot imprimint.  Premeu Cancel¬∑la per esperar fins que el GSview hagi acabat.")
 END
 
 STRINGTABLE
 BEGIN
 	/* sound type types*/
 	GSVS(IDS_SOUNDNAME, "Fitxer de so")
-	GSVS(IDS_SNDPAGE, "P‡gina de sortida")
-	GSVS(IDS_SNDNOPAGE, "Sense p‡gina")
-	GSVS(IDS_SNDNONUMBER, "Sense n˙meraciÛ")
+	GSVS(IDS_SNDPAGE, "P√†gina de sortida")
+	GSVS(IDS_SNDNOPAGE, "Sense p√†gina")
+	GSVS(IDS_SNDNONUMBER, "Sense n√∫meraci√≥")
 	GSVS(IDS_SNDNOTOPEN, "No s'ha obert")
 	GSVS(IDS_SNDERROR, "Error")
 	GSVS(IDS_SNDTIMEOUT,	"Temps excedit")
@@ -128,21 +128,21 @@ END
 STRINGTABLE
 BEGIN
 	/* help topics - these need to match keywords in XX\gvclang.txt */
-	GSVS(IDS_TOPICROOT,  "IntroducciÛ")
+	GSVS(IDS_TOPICROOT,  "Introducci√≥")
 	GSVS(IDS_TOPICOPEN,  "Obre")
 	GSVS(IDS_TOPICPRINT, "Imprimeix")
 	GSVS(IDS_TOPICPROP, "Propietats")
-	GSVS(IDS_TOPICEDITPROP, "Propietats de l'ediciÛ")
+	GSVS(IDS_TOPICEDITPROP, "Propietats de l'edici√≥")
 	GSVS(IDS_TOPICCONVERT, "Converteix")
 	GSVS(IDS_TOPICCLIP, "Porta-retalls")
-	GSVS(IDS_TOPICPREVIEW, "VisualitzaciÛ prËvia de l'EPS")
+	GSVS(IDS_TOPICPREVIEW, "Visualitzaci√≥ pr√®via de l'EPS")
 	GSVS(IDS_TOPICSOUND, "Sons")
-	GSVS(IDS_TOPICDSET, "Par‡metres de la visualitzaciÛ")
+	GSVS(IDS_TOPICDSET, "Par√†metres de la visualitzaci√≥")
 	GSVS(IDS_TOPICMEDIA, "Suport")
 	GSVS(IDS_TOPICPSTOEPS, "De PS a EPS")
-	GSVS(IDS_TOPICGOTO, "SelecciÛ de p‡gina")
-	GSVS(IDS_TOPICINSTALL, "Instal∑laciÛ")
-	GSVS(IDS_TOPICTEXT, "ExtracciÛ i Recerca de Text")
+	GSVS(IDS_TOPICGOTO, "Selecci√≥ de p√†gina")
+	GSVS(IDS_TOPICINSTALL, "Instal¬∑laci√≥")
+	GSVS(IDS_TOPICTEXT, "Extracci√≥ i Recerca de Text")
 	GSVS(IDS_TOPICKEYS, "Tecles")
 	GSVS(IDS_TOPICMESS, "Mostra els missatges")
 	GSVS(IDS_TOPICSPOOL, "Gestor de cues")
@@ -150,9 +150,9 @@ BEGIN
 	GSVS(IDS_TOPICBZIP2, "bzip2")
 	GSVS(IDS_TOPICPSTOEDIT, "PS a Edit")
 	GSVS(IDS_TOPICMEASURE, "Mida")
-	GSVS(IDS_TOPICEASYCFG, "ConfiguraciÛ f‡cil")
-	GSVS(IDS_TOPICADVANCEDCFG, "ConfiguraciÛ avanÁada")
-	GSVS(IDS_TOPICDOWNLOAD, "ObtenciÛ del Ghostscript")
+	GSVS(IDS_TOPICEASYCFG, "Configuraci√≥ f√†cil")
+	GSVS(IDS_TOPICADVANCEDCFG, "Configuraci√≥ avan√ßada")
+	GSVS(IDS_TOPICDOWNLOAD, "Obtenci√≥ del Ghostscript")
 	GSVS(IDS_TOPICDSCWARN, "Avisos DSC")
 	GSVS(IDS_TOPICREG, "Registre")
 END
@@ -163,39 +163,39 @@ BEGIN
 	GSVS(IDS_BBPROMPT1, "Feu clic a la part inferior")
 	GSVS(IDS_BBPROMPT2, "Feu clic a la dreta")
 	GSVS(IDS_BBPROMPT3, "Feu clic a la part superior")
-	GSVS(IDS_EPSONEPAGE, "Un fitxer EPS ha de ser un document d'una sola p‡gina. \nVegeu l'ajuda de 'PS a EPS'.")
-	GSVS(IDS_EPSQPAGES, "…s un document d'una sola p‡gina?")
-	GSVS(IDS_EPSNOBBOX, "No es pot obtenir el requadre del lÌmit")
-	GSVS(IDS_EPSUSERINVALID, "El fitxer de visualitzaciÛ prËvia no Ès un TIFF o un Windows Metafile")
-	GSVS(IDS_EPSUSERTITLE, "Obre el fitxer de visualitzaciÛ prËvia")
-	GSVS(IDS_EPS_OFF_PAGE, "El requadre del lÌmit de l'EPS est‡ completament fora de la p‡gina. Us suggerim utilitzar l'opciÛ 'Opcions | Retalla l'EPS'")
-	GSVS(IDS_MUSTUSEPORTRAIT, "Heu d'utilitzar la orientaciÛ vertical.")
+	GSVS(IDS_EPSONEPAGE, "Un fitxer EPS ha de ser un document d'una sola p√†gina. \nVegeu l'ajuda de 'PS a EPS'.")
+	GSVS(IDS_EPSQPAGES, "√âs un document d'una sola p√†gina?")
+	GSVS(IDS_EPSNOBBOX, "No es pot obtenir el requadre del l√≠mit")
+	GSVS(IDS_EPSUSERINVALID, "El fitxer de visualitzaci√≥ pr√®via no √©s un TIFF o un Windows Metafile")
+	GSVS(IDS_EPSUSERTITLE, "Obre el fitxer de visualitzaci√≥ pr√®via")
+	GSVS(IDS_EPS_OFF_PAGE, "El requadre del l√≠mit de l'EPS est√† completament fora de la p√†gina. Us suggerim utilitzar l'opci√≥ 'Opcions | Retalla l'EPS'")
+	GSVS(IDS_MUSTUSEPORTRAIT, "Heu d'utilitzar la orientaci√≥ vertical.")
 END
 
 STRINGTABLE
 BEGIN
 	/* wait messages */
 	GSVS(IDS_WAIT, "Espereu")
-	GSVS(IDS_WAITREAD,  "S'est‡ llegint...")
-	GSVS(IDS_WAITWRITE,  "S'est‡ escrivint...")
-	GSVS(IDS_WAITDRAW, "S'est‡ dibuixant...")
-	GSVS(IDS_WAITDRAW_PC, "S'est‡ dibuixant %d%%")
-	GSVS(IDS_WAITGSOPEN, "S'est‡ obrint el Ghostscript...")
-	GSVS(IDS_WAITGSCLOSE,  "S'est‡ tancant el Ghostscript...")
-	GSVS(IDS_WAITPRINT,  "S'est‡ imprimint...")
-	GSVS(IDS_WAITSEARCH,  "S'est‡ cercant...")
-	GSVS(IDS_WAITTEXT, "S'est‡ extreient el text %d%%")
+	GSVS(IDS_WAITREAD,  "S'est√† llegint...")
+	GSVS(IDS_WAITWRITE,  "S'est√† escrivint...")
+	GSVS(IDS_WAITDRAW, "S'est√† dibuixant...")
+	GSVS(IDS_WAITDRAW_PC, "S'est√† dibuixant %d%%")
+	GSVS(IDS_WAITGSOPEN, "S'est√† obrint el Ghostscript...")
+	GSVS(IDS_WAITGSCLOSE,  "S'est√† tancant el Ghostscript...")
+	GSVS(IDS_WAITPRINT,  "S'est√† imprimint...")
+	GSVS(IDS_WAITSEARCH,  "S'est√† cercant...")
+	GSVS(IDS_WAITTEXT, "S'est√† extreient el text %d%%")
 END
 
 
 STRINGTABLE
 BEGIN
 	/* debug messages */
-	GSVS(IDS_DEBUG_DFISLOCKED, "dfreopen: el fitxer est‡ blocat")
-	GSVS(IDS_DEBUG_DFISOPEN, "dfreopen: el fitxer ja est‡ obert")
+	GSVS(IDS_DEBUG_DFISLOCKED, "dfreopen: el fitxer est√† blocat")
+	GSVS(IDS_DEBUG_DFISOPEN, "dfreopen: el fitxer ja est√† obert")
 	GSVS(IDS_DEBUG_DFISMISSING, "dfreopen: falta el fitxer")
 	GSVS(IDS_DEBUG_DFCHANGED, "dfreopen: el fitxer ha canviat")
-	GSVS(IDS_DEBUG_DFISCLOSED, "dfclose: el fitxer ja est‡ tancat")
+	GSVS(IDS_DEBUG_DFISCLOSED, "dfclose: el fitxer ja est√† tancat")
 END
 
 STRINGTABLE
@@ -209,35 +209,35 @@ END
 STRINGTABLE
 BEGIN
 	/* PDF messages */
-	GSVS(IDS_PDFNOPAGE, "Hi ha un nombre desconegut de p‡gines al fitxer PDF\nPrimer heu de visualitzar el fitxer" )
-	GSVS(IDS_PDFEXTRACTALL, "Hi ha un nombre desconegut de p‡gines al fitxer PDF\nS'estan extreient o imprimint totes les p‡gines")
-	GSVS(IDS_USEPDFWRITE, "Per extreure p‡gines d'un fitxer PDF, utilitzeu l'opciÛ Fitxer | Converteix amb el dispositiu pdfwrite o pswrite.")
+	GSVS(IDS_PDFNOPAGE, "Hi ha un nombre desconegut de p√†gines al fitxer PDF\nPrimer heu de visualitzar el fitxer" )
+	GSVS(IDS_PDFEXTRACTALL, "Hi ha un nombre desconegut de p√†gines al fitxer PDF\nS'estan extreient o imprimint totes les p√†gines")
+	GSVS(IDS_USEPDFWRITE, "Per extreure p√†gines d'un fitxer PDF, utilitzeu l'opci√≥ Fitxer | Converteix amb el dispositiu pdfwrite o pswrite.")
 END
 
 STRINGTABLE
 BEGIN
-	GSVS(IDS_LARGEMEDIA, "AvÌs: la mida del suport Ès mÈs ampla o mÈs alta de 2 metres. Si us plau, comproveu l'opciÛ 'Suport | Definit per l'usuari")
+	GSVS(IDS_LARGEMEDIA, "Av√≠s: la mida del suport √©s m√©s ampla o m√©s alta de 2 metres. Si us plau, comproveu l'opci√≥ 'Suport | Definit per l'usuari")
 	GSVS(IDS_NOTIMPLEMENTED, "No s'ha implementat")
-	GSVS(IDS_NOLINKTARGET, "L'objectiu per enllaÁar Ès desconegut")
-	GSVS(IDS_PARSEERROR, "S'ha produÔt un error en analitzar la lÌnia d'ordre")
-	GSVS(IDS_ZLIB_FAIL, "La c‡rrega del DLL zlib ha fallat. Premeu el botÛ D'acord per a ajuda.")
-	GSVS(IDS_BZIP2_FAIL, "La c‡rrega del DLL bzip2 ha fallat.  Premeu el botÛ D'acord per a ajuda.")
+	GSVS(IDS_NOLINKTARGET, "L'objectiu per enlla√ßar √©s desconegut")
+	GSVS(IDS_PARSEERROR, "S'ha produ√Øt un error en analitzar la l√≠nia d'ordre")
+	GSVS(IDS_ZLIB_FAIL, "La c√†rrega del DLL zlib ha fallat. Premeu el bot√≥ D'acord per a ajuda.")
+	GSVS(IDS_BZIP2_FAIL, "La c√†rrega del DLL bzip2 ha fallat.  Premeu el bot√≥ D'acord per a ajuda.")
 END
 
 STRINGTABLE
 BEGIN
-	GSVS(IDS_BETAEXPIRED, "Aquesta versiÛ de prova (BETA) del GSview ha caducat. Vegeu http://www.cs.wisc.edu/~ghost/ per als detalls sobre com obtenir una versiÛ actual del GSview")
+	GSVS(IDS_BETAEXPIRED, "Aquesta versi√≥ de prova (BETA) del GSview ha caducat. Vegeu http://www.cs.wisc.edu/~ghost/ per als detalls sobre com obtenir una versi√≥ actual del GSview")
 	GSVS(IDS_BETAWARN, AABETAWARN)
 	GSVS(IDS_NOPRINTERINI, "No es pot obrir el printer.ini")
 	GSVS(IDS_NOINI, "No es pot obrir el fitxer INI")
-	GSVS(IDS_NEEDTEMP, "Heu de definir la variable d'entorn TEMP com un directori d'escriptura v‡lid. Sense aixÚ, el GSview no podr‡ imprimir")
-	GSVS(IDS_GSNOTINSTALLED, "No heu instal∑lat el Ghostscript. Si us plau, llegiu el fitxer readme.htm del GSview.")
-	GSVS(IDS_GSLIBNOTINSTALLED, "No heu instal∑lat els fitxers de biblioteca del Ghostscript. Si us plau, llegiu el fitxer readme.htm del GSview.")
+	GSVS(IDS_NEEDTEMP, "Heu de definir la variable d'entorn TEMP com un directori d'escriptura v√†lid. Sense aix√≤, el GSview no podr√† imprimir")
+	GSVS(IDS_GSNOTINSTALLED, "No heu instal¬∑lat el Ghostscript. Si us plau, llegiu el fitxer readme.htm del GSview.")
+	GSVS(IDS_GSLIBNOTINSTALLED, "No heu instal¬∑lat els fitxers de biblioteca del Ghostscript. Si us plau, llegiu el fitxer readme.htm del GSview.")
 	GSVS(IDS_NOPROGMAN, AANODDEPROGMAN)
 	GSVS(IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED)
-	GSVS(IDS_INVALIDREG, "El Nom o el N˙mero de registre no sÛn v‡lids")
+	GSVS(IDS_INVALIDREG, "El Nom o el N√∫mero de registre no s√≥n v√†lids")
 	GSVS(IDS_UNREGISTERED, "No s'ha registrat")
-	GSVS(IDS_WRONGEMX, "Teniu l'emx %s.\rNecessiteu l'emx %s o superior.\rPM El GSview no funcionar‡ correctament.")
+	GSVS(IDS_WRONGEMX, "Teniu l'emx %s.\rNecessiteu l'emx %s o superior.\rPM El GSview no funcionar√† correctament.")
 	GSVS(IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION)
 	GSVS(IDS_PROGMANGROUP4, AAPROGMANGROUP4)
 	GSVS(IDS_CFG73, AACFG73)
@@ -246,23 +246,23 @@ END
 
 STRINGTABLE
 BEGIN
-	GSVS(IDS_PRN_PRINTMETHOD, "MËtode d'impressiÛ")
+	GSVS(IDS_PRN_PRINTMETHOD, "M√®tode d'impressi√≥")
 	GSVS(IDS_PRN_WINDOWSGDI, "Impressora Windows GDI")
 	GSVS(IDS_PRN_GSDEVICE, "Dispositiu Ghostscript")
 	GSVS(IDS_PRN_PSPRINTER, AAPSPRINTER)		/* "Impressora PostScript" */
-	GSVS(IDS_PRN_SETTINGS, "Par‡metres")
+	GSVS(IDS_PRN_SETTINGS, "Par√†metres")
 	GSVS(IDS_PRN_HELP, AAHELP)			/* "Ajuda" */
 	GSVS(IDS_PRN_SELECTPAGES, "Selecciona")
 	GSVS(IDS_ALL, AAALL)
 	/* PageSize policies */
-	GSVS(IDS_PAGESIZE_VARIABLE, "Mida de la p‡gina variable")
-	GSVS(IDS_PAGESIZE_FIXED, "Mida de la p‡gina fixa")
-	GSVS(IDS_PAGESIZE_SHRINK, "Encongeix i ajusta la mida de p‡gina")
+	GSVS(IDS_PAGESIZE_VARIABLE, "Mida de la p√†gina variable")
+	GSVS(IDS_PAGESIZE_FIXED, "Mida de la p√†gina fixa")
+	GSVS(IDS_PAGESIZE_SHRINK, "Encongeix i ajusta la mida de p√†gina")
 END
 
 STRINGTABLE
 BEGIN
- 	GSVS(IDS_INVALIDNUMBER, "El nombre no Ès v‡lid")
+ 	GSVS(IDS_INVALIDNUMBER, "El nombre no √©s v√†lid")
  	GSVS(IDS_CANTINVERT, "No es pot invertir la matriu")
 	GSVS(IDS_UNITPT, AAPT)
 	GSVS(IDS_UNITMM, AAMM)
@@ -273,10 +273,10 @@ END
 
 STRINGTABLE
 BEGIN
-	GSVS(IDS_DSC_INFO, "InformaciÛ DSC")
+	GSVS(IDS_DSC_INFO, "Informaci√≥ DSC")
 	GSVS(IDS_DSC_WARN, "Avisos DSC")
 	GSVS(IDS_DSC_ERROR, "Error DSC")
-        GSVS(IDS_DSC_LINEFMT, "%.40s a la lÌnia %d:")
+        GSVS(IDS_DSC_LINEFMT, "%.40s a la l√≠nia %d:")
 END
 
 
@@ -284,68 +284,68 @@ END
 
 STRINGTABLE
 BEGIN
-	GSVS(CDSC_RESOURCE_BBOX, "Aquesta lÌnia Ès incorrecta.\012El requadre del lÌmit ha de tenir coordenades enteres,\012no de punt flotant. Un requadre del lÌmit amb punt flotant\012s'ha d'indicar utilitzant %%HiResBoundingBox:\012A Amb %%BoundingBox: s'haurien de donar valors enters.\012")
-	GSVS(CDSC_RESOURCE_BBOX2, "\012'D'acord' convertir‡ les coordenades a enters i\012les arrodonir‡ a l'alÁa.\012'Cancel∑la' ignorar‡ la lÌnia.\012")
+	GSVS(CDSC_RESOURCE_BBOX, "Aquesta l√≠nia √©s incorrecta.\012El requadre del l√≠mit ha de tenir coordenades enteres,\012no de punt flotant. Un requadre del l√≠mit amb punt flotant\012s'ha d'indicar utilitzant %%HiResBoundingBox:\012A Amb %%BoundingBox: s'haurien de donar valors enters.\012")
+	GSVS(CDSC_RESOURCE_BBOX2, "\012'D'acord' convertir√† les coordenades a enters i\012les arrodonir√† a l'al√ßa.\012'Cancel¬∑la' ignorar√† la l√≠nia.\012")
 	GSVS(CDSC_RESOURCE_BBOX3, "")
 
 
-	GSVS(CDSC_RESOURCE_EARLY_TRAILER, "El tr‡iler normalment Ès al final del document.\012Aquesta lÌnia s'ha trobat a mÈs de 32 kbytes del final\012del fitxer.  Els tr‡ilers normalment no sÛn d'aquesta mida.\012MÈs aviat sembla que s'hagi inclÚs un altre fitxer PostScript,")
-	GSVS(CDSC_RESOURCE_EARLY_TRAILER2, "\012i que no s'hagi adjuntat entre %%BeginDocument / %%EndDocument.\012\012'D'acord' assumir‡ que aixÚ forma part d'un fitxer inclÚs.\012'Cancel∑la' assumir‡ que Ès un tr‡iler.\012")
+	GSVS(CDSC_RESOURCE_EARLY_TRAILER, "El tr√†iler normalment √©s al final del document.\012Aquesta l√≠nia s'ha trobat a m√©s de 32 kbytes del final\012del fitxer.  Els tr√†ilers normalment no s√≥n d'aquesta mida.\012M√©s aviat sembla que s'hagi incl√≤s un altre fitxer PostScript,")
+	GSVS(CDSC_RESOURCE_EARLY_TRAILER2, "\012i que no s'hagi adjuntat entre %%BeginDocument / %%EndDocument.\012\012'D'acord' assumir√† que aix√≤ forma part d'un fitxer incl√≤s.\012'Cancel¬∑la' assumir√† que √©s un tr√†iler.\012")
 	GSVS(CDSC_RESOURCE_EARLY_TRAILER3, "")
 
-	GSVS(CDSC_RESOURCE_EARLY_EOF, "Aquesta lÌnia normalment apareix al final d'un document.\012Aquesta lÌnia s'ha trobat a mÈs de 100 bytes del final\012del fitxer.\012MÈs aviat sembla que s'hagi inclÚs un altre fitxer PostScript,")
-	GSVS(CDSC_RESOURCE_EARLY_EOF2, "\012i que no s'hagi adjuntat entre %%BeginDocument / %%EndDocument.\012\012'D'acord' assumir‡ que aixÚ forma part d'un fitxer inclÚs.\012'Cancel∑la' assumir‡ que forma part d'un tr‡iler.\012")
+	GSVS(CDSC_RESOURCE_EARLY_EOF, "Aquesta l√≠nia normalment apareix al final d'un document.\012Aquesta l√≠nia s'ha trobat a m√©s de 100 bytes del final\012del fitxer.\012M√©s aviat sembla que s'hagi incl√≤s un altre fitxer PostScript,")
+	GSVS(CDSC_RESOURCE_EARLY_EOF2, "\012i que no s'hagi adjuntat entre %%BeginDocument / %%EndDocument.\012\012'D'acord' assumir√† que aix√≤ forma part d'un fitxer incl√≤s.\012'Cancel¬∑la' assumir√† que forma part d'un tr√†iler.\012")
 	GSVS(CDSC_RESOURCE_EARLY_EOF3, "")
 
-	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER, "Ha aparegut aquesta lÌnia de %%Page: en un tr‡iler, la qual cosa no Ès legal.\012Els fitxer EPS s'han d'encapsular entre %%BeginDocument / %%EndDocument.\012…s possible que el fitxer EPS fÛs encapsulat incorrectament,")
-	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER2, "\012i que ens haguem confÛs pel %%Trailer en un fitxer EPS.\012\012'D'acord' processar‡ mÈs p‡gines.\012'Cancel∑la' ignorar‡ aquest comentari de p‡gina.\012")
+	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER, "Ha aparegut aquesta l√≠nia de %%Page: en un tr√†iler, la qual cosa no √©s legal.\012Els fitxer EPS s'han d'encapsular entre %%BeginDocument / %%EndDocument.\012√âs possible que el fitxer EPS f√≥s encapsulat incorrectament,")
+	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER2, "\012i que ens haguem conf√≥s pel %%Trailer en un fitxer EPS.\012\012'D'acord' processar√† m√©s p√†gines.\012'Cancel¬∑la' ignorar√† aquest comentari de p√†gina.\012")
 	GSVS(CDSC_RESOURCE_PAGE_IN_TRAILER3, "")
 
-	GSVS(CDSC_RESOURCE_PAGE_ORDINAL, "Aquesta lÌnia Ès incorrecta.\012Els dos arguments haurien de ser una etiqueta i un ordinal.\012L'ordinal hauria de ser 1 per a la primera p‡gina i s'hauria\012d'augmentar en 1 per a cada p‡gina que seguÌs.\012Falta l'ordinal de la p‡gina o no hi Ès a ")
-	GSVS(CDSC_RESOURCE_PAGE_ORDINAL2, "la seq¸Ëncia.\012\012Sembla que aquesta lÌnia formi part d'un fitxer inclÚs que\012no s'ha adjuntat entre %%BeginDocument / %%EndDocument.\012\012'D'acord' ignorar‡ aquesta p‡gina, tot assumint que Ès part d'un\012fitxer EPS encapsulat incorrectament.\012")
-	GSVS(CDSC_RESOURCE_PAGE_ORDINAL3, "'Cancel∑la' ho tractar‡ com una p‡gina v‡lida\012")
+	GSVS(CDSC_RESOURCE_PAGE_ORDINAL, "Aquesta l√≠nia √©s incorrecta.\012Els dos arguments haurien de ser una etiqueta i un ordinal.\012L'ordinal hauria de ser 1 per a la primera p√†gina i s'hauria\012d'augmentar en 1 per a cada p√†gina que segu√≠s.\012Falta l'ordinal de la p√†gina o no hi √©s a ")
+	GSVS(CDSC_RESOURCE_PAGE_ORDINAL2, "la seq√º√®ncia.\012\012Sembla que aquesta l√≠nia formi part d'un fitxer incl√≤s que\012no s'ha adjuntat entre %%BeginDocument / %%EndDocument.\012\012'D'acord' ignorar√† aquesta p√†gina, tot assumint que √©s part d'un\012fitxer EPS encapsulat incorrectament.\012")
+	GSVS(CDSC_RESOURCE_PAGE_ORDINAL3, "'Cancel¬∑la' ho tractar√† com una p√†gina v√†lida\012")
 
-	GSVS(CDSC_RESOURCE_PAGES_WRONG, "%%Pages: no coincideix amb el n˙mero de %%Page:\012\012'D'acord' ajustar‡ el comptatge de p‡gines per fer-lo coincidir amb el n˙mero de comentaris %%Page:\012que s'han trobat.\012'Cancel∑la' definir‡ el comptatge de p‡gines com %%Pages:\012")
+	GSVS(CDSC_RESOURCE_PAGES_WRONG, "%%Pages: no coincideix amb el n√∫mero de %%Page:\012\012'D'acord' ajustar√† el comptatge de p√†gines per fer-lo coincidir amb el n√∫mero de comentaris %%Page:\012que s'han trobat.\012'Cancel¬∑la' definir√† el comptatge de p√†gines com %%Pages:\012")
 	GSVS(CDSC_RESOURCE_PAGES_WRONG2,"")
 	GSVS(CDSC_RESOURCE_PAGES_WRONG3,"")
 
-	GSVS(CDSC_RESOURCE_EPS_NO_BBOX, "Falta el %%BoundingBox: necessari al fitxer EPS.\012Vegeu l'ajuda del GSview per a detalls sobre com afegir/ajustar el\012requadre del lÌmit.\012\012'D'acord' assumir‡ que Ès un fitxer EPS.\012'Cancel∑la' assumir‡ que NO Ès un fitxer EPS.\012")
+	GSVS(CDSC_RESOURCE_EPS_NO_BBOX, "Falta el %%BoundingBox: necessari al fitxer EPS.\012Vegeu l'ajuda del GSview per a detalls sobre com afegir/ajustar el\012requadre del l√≠mit.\012\012'D'acord' assumir√† que √©s un fitxer EPS.\012'Cancel¬∑la' assumir√† que NO √©s un fitxer EPS.\012")
 	GSVS(CDSC_RESOURCE_EPS_NO_BBOX2, "")
 	GSVS(CDSC_RESOURCE_EPS_NO_BBOX3, "")
 
-	GSVS(CDSC_RESOURCE_EPS_PAGES, "Els fitxers EPS poden tenir 0 o 1 p‡gines.  Aquest fitxer 'EPS' en tÈ\012mÈs i per tant no Ès un fitxer EPS.\012No podeu utilitzar `Imprimeix a` `Fitxer PostScript Encapsulat` per\012imprimir fitxers de m˙ltiples p‡gines. El mËtode correcte Ès connectar")
-	GSVS(CDSC_RESOURCE_EPS_PAGES2, "\012la impressora a FILE: o seleccionar 'Imprimeix a un fitxer'.\012\012'D'acord' assumir‡ que Ès un fitxer EPS.\012'Cancel∑la' assumir‡ que NO Ès un fitxer EPS.\012")
+	GSVS(CDSC_RESOURCE_EPS_PAGES, "Els fitxers EPS poden tenir 0 o 1 p√†gines.  Aquest fitxer 'EPS' en t√©\012m√©s i per tant no √©s un fitxer EPS.\012No podeu utilitzar `Imprimeix a` `Fitxer PostScript Encapsulat` per\012imprimir fitxers de m√∫ltiples p√†gines. El m√®tode correcte √©s connectar")
+	GSVS(CDSC_RESOURCE_EPS_PAGES2, "\012la impressora a FILE: o seleccionar 'Imprimeix a un fitxer'.\012\012'D'acord' assumir√† que √©s un fitxer EPS.\012'Cancel¬∑la' assumir√† que NO √©s un fitxer EPS.\012")
 	GSVS(CDSC_RESOURCE_EPS_PAGES3, "")
 
-	GSVS(CDSC_RESOURCE_NO_MEDIA, "El suport s'ha especificat amb %%DocumentMedia:, perÚ no s'ha indicat\012un suport predeterminat amb %%PageMedia:.\012\012'D'acord' definir‡ el suport predeterminat com el primer de la llista.\012'Cancel∑la' no definir‡ un suport predeterminat.\012") 
+	GSVS(CDSC_RESOURCE_NO_MEDIA, "El suport s'ha especificat amb %%DocumentMedia:, per√≤ no s'ha indicat\012un suport predeterminat amb %%PageMedia:.\012\012'D'acord' definir√† el suport predeterminat com el primer de la llista.\012'Cancel¬∑la' no definir√† un suport predeterminat.\012") 
 	GSVS(CDSC_RESOURCE_NO_MEDIA2, "") 
 	GSVS(CDSC_RESOURCE_NO_MEDIA3, "") 
 
-	GSVS(CDSC_RESOURCE_ATEND, "La lÌnia Ès incorrecta.\012Per ajornar un valor, heu d'utilitzar '(atend)', no 'atend'\012\012'D'acord' assumir‡ que es volia dir (atend).\012'Cancel∑la' ignorar‡ aquesta lÌnia.\012")
+	GSVS(CDSC_RESOURCE_ATEND, "La l√≠nia √©s incorrecta.\012Per ajornar un valor, heu d'utilitzar '(atend)', no 'atend'\012\012'D'acord' assumir√† que es volia dir (atend).\012'Cancel¬∑la' ignorar√† aquesta l√≠nia.\012")
 	GSVS(CDSC_RESOURCE_ATEND2, "")
 	GSVS(CDSC_RESOURCE_ATEND3, "")
 
-	GSVS(CDSC_RESOURCE_DUP_COMMENT, "Aquest comentari est‡ duplicat a l'encapÁalament, la qual cosa no Ès necess‡ria.\012La primera apariciÛ d'una lÌnia de capÁalera tÈ prioritat.\012\012'D'acord' o 'Cancel∑la' ignoraran la lÌnia duplicada.\012")
+	GSVS(CDSC_RESOURCE_DUP_COMMENT, "Aquest comentari est√† duplicat a l'encap√ßalament, la qual cosa no √©s necess√†ria.\012La primera aparici√≥ d'una l√≠nia de cap√ßalera t√© prioritat.\012\012'D'acord' o 'Cancel¬∑la' ignoraran la l√≠nia duplicada.\012")
 	GSVS(CDSC_RESOURCE_DUP_COMMENT2, "")
 	GSVS(CDSC_RESOURCE_DUP_COMMENT3, "")
 
-	GSVS(CDSC_RESOURCE_DUP_TRAILER, "Aquest comentari est‡ duplicat al tr‡iler, la qual cosa no Ès necess‡ria.\012La ˙ltima apariciÛ d'una lÌnia del tr‡iler tÈ prioritat.\012\012'D'acord' o 'Cancel∑la' utilitzaran la lÌnia duplicada.\012")
+	GSVS(CDSC_RESOURCE_DUP_TRAILER, "Aquest comentari est√† duplicat al tr√†iler, la qual cosa no √©s necess√†ria.\012La √∫ltima aparici√≥ d'una l√≠nia del tr√†iler t√© prioritat.\012\012'D'acord' o 'Cancel¬∑la' utilitzaran la l√≠nia duplicada.\012")
 	GSVS(CDSC_RESOURCE_DUP_TRAILER2, "")
 	GSVS(CDSC_RESOURCE_DUP_TRAILER3, "")
 
-	GSVS(CDSC_RESOURCE_BEGIN_END, "El nombre de comentaris del comenÁament i del final no coincideixen.\012\012'D'acord' o 'Cancel∑la' ignoraran aquest error.\012")
+	GSVS(CDSC_RESOURCE_BEGIN_END, "El nombre de comentaris del comen√ßament i del final no coincideixen.\012\012'D'acord' o 'Cancel¬∑la' ignoraran aquest error.\012")
 	GSVS(CDSC_RESOURCE_BEGIN_END2, "")
 	GSVS(CDSC_RESOURCE_BEGIN_END3, "")
 
-	GSVS(CDSC_RESOURCE_BAD_SECTION, "Aquesta lÌnia Ès incorrecta perquË no hauria d'aparËixer\012en una p‡gina. AixÚ possiblement indiqui que es va encapsular\012incorrectament un fitxer EPS. S'ignorar‡ la lÌnia.\012\012'D'acord' o 'Cancel∑la' ignoraran la lÌnia.\012")
+	GSVS(CDSC_RESOURCE_BAD_SECTION, "Aquesta l√≠nia √©s incorrecta perqu√® no hauria d'apar√®ixer\012en una p√†gina. Aix√≤ possiblement indiqui que es va encapsular\012incorrectament un fitxer EPS. S'ignorar√† la l√≠nia.\012\012'D'acord' o 'Cancel¬∑la' ignoraran la l√≠nia.\012")
 	GSVS(CDSC_RESOURCE_BAD_SECTION2, "")
 	GSVS(CDSC_RESOURCE_BAD_SECTION3, "")
 
-	GSVS(CDSC_RESOURCE_LONG_LINE, "\012\012Les lÌnies en els documents DSC han de ser mÈs petites que 255 car‡cters.\012") 
+	GSVS(CDSC_RESOURCE_LONG_LINE, "\012\012Les l√≠nies en els documents DSC han de ser m√©s petites que 255 car√†cters.\012") 
 	GSVS(CDSC_RESOURCE_LONG_LINE2, "") 
 	GSVS(CDSC_RESOURCE_LONG_LINE3, "") 
 
-	GSVS(CDSC_RESOURCE_INCORRECT_USAGE, "Aquesta lÌnia de comentari DSC Ès incorrecta.\012Si us plau, vegeu les especificacions dels DSC.\012\012'D'acord' o 'Cancel∑la' ignoraran aquest error.\012")
+	GSVS(CDSC_RESOURCE_INCORRECT_USAGE, "Aquesta l√≠nia de comentari DSC √©s incorrecta.\012Si us plau, vegeu les especificacions dels DSC.\012\012'D'acord' o 'Cancel¬∑la' ignoraran aquest error.\012")
 	GSVS(CDSC_RESOURCE_INCORRECT_USAGE2, "")
 	GSVS(CDSC_RESOURCE_INCORRECT_USAGE3, "")
 

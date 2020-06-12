@@ -24,66 +24,66 @@ ID_LANG BITMAP "binary/slovak.bmp"
 
 gsview_menu MENU
 BEGIN
-	POPUP "&S˙bor"
+	POPUP "&S√∫bor"
 	BEGIN
 #ifndef MEMORYFILE
-		MENUITEM "&Otvoriù...\tO", IDM_OPEN
-		MENUITEM "&Vybraù s˙bor...\tS", IDM_SELECT
+		MENUITEM "&Otvori≈•...\tO", IDM_OPEN
+		MENUITEM "&Vybra≈• s√∫bor...\tS", IDM_SELECT
 #ifndef VIEWONLY
-		MENUITEM "Uloûiù &ako...\tA", IDM_SAVEAS
+		MENUITEM "Ulo≈æi≈• &ako...\tA", IDM_SAVEAS
 #endif
-		MENUITEM "&Zavrieù\tC", IDM_CLOSE
-		MENUITEM "&Inform·cie...\tI", IDM_INFO
+		MENUITEM "&Zavrie≈•\tC", IDM_CLOSE
+		MENUITEM "&Inform√°cie...\tI", IDM_INFO
 		MENUITEM SEPARATOR
 #ifndef VIEWONLY
-		MENUITEM "Konvertovaù...\tF", IDM_CONVERTFILE
-		MENUITEM "&Extrahovaù...\tE", IDM_EXTRACT
+		MENUITEM "Konvertova≈•...\tF", IDM_CONVERTFILE
+		MENUITEM "&Extrahova≈•...\tE", IDM_EXTRACT
 		MENUITEM "PS do EPS", IDM_PSTOEPS
 		MENUITEM SEPARATOR
-		MENUITEM "&TlaËiù...\tP", IDM_PRINT
-		MENUITEM "TlaËiù s˙bor...", IDM_SPOOL
+		MENUITEM "&Tlaƒçi≈•...\tP", IDM_PRINT
+		MENUITEM "Tlaƒçi≈• s√∫bor...", IDM_SPOOL
 		MENUITEM SEPARATOR
 #endif
-		MENUITEM "Zobraziù spr·vy\tM", IDM_GSMESS 
+		MENUITEM "Zobrazi≈• spr√°vy\tM", IDM_GSMESS 
 		MENUITEM SEPARATOR
 		MENUITEM SEPARATOR
 #endif /* !MEMORYFILE */
-		MENUITEM "&SkonËiù", IDM_EXIT
+		MENUITEM "&Skonƒçi≈•", IDM_EXIT
 	END
 #ifndef VIEWONLY
-	POPUP "⁄pr&avy"
+	POPUP "√öpr&avy"
 	BEGIN
-		MENUITEM "&KopÌrovaù\tCtrl+C", IDM_COPYCLIP
+		MENUITEM "&Kop√≠rova≈•\tCtrl+C", IDM_COPYCLIP
 		MENUITEM SEPARATOR
-		MENUITEM "&Prilepiù do...", IDM_PASTETO
-		MENUITEM "Konvertovaù &bitov˙ mapu", IDM_CONVERT
+		MENUITEM "&Prilepi≈• do...", IDM_PASTETO
+		MENUITEM "Konvertova≈• &bitov√∫ mapu", IDM_CONVERT
 		MENUITEM SEPARATOR
-		POPUP "&Pridaù EPS n·hæad"
+		POPUP "&Prida≈• EPS n√°hƒæad"
 		BEGIN
 		    MENUITEM "&Interchange", IDM_MAKEEPSI
 		    MENUITEM "TIFF 4", IDM_MAKEEPST4
 		    MENUITEM "&TIFF 6 bez kompresie", IDM_MAKEEPST6U
 		    MENUITEM "TIFF 6 &packbits", IDM_MAKEEPST6P
-		    MENUITEM "&Windows Meta s˙bor", IDM_MAKEEPSW
-		    MENUITEM "&PouûÌvateæsk˝ n·hæad", IDM_MAKEEPSU
+		    MENUITEM "&Windows Meta s√∫bor", IDM_MAKEEPSW
+		    MENUITEM "&Pou≈æ√≠vateƒæsk√Ω n√°hƒæad", IDM_MAKEEPSU
 		END
-		POPUP "&Extrahovaù EPS"
+		POPUP "&Extrahova≈• EPS"
 		BEGIN
 		    MENUITEM "&PostScript", IDM_EXTRACTPS
-		    MENUITEM "&N·hæad", IDM_EXTRACTPRE
+		    MENUITEM "&N√°hƒæad", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
 		MENUITEM "Measure", IDM_MEASURE
-		MENUITEM "Konvertovaù na vektorov form·t...", IDM_PSTOEDIT
-		MENUITEM "&Extrahovaù text...", IDM_TEXTEXTRACT
-		MENUITEM "&Hæadaù...\tCtrl+F", IDM_TEXTFIND
-		MENUITEM "Hæadaù Ô&alej\tF3", IDM_TEXTFINDNEXT
+		MENUITEM "Konvertova≈• na vektorov form√°t...", IDM_PSTOEDIT
+		MENUITEM "&Extrahova≈• text...", IDM_TEXTEXTRACT
+		MENUITEM "&Hƒæada≈•...\tCtrl+F", IDM_TEXTFIND
+		MENUITEM "Hƒæada≈• ƒè&alej\tF3", IDM_TEXTFINDNEXT
 	END
 #endif
-	POPUP "&Moûnosti"
+	POPUP "&Mo≈ænosti"
 	BEGIN
-		MENUITEM "JendoduchÈ nastavenia...", IDM_CFG
-		MENUITEM "RozöÌrenÈ nastavenia...", IDM_GSCOMMAND
+		MENUITEM "Jendoduch√© nastavenia...", IDM_CFG
+		MENUITEM "Roz≈°√≠ren√© nastavenia...", IDM_GSCOMMAND
 		MENUITEM "Zvuky...", IDM_SOUNDS
 		POPUP "&Jednotky"
 		BEGIN
@@ -101,8 +101,8 @@ BEGIN
 #ifndef VIEWONLY
 		POPUP "PStoText"
 		BEGIN
-			MENUITEM "Vypnut˝", IDM_PSTOTEXTDIS
-			MENUITEM "Norm·lny", IDM_PSTOTEXTNORM
+			MENUITEM "Vypnut√Ω", IDM_PSTOTEXTDIS
+			MENUITEM "Norm√°lny", IDM_PSTOTEXTNORM
 			MENUITEM "Dvips Cork Encoding", IDM_PSTOTEXTCORK
 		END
 #endif
@@ -111,37 +111,37 @@ BEGIN
 			MENUITEM "Off", IDM_DSC_OFF
 			MENUITEM "Chyby", IDM_DSC_ERROR
 			MENUITEM "Upozornenia", IDM_DSC_WARN
-			MENUITEM "Vöetko", IDM_DSC_INFO
+			MENUITEM "V≈°etko", IDM_DSC_INFO
 		END
-		MENUITEM "&Uloûiù nastavenia teraz", IDM_SETTINGS
+		MENUITEM "&Ulo≈æi≈• nastavenia teraz", IDM_SETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "U&loûiù nastavenia pri skonËenÌ", IDM_SAVESETTINGS
+		MENUITEM "U&lo≈æi≈• nastavenia pri skonƒçen√≠", IDM_SAVESETTINGS
 		MENUITEM "Sa&fer", IDM_SAFER
-		MENUITEM "Uloû&iù posledn˝ prieËinok", IDM_SAVEDIR
-		MENUITEM "&Panel s n·strojmi", IDM_BUTTONSHOW
+		MENUITEM "Ulo≈æ&i≈• posledn√Ω prieƒçinok", IDM_SAVEDIR
+		MENUITEM "&Panel s n√°strojmi", IDM_BUTTONSHOW
 		MENUITEM "&Fit Window to Page", IDM_FITPAGE
 		MENUITEM "Auto &Redisplay", IDM_AUTOREDISPLAY
 		MENUITEM "EPS &Clip", IDM_EPSFCLIP
 		MENUITEM "EPS &Warn", IDM_EPSFWARN
-		MENUITEM "&Ignorovaù DSC", IDM_IGNOREDSC
+		MENUITEM "&Ignorova≈• DSC", IDM_IGNOREDSC
 		MENUITEM "Show Bounding Bo&x", IDM_SHOWBBOX
 	END
 	POPUP "&View"
 	BEGIN
-		MENUITEM "œ&alöia strana\t+", IDM_NEXT
-		MENUITEM "Pre&dch·dzaj˙ca strana\t-", IDM_PREV
-		MENUITEM "&Prejsù na stranu...\tG", IDM_GOTO
-		MENUITEM "Prejsù &dozadu\tB", IDM_GOBACK
-		MENUITEM "Prejsù dopr&edu", IDM_GOFWD
+		MENUITEM "ƒé&al≈°ia strana\t+", IDM_NEXT
+		MENUITEM "Pre&dch√°dzaj√∫ca strana\t-", IDM_PREV
+		MENUITEM "&Prejs≈• na stranu...\tG", IDM_GOTO
+		MENUITEM "Prejs≈• &dozadu\tB", IDM_GOBACK
+		MENUITEM "Prejs≈• dopr&edu", IDM_GOFWD
 		MENUITEM "&Redisplay\tR", IDM_REDISPLAY
 		MENUITEM SEPARATOR
 		MENUITEM "Next Page and Home\tSpace", IDM_NEXTHOME
 		MENUITEM "Previous Page and Home\tBkSp", IDM_PREVHOME
 		MENUITEM SEPARATOR
-		MENUITEM "&Cel· obrzovka\tF4", IDM_FULLSCREEN
+		MENUITEM "&Cel√° obrzovka\tF4", IDM_FULLSCREEN
 		MENUITEM "Fit &Window\tF6", IDM_FITWIN
 	END
-	POPUP "&Orient·cia"
+	POPUP "&Orient√°cia"
 	BEGIN
 		MENUITEM "&Auto", IDM_AUTOORIENT
 		MENUITEM SEPARATOR
@@ -156,7 +156,7 @@ BEGIN
 	BEGIN
 		MENUITEM "Nastavenia &zobrazenia...", IDM_DISPLAYSETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "&Rotatovaù mÈdium", IDM_MEDIAROTATE
+		MENUITEM "&Rotatova≈• m√©dium", IDM_MEDIAROTATE
 		MENUITEM SEPARATOR
 		MENUITEM "11x17", IDM_11x17
 		MENUITEM "A3", IDM_A3

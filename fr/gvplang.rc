@@ -28,7 +28,7 @@ BEGIN
 	SUBMENU "~Fichier", IDM_FILEMENU
 	BEGIN
 		MENUITEM "~Ouvrir...\tO", IDM_OPEN
-		MENUITEM "~Sélectionner un fichier...\tS", IDM_SELECT
+		MENUITEM "~SÃ©lectionner un fichier...\tS", IDM_SELECT
 		MENUITEM "~Enregistrer sous...\tE", IDM_SAVEAS
 		MENUITEM "~Fermer\tF", IDM_CLOSE
 		MENUITEM "~Informations...\tI", IDM_INFO
@@ -58,20 +58,20 @@ BEGIN
 		MENUITEM "Convertir ~Bitmap", IDM_CONVERT
 */
 		MENUITEM SEPARATOR
-		SUBMENU "~Ajouter un aperçu EPS", IDM_ADDEPSMENU
+		SUBMENU "~Ajouter un aperÃ§u EPS", IDM_ADDEPSMENU
 		BEGIN
 			MENUITEM "~Interchange", IDM_MAKEEPSI
 			MENUITEM "~TIFF 4", IDM_MAKEEPST4
-			MENUITEM "TIFF 6 ~non compressé", IDM_MAKEEPST6U
-			MENUITEM "TIFF 6 ~compressé", IDM_MAKEEPST6P
+			MENUITEM "TIFF 6 ~non compressÃ©", IDM_MAKEEPST6U
+			MENUITEM "TIFF 6 ~compressÃ©", IDM_MAKEEPST6P
 			MENUITEM "~Windows Metafile", IDM_MAKEEPSW
-			MENUITEM "~Personnalisé", IDM_MAKEEPSU
+			MENUITEM "~PersonnalisÃ©", IDM_MAKEEPSU
 		END
 
 		SUBMENU "~Extraire du fichier EPS", IDM_EXTEPSMENU
 		BEGIN
 			MENUITEM "la partie ~PostScript", IDM_EXTRACTPS
-			MENUITEM "la partie ~aperçu", IDM_EXTRACTPRE
+			MENUITEM "la partie ~aperÃ§u", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
 		MENUITEM "Conversion vers un format ~vectoriel...", IDM_PSTOEDIT
@@ -84,15 +84,15 @@ BEGIN
 	SUBMENU "~Options", IDM_OPTIONMENU
 	BEGIN
 		MENUITEM "~Configuration standard...", IDM_CFG
-		MENUITEM "Configuration avancée...", IDM_GSCOMMAND
+		MENUITEM "Configuration avancÃ©e...", IDM_GSCOMMAND
 		MENUITEM "~Sons...", IDM_SOUNDS
-		SUBMENU "~Unités", IDM_UNITMENU
+		SUBMENU "~UnitÃ©s", IDM_UNITMENU
 		BEGIN
 			MENUITEM "~pt", IDM_UNITPT
 			MENUITEM "~mm", IDM_UNITMM
 			MENUITEM "p~ouce", IDM_UNITINCH
 			MENUITEM SEPARATOR
-			MENUITEM "Résolution ~fine", IDM_UNITFINE
+			MENUITEM "RÃ©solution ~fine", IDM_UNITFINE
 		END
 		SUBMENU "~Langue", IDM_LANGMENU
 		BEGIN
@@ -101,7 +101,7 @@ BEGIN
 		END
 		SUBMENU "PS vers ~texte", IDM_PSTOTEXTMENU
 		BEGIN
-			MENUITEM "~Désactivé", IDM_PSTOTEXTDIS
+			MENUITEM "~DÃ©sactivÃ©", IDM_PSTOTEXTDIS
 			MENUITEM "~Normal", IDM_PSTOTEXTNORM
 			MENUITEM "~Encodage Dvips Cork", IDM_PSTOTEXTCORK
 		END
@@ -112,14 +112,14 @@ BEGIN
 			MENUITEM "Warnings", IDM_DSC_WARN	/* ENGLISH */
 			MENUITEM "All", IDM_DSC_INFO		/* ENGLISH */
 		END
-		MENUITEM "Enregistrer les paramètres ~maintenant", IDM_SETTINGS
+		MENUITEM "Enregistrer les paramÃ¨tres ~maintenant", IDM_SETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "Enregistrer les paramètres en ~quittant", IDM_SAVESETTINGS
+		MENUITEM "Enregistrer les paramÃ¨tres en ~quittant", IDM_SAVESETTINGS
 		MENUITEM "~Protection des fichiers", IDM_SAFER
-		MENUITEM "Enregistrer le ~dernier répertoire", IDM_SAVEDIR
+		MENUITEM "Enregistrer le ~dernier rÃ©pertoire", IDM_SAVEDIR
 		MENUITEM "Afficher la ~barre d'outils", IDM_BUTTONSHOW
-		MENUITEM "Ajuster la fe~nêtre à la page", IDM_FITPAGE
-		MENUITEM "Réaffichage ~automatique", IDM_AUTOREDISPLAY
+		MENUITEM "Ajuster la fe~nÃªtre Ã  la page", IDM_FITPAGE
+		MENUITEM "RÃ©affichage ~automatique", IDM_AUTOREDISPLAY
 		MENUITEM "Ajuster l'affichage des ~fichiers EPS", IDM_EPSFCLIP
 		MENUITEM "A~vertissements EPS", IDM_EPSFWARN
 		MENUITEM "~Ignorer les commentaires DSC", IDM_IGNOREDSC
@@ -129,17 +129,17 @@ BEGIN
 	SUBMENU "~Affichage", IDM_VIEWMENU
 	BEGIN
 		MENUITEM "Page ~suivante\t+", IDM_NEXT
-		MENUITEM "Page ~précédente\t-", IDM_PREV
+		MENUITEM "Page ~prÃ©cÃ©dente\t-", IDM_PREV
 		MENUITEM "~Atteindre la page...\tA", IDM_GOTO
 		MENUITEM "Re~tour\tT", IDM_GOBACK
 		MENUITEM "A~vance", IDM_GOFWD
-		MENUITEM "~Réafficher\tR", IDM_REDISPLAY
+		MENUITEM "~RÃ©afficher\tR", IDM_REDISPLAY
 		MENUITEM SEPARATOR
 		MENUITEM "Haut de la page suivante\tEspace", IDM_NEXTHOME
-		MENUITEM "Haut de la page précédente\tRetour", IDM_PREVHOME
+		MENUITEM "Haut de la page prÃ©cÃ©dente\tRetour", IDM_PREVHOME
 		MENUITEM SEPARATOR
-		MENUITEM "P~lein écran\tF4", IDM_FULLSCREEN
-		MENUITEM "S'adapter à la fenêtre\tF6", IDM_FITWIN
+		MENUITEM "P~lein Ã©cran\tF4", IDM_FULLSCREEN
+		MENUITEM "S'adapter Ã  la fenÃªtre\tF6", IDM_FITWIN
 	END
 
 	SUBMENU "Orientatio~n", IDM_ORIENTMENU
@@ -148,17 +148,17 @@ BEGIN
 		MENUITEM SEPARATOR
 		MENUITEM "~Portrait", IDM_PORTRAIT
 		MENUITEM "Pa~ysage", IDM_LANDSCAPE
-		MENUITEM "~Renversé", IDM_UPSIDEDOWN
+		MENUITEM "~RenversÃ©", IDM_UPSIDEDOWN
 		MENUITEM "Pa~norama", IDM_SEASCAPE
 		MENUITEM SEPARATOR
-		MENUITEM "Pay~sage renversé", IDM_SWAPLANDSCAPE
+		MENUITEM "Pay~sage renversÃ©", IDM_SWAPLANDSCAPE
 	END
 
 	SUBMENU "Forma~t", IDM_MEDIAMENU
 	BEGIN
-		MENUITEM "Paramètres de l'~affichage...", IDM_DISPLAYSETTINGS
+		MENUITEM "ParamÃ¨tres de l'~affichage...", IDM_DISPLAYSETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "Format ~inversé", IDM_MEDIAROTATE
+		MENUITEM "Format ~inversÃ©", IDM_MEDIAROTATE
 		MENUITEM SEPARATOR
 		MENUITEM "11x17", IDM_11x17
 		MENUITEM "A3", IDM_A3
@@ -170,7 +170,7 @@ BEGIN
 		MENUITEM "Legal", IDM_LEGAL
 		MENUITEM "Letter", IDM_LETTER
 		MENUITEM "Note", IDM_LETTER
-		MENUITEM "Taille ~personnalisée...", IDM_USERSIZE
+		MENUITEM "Taille ~personnalisÃ©e...", IDM_USERSIZE
 	END
 
 	SUBMENU "A~ide", IDM_HELPMENU

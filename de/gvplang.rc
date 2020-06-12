@@ -24,10 +24,10 @@ MENU ID_GSVIEW
 BEGIN
 	SUBMENU "~Datei", IDM_FILEMENU
 	BEGIN
-		MENUITEM "~Öffnen...\tO", IDM_OPEN
+		MENUITEM "~Ã–ffnen...\tO", IDM_OPEN
 		MENUITEM "~Auswahl Datei...\tA", IDM_SELECT
 		MENUITEM "Speichern ~Unter...\tU", IDM_SAVEAS
-		MENUITEM "~Schließen\tS", IDM_CLOSE
+		MENUITEM "~SchlieÃŸen\tS", IDM_CLOSE
 		MENUITEM "~Info...\tI", IDM_INFO
 		MENUITEM SEPARATOR
 		MENUITEM SEPARATOR
@@ -47,12 +47,12 @@ BEGIN
 	BEGIN
 		MENUITEM "~Kopieren\tCtrl+K", IDM_COPYCLIP
 		MENUITEM SEPARATOR
-		MENUITEM "~Einfügen...", IDM_PASTETO
+		MENUITEM "~EinfÃ¼gen...", IDM_PASTETO
 /*
 		MENUITEM "Konvertiere ~Bitmap", IDM_CONVERT
 */
 		MENUITEM SEPARATOR
-		SUBMENU "EPS Vorschau ein~fügen", IDM_ADDEPSMENU
+		SUBMENU "EPS Vorschau ein~fÃ¼gen", IDM_ADDEPSMENU
 		BEGIN
 		    MENUITEM "~Interchange", IDM_MAKEEPSI
 		    MENUITEM "TIFF 4", IDM_MAKEEPST4
@@ -71,20 +71,20 @@ BEGIN
 		MENUITEM "Messen", IDM_MEASURE
 		MENUITEM "~Text extrahieren...", IDM_TEXTEXTRACT
 		MENUITEM "~Suche...\tCtrl+S", IDM_TEXTFIND
-		MENUITEM "Suche ~Nächsten\tF3", IDM_TEXTFINDNEXT
+		MENUITEM "Suche ~NÃ¤chsten\tF3", IDM_TEXTFINDNEXT
 	END
 	SUBMENU "O~ptionen", IDM_OPTIONMENU
 	BEGIN
 		MENUITEM "~Konfiguration...", IDM_CFG
 		MENUITEM "Konfiguriere ~Ghostscript...", IDM_GSCOMMAND
-		MENUITEM "Klänge...", IDM_SOUNDS
+		MENUITEM "KlÃ¤nge...", IDM_SOUNDS
 		SUBMENU "~Einheiten", IDM_UNITMENU
 		BEGIN
 			MENUITEM "~pt", IDM_UNITPT
 			MENUITEM "~mm", IDM_UNITMM
 			MENUITEM "~zoll", IDM_UNITINCH
 			MENUITEM SEPARATOR
-			MENUITEM "~Feine Auflösung", IDM_UNITFINE
+			MENUITEM "~Feine AuflÃ¶sung", IDM_UNITFINE
 		END
 		SUBMENU "~Sprache", IDM_LANGMENU
 		BEGIN
@@ -107,7 +107,7 @@ BEGIN
 		MENUITEM "Speichere ~Optionen jetzt", IDM_SETTINGS
 		MENUITEM SEPARATOR
 		MENUITEM "~Speichere Optionen am Ende", IDM_SAVESETTINGS
-		MENUITEM "Sch~reibschutz für Dateien", IDM_SAFER
+		MENUITEM "Sch~reibschutz fÃ¼r Dateien", IDM_SAFER
 		MENUITEM "Merke Letztes ~Verzeichnis", IDM_SAVEDIR
 		MENUITEM "~Hilfsmittelpalette", IDM_BUTTONSHOW
 		MENUITEM "Fenster an Seite an~passen", IDM_FITPAGE
@@ -119,14 +119,14 @@ BEGIN
 	END
 	SUBMENU "~Anzeige", IDM_VIEWMENU
 	BEGIN
-		MENUITEM "~Nächste Seite\t+", IDM_NEXT
+		MENUITEM "~NÃ¤chste Seite\t+", IDM_NEXT
 		MENUITEM "~Vorherige Seite\t-", IDM_PREV
 		MENUITEM "~Gehe zu Seite...\tG", IDM_GOTO
-		MENUITEM "~Zurück\tB", IDM_GOBACK
+		MENUITEM "~ZurÃ¼ck\tB", IDM_GOBACK
 		MENUITEM "W~eiter", IDM_GOFWD
 		MENUITEM "~Wiederaufbau\tW", IDM_REDISPLAY
 		MENUITEM SEPARATOR
-		MENUITEM "Nächste Seite oben\tLeer", IDM_NEXTHOME
+		MENUITEM "NÃ¤chste Seite oben\tLeer", IDM_NEXTHOME
 		MENUITEM "Vorherige Seite oben\tBkSp", IDM_PREVHOME
 		MENUITEM SEPARATOR
 		MENUITEM "V~ollbild\tF4", IDM_FULLSCREEN
@@ -138,7 +138,7 @@ BEGIN
 		MENUITEM SEPARATOR
 		MENUITEM "~Hochformat", IDM_PORTRAIT
 		MENUITEM "~Querformat", IDM_LANDSCAPE
-		MENUITEM "~Kopfüber", IDM_UPSIDEDOWN
+		MENUITEM "~KopfÃ¼ber", IDM_UPSIDEDOWN
 		MENUITEM "~Umgekehrt Quer", IDM_SEASCAPE
 		MENUITEM SEPARATOR
 		MENUITEM "Gedreht Quer", IDM_SWAPLANDSCAPE
@@ -164,11 +164,11 @@ BEGIN
 	SUBMENU "~Hilfe", IDM_HELPMENU
 	BEGIN
 		MENUITEM "~Inhalt", IDM_HELPCONTENT
-		MENUITEM "~Suche nach Hilfe für...", IDM_HELPSEARCH
-		MENUITEM "~Tastenübersicht", IDM_HELPKEYS
+		MENUITEM "~Suche nach Hilfe fÃ¼r...", IDM_HELPSEARCH
+		MENUITEM "~TastenÃ¼bersicht", IDM_HELPKEYS
 		MENUITEM SEPARATOR
 		MENUITEM "~Registrierung...", IDM_REGISTER
-		MENUITEM "~Über GSview...", IDM_ABOUT
+		MENUITEM "~Ãœber GSview...", IDM_ABOUT
 	END
 END
 

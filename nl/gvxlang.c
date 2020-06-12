@@ -78,7 +78,7 @@ MENU_ENTRY menu_nl[] = {
 
   { "/B_ewerken",      		NULL,   NULL, 	IDM_EDITMENU, "<Branch>" },
 /*
-  { "/Bewerken/_Kopiëren",     		"<control>C", GS_CMD, IDM_COPYCLIP, NULL },
+  { "/Bewerken/_KopiÃ«ren",     		"<control>C", GS_CMD, IDM_COPYCLIP, NULL },
   { "/Bewerken/sep1",     		NULL,   NULL, 		0, "<Separator>" },
   { "/Bewerken/_Bitmap omzetten",    NULL,	GS_CMD,	IDM_CONVERT, NULL },
 */
@@ -116,8 +116,8 @@ MENU_ENTRY menu_nl[] = {
   { "/Opties/Taal/Catalan", 	NULL,		GS_CMD, IDM_LANGCT, "<CheckItem>" },
   { "/Opties/Taal/_Deutsch", 	NULL,		GS_CMD, IDM_LANGDE, "<CheckItem>" },
   { "/Opties/Taal/_Greek", 	NULL,		GS_CMD, IDM_LANGGR, "<CheckItem>" },
-  { "/Opties/Taal/E_spañol", 	NULL,		GS_CMD, IDM_LANGES, "<CheckItem>" },
-  { "/Opties/Taal/_Français", 	NULL,		GS_CMD, IDM_LANGFR, "<CheckItem>" },
+  { "/Opties/Taal/E_spaÃ±ol", 	NULL,		GS_CMD, IDM_LANGES, "<CheckItem>" },
+  { "/Opties/Taal/_FranÃ§ais", 	NULL,		GS_CMD, IDM_LANGFR, "<CheckItem>" },
   { "/Opties/Taal/_Italiano", 	NULL,		GS_CMD, IDM_LANGIT, "<CheckItem>" },
   { "/Opties/Taal/_Nederlands", NULL,		GS_CMD, IDM_LANGNL, "<CheckItem>" },
   { "/Opties/Taal/Russian", 	NULL,		GS_CMD, IDM_LANGRU, "<CheckItem>" },

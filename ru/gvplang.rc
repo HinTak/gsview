@@ -25,137 +25,137 @@ BEGIN
 /*
         PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
 */
-    SUBMENU "~Файл", IDM_FILEMENU
+    SUBMENU "~Р¤Р°Р№Р»", IDM_FILEMENU
 	BEGIN
-        MENUITEM "~Открыть...\tO", IDM_OPEN
-        MENUITEM "~Выбрать файл...\tS", IDM_SELECT
-        MENUITEM "~Сохранить как...\tA", IDM_SAVEAS
-        MENUITEM "~Закрыть\tC", IDM_CLOSE
-        MENUITEM "~Информация...\tI", IDM_INFO
+        MENUITEM "~РћС‚РєСЂС‹С‚СЊ...\tO", IDM_OPEN
+        MENUITEM "~Р’С‹Р±СЂР°С‚СЊ С„Р°Р№Р»...\tS", IDM_SELECT
+        MENUITEM "~РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє...\tA", IDM_SAVEAS
+        MENUITEM "~Р—Р°РєСЂС‹С‚СЊ\tC", IDM_CLOSE
+        MENUITEM "~РРЅС„РѕСЂРјР°С†РёСЏ...\tI", IDM_INFO
 		MENUITEM SEPARATOR
-        MENUITEM "~Конвертировать...\tF", IDM_CONVERTFILE
-        MENUITEM "И~звлечь...\tE", IDM_EXTRACT
-        MENUITEM "~PS в EPS", IDM_PSTOEPS 
+        MENUITEM "~РљРѕРЅРІРµСЂС‚РёСЂРѕРІР°С‚СЊ...\tF", IDM_CONVERTFILE
+        MENUITEM "Р~Р·РІР»РµС‡СЊ...\tE", IDM_EXTRACT
+        MENUITEM "~PS РІ EPS", IDM_PSTOEPS 
 		MENUITEM SEPARATOR
-        MENUITEM "~Печать...\tP", IDM_PRINT
-        MENUITEM "Печатать ~файл...", IDM_SPOOL
+        MENUITEM "~РџРµС‡Р°С‚СЊ...\tP", IDM_PRINT
+        MENUITEM "РџРµС‡Р°С‚Р°С‚СЊ ~С„Р°Р№Р»...", IDM_SPOOL
 		MENUITEM SEPARATOR
-        MENUITEM "Соо~бщения Ghostscript...\tM", IDM_GSMESS 
+        MENUITEM "РЎРѕРѕ~Р±С‰РµРЅРёСЏ Ghostscript...\tM", IDM_GSMESS 
 		MENUITEM SEPARATOR
 		MENUITEM SEPARATOR
-        MENUITEM "~Выход", IDM_EXIT
+        MENUITEM "~Р’С‹С…РѕРґ", IDM_EXIT
 	END
 
-    SUBMENU "~Правка", IDM_EDITMENU
+    SUBMENU "~РџСЂР°РІРєР°", IDM_EDITMENU
 	BEGIN
-        MENUITEM "~Копировать\tCtrl+C", IDM_COPYCLIP
+        MENUITEM "~РљРѕРїРёСЂРѕРІР°С‚СЊ\tCtrl+C", IDM_COPYCLIP
 		MENUITEM SEPARATOR
-        MENUITEM "~Вставить в...", IDM_PASTETO
+        MENUITEM "~Р’СЃС‚Р°РІРёС‚СЊ РІ...", IDM_PASTETO
 /*
-        MENUITEM "Конвертировать ~битовый образ", IDM_CONVERT
+        MENUITEM "РљРѕРЅРІРµСЂС‚РёСЂРѕРІР°С‚СЊ ~Р±РёС‚РѕРІС‹Р№ РѕР±СЂР°Р·", IDM_CONVERT
 */
 		MENUITEM SEPARATOR
-        SUBMENU "~Добавить EPS превью", IDM_ADDEPSMENU
+        SUBMENU "~Р”РѕР±Р°РІРёС‚СЊ EPS РїСЂРµРІСЊСЋ", IDM_ADDEPSMENU
 		BEGIN
 			MENUITEM "~Interchange", IDM_MAKEEPSI
 			MENUITEM "TIFF 4", IDM_MAKEEPST4
-            MENUITEM "~TIFF 6 без сжатия", IDM_MAKEEPST6U
+            MENUITEM "~TIFF 6 Р±РµР· СЃР¶Р°С‚РёСЏ", IDM_MAKEEPST6U
 			MENUITEM "TIFF 6 ~packbits", IDM_MAKEEPST6P
-            MENUITEM "Метафайл ~Windows", IDM_MAKEEPSW
-            MENUITEM "~Пользовательское превью", IDM_MAKEEPSU
+            MENUITEM "РњРµС‚Р°С„Р°Р№Р» ~Windows", IDM_MAKEEPSW
+            MENUITEM "~РџРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРµ РїСЂРµРІСЊСЋ", IDM_MAKEEPSU
 		END
 
-        SUBMENU "~Извлечь из EPS", IDM_EXTEPSMENU
+        SUBMENU "~РР·РІР»РµС‡СЊ РёР· EPS", IDM_EXTEPSMENU
 		BEGIN
 			MENUITEM "~PostScript", IDM_EXTRACTPS
-            MENUITEM "~Превью", IDM_EXTRACTPRE
+            MENUITEM "~РџСЂРµРІСЊСЋ", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
-        MENUITEM "К~онвертировать в векторный формат...", IDM_PSTOEDIT
-        MENUITEM "И~змерения", IDM_MEASURE
-        MENUITEM "Извлечь ~текст...", IDM_TEXTEXTRACT
-        MENUITEM "~Найти...\tCtrl+F", IDM_TEXTFIND
-        MENUITEM "Найти ~далее\tF3", IDM_TEXTFINDNEXT
+        MENUITEM "Рљ~РѕРЅРІРµСЂС‚РёСЂРѕРІР°С‚СЊ РІ РІРµРєС‚РѕСЂРЅС‹Р№ С„РѕСЂРјР°С‚...", IDM_PSTOEDIT
+        MENUITEM "Р~Р·РјРµСЂРµРЅРёСЏ", IDM_MEASURE
+        MENUITEM "РР·РІР»РµС‡СЊ ~С‚РµРєСЃС‚...", IDM_TEXTEXTRACT
+        MENUITEM "~РќР°Р№С‚Рё...\tCtrl+F", IDM_TEXTFIND
+        MENUITEM "РќР°Р№С‚Рё ~РґР°Р»РµРµ\tF3", IDM_TEXTFINDNEXT
 	END
 
-    SUBMENU "~Настройка", IDM_OPTIONMENU
+    SUBMENU "~РќР°СЃС‚СЂРѕР№РєР°", IDM_OPTIONMENU
 	BEGIN
-        MENUITEM "~Простая настройка...", IDM_CFG
-        MENUITEM "~Расширенная настройка...", IDM_GSCOMMAND
-        MENUITEM "~Звуки...", IDM_SOUNDS
-        SUBMENU "~Единицы измерения", IDM_UNITMENU
+        MENUITEM "~РџСЂРѕСЃС‚Р°СЏ РЅР°СЃС‚СЂРѕР№РєР°...", IDM_CFG
+        MENUITEM "~Р Р°СЃС€РёСЂРµРЅРЅР°СЏ РЅР°СЃС‚СЂРѕР№РєР°...", IDM_GSCOMMAND
+        MENUITEM "~Р—РІСѓРєРё...", IDM_SOUNDS
+        SUBMENU "~Р•РґРёРЅРёС†С‹ РёР·РјРµСЂРµРЅРёСЏ", IDM_UNITMENU
 		BEGIN
-            MENUITEM "~поинты", IDM_UNITPT
-            MENUITEM "~мм", IDM_UNITMM
-            MENUITEM "~дюймы", IDM_UNITINCH
+            MENUITEM "~РїРѕРёРЅС‚С‹", IDM_UNITPT
+            MENUITEM "~РјРј", IDM_UNITMM
+            MENUITEM "~РґСЋР№РјС‹", IDM_UNITINCH
 			MENUITEM SEPARATOR
-            MENUITEM "~С высокой точностью", IDM_UNITFINE
+            MENUITEM "~РЎ РІС‹СЃРѕРєРѕР№ С‚РѕС‡РЅРѕСЃС‚СЊСЋ", IDM_UNITFINE
 		END
-        SUBMENU "~Язык", IDM_LANGMENU
+        SUBMENU "~РЇР·С‹Рє", IDM_LANGMENU
 		BEGIN
 			MENUITEM "~English", IDM_LANGEN
 			/* Remaining languages are added at run time */
 		END
 		SUBMENU "PStoText", IDM_PSTOTEXTMENU
 		BEGIN
-            MENUITEM "~Отключен", IDM_PSTOTEXTDIS
-            MENUITEM "~Нормальный", IDM_PSTOTEXTNORM
+            MENUITEM "~РћС‚РєР»СЋС‡РµРЅ", IDM_PSTOTEXTDIS
+            MENUITEM "~РќРѕСЂРјР°Р»СЊРЅС‹Р№", IDM_PSTOTEXTNORM
             MENUITEM "~Dvips Cork Encoding", IDM_PSTOTEXTCORK
 		END
-        SUBMENU "~Предупреждения DSC", IDM_DSCMENU
+        SUBMENU "~РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏ DSC", IDM_DSCMENU
 		BEGIN
-            MENUITEM "~Отключить", IDM_DSC_OFF
-            MENUITEM "О~шибки", IDM_DSC_ERROR
-            MENUITEM "~Предупреждения", IDM_DSC_WARN
-            MENUITEM "~Всё", IDM_DSC_INFO
+            MENUITEM "~РћС‚РєР»СЋС‡РёС‚СЊ", IDM_DSC_OFF
+            MENUITEM "Рћ~С€РёР±РєРё", IDM_DSC_ERROR
+            MENUITEM "~РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏ", IDM_DSC_WARN
+            MENUITEM "~Р’СЃС‘", IDM_DSC_INFO
 		END
-        MENUITEM "Сохранить ~настройки", IDM_SETTINGS
+        MENUITEM "РЎРѕС…СЂР°РЅРёС‚СЊ ~РЅР°СЃС‚СЂРѕР№РєРё", IDM_SETTINGS
 		MENUITEM SEPARATOR
-        MENUITEM "Сохранять настройки при ~выходе", IDM_SAVESETTINGS
-        MENUITEM "~Безопасный режим", IDM_SAFER
-        MENUITEM "Запоминать последний ~каталог", IDM_SAVEDIR
-        MENUITEM "П~анель кнопок", IDM_BUTTONSHOW
-        MENUITEM "О~кно по размеру страницы", IDM_FITPAGE
-        MENUITEM "~Автоматическое обновление", IDM_AUTOREDISPLAY
-        MENUITEM "Обр~езка EPS", IDM_EPSFCLIP
-        MENUITEM "Предупреждения ~EPS", IDM_EPSFWARN
-        MENUITEM "Игнорировать комментарии ~DSC", IDM_IGNOREDSC
-        MENUITEM "Показывать габаритный пря~моугольник", IDM_SHOWBBOX
+        MENUITEM "РЎРѕС…СЂР°РЅСЏС‚СЊ РЅР°СЃС‚СЂРѕР№РєРё РїСЂРё ~РІС‹С…РѕРґРµ", IDM_SAVESETTINGS
+        MENUITEM "~Р‘РµР·РѕРїР°СЃРЅС‹Р№ СЂРµР¶РёРј", IDM_SAFER
+        MENUITEM "Р—Р°РїРѕРјРёРЅР°С‚СЊ РїРѕСЃР»РµРґРЅРёР№ ~РєР°С‚Р°Р»РѕРі", IDM_SAVEDIR
+        MENUITEM "Рџ~Р°РЅРµР»СЊ РєРЅРѕРїРѕРє", IDM_BUTTONSHOW
+        MENUITEM "Рћ~РєРЅРѕ РїРѕ СЂР°Р·РјРµСЂСѓ СЃС‚СЂР°РЅРёС†С‹", IDM_FITPAGE
+        MENUITEM "~РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРµ РѕР±РЅРѕРІР»РµРЅРёРµ", IDM_AUTOREDISPLAY
+        MENUITEM "РћР±СЂ~РµР·РєР° EPS", IDM_EPSFCLIP
+        MENUITEM "РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏ ~EPS", IDM_EPSFWARN
+        MENUITEM "РРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ РєРѕРјРјРµРЅС‚Р°СЂРёРё ~DSC", IDM_IGNOREDSC
+        MENUITEM "РџРѕРєР°Р·С‹РІР°С‚СЊ РіР°Р±Р°СЂРёС‚РЅС‹Р№ РїСЂСЏ~РјРѕСѓРіРѕР»СЊРЅРёРє", IDM_SHOWBBOX
 	END
 
-    SUBMENU "П~росмотр", IDM_VIEWMENU
+    SUBMENU "Рџ~СЂРѕСЃРјРѕС‚СЂ", IDM_VIEWMENU
 	BEGIN
-        MENUITEM "~Следующая страница\t+", IDM_NEXT
-        MENUITEM "~Предыдущая страница\t-", IDM_PREV
-        MENUITEM "П~ерейти к странице...\tG", IDM_GOTO
-        MENUITEM "~Назад\tB", IDM_GOBACK
-        MENUITEM "~Вперёд", IDM_GOFWD
-        MENUITEM "~Обновить\tR", IDM_REDISPLAY
+        MENUITEM "~РЎР»РµРґСѓСЋС‰Р°СЏ СЃС‚СЂР°РЅРёС†Р°\t+", IDM_NEXT
+        MENUITEM "~РџСЂРµРґС‹РґСѓС‰Р°СЏ СЃС‚СЂР°РЅРёС†Р°\t-", IDM_PREV
+        MENUITEM "Рџ~РµСЂРµР№С‚Рё Рє СЃС‚СЂР°РЅРёС†Рµ...\tG", IDM_GOTO
+        MENUITEM "~РќР°Р·Р°Рґ\tB", IDM_GOBACK
+        MENUITEM "~Р’РїРµСЂС‘Рґ", IDM_GOFWD
+        MENUITEM "~РћР±РЅРѕРІРёС‚СЊ\tR", IDM_REDISPLAY
 		MENUITEM SEPARATOR
-        MENUITEM "С~ледующая страница и вверх\tSpace", IDM_NEXTHOME
-        MENUITEM "П~редыдущая страница и вверх\tBkSp", IDM_PREVHOME
+        MENUITEM "РЎ~Р»РµРґСѓСЋС‰Р°СЏ СЃС‚СЂР°РЅРёС†Р° Рё РІРІРµСЂС…\tSpace", IDM_NEXTHOME
+        MENUITEM "Рџ~СЂРµРґС‹РґСѓС‰Р°СЏ СЃС‚СЂР°РЅРёС†Р° Рё РІРІРµСЂС…\tBkSp", IDM_PREVHOME
 		MENUITEM SEPARATOR
-        MENUITEM "Полноэкранный ~режим\tF4", IDM_FULLSCREEN
-        MENUITEM "По р~азмеру окна\tF6", IDM_FITWIN
+        MENUITEM "РџРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Р№ ~СЂРµР¶РёРј\tF4", IDM_FULLSCREEN
+        MENUITEM "РџРѕ СЂ~Р°Р·РјРµСЂСѓ РѕРєРЅР°\tF6", IDM_FITWIN
 	END
 
-    SUBMENU "~Ориентация", IDM_ORIENTMENU
+    SUBMENU "~РћСЂРёРµРЅС‚Р°С†РёСЏ", IDM_ORIENTMENU
 	BEGIN
-        MENUITEM "~Авто", IDM_AUTOORIENT
+        MENUITEM "~РђРІС‚Рѕ", IDM_AUTOORIENT
 		MENUITEM SEPARATOR
-        MENUITEM "~Книжная", IDM_PORTRAIT
-        MENUITEM "А~льбомная", IDM_LANDSCAPE
-        MENUITEM "П~еревернутая книжная", IDM_UPSIDEDOWN
-        MENUITEM "~Обратная альбомная", IDM_SEASCAPE
+        MENUITEM "~РљРЅРёР¶РЅР°СЏ", IDM_PORTRAIT
+        MENUITEM "Рђ~Р»СЊР±РѕРјРЅР°СЏ", IDM_LANDSCAPE
+        MENUITEM "Рџ~РµСЂРµРІРµСЂРЅСѓС‚Р°СЏ РєРЅРёР¶РЅР°СЏ", IDM_UPSIDEDOWN
+        MENUITEM "~РћР±СЂР°С‚РЅР°СЏ Р°Р»СЊР±РѕРјРЅР°СЏ", IDM_SEASCAPE
 		MENUITEM SEPARATOR
-        MENUITEM "~Поменять альбомные", IDM_SWAPLANDSCAPE
+        MENUITEM "~РџРѕРјРµРЅСЏС‚СЊ Р°Р»СЊР±РѕРјРЅС‹Рµ", IDM_SWAPLANDSCAPE
 	END
 
-    SUBMENU "~Бумага", IDM_MEDIAMENU
+    SUBMENU "~Р‘СѓРјР°РіР°", IDM_MEDIAMENU
 	BEGIN
-        MENUITEM "~Настройка экрана...", IDM_DISPLAYSETTINGS
+        MENUITEM "~РќР°СЃС‚СЂРѕР№РєР° СЌРєСЂР°РЅР°...", IDM_DISPLAYSETTINGS
 		MENUITEM SEPARATOR
-        MENUITEM "~Повернуть лист", IDM_MEDIAROTATE
+        MENUITEM "~РџРѕРІРµСЂРЅСѓС‚СЊ Р»РёСЃС‚", IDM_MEDIAROTATE
 		MENUITEM SEPARATOR
         MENUITEM "11x17", IDM_11x17
         MENUITEM "A3", IDM_A3
@@ -167,17 +167,17 @@ BEGIN
         MENUITEM "Legal", IDM_LEDGER
         MENUITEM "Letter", IDM_LEGAL
         MENUITEM "Note", IDM_LETTER
-        MENUITEM "Другая...", IDM_USERSIZE
+        MENUITEM "Р”СЂСѓРіР°СЏ...", IDM_USERSIZE
 	END
 
-    SUBMENU "~Справка", IDM_HELPMENU
+    SUBMENU "~РЎРїСЂР°РІРєР°", IDM_HELPMENU
 	BEGIN
-        MENUITEM "~Содержание", IDM_HELPCONTENT
-        MENUITEM "~Указатель...", IDM_HELPSEARCH
-        MENUITEM "~Клавиатура", IDM_HELPKEYS
+        MENUITEM "~РЎРѕРґРµСЂР¶Р°РЅРёРµ", IDM_HELPCONTENT
+        MENUITEM "~РЈРєР°Р·Р°С‚РµР»СЊ...", IDM_HELPSEARCH
+        MENUITEM "~РљР»Р°РІРёР°С‚СѓСЂР°", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-        MENUITEM "~Регистрация...", IDM_REGISTER
-        MENUITEM "~О программе...", IDM_ABOUT
+        MENUITEM "~Р РµРіРёСЃС‚СЂР°С†РёСЏ...", IDM_REGISTER
+        MENUITEM "~Рћ РїСЂРѕРіСЂР°РјРјРµ...", IDM_ABOUT
 	END
 
 END
@@ -273,9 +273,9 @@ BEGIN
     IDS_SLANGUAGE, "7" /* Russian language countries */
     IDS_CODEPAGE, "866" /* IBM Cyrillic */
     IDS_HELPFILE, "gvpmru.hlp"
-    IDS_HELPTITLE, "Справка GSview"
-    IDS_SIGSEGV "Нарушение сегментации или исключение при операции с плавающей точкой в Ghostscript или во второй нитке GSview\015Пожалуйста выйдите из GSview"
-    IDS_FILENOTFOUND, "Файл не найден"
+    IDS_HELPTITLE, "РЎРїСЂР°РІРєР° GSview"
+    IDS_SIGSEGV "РќР°СЂСѓС€РµРЅРёРµ СЃРµРіРјРµРЅС‚Р°С†РёРё РёР»Рё РёСЃРєР»СЋС‡РµРЅРёРµ РїСЂРё РѕРїРµСЂР°С†РёРё СЃ РїР»Р°РІР°СЋС‰РµР№ С‚РѕС‡РєРѕР№ РІ Ghostscript РёР»Рё РІРѕ РІС‚РѕСЂРѕР№ РЅРёС‚РєРµ GSview\015РџРѕР¶Р°Р»СѓР№СЃС‚Р° РІС‹Р№РґРёС‚Рµ РёР· GSview"
+    IDS_FILENOTFOUND, "Р¤Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ"
 END
 
 STRINGTABLE

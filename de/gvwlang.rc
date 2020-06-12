@@ -27,12 +27,12 @@ BEGIN
 	POPUP "&Datei"
 	BEGIN
 #ifndef MEMORYFILE
-		MENUITEM "&Öffnen...\tO", IDM_OPEN
+		MENUITEM "&Ã–ffnen...\tO", IDM_OPEN
 		MENUITEM "&Auswahl Datei...\tA", IDM_SELECT
 #ifndef VIEWONLY
 		MENUITEM "Speichern &Unter...\tU", IDM_SAVEAS
 #endif
-		MENUITEM "&Schließen\tS", IDM_CLOSE
+		MENUITEM "&SchlieÃŸen\tS", IDM_CLOSE
 		MENUITEM "&Info...\tI", IDM_INFO
 		MENUITEM SEPARATOR
 #ifndef VIEWONLY
@@ -55,10 +55,10 @@ BEGIN
 	BEGIN
 		MENUITEM "&Kopieren\tCtrl+K", IDM_COPYCLIP
 		MENUITEM SEPARATOR
-		MENUITEM "&Einfügen...", IDM_PASTETO
+		MENUITEM "&EinfÃ¼gen...", IDM_PASTETO
 		MENUITEM "Konvertiere &Bitmap", IDM_CONVERT
 		MENUITEM SEPARATOR
-		POPUP "EPS Vorschau ein&fügen"
+		POPUP "EPS Vorschau ein&fÃ¼gen"
 		BEGIN
 		    MENUITEM "&Interchange", IDM_MAKEEPSI
 		    MENUITEM "TIFF 4", IDM_MAKEEPST4
@@ -77,14 +77,14 @@ BEGIN
 		MENUITEM "Konvertierung in Vektor Format...", IDM_PSTOEDIT
 		MENUITEM "&Text extrahieren...", IDM_TEXTEXTRACT
 		MENUITEM "&Suche...\tCtrl+S", IDM_TEXTFIND
-		MENUITEM "Suche &Nächsten\tF3", IDM_TEXTFINDNEXT
+		MENUITEM "Suche &NÃ¤chsten\tF3", IDM_TEXTFINDNEXT
 	END
 #endif
 	POPUP "O&ptionen"
 	BEGIN
 		MENUITEM "&Konfiguration...", IDM_CFG
 		MENUITEM "Konfiguriere &Ghostscript...", IDM_GSCOMMAND
-		MENUITEM "Klänge...", IDM_SOUNDS
+		MENUITEM "KlÃ¤nge...", IDM_SOUNDS
 		POPUP "&Einheiten"
 		BEGIN
 			MENUITEM "&pt", IDM_UNITPT
@@ -116,7 +116,7 @@ BEGIN
 		MENUITEM "Speichere &Optionen jetzt", IDM_SETTINGS
 		MENUITEM SEPARATOR
 		MENUITEM "&Speichere Optionen am Ende", IDM_SAVESETTINGS
-		MENUITEM "Sch&reibschutz für Dateien", IDM_SAFER
+		MENUITEM "Sch&reibschutz fÃ¼r Dateien", IDM_SAFER
 		MENUITEM "Merke Letztes &Verzeichnis", IDM_SAVEDIR
 		MENUITEM "&Hilfsmittelpalette", IDM_BUTTONSHOW
 		MENUITEM "Fenster an Seite an&passen", IDM_FITPAGE
@@ -128,14 +128,14 @@ BEGIN
 	END
 	POPUP "&Anzeige"
 	BEGIN
-		MENUITEM "&Nächste Seite\t+", IDM_NEXT
+		MENUITEM "&NÃ¤chste Seite\t+", IDM_NEXT
 		MENUITEM "&Vorherige Seite\t-", IDM_PREV
 		MENUITEM "&Gehe zu Seite...\tG", IDM_GOTO
-		MENUITEM "&Zurück\tB", IDM_GOBACK
+		MENUITEM "&ZurÃ¼ck\tB", IDM_GOBACK
 		MENUITEM "W&eiter", IDM_GOFWD
 		MENUITEM "&Wiederaufbau\tW", IDM_REDISPLAY
 		MENUITEM SEPARATOR
-		MENUITEM "Nächste Seite oben\tLeer", IDM_NEXTHOME
+		MENUITEM "NÃ¤chste Seite oben\tLeer", IDM_NEXTHOME
 		MENUITEM "Vorherige Seite oben\tBkSp", IDM_PREVHOME
 		MENUITEM SEPARATOR
 		MENUITEM "Ganzer &Bildschirm\tF4", IDM_FULLSCREEN
@@ -147,7 +147,7 @@ BEGIN
 		MENUITEM SEPARATOR
 		MENUITEM "&Hochformat", IDM_PORTRAIT
 		MENUITEM "&Querformat", IDM_LANDSCAPE
-		MENUITEM "&Kopfüber", IDM_UPSIDEDOWN
+		MENUITEM "&KopfÃ¼ber", IDM_UPSIDEDOWN
 		MENUITEM "&Umgekehrt Quer", IDM_SEASCAPE
 		MENUITEM SEPARATOR
 		MENUITEM "Gedreht Quer", IDM_SWAPLANDSCAPE
@@ -173,11 +173,11 @@ BEGIN
 	POPUP "&Hilfe"
 	BEGIN
 		MENUITEM "&Inhalt", IDM_HELPCONTENT
-		MENUITEM "&Suche nach Hilfe für...", IDM_HELPSEARCH
-		MENUITEM "&Tastenübersicht", IDM_HELPKEYS
+		MENUITEM "&Suche nach Hilfe fÃ¼r...", IDM_HELPSEARCH
+		MENUITEM "&TastenÃ¼bersicht", IDM_HELPKEYS
 		MENUITEM SEPARATOR
 		MENUITEM "&Registrierung...", IDM_REGISTER
-		MENUITEM "&Über GSview...", IDM_ABOUT
+		MENUITEM "&Ãœber GSview...", IDM_ABOUT
 	END
 END
 
@@ -243,7 +243,7 @@ BEGIN
 	IDS_SLANGUAGE, "DEU,3"
 	IDS_CODEPAGE, "1252"	/* ISO-Latin-1 */
 	IDS_HELPFILE, WINHELPFILE
-	IDS_SOUNDNOMM, "Kann WINMM.DLL nicht laden\nKlänge nicht verfügbar"
+	IDS_SOUNDNOMM, "Kann WINMM.DLL nicht laden\nKlÃ¤nge nicht verfÃ¼gbar"
 END
 
 STRINGTABLE

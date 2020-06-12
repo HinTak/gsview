@@ -22,139 +22,139 @@ CODEPAGE 869
 
 MENU ID_GSVIEW 
 BEGIN
-	SUBMENU "~Αρχείο", IDM_FILEMENU
+	SUBMENU "~Ξ‘ΟΟ‡ΞµΞ―ΞΏ", IDM_FILEMENU
 	BEGIN
-		MENUITEM "Άν~οιγμα...\tΟ", IDM_OPEN
-		MENUITEM "Επι~λογή αρχείου...\tΛ", IDM_SELECT
-		MENUITEM "Αποθήκευση ~ως...\tΩ", IDM_SAVEAS
-		MENUITEM "~Κλείσιμο...\tΚ",  IDM_CLOSE
-		MENUITEM "~Πληροφορίες...\tΠ",  IDM_INFO
+		MENUITEM "Ξ†Ξ½~ΞΏΞΉΞ³ΞΌΞ±...\tΞ", IDM_OPEN
+		MENUITEM "Ξ•Ο€ΞΉ~Ξ»ΞΏΞ³Ξ® Ξ±ΟΟ‡ΞµΞ―ΞΏΟ…...\tΞ›", IDM_SELECT
+		MENUITEM "Ξ‘Ο€ΞΏΞΈΞ®ΞΊΞµΟ…ΟƒΞ· ~Ο‰Ο‚...\tΞ©", IDM_SAVEAS
+		MENUITEM "~ΞΞ»ΞµΞ―ΟƒΞΉΞΌΞΏ...\tΞ",  IDM_CLOSE
+		MENUITEM "~Ξ Ξ»Ξ·ΟΞΏΟ†ΞΏΟΞ―ΞµΟ‚...\tΞ ",  IDM_INFO
 		MENUITEM SEPARATOR
-		MENUITEM "Μετατ~ροπή...\tΡ", IDM_CONVERTFILE
-		MENUITEM "Εξα~γωγή...\tΓ", IDM_EXTRACT
-		MENUITEM "PS ~σε EPS", IDM_PSTOEPS
+		MENUITEM "ΞΞµΟ„Ξ±Ο„~ΟΞΏΟ€Ξ®...\tΞ΅", IDM_CONVERTFILE
+		MENUITEM "Ξ•ΞΎΞ±~Ξ³Ο‰Ξ³Ξ®...\tΞ“", IDM_EXTRACT
+		MENUITEM "PS ~ΟƒΞµ EPS", IDM_PSTOEPS
 		MENUITEM SEPARATOR
-		MENUITEM "~Εκτύπωση...\tE", IDM_PRINT
-		MENUITEM  "Εκτύπωση ~του αρχείου...", IDM_SPOOL
+		MENUITEM "~Ξ•ΞΊΟ„ΟΟ€Ο‰ΟƒΞ·...\tE", IDM_PRINT
+		MENUITEM  "Ξ•ΞΊΟ„ΟΟ€Ο‰ΟƒΞ· ~Ο„ΞΏΟ… Ξ±ΟΟ‡ΞµΞ―ΞΏΟ…...", IDM_SPOOL
 		MENUITEM  SEPARATOR
-		MENUITEM  "Παρουσίαση ~μηνυμάτων\tΜ", IDM_GSMESS 
+		MENUITEM  "Ξ Ξ±ΟΞΏΟ…ΟƒΞ―Ξ±ΟƒΞ· ~ΞΌΞ·Ξ½Ο…ΞΌΞ¬Ο„Ο‰Ξ½\tΞ", IDM_GSMESS 
 		MENUITEM  SEPARATOR
 		MENUITEM  SEPARATOR
-		MENUITEM  "Έξο~δος\tΔ", IDM_EXIT
+		MENUITEM  "ΞΞΎΞΏ~Ξ΄ΞΏΟ‚\tΞ”", IDM_EXIT
 	END
 
-	SUBMENU "~Επεξεργασία", IDM_EDITMENU
+	SUBMENU "~Ξ•Ο€ΞµΞΎΞµΟΞ³Ξ±ΟƒΞ―Ξ±", IDM_EDITMENU
 	BEGIN
-		MENUITEM "Αντι~γραφή\tCtrl+C", IDM_COPYCLIP
+		MENUITEM "Ξ‘Ξ½Ο„ΞΉ~Ξ³ΟΞ±Ο†Ξ®\tCtrl+C", IDM_COPYCLIP
 		MENUITEM SEPARATOR
-		MENUITEM "~Επικόλληση σε...", IDM_PASTETO
+		MENUITEM "~Ξ•Ο€ΞΉΞΊΟΞ»Ξ»Ξ·ΟƒΞ· ΟƒΞµ...", IDM_PASTETO
 /*
-		MENUITEM "Μετατροπή ~Bitmap", IDM_CONVERT
+		MENUITEM "ΞΞµΟ„Ξ±Ο„ΟΞΏΟ€Ξ® ~Bitmap", IDM_CONVERT
 */
 		MENUITEM SEPARATOR
-		SUBMENU "~Προσθήκη προεπισκόπησης EPS", IDM_ADDEPSMENU
+		SUBMENU "~Ξ ΟΞΏΟƒΞΈΞ®ΞΊΞ· Ο€ΟΞΏΞµΟ€ΞΉΟƒΞΊΟΟ€Ξ·ΟƒΞ·Ο‚ EPS", IDM_ADDEPSMENU
 		BEGIN
 			MENUITEM "~Interchange", IDM_MAKEEPSI
 			MENUITEM "~TIFF 4", IDM_MAKEEPST4
-			MENUITEM "TIFF 6 ~χωρίς συμπίεση", IDM_MAKEEPST6U
-			MENUITEM "TIFF 6 ~με συμπίεση", IDM_MAKEEPST6P
-			MENUITEM "Μετα-αρχείο ~Windows", IDM_MAKEEPSW
-			MENUITEM "~Καθορισμένη από το χρήστη...", IDM_MAKEEPSU
+			MENUITEM "TIFF 6 ~Ο‡Ο‰ΟΞ―Ο‚ ΟƒΟ…ΞΌΟ€Ξ―ΞµΟƒΞ·", IDM_MAKEEPST6U
+			MENUITEM "TIFF 6 ~ΞΌΞµ ΟƒΟ…ΞΌΟ€Ξ―ΞµΟƒΞ·", IDM_MAKEEPST6P
+			MENUITEM "ΞΞµΟ„Ξ±-Ξ±ΟΟ‡ΞµΞ―ΞΏ ~Windows", IDM_MAKEEPSW
+			MENUITEM "~ΞΞ±ΞΈΞΏΟΞΉΟƒΞΌΞ­Ξ½Ξ· Ξ±Ο€Ο Ο„ΞΏ Ο‡ΟΞ®ΟƒΟ„Ξ·...", IDM_MAKEEPSU
 		END
 
-		SUBMENU "Ε~ξαγωγή EPS", IDM_EXTEPSMENU
+		SUBMENU "Ξ•~ΞΎΞ±Ξ³Ο‰Ξ³Ξ® EPS", IDM_EXTEPSMENU
 		BEGIN
-			MENUITEM "Τμήμα ~PostScript", IDM_EXTRACTPS
-			MENUITEM "Τμήμα προ~επισκόπησης", IDM_EXTRACTPRE
+			MENUITEM "Ξ¤ΞΌΞ®ΞΌΞ± ~PostScript", IDM_EXTRACTPS
+			MENUITEM "Ξ¤ΞΌΞ®ΞΌΞ± Ο€ΟΞΏ~ΞµΟ€ΞΉΟƒΞΊΟΟ€Ξ·ΟƒΞ·Ο‚", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
-		MENUITEM "Μετατροπή σε γράφημα διανυσματικής μορφής...", IDM_PSTOEDIT
-		MENUITEM "~Μέτρηση", IDM_MEASURE
-		MENUITEM "Εξαγωγή ~κειμένου...", IDM_TEXTEXTRACT
-		MENUITEM "Εύ~ρεση...\tCtrl+F", IDM_TEXTFIND
-		MENUITEM "Εύρε~ση επόμενου\tF3", IDM_TEXTFINDNEXT
+		MENUITEM "ΞΞµΟ„Ξ±Ο„ΟΞΏΟ€Ξ® ΟƒΞµ Ξ³ΟΞ¬Ο†Ξ·ΞΌΞ± Ξ΄ΞΉΞ±Ξ½Ο…ΟƒΞΌΞ±Ο„ΞΉΞΊΞ®Ο‚ ΞΌΞΏΟΟ†Ξ®Ο‚...", IDM_PSTOEDIT
+		MENUITEM "~ΞΞ­Ο„ΟΞ·ΟƒΞ·", IDM_MEASURE
+		MENUITEM "Ξ•ΞΎΞ±Ξ³Ο‰Ξ³Ξ® ~ΞΊΞµΞΉΞΌΞ­Ξ½ΞΏΟ…...", IDM_TEXTEXTRACT
+		MENUITEM "Ξ•Ο~ΟΞµΟƒΞ·...\tCtrl+F", IDM_TEXTFIND
+		MENUITEM "Ξ•ΟΟΞµ~ΟƒΞ· ΞµΟ€ΟΞΌΞµΞ½ΞΏΟ…\tF3", IDM_TEXTFINDNEXT
 	END
 
-	SUBMENU "Επι~λογές", IDM_OPTIONMENU
+	SUBMENU "Ξ•Ο€ΞΉ~Ξ»ΞΏΞ³Ξ­Ο‚", IDM_OPTIONMENU
 	BEGIN
-		MENUITEM "Τυπική διαμόρφωση...", IDM_CFG
-		MENUITEM "Διαμόρφωση για προχωρημένους...", IDM_GSCOMMAND
-		MENUITEM "Ή~χοι...", IDM_SOUNDS
-		SUBMENU "~Μονάδες", IDM_UNITMENU
+		MENUITEM "Ξ¤Ο…Ο€ΞΉΞΊΞ® Ξ΄ΞΉΞ±ΞΌΟΟΟ†Ο‰ΟƒΞ·...", IDM_CFG
+		MENUITEM "Ξ”ΞΉΞ±ΞΌΟΟΟ†Ο‰ΟƒΞ· Ξ³ΞΉΞ± Ο€ΟΞΏΟ‡Ο‰ΟΞ·ΞΌΞ­Ξ½ΞΏΟ…Ο‚...", IDM_GSCOMMAND
+		MENUITEM "Ξ‰~Ο‡ΞΏΞΉ...", IDM_SOUNDS
+		SUBMENU "~ΞΞΏΞ½Ξ¬Ξ΄ΞµΟ‚", IDM_UNITMENU
 		BEGIN
-			MENUITEM "~στιγμές (pt)", IDM_UNITPT
-			MENUITEM "~χιλιοστά (mm)", IDM_UNITMM
-			MENUITEM "ί~ντσες (in)", IDM_UNITINCH
+			MENUITEM "~ΟƒΟ„ΞΉΞ³ΞΌΞ­Ο‚ (pt)", IDM_UNITPT
+			MENUITEM "~Ο‡ΞΉΞ»ΞΉΞΏΟƒΟ„Ξ¬ (mm)", IDM_UNITMM
+			MENUITEM "Ξ―~Ξ½Ο„ΟƒΞµΟ‚ (in)", IDM_UNITINCH
 			MENUITEM SEPARATOR
-			MENUITEM "Υ~ψηλή ευκρίνεια", IDM_UNITFINE
+			MENUITEM "Ξ¥~ΟΞ·Ξ»Ξ® ΞµΟ…ΞΊΟΞ―Ξ½ΞµΞΉΞ±", IDM_UNITFINE
 		END
-		SUBMENU "~Γλώσσα", IDM_LANGMENU
+		SUBMENU "~Ξ“Ξ»ΟΟƒΟƒΞ±", IDM_LANGMENU
 		BEGIN
 			MENUITEM "~English", IDM_LANGEN
 			/* Remaining languages are added at run time */
 		END
-		SUBMENU "PS σε ~κείμενο", IDM_PSTOTEXTMENU
+		SUBMENU "PS ΟƒΞµ ~ΞΊΞµΞ―ΞΌΞµΞ½ΞΏ", IDM_PSTOTEXTMENU
 		BEGIN
-			MENUITEM "Απενεργοποιημένη", IDM_PSTOTEXTDIS
-			MENUITEM "Κανονική", IDM_PSTOTEXTNORM
-			MENUITEM "Κωδικοποίηση Dvips Cork", IDM_PSTOTEXTCORK
+			MENUITEM "Ξ‘Ο€ΞµΞ½ΞµΟΞ³ΞΏΟ€ΞΏΞΉΞ·ΞΌΞ­Ξ½Ξ·", IDM_PSTOTEXTDIS
+			MENUITEM "ΞΞ±Ξ½ΞΏΞ½ΞΉΞΊΞ®", IDM_PSTOTEXTNORM
+			MENUITEM "ΞΟ‰Ξ΄ΞΉΞΊΞΏΟ€ΞΏΞ―Ξ·ΟƒΞ· Dvips Cork", IDM_PSTOTEXTCORK
 		END
-		SUBMENU "Προειδοποιητικά μηνύματα δομής DSC", IDM_DSCMENU
+		SUBMENU "Ξ ΟΞΏΞµΞΉΞ΄ΞΏΟ€ΞΏΞΉΞ·Ο„ΞΉΞΊΞ¬ ΞΌΞ·Ξ½ΟΞΌΞ±Ο„Ξ± Ξ΄ΞΏΞΌΞ®Ο‚ DSC", IDM_DSCMENU
 		BEGIN
-			MENUITEM "Απενεργοποιημένα", IDM_DSC_OFF
-			MENUITEM "Σφάλματα", IDM_DSC_ERROR
-			MENUITEM "Προειδοποιήσεις", IDM_DSC_WARN
-			MENUITEM "Όλα", IDM_DSC_INFO
+			MENUITEM "Ξ‘Ο€ΞµΞ½ΞµΟΞ³ΞΏΟ€ΞΏΞΉΞ·ΞΌΞ­Ξ½Ξ±", IDM_DSC_OFF
+			MENUITEM "Ξ£Ο†Ξ¬Ξ»ΞΌΞ±Ο„Ξ±", IDM_DSC_ERROR
+			MENUITEM "Ξ ΟΞΏΞµΞΉΞ΄ΞΏΟ€ΞΏΞΉΞ®ΟƒΞµΞΉΟ‚", IDM_DSC_WARN
+			MENUITEM "ΞΞ»Ξ±", IDM_DSC_INFO
 		END
-		MENUITEM "Αποθήκευση των επιλογών ~τώρα", IDM_SETTINGS
+		MENUITEM "Ξ‘Ο€ΞΏΞΈΞ®ΞΊΞµΟ…ΟƒΞ· Ο„Ο‰Ξ½ ΞµΟ€ΞΉΞ»ΞΏΞ³ΟΞ½ ~Ο„ΟΟΞ±", IDM_SETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "Αποθήκευση των επιλογών κατά την έξο~δο", IDM_SAVESETTINGS
-		MENUITEM "Α~σφαλής λειτουργία", IDM_SAFER
-		MENUITEM "Απομνημόνευση τελευταίου ~καταλόγου", IDM_SAVEDIR
-		MENUITEM "Εμφάνιση της γραμμής ~εργαλείων", IDM_BUTTONSHOW
-		MENUITEM "Προσαρμογή του ~παράθυρου στη σελίδα", IDM_FITPAGE
-		MENUITEM "Α~υτόματη επανεμφάνιση", IDM_AUTOREDISPLAY
-		MENUITEM "Περικ~οπή EPS", IDM_EPSFCLIP
-		MENUITEM "Π~ροειδοποιήσεις EPS", IDM_EPSFWARN
-		MENUITEM "Παρά~βλεψη σχολίων δομής DSC", IDM_IGNOREDSC
-		MENUITEM "Εμ~φάνιση ορίων πλαισίου", IDM_SHOWBBOX
+		MENUITEM "Ξ‘Ο€ΞΏΞΈΞ®ΞΊΞµΟ…ΟƒΞ· Ο„Ο‰Ξ½ ΞµΟ€ΞΉΞ»ΞΏΞ³ΟΞ½ ΞΊΞ±Ο„Ξ¬ Ο„Ξ·Ξ½ Ξ­ΞΎΞΏ~Ξ΄ΞΏ", IDM_SAVESETTINGS
+		MENUITEM "Ξ‘~ΟƒΟ†Ξ±Ξ»Ξ®Ο‚ Ξ»ΞµΞΉΟ„ΞΏΟ…ΟΞ³Ξ―Ξ±", IDM_SAFER
+		MENUITEM "Ξ‘Ο€ΞΏΞΌΞ½Ξ·ΞΌΟΞ½ΞµΟ…ΟƒΞ· Ο„ΞµΞ»ΞµΟ…Ο„Ξ±Ξ―ΞΏΟ… ~ΞΊΞ±Ο„Ξ±Ξ»ΟΞ³ΞΏΟ…", IDM_SAVEDIR
+		MENUITEM "Ξ•ΞΌΟ†Ξ¬Ξ½ΞΉΟƒΞ· Ο„Ξ·Ο‚ Ξ³ΟΞ±ΞΌΞΌΞ®Ο‚ ~ΞµΟΞ³Ξ±Ξ»ΞµΞ―Ο‰Ξ½", IDM_BUTTONSHOW
+		MENUITEM "Ξ ΟΞΏΟƒΞ±ΟΞΌΞΏΞ³Ξ® Ο„ΞΏΟ… ~Ο€Ξ±ΟΞ¬ΞΈΟ…ΟΞΏΟ… ΟƒΟ„Ξ· ΟƒΞµΞ»Ξ―Ξ΄Ξ±", IDM_FITPAGE
+		MENUITEM "Ξ‘~Ο…Ο„ΟΞΌΞ±Ο„Ξ· ΞµΟ€Ξ±Ξ½ΞµΞΌΟ†Ξ¬Ξ½ΞΉΟƒΞ·", IDM_AUTOREDISPLAY
+		MENUITEM "Ξ ΞµΟΞΉΞΊ~ΞΏΟ€Ξ® EPS", IDM_EPSFCLIP
+		MENUITEM "Ξ ~ΟΞΏΞµΞΉΞ΄ΞΏΟ€ΞΏΞΉΞ®ΟƒΞµΞΉΟ‚ EPS", IDM_EPSFWARN
+		MENUITEM "Ξ Ξ±ΟΞ¬~Ξ²Ξ»ΞµΟΞ· ΟƒΟ‡ΞΏΞ»Ξ―Ο‰Ξ½ Ξ΄ΞΏΞΌΞ®Ο‚ DSC", IDM_IGNOREDSC
+		MENUITEM "Ξ•ΞΌ~Ο†Ξ¬Ξ½ΞΉΟƒΞ· ΞΏΟΞ―Ο‰Ξ½ Ο€Ξ»Ξ±ΞΉΟƒΞ―ΞΏΟ…", IDM_SHOWBBOX
 	END
 
-	SUBMENU "Π~ροβολή", IDM_VIEWMENU
+	SUBMENU "Ξ ~ΟΞΏΞ²ΞΏΞ»Ξ®", IDM_VIEWMENU
 	BEGIN
-		MENUITEM "~Επόμενη σελίδα\t+", IDM_NEXT
-		MENUITEM "~Προηγούμενη σελίδα\t-", IDM_PREV
-		MENUITEM "~Μετάβαση στη σελίδα...\tΜ", IDM_GOTO
-		MENUITEM "Πί~σω\tΣ", IDM_GOBACK
-		MENUITEM "Εμπ~ρός\tΡ", IDM_GOFWD
-		MENUITEM "~Ανανέωση οθόνης\tΑ", IDM_REDISPLAY
+		MENUITEM "~Ξ•Ο€ΟΞΌΞµΞ½Ξ· ΟƒΞµΞ»Ξ―Ξ΄Ξ±\t+", IDM_NEXT
+		MENUITEM "~Ξ ΟΞΏΞ·Ξ³ΞΏΟΞΌΞµΞ½Ξ· ΟƒΞµΞ»Ξ―Ξ΄Ξ±\t-", IDM_PREV
+		MENUITEM "~ΞΞµΟ„Ξ¬Ξ²Ξ±ΟƒΞ· ΟƒΟ„Ξ· ΟƒΞµΞ»Ξ―Ξ΄Ξ±...\tΞ", IDM_GOTO
+		MENUITEM "Ξ Ξ―~ΟƒΟ‰\tΞ£", IDM_GOBACK
+		MENUITEM "Ξ•ΞΌΟ€~ΟΟΟ‚\tΞ΅", IDM_GOFWD
+		MENUITEM "~Ξ‘Ξ½Ξ±Ξ½Ξ­Ο‰ΟƒΞ· ΞΏΞΈΟΞ½Ξ·Ο‚\tΞ‘", IDM_REDISPLAY
 		MENUITEM SEPARATOR
-		MENUITEM "Αρχή επόμενης σελίδας\tΔιάστημα", IDM_NEXTHOME
-		MENUITEM "Αρχή προηγούμενης σελίδας\tBksp", IDM_PREVHOME
+		MENUITEM "Ξ‘ΟΟ‡Ξ® ΞµΟ€ΟΞΌΞµΞ½Ξ·Ο‚ ΟƒΞµΞ»Ξ―Ξ΄Ξ±Ο‚\tΞ”ΞΉΞ¬ΟƒΟ„Ξ·ΞΌΞ±", IDM_NEXTHOME
+		MENUITEM "Ξ‘ΟΟ‡Ξ® Ο€ΟΞΏΞ·Ξ³ΞΏΟΞΌΞµΞ½Ξ·Ο‚ ΟƒΞµΞ»Ξ―Ξ΄Ξ±Ο‚\tBksp", IDM_PREVHOME
 		MENUITEM SEPARATOR
-		MENUITEM "Προβολή πλήρους ~οθόνης\tF4", IDM_FULLSCREEN
-		MENUITEM "Προσαρμογή στο παρά~θυρο\tF6", IDM_FITWIN
+		MENUITEM "Ξ ΟΞΏΞ²ΞΏΞ»Ξ® Ο€Ξ»Ξ®ΟΞΏΟ…Ο‚ ~ΞΏΞΈΟΞ½Ξ·Ο‚\tF4", IDM_FULLSCREEN
+		MENUITEM "Ξ ΟΞΏΟƒΞ±ΟΞΌΞΏΞ³Ξ® ΟƒΟ„ΞΏ Ο€Ξ±ΟΞ¬~ΞΈΟ…ΟΞΏ\tF6", IDM_FITWIN
 	END
 
-	SUBMENU "~Προσανατολισμός", IDM_ORIENTMENU
+	SUBMENU "~Ξ ΟΞΏΟƒΞ±Ξ½Ξ±Ο„ΞΏΞ»ΞΉΟƒΞΌΟΟ‚", IDM_ORIENTMENU
 	BEGIN
-		MENUITEM "~Αυτόματος", IDM_AUTOORIENT
+		MENUITEM "~Ξ‘Ο…Ο„ΟΞΌΞ±Ο„ΞΏΟ‚", IDM_AUTOORIENT
 		MENUITEM SEPARATOR
-		MENUITEM "~Κατακόρυφος", IDM_PORTRAIT
-		MENUITEM "~Οριζόντιος", IDM_LANDSCAPE
-		MENUITEM "Ανε~στραμμένος", IDM_UPSIDEDOWN
-		MENUITEM "~Πανοραμικός", IDM_SEASCAPE
+		MENUITEM "~ΞΞ±Ο„Ξ±ΞΊΟΟΟ…Ο†ΞΏΟ‚", IDM_PORTRAIT
+		MENUITEM "~ΞΟΞΉΞ¶ΟΞ½Ο„ΞΉΞΏΟ‚", IDM_LANDSCAPE
+		MENUITEM "Ξ‘Ξ½Ξµ~ΟƒΟ„ΟΞ±ΞΌΞΌΞ­Ξ½ΞΏΟ‚", IDM_UPSIDEDOWN
+		MENUITEM "~Ξ Ξ±Ξ½ΞΏΟΞ±ΞΌΞΉΞΊΟΟ‚", IDM_SEASCAPE
 		MENUITEM SEPARATOR
-		MENUITEM "Οριζόντια ~μετάθεση", IDM_SWAPLANDSCAPE
+		MENUITEM "ΞΟΞΉΞ¶ΟΞ½Ο„ΞΉΞ± ~ΞΌΞµΟ„Ξ¬ΞΈΞµΟƒΞ·", IDM_SWAPLANDSCAPE
 	END
 
-	SUBMENU "~Μέσα", IDM_MEDIAMENU
+	SUBMENU "~ΞΞ­ΟƒΞ±", IDM_MEDIAMENU
 	BEGIN
-		MENUITEM "~Ρυθμίσεις οθόνης...", IDM_DISPLAYSETTINGS
+		MENUITEM "~Ξ΅Ο…ΞΈΞΌΞ―ΟƒΞµΞΉΟ‚ ΞΏΞΈΟΞ½Ξ·Ο‚...", IDM_DISPLAYSETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "~Περιστροφή μέσου", IDM_MEDIAROTATE
+		MENUITEM "~Ξ ΞµΟΞΉΟƒΟ„ΟΞΏΟ†Ξ® ΞΌΞ­ΟƒΞΏΟ…", IDM_MEDIAROTATE
 		MENUITEM SEPARATOR
-		MENUITEM "11x17 ίντσες", IDM_11x17
+		MENUITEM "11x17 Ξ―Ξ½Ο„ΟƒΞµΟ‚", IDM_11x17
 		MENUITEM "A3", IDM_A3
 		MENUITEM "A4", IDM_A4
 		MENUITEM "A5", IDM_A5
@@ -164,17 +164,17 @@ BEGIN
 		MENUITEM "Ledger", IDM_LEDGER
 		MENUITEM "Legal", IDM_LEGAL
 		MENUITEM "Note", IDM_LETTER
-		MENUITEM "~Καθορισμένο από το χρήστη...", IDM_USERSIZE
+		MENUITEM "~ΞΞ±ΞΈΞΏΟΞΉΟƒΞΌΞ­Ξ½ΞΏ Ξ±Ο€Ο Ο„ΞΏ Ο‡ΟΞ®ΟƒΟ„Ξ·...", IDM_USERSIZE
 	END
 
-	SUBMENU "~Βοήθεια", IDM_HELPMENU
+	SUBMENU "~Ξ’ΞΏΞ®ΞΈΞµΞΉΞ±", IDM_HELPMENU
 	BEGIN
-		MENUITEM "Π~εριεχόμενα", IDM_HELPCONTENT
-		MENUITEM "~Ευρετήριο βοήθειας...", IDM_HELPSEARCH
-		MENUITEM "Βοήθεια για τα π~λήκτρα", IDM_HELPKEYS
+		MENUITEM "Ξ ~ΞµΟΞΉΞµΟ‡ΟΞΌΞµΞ½Ξ±", IDM_HELPCONTENT
+		MENUITEM "~Ξ•Ο…ΟΞµΟ„Ξ®ΟΞΉΞΏ Ξ²ΞΏΞ®ΞΈΞµΞΉΞ±Ο‚...", IDM_HELPSEARCH
+		MENUITEM "Ξ’ΞΏΞ®ΞΈΞµΞΉΞ± Ξ³ΞΉΞ± Ο„Ξ± Ο€~Ξ»Ξ®ΞΊΟ„ΟΞ±", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-		MENUITEM "~Δήλωση...", IDM_REGISTER
-		MENUITEM "~Πληροφορίες...", IDM_ABOUT
+		MENUITEM "~Ξ”Ξ®Ξ»Ο‰ΟƒΞ·...", IDM_REGISTER
+		MENUITEM "~Ξ Ξ»Ξ·ΟΞΏΟ†ΞΏΟΞ―ΞµΟ‚...", IDM_ABOUT
 	END
 
 END
@@ -354,9 +354,9 @@ BEGIN
         IDS_SLANGUAGE, "30"
 	IDS_CODEPAGE, "869"	/* IBM Modern Greek */
 	IDS_HELPFILE, "gvpmgr.hlp"
-	IDS_HELPTITLE, "Βοήθεια για το GSview"
-	IDS_SIGSEGV "Παραβίαση κατάτμησης ή εξαίρεση κινητής υποδιαστολής στο μεταγλωττιστή Ghostscript ή δεύτερο νήμα GSview.\015Παρακαλώ διακόψτε την εκτέλεση του GSview."
-	IDS_FILENOTFOUND, "Το αρχείο δεν εντοπίστηκε"
+	IDS_HELPTITLE, "Ξ’ΞΏΞ®ΞΈΞµΞΉΞ± Ξ³ΞΉΞ± Ο„ΞΏ GSview"
+	IDS_SIGSEGV "Ξ Ξ±ΟΞ±Ξ²Ξ―Ξ±ΟƒΞ· ΞΊΞ±Ο„Ξ¬Ο„ΞΌΞ·ΟƒΞ·Ο‚ Ξ® ΞµΞΎΞ±Ξ―ΟΞµΟƒΞ· ΞΊΞΉΞ½Ξ·Ο„Ξ®Ο‚ Ο…Ο€ΞΏΞ΄ΞΉΞ±ΟƒΟ„ΞΏΞ»Ξ®Ο‚ ΟƒΟ„ΞΏ ΞΌΞµΟ„Ξ±Ξ³Ξ»Ο‰Ο„Ο„ΞΉΟƒΟ„Ξ® Ghostscript Ξ® Ξ΄ΞµΟΟ„ΞµΟΞΏ Ξ½Ξ®ΞΌΞ± GSview.\015Ξ Ξ±ΟΞ±ΞΊΞ±Ξ»Ο Ξ΄ΞΉΞ±ΞΊΟΟΟ„Ξµ Ο„Ξ·Ξ½ ΞµΞΊΟ„Ξ­Ξ»ΞµΟƒΞ· Ο„ΞΏΟ… GSview."
+	IDS_FILENOTFOUND, "Ξ¤ΞΏ Ξ±ΟΟ‡ΞµΞ―ΞΏ Ξ΄ΞµΞ½ ΞµΞ½Ο„ΞΏΟ€Ξ―ΟƒΟ„Ξ·ΞΊΞµ"
 END
 
 STRINGTABLE

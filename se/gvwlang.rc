@@ -27,12 +27,12 @@ BEGIN
 	POPUP "&Arkiv"
 	BEGIN
 #ifndef MEMORYFILE
-		MENUITEM "&Öppna...\tÖ", IDM_OPEN
-		MENUITEM "Välj &fil...\tF", IDM_SELECT
+		MENUITEM "&Ã–ppna...\tÃ–", IDM_OPEN
+		MENUITEM "VÃ¤lj &fil...\tF", IDM_SELECT
 #ifndef VIEWONLY
 		MENUITEM "S&para som...\tp", IDM_SAVEAS
 #endif
-		MENUITEM "S&täng\tt", IDM_CLOSE
+		MENUITEM "S&tÃ¤ng\tt", IDM_CLOSE
 		MENUITEM "&Info...\tI", IDM_INFO
 		MENUITEM SEPARATOR
 #ifndef VIEWONLY
@@ -58,26 +58,26 @@ BEGIN
 		MENUITEM "&Klistra in...", IDM_PASTETO
 		MENUITEM "Konvertera &bitmapp", IDM_CONVERT
 		MENUITEM SEPARATOR
-		POPUP "&Lägg till EPS förhandsvisning"
+		POPUP "&LÃ¤gg till EPS fÃ¶rhandsvisning"
 		BEGIN
 		    MENUITEM "&Interchange", IDM_MAKEEPSI
 		    MENUITEM "TIFF 4", IDM_MAKEEPST4
 		    MENUITEM "&TIFF 6 okomprimerad", IDM_MAKEEPST6U
 		    MENUITEM "TIFF 6 &packbitar", IDM_MAKEEPST6P
 		    MENUITEM "&Windows metafil", IDM_MAKEEPSW
-		    MENUITEM "&Användardefinierad förhandsvisning", IDM_MAKEEPSU
+		    MENUITEM "&AnvÃ¤ndardefinierad fÃ¶rhandsvisning", IDM_MAKEEPSU
 		END
 		POPUP "&Extrahera EPS"
 		BEGIN
 		    MENUITEM "&PostScript", IDM_EXTRACTPS
-		    MENUITEM "&Förhandsvisa", IDM_EXTRACTPRE
+		    MENUITEM "&FÃ¶rhandsvisa", IDM_EXTRACTPRE
 		END
 		MENUITEM SEPARATOR
-		MENUITEM "Mäta", IDM_MEASURE
+		MENUITEM "MÃ¤ta", IDM_MEASURE
 		MENUITEM "Konvertera till vektorformat...", IDM_PSTOEDIT
 		MENUITEM "&Text extrahera...", IDM_TEXTEXTRACT
 		MENUITEM "&Finn...\tCtrl+F", IDM_TEXTFIND
-		MENUITEM "Finn &nästa\tF3", IDM_TEXTFINDNEXT
+		MENUITEM "Finn &nÃ¤sta\tF3", IDM_TEXTFINDNEXT
 	END
 #endif
 	POPUP "A&lternativ"
@@ -91,9 +91,9 @@ BEGIN
 			MENUITEM "&mm", IDM_UNITMM
 			MENUITEM "&inch", IDM_UNITINCH
 			MENUITEM SEPARATOR
-			MENUITEM "&Hög upplösning", IDM_UNITFINE
+			MENUITEM "&HÃ¶g upplÃ¶sning", IDM_UNITFINE
 		END
-		POPUP "&Språk"
+		POPUP "&SprÃ¥k"
 		BEGIN
 			MENUITEM "&English", IDM_LANGEN
 			/* Remaining languages are added at run time */
@@ -113,13 +113,13 @@ BEGIN
 			MENUITEM "Varningar", IDM_DSC_WARN
 			MENUITEM "Alla", IDM_DSC_INFO
 		END
-		MENUITEM "Spara inställningar &nu", IDM_SETTINGS
+		MENUITEM "Spara instÃ¤llningar &nu", IDM_SETTINGS
 		MENUITEM SEPARATOR
-		MENUITEM "&Spara inställningar vid avslutning", IDM_SAVESETTINGS
-		MENUITEM "Sä&krare", IDM_SAFER
+		MENUITEM "&Spara instÃ¤llningar vid avslutning", IDM_SAVESETTINGS
+		MENUITEM "SÃ¤&krare", IDM_SAFER
 		MENUITEM "Spara senaste &katalog", IDM_SAVEDIR
 		MENUITEM "&Knapprad", IDM_BUTTONSHOW
-		MENUITEM "&Anpassa fönster till sida", IDM_FITPAGE
+		MENUITEM "&Anpassa fÃ¶nster till sida", IDM_FITPAGE
 		MENUITEM "Automatisk &uppdatering", IDM_AUTOREDISPLAY
 		MENUITEM "EPS &klipp", IDM_EPSFCLIP
 		MENUITEM "EPS &varning", IDM_EPSFWARN
@@ -128,33 +128,33 @@ BEGIN
 	END
 	POPUP "&Visa"
 	BEGIN
-		MENUITEM "&Nästa sida\t+", IDM_NEXT
-		MENUITEM "Före&gående sida\t-", IDM_PREV
-		MENUITEM "&Gå till sida...\tG", IDM_GOTO
-		MENUITEM "Gå &tillbaka\tT", IDM_GOBACK
-		MENUITEM "Gå &framåt", IDM_GOFWD
+		MENUITEM "&NÃ¤sta sida\t+", IDM_NEXT
+		MENUITEM "FÃ¶re&gÃ¥ende sida\t-", IDM_PREV
+		MENUITEM "&GÃ¥ till sida...\tG", IDM_GOTO
+		MENUITEM "GÃ¥ &tillbaka\tT", IDM_GOBACK
+		MENUITEM "GÃ¥ &framÃ¥t", IDM_GOFWD
 		MENUITEM "&Uppdatera\tU", IDM_REDISPLAY
 		MENUITEM SEPARATOR
-		MENUITEM "Nästa sida och hem\tMellanslag", IDM_NEXTHOME
-		MENUITEM "Föregående sida och hem\tBkSp", IDM_PREVHOME
+		MENUITEM "NÃ¤sta sida och hem\tMellanslag", IDM_NEXTHOME
+		MENUITEM "FÃ¶regÃ¥ende sida och hem\tBkSp", IDM_PREVHOME
 		MENUITEM SEPARATOR
-		MENUITEM "Full&skärm\tF4", IDM_FULLSCREEN
-		MENUITEM "Anpassa &till fönster\tF6", IDM_FITWIN
+		MENUITEM "Full&skÃ¤rm\tF4", IDM_FULLSCREEN
+		MENUITEM "Anpassa &till fÃ¶nster\tF6", IDM_FITWIN
 	END
 	POPUP "&Orientering"
 	BEGIN
 		MENUITEM "&Auto", IDM_AUTOORIENT
 		MENUITEM SEPARATOR
-		MENUITEM "&Porträtt", IDM_PORTRAIT
+		MENUITEM "&PortrÃ¤tt", IDM_PORTRAIT
 		MENUITEM "&Landskap", IDM_LANDSCAPE
 		MENUITEM "&Upp-och-ner", IDM_UPSIDEDOWN
-		MENUITEM "&Omvänt landskap", IDM_SEASCAPE
+		MENUITEM "&OmvÃ¤nt landskap", IDM_SEASCAPE
 		MENUITEM SEPARATOR
 		MENUITEM "S&kifta landskap", IDM_SWAPLANDSCAPE
 	END
 	POPUP "&Media"
 	BEGIN
-		MENUITEM "&Visa inställningar...", IDM_DISPLAYSETTINGS
+		MENUITEM "&Visa instÃ¤llningar...", IDM_DISPLAYSETTINGS
 		MENUITEM SEPARATOR
 		MENUITEM "&Rotera media", IDM_MEDIAROTATE
 		MENUITEM SEPARATOR
@@ -168,13 +168,13 @@ BEGIN
 		MENUITEM "Legal", IDM_LEGAL
 		MENUITEM "Letter", IDM_LETTER
 		MENUITEM "Note", IDM_NOTE
-		MENUITEM "Användardefinierad...", IDM_USERSIZE
+		MENUITEM "AnvÃ¤ndardefinierad...", IDM_USERSIZE
 	END
-	POPUP "&Hjälp"
+	POPUP "&HjÃ¤lp"
 	BEGIN
-		MENUITEM "&Innehåll", IDM_HELPCONTENT
-		MENUITEM "&Sök hjälp för...", IDM_HELPSEARCH
-		MENUITEM "&Tangenter hjälp", IDM_HELPKEYS
+		MENUITEM "&InnehÃ¥ll", IDM_HELPCONTENT
+		MENUITEM "&SÃ¶k hjÃ¤lp fÃ¶r...", IDM_HELPSEARCH
+		MENUITEM "&Tangenter hjÃ¤lp", IDM_HELPKEYS
 		MENUITEM SEPARATOR
 		MENUITEM "&Registrera...", IDM_REGISTER
 		MENUITEM "&Om...", IDM_ABOUT
@@ -183,8 +183,8 @@ END
 
 gsview_accel ACCELERATORS
 BEGIN
-	"Ö", IDM_OPEN
-	"ö", IDM_OPEN
+	"Ã–", IDM_OPEN
+	"Ã¶", IDM_OPEN
 	"T", IDM_CLOSE
 	"t", IDM_CLOSE
 	"N", IDM_NEXT
@@ -243,7 +243,7 @@ BEGIN
 	IDS_SLANGUAGE, "SE,2"
 	IDS_CODEPAGE, "1252"	/* ISO-Latin-1 */
 	IDS_HELPFILE, WINHELPFILE
-	IDS_SOUNDNOMM, "Kan inte ladda WINMM.DLL\nLjud kommer inte att vara tillgängliga"
+	IDS_SOUNDNOMM, "Kan inte ladda WINMM.DLL\nLjud kommer inte att vara tillgÃ¤ngliga"
 END
 
 STRINGTABLE

@@ -351,23 +351,6 @@ W
 
  Press the `Close `button.
 E
-2Registration
--Registration
-?Registration
- If you wish to support the development of GSview or wish
- to disable the GSview nag screen, please consider registering
- GSview.  There is no requirement for you to register GSview.
- GSview is made available with the Aladdin Free Public Licence,
- contained in the file `LICENCE`.
- This allows free use, but restricts commercial distribution.
-
- The registration fee is currently AUD$40.
- GSview can be registered online at
-  http://www.ghostgum.com.au/
- or by faxing or mailing the
- registration form which can be found in the file `regorder.txt`
- in the GSview directory.
- Ghostgum Software prefers that you use the online registration.
 2Document Structuring Conventions
 -DSC
 ?Document Structuring Conventions
@@ -2254,8 +2237,7 @@ X
 E
  use -d9
 
- `-t` Multi-threading.  GSview by default runs multi-threaded,
- except for Windows 3.1/Win32s.
+ `-t` Multi-threading.  GSview by default runs multi-threaded.
  To change this, use `-t` to toggle the threading mode, use `-t0` to select
  single-thread mode and `-t1` to select multi-thread mode.
 
@@ -2299,7 +2281,7 @@ W
   [Command("command line")]
  The [Command()] command only understands "filename" or "/P filename".
 
- Don't sent multiple commands together.  GSview won't complain,
+ Don't send multiple commands together.  GSview won't complain,
  but the multithreaded asynchrononous execution within GSview
  means that the first command won't have been completed before
  the second command is received.  If you need to send multiple
@@ -2315,20 +2297,11 @@ E
 ?World Wide Web
 ?WWW
 ?HTML
- The World Wide Web home page for Ghostscript, Ghostview and GSview
- is at
-  http://www.cs.wisc.edu/~ghost/
-
- GSview can be registered on-line at
+ The home page for GSviwe is
   http://www.ghostgum.com.au/
+ The home page for Ghostscript is
+  https://www.ghostscript.com/
 
- GSview can be used as a PostScript file viewer for several OS/2
- and MS-Windows Web browsers.  See the GSview home page for details.
-
- Thomas Merz has written a Ghostscript manual, which is available
- in `PDF` from the above WWW site.  This manual is an extract from a
- book written by Thomas Merz titled `PostScript and Acrobat/PDF`,
- available in English and German.
 2Copyright
 -Copyright
 ?Copyright
@@ -2377,7 +2350,7 @@ WP
  `Problem:` Can't load Ghostscript DLL ...
 
  GSview requires the Ghostscript DLL
- (gsdll2.dll for OS/2, gsdll32.dll for Win32, gsdll63.dll for Win64).
+ (gsdll2.dll for OS/2, gsdll32.dll for Win32, gsdll64.dll for Win64).
  This error message usually occurs if you don't have Ghostscript,
  or if GSview can't find Ghostscript.
 
@@ -2392,11 +2365,6 @@ WP
  This message also occurs if Ghostscript cannot find its
  initialisation files (e.g. gs_init.ps).  Set the
  `Ghostscript Include Path` correctly.
-
-W
- If using Win32s, make sure you don't already have a copy of
- the Ghostscript DLL loaded by another copy of GSview.
- Only one copy of Ghostscript DLL can be loaded by Win32s at a time.
 
 WP
  If you can't get GSview to run Ghostscript DLL correctly, make sure
