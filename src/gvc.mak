@@ -529,30 +529,7 @@ gsv$(GSVIEW_VERSION)w32.zip: strip distcopy files32.txt
 	zip -9 -@ gsv$(GSVIEW_VERSION)w32.zip < src\files32.txt
 	cd src
 
-
-
-# Now convert to a self extracting archive.
-# This involves making a few temporary files.
-gsv$(GSVIEW_VERSION)w32.exe: strip distcopy gsv$(GSVIEW_VERSION)w32.zip
-	cd ..
-	echo -win32 -setup > setup.rsp
-	echo -st "GSview $(GSVIEW_DOT_VERSION) for Win32" >> setup.rsp
-	echo -i gsview32.ico >> setup.rsp
-	echo -a about.txt >> setup.rsp
-	echo -t dialog.txt >> setup.rsp
-	echo -c .\setup.exe >> setup.rsp
-	echo GSview is Copyright (C) 2007 Ghostgum Software Pty Ltd. > about.txt
-	echo See licence in gsview\LICENCE >> about.txt
-	echo This installs GSview $(GSVIEW_DOT_VERSION) for Win32. > dialog.txt
-	echo GSview uses GPL Ghostscript to display, print and convert PostScript and PDF files. >> dialog.txt
-	$(WINZIPSE_XE) gsv$(GSVIEW_VERSION)w32 @setup.rsp
-# Don't delete temporary files, because make continues
-# before these files are used.
-#	-del setup.rsp 
-#	-del about.txt
-#	-del dialog.txt
-#	-del gsview32.ico
-	cd src
+zip: gsv$(GSVIEW_VERSION)w32.zip
 
 language:
 	-del *.res

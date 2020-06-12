@@ -19,6 +19,8 @@
 /* Resources for GSVWXX.DLL, which contains the language dependent */
 /* resources for MS-Windows Ghostscript */
 
+#pragma code_page(65001) // UTF-8
+
 #ifndef GVWIN1
 #include <windows.h>
 #ifndef _Windows

@@ -41,11 +41,6 @@ RIFLAGS=$(RIPATH)$(SRCDIR) $(RIPATH)$(SRCWINDIR) $(RIPATH)$(OBJDIR)
 # To disable print/convert, set VIEWONLY=1
 VIEWONLY=0
 
-# Define the location of the WinZip self-extracting-archive-maker.
-ifeq ($(WINZIPSE_XE),)
-WINZIPSE_XE="C:\\Program Files\\WinZip Self-Extractor\\WZIPSE32.EXE"
-endif
-
 BINDIR=./bin
 OBJDIR=./obj
 SRCDIR=./src

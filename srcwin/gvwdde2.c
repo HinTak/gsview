@@ -263,6 +263,11 @@ char *q;
 	    q = skiparg(p);
 	    gsview_fullscreen();
 	}
+	else if (strncmp(p, "Print(", 6) == 0) {
+	    p+= 6;
+	    q = skiparg(p);
+	    gsview_print(FALSE);
+	}
 	
 	p = q;
 	while (*p && *p!= ']')

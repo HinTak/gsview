@@ -1,4 +1,12 @@
 bin
 binary
+dist
+gsview32
+gsview64
 *.exe
 *.zip
+*.pdb
+.vs
+Makefile
+hhptemp
+obj

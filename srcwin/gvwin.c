@@ -323,7 +323,7 @@ int gsview_main(HINSTANCE hInstance, LPSTR lpszCmdLine)
 	display.tid = _beginthread(gs_thread, 131072, NULL);
     }
 #ifdef USE_HTMLHELP
-    HtmlHelp(hwndimg, NULL, HH_INITIALIZE, (DWORD)&dwHelpCookie);
+    HtmlHelp(hwndimg, NULL, HH_INITIALIZE, (DWORD_PTR)&dwHelpCookie);
 #endif
     
     while (!(!multithread && quitnow)
@@ -332,7 +332,7 @@ int gsview_main(HINSTANCE hInstance, LPSTR lpszCmdLine)
 	  && ((hwnd_measure == 0) || !IsDialogMessage(hwnd_measure, &msg)) 
 	   ) {
 #ifdef USE_HTMLHELP
-	    if (!HtmlHelp(NULL, NULL, HH_PRETRANSLATEMESSAGE, (DWORD)(&msg))) { 
+	    if (!HtmlHelp(NULL, NULL, HH_PRETRANSLATEMESSAGE, (DWORD_PTR)(&msg))) { 
 #endif
 		if (!TranslateAccelerator(hwndimg, haccel, &msg)) {
 		    TranslateMessage(&msg);
@@ -350,35 +350,10 @@ int gsview_main(HINSTANCE hInstance, LPSTR lpszCmdLine)
 	else 
 	{
 	    if (pending.now) {
-		if (is_win95 || is_winnt)
-		    gs_process();	/* start Ghostscript */
-		else {
-		    /* Win32s can't start gs_process while printing */
-		    /* Check if gvwgs.exe is running */
-		    HWND hwndprn = FindWindow(NULL, TEXT("GSview Print"));
-		    if (IsWindow(hwndprn)) {
-			pending.now = FALSE;
-			gserror(0, "Busy printing.  Win32s can't use Ghostscript for displaying while it is being used for printing. Try again when 'GSview Print' has finished.", MB_ICONEXCLAMATION, SOUND_ERROR);
-		    }
-		    if (pending.now)
-			gs_process();	/* start Ghostscript */
-		}
+	        gs_process();	/* start Ghostscript */
 		update_scroll_bars();
 	    }
 	}
-#ifndef VIEWONLY
-	if (
-	    is_win32s && 
-	    win32s_printer_pending) {
-	    /* Win32s can't load GS DLL twice */
-	    /* so we must run it while display GS DLL is unloaded */
-	    start_gvwgs();
-	    win32s_printer_pending = FALSE;
-	    /* We can't stop the user attempting to display while */
-	    /* printing since we don't know when printer finished */
-	    /* We'll see how much of a problem this causes */
-	}
-#endif
     }
 
     dde_uninitialise();
@@ -393,7 +368,7 @@ int gsview_main(HINSTANCE hInstance, LPSTR lpszCmdLine)
     delete_buttons();
     free_SetScrollInfo();
 #ifdef USE_HTMLHELP
-    HtmlHelp(hwndimg,szHelpName, HH_UNINITIALIZE, (DWORD)dwHelpCookie);
+    HtmlHelp(hwndimg,szHelpName, HH_UNINITIALIZE, (DWORD_PTR)dwHelpCookie);
 #else
     WinHelp(hwndimg,szHelpName,HELP_QUIT,(DWORD)NULL);
 #endif
@@ -1147,7 +1122,7 @@ RECT rect;
 	    lstrcat(buf, TEXT(".htm"));
 	}
 
-	HtmlHelp(hwndimg,szHelpName,HH_DISPLAY_TOPIC,(DWORD)buf);
+	HtmlHelp(hwndimg,szHelpName,HH_DISPLAY_TOPIC,(DWORD_PTR)buf);
 
 convert_widechar(strh, szHelpName, sizeof(strh)-1);
 convert_widechar(strb, buf, sizeof(strh)-1);

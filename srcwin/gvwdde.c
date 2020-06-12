@@ -142,12 +142,11 @@ char gsdocbuf[MAXSTR];
 	strcat(gsdocbuf, "\\");
     }
     strncpy(gsviewpathbuf, gsviewpath, sizeof(gsviewpathbuf));
-    if (!is_win32s) {
-	/* The DDE interface isn't reliable with long names */
-	/* Convert everything to short names */
-	GetShortPathNameA(gspath, gspathbuf, sizeof(gspathbuf));
-	GetShortPathNameA(gsviewpath, gsviewpathbuf, sizeof(gsviewpathbuf));
-    }
+    /* The DDE interface isn't reliable with long names */
+    /* Convert everything to short names */
+    GetShortPathNameA(gspath, gspathbuf, sizeof(gspathbuf));
+    GetShortPathNameA(gsviewpath, gsviewpathbuf, sizeof(gsviewpathbuf));
+
 
     /* Open ProgMan DDE undo file if it doesn't exist */
     strcpy(setup, gsviewpathbuf);

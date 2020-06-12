@@ -375,7 +375,7 @@ int i;
     haccel = LoadAccelerators(hlanguage, TEXT("gsview_accel"));
 
 #ifdef USE_HTMLHELP
-    HtmlHelp(NULL, NULL, HH_CLOSE_ALL, (DWORD)NULL);
+    HtmlHelp(NULL, NULL, HH_CLOSE_ALL, (DWORD_PTR)NULL);
 #else
     WinHelp(hwndimg,szHelpName,HELP_QUIT,(DWORD)NULL);
 #endif
@@ -590,14 +590,6 @@ int ndisp;
 	if (dde_exit)
 	    return FALSE;
 
-	if (is_win32s) {
-	    /* don't allow multiple copies under Win32s */
-	    HWND hwnd = FindWindow(szClassName, NULL);
-	    if (hwnd != (HWND)NULL) {
-		gsview_init0(GetCommandLineA());
-		return FALSE;
-	    }
-	}
 	if (is_win95 || is_winnt) {
 	    if (multithread) {
 		display.event = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -818,8 +810,6 @@ parse_args(GSVIEW_ARGS *args)
     debug = args->debug;
     multithread = args->multithread;
     portable_app = args->portable;
-    if (is_win32s)
-	multithread = FALSE;
     if (args->print || args->convert) {
 	print_silent = TRUE;
 	print_exit = TRUE;
@@ -1071,7 +1061,6 @@ RECT rect;
 
 
 char hkey_root[]="HKEY_CLASSES_ROOT";
-char reg_win32s_error[]="ERROR: You can't set named values under Win32s\n";
 
 void
 reg_quote(char *d, char *s)
@@ -1126,7 +1115,7 @@ LONG lenbuf;
 		}
 	    }
 	}
-	else if (!is_win32s) {
+	else {
 	    cbData = sizeof(buf);
 	    keytype =  REG_SZ;
 	    if (RegQueryValueExA(hkey, name, 0, &keytype, 
@@ -1134,10 +1123,6 @@ LONG lenbuf;
 	        reg_quote(qbuf, buf);
 	        fprintf(oldfile, "\042%s\042=\042%s\042\n", name, qbuf);
 	    }
-	}
-	else {
-	    fprintf(oldfile, reg_win32s_error);
-	    return FALSE;
 	}
     }
     if (name==(char *)NULL) {
@@ -1148,18 +1133,13 @@ LONG lenbuf;
 	    value, strlen(value)) != ERROR_SUCCESS)
 	    return FALSE;
     }
-    else if (!is_win32s) {
+    else {
 	reg_quote(qbuf, value);
 	if (newfile)
 	    fprintf(newfile, "\042%s\042=\042%s\042\n", name, qbuf);
 	if (RegSetValueExA(hkey, name, 0, REG_SZ, 
 	    (CONST BYTE *)value, strlen(value)+1) != ERROR_SUCCESS)
 	    return FALSE;
-    }
-    else {
-	if (newfile)
-	    fprintf(newfile, reg_win32s_error);
-	return FALSE;
     }
     return TRUE; 
 }
@@ -1206,10 +1186,7 @@ BOOL flag = TRUE;
     strcat(kbuf, commandsubkey);
     if (flag)
 	flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
-    if (!is_win32s)
-        sprintf(buf, "\042%s%s\042 \042%%1\042", szExePath, GSVIEW_EXENAME);
-    else
-        sprintf(buf, "%s%s %%1", szExePath, GSVIEW_EXENAME);
+    sprintf(buf, "\042%s%s\042 \042%%1\042", szExePath, GSVIEW_EXENAME);
     if (flag) {
 	flag = reg_set_value(newfile, oldfile, hkey, NULL, buf);
 	reg_close_key(&hkey);
@@ -1225,10 +1202,7 @@ BOOL flag = TRUE;
     strcat(kbuf, commandsubkey);
     if (flag)
 	flag = reg_open_key(newfile, oldfile, kbuf, &hkey);
-    if (!is_win32s)
-        sprintf(buf, "\042%s%s\042 /p \042%%1\042", szExePath, GSVIEW_EXENAME);
-    else
-        sprintf(buf, "%s%s /p %%1", szExePath, GSVIEW_EXENAME);
+    sprintf(buf, "\042%s%s\042 /p \042%%1\042", szExePath, GSVIEW_EXENAME);
     if (flag) {
 	flag = reg_set_value(newfile, oldfile, hkey, NULL, buf);
 	reg_close_key(&hkey);
@@ -1306,7 +1280,7 @@ const char regheader[]="REGEDIT4\n";
 	    flag = reg_open_key(newfile, oldfile, psext, &hkey);
 	if (flag) {
 	    flag = reg_set_value(newfile, oldfile, hkey, NULL, pskey);
-	    if (flag && !is_win32s)
+	    if (flag)
 		reg_set_value(newfile, oldfile, hkey, contentname, psmime);
 	    reg_close_key(&hkey);
 	}
@@ -1315,7 +1289,7 @@ const char regheader[]="REGEDIT4\n";
 	    flag = reg_open_key(newfile, oldfile, epsext, &hkey);
 	if (flag) {
 	    flag = reg_set_value(newfile, oldfile, hkey, NULL, pskey);
-	    if (flag && !is_win32s)
+	    if (flag)
 		flag = reg_set_value(newfile, oldfile, hkey, 
 		    contentname, psmime);
 	    reg_close_key(&hkey);
@@ -1323,7 +1297,7 @@ const char regheader[]="REGEDIT4\n";
 
 
 	/* Don't bother with undelete information for these */
-	if (!is_win32s) {
+        {
 	    sprintf(buf, "MIME\\Database\\%s\\%s", contentname, psmime);
 	    if (flag)
 		flag = reg_open_key(newfile, oldfile, buf, &hkey);
@@ -1341,13 +1315,13 @@ const char regheader[]="REGEDIT4\n";
 	    flag = reg_open_key(newfile, oldfile, pdfext, &hkey);
 	if (flag) {
 	    flag = reg_set_value(newfile, oldfile, hkey, NULL, pdfkey);
-	    if (flag && !is_win32s)
+	    if (flag)
 		reg_set_value(newfile, oldfile, hkey, contentname, pdfmime);
 	    reg_close_key(&hkey);
 	}
 
 	/* Don't bother with undelete information for these */
-	if (!is_win32s) {
+	{
 	    sprintf(buf, "MIME\\Database\\%s\\%s", contentname, pdfmime);
 	    if (flag)
 		flag = reg_open_key(newfile, oldfile, buf, &hkey);

@@ -385,32 +385,6 @@ load_sounds(void)
 	sound_entry[1] = TEXT(BEEP);
 	load_string(IDS_NONE, szNone, sizeof(szNone));
 	load_string(IDS_SPKR, szSpeaker, sizeof(szSpeaker));
-#ifndef UNICODE
-	if (is_win32s) {
-	    /* get list of system sounds */
-	    char *p;
-	    int j;
-	    system_sounds = (char *)malloc(PROFILE_SIZE);
-	    if (system_sounds != (char *)NULL) {
-		GetProfileString("sounds", NULL, "", system_sounds, 
-		PROFILE_SIZE);
-	    }
-	    p = system_sounds;
-	    for (j=2; p!=(char *)NULL && j<MAX_SYSTEM_SOUND && strlen(p)!=0; 
-		j++) {
-		/* Windows NT uses "Enable=1" in the sounds section */
-		/* We need to prevent this from appearing in the */
-		/* list of sounds */
-		if (strcmp(p, "Enable") == 0)
-		    j--;
-		else
-		    sound_entry[j] = p;	
-		p += strlen(p) + 1;
-	    }
-	    system_num = j;
-	}
-	else 
-#endif
 	{
 	    /* It is difficult to get the names of Windows system sounds */
 	    /* for Windows 4 and later */
@@ -434,15 +408,6 @@ TCHAR *p;
 		return szNone;
 	if (index==1)
 		return szSpeaker;
-#ifndef UNICODE
-	if (is_win32s) {
-	    GetProfileString("sounds", sound_entry[index], ",", 
-		buf, sizeof(buf));
-	    p = strchr(buf,',');
-	    if (p != (char *)NULL)
-		return p+1;
-	}
-#endif
 	return (TCHAR *)NULL;
 }
 

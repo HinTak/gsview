@@ -664,7 +664,7 @@ gsview_command(int command)
 #else
 #ifdef _Windows
 #ifdef USE_HTMLHELP
-		HtmlHelp(hwndimg,szHelpName,HH_DISPLAY_INDEX, (DWORD)TEXT(""));
+		HtmlHelp(hwndimg,szHelpName,HH_DISPLAY_INDEX, (DWORD_PTR)TEXT(""));
 		gs_addmessf("HtmlHelp: %s HH_DISPLAY_INDEX\n", szHelpName);
 #else
 		WinHelp(hwndimg,szHelpName,HELP_PARTIALKEY,(DWORD)"");

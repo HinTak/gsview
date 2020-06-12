@@ -33,7 +33,7 @@
  */
 
 
-/* #define NONAG */
+#define NONAG
 
 #include "gvc.h"
 
