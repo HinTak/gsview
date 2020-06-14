@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2004, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2020, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -81,12 +81,21 @@ Page /Rotate pget not { 0 } if\n\
     /* put these in userdict so we can write to them later */
     if (!code)
 	code = gs_printf("/Page null def\n/Page# 0 def\n/PDFSave null def\n/DSCPageCount 0 def\n");
-    /* open PDF support dictionaries */
-    if (!code)
-        code = gs_printf("GS_PDF_ProcSet begin\npdfdict begin\n");
-    /* open PDF file */
-    if (!code)
-	code = gs_printf("(%s) (r) file pdfopen begin\n", filename);
+    if (option.gsversion >= 927) {
+        /* open PDF file */
+        if (!code)
+            code = gs_printf("(%s) (r) file runpdfbegin\n", filename);
+        if (!code)
+                code = gs_printf("process_trailer_attrs\r\n");
+    }
+    else {
+        /* open PDF support dictionaries */
+        if (!code)
+                code = gs_printf("GS_PDF_ProcSet begin\npdfdict begin\n");
+        /* open PDF file */
+        if (!code)
+                code = gs_printf("(%s) (r) file pdfopen begin\n", filename);
+    }
     if (!code)
 	code = gs_printf("/FirstPage where { pop FirstPage } { 1 } ifelse\n ");
     if (!code)
@@ -204,7 +213,12 @@ int
 pdf_trailer(void)
 {
     pdf_free_link();
-    return gs_printf("currentdict pdfclose\nend\nend\nend\n");
+    if (option.gsversion >= 927) {
+        return gs_printf("runpdfend\n");
+    }
+    else {
+        return gs_printf("currentdict pdfclose\nend\nend\nend\n");
+    }
 }
 
 int
@@ -821,7 +835,21 @@ BOOL reverse = psfile.page_list.reverse;
     fprintf(f, "%%%%PageOrder: %s\r\n", reverse ? "Descend" : "Ascend");
     fputs("%%EndComments\r\n", f);
     fputs("%%BeginProlog\r\n", f);
-    fputs("\
+    if (option.gsversion >= 927) {
+        fputs("\
+/Page null def\r\n\
+/Page# 0 def\r\n\
+/PDFSave null def\r\n\
+/DSCPageCount 0 def\r\n\
+/DoPDFPage {\r\n\
+  (Page ) print dup == flush\r\n\
+  dup /Page# exch store\r\n\
+  pdfgetpage pdfshowpage\r\n\
+} def\r\n\
+", f);
+    }
+    else {
+        fputs("\
 /Page null def\r\n\
 /Page# 0 def\r\n\
 /PDFSave null def\r\n\
@@ -834,11 +862,18 @@ BOOL reverse = psfile.page_list.reverse;
 GS_PDF_ProcSet begin\r\n\
 pdfdict begin\r\n\
 ", f);
+    }
     fputs("%%EndProlog\r\n", f);
     fputs("%%BeginSetup\r\n", f);
     if (copies > 1)
 	add_copies(f, copies);
-    fprintf(f, "(%s) (r) file pdfopen begin\r\n", filename);
+    if (option.gsversion >= 927) {
+        fprintf(f, "(%s) (r) file runpdfbegin\r\n", filename);
+        fprintf(f, "process_trailer_attrs\r\n");
+    }
+    else {
+        fprintf(f, "(%s) (r) file pdfopen begin\r\n", filename);
+    }
     if (option.safer)
 	fprintf(f, "systemdict /.setsafe known { .setsafe } if\n");
     fputs("%%EndSetup\r\n", f);
@@ -857,7 +892,12 @@ pdfdict begin\r\n\
 
     /* Send trailer */
     fputs("%%Trailer\r\n", f);
-    fputs("currentdict pdfclose\r\nend\r\nend\r\nend\r\n%%EOF\r\n", f);
+    if (option.gsversion >= 927) {
+        fputs("runpdfend\r\n%%EOF\r\n", f);
+    }
+    else {
+        fputs("currentdict pdfclose\r\nend\r\nend\r\nend\r\n%%EOF\r\n", f);
+    }
     return TRUE;
 }
 #endif

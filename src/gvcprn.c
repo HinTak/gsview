@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2020, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -1057,6 +1057,9 @@ int method = option.print_method;
     }
     if (option.gsinclude[0])
 	fprintf(optfile, "-I\042%s\042\n", option.gsinclude);
+    if (option.gsversion >= 950) {
+	fprintf(optfile, "--permit-file-read=\042%s\042\n", psfile_name(&psfile));
+    }
     fprintf(optfile, "-dNOPAUSE\n");
     /* If using a PDF file, we set SAFER later after we have opened
      * the PDF file.
