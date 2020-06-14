@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2000-2015, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -462,6 +462,7 @@ dsc_fixup(CDSC *dsc)
     unsigned int i;
     char buf[32];
     DSC_OFFSET *last;
+    int ignore_pages_mismatch = 0;
 
     if (dsc->id == CDSC_NOTDSC)
 	return 0;
@@ -537,8 +538,13 @@ dsc_fixup(CDSC *dsc)
 	dsc->page_pages = dsc->page_count;
     }
 
+    if (dsc->epsf && ((dsc->page_count == 0) && (dsc->page_pages == 1))) {
+      /* Don't flag an error if EPSF has %%Pages without any %%Page */
+      ignore_pages_mismatch = 1;
+    }
+
     /* Warnings and Errors that we can now identify */
-    if ((dsc->page_count != dsc->page_pages)) {
+    if ((dsc->page_count != dsc->page_pages) && !ignore_pages_mismatch) {
 	int rc = dsc_error(dsc, CDSC_MESSAGE_PAGES_WRONG, NULL, 0);
 	switch (rc) {
 	    case CDSC_RESPONSE_OK:
@@ -2278,29 +2284,39 @@ dsc_scan_comments(CDSC *dsc)
 	dsc_save_line(dsc);
 
     if (IS_DSC(line, "%%Pages:")) {
+	if (continued)
+	    return CDSC_ERROR;
 	dsc->id = CDSC_PAGES;
 	if (dsc_parse_pages(dsc) != 0)
 	    return CDSC_ERROR;
     }
     else if (IS_DSC(line, "%%Creator:")) {
+	if (continued)
+	    return CDSC_ERROR;
 	dsc->id = CDSC_CREATOR;
 	dsc->dsc_creator = dsc_add_line(dsc, dsc->line+10, dsc->line_length-10);
 	if (dsc->dsc_creator==NULL)
 	    return CDSC_ERROR;
     }
     else if (IS_DSC(line, "%%CreationDate:")) {
+	if (continued)
+	    return CDSC_ERROR;
 	dsc->id = CDSC_CREATIONDATE;
 	dsc->dsc_date = dsc_add_line(dsc, dsc->line+15, dsc->line_length-15);
 	if (dsc->dsc_date==NULL)
 	    return CDSC_ERROR;
     }
     else if (IS_DSC(line, "%%Title:")) {
+	if (continued)
+	    return CDSC_ERROR;
 	dsc->id = CDSC_TITLE;
 	dsc->dsc_title = dsc_add_line(dsc, dsc->line+8, dsc->line_length-8);
 	if (dsc->dsc_title==NULL)
 	    return CDSC_ERROR;
     }
     else if (IS_DSC(line, "%%For:")) {
+	if (continued)
+	    return CDSC_ERROR;
 	dsc->id = CDSC_FOR;
 	dsc->dsc_for = dsc_add_line(dsc, dsc->line+6, dsc->line_length-6);
 	if (dsc->dsc_for==NULL)
@@ -2346,11 +2362,15 @@ dsc_scan_comments(CDSC *dsc)
 	    return CDSC_ERROR;
     }
     else if (IS_DSC(line, "%%PageOrder:")) {
+	if (continued)
+	    return CDSC_ERROR;
 	dsc->id = CDSC_PAGEORDER;
 	if (dsc_parse_order(dsc))
 	    return CDSC_ERROR;
     }
     else if (IS_DSC(line, "%%DocumentMedia:")) {
+	if (continued)
+	    return CDSC_ERROR;
 	dsc->id = CDSC_DOCUMENTMEDIA;
 	if (dsc_parse_document_media(dsc))
 	    return CDSC_ERROR;
@@ -3504,6 +3524,8 @@ dsc_private char *
 dsc_alloc_string(CDSC *dsc, const char *str, int len)
 {
     char *p;
+    if (len < 0)
+	return NULL;
     if (dsc->string_head == NULL) {
 	dsc->string_head = (CDSCSTRING *)dsc_memalloc(dsc, sizeof(CDSCSTRING));
 	if (dsc->string_head == NULL)
@@ -3553,6 +3575,8 @@ dsc_add_line(CDSC *dsc, const char *line, unsigned int len)
 {
     char *newline;
     unsigned int i;
+    if (len > CDSC_STRING_CHUNK - 1)
+	return NULL;
     while (len && (IS_WHITE(*line))) {
 	len--;
 	line++;
