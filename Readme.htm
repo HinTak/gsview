@@ -3,7 +3,7 @@
 <head>
 <title>GSview Readme</title>
 <link rel="stylesheet" type="text/css" href="gsview.css" title="GSview Style">
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
 <h1>
@@ -105,20 +105,20 @@ Win32
   Obtain GSview (gsv50w32.exe) from 
 </p>
   <blockquote>
-    <a href="http://www.cs.wisc.edu/~ghost/gsview/get50.htm">
-    http://www.cs.wisc.edu/~ghost/gsview/get50.htm
+    <a href="http://www.ghostgum.com.au/software/gsview.htm">
+        http://www.ghostgum.com.au/software/gsview.htm
     </a>
   </blockquote>
 <p>
-  Obtain GPL Ghostscript 9.02 (gs902w32.exe) from
+  Obtain Ghostscript (gs9XXw32.exe) from
 </p>
   <blockquote>
-    <a href="http://www.cs.wisc.edu/~ghost/doc/GPL/gpl902.htm">
-    http://www.cs.wisc.edu/~ghost/doc/GPL/gpl902.htm
+    <a href="https://www.ghostscript.com">
+        https://www.ghostscript.com
     </a>
   </blockquote>
 <p>
-  First install the GPL Ghostscript self extracting archive 
+  First install the Ghostscript self extracting archive 
   gs902w32.exe (or a later version if available)
   Then install the GSview self extracting archive gsv50w32.exe.
   Run GSview.
@@ -135,20 +135,18 @@ Win32 location details
   <tt>c:\Program Files\Ghostgum\gsview\gsview32.exe</tt>.
 </p>
 <p>
-  By default, GPL Ghostscript is installed in the directory 
-  <tt>c:\gs</tt>, which creates the sub-directories
-  <tt>c:\gs\gsN.NN</tt> and <tt>c:\gs\fonts</tt>.
-  The GPL Ghostscript executables are
-  <tt>c:\gs\gsN.NN\gswin32c.exe</tt> for console mode and
-  <tt>c:\gs\gsN.NN\gswin32.exe</tt> for windowing mode.
+  By default, Ghostscript is installed in the directory 
+  <tt>c:\Program Files\gs\GS.NN</tt>.
+  The Ghostscript executables are
+  <tt>c:\Program Files\gs\gsN.NN\gswin32c.exe</tt> for console mode and
+  <tt>c:\Program Files\gs\gsN.NN\gswin32.exe</tt> for windowing mode.
 </p>
 <p>
-  GSview normally locates GPL Ghostscript using registry 
-  entries created by the GPL Ghostscript setup program.  
+  GSview normally locates Ghostscript using registry 
+  entries created by the Ghostscript setup program.  
   If these do not exist, GSview will assume that Ghostscript 
   is in an adjacent directory to GSview, usually 
-  <tt>c:\Program Files\Ghostgum\gsN.NN</tt> 
-  and <tt>c:\Program Files\Ghostgum\fonts</tt>.
+  <tt>c:\Program Files\Ghostgum\gsN.NN</tt>. 
 </p>
 
 <h3>
@@ -158,12 +156,12 @@ Win64 (AMD64)
   Obtain GSview (gsv50w64.exe) from 
 </p>
   <blockquote>
-    <a href="http://www.cs.wisc.edu/~ghost/gsview/get50.htm">
-    http://www.cs.wisc.edu/~ghost/gsview/get50.htm
+    <a href="http://www.ghostgum.com.au/software/gsview.htm">
+        http://www.ghostgum.com.au/software/gsview.htm
     </a>
   </blockquote>
 <p>
-  First install the GPL Ghostscript self extracting archive 
+  First install the Ghostscript self extracting archive 
   gs902w64.exe (or a later version if available)
   Then install the GSview self extracting archive gsv50w64.exe.
   Run GSview.
@@ -176,81 +174,6 @@ Win64 (AMD64)
 </p>
 
 
-<h3>
-OS/2
-</h3>
-<p>
-  Obtain GSview (gsv49os2.zip) from
-</p>
-  <blockquote>
-    <a href="http://www.cs.wisc.edu/~ghost/gsview/get49.htm">
-    http://www.cs.wisc.edu/~ghost/gsview/get49.htm
-    </a>
-  </blockquote>
-<p>
-  Obtain GPL Ghostscript 8.60 (gs860os2.zip) from
-</p>
-  <blockquote>
-    <a href="http://www.cs.wisc.edu/~ghost/doc/GPL/gpl860.htm">
-    http://www.cs.wisc.edu/~ghost/doc/GPL/gpl860.htm
-    </a>
-  </blockquote>
-
-<p>
-  <a href="http://www.info-zip.org/pub/infozip/">Unzip</a>
-  GSview to a temporary directory, change to the gsview2 subdirectory,
-  place gs860os2.zip (or a later version) in the same directory, 
-  and then run os2setup.exe.
-</p>
- 
-<p>
-  If you do not already have EMX installed on your system, you will 
-  also need to obtain the EMX Run Time library, emxrt.zip,
-  from one of
-</p>
-  <blockquote>
-    <a href="ftp://ftp-os2.cdrom.com/pub/os2/emx09d/emxrt.zip">
-    ftp://ftp-os2.cdrom.com/pub/os2/emx09d/emxrt.zip
-    </a>
-    <br>
-    <a href="ftp://ftp-os2.nmsu.edu/pub/os2/dev/emx/v0.9d/emxrt.zip">
-    ftp://ftp-os2.nmsu.edu/pub/os2/dev/emx/v0.9d/emxrt.zip
-    </a>
-  </blockquote>
-<p>
-  If GSview refuses to run at all, make sure you do not have
-  an old version of the emx DLL on your system.
-</p>
- 
-<p>
-  GSview (gvpm.exe) will run under OS/2 2.1 and OS/2 Warp. 
-</p>
-
-
-<h3>
-X11/Unix
-</h3>
-<p>
-Copy <tt>gsview</tt>, <tt>gsview-help</tt>, <tt>epstool</tt> and 
-<tt>pstotext</tt> to a directory on your search path.
-Copy <tt>gvx*.htm</tt> to the directory <tt>/usr/share/doc/gsview-N.N</tt>.
-Copy <tt>printer.ini</tt> to directory <tt>/etc/gsview</tt>.
-GSview stores configuration information in <tt>$HOME/.gsview.ini</tt>.
-</p>
-
-<p>
-You must have the <b>shared object</b> version of Ghostscript 7.04 - 9.19,
-which should be included in recent GNU/Linux distributions.
-If you don't have the ghostscript shared object, 
-you must first install Ghostscript, then the additional shared
-object files.  To build the ghostscript shared object files,
-use '<tt>./configure ; make so</tt>'
-</p>
-
-<p>
-A precompiled version is available for GNU/Linux.
-GSview can also be compiled for SunOS and SGI IRIX.
-</p>
 
 <h3>General</h3>
 <p>
@@ -258,18 +181,8 @@ Make sure that the zip/exe files are transferred in binary mode.
 </p>
 
 <p>
-The Ghostscript fonts are used by Ghostscript alone.  Your system 
-Fonts folder will not be modified.
-</p>
-
-<p>
-If you don't like automatic installation programs, it is 
-possible to install GSview and Ghostscript manually.
-For Ghostscript, read the file
-    <a href="http://www.cs.wisc.edu/~ghost/doc/cvs/Install.htm">
-    gsN.NN\doc\Install.htm.
-    </a>
-For GSview, read the file
+If you don't like automatic installation programs it is 
+possible to install GSview manually.  Details are in 
     <a href="gsviewen.hlp">
     gsviewen.hlp
     </a>
@@ -305,96 +218,13 @@ The 'Common Problems' topic is worth reading if GSview doesn't work.
 Compilation
 </h2>
 <p>
-To compile GSview for Windows you need MS Visual C++ 5, 6, 7, 7.1, 8 or 9.
-Copy srcwin/win.mak to Makefile, edit Makefile to set 
-<tt>VCVER</tt> and <tt>DEVBASE</tt> as required, then type '<tt>nmake</tt>'. 
-To build for Win64 use '<tt>nmake VCVER=71 WIN64=1</tt>'
+To compile GSview for Windows you need Microsoft Visual Studio 2019 and HTML Help workshop 1.3.
+Copy srcwin/win.mak to Makefile.
+To build for 64-bit, Start Menu, Visual Studio 2019, x64 Native Tools Command Prompt for VS 2019, then run 
+<tt>nmake WIN64=1</tt>
+To build for 32-bit, Start Menu, Visual Studio 2019, x64_x86 Cross Tools Command Prompt for VS 2019, then run
+<tt>nmake WIN32=1</tt>
 </p>
-
-<p>
-To compile GSview for OS/2 you need IBM NMAKE.EXE and EMX/GCC 0.9d.
-To create the GSview online help you need the IBM toolkit.
-Copy srcos2/os2.mak to Makefile and edit COMPBASE and EMXPATH as required.
-Type 'nmake'
-</p>
-
-<p>
-To compile GSview for X11/Unix you need gcc and the GTK+ 1.2 toolkit.
-Unzip the sources as follows to convert the line endings:
-<pre>
-  unzip -aa gsv49src.zip
-  unzip -o gsv49src.zip "gsview-4.9/binary/*"
-  cd gsview-4.9
-  cp srcunx/unx.mak Makefile
-  make
-</pre>
-GSview may also be available in a tar.gz file which already has
-Unix line endings.
-To install, run <tt>make install</tt>
-See the <a href="#X11">X11/Unix</a> topic for more notes
-on X11 GSview.
-For SunOS or SGI IRIX, uncomment the appropriate lines in the makefile.
-You also be able to use
-<pre>
-  rpmbuild -ta gsview-4.9.tar.gz
-</pre>
-</p>
-
-<h2>
-<a name="X11"></a>
-X11/Unix
-</h2>
-<p>
-X11 GSview is written by a novice at X Windows programming.
-It might have serious problems.  
-The GTK+ toolkit is used for most of the graphical interface,
-with a very small amount of Xlib.
-</p>
-<p>
-GSview on Unix uses the Ghostscript shared object.
-Drawing (especially over a network when using anti-aliased text) 
-should be faster.
-</p>
-
-<h3>
-Unimplemented features
-</h3>
-<ul>
-<li> Help uses HTML and netscape.
-    Gnome Help Browser is not used because it doesn't
-    support #topic on the command line.  For example:
-      gnome-help-browser file:/path/gsview.htm#Page_Size
-    If you know of a way to tell the Gnome Help Browser to
-    jump to a particular topic, particularly without opening
-    another copy of the browser, please let me know.
-<li> Keyboard movement between widgets
-<li> Full screen not implemented
-<li> Clipboard operations
-<li> Sounds
-</ul>
-<p>
-
-<h3>
-Known problems
-</h3>
-<ul>
-<li> Fit window doesn't get the correct dimension of the scrolled window
-     client area, so the resize is slightly wrong.
-   At the moment we use the size of the scroll window less the
-   two scroll bars.
-<li> GSview still includes lots of debugging code.
-</ul>
-
-<h3>
-Requests
-</h3>
-<p>
-Suggestions from GTK+ programmers about how to improve GSview.
-</p>
-<p>
-Bug reports.  Use "gsview -d9" to get debugging messages on stdout.
-</p>
-
 
 <h2>
 <a name="Bugs"></a>
@@ -417,10 +247,6 @@ by making sure that the problem only occurs when using GSview,
 and not when using Ghostscript alone.
 Don't expect a fast response - the work I'm paid to do has a higher
 priority.
-For a list of known bugs, see
-    <a href="http://www.cs.wisc.edu/~ghost/gsview/bugs.htm">
-    http://www.cs.wisc.edu/~ghost/gsview/bugs.htm
-    </a>
 </p>
 
 <h2>
@@ -428,16 +254,13 @@ For a list of known bugs, see
 Updates
 </h2>
 <p>
-A World Wide Web home page for Ghostscript, Ghostview and GSview is at
-    <a href="http://www.cs.wisc.edu/~ghost/">
-    http://www.cs.wisc.edu/~ghost/
+The home page for Ghostscript is at
+    <a href="https://www.ghostscript.com/">
+    https://www.ghostscript.com/
     </a>
-</p>
-
-<p>
-The latest version of GSview should be available from
-    <a href="ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/">
-    ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/gsview*.zip
+    and for GSview at 
+    <a href="http://www.ghostgum.com.au/">
+    http://www.ghostgum.com.au/
     </a>
 </p>
 
@@ -450,9 +273,9 @@ Ghostscript can be downloaded from the Internet.
 </p>
 
 <p>
-To download, go to the <a href="http://www.cs.wisc.edu/~ghost/">
+To download, go to the <a href="https://www.ghostscript.com/">
 Ghostscript home page</a>
-then follow the link to <b>Obtaining GPL Ghostscript</b>.
+then follow the Download link.
 </p>
 
 <h2>
@@ -522,14 +345,9 @@ pstoedit is Copyright by Wolfgang Glunz and is licensed with
 the GNU Public Licence (GPL).  pstoedit is <b>not</b> included
 with GSview.  You will need to obtain pstoedit separately from the 
 pstoedit homepage
-  <a href="http://www.pstoedit.net/pstoedit">
+  <a href="http://www.pstoedit.net/">
   http://www.pstoedit.net/pstoedit
-  </a> 
-  or from 
-  <a href="http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm">
-  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
-  </a>.  
-Source code can be obtained from these sites.
+  </a>
 </p>
 
 <p>
@@ -601,7 +419,7 @@ German/Deutsch.  Thomas Hoffmann for updates.
 </p>
 
 <p>
-Cyrille Chevallet for translating GSview into French/Français.
+Cyrille Chevallet for translating GSview into French/FranÃ¯Â¿Â½ais.
 </p>
 
 <p>
@@ -609,7 +427,7 @@ Antonio Guadagnin for translating GSview into Italian/Italiano.
 </p>
 
 <p>
-Pascual Lucas for translating GSview into Spanish/Español.
+Pascual Lucas for translating GSview into Spanish/EspaÃ¯Â¿Â½ol.
 </p>
 
 <p>
@@ -625,7 +443,7 @@ Oleg Bondar for translating GSview into Russian.
 </p>
 
 <p>
-Björn Söderström for translating GSview into Swedish/Svenska.
+BjÃ¶rn SÃ¶derstrÃ¶m for translating GSview into Swedish/Svenska.
 </p>
 
 <p>

@@ -226,7 +226,7 @@ END
 
 STRINGTABLE
 BEGIN
-	GSVS(IDS_BETAEXPIRED, "Denna BETA testkopia av GSview har upphört.  Se http://www.cs.wisc.edu/~ghost/ för detaljer om hämtning av en aktuell version av GSview")
+	GSVS(IDS_BETAEXPIRED, "Denna BETA testkopia av GSview har upphört.  Se http://www.ghostgum.com.au/ för detaljer om hämtning av en aktuell version av GSview")
 	GSVS(IDS_BETAWARN, AABETAWARN)
 	GSVS(IDS_NOPRINTERINI, "Kan inte öppna printer.ini")
 	GSVS(IDS_NOINI, "Kan inte öppna INI fil")

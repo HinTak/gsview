@@ -43,9 +43,8 @@ E
 3Beschaffung von Ghostscript
 -Obtaining_Ghostscript
 ?Beschaffung von Ghostscript
- GSview benötigt Aladdin or AFPL Ghostscript.  GSview und Ghostscript
- sind gesondert erhältlich von
-  http://www.cs.wisc.edu/~ghost/
+ GSview benötigt Aladdin or Ghostscript.
+   https://www.ghostscript.com/
  Um GSview zu konfigurieren, muss man Ghostscript und GSview
  beschaffen und installieren und dann GSview starten.
 3Ghostscript installieren
@@ -914,10 +913,6 @@ PX
  ein, an die die Daten geschickt werden sollen.
  Diese Einstellung wird gespeichert und automatisch vorgeschlagen,
  wenn das Dialogfeld wieder geöffnet wird.
-
- Printerkompatibilitätsinformationen sind unter
-  http://www.cs.wisc.edu/~ghost/doc/printer.htm
- verfügbar.
 3PostScript-Drucker
 -PostScript_Printer2
 ?PostScript-Drucker
@@ -1397,11 +1392,8 @@ WP
  von Wolfgang Glunz benutzen.
  `pstoedit` unterliegt der GNU Public Licence und ist nicht in GSview
  enthalten.  Es muss gesondert von der pstoedit-Homepage
-  http://www.pstoedit.net/pstoedit 
- oder von
-  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
- geladen werden.
-
+  http://www.pstoedit.net/ 
+ 
  Um `pstoedit` innerhalb von GSview zu benutzen, verwenden Sie
  `Bearbeiten | Konvertierung in Vektor Format`.
  Es werden 3 Dialogboxen angezeigt.
@@ -2482,12 +2474,12 @@ E
 ?World Wide Web
 ?WWW
 ?HTML
- Die World Wide Web-Homepage für Ghostscript, Ghostview und GSview finden
+ Die World Wide Web-Homepage für Ghostscript finden
  Sie unter folgender Adresse:
-  http://www.cs.wisc.edu/~ghost/
+  https://www.ghostscript.com/
 
- GSview kann online registriert werden unter
-  http://www.ghostgum.com.au/
+ Die World Wide Web-Homepage für GSview finden
+   http://www.ghostgum.com.au/
 
  Für verschiedene OS/2 und MS-Windows Web-Browser kann GSview als
  PostScript-Viewer verwendet werden.
@@ -2755,7 +2747,7 @@ W
  Drucker benutzt werden, um einen Postscriptdrucker zu emulieren. Dieser
  emulierte Drucker kann als Netzwerkdrucker anderen Computern zur
  Verfügung gestellt werden. Weiteres unter:
-   http://www.cs.wisc.edu/~ghost/redmon/
+   http://www.ghostgum.com.au/
  RedMon beinhaltet außerdem ein Kommandozeilenprogramm um eine
  Datei in eine Windows-Druckerwarteschlange zu stellen.
 
@@ -2800,9 +2792,7 @@ WX
 
 W
  Wenn Sie die Fehlermeldung `Failed to load bzip2 DLL...`  bekommen,
- dann ist diese Bibliothek wahrscheinlich nicht verfügbar. Laden Sie diese
- von demselben  Server, von dem Sie auch GSview geladen haben oder von
-  ftp://ftp.cs.wisc.edu/ghost/ghostgum/
+ dann ist diese Bibliothek wahrscheinlich nicht verfügbar. 
  Kopieren Sie die bzip2-DLL in dasselbe Verzeichnis wie GSview EXE.
  libbz2.dll ist für Win32. Zur Zeit ist leider keine bzip2 DLL für Win16
  oder OS/2 verfügbar.
@@ -2826,8 +2816,6 @@ E
 WP
  Wenn Sie die Fehlermeldung `Failed to load zlib DLL...` erhalten,
  dann ist diese wahrscheinlich nicht auf ihrem System installiert.
- Sie können diese DLL von dort bekommen, wo Sie Gsview erhalten haben,
- oder von ftp://ftp.cs.wisc.edu/ghost/ghostgum/
  Kopieren Sie die zlib-DLL in dasselbe Verzeichnis wie Gsview.exe.
  zlib16.dll ist für Win16. zlib32.dll ist für Win32.
  zlib2.dll ist für OS/2.

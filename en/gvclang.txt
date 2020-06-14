@@ -37,9 +37,9 @@ E
 3Obtaining Ghostscript
 -Obtaining_Ghostscript
 ?Obtaining Ghostscript
- GSview needs GPL Ghostscript.  GSview and Ghostscript
- are available separately from
-  http://www.cs.wisc.edu/~ghost/
+ GSview needs GPL Ghostscript.  Ghostscript
+ is available from
+  https://www.ghostscript.com/
  To configure GSview, obtain and install both Ghostscript
  and GSview, then run GSview.
 3Ghostscript Installation
@@ -821,10 +821,7 @@ PX
  The `Printer Setup` dialog box prompts you for the name of a printer
  queue to which output should be sent.
  This queue will be saved and will be the default selection next time.
-
- Some information of printer compatibility is available from
-  http://www.cs.wisc.edu/~ghost/doc/printer.htm
-3PostScript Printer
+ PostScript Printer
 -PostScript_Printer2
 ?PostScript Printer
 ?Advanced
@@ -1274,10 +1271,8 @@ WP
  `pstoedit` is licensed with the GNU Public Licence and is not
  included with GSview.  You will need to download it separately
  from the pstoedit homepage
-  http://www.pstoedit.net/pstoedit
- or from
-  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
-
+  http://www.pstoedit.net/
+ 
  To use `pstoedit` from within GSview, use
  `Edit | Convert to vector format`.
  Three dialog boxes will be shown.
@@ -2535,7 +2530,7 @@ W
  to emulate a PostScript printer.  This emulated PostScript printer
  can be shared on a computer network and appears as a PostScript
  printer to network clients.   More details at:
-  http://www.cs.wisc.edu/~ghost/redmon/
+  http://www.ghostgum.com.au/
  RedMon also includes a command line utility for writing a file
  to a Windows printer queue.
 
@@ -2577,8 +2572,6 @@ WX
 W
  If you get an error message `Failed to load bzip2 DLL...` then
  you probably don't have the bzip2 DLL available.
- Obtain it from the same place you obtained GSview or from
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Place the bzip2 DLL in the same directory as the GSview EXE.
  libbz2.dll is for Win32.  At this stage there is no bzip2 DLL
  for Win16 or OS/2.
@@ -2602,8 +2595,6 @@ E
 WP
  If you get an error message `Failed to load zlib DLL...` then
  you probably don't have the zlib DLL available.
- Obtain it from the same place you obtained GSview or from
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Place the zlib DLL in the same directory as the GSview EXE.
  zlib32.dll is for Win32 (same as official zlib1.dll).
  zlib64.dll is for Win64 (AMD64).

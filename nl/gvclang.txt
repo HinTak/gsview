@@ -35,9 +35,8 @@ E
 3Hoe zich Ghostscript aanschaffen?
 -Obtaining_Ghostscript
 ?Hoe zich Ghostscript aanschaffen?
- GSview moet samengaan met AFPL Ghostscript.  GSview en Ghostscript
- zijn afzonderlijk af te halen van
-  http://www.cs.wisc.edu/~ghost/
+ GSview moet samengaan met Ghostscript.
+  https://www.ghostscript.com/
  Om GSview in te stellen en/of aan te passen, dient u eerst zowel Ghostscript
  als GSview te installeren, en daarna GSview op te starten.
 3Het installeren van Ghostscript.
@@ -834,9 +833,6 @@ PX
  uitvoer dient te worden heen gezonden.
  Deze instelling zal worden opgeslagen en is de standaard voor
  sessies.
-
- Voor meer inlichtingen over printerinstellingen, zie:
-  http://www.cs.wisc.edu/~ghost/doc/printer.htm
 3PostScript Printer
 ?PostScript Printer
 ?Geavanceerd
@@ -1301,9 +1297,7 @@ P
 WP
  directory.
  De thuispagina van pstoedit is
-  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/
- Voor bijwerkingen, zie de locatie van pstoedit, of ook
-  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
+  http://www.pstoedit.net/
 
  Om `pstoedit` vanuit GSview te in the schakelen, gebruik de menuoptie
  `Bewerken | Omzetten naar vectorieel formaat`.
@@ -2285,11 +2279,10 @@ E
 ?World Wide Web
 ?WWW
 ?HTML
- De WWW thuislocatie van Ghostscript, Ghostview en GSview is:
+ De WWW thuislocatie van Ghostscript is:
+  https://www.ghostscript.com/
 
-  http://www.cs.wisc.edu/~ghost/
-
- GSview kan online worden geregistreerd op de onderstaande locatie:
+ De WWW thuislocatie van GSview is:
   http://www.ghostgum.com.au/
 
  GSview kan ook worden aangewend om *.htm* bronbestanden te bekijken.
@@ -2546,7 +2539,7 @@ W
  Zo'n emualatieh kan op een computer network worden gezet en wordt
  door de aangesloten eenheden als PostScript prnter gezien.
  Meer hierover op de locatie:
-  http://www.cs.wisc.edu/~ghost/redmon/
+  http://www.ghostgum.com.au/
  RedMon laat ook toe naar een Windows printerreeks te schrijven aan de
  hand van enkele eenvoudige opdrachten.
 
@@ -2590,8 +2583,6 @@ WX
 W
  Krijgt u de foutmelding `Failed to load bzip2 DLL...` te zien dan
  bevindt het bestand bzip2.DLL zich denkelijk niet op uw systeem.
- U kan bzip2.dll afhalen op deze locatie:
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Plaats dan bzip2 DLL in dezelfde directry als GSview EXE.
  libbz2.dll is for Win32. Momenteel is er geen versie beschikbaar noch
  voor Win16 noch voor OS/2.
@@ -2616,8 +2607,6 @@ E
 WP
  Krijgt u de foutmelding `Failed to load zlib DLL...` te zien, dan
  beschikt uw systeem waarschijnlijk niet over het bestand ZLIB.DLL.
- U kan dan dit bestand op deze locatie afhalen:
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Plaats het bestand ZLIB.DLL in dezelfde directory als GSview.EXE.
  zlib16.dll is   bestemd voor win16, zlib32.dll voor win32 en
  zlib2.dll voor OS/2.

@@ -37,10 +37,8 @@ E
 3Получение Ghostscript
 -Obtaining_Ghostscript
 ?Получение Ghostscript
- Для GSview необходим AFPL Ghostscript.  GSview и Ghostscript
- доступны по отдельности на
-
-  http://www.cs.wisc.edu/~ghost/
+ Для GSview необходим Ghostscript.
+  https://www.ghostscript.com/
 
  Чтобы настроить GSview, загрузите и установите оба, Ghostscript и
  GSview, а затем запустите GSview.
@@ -877,11 +875,6 @@ PX
  В диалоговом окне `Установка принтера` вам нужно указать в очередь
  какого принтера вы отправляете задание.
  Эта очередь будет использоваться в следующий раз.
-
- О совместимости принтеров см.
-
-  http://www.cs.wisc.edu/~ghost/doc/printer.htm
-
 3PostScript принтер
 -PostScript_Printer2
 ?PostScript принтер
@@ -1366,12 +1359,7 @@ WP
  затем можно будет редактировать.
  `pstoedit` лицензирован GNU Public Licence и не включён в дистрибутив GSview.
  Его нужно загружать отдельно со страницы
-
-  http://www.pstoedit.net/pstoedit
-
- или
-
-  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
+  http://www.pstoedit.net/
 
  Чтобы использовать `pstoedit` из GSview, используйте команду `Правка |
  Конвертировать в векторный формат`.
@@ -2421,11 +2409,11 @@ E
 ?Интернет
 ?WWW
 ?HTML
- Домашняя страница Ghostscript, Ghostview и GSview находится по адресу
+ Домашняя страница Ghostscript находится по адресу
 
-  http://www.cs.wisc.edu/~ghost/
+  https://www.ghostscript.com/
 
- GSview можно зарегистрировать он-лайн по адресу
+ Домашняя страница GSview находится по адресу
 
   http://www.ghostgum.com.au/
 
@@ -2693,7 +2681,7 @@ W
  для эмуляции PostScript-принтера. Этот принтер можно предоставлять по сети, и
  для клиентов он выглядит как PostScript-принтер. Подробнее см.
 
-  http://www.cs.wisc.edu/~ghost/redmon/
+  http://www.ghostgum.com.au/
 
  RedMon также включает утилиту командной строки для записи файла в очередь
  печати Windows.
@@ -2738,10 +2726,6 @@ WX
 W
  Если вы увидели сообщение `Не могу загрузить bzip2 DLL...`, возможно, она у
  вас недоступна.
- DLL можно загрузить по адресу
-
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
-
  Поместите её в каталог с GSview. libbz2.dll предназначена для Win32. В
  настоящее время DLL bzip2 для Win16 и OS/2 нет.
 X
@@ -2766,10 +2750,6 @@ E
 WP
  Если вы увидели сообщение `Не могу загрузить zlib DLL...`, возможно, у вас
  она недоступна.
- Загрузите её с сайта GSview или по адресу
-
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
-
  И поместите в каталог с GSview.
  zlib16.dll предназначена для Win16.  zlib32.dll - для Win32.
  zlib2.dll - для OS/2.

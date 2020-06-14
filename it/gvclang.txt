@@ -36,9 +36,8 @@
 ?Ottenere Ghostscript
 ?Download di Ghostscript
 ?Download Ghostscript
- GSview necessita di Aladdin Ghostscript.  GSview e Aladdin
- Ghostscript sono disponibili separatamente presso il sito
-  http://www.cs.wisc.edu/~ghost/
+ GSview necessita di Ghostscript.
+  https://www.ghostscript.com/
  Per configurare GSview, è necessario ottenere e installare sia Aladdin
  Ghostscript che GSview e quindi avviare GSview.
 3Installazione di Ghostscript
@@ -780,9 +779,6 @@ P
  della coda di stampa verso la quale deve essere inviato l'output.
  
  Essa sarà salvata e sarà la selezione predefinita per la prossima occorrenza.
-
- Alcune informazioni per la compatibilità delle stampanti sono disponibili presso
-  http://www.cs.wisc.edu/~ghost/doc/printer.htm
 3Stampante PostScript
 ?Stampante PostScript
 ?Avanzate
@@ -1195,10 +1191,7 @@ W
  La versione a linea di comando `pstoedit.exe` e il manuale `pstoedit.htm`
  sono inclusi nella cartella pstoedit.
  La home page di pstoedit è
-  http://www.geocities.com/SiliconValley/Network/1958/pstoedit/
-
- Per aggiornamenti di pstoedit vedere presso la home page di pstoedit oppure presso
-  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
+  http://www.pstoedit.net/
 
  Per usare `pstoedit` da GSview, usare
  `Modifica | Converti in formato vettoriale`.
@@ -2098,12 +2091,11 @@ E
 ?World Wide Web
 ?WWW
 ?HTML
- La home page WWW per Ghostscript, Ghostview e GSview
- è presso
-  http://www.cs.wisc.edu/~ghost/
+ La home page WWW per Ghostscript è presso
+  https://www.ghostscript.com/
 
- GSview può essere registrato on-line presso
-  http://www.ghostgum.com.au/
+ La home page WWW per GSview è presso
+   http://www.ghostgum.com.au/
                                
  GSview può essere usato come visualizzatore di file PostScript per molti browsers Web,
  sia sotto  OS/2 che sotto MS-Windows.  Per maggiori dettagli vedere la home page di GSview.
@@ -2337,7 +2329,7 @@ W
  per emulare una stampante PostScript.  Questa Stampante PostScript emulata
  può essere condivisa in una rete di computer network e apparirà come una stampante PostScript
  ai clienti della rete.   Maggiori dettagli presso:
-  http://www.cs.wisc.edu/~ghost/redmon/
+  http://www.ghostgum.com.au/
  RedMon include anche una linea di comando per scrivere un file
  nella coda di stampa di una Stampante Windows.
 
@@ -2376,8 +2368,6 @@ W
 
  Se si riceve un messaggio di errore `Errore nel caricamento di bzip2 DLL...`
  probabilmente non c'è la DLL bzip2 disponibile.
- E' possibile ottenerla dallo stesso sito da cui si è ottenuto GSview oppure da
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Mettere la DLL di bzip2 nella stessa cartella dell'EXE di GSview.
  libbz2.dll è per Win32.  Per questo aspetto non c'è la DLL bzip2
  per Win16 o OS/2.
@@ -2396,8 +2386,6 @@ E
 
  Se si riceve un messaggio `Errore nel caricamento della DLL zlib...`
  probabilmente non c'è la DLL zlib disponibile.
- E' possibile ottenerla dallo stesso sito dove è stato ottenuto GSview oppure da
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Mettere la DLL zlib nella stessa cartella dell'EXE di GSview.
  zlib16.dll è per Win16.  zlib32.dll è per Win32.
  zlib2.dll è per OS/2.

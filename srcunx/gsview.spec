@@ -10,8 +10,8 @@ Version: 4.91
 Release: 1
 Copyright: Aladdin Free Public License, Ghostgum Software Pty Ltd
 Group: Applications/Graphics
-Source: ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/gsview-4.9.tar.gz
-URL: http://www.cs.wisc.edu/~ghost/gsview/
+Source: http://www.ghostgum.com.au/
+URL: http://www.ghostgum.com.au/
 #Icon: gsview.gif
 #Distribution: Unknown
 Vendor: Ghostgum Software Pty Ltd

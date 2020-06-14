@@ -36,9 +36,8 @@ E
 3Hämta Ghostscript
 -Obtaining_Ghostscript
 ?Hämta Ghostscript
- GSview kräver AFPL Ghostscript.  GSview eller Ghostscript
- är tillgängliga separat från
-  http://www.cs.wisc.edu/~ghost/
+ GSview kräver Ghostscript.
+  https://www.ghostscript.com/
  För att konfigurera GSview, hämta och installera både Ghostscript
  och GSview, kör sedan GSview.
 3Ghostscript installation
@@ -809,9 +808,6 @@ PX
  Dilaogboxen `Skrivarinställningar` frågar dig efter namnet på skrivarkön
  till vilket den tillverkade filen skall sändas.
  Kön kommer att sparas och vara standardvalet nästa gång.
-
- Viss information om kompatibilitet hos skrivare är tillgänglig från
-  http://www.cs.wisc.edu/~ghost/doc/printer.htm
 3PostScript skrivare
 ?PostScript skrivare
 ?Avancerad
@@ -1251,10 +1247,8 @@ WP
  `pstoedit` är licensierad med GNU Public Licensen och är inte
  inkluderad med GSview.  Du måste ladda ner den separat
  från pstoedit's hemsida
-  http://www.pstoedit.net/pstoedit
- eller från
-  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
-
+  http://www.pstoedit.net/
+ 
  För att använda `pstoedit` infrån GSview, använd
  `Redigera | Konvertera till vektorformat`.
  Tre dialogboxar kommer att visas.
@@ -2256,11 +2250,10 @@ E
 ?World Wide Web
 ?WWW
 ?HTML
- World Wide Web hemsidan för Ghostscript, Ghostview och GSview
- finns på
-  http://www.cs.wisc.edu/~ghost/
+ World Wide Web hemsidan för Ghostscript finns på
+  https://www.ghostscript.com/
 
- GSview kan registeras on-line på
+ World Wide Web hemsidan för Ghostscript finns på
   http://www.ghostgum.com.au/
 
  GSview kan användas som en PostScriptfilvisare för åtskilliga OS/2
@@ -2503,7 +2496,7 @@ W
  och en icke-PostScript skrivare för att emulera en PostScript skrivare.
  Den emulerade PostScript skrivare kan delas i ett datanätverk och upppträder
  som en PostScript skrivare för nätverksklienterna.   Fler detaljer finns på:
-  http://www.cs.wisc.edu/~ghost/redmon/
+  http://www.ghostgum.com.au/
  RedMon inkluderar också ett kommandoradsverktyg för att skriva en fil till
  en Windows skrivarkö.
 
@@ -2544,8 +2537,6 @@ WX
 W
  Om du får ett felmeddelande `Failed to load bzip2 DLL...` har
  du troligtvis inte bzip2 DLL tillgängligt.
- Hämta den från samma ställe som du hämtade GSview eller från
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Placera bzip2 DLL i samma katalog som GSview EXE.
  libbz2.dll är för Win32.  För närvarande finns ingen bzip2 DLL
  för Win16 eller OS/2.
@@ -2569,8 +2560,6 @@ E
 WP
  Om du får ett felmeddelande `Failed to load zlib DLL...` har
  du troligtvis inte zlib DLL tillgängligt.
- Hämta den på samma plats som du hämtade GSview eller från
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Placera zlib DLL i samma katalog som GSview EXE.
  zlib16.dll är för Win16.  zlib32.dll är för Win32.
  zlib2.dll är för OS/2.

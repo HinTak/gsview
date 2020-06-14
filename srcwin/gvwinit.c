@@ -2041,7 +2041,7 @@ config_wizard(BOOL bVerbose)
 		DownloadGSDlgProc, (LPARAM)0)) {
 	/* download now */
 	ShellExecute(hwndimg, NULL, 
-	    TEXT("http://www.cs.wisc.edu/~ghost/index.htm"),
+	    TEXT("https://www.ghostscript.com/"),
 	    NULL, NULL, SW_SHOWNORMAL);
     }
     

@@ -32,9 +32,8 @@
 3Obtenir Ghostscript
 -Obtaining_Ghostscript
 ?Obtenir Ghostscript
- GSview nécessite Aladdin Ghostscript.  GSview et Aladdin
- Ghostscript sont disponibles séparément à l'adresse
-  http://www.cs.wisc.edu/~ghost/
+ GSview nécessite Ghostscript. Ghostscript est à l'adresse
+  https://www.ghostscript.com/
  Pour configurer GSview, procurez-vous et installez Aladdin Ghostscript
  et GSview, puis exécutez GSview.
 3Installation de Ghostscript
@@ -735,9 +734,6 @@ E
  va être placé dans le champ `Options `de la boîte de dialogue Configuration de l'imprimante.
  Consultez le fichier `Devices.htm` fourni avec Ghostscript pour obtenir des détails concernant
  la configuration du type d'imprimante uniprint.
-
- Vous pouvez trouver des informations concernant la compatibilité des imprimantes sur la page
-  http://www.cs.wisc.edu/~ghost/doc/printer.htm
 3Imprimante PostScript
 -PostScript_Printer
 ?Imprimante PostScript
@@ -954,7 +950,7 @@ WP
  La home page de pstoedit est
   http://www.geocities.com/SiliconValley/Network/1958/pstoedit/
  Pour les mises à jour de pstoedit, regardez sur la home page de pstoedit, ou à l'adresse
-  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
+  http://www.pstoedit.net/
 
  Pour utiliser `pstoedit` depuis GSview, utilisez la commande
  `Edition | Conversion vers un format vectoriel`.
@@ -2219,7 +2215,7 @@ W
  pour émuler une imprimante PostScript.  Cette imprimante PostScript émulée
  peut être partagée à travers un réseau et apparaît pour les utilisateurs du
  réseau sous la forme d'une imprimante PostScript.   Plus de détails sur la page :
-  http://www.cs.wisc.edu/~ghost/redmon/
+  http://www.ghostgum.com.au/
  RedMon contient également un utilitaire de ligne de commande pour envoyer un fichier sur une file
  d'attente d'imprimante sous Windows.
 
@@ -2260,8 +2256,6 @@ W
 
  Si vous recevez le message d'erreur `Chargement de la DLL bzip2 impossible...`, ce sera
  sans doute parce que la DLL bzip2 n'est pas disponible sur votre système.
- Vous pouvez la trouver au même endroit que celui où vous avez trouvé GSview ou à l'adresse suivante :
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
  Copiez la DLL bzip2 dans le répertoire contenant l'exécutable de GSview.
  Elle s'appelle libbz2.dll pour Win32.  Il n'existe pour le moment aucune DLL bzip2
  pour Win16 ou OS/2.
@@ -2280,8 +2274,6 @@ E
 
  Si vous recevez le message d'erreur `Chargement de la DLL zlib impossible ...`, ce sera
  sans doute parce que la DLL zlib n'est pas disponible sur votre système.
- Vous pouvez la trouver au même endroit que celui où vous avez trouvé GSview ou à l'adresse suivante :
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/rjl/
  Copiez la DLL zlib dans le répertoire contenant l'exécutable de GSview.
  Elle s'appelle zlib16.dll pour Win16, zlib32.dll pour Win32 et
  zlib2.dll pour OS/2.

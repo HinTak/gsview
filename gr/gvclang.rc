@@ -226,7 +226,7 @@ END
 
 STRINGTABLE
 BEGIN
-	GSVS(IDS_BETAEXPIRED, "Η συγκεκριμένη δοκιμαστική έκδοση του προγράμματος GSview έχει λήξει. Για λεπτομερείς σχετικά με τον τρόπο απόκτησης της πλέον πρόσφατης εκδοχής ανατρέξτε στη διεύθυνση http://www.cs.wisc.edu/~ghost/")
+	GSVS(IDS_BETAEXPIRED, "Η συγκεκριμένη δοκιμαστική έκδοση του προγράμματος GSview έχει λήξει. Για λεπτομερείς σχετικά με τον τρόπο απόκτησης της πλέον πρόσφατης εκδοχής ανατρέξτε στη διεύθυνση http://www.ghostgum.com.au/")
 	GSVS(IDS_BETAWARN, AABETAWARN)
 	GSVS(IDS_NOPRINTERINI, "Αδύνατο το άνοιγμα του αρχείου printer.ini")
 	GSVS(IDS_NOINI, "Αδύνατο το άνοιγμα του αρχείου INI")

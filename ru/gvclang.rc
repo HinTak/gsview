@@ -227,7 +227,7 @@ END
 
 STRINGTABLE
 BEGIN
-    GSVS(IDS_BETAEXPIRED, "Срок этой копии BETA-версии GSview истёк.  Подробности о том, как загрузить текущую версию GSView см. http://www.cs.wisc.edu/~ghost/")
+    GSVS(IDS_BETAEXPIRED, "Срок этой копии BETA-версии GSview истёк.  Подробности о том, как загрузить текущую версию GSView см. http://www.ghostgum.com.au/")
 	GSVS(IDS_BETAWARN, AABETAWARN)
     GSVS(IDS_NOPRINTERINI, "Не могу открыть printer.ini")
     GSVS(IDS_NOINI, "Не могу открыть INI файл")

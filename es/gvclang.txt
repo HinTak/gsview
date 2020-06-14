@@ -34,9 +34,8 @@ E
  Vea también `Opciones` | `Idioma`.
 3Conseguir Ghostscript
 ?Conseguir Ghostscript
- GSview necesita Aladdin Ghostscript. GSview y Aladdin Ghostscript están
- disponibles por separado en
-  http://www.cs.wisc.edu/~ghost/
+ GSview necesita Ghostscript.
+  https://www.ghostscript.com/
  Para configurar GSview, obtenga e instale, por este orden, Aladdin Ghostscript
  y GSview, y posteriormente ejecute GSview.
 3Instalación de Ghostscript
@@ -842,9 +841,6 @@ PX
  impresión a la que debe ser enviado el fichero de salida.
  Esta cola será guardada y será la opción por defecto en el próximo intento de
  impresión.
-
- Existe información acerca de la compatibilidad de impresoras en la dirección
-  http://www.cs.wisc.edu/~ghost/doc/printer.htm
 3Impresora PostScript
 -PostScript_Printer2
 ?Impresora PostScript
@@ -1323,9 +1319,7 @@ WP
  `pstoedit` está registrado con la Licencia Pública GNU y no está
  incluido en GSview.  Necesita descargarlo directamente desde
  la página principal de pstoedit
-  http://www.pstoedit.net/pstoedit
- o desde
-  http://www.cs.wisc.edu/~ghost/gsview/pstoedit.htm
+  http://www.pstoedit.net/
 
  Para usar `pstoedit` desde dentro de GSview, use
  `Editar | Convertir a formato vectorial`. Se mostrará entonces
@@ -2375,12 +2369,12 @@ E
 ?World Wide Web
 ?WWW
 ?HTML
- La página principal World Wide Web de Ghostscript, Ghostview y GSview
+ La página principal World Wide Web de Ghostscript
  está en:
-  http://www.cs.wisc.edu/~ghost/
+  https://www.ghostscript.com/
 
- Puede registrarse en línea en la dirección
-  http://www.ghostgum.com.au/
+ La página principal World Wide Web de GSview
+   http://www.ghostgum.com.au/
 
  GSview puede ser utilizado como un visor de archivos PostScript para varios navegadores de
  OS/2 y de MS-Windows. Consulte la página principal de GSview para los detalles.
@@ -2620,7 +2614,7 @@ W
  PostScript emulada puede compartirse con otros usuarios de la red, a los
  cuales se les presentará como una verdadera impresora PostScript. Para
  más detalles, conéctese a:
-  http://www.cs.wisc.edu/~ghost/redmon/
+  http://www.ghostgum.com.au/
  RedMon incluye una utilidad para imprimir un archivo en una cola de
  impresión Windows.
 
@@ -2663,9 +2657,7 @@ WX
 W
  Si aparece el error "No se pudo cargar la librería DLL bzip2"
  (`Failed to load bzip2 DLL...`), entonces
- es probable que dicha librería no se encuentre en su sistema. Puede
- conseguirla en el mismo sitio en el que consiguió GSview o en
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
+ es probable que dicha librería no se encuentre en su sistema.
  Guarde la librería DLL bzip2 en el mismo directorio en el que se encuentre
  GSview. En Win32, la librería se llama libbz2.dll. En estos momentos no
  existe una versión de esta librería ni para Win16 ni para OS/2.
@@ -2690,9 +2682,7 @@ E
 WP
  Si aparece el error "No se pudo cargar la librería DLL zlib"
  (`Failed to load zlib DLL...`), entonces
- es probable que dicha librería no se encuentre en su sistema. Puede
- conseguirla en el mismo sitio en el que consiguió GSview o en
-  ftp://mirror.cs.wisc.edu/pub/mirrors/ghost/ghostgum/
+ es probable que dicha librería no se encuentre en su sistema.
  Guarde la librería DLL zlib en el mismo directorio en el que se encuentre
  GSview. En Win16 se llama zlib16.dll, en Win32 se llama zlib32.dll y
  zlib2.dll en OS/2.
