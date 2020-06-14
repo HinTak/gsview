@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2007, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2020, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -791,35 +791,22 @@ char buf[MAXSTR];
 
 BOOL get_inipath(char *buf, int len)
 {
+        PWSTR appdata_path;
+        DWORD fa;
+
 	/* get path to INI file */
 	buf[0] = '\0';
-	/* allow for user profiles */
-	if (is_win4) {
-	    LONG rc;
-	    HKEY hkey;
-	    DWORD keytype;
-	    DWORD cbData;
-	    DWORD fa;
-	    /* Find the user profile directory */
-	    rc = RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\ProfileReconciliation", 0, KEY_READ, &hkey);
-	    if (rc == ERROR_SUCCESS) {
-		cbData = len - sizeof(szIniName);
-		keytype =  REG_SZ;
-		rc = RegQueryValueEx(hkey, "ProfileDirectory", 0, &keytype, (LPBYTE)buf, &cbData);
-		RegCloseKey(hkey);
-	    }
-	    if (rc == ERROR_SUCCESS) {
-		fa = GetFileAttributes(buf);
-		if ((fa != 0xffffffff) && (fa & FILE_ATTRIBUTE_DIRECTORY))
-		    strcat(buf, "\\");
-		else
-		    buf[0] = '\0';
-	    }
-	    else {
-		    /* If we didn't succeed, use the Windows directory */
-		    buf[0] = '\0';
-	    }
-	}
+        /* Get the AppData directory location */
+        if (SHGetKnownFolderPath((REFKNOWNFOLDERID)FOLDERID_RoamingAppData, 0, NULL, &appdata_path) == S_OK) {
+            WideCharToMultiByte(GetACP(), 0, appdata_path, lstrlenW(appdata_path)+1, buf, len-sizeof(szIniName)-1, NULL, NULL);
+            strcat(buf, "\\Ghostgum");
+            mkdir(buf);
+            fa = GetFileAttributesA(buf);
+            if ((fa != 0xffffffff) && (fa & FILE_ATTRIBUTE_DIRECTORY))
+                strcat(buf, "\\");
+            else
+                buf[0] = '\0';
+        }
 	if (buf[0] == '\0') {
 	    DWORD fa;
 	    /* If we didn't succeed, try %USERPROFILE% */

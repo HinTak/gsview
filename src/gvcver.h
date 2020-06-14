@@ -34,11 +34,11 @@
 
 /* undefine BETA for a final release */
 /*
+*/
 #define BETA
-#define BETA_YEAR    2011
+#define BETA_YEAR    2020
 #define BETA_MONTH   12
 #define BETA_DAY     30
-*/
 
 
 /* GSview */
@@ -56,7 +56,7 @@
 
 
 /* Ghostscript */
-#define GS_PRODUCT  "GPL Ghostscript"
+#define GS_PRODUCT  "Ghostscript"
 #define GS_REVISION_MIN   704
 #define GS_REVISION	  704
 #define GS_REVISION_MAX   999

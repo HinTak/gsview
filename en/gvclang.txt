@@ -247,18 +247,13 @@ WP
  after the version number has changed, GSview will configure
  the local computer.
 
- Using a UNC path when installing GSview will not work
- from Windows 3.1, but does work from Windows 95.
-
 W
  GSview tries to maintain one configuration file for each user.
- If user profiles are being used under Windows 95 or NT,
- GSview will store the INI file in the user profile directory,
- as specified in the registry.  If this can't be found,
+ GSview will store the INI file in AppData/Roaming/Ghostgum directory.
+ If this can't be found,
  and the environment variable USERPROFILE is defined and is
  a directory, GSview will store the INI file in this directory.
- If this fails, GSview will store the INI file in the default
- location, the Windows directory.
+ If this fails, GSview will store the INI file in the current directory.
  If the user profile directory exists, but is write protected,
  GSview will have trouble.
 

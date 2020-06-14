@@ -622,32 +622,20 @@ int ndisp;
 	    /* Store INI file in same directory as executable */
 	    strcpy(szIniFile, szExePath);
 	}
-	else if (is_win4) {
-	    /* allow for user profiles */
-	    LONG rc;
-	    HKEY hkey;
-	    DWORD keytype;
-	    DWORD cbData;
+	else {
+            PWSTR appdata_path;
 	    DWORD fa;
-	    /* Find the user profile directory */
-	    rc = RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\ProfileReconciliation", 0, KEY_READ, &hkey);
-	    if (rc == ERROR_SUCCESS) {
-		cbData = sizeof(szIniFile)-sizeof(INIFILE);
-		keytype =  REG_SZ;
-		rc = RegQueryValueExA(hkey, "ProfileDirectory", 0, &keytype, (LPBYTE)szIniFile, &cbData);
-		RegCloseKey(hkey);
-	    }
-	    if (rc == ERROR_SUCCESS) {
-		fa = GetFileAttributesA(szIniFile);
-		if ((fa != 0xffffffff) && (fa & FILE_ATTRIBUTE_DIRECTORY))
-		    strcat(szIniFile, "\\");
-		else
-		    szIniFile[0] = '\0';
-	    }
-	    else {
-		    /* If we didn't succeed, use the Windows directory */
-		    szIniFile[0] = '\0';
-	    }
+            /* Get the AppData directory location */
+            if (SHGetKnownFolderPath(&FOLDERID_RoamingAppData, 0, NULL, &appdata_path) == S_OK) {
+                WideCharToMultiByte(nCodePageLanguage, 0, appdata_path, lstrlenW(appdata_path)+1, szIniFile, sizeof(szIniFile)-sizeof(INIFILE)-1, NULL, NULL);
+                strcat(szIniFile, "\\Ghostgum");
+                mkdir(szIniFile);
+                fa = GetFileAttributesA(szIniFile);
+                if ((fa != 0xffffffff) && (fa & FILE_ATTRIBUTE_DIRECTORY))
+                    strcat(szIniFile, "\\");
+                else
+                    szIniFile[0] = '\0';
+            }
 	}
 	if (szIniFile[0] == '\0') {
 	    DWORD fa;
@@ -668,13 +656,6 @@ int ndisp;
 		else
 		    szIniFile[0] = '\0';
 	    }
-	}
-	if (szIniFile[0] == '\0') {
-	    TCHAR tbuf[MAXSTR];
-	    GetWindowsDirectory(tbuf, 
-		sizeof(tbuf)/sizeof(TCHAR)-2-sizeof(INIFILE));
-	    convert_widechar(szIniFile, tbuf, sizeof(szIniFile));
-	    strcat(szIniFile, "\\");
 	}
 	strcat(szIniFile, INIFILE);
 

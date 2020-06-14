@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2012, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2020, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -331,6 +331,7 @@ $(OD)winsetup.res: $(SRCWIN)winsetup.rc $(SRCWIN)winsetup.h $(LANGUAGE)/gvclang.
 
 $(BD)setup.exe: $(OD)winsetup$(OBJ) $(OD)winsetup.res $(SRCWIN)winsetup.def $(OD)dwinst$(OBJ) $(OD)gvcbetaa$(OBJ) $(OD)gvwgsver$(OBJ) $(OD)lib.rsp
 	$(LINK) $(DEBUGLINK) $(LGUI) $(LDEF)$(SRCWIN)winsetup.def $(LOUT)$(BD)setup.exe $(OD)winsetup$(OBJ) $(OD)dwinst$(OBJ) $(OD)gvcbetaa$(OBJ) $(OD)gvwgsver$(OBJ) $(LIBRSP) $(OD)winsetup.res
+        mt -nologo -manifest $(SRCWIN)winsetup$(WINEXT).manifest -outputresource:$(BD)setup.exe;#1
 
 $(OD)dwuninst.res: $(SRCWIN)dwuninst.rc $(SRCWIN)dwuninst.h
 	$(RCOMP) $(RIPATH)"$(LANGUAGE)" $(ROFILE)$(OD)dwuninst.res $(SRCWIN)dwuninst.rc
