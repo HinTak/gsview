@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2020, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -122,17 +122,17 @@ const int lang_offset = 6;  /* offset to ?? */
  * The id is allocated automatically.
  * We refer to each language in the INI file using the twocc code, 
  * which matches the two letter Internet country code.
- * Each language DLL provides a bitmap of the language name,
- * to allow it to be displayed on systems without that language
- * installed.
+ * Each language DLL provides the name of the language as a Unicode string.
  * The required ANSI codepage is in codepage.  If any code page is
  * acceptable (e.g. English) then this may be 0.
+ * Codepage is now 65001 = UTF-8 for all languages.
  */
+#define MAX_LANGNAME_LENGTH 32
 typedef struct lang_s {
     int id;
     char twocc[3];
     TCHAR dllname[MAXSTR];
-    HBITMAP bitmap;
+    WCHAR name[MAX_LANGNAME_LENGTH+1];
     int codepage;
 } lang_t;
 
@@ -156,7 +156,7 @@ language_find(void)
 	lang[i].id = 0;
 	lang[i].twocc[0] = '\0';
 	lang[i].dllname[0] = '\0';
-	lang[i].bitmap = NULL;
+	lang[i].name[0] = '\0';
     }
 
     /* First language is always English */
@@ -166,7 +166,7 @@ language_find(void)
     lang[nlang].twocc[1] = 'n';
     lang[nlang].twocc[2] = '\0';
     lang[nlang].dllname[0] = '\0';
-    lang[nlang].bitmap = LoadBitmap(phInstance, MAKEINTRESOURCE(ID_LANG));
+    LoadStringW(phInstance, IDS_LANGUAGE, lang[nlang].name, MAX_LANGNAME_LENGTH);
     nlang++;
 
     /* Now search for language DLLs */
@@ -195,7 +195,7 @@ language_find(void)
  	}
 	else
 	    lang[nlang].id = 0;	/* can't do it */
-	lang[nlang].bitmap = NULL;
+        lang[nlang].name[0] = (WCHAR)0;
 
 	/* Try opening DLL */
         hInstance = LoadLibrary(lang[nlang].dllname);
@@ -207,9 +207,8 @@ language_find(void)
 	    if (lstrcmp(TEXT(GSVIEW_DOT_VERSION), vbuf) != 0)
 		lang[nlang].id = 0;
 	    else  {
-		/* Load bitmap of language name */
-		lang[nlang].bitmap = LoadBitmap(hInstance, 
-			MAKEINTRESOURCE(ID_LANG));
+		/* Load language name */
+                LoadStringW(hInstance, IDS_LANGUAGE, lang[nlang].name, MAX_LANGNAME_LENGTH);
 		/* Get required code page */
 		LoadString(hInstance, IDS_CODEPAGE, vbuf, sizeof(vbuf));
 #ifdef UNICODE
@@ -240,8 +239,6 @@ int language_free(void)
 	lang[i].id = 0;
 	lang[i].twocc[0] = '\0';
 	lang[i].dllname[0] = '\0';
-	if (lang[i].bitmap)
-	    DeleteObject((HGDIOBJ)lang[i].bitmap);
     }
     return 0;
 }
@@ -353,7 +350,7 @@ int i;
 #endif
     hMenuLang = GetSubMenu(hMenuOptions, 4);
     for (i=1; i<nlang; i++) {
-	AppendMenu(hMenuLang, MF_BITMAP, lang[i].id, (LPTSTR)lang[i].bitmap);
+        AppendMenuW(hMenuLang, MF_STRING, lang[i].id, lang[i].name);
 	if (!is_winnt && (nCodePageSystem != lang[i].codepage))
 	    enable_menu_item(IDM_LANGMENU, lang[i].id, FALSE);
     }
@@ -405,17 +402,7 @@ LanguageDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     int i;
     switch(message) {
 	case WM_INITDIALOG:
-	    /* Display language names as bitmaps, to make them
-	     * work even if we don't have the correct fonts.
-	     */
 	    for (i=0; i<nlang; i++) {
-		CreateWindow(TEXT("button"), NULL,
-		    BS_BITMAP | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP,
-		    20, 8 + i * 32, 80, 24,
-		    hDlg, (HMENU)lang[i].id,
-		    phInstance, NULL);
-		SendDlgItemMessage(hDlg, lang[i].id, BM_SETIMAGE, IMAGE_BITMAP, 
-		    (LPARAM)lang[i].bitmap);
 		if (!is_winnt && lang[i].codepage &&
 		    (nCodePageSystem != lang[i].codepage))
 		    EnableWindow(GetDlgItem(hDlg, lang[i].id), FALSE);

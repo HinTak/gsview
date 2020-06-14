@@ -241,7 +241,7 @@ STRINGTABLE
 BEGIN
 	/* general strings */
 	IDS_SLANGUAGE, "EN,2"
-    IDS_CODEPAGE, "1251"    /* ISO-Latin-1 */
+        IDS_CODEPAGE, "65001"    /* UTF-8 */
 	IDS_HELPFILE, WINHELPFILE
     IDS_SOUNDNOMM, "Не могу загрузить WINMM.DLL\nЗвуки будут недоступны"
 END

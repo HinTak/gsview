@@ -18,7 +18,7 @@
 /* ru\gvclang.h */
 /* Common Russian language defines */
 
-#define AARUSSIAN "Russian"
+#define AARUSSIAN "Русский"
 
 #define GSVIEW_COPYRIGHT1 "Copyright (C) 1993-2012 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Все права сохранены."

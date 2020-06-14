@@ -265,7 +265,7 @@ STRINGTABLE
 BEGIN
 	/* general strings */
 	IDS_SLANGUAGE "ELL,3"
-	IDS_CODEPAGE, "1253"	/* almost ISO-8859-7 */
+	IDS_CODEPAGE, "65001"	/* UTF-8 */
 	IDS_HELPFILE, WINHELPFILE
 	IDS_SOUNDNOMM, "Αδύνατη η φόρτωση της βιβλιοθήκης WINMM.DLL.\nΟι ήχοι δεν θα είναι διαθέσιμοι."
 END
