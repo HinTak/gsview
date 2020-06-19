@@ -208,7 +208,6 @@ MENU_ENTRY menu_ct[] = {
   { "/Ajuda/_Cerca ajuda sobre", NULL,	GS_CMD, 	IDM_HELPSEARCH, NULL },
   { "/Ajuda/_Tecles d'ajuda", 	NULL,	GS_CMD, 	IDM_HELPKEYS, NULL },
   { "/Ajuda/sep1",		NULL,   NULL, 		0, "<Separator>" },
-  { "/Ajuda/_Registre...", 	NULL,	GS_CMD, 	IDM_REGISTER, NULL },
   { "/Ajuda/_Quant al...", 		NULL,	GS_CMD, 	IDM_ABOUT, NULL },
 };
 

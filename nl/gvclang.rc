@@ -236,8 +236,6 @@ BEGIN
         GSVS(IDS_GSLIBNOTINSTALLED, "De Ghostscript DLL bestanden werden niet geïnstalleerd. Zie hiervoor het bestand readme.htm.")
         GSVS(IDS_NOPROGMAN, AANODDEPROGMAN)
         GSVS(IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED)
-        GSVS(IDS_INVALIDREG, "Ongeldige Registratie Naam of Nummer!")
-        GSVS(IDS_UNREGISTERED, "Niet geregistreerd.")
         GSVS(IDS_WRONGEMX, "Op uw systeem werd emx %s geïnstalleerd.\rU hebt emx %s of jonger nodig.\rPM GSview zal niet goed kunnen werken.")
         GSVS(IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION)
         GSVS(IDS_PROGMANGROUP4, AAPROGMANGROUP4)

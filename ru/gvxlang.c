@@ -208,7 +208,6 @@ MENU_ENTRY menu_ru[] = {
   { "/?/_Указатель...", NULL,  GS_CMD,     IDM_HELPSEARCH, NULL },
   { "/?/_Клавиатура",     NULL,   GS_CMD,     IDM_HELPKEYS, NULL },
   { "/?/sep1",       NULL,   NULL,       0, "<Separator>" },
-  { "/?/_Регистрация...",   NULL,   GS_CMD,     IDM_REGISTER, NULL },
   { "/?/_О программе...",      NULL,   GS_CMD,     IDM_ABOUT, NULL },
 };
 

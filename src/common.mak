@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2020, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -32,7 +32,7 @@ OBJCOM1=$(OD)gvcmisc$(OBJ) $(OD)gvcdisp$(OBJ) $(OD)gvccmd$(OBJ) \
  $(OD)gvcinit$(OBJ) $(OD)gvcprf$(OBJ) \
  $(OD)dscparse$(OBJ) $(OD)dscutil$(OBJ) \
  $(OD)gvcdll$(OBJ) $(OD)gvcpdf$(OBJ) \
- $(OD)gvcbeta$(OBJ) $(OD)gvcreg$(OBJ) \
+ $(OD)gvcbeta$(OBJ) \
  $(OD)cdll$(OBJ) $(OD)cimg$(OBJ) $(OD)cview$(OBJ)
 
 OBJCOM2=$(OD)gvcedit$(OBJ) $(OD)gvcmeas$(OBJ) \
@@ -149,9 +149,6 @@ $(OD)gvcprf$(OBJ): $(SRC)gvcprf.c $(HDRS)
 
 $(OD)gvctext$(OBJ): $(SRC)gvctext.c $(HDRS)
 	$(COMP) $(FOO)gvctext$(OBJ) $(CO) $(SRC)gvctext.c
-
-$(OD)gvcreg$(OBJ): $(SRC)gvcreg.c $(HDRS)
-	$(COMP) $(FOO)gvcreg$(OBJ) $(CO) $(SRC)gvcreg.c
 
 $(OD)gvcbetaa$(OBJ): $(SRC)gvcbeta.c $(SRC)gvcbeta.h $(HDRS)
 	$(COMP) $(FOO)gvcbetaa$(OBJ) $(CO) $(SRC)gvcbeta.c

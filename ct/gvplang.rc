@@ -176,7 +176,6 @@ BEGIN
 		MENUITEM "Índex de l'Ajuda", IDM_HELPSEARCH
 		MENUITEM "~Tecles d'ajuda", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-		MENUITEM "~Registre...", IDM_REGISTER
 		MENUITEM "~Quant al...", IDM_ABOUT
 	END
 

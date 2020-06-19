@@ -288,21 +288,6 @@
 #define AADEFAULTFONTC "Štandardné písmo:"
 #define AADRIVEROPTIONSC "Možnosti ovládača:"
 
-/* Registration */
-#define AAREGTOC "Registrované na:"
-#define AANUMBERC "Číslo:"
-#define AAGSVIEWREG "GSview Registrácia"
-#define AAREGISTERNOW "Registrovať"
-#define AAONLINEREG "On-line registrácia"
-#define AAREG1 "Určte prosím Vaše meno a číslo pre registráciu"
-#define AAREG2 ""
-#define AANAG1 "GSview autorské práva 2006 Ghostgum Software Pty Ltd."
-#define AANAG2 "Popdporte prosím vývoj programu GSview jeho registráciou."
-#define AANAG3 ""
-#define AANAG4 "GSview môžete rigistrovať aj on-line"
-/* Borland Resource Compiler has a bug - it can't handle "//" inside a string */
-#define AANAG5 "    http:/\057www.ghostgum.com.au/"
-
 
 /* Installation program */
 #define AAINSTALL1 "GSview inštalácia"
@@ -380,7 +365,7 @@
 
 /* configure */
 #define AAGSVIEWC "GSview:"
-#define AAALADDINGSC "AFPL Ghostscript:"
+#define AAALADDINGSC "Ghostscript:"
 #define AACFG1 "GSview nastavenia"
 #define AACFG10 "Tento sprievodca Vám pomôže s nastaveniami preprogram GSview."
 #define AACFG11 "Ak neporozumiete položkám na nasledujúcek strane,\

@@ -276,20 +276,6 @@
 #define AADEFAULTFONTC "Standardzeichensatz:"
 #define AADRIVEROPTIONSC "Treiberoptionen:"
 
-/* Registration */
-#define AAREGTOC "Registriert an:"
-#define AANUMBERC "Nummer:"
-#define AAGSVIEWREG "GSview Registrierung"
-#define AAREGISTERNOW "Registriere jetzt"
-#define AAONLINEREG "Online Registrierung"
-#define AAREG1 "Bitte geben Sie ihren Namen und ihre Registrierungsnummer ein"
-#define AAREG2 ""
-#define AANAG1 "GSview ist Copyright 2006 Ghostgum Software Pty Ltd."
-#define AANAG2 "Bitte unterstützen Sie durch Ihre Registrierung"
-#define AANAG3 "die Entwicklung von GSview."
-#define AANAG4 "GSview kann online registriert werden bei"
-#define AANAG5 "    http:/\057www.ghostgum.com.au/"
-
 
 /* Installation program */
 #define AAINSTALL1 "GSview Installation"
@@ -367,7 +353,7 @@
 
 /* configure */
 #define AAGSVIEWC "GSview:"
-#define AAALADDINGSC "AFPL Ghostscript:"
+#define AAALADDINGSC "Ghostscript:"
 #define AACFG1 "GSview Konfigurieren"
 #define AACFG10 "Dieser Wizard hilft Ihnen Gsview zu konfigurieren."
 #define AACFG11 "Wenn Sie einen Eintrag der folgenden Seiten nicht verstehen,\

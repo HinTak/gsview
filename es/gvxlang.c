@@ -194,7 +194,6 @@ MENU_ENTRY menu_es[] = {
   { "/Ayuda/_Buscar ayuda sobre...", NULL,	GS_CMD, 	IDM_HELPSEARCH, NULL },
   { "/Ayuda/Los atajos del _teclado", 	NULL,	GS_CMD, 	IDM_HELPKEYS, NULL },
   { "/Ayuda/sep1",		NULL,   NULL, 		0, "<Separator>" },
-  { "/Ayuda/_Registro...", 	NULL,	GS_CMD, 	IDM_REGISTER, NULL },
   { "/Ayuda/_Acerca de...", 		NULL,	GS_CMD, 	IDM_ABOUT, NULL },
 };
 

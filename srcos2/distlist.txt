@@ -29,7 +29,5 @@ gvpgs.exe
 printer.ini
 Readme.htm
 gsview.css
-cdorder.txt
-regorder.txt
 LICENCE
 FILE_ID.DIZ

@@ -235,8 +235,6 @@ BEGIN
 	GSVS(IDS_GSLIBNOTINSTALLED, "No heu instal·lat els fitxers de biblioteca del Ghostscript. Si us plau, llegiu el fitxer readme.htm del GSview.")
 	GSVS(IDS_NOPROGMAN, AANODDEPROGMAN)
 	GSVS(IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED)
-	GSVS(IDS_INVALIDREG, "El Nom o el Número de registre no són vàlids")
-	GSVS(IDS_UNREGISTERED, "No s'ha registrat")
 	GSVS(IDS_WRONGEMX, "Teniu l'emx %s.\rNecessiteu l'emx %s o superior.\rPM El GSview no funcionarà correctament.")
 	GSVS(IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION)
 	GSVS(IDS_PROGMANGROUP4, AAPROGMANGROUP4)

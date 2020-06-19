@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2011, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2020, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -314,9 +314,6 @@ int gsview_main(HINSTANCE hInstance, LPSTR lpszCmdLine)
     info_wait(IDS_NOWAIT);
     if (gsview_changed())
 	PostQuitMessage(0);
-    else if (!print_silent)
-	// before changing following line, please see gvcreg.cpp
-	registration_check();
 
     if (multithread) {
 	/* start thread for displaying */

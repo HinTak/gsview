@@ -288,21 +288,6 @@
 #define AADEFAULTFONTC "Γραμματοσειρά:"
 #define AADRIVEROPTIONSC "Επιλογές οδηγού:"
 
-/* Registration */
-#define AAREGTOC "Νόμιμος κάτοχος:"
-#define AANUMBERC "Αριθμός:"
-#define AAGSVIEWREG "Δήλωση GSview"
-#define AAREGISTERNOW "Δήλωση τώρα"
-#define AAONLINEREG "Ηλεκτρονική δήλωση"
-#define AAREG1 "Παρακαλώ πληκτρολογήστε το όνομά σας και τον αριθμό"
-#define AAREG2 "δήλωσης του προγράμματος."
-#define AANAG1 "GSview - Πνευματικά δικαιώματα 2006 Ghostgum Software Pty Ltd."
-#define AANAG2 "Υποστηρίξτε τη συνέχιση της ανάπτυξης του προγράμματος"
-#define AANAG3 "GSview δηλώνοντας τη χρήση του."
-#define AANAG4 "Η δήλωση του GSview μπορεί να γίνει ηλεκτρονικά στη διεύθυνση"
-/* Borland Resource Compiler has a bug - it can't handle "//" inside a string */
-#define AANAG5 "      http:/\057www.ghostgum.com.au/"
-
 
 /* Installation program */
 #define AAINSTALL1 "Εγκατάσταση GSview"
@@ -380,7 +365,7 @@
 
 /* configure */
 #define AAGSVIEWC "GSview:"
-#define AAALADDINGSC "AFPL Ghostscript:"
+#define AAALADDINGSC "Ghostscript:"
 #define AACFG1 "Διαμόρφωση GSview"
 #define AACFG10 "Ο οδηγός αυτός θα σας βοηθήσει στη διαμόρφωση του GSview."
 #define AACFG11 "Εάν δεν γνωρίζετε κάποιες από τις ακόλουθες παραμέτρους,\

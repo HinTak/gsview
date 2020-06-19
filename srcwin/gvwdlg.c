@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2007, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2020, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -241,12 +241,6 @@ AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch(message) {
         case WM_INITDIALOG:
             SetDlgItemText(hDlg, ABOUT_VERSION, TEXT(GSVIEW_DOT_VERSION));
-            SetDlgItemText(hDlg, NAG_NAME, registration_name);
-	    if (registration_receipt != 0) {
-		TCHAR buf[16];
-		wsprintf(buf, TEXT("%u"), registration_receipt);
-		SetDlgItemText(hDlg, NAG_RECEIPT, buf);
-	    }
             return( TRUE);
 	  case WM_LBUTTONDOWN:
 	    {

@@ -183,7 +183,6 @@
 #define IDM_HELPKEYS	343
 #define IDM_ABOUT	344
 #define IDM_MISC	345
-#define IDM_REGISTER	346
 
 #define IDD_LANG	350
 #define IDM_LANGMENU	350
@@ -559,8 +558,6 @@
 #define IDS_APPNAME		861
 #define IDS_TARGET_GROUP	862
 #define IDS_TARGET_DIR		863
-#define IDS_INVALIDREG		864
-#define IDS_UNREGISTERED	865
 
 #define IDS_MKDIRFAIL		870
 #define IDS_WRONGEMX		871
@@ -718,19 +715,6 @@
 #define IDM_DSC_ERROR		2262
 #define IDM_DSC_WARN		2263
 #define IDM_DSC_INFO		2264
-
-#define IDD_NAG			2270
-#define NAG_REGISTER		2271
-#define NAG_NAME		2272
-#define NAG_RECEIPT		2273
-#define NAG_ICON		2274
-
-#define IDD_REG			2280
-#define REGDLG_ONLINE		2281
-#define REGDLG_NAME		2282
-#define REGDLG_RECEIPT		2283
-#define REGDLG_NUMBER		2284
-#define REGDLG_ICON		2285
 
 #define IDD_PAGERANGE		2290
 #define IDC_ALL			2291

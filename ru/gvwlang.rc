@@ -176,7 +176,6 @@ BEGIN
         MENUITEM "&Указатель...", IDM_HELPSEARCH
         MENUITEM "&Клавиатура", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-        MENUITEM "&Регистрация...", IDM_REGISTER
         MENUITEM "&О программе...", IDM_ABOUT
 	END
 END

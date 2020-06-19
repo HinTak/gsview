@@ -8,7 +8,7 @@ Summary: PostScript and PDF previewer
 Name: gsview
 Version: 4.91
 Release: 1
-Copyright: Aladdin Free Public License, Ghostgum Software Pty Ltd
+Copyright: GNU General Public License, Ghostgum Software Pty Ltd
 Group: Applications/Graphics
 Source: http://www.ghostgum.com.au/
 URL: http://www.ghostgum.com.au/

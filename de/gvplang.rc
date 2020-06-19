@@ -167,7 +167,6 @@ BEGIN
 		MENUITEM "~Suche nach Hilfe für...", IDM_HELPSEARCH
 		MENUITEM "~Tastenübersicht", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-		MENUITEM "~Registrierung...", IDM_REGISTER
 		MENUITEM "~Über GSview...", IDM_ABOUT
 	END
 END

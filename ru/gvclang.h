@@ -288,21 +288,6 @@
 #define AADEFAULTFONTC "Шрифт по ум.:"
 #define AADRIVEROPTIONSC "Опции драйвера:"
 
-/* Registration */
-#define AAREGTOC "Владелец копии:"
-#define AANUMBERC "Номер:"
-#define AAGSVIEWREG "Регистрация GSview"
-#define AAREGISTERNOW "Регистрировать"
-#define AAONLINEREG "Регистрация по сети"
-#define AAREG1 "Пожалуйста, введите Ваше имя и регистрационный номер"
-#define AAREG2 ""
-#define AANAG1 "GSview is Copyright 2006 Ghostgum Software Pty Ltd."
-#define AANAG2 "Пожалуйста, поддержите регистрацией разработку GSview."
-#define AANAG3 ""
-#define AANAG4 "GSview можно зарегистрировать в Интернет по адресу"
-/* Borland Resource Compiler has a bug - it can't handle "//" inside a string */
-#define AANAG5 "    http:/\057www.ghostgum.com.au/"
-
 
 /* Installation program */
 #define AAINSTALL1 "Установка GSview"
@@ -380,7 +365,7 @@
 
 /* configure */
 #define AAGSVIEWC "GSview:"
-#define AAALADDINGSC "AFPL Ghostscript:"
+#define AAALADDINGSC "Ghostscript:"
 #define AACFG1 "Конфигурация GSview"
 #define AACFG10 "Мастер поможет сконфигурировать GSview."
 #define AACFG11 "Если вы не понимаете некоторые пункты на следующих страницах,\

@@ -176,7 +176,6 @@ BEGIN
 		MENUITEM "~Register", IDM_HELPSEARCH
 		MENUITEM "~Klávesové skratky", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-		MENUITEM "R~egistrácia...", IDM_REGISTER
 		MENUITEM "~Čo je...", IDM_ABOUT
 	END
 

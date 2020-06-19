@@ -350,23 +350,6 @@ W
 
  Premeu el botó `Tanca.`
 E
-2Registre
--Registration
-?Registre
- Si voleu permetre el desenvolupament del GSview, o bé voleu inhabilitar-ne
- la pantalla empipadora, si us plau, penseu el fet de registrar-lo.
- Tanmateix, no teniu cap necessitat de registrar el GSview.
- El GSview està disponible sota la Llicència Pública Gratuïta d'Aladdin (l'AFPL, 
- Aladdin Free Public Licence), continguda al fixer `LICENCE`.
- Això permet l'ús gratuït, però en restringeix la distribució comercial.
-
- Ara mateix l'import del registre és de 40 AUD$.
- El GSview es pot registrar en línia a
-  http://www.ghostgum.com.au/
- o enviant per fax o per correu el
- formulari de registre que podeu trobar al fitxer `regorder.txt`
- al directori del GSview.
- Ghostgum Software prefereix que utilitzeu el registre en línia.
 2Convencions de l'estructura del document
 -DSC
 ?Convencions de l'estructura del document

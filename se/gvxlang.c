@@ -208,7 +208,6 @@ MENU_ENTRY menu_se[] = {
   { "/Hjälp/_Sök efter hjälp för", NULL,	GS_CMD, 	IDM_HELPSEARCH, NULL },
   { "/Hjälp/_Tangenter hjälp", 	NULL,	GS_CMD, 	IDM_HELPKEYS, NULL },
   { "/Hjälp/sep1",		NULL,   NULL, 		0, "<Separator>" },
-  { "/Hjälp/_Registrera...", 	NULL,	GS_CMD, 	IDM_REGISTER, NULL },
   { "/Hjälp/_Om...", 		NULL,	GS_CMD, 	IDM_ABOUT, NULL },
 };
 

@@ -43,7 +43,7 @@ E
 3Beschaffung von Ghostscript
 -Obtaining_Ghostscript
 ?Beschaffung von Ghostscript
- GSview benötigt Aladdin or Ghostscript.
+ GSview benötigt or Ghostscript.
    https://www.ghostscript.com/
  Um GSview zu konfigurieren, muss man Ghostscript und GSview
  beschaffen und installieren und dann GSview starten.
@@ -385,25 +385,6 @@ W
 
  Klicken Sie auf die Schaltfläche` Schließen`.
 E
-2Registrierung
--Registration
-?Registrierung
- Wenn Sie die Entwicklung von GSview unterstützen wollen,
- oder die Startseite von GSview nicht mehr sehen wollen,
- dann registrieren Sie GSview. Es besteht keine Verpflichtung
- GSview zu lizensieren, es ist vefügbar im Rahmen der
- Aladdin Free Public Licence, die in der Datei `LICENCE` zu
- finden ist.
- Dies erlaubt die freie Benutzung, schränkt aber die
- kommerzielle Verwendung ein.
-
- Die Registrierungsgebühr beträgt zur Zeit AUD$40.
- GSview kann online registriert werden unter
-  http://www.ghostgum.com.au/
- oder durch Fax oder Email des Registrierungsformulars,
- welches in der Datei `regorder.txt` im GSview Verzeichnis
- zu finden ist.
- Wir bevorzugen die online Registrierung.
 2Document Structuring Conventions (DSC-Kommentare)
 -DSC
 ?Document Structuring Conventions (DSC-Kommentare)
@@ -1674,7 +1655,7 @@ WP
 W
  Die einfache Konfiguration erlaubt die Auswahl der zu verwendenden
  Ghostscript-Version. Es wird davon ausgegangen, dass Sie bereits
- Aladdin oder AFPL Ghostscript 5.50 oder neuer installiert haben.
+ Ghostscript 5.50 oder neuer installiert haben.
  Haben Sie Ghostscript noch nicht installiert, lesen Sie in
  `Beschaffung von Ghostscript` nach.
  Für weitere Konfigurationseinstellungen von GSview, siehe

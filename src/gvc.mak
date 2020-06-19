@@ -1,4 +1,4 @@
-#  Copyright (C) 1993-2002, Ghostgum Software Pty Ltd.  All rights reserved.
+#  Copyright (C) 1993-2020, Ghostgum Software Pty Ltd.  All rights reserved.
 #  
 # This file is part of GSview.
 #  
@@ -102,10 +102,6 @@ gvcpdf.obj: gvcpdf.c $(HDRS)
 gvcprn.obj: gvcprn.c $(HDRS)
 
 gvctext.obj: gvctext.c $(HDRS)
-
-gvcreg.obj: gvcreg.c $(HDRS)
-
-gvwreg.obj: gvwreg.c $(HDRS)
 
 gvwfile.obj: gvwfile.c gvcfile.h
 
@@ -414,7 +410,6 @@ gsv$(GSVIEW_VERSION)wda.zip:
 	copy FILE_ID.DIZ ..\FILE_ID.DIZ
 	copy LICENCE ..\gsview\LICENCE
 	copy Readme.htm ..\gsview\Readme.htm
-	copy regorder.txt ..\gsview\regorder.txt
 	copy gsviewda.exe ..\gsview\gsviewda.exe
 	copy NUL ..\gsview\gsview32.ini
 	copy binary\gvwin1.ico ..\gsview32.ico
@@ -467,7 +462,6 @@ distcopy:
 	copy LICENCE ..\gsview\LICENCE
 	copy Readme.htm ..\gsview\Readme.htm
 	copy gsview.css ..\gsview\gsview.css
-	copy regorder.txt ..\gsview\regorder.txt
 	copy gsview32.exe ..\gsview\gsview32.exe
 	copy binary\gvwin1.ico ..\gsview32.ico
 	copy gsviewen.hlp ..\gsview\gsviewen.hlp
@@ -563,7 +557,6 @@ clean: language
 	-del gvwpgdi.obj
 	-del gvwprf.obj
 	-del gvwprn.obj
-	-del gvwreg.obj
 	-del gvcbeta.obj
 	-del gvccmd.obj
 	-del dscparse.obj
@@ -579,7 +572,6 @@ clean: language
 	-del gvcpdf.obj
 	-del gvcprn.obj
 	-del gvcprf.obj
-	-del gvcreg.obj
 	-del gvctext.obj
 	-del gsview16.map
 	-del gsview16.sym

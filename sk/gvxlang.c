@@ -208,7 +208,6 @@ MENU_ENTRY menu_sk[] = {
   { "/Pomocník/_Register", NULL,	GS_CMD, 	IDM_HELPSEARCH, NULL },
   { "/Pomocník/_Klávesové skratky", 	NULL,	GS_CMD, 	IDM_HELPKEYS, NULL },
   { "/Pomocník/sep1",		NULL,   NULL, 		0, "<Separator>" },
-  { "/Pomocník/R_egistrácia...", 	NULL,	GS_CMD, 	IDM_REGISTER, NULL },
   { "/Pomocník/_Čo je...", 		NULL,	GS_CMD, 	IDM_ABOUT, NULL },
 };
 

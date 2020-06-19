@@ -340,23 +340,6 @@ W
 
  Tryck på knappen `Avsluta `.
 E
-2Registrering
--Registration
-?Registrering
- Om du vill stödja utecklingen av GSview eller vill
- bli av med GSview's påminnelseskärm, var vänlig överväg registrering
- av GSview.  Det är inte nödvändigt för dig att registrera GSview.
- GSview har gjorts tillgänglig med Aladdin Free Public Licence,
- som finns i filen `LICENCE`.
- Den medger fri användning, men begränsar kommersiell distribution.
-
- Registreringsavgiften är för närvarande AUD$40.
- GSview kan registreras online på
-  http://www.ghostgum.com.au/
- eller via fax eller mail av
- registreringsblanketten vilken finns i filen `regorder.txt`
- i GSview's katalog.
- Ghostgum Software föredrar att du använder online registreringen.
 2Document Structuring Conventions
 -DSC
 ?Document Structuring Conventions

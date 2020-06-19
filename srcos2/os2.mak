@@ -94,7 +94,7 @@ VIEWONLY=0
 
 OBJPLAT1=$(OD)gvpm$(OBJ) $(OD)gvpdisp$(OBJ) $(OD)gvpdlg$(OBJ) \
  $(OD)gvpdll$(OBJ) $(OD)gvpgsver$(OBJ) $(OD)gvpinit$(OBJ) \
- $(OD)gvpmisc$(OBJ) $(OD)gvpreg$(OBJ) $(OD)gvcfile$(OBJ)
+ $(OD)gvpmisc$(OBJ) $(OD)gvcfile$(OBJ)
 
 OBJPLAT2=$(OD)gvpedit$(OBJ) $(OD)gvpeps$(OBJ) $(OD)gvpprn$(OBJ) \
  $(OD)gvpmeas$(OBJ) $(OD)gvcmeas2$(OBJ)
@@ -161,9 +161,6 @@ $(OD)gvpmisc$(OBJ): $(SRCOS2)gvpmisc.c $(HDRS)
 
 $(OD)gvpprn$(OBJ): $(SRCOS2)gvpprn.c $(HDRS)
 	$(COMP) $(FOO)gvpprn$(OBJ) $(CO) $(SRCOS2)gvpprn.c
-
-$(OD)gvpreg$(OBJ): $(SRCOS2)gvpreg.c $(HDRS)
-	$(COMP) $(FOO)gvpreg$(OBJ) $(CO) $(SRCOS2)gvpreg.c
 
 
 # OS/2 resources also include common resources so use gvpm1.rc not gvpm3.rc
@@ -561,10 +558,6 @@ distcopy:
 	copy Readme.htm dist\Readme.htm
 	copy gsview.css dist\gsview2\gsview.css
 	copy gsview.css dist\gsview.css
-	copy cdorder.txt dist\gsview2\cdorder.txt
-	copy cdorder.txt dist\cdorder.txt
-	copy regorder.txt dist\gsview2\regorder.txt
-	copy regorder.txt dist\regorder.txt
 #	copy gsview2\zlib2.dll dist\zlib2.dll
 	copy $(BD)gvpm.exe dist\gvpm.exe
 	copy binary\gvpm1.ico dist\gvpm.ico
@@ -605,7 +598,7 @@ gsv$(GSVIEW_VERSION)os2.zip: distcopy
 	-del ..\gsv$(GSVIEW_VERSION)os2.zip
 	zip -9 ..\gsv$(GSVIEW_VERSION)os2.zip gsview2\os2.zip gsview2\os2setup.exe gsview2\unzip2.dll 
 	zip -9 ..\gsv$(GSVIEW_VERSION)os2.zip gsview2\setup2ct.dll gsview2\setup2de.dll gsview2\setup2es.dll gsview2\setup2fr.dll gsview2\setup2gr.dll gsview2\setup2it.dll gsview2\setup2nl.dll gsview2\setup2ru.dll gsview2\setup2se.dll gsview2\setup2sk.dll
-	zip -9 ..\gsv$(GSVIEW_VERSION)os2.zip gsview2\README2.TXT gsview2\Readme.htm gsview2\gsview.css gsview2\cdorder.txt gsview2\regorder.txt gsview2\FILE_ID.DIZ gsview2\LICENCE
+	zip -9 ..\gsv$(GSVIEW_VERSION)os2.zip gsview2\README2.TXT gsview2\Readme.htm gsview2\gsview.css gsview2\FILE_ID.DIZ gsview2\LICENCE
 	cd ..
 
 zip: gsv$(GSVIEW_VERSION)os2.zip

@@ -34,16 +34,16 @@
 ?Obtenir Ghostscript
  GSview nécessite Ghostscript. Ghostscript est à l'adresse
   https://www.ghostscript.com/
- Pour configurer GSview, procurez-vous et installez Aladdin Ghostscript
+ Pour configurer GSview, procurez-vous et installez Ghostscript
  et GSview, puis exécutez GSview.
 3Installation de Ghostscript
 -Ghostscript_Installation
 ?Installation de Ghostscript
 W
- Aladdin Ghostscript pour Win32 est disponible sous la forme d'une archive auto-extractable
+ Ghostscript pour Win32 est disponible sous la forme d'une archive auto-extractable
  et il s'installe automatiquement.
 P
- Aladdin Ghostscript pour OS/2 est disponible sous la forme d'un fichier zip
+ Ghostscript pour OS/2 est disponible sous la forme d'un fichier zip
  et vous devez l'installer manuellement.
 E
  Pour avoir plus de détails sur la façon dont vous pouvez installer manuellement Ghostscript,
@@ -1260,7 +1260,7 @@ E
 W
  La Configuration standard vous permet de sélectionner quelle version de
  Ghostscript vous souhaitez utiliser.  Il est supposé que vous avez déjà installé
- Aladdin Ghostscript 5.50 ou ultérieur.
+ Ghostscript 5.50 ou ultérieur.
  Si vous n'avez pas encore installé Ghostscript, veuilez vous référer à la rubrique
  d'aide `Obtenir Ghostscript`.
  Si vous souhaitez pouvoir davantage paramétrer GSview, veuillez vous référer
@@ -2284,7 +2284,7 @@ E
 2Fonctionnement de GSview
 -Internals
 ?Fonctionnement de GSview
- GSview utilise la DLL d'Aladdin Ghostscript pour interpréter les fichiers PostScript.
+ GSview utilise la DLL de Ghostscript pour interpréter les fichiers PostScript.
 
  Sous Win32s, la DLL GS ne peut être utilisée à un certain moment que par une
  seule application. Sous Windows 95, Windows NT et OS/2, la DLL GS peut être utilisée

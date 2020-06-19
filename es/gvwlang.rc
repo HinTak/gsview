@@ -169,7 +169,6 @@ BEGIN
         MENUITEM "&Buscar ayuda sobre...", IDM_HELPSEARCH
         MENUITEM "Los atajos del &teclado", IDM_HELPKEYS
         MENUITEM SEPARATOR
-        MENUITEM "&Registro...", IDM_REGISTER
         MENUITEM "&Acerca de...", IDM_ABOUT
     END
 END

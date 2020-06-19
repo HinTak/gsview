@@ -208,7 +208,6 @@ MENU_ENTRY menu_gr[] = {
   { "/Βοήθεια/_Αναζήτηση βοήθειας για...", NULL,	GS_CMD, 	IDM_HELPSEARCH, NULL },
   { "/Βοήθεια/Βοήθεια για τα π_λήκτρα", 	NULL,	GS_CMD, 	IDM_HELPKEYS, NULL },
   { "/Βοήθεια/sep1",		NULL,   NULL, 		0, "<Separator>" },
-  { "/Βοήθεια/_Δήλωση...", 	NULL,	GS_CMD, 	IDM_REGISTER, NULL },
   { "/Βοήθεια/_Πληροφορίες...", 		NULL,	GS_CMD, 	IDM_ABOUT, NULL },
 };
 

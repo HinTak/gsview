@@ -1273,61 +1273,6 @@ install_all()
 	return TRUE;
 }
 
-/* Simplified from gvwreg.cpp */
-#define REG_KEY_NAME "Software\\Ghostgum\\GSview"
-#define REGISTRATION_RECEIPT "Receipt"
-#define REGISTRATION_NUMBER "Number"
-#define REGISTRATION_NAME "Name"
-BOOL
-write_registration(unsigned int reg_receipt, unsigned int reg_number,
-  char *reg_name)
-{
-    LONG rc;
-    HKEY hkey;
-    DWORD dwValue;
-    HKEY root;
-    char *name;
-    char *value;
-   
-    root = HKEY_LOCAL_MACHINE;
-    name = REG_KEY_NAME;
-    value = NULL;
-    if ((rc = RegOpenKeyEx(root, name, 0, 
-	    KEY_ALL_ACCESS, &hkey)) != ERROR_SUCCESS) {
-	/* failed to open key, so try to create it */
-	rc = RegCreateKey(root, name, &hkey);
-    }
-
-    if (rc == ERROR_SUCCESS) {
-	dwValue = (DWORD)reg_receipt;
-	value = REGISTRATION_RECEIPT;
-	rc = RegSetValueEx(hkey, value, 0, REG_DWORD,
-		    (CONST BYTE *)&dwValue, sizeof(DWORD));
-
-	dwValue = (DWORD)(reg_number ^ 0xffff);
-	if (rc == ERROR_SUCCESS) {
-	    value = REGISTRATION_NUMBER;
-	    rc = RegSetValueEx(hkey, value, 0, REG_DWORD,
-		    (CONST BYTE *)&dwValue, sizeof(DWORD));
-	}
-
-	if (rc == ERROR_SUCCESS) {
-	    value = REGISTRATION_NAME;
-	    rc = RegSetValueEx(hkey, value, 0, REG_SZ,
-		    (CONST BYTE *)reg_name, lstrlen(reg_name)+1);
-	}
-	RegCloseKey(hkey);
-    }
-    
-    if (rc != ERROR_SUCCESS) {
-/*
-	registry_error(root, name, value, FALSE, rc);
-*/
-	return FALSE;
-    }
-    return TRUE;
-}
-
 #ifndef CSIDL_PROGRAM_FILES
 #define CSIDL_PROGRAM_FILES 0x0026
 #endif
@@ -1521,9 +1466,6 @@ init()
 	    init_temp();	/* find out if TEMP is defined */
 	}
     }
-
-    if (szRegName && nRegReceipt)
-	 write_registration(nRegReceipt, nRegNumber, szRegName);
 
     if (g_bBatch) {
 	    if (!install_all()) {

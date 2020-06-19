@@ -38,15 +38,15 @@
 ?Download Ghostscript
  GSview necessita di Ghostscript.
   https://www.ghostscript.com/
- Per configurare GSview, è necessario ottenere e installare sia Aladdin
+ Per configurare GSview, è necessario ottenere e installare sia
  Ghostscript che GSview e quindi avviare GSview.
 3Installazione di Ghostscript
 ?Installazione di Ghostscript
 W
- Aladdin Ghostscript per Win32 è disponibile come archivio auto estraente
+ Ghostscript per Win32 è disponibile come archivio auto estraente
  che esegue l'installazione automaticamente.
 P
- Aladdin Ghostscript per OS/2 è disponibile in un file zip che deve essere
+ Ghostscript per OS/2 è disponibile in un file zip che deve essere
  installato manualmente.
 E
  Per maggiori dettagli su come installare manualmente Ghostscript si prega di
@@ -311,23 +311,6 @@ E
 
  Premere il pulsante` Chiudi`.
 E
-2Registrazione
--Registration
-?Registrazione
- Se si vuole sostenere lo sviluppo di GSview oppure si vuole
- disabilitare la schermata di disturbo di GSview, si prega di considerare la
- registrazione di GSview.  Non ci sono requisiti richiesti per registrare GSview.
- GSview è disponibile con la Aladdin Free Public Licence,
- contenuta nel file `LICENCE`.
- Questo abilita al libero uso, ma limita la distribuzione commerciale.
-
- La quota di registrazione è attualmente di AUD$40.
- GSview può essere registrato online presso
-  http://www.ghostgum.com.au/
- oppure inviando tramite fax o email il form di
- registrazione che è contenuto nel file `regorder.txt`,
- reperibile presso la cartella di GSview.
- L'uso della registrazione online è comunque preferibible per la Ghostgum Software.
 2Convenzioni sulla struttura del Documento
 -DSC
 ?Convenzioni sulla struttura del Documento
@@ -1432,7 +1415,7 @@ E
 W
  Configurazione Facile permette di selezionare quale versione di
  Ghostscript usare.  E' dato per scontato che si sia già installato
- Aladdin Ghostscript 5.50 o successivo.
+ Ghostscript 5.50 o successivo.
  Se non è già stato installato Ghostscript, vedere l'argomento
  `Ottenere Ghostscript`.
  Per un maggior controllo sulla configurazione di GSview, vedere
@@ -2396,7 +2379,7 @@ E
 3All'interno di GsView
 -Internals
 ?All'interno di GsView
- GSview usa le DLL di Aladdin Ghostscript per produrre l'immagine
+ GSview usa le DLL di Ghostscript per produrre l'immagine
  dei files PostScript.
 
  Sotto Win32s, le DLL di GS possono essere usate solo un'applicazione

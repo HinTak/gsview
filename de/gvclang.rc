@@ -232,8 +232,6 @@ BEGIN
 	GSVS(IDS_GSLIBNOTINSTALLED, "Sie haben die Ghostscript Bibliotheksdateien nicht installiert. Bitte lesen Sie die Datei Readme.htm.")
 	GSVS(IDS_NOPROGMAN, "Kann DDE Verbindung zum Program Manager nicht öffnen")
 	GSVS(IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED)
-	GSVS(IDS_INVALIDREG, "Ungültige(r) Registrierungsname oder -Nummer")
-	GSVS(IDS_UNREGISTERED, "Unregistriert")
 	GSVS(IDS_WRONGEMX, "Sie haben EMX %s.\rSie brauchen EMX %s oder höher.\rPM GSview wird nicht laufen.")
 	GSVS(IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION)
 	GSVS(IDS_PROGMANGROUP4, AAPROGMANGROUP4)

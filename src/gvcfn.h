@@ -333,18 +333,6 @@ void measure_dialog_unit(void);
 #endif
 #endif /* !VIEWONLY */
 
-/* gvwreg.cpp or gvpreg.cpp */
-BOOL write_registration(unsigned int reg_receipt, unsigned int reg_number, 
-  TCHAR *reg_name);
-BOOL read_registration(unsigned int *preg_receipt, unsigned int *preg_number,
-  TCHAR *reg_name, int reg_len);
-BOOL registration_nag(void);
-
-/* gvcreg.cpp */
-
-BOOL registration_check(void);
-unsigned int make_reg(unsigned int receipt_number);
-
 /* gvwpgdi.cpp */
 #ifndef VIEWONLY
 #ifdef _Windows

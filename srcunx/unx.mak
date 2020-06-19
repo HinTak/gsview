@@ -132,7 +132,7 @@ VIEWONLY=0
 OBJPLAT1=$(OD)gvx$(OBJ) $(OD)gvxdlg$(OBJ) $(OD)gvxdisp$(OBJ) \
  $(OD)gvxedit$(OBJ) $(OD)gvxeps$(OBJ) $(OD)gvxgsver$(OBJ) \
  $(OD)gvxinit$(OBJ) $(OD)gvxmeas$(OBJ) $(OD)gvxmisc$(OBJ) \
- $(OD)gvxprn$(OBJ) $(OD)gvxdll$(OBJ) $(OD)gvxreg$(OBJ) \
+ $(OD)gvxprn$(OBJ) $(OD)gvxdll$(OBJ) \
  $(OD)gvxres$(OBJ) $(OD)gvcfile$(OBJ) \
  $(OD)gvxl_en$(OBJ) \
  $(OD)gvxl_ct$(OBJ) \
@@ -174,8 +174,6 @@ install: all
 	-mkdir -p $(GSVIEW_DOCDIR)
 	chmod 755  $(GSVIEW_DOCDIR)
 	$(INSTALL) gsview.css $(GSVIEW_DOCDIR)/gsview.css
-	$(INSTALL) cdorder.txt $(GSVIEW_DOCDIR)/cdorder.txt
-	$(INSTALL) regorder.txt $(GSVIEW_DOCDIR)/regorder.txt
 	$(INSTALL) Readme.htm  $(GSVIEW_DOCDIR)/Readme.htm
 	$(INSTALL) LICENCE $(GSVIEW_DOCDIR)/LICENCE
 	$(INSTALL) $(BD)gvxct.htm  $(GSVIEW_DOCDIR)/gvxct.htm
@@ -332,9 +330,6 @@ $(OD)gvxmisc$(OBJ): $(SRCUNX)gvxmisc.c $(HDRS)
 
 $(OD)gvxprn$(OBJ): $(SRCUNX)gvxprn.c $(HDRS)
 	$(COMP) $(FOO)gvxprn$(OBJ) $(CO) $(SRCUNX)gvxprn.c
-
-$(OD)gvxreg$(OBJ): $(SRCUNX)gvxreg.c $(HDRS)
-	$(COMP) $(FOO)gvxreg$(OBJ) $(CO) $(SRCUNX)gvxreg.c
 
 $(OD)gvxres$(OBJ): $(SRCUNX)gvxres.c $(HDRS) $(SRCUNX)gvxlang.h
 	$(COMP) $(FOO)gvxres$(OBJ) $(CO) $(SRCUNX)gvxres.c

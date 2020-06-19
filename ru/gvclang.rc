@@ -236,8 +236,6 @@ BEGIN
     GSVS(IDS_GSLIBNOTINSTALLED, "У Вас не установлены библиотечные файлы Ghostscript. Пожалуйста, прочитайте файл Readme.htm GSview.")
 	GSVS(IDS_NOPROGMAN, AANODDEPROGMAN)
 	GSVS(IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED)
-    GSVS(IDS_INVALIDREG, "Неверное имя или номер регистрации")
-    GSVS(IDS_UNREGISTERED, "Не зарегистрировано")
     GSVS(IDS_WRONGEMX, "У Вас emx %s.\rВам нужен emx %s или более поздний.\rGSview для PM будет работать некорректно.")
 	GSVS(IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION)
 	GSVS(IDS_PROGMANGROUP4, AAPROGMANGROUP4)

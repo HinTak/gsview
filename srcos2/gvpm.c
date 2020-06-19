@@ -274,9 +274,6 @@ main(int argc, char *argv[])
   info_wait(IDS_NOWAIT);
   if (gsview_changed())
       WinPostMsg(hwnd_bmp, WM_CLOSE, MPFROMLONG(0), MPFROMLONG(0));
-  else if (!print_silent)
-      /* before changing following line, please see gvcreg.cpp */
-      registration_check();
 
   /* message loop */
   while (!rc && !quitnow && WinGetMsg(hab, &q_mess, 0L, 0, 0)) {

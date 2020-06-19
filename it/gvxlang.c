@@ -169,7 +169,6 @@ MENU_ENTRY menu_it[] = {
   { "/?/_Indice", NULL,	GS_CMD, 	IDM_HELPSEARCH, NULL },
   { "/?/_Tasti di scelta rapida", 	NULL,	GS_CMD, 	IDM_HELPKEYS, NULL },
   { "/?/sep1",		NULL,   NULL, 		0, "<Separator>" },
-  { "/?/_Registrazione...", 	NULL,	GS_CMD, 	IDM_REGISTER, NULL },
   { "/?/_Informazioni su GSView...", 		NULL,	GS_CMD, 	IDM_ABOUT, NULL },
 };
 

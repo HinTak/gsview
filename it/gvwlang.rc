@@ -169,7 +169,6 @@ POPUP "&Orientamento"
 		MENUITEM "&Indice...", IDM_HELPSEARCH
 		MENUITEM "&Tasti di scelta rapida", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-		MENUITEM "&Registrazione...", IDM_REGISTER /* ENGLISH */
 		MENUITEM "&Informazioni su GSView...", IDM_ABOUT
 	END
 END

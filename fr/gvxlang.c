@@ -193,7 +193,6 @@ MENU_ENTRY menu_fr[] = {
   { "/Aide/_Rechercher de l'aide sur...", NULL,	GS_CMD, 	IDM_HELPSEARCH, NULL },
   { "/Aide/Raccourcis _clavier", 	NULL,	GS_CMD, 	IDM_HELPKEYS, NULL },
   { "/Aide/sep1",		NULL,   NULL, 		0, "<Separator>" },
-  { "/Aide/_Register...", 	NULL,	GS_CMD, 	IDM_REGISTER, NULL },
   { "/Aide/_A propos de...", 		NULL,	GS_CMD, 	IDM_ABOUT, NULL },
 };
 

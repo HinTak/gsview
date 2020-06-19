@@ -166,7 +166,6 @@ BEGIN
                 MENUITEM "&Hulp zoeken over...", IDM_HELPSEARCH
                 MENUITEM "&Toetsen", IDM_HELPKEYS
                 MENUITEM SEPARATOR
-                MENUITEM "GSview &Registreren...", IDM_REGISTER
                 MENUITEM "&Over GSview...", IDM_ABOUT
         END
 END

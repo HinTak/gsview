@@ -179,7 +179,6 @@ BEGIN
 		MENUITEM "~Rechercher de l'aide sur...", IDM_HELPSEARCH
 		MENUITEM "Raccourcis ~clavier", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-		MENUITEM "~Register...", IDM_REGISTER /* ENGLISH */
 		MENUITEM "~A propos de...", IDM_ABOUT
 	END
 

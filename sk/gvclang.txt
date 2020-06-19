@@ -350,23 +350,6 @@ W
 
  Press the `Close `button.
 E
-2Registration
--Registration
-?Registration
- If you wish to support the development of GSview or wish
- to disable the GSview nag screen, please consider registering
- GSview.  There is no requirement for you to register GSview.
- GSview is made available with the Aladdin Free Public Licence,
- contained in the file `LICENCE`.
- This allows free use, but restricts commercial distribution.
-
- The registration fee is currently AUD$40.
- GSview can be registered online at
-  http://www.ghostgum.com.au/
- or by faxing or mailing the
- registration form which can be found in the file `regorder.txt`
- in the GSview directory.
- Ghostgum Software prefers that you use the online registration.
 2Document Structuring Conventions
 -DSC
 ?Document Structuring Conventions

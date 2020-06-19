@@ -235,8 +235,6 @@ BEGIN
 	GSVS(IDS_GSLIBNOTINSTALLED, "Δεν έχουν εγκατασταθεί όλες οι βιβλιοθήκες Ghostscript. Παρακαλώ διαβάστε το αρχείο Readme.htm στον κατάλογο του προγράμματος GSview.")
 	GSVS(IDS_NOPROGMAN, AANODDEPROGMAN)
 	GSVS(IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED)
-	GSVS(IDS_INVALIDREG, "Άκυρο όνομα κατόχου ή αριθμός δήλωσης")
-	GSVS(IDS_UNREGISTERED, "Μη δηλωμένο")
 	GSVS(IDS_WRONGEMX, "Εντοπίστηκε emx %s. Απαιτείται emx %s ή μεταγενέστερης εκδοχής. Η λειτουργία του GSview δεν θα είναι κανονική.")
 	GSVS(IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION)
 	GSVS(IDS_PROGMANGROUP4, AAPROGMANGROUP4)

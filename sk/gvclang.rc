@@ -235,8 +235,6 @@ BEGIN
 	GSVS(IDS_GSLIBNOTINSTALLED, "Nie sú naištalované súbory knižníc programu Ghostscript.  Prečítajte si súbor Readme.htm programu GSview.")
 	GSVS(IDS_NOPROGMAN, AANODDEPROGMAN)
 	GSVS(IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED)
-	GSVS(IDS_INVALIDREG, "Neplatné meno alebo číslo")
-	GSVS(IDS_UNREGISTERED, "Neregistrovaný")
 	GSVS(IDS_WRONGEMX, "You have emx %s.\rYou need emx %s or later.\rPM GSview will not run correctly.")
 	GSVS(IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION)
 	GSVS(IDS_PROGMANGROUP4, AAPROGMANGROUP4)

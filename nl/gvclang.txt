@@ -333,23 +333,6 @@ W
 
  Klik dan op `Sluiten`.
 E
-2Registratie
--Registration
-?Registratie
- Indien u de ontwikkeling van GSview of wilt steunen en
- het  GSview pestschermpje wilt uigeschakeld hebben,  overweeg dan
- GSView te registreren.  Registratie is echter niet vereist.
- GSview werd beschikbaar gesteld via  het Aladdin Free Public Licence,
- inbegrepen in het bestand `LICENCE`.
- Dit laat vrij gebruik toe, maar sluit commerciële distributie uit.
-
- Momenteel bedraagt de registratievergoeding AUD$40.
- GSview registreren kan online op de locatie:
-  http://www.ghostgum.com.au/
- ofwel door het registratieformilier dat u in het bestand
- `regorder.txt` kan vinden door te faxen of per email
- te verzenden.
- Online registratie geniet de voorkeur.
 2DSC: Afspraken over de structuur
 -DSC
 ?DSC: Afspraken over de structuuDocument

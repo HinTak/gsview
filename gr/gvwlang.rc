@@ -167,7 +167,6 @@ BEGIN
 		MENUITEM "&Αναζήτηση βοήθειας για...", IDM_HELPSEARCH
 		MENUITEM "Βοήθεια για τα π&λήκτρα", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-		MENUITEM "&Δήλωση...", IDM_REGISTER
 		MENUITEM "&Πληροφορίες...", IDM_ABOUT
 	END
 END

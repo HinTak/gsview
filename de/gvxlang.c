@@ -182,7 +182,6 @@ MENU_ENTRY menu_de[] = {
   { "/Hilfe/_Suche nach Hilfe für...", NULL,	GS_CMD, 	IDM_HELPSEARCH, NULL },
   { "/Hilfe/_Tastenübersicht", 	NULL,	GS_CMD, 	IDM_HELPKEYS, NULL },
   { "/Hilfe/sep1",		NULL,   NULL, 		0, "<Separator>" },
-  { "/Hilfe/_Registrierung...", 	NULL,	GS_CMD, 	IDM_REGISTER, NULL },
   { "/Hilfe/_Über GSview...", 		NULL,	GS_CMD, 	IDM_ABOUT, NULL },
 };
 

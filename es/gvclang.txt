@@ -349,21 +349,6 @@ W
  previamente introducidas. Si disponemos de una impresora Postscript,
  entonces la acción `Imprimir` no es necesaria y puede suprimirse.
 E
-2Registro
--Registration
-?Registro
- Si desea apoyar el desarrollo de GSview o desea desactivar la
- molesta pantalla, por favor piense en registrarse. No hay necesidad de
- registrarse. GSview está disponible con la Aladdin Free Public Licence,
- contenida en el archivo `LICENCE`.
- Esto permite su libre utilización, pero restringe su distribución comercial.
-
- La cuota para registrarse es actualmente de 40$ australianos.
- Puede registrarse en línea en la dirección
- http://www.ghostgum.com.au/
- o enviando por fax o correo ordinario el formulario de registro
- que se encuentra en el archivo `regorder.txt` situado en el directorio de GSview.
- Ghostgum Software prefiere que utilice el registro en línea.
 2Convención para la Estructuración de Documentos
 -DSC
 ?Convención para la Estructuración de Documentos

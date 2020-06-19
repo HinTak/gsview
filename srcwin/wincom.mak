@@ -26,7 +26,7 @@
 OBJPLAT1=$(OD)gvwin$(OBJ) $(OD)gvwcp$(OBJ) $(OD)gvwdll$(OBJ) \
  $(OD)gvwdisp$(OBJ) $(OD)gvwdlg$(OBJ) $(OD)gvwinit$(OBJ) \
  $(OD)gvwdde$(OBJ) $(OD)gvwdde2$(OBJ) $(OD)gvwmisc$(OBJ) \
- $(OD)gvwreg$(OBJ) $(OD)gvwfile$(OBJ) $(OD)gvwgsver$(OBJ) \
+ $(OD)gvwfile$(OBJ) $(OD)gvwgsver$(OBJ) \
  $(OD)gvwimg$(OBJ) 
 
 OBJPLAT2=$(OD)gvwclip$(OBJ) $(OD)gvwedit$(OBJ) $(OD)gvweps$(OBJ) \
@@ -124,9 +124,6 @@ $(OD)gvwmisc$(OBJ): $(SRCWIN)gvwmisc.c $(HDRS)
 
 $(OD)gvwprn$(OBJ): $(SRCWIN)gvwprn.c $(HDRS)
 	$(COMP) $(FOO)gvwprn$(OBJ) $(CO) $(SRCWIN)gvwprn.c
-
-$(OD)gvwreg$(OBJ): $(SRCWIN)gvwreg.c $(HDRS)
-	$(COMP) $(FOO)gvwreg$(OBJ) $(CO) $(SRCWIN)gvwreg.c
 
 $(OD)gvwfile$(OBJ): $(SRCWIN)gvwfile.c $(SRC)gvcfile.h
 	$(COMP) $(FOO)gvwfile$(OBJ) $(CO) $(SRCWIN)gvwfile.c
@@ -591,7 +588,6 @@ srczip:
 	echo $(DISTDIR)/gsview.css >> $(OD)src.txt
 	echo $(DISTDIR)/LICENCE >> $(OD)src.txt
 	echo $(DISTDIR)/FILE_ID.DIZ >> $(OD)src.txt
-	echo $(DISTDIR)/regorder.txt >> $(OD)src.txt
 	echo $(DISTDIR)/src >> $(OD)src.txt
 	echo $(DISTDIR)/srcwin >> $(OD)src.txt
 	echo $(DISTDIR)/srcos2 >> $(OD)src.txt
@@ -644,7 +640,6 @@ srctar:
 	echo $(DISTDIR)/Readme.htm > $(OD)src_tar.txt
 	echo $(DISTDIR)/epstool.htm >> $(OD)src_tar.txt
 	echo $(DISTDIR)/gsview.css >> $(OD)src_tar.txt
-	echo $(DISTDIR)/regorder.txt >> $(OD)src_tar.txt
 	echo $(DISTDIR)/LICENCE >> $(OD)src_tar.txt
 	echo $(DISTDIR)/FILE_ID.DIZ >> $(OD)src_tar.txt
 	echo $(DISTDIR)/src >> $(OD)src_tar.txt
@@ -676,7 +671,6 @@ viewonlydist:
 	$(CP) LICENCE dist$(D)gsview$(D)LICENCE
 	$(CP) Readme.htm dist$(D)gsview$(D)Readme.htm
 	$(CP) gsview.css dist$(D)gsview$(D)gsview.css
-	$(CP) regorder.txt dist$(D)gsview$(D)regorder.txt
 	$(CP) $(BD)gsview$(WINEXT).exe dist$(D)gsview$(D)gsview$(WINEXT).exe
 	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(WINEXT).ico
 	$(CP) $(BD)gsviewen.chm dist$(D)gsview$(D)gsviewen.chm
@@ -696,7 +690,6 @@ viewonlydist:
 	echo gsview$(D)libbz2.dll>> $(OD)viewlist.txt
 	echo gsview$(D)Readme.htm>> $(OD)viewlist.txt
 	echo gsview$(D)gsview.css>> $(OD)viewlist.txt
-	echo gsview$(D)regorder.txt>> $(OD)viewlist.txt
 	echo gsview$(D)LICENCE>> $(OD)viewlist.txt
 	echo GSview $(GSVIEW_DOT_VERSION)> $(OD)$(D)viewlist.tmp
 	echo gsview>> $(OD)viewlist.tmp
@@ -732,7 +725,6 @@ distcopy:
 	$(CP) LICENCE dist$(D)gsview$(D)LICENCE
 	$(CP) Readme.htm dist$(D)gsview$(D)Readme.htm
 	$(CP) gsview.css dist$(D)gsview$(D)gsview.css
-	$(CP) regorder.txt dist$(D)gsview$(D)regorder.txt
 	$(CP) $(BD)gsview$(WINEXT).exe dist$(D)gsview$(D)gsview$(WINEXT).exe
 	$(CP) binary$(D)gvwin4.ico dist$(D)gsview$(WINEXT).ico
 	$(CP) $(BD)gsviewen.chm dist$(D)gsview$(D)gsviewen.chm

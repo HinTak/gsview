@@ -235,8 +235,6 @@ BEGIN
 	GSVS(IDS_GSLIBNOTINSTALLED, "Du har inte installerat Ghostscript katalogfiler.  Var vänlig läs filen GSview Readme.htm.")
 	GSVS(IDS_NOPROGMAN, AANODDEPROGMAN)
 	GSVS(IDS_PROGRAMOBJECTFAILED, AAPROGRAMOBJECTFAILED)
-	GSVS(IDS_INVALIDREG, "Ogiltigt registreringsnamn eller nummer")
-	GSVS(IDS_UNREGISTERED, "Oregistrerad")
 	GSVS(IDS_WRONGEMX, "Du har emx %s.\rDu behöver emx %s eller senare.\rPM GSview kommer inte att köras korrekt.")
 	GSVS(IDS_GSVIEWVERSION, GSVIEW_DOT_VERSION)
 	GSVS(IDS_PROGMANGROUP4, AAPROGMANGROUP4)

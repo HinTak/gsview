@@ -119,8 +119,8 @@ MENU_ENTRY menu_en[] = {
   { "/Options/Language/Catalan", 	NULL,		GS_CMD, IDM_LANGCT, "<CheckItem>" },
   { "/Options/Language/_Deutsch", 	NULL,		GS_CMD, IDM_LANGDE, "<CheckItem>" },
   { "/Options/Language/_Greek", 	NULL,		GS_CMD, IDM_LANGGR, "<CheckItem>" },
-  { "/Options/Language/E_spañol", 	NULL,		GS_CMD, IDM_LANGES, "<CheckItem>" },
-  { "/Options/Language/_Français", 	NULL,		GS_CMD, IDM_LANGFR, "<CheckItem>" },
+  { "/Options/Language/E_spaï¿½ol", 	NULL,		GS_CMD, IDM_LANGES, "<CheckItem>" },
+  { "/Options/Language/_Franï¿½ais", 	NULL,		GS_CMD, IDM_LANGFR, "<CheckItem>" },
   { "/Options/Language/_Italiano", 	NULL,		GS_CMD, IDM_LANGIT, "<CheckItem>" },
   { "/Options/Language/_Nederlands", 	NULL,		GS_CMD, IDM_LANGNL, "<CheckItem>" },
   { "/Options/Language/Russian", 	NULL,		GS_CMD, IDM_LANGRU, "<CheckItem>" },
@@ -208,7 +208,6 @@ MENU_ENTRY menu_en[] = {
   { "/Help/_Search for Help on", NULL,	GS_CMD, 	IDM_HELPSEARCH, NULL },
   { "/Help/_Keys Help", 	NULL,	GS_CMD, 	IDM_HELPKEYS, NULL },
   { "/Help/sep1",		NULL,   NULL, 		0, "<Separator>" },
-  { "/Help/_Register...", 	NULL,	GS_CMD, 	IDM_REGISTER, NULL },
   { "/Help/_About...", 		NULL,	GS_CMD, 	IDM_ABOUT, NULL },
 };
 

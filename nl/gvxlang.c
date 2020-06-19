@@ -191,7 +191,6 @@ MENU_ENTRY menu_nl[] = {
   { "/Help/_Hulp zoeken over", NULL,	GS_CMD, 	IDM_HELPSEARCH, NULL },
   { "/Help/_Toetsen", 	NULL,	GS_CMD, 	IDM_HELPKEYS, NULL },
   { "/Help/sep1",		NULL,   NULL, 		0, "<Separator>" },
-  { "/Help/_GSview _Registreren...", 	NULL,	GS_CMD, 	IDM_REGISTER, NULL },
   { "/Help/_Over GSview...", 		NULL,	GS_CMD, 	IDM_ABOUT, NULL },
 };
 

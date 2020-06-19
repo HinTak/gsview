@@ -681,9 +681,6 @@ gsview_command(int command)
 	case IDM_ABOUT:
 		show_about();
 		return 0;
-	case IDM_REGISTER:
-		registration_nag();
-		return 0;
 	}
 	return 0;
 }

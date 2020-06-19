@@ -179,7 +179,6 @@ BEGIN
 		MENUITEM "~Indice", IDM_HELPSEARCH
 		MENUITEM "~Tasti di scelta rapida", IDM_HELPKEYS
 		MENUITEM SEPARATOR
-		MENUITEM "~Registrazione...", IDM_REGISTER
 		MENUITEM "~Informazioni su GSview...", IDM_ABOUT
 	END
 
