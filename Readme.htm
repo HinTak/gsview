@@ -10,9 +10,9 @@
 GSview Readme
 </h1>
 <p>
-GSview 5.0 PostScript previewer.  Needs Ghostscript 7.04 or later.
+GSview 5.01beta PostScript previewer.  Needs Ghostscript 7.04 or later.
 <br>
-Release date: 2012-01-17
+Release date: 2020-08-23
 </p>
 <h2>
 Table of contents
@@ -35,12 +35,12 @@ Table of contents
 Overview
 </h2>
 <p>
-GSview is a graphical interface for Ghostscript under MS-Windows,
-OS/2 and Unix.  Ghostscript is an interpreter for the PostScript page 
+GSview is a graphical interface for Ghostscript under MS-Windows.
+Ghostscript is an interpreter for the PostScript page 
 description language used by laser printers.
 For documents following the Adobe PostScript Document Structuring 
 Conventions, GSview allows selected pages to be viewed or printed.
-GSview requires <a href="#ObtainGS">Ghostscript 7.04 - 9.99</a>.
+GSview requires <a href="#ObtainGS">Ghostscript 7.04 - 10.99.0</a>.
 </p>
 <p>
 Features include:
@@ -77,15 +77,15 @@ Features include:
    Some older versions of GSview will work with Ghostscript 4.03 - 6.99.
 </ul>
 <p>
-Changes in version 5.0:
+Changes in version 5.01beta:
 </p>
 <ul>
- <li> Minor bug fixes.
- <li> Help file updated to work on Windows 7.
- <li> Saving registration number fix on Windows 7.
- <li> Non-English languages work on 64-bit Windows.
- <li> GNU/Linux code has been removed while it is being updated
-      to the current version of gtk+.
+ <li> Removed nag screen and registration information.
+ <li> Change licence to GPL v3.
+ <li> Works on Windows 10.  Has not been tested on older Windows releases.
+ <li> INI file is now stored in the user's AppData/Roaming/Ghostgum directory.
+ <li> Setup program now prompts for admin credentials.
+ <li> Fixes to work with recent Ghostscript releases.
 </ul>
 <p>
 GSview was written by Russell Lang at Ghostgum Software Pty Ltd.
@@ -98,6 +98,55 @@ Installation
 <p>
 First uninstall any previous versions of GSview.
 </p>
+<h3>
+Win64 (AMD64)
+</h3>
+<p>
+  Obtain GSview (gsv50w64.zip) from 
+</p>
+  <blockquote>
+    <a href="http://www.ghostgum.com.au/software/gsview.htm">
+        http://www.ghostgum.com.au/software/gsview.htm
+    </a>
+  </blockquote>
+<p>
+  First install the Ghostscript self extracting archive 
+  gs9530w64.exe (or a later version if available)
+  Then open the GSview zip file and run setup.exe.
+  Run GSview.
+</p>
+<p>
+  This version requires that you have a 64-bit x64 processor
+  (AMD64 or EM64T).
+  It will not run on 32-bit Windows.
+</p>
+
+<h4>
+Win64 location details
+</h4>
+<p>
+  By default, GSview is installed in the directory 
+  <tt>c:\Program Files\Ghostgum</tt>, which creates the sub-directories
+  <tt>c:\Program Files\Ghostgum\gsview</tt> and 
+  <tt>c:\Program Files\Ghostgum\pstotext</tt>.
+  The GSview executable is 
+  <tt>c:\Program Files\Ghostgum\gsview\gsview64.exe</tt>.
+</p>
+<p>
+  By default, Ghostscript is installed in the directory 
+  <tt>c:\Program Files\gs\GS.NN</tt>.
+  The Ghostscript executables are
+  <tt>c:\Program Files\gs\gsN.NN\gswin64c.exe</tt> for console mode and
+  <tt>c:\Program Files\gs\gsN.NN\gswin64.exe</tt> for windowing mode.
+</p>
+<p>
+  GSview normally locates Ghostscript using registry 
+  entries created by the Ghostscript setup program.  
+  If these do not exist, GSview will assume that Ghostscript 
+  is in an adjacent directory to GSview, usually 
+  <tt>c:\Program Files\Ghostgum\gsN.NN</tt>. 
+</p>
+
 <h3>
 Win32
 </h3>
@@ -119,58 +168,12 @@ Win32
   </blockquote>
 <p>
   First install the Ghostscript self extracting archive 
-  gs902w32.exe (or a later version if available)
+  gs9530w32.exe (or a later version if available)
   Then open the GSview zip file and run setup.exe.
   Run GSview.
-</p>
-<h4>
-Win32 location details
-</h4>
-<p>
-  By default, GSview is installed in the directory 
-  <tt>c:\Program Files\Ghostgum</tt>, which creates the sub-directories
-  <tt>c:\Program Files\Ghostgum\gsview</tt> and 
-  <tt>c:\Program Files\Ghostgum\pstotext</tt>.
-  The GSview executable is 
-  <tt>c:\Program Files\Ghostgum\gsview\gsview32.exe</tt>.
-</p>
-<p>
-  By default, Ghostscript is installed in the directory 
-  <tt>c:\Program Files\gs\GS.NN</tt>.
-  The Ghostscript executables are
-  <tt>c:\Program Files\gs\gsN.NN\gswin32c.exe</tt> for console mode and
-  <tt>c:\Program Files\gs\gsN.NN\gswin32.exe</tt> for windowing mode.
-</p>
-<p>
-  GSview normally locates Ghostscript using registry 
-  entries created by the Ghostscript setup program.  
-  If these do not exist, GSview will assume that Ghostscript 
-  is in an adjacent directory to GSview, usually 
-  <tt>c:\Program Files\Ghostgum\gsN.NN</tt>. 
 </p>
 
-<h3>
-Win64 (AMD64)
-</h3>
-<p>
-  Obtain GSview (gsv50w64.zip) from 
-</p>
-  <blockquote>
-    <a href="http://www.ghostgum.com.au/software/gsview.htm">
-        http://www.ghostgum.com.au/software/gsview.htm
-    </a>
-  </blockquote>
-<p>
-  First install the Ghostscript self extracting archive 
-  gs902w64.exe (or a later version if available)
-  Then open the GSview zip file and run setup.exe.
-  Run GSview.
-</p>
-<p>
-  This version requires that you have a 64-bit x64 processor
-  (AMD64 or EM64T).
-  It will not run on 32-bit Windows.
-</p>
+
 
 
 <h3>General</h3>

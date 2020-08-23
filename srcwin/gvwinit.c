@@ -35,29 +35,6 @@ BOOL dde_exit = FALSE;		/* exit after sending DDE command */
 
 BOOL parse_args(GSVIEW_ARGS *pargs);
 
-/* convert gs version integer to string */
-/* buf must be 6 chars or longer */
-void gsver_string(int ver, char *buf)
-{
-    /* make sure length including null never exceeds 6 */
-    if (ver >= 9999)
-	strcpy(buf, "0.0");
-    sprintf(buf, "%d.%02d", ver / 100, ver % 100);
-}
-
-/* convert gs version string to integer */
-int gsver_int(char *buf)
-{
-    int ver;
-    if (strlen(buf) == 4)
-	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10 + (buf[3]-'0');
-    else if (strlen(buf) == 3)
-	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10;
-    else
-	ver = GS_REVISION;
-    return ver;
-}
-
 void
 drop_filename(HWND hwnd, char *str)
 {
@@ -1517,7 +1494,7 @@ EasyConfigureDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		int *gsver = (int *)lParam;
 		int i;
 		int n=0;
-		char buf[16];
+		char buf[20];
 	        for (i=1; i<=gsver[0]; i++) {
 		    if ((gsver[i] >= GS_REVISION_MIN) &&
 		        (gsver[i] <= GS_REVISION_MAX)) {
@@ -1537,7 +1514,7 @@ EasyConfigureDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
             switch(LOWORD(wParam)) {
 		case IDOK:
 		    {
-		    char buf[16];
+		    char buf[20];
 		    int i = (int)SendDlgItemMessage(hDlg, IDC_GSVER, 
 			LB_GETCURSEL, 0, 0L);
 		    SendDlgItemMessage(hDlg, IDC_GSVER, LB_GETTEXT, 
@@ -1729,12 +1706,7 @@ add_gsver(HWND hwnd, int offset)
 char buf[MAXSTR];
 int ver;
     GetDlgItemTextA(hwnd, IDC_CFG20, buf, sizeof(buf));
-    if (strlen(buf) == 4)
-	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10 + (buf[3]-'0');
-    else if (strlen(buf) == 3)
-	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10;
-    else
-	return GS_REVISION;
+    ver = gsver_int(buf);
     ver += offset;
     if (ver > GS_REVISION_MAX)
        ver = GS_REVISION_MAX;
@@ -1752,16 +1724,13 @@ BOOL fixit = FALSE;
     /* should allow edit field to be changed  */
     /* then make sure it is within range */
     GetDlgItemTextA(hwnd, IDC_CFG20, buf, sizeof(buf));
-    if (strlen(buf) == 4) {
-	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10 + (buf[3]-'0');
-	if ( (ver > GS_REVISION_MAX) || (ver < GS_REVISION_MIN) )
-	    fixit = TRUE;
-    }
-    else
-	fixit = TRUE;
+    ver = gsver_int(buf);
+    if ( (ver > GS_REVISION_MAX) || (ver < GS_REVISION_MIN) )
+        fixit = TRUE;
+
     if (fixit) {
 	ver = GS_REVISION;
-	sprintf(buf, "%d.%02d", ver / 100, ver % 100);
+        gsver_string(ver, buf);
 	SetDlgItemTextA(hwnd, IDC_CFG20, buf);
 	/* don't move until it is valid */
 	return IDD_CFG2;
@@ -1776,23 +1745,15 @@ void
 gsdir_fix(HWND hwnd, char *verstr)
 {
 char buf[MAXSTR];
-char *p;
+char *p, *v;
     GetDlgItemTextA(hwnd, IDC_CFG22, buf, sizeof(buf));
-    if (strlen(buf) < 6)
-	return;
-    p = buf + strlen(buf) - 4;
-    if (isdigit((int)(p[0])) && (p[1]=='.') && 
-	isdigit((int)(p[2])) && isdigit((int)(p[3]))) {
-	strcpy(p, verstr);
-        SetDlgItemTextA(hwnd, IDC_CFG22, buf);
-    }
-    else {
-	p = buf + strlen(buf) - 3;
-	if (isdigit((int)(p[0])) && (p[1]=='.') && isdigit((int)(p[2]))) {
-	    strcpy(p, verstr);
-	    SetDlgItemTextA(hwnd, IDC_CFG22, buf);
-	}
-    }
+    /* find last character that isn't a digit or . */
+    v = buf;
+    for (p=buf; *p; p++)
+        if ( !isdigit((int)*p) && (*p != '.') )
+            v = p;
+    strcpy(v, verstr);
+    SetDlgItemTextA(hwnd, IDC_CFG22, buf);
 }
 
 int
@@ -1963,6 +1924,7 @@ config_wizard(BOOL bVerbose)
 	*(++p) = '\0';
     strcpy(gsdir, basedir);
 
+    strcat(gsdir, "gs");
     p = gsdir + strlen(gsdir);
 
 
@@ -1973,8 +1935,7 @@ config_wizard(BOOL bVerbose)
 
     gsver = GS_REVISION;
     while (gsver <= GS_REVISION_MAX) {
-	sprintf(p, "gs%d.%02d", gsver / 100, gsver % 100);
-
+        gsver_string(gsver, p);
 	strcpy(gsdll, gsdir);
 #ifdef _WIN64
 	if (gsver <= 900)
@@ -2000,7 +1961,10 @@ config_wizard(BOOL bVerbose)
 	    write_profile();
 	    return 0;	/* success */
 	}
-	gsver++;
+        if (gsver == GS_REVISION_PREPATCH)
+            gsver = GS_REVISION_POSTPATCH;
+        else
+	    gsver++;
     }
 
     
@@ -2048,16 +2012,26 @@ CfgMainDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		/* initialize GS version */
 		page = find_page_from_id(IDD_CFG2);
 		if (page) {
-		    wsprintf(buf, TEXT("%d.%02d"), option.gsversion / 100, 
-			option.gsversion % 100);
+                    if (option.gsversion >= GS_REVISION_POSTPATCH)
+		        wsprintf(buf, TEXT("%d.%02d.%01d"), 
+                            option.gsversion / 1000, 
+			    (option.gsversion/10) % 100,
+			    option.gsversion % 10);
+                    else
+		        wsprintf(buf, TEXT("%d.%02d"), option.gsversion / 100, 	option.gsversion % 100);
 		    SetDlgItemText(page->hwnd, IDC_CFG20, buf);
 		    SetDlgItemText(page->hwnd, IDC_CFG22, szExePath);
 		    SetDlgItemText(page->hwnd, IDC_CFG23, TEXT("c:\\psfonts"));
 		}
 
 		/* assume that GS is in the adjacent directory */
-		wsprintf(buf, TEXT("%d.%02d"), option.gsversion / 100, 
-			option.gsversion % 100);
+                if (option.gsversion >= GS_REVISION_POSTPATCH)
+                    wsprintf(buf, TEXT("%d.%02d.%01d"), 
+                        option.gsversion / 1000, 
+                        (option.gsversion/10) % 100,
+                        option.gsversion % 10);
+                else
+        	    wsprintf(buf, TEXT("%d.%02d"), option.gsversion / 100, option.gsversion % 100);
 		lstrcpy(gsdir, szExePath);
 		/* remove trailing \ */
 		for (i=lstrlen(gsdir); i>0; i++)
@@ -2151,7 +2125,7 @@ CfgChildDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    { int ver;
 		      char buf[16];
 		      ver = add_gsver(hwnd, 0);
-		      sprintf(buf, "%d.%02d", ver / 100, ver % 100);
+                      gsver_string(ver, buf);
 		      /* don't use touch IDC_CFG20 - this would be recursive */
 		      gsdir_fix(hwnd, buf);
 		    }

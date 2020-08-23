@@ -738,6 +738,8 @@ create_dialog(void)
 {
 WIZPAGE *page;
 char buf[MAXSTR];
+char min_ver[32];
+char max_ver[32];
     // main dialog box
     g_hMain = CreateDialogParam(g_hLanguage, MAKEINTRESOURCE(IDD_MAIN), (HWND)NULL, MainDlgProc, (LPARAM)NULL);
     centre_dialog(g_hMain);
@@ -759,9 +761,9 @@ char buf[MAXSTR];
 	find_page_from_id(IDD_FINISH)->prev = IDD_CONFIG; 
     }
 
-    sprintf(buf, "%d.%02d - %d.%02d", 
-	GS_REVISION_MIN / 100, GS_REVISION_MIN % 100,
-	GS_REVISION_MAX / 100, GS_REVISION_MAX % 100);
+    gsver_string(GS_REVISION_MIN, min_ver);
+    gsver_string(GS_REVISION_MAX, max_ver);
+    sprintf(buf, "%s - %s", min_ver,  max_ver);
     SetDlgItemText(find_page_from_id(IDD_INTRO)->hwnd,
 	IDD_INTRO_T3, buf);
 

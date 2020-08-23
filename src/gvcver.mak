@@ -18,13 +18,13 @@
 
 # Language is English (en), Deutsch (de), Spanish (es), French (fr),
 # Italian (it), Greek (gr) or Dutch (nl)
-# This only applies to the utilties, not GSview itself.
+# This only applies to the utilities, not GSview itself.
 LANGUAGE=en
 
 # GSview version
 GSVIEW_VERSION=501
 GSVIEW_DOT_VERSION=5.01beta
-GSVIEW_DATE=2020-06-14
+GSVIEW_DATE=2020-08-23
 
 
 $(OD)gsvver.h: $(ECHOGSV) $(SRC)gvcver.mak

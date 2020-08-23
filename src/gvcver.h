@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2012, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2020, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
    
@@ -59,7 +59,7 @@
 #define GS_PRODUCT  "Ghostscript"
 #define GS_REVISION_MIN   704
 #define GS_REVISION	  704
-#define GS_REVISION_MAX   999
+#define GS_REVISION_MAX   10990
 
 #ifdef _Windows
 #ifdef _WIN64

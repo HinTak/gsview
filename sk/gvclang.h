@@ -1,4 +1,4 @@
-/* Copyright (C) 1993-2012, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 1993-2020, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -20,7 +20,7 @@
 
 #define AASLOVAK "Slovak"
 
-#define GSVIEW_COPYRIGHT1 "Autorské práva (C) 1993-2012 Ghostgum Software Pty Ltd."
+#define GSVIEW_COPYRIGHT1 "Autorské práva (C) 1993-2020 Ghostgum Software Pty Ltd."
 #define GSVIEW_COPYRIGHT2 "Všetky práva vyhradené."
 #define GSVIEW_COPYRIGHT3 "Pozrite si súbor LICENCE pre viac informácií."
 

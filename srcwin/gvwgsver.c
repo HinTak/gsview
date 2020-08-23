@@ -33,6 +33,39 @@
 #include <stdlib.h>
 #include "gvwgsver.h"
 
+/* convert gs version integer to string */
+/* buf must be 8 chars or longer */
+void gsver_string(int ver, char *buf)
+{
+    /* make sure length including null never exceeds 8 */
+    if (ver >= 99999)
+	strcpy(buf, "0.0");
+    if (ver > GS_REVISION_PREPATCH)
+        if (ver < GS_REVISION_POSTPATCH)
+	    strcpy(buf, "0.0");
+        else
+            sprintf(buf, "%d.%02d.%01d", ver / 1000, (ver/10) % 100, ver % 10);
+    else
+        sprintf(buf, "%d.%02d", ver / 100, ver % 100);
+}
+
+/* convert gs version string to integer */
+int gsver_int(char *buf)
+{
+    int ver;
+    if (strlen(buf) == 7)       /* 10.99.9 */
+	ver = (buf[0]-'0')*10000 + (buf[1]-'0')*1000 + (buf[3]-'0')*100 + (buf[4]-'0')*10 + (buf[6]-'0');
+    else if (strlen(buf) == 6)  /* 9.99.9 */
+	ver = (buf[0]-'0')*1000 + (buf[2]-'0')*100 + (buf[3]-'0')*10 + (buf[5]-'0');
+    else if (strlen(buf) == 4)  /* 9.99 */
+	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10 + (buf[3]-'0');
+    else if (strlen(buf) == 3)  /* 9.9 */
+	ver = (buf[0]-'0')*100 + (buf[2]-'0')*10;
+    else
+	ver = 0;
+    return ver;
+}
+
 /* Ghostscript may be known in the Windows Registry by
  * the following names.
  */
@@ -63,20 +96,7 @@ static int get_gs_versions_product(int *pver, int offset,
 	cbData = sizeof(key) / sizeof(char);
 	while (RegEnumKeyA(hkey, n, key, cbData) == ERROR_SUCCESS) {
 	    n++;
-	    ver = 0;
-	    p = key;
-	    while (*p && (*p!='.')) {
-		ver = (ver * 10) + (*p - '0')*100;
-		p++;
-	    }
-	    if (*p == '.')
-		p++;
-	    if (*p) {
-		ver += (*p - '0') * 10;
-		p++;
-	    }
-	    if (*p)
-		ver += (*p - '0');
+            ver = gsver_int(key);
 	    if (n + offset < pver[0])
 		pver[n+offset] = ver;
 	}
@@ -187,9 +207,7 @@ static BOOL get_gs_string_product(int gs_revision, const char *name,
 	return FALSE;
     }
 
-
-    sprintf(dotversion, "%d.%02d", 
-	    (int)(gs_revision / 100), (int)(gs_revision % 100));
+    gsver_string(gs_revision, dotversion);
     sprintf(key, "Software\\%s\\%s", gs_productfamily, dotversion);
 
     length = len;

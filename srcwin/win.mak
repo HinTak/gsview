@@ -23,23 +23,22 @@
 # To build for 64-bit, Start Menu, Visual Studio 2019, x64 Native Tools Command Prompt for VS 2019
 # nmake WIN64=1
 
-# For 32-bit build, 
-# To build for 64-bit, Start Menu, Visual Studio 2019, x64_x86 Cross Tools Command Prompt for VS 2019
-# nmake
+# To build for 32-bit, Start Menu, Visual Studio 2019, x64_x86 Cross Tools Command Prompt for VS 2019
+# nmake WIN32=1
 
 # DEBUG=1 for Debugging options
 !ifndef DEBUG
 DEBUG=0
 !endif
 
-# Win64 requires Microsoft Visual Studio 8 (.NET 2005)
-# or Microsoft Visual Studio .NET 2003 with Windows Server 2003 DDK.
 !ifdef WIN64
 WIN32=0
 WIN64=1
-!else
+!else ifdef WIN32
 WIN32=1
 WIN64=0
+!else
+!error Must specify WIN64=1 or WIN32=1
 !endif
 
 DEVBASE=$(VCINSTALLDIR)

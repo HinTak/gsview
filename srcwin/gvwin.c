@@ -319,25 +319,32 @@ int gsview_main(HINSTANCE hInstance, LPSTR lpszCmdLine)
 	/* start thread for displaying */
 	display.tid = _beginthread(gs_thread, 131072, NULL);
     }
+/* Don't use this on Win64
 #ifdef USE_HTMLHELP
     HtmlHelp(hwndimg, NULL, HH_INITIALIZE, (DWORD_PTR)&dwHelpCookie);
 #endif
-    
+*/
+
     while (!(!multithread && quitnow)
 	     && GetMessage(&msg, (HWND)NULL, 0, 0)) {
 	if ( ((hDlgModeless == 0) || !IsDialogMessage(hDlgModeless, &msg)) 
 	  && ((hwnd_measure == 0) || !IsDialogMessage(hwnd_measure, &msg)) 
 	   ) {
+/* Don't use this on Win64, it doesn't pre-translate messages as it should
+ * so keyboard shortcuts get passed through as does WM_QUIT
 #ifdef USE_HTMLHELP
 	    if (!HtmlHelp(NULL, NULL, HH_PRETRANSLATEMESSAGE, (DWORD_PTR)(&msg))) { 
 #endif
+*/
 		if (!TranslateAccelerator(hwndimg, haccel, &msg)) {
 		    TranslateMessage(&msg);
 		    DispatchMessage(&msg);
 		}
+/* Don't use this on Win64
 #ifdef USE_HTMLHELP
 	    }
 #endif
+*/
 	}
 	if (multithread) {
 	    /* release other thread if needed */
@@ -364,11 +371,13 @@ int gsview_main(HINSTANCE hInstance, LPSTR lpszCmdLine)
 #endif
     delete_buttons();
     free_SetScrollInfo();
+/* Don't use this on Win64
 #ifdef USE_HTMLHELP
     HtmlHelp(hwndimg,szHelpName, HH_UNINITIALIZE, (DWORD_PTR)dwHelpCookie);
 #else
     WinHelp(hwndimg,szHelpName,HELP_QUIT,(DWORD)NULL);
 #endif
+*/
     if (hlib_mmsystem != (HINSTANCE)NULL)
 	FreeLibrary(hlib_mmsystem);
     if ((hlanguage != (HINSTANCE)NULL) && (hlanguage != phInstance))
@@ -1119,7 +1128,10 @@ RECT rect;
 	    lstrcat(buf, TEXT(".htm"));
 	}
 
+/* Don't use this on Win64
 	HtmlHelp(hwndimg,szHelpName,HH_DISPLAY_TOPIC,(DWORD_PTR)buf);
+*/
+	HtmlHelp(GetDesktopWindow(),szHelpName,HH_DISPLAY_TOPIC,(DWORD_PTR)buf);
 
 convert_widechar(strh, szHelpName, sizeof(strh)-1);
 convert_widechar(strb, buf, sizeof(strh)-1);

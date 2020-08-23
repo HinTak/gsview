@@ -23,7 +23,15 @@
 
 
 /* gvgsver.h */
+
+/* This version and before do not use a patch suffix.  Dot version is 9.52 */
+#define GS_REVISION_PREPATCH    952
+/* This version and later use a patch suffix.  Dot version is 9.53.0 */
+#define GS_REVISION_POSTPATCH   9530
+
 /* Functions for finding Ghostscript versions */
+void gsver_string(int ver, char *buf);
+int gsver_int(char *buf);
 BOOL get_gs_versions(int *pver);
 BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len);
 BOOL find_gs(char *gspath, int len, int minver, BOOL bDLL);

@@ -1,4 +1,28 @@
 ---------------------------
+Version 5.01beta 2020-08-23
+---------------------------
+
+All:
+  Remove the nag screen and registration information.
+  Store international text as UTF-8 and convert to other code pages as required (i.e. for old HtmlHelp compiler)
+  Fix handling of DSC extension lines.
+  Remove references to old web sites. Use https://www.ghostscript.com/ and http://www.ghostgum.com.au/
+  Handle PDF files with changes in Ghostscript 9.27 and 9.50.
+  Works with Ghostscript >= 9.53.0
+  Change licence to GPL v3.
+  Remove registration details.
+
+Win:
+  Build with Visual Studio 2019.  Remove support for old compilers.
+  Remove Win32s and Windows 95 code.
+  Language menu now uses text instead of bitmaps.
+  INI file is now stored in the user's AppData/Roaming/Ghostgum directory.
+  Setup program now prompts for admin credentials.
+  Has been tested on Windows 10.  May not run on older versions.
+  GSviewPortable fixed for 64-bit Windows.
+  Don't tell HtmlHelp to run on caller thread.  This works poorly on Windows 10.
+
+---------------------------
 Version 5.0 2012-01-17
 ---------------------------
 All:
@@ -332,7 +356,7 @@ All:
   message without line breaks.
 
   Added Slovak language translation (no help file yet) from
-  Juo Sit·.
+  Juo Sit√°.
 
   When converting or printing a PDF file, open without -dSAFER,
   then use .setsafe if needed.

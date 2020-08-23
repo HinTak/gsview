@@ -1,4 +1,4 @@
-/* Copyright (C) 2007, Ghostgum Software Pty Ltd.  All rights reserved.
+/* Copyright (C) 2020, Ghostgum Software Pty Ltd.  All rights reserved.
   
   This file is part of GSview.
   
@@ -27,6 +27,12 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef _WIN64
+#define GSVIEW_EXENAME "gsview64.exe"
+#else
+#define GSVIEW_EXENAME "gsview32.exe"
+#endif
 
 int PASCAL 
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmdShow)
@@ -66,8 +72,9 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int cmd
     if (command != NULL) {
 	strcpy(command, "\042");
         strcat(command, szExePath);
-        strcat(command, "gsview\\gsview32.exe\042");
-	strcat(command, " /a ");
+        strcat(command, "gsview\\");
+        strcat(command, GSVIEW_EXENAME);
+        strcat(command, "\042 /a ");
 	strcat(command, pargs);
 	WinExec(command, SW_SHOWNORMAL);
     }
