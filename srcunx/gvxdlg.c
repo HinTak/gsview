@@ -725,12 +725,8 @@ void show_about(void)
 /*
 ICON ID_GSVIEW, ABOUT_ICON, 8, 8, 18, 20
 */
-    sprintf(buf, "%s  %s", get_string(IDS_AAREGTOC), registration_name);
-    add_about(vbox, buf);
-    strcpy(buf, get_string(IDS_AANUMBERC));
-    if (registration_receipt != 0)
-	sprintf(buf, "%s  %u", get_string(IDS_AANUMBERC), registration_receipt);
-    add_about(vbox, buf);
+    add_about(vbox, "");
+    add_about(vbox, "");
 
     /* Create and place OK button at the bottom */
     button_ok = gtk_button_new_with_label(get_string(IDS_AAOK));

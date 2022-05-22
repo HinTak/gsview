@@ -1924,8 +1924,6 @@ do_args(gpointer data)
 	return TRUE;
     }
 
-    registration_check();
-
     /* 
      * we had some command line options that couldn't be
      * be processed until the window was created.

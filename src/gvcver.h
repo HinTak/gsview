@@ -35,7 +35,7 @@
 /* undefine BETA for a final release */
 /*
 */
-#define BETA
+#undef BETA
 #define BETA_YEAR    2020
 #define BETA_MONTH   12
 #define BETA_DAY     30
