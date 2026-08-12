@@ -1246,9 +1246,9 @@ void display_settings(void)
 gint
 showmess_realize(GtkWidget *widget, gpointer user_data)
 {
-   (GTK_TEXT(widget)->vadj)->value = (GTK_TEXT(widget)->vadj)->upper
-	- (GTK_TEXT(widget)->vadj)->page_size;
-   gtk_signal_emit_by_name(GTK_OBJECT(GTK_TEXT(widget)->vadj), "changed");
+   (GTK_TEXT_VIEW(widget)->vadjustment)->value = (GTK_TEXT_VIEW(widget)->vadjustment)->upper
+	- (GTK_TEXT_VIEW(widget)->vadjustment)->page_size;
+   gtk_signal_emit_by_name(GTK_OBJECT(GTK_TEXT_VIEW(widget)->vadjustment), "changed");
    return FALSE; 
 }
 
@@ -1264,6 +1264,8 @@ void gs_showmess(void)
     GtkWidget *hbox;
     GtkWidget *vbox;
     GtkWidget *text;
+    GtkTextBuffer *textbuf;
+    GtkTextIter textiter;
     GtkWidget *table;
     GtkWidget *vscrollbar;
     GtkWidget *button_ok, *button_help;
@@ -1287,20 +1289,22 @@ void gs_showmess(void)
     gtk_widget_show(table);
    
     /* Create text */
-    text = gtk_text_new(NULL, NULL);
+    text = gtk_text_view_new();
     gtk_table_attach(GTK_TABLE(table), text, 0, 1, 0, 1,
 	(GtkAttachOptions)(GTK_EXPAND | GTK_SHRINK | GTK_FILL),
 	(GtkAttachOptions)(GTK_EXPAND | GTK_SHRINK | GTK_FILL), 0, 0);
     gtk_widget_show(text);
 
     /* Add a vertical scroll bar to the GtkText widget */
-    vscrollbar = gtk_vscrollbar_new(GTK_TEXT(text)->vadj);
+    vscrollbar = gtk_vscrollbar_new(GTK_TEXT_VIEW(text)->vadjustment);
     gtk_table_attach(GTK_TABLE(table), vscrollbar, 1, 2, 0, 1,
 	(GtkAttachOptions)(GTK_FILL),
 	(GtkAttachOptions)(GTK_EXPAND | GTK_SHRINK | GTK_FILL), 0, 0);
     gtk_widget_show(vscrollbar);
 
-    gtk_text_insert(GTK_TEXT(text), NULL, NULL, NULL, twbuf, twend); 
+    textbuf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
+    gtk_text_buffer_get_iter_at_offset(textbuf, &textiter, 0);
+    gtk_text_buffer_insert(textbuf, &textiter, twbuf, twend);
 
     /* connect to realize handler so we can scroll to
      * the end when the window is created

@@ -1274,8 +1274,12 @@ void add_print_message(char *str, int len)
 {
    if (debug & DEBUG_GENERAL)
 	write(fileno(stdout), str, len);
-   if (print_text != NULL) 
-       gtk_text_insert(GTK_TEXT(print_text), NULL, NULL, NULL, str, len); 
+   if (print_text != NULL) {
+       GtkTextIter textiter;
+       GtkTextBuffer *textbuf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(print_text));
+       gtk_text_buffer_get_iter_at_offset(textbuf, &textiter, 0);
+       gtk_text_buffer_insert(textbuf, &textiter, str, len);
+   }
 }
 
 void close_print_message(void)
@@ -1309,14 +1313,14 @@ void show_print_message(void)
     gtk_widget_show(table);
    
     /* Create text */
-    print_text = gtk_text_new(NULL, NULL);
+    print_text = gtk_text_view_new();
     gtk_table_attach(GTK_TABLE(table), print_text, 0, 1, 0, 1,
 	(GtkAttachOptions)(GTK_EXPAND | GTK_SHRINK | GTK_FILL),
 	(GtkAttachOptions)(GTK_EXPAND | GTK_SHRINK | GTK_FILL), 0, 0);
     gtk_widget_show(print_text);
 
     /* Add a vertical scroll bar to the GtkText widget */
-    vscrollbar = gtk_vscrollbar_new(GTK_TEXT(print_text)->vadj);
+    vscrollbar = gtk_vscrollbar_new(GTK_TEXT_VIEW(print_text)->vadjustment);
     gtk_table_attach(GTK_TABLE(table), vscrollbar, 1, 2, 0, 1,
 	(GtkAttachOptions)(GTK_FILL),
 	(GtkAttachOptions)(GTK_EXPAND | GTK_SHRINK | GTK_FILL), 0, 0);
