@@ -38,6 +38,11 @@ typedef struct {
    GtkItemFactoryCallback callback;
    guint callback_action;
    const gchar *item_type;
+  /* Extra data for some item types:
+   *  ImageItem  -> pointer to inlined pixbuf stream
+   *  StockItem  -> name of stock item
+   */
+  gconstpointer extra_data;
 } MENU_ENTRY;
 
 /* Catalan */
