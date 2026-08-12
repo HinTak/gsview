@@ -80,7 +80,7 @@ PLINK=-lpthread -lrt
 CFLAGS=-O -Wall -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -fno-builtin -fno-common -Wcast-qual -Wwrite-strings $(CDEBUG) -DX11 -DUNIX -DNONAG $(RPM_OPT_FLAGS) `pkg-config gtk+-2.0 --cflags` $(XINCLUDE) $(PFLAGS)
 
 # Linker flags
-LFLAGS=$(LDEBUG) $(PLINK) `pkg-config gtk+-2.0 --libs` -ldl
+LFLAGS=$(LDEBUG) $(PLINK) `pkg-config gtk+-2.0 --libs` -ldl -lm
 
 COMP=$(CC) $(CFLAGS) -I. -I$(SRCDIR) -I$(SRCUNXDIR) -I$(OBJDIR)
 CCAUX=$(CC) $(CFLAGS) -I$(SRCDIR)
