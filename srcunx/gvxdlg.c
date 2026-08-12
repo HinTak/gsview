@@ -1294,6 +1294,7 @@ void gs_showmess(void)
                                    GTK_POLICY_NEVER,   /* horizontal policy */
                                    GTK_POLICY_NEVER);  /* vertical policy */
     text = gtk_text_view_new();
+    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(text), GTK_WRAP_WORD);
     gtk_container_add(GTK_CONTAINER(scrolled_window), text);
     gtk_table_attach(GTK_TABLE(table), scrolled_window, 0, 1, 0, 1,
 	(GtkAttachOptions)(GTK_EXPAND | GTK_SHRINK | GTK_FILL),
