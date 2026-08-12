@@ -168,7 +168,7 @@ int message_box(const char *str, int icon)
     int rc = 0;
     int type = icon & MB_TYPEMASK;
 
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 
     gtk_window_set_title(GTK_WINDOW(window), szAppName);
 
@@ -244,7 +244,7 @@ query_string(const char *prompt, char *answer)
     GtkWidget *button_ok, *button_cancel, *button_help;
     int rc = 0;
 
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AAINPUT));
 
@@ -394,7 +394,7 @@ get_page(int *ppage, BOOL multiple, BOOL allpages)
     }
     psfile.page_list.select[psfile.page_list.current] = TRUE;
 
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_widget_set_usize(GTK_WIDGET(window), 200, 300);
 
     gtk_window_set_title(GTK_WINDOW(window), 
@@ -552,7 +552,7 @@ void show_info(void)
     int y = 0;
     int n;
 
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_container_set_border_width(GTK_CONTAINER(window), 10);
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AAINFO));
 
@@ -689,7 +689,7 @@ void show_about(void)
 
     gs_addmess("show_about: not implemented fully\n");
 
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AAABOUTX11));
     gtk_signal_connect(GTK_OBJECT(window), "delete-event",
@@ -801,7 +801,7 @@ BOOL get_bbox(void)
     }
 
     /* display modeless dialog */
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AABOUNDINGBOX));
     gtk_signal_connect(GTK_OBJECT(window), "delete-event",
                        GTK_SIGNAL_FUNC(modal_delete), &rc);
@@ -834,7 +834,7 @@ BOOL pstoeps_warn(void)
     int rc = 0;
 
     nHelpTopic = IDS_TOPICPSTOEPS;
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AAPSTOEPS));
 
@@ -976,7 +976,7 @@ void display_settings(void)
     const char *s;
 
     nHelpTopic = IDS_TOPICDSET;
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_signal_connect(GTK_OBJECT(window), "delete-event",
                        GTK_SIGNAL_FUNC(modal_delete), &rc);
     gtk_container_set_border_width(GTK_CONTAINER(window), 10);
@@ -1270,7 +1270,7 @@ void gs_showmess(void)
     int rc = 0;
 
     nHelpTopic = IDS_TOPICMESS;
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AAGSMESSX11));
     gtk_widget_set_usize(GTK_WIDGET(window), 450, 300);
 
@@ -1403,7 +1403,7 @@ int get_dsc_response(char *message)
     int rc;
 
     nHelpTopic = IDS_TOPICDSCWARN;
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AADSC));
 
@@ -1513,7 +1513,7 @@ install_gsdll(void)
     int rc = 0;
 
     nHelpTopic = IDS_TOPICADVANCEDCFG;
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AACONFIGUREGS));
 

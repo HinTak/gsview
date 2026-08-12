@@ -244,7 +244,7 @@ measure_show(void)
     measure_lastx = 0.0;
     measure_lasty = 0.0;
 
-    measure=gtk_window_new(GTK_WINDOW_DIALOG);
+    measure=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_container_set_border_width(GTK_CONTAINER(measure), 10);
     gtk_window_set_title(GTK_WINDOW(measure), get_string(IDS_AAMEASURE));
 
@@ -595,7 +595,7 @@ void show_calc_dialog(void)
     GtkWidget *hbox;
     int y;
 
-    dlg.window=gtk_window_new(GTK_WINDOW_DIALOG);
+    dlg.window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_container_set_border_width(GTK_CONTAINER(dlg.window), 10);
     gtk_window_set_title(GTK_WINDOW(dlg.window), get_string(IDS_AACALCXFORM));
     gtk_signal_connect(GTK_OBJECT(dlg.window), "delete-event",

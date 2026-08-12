@@ -312,7 +312,7 @@ edit_prop_dialog(GtkWidget *w, gpointer data)
 		sizeof(editpropname)-1);
     }
 
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AAEDITPROPERTIES));
 
@@ -511,7 +511,7 @@ void prop_dialog(GtkWidget *w, gpointer data)
 	gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(devres->device)->entry)),
 	sizeof(pv.device)-1);
 
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AAPROPERTIES));
 
@@ -722,7 +722,7 @@ advanced_ps_dialog(GtkWidget *w, gpointer data)
     int prectrld=0;
     int postctrld=0;
 
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AAADVANCEDPSOPT));
 
@@ -894,7 +894,7 @@ int print_dialog_box(BOOL convert)
 		psfile.page_list.select[i] = TRUE;
     }
 
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     /* Should we set a a default size? */
 
     gtk_window_set_title(GTK_WINDOW(window), 
@@ -1295,7 +1295,7 @@ void show_print_message(void)
 
     close_print_message();	/* close any existing window */
 
-    print_window=gtk_window_new(GTK_WINDOW_DIALOG);
+    print_window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_window_set_title(GTK_WINDOW(print_window), get_string(IDS_AAGSVIEWPRINT));
     gtk_widget_set_usize(GTK_WIDGET(print_window), 450, 300);
 

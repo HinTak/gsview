@@ -1016,7 +1016,7 @@ int get_language(void)
 
     language_value = IDM_LANGEN;
 
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_signal_connect(GTK_OBJECT(window), "delete-event",
 	GTK_SIGNAL_FUNC(modal_delete), &rc);
     gtk_window_set_title(GTK_WINDOW(window), get_string(IDS_AASELECTLANGUAGE));

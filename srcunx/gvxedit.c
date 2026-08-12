@@ -191,7 +191,7 @@ BOOL pstoedit_dialog(void)
     int index;
     int i;
 
-    window=gtk_window_new(GTK_WINDOW_DIALOG);
+    window=gtk_window_new(GTK_WINDOW_TOPLEVEL); gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
     gtk_widget_set_usize(GTK_WIDGET(window), 480, 400);
 
     gtk_window_set_title(GTK_WINDOW(window), "PS to Edit");
