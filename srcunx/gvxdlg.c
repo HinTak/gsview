@@ -1289,14 +1289,22 @@ void gs_showmess(void)
     gtk_widget_show(table);
    
     /* Create text */
+    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+                                   GTK_POLICY_NEVER,   /* horizontal policy */
+                                   GTK_POLICY_NEVER);  /* vertical policy */
     text = gtk_text_view_new();
-    gtk_table_attach(GTK_TABLE(table), text, 0, 1, 0, 1,
+    gtk_container_add(GTK_CONTAINER(scrolled_window), text);
+    gtk_table_attach(GTK_TABLE(table), scrolled_window, 0, 1, 0, 1,
 	(GtkAttachOptions)(GTK_EXPAND | GTK_SHRINK | GTK_FILL),
 	(GtkAttachOptions)(GTK_EXPAND | GTK_SHRINK | GTK_FILL), 0, 0);
     gtk_widget_show(text);
+    gtk_widget_show(scrolled_window);
 
     /* Add a vertical scroll bar to the GtkText widget */
-    vscrollbar = gtk_vscrollbar_new(GTK_TEXT_VIEW(text)->vadjustment);
+    GtkAdjustment *vadjustment =
+        gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scrolled_window));
+    vscrollbar = gtk_vscrollbar_new(vadjustment);
     gtk_table_attach(GTK_TABLE(table), vscrollbar, 1, 2, 0, 1,
 	(GtkAttachOptions)(GTK_FILL),
 	(GtkAttachOptions)(GTK_EXPAND | GTK_SHRINK | GTK_FILL), 0, 0);
